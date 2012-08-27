@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==================================== -->
+<!-- Red Horizon XML - Red Alert: Soviets -->
+<!-- ==================================== -->
+
+<faction:FactionData xmlns="http://www.westwood.com/redalert"
+	xmlns:faction="http://www.ultraq.net.nz/redhorizon/factions"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/factions ../../../Schema/Factions.xsd">
+
+	<!-- Soviet Forces -->
+	<faction:Faction
+		ID="soviet"
+		Playable="SINGLE">
+		<faction:Radar
+			ID="SovietRadar"
+			Filename="ussrradr.shp"/>
+
+		<!-- Russia -->
+		<faction:SubFaction
+			ID="USSR"
+			Colour="RED"
+			Playable="MULTI">
+			<faction:Multiplayer
+				Cost="0.9"/>
+		</faction:SubFaction>
+
+		<!-- Ukraine -->
+		<faction:SubFaction
+			ID="Ukraine"
+			Colour="ORANGE"
+			Playable="MULTI">
+			<faction:Multiplayer
+				GroundSpeed="1.1"/>
+		</faction:SubFaction>
+
+	</faction:Faction>
+
+</faction:FactionData>

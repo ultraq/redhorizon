@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ===================================== -->
+<!-- Red Horizon XML - Red Alert: Barracks -->
+<!-- ===================================== -->
+
+<bldg:StructureData xmlns="http://www.westwood.com/redalert"
+	xmlns:bldg="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<bldg:Structure
+		ID="BARR"
+		Template="DefaultStructure"
+		Armour="wood"
+		Cost="300"
+		Hitpoints="800"
+		Points="30"
+		Power="-20"
+		Prerequisites="POWR"
+		Sight="5"
+		TechLevel="1"
+		Characteristics="BIB BUILD_ADJACENT CREWED CAPTURABLE REPAIRABLE">
+		<bldg:Footprint width="48" height="48"/>
+		<bldg:Portrait
+			ID="BarracksIcon"
+			Filename="barricon.shp"/>
+		<bldg:Animation
+			ID="BarracksAnim"
+			Filename="barr.shp"
+			DamagedStartFrame="10">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="10"/>
+		</bldg:Animation>
+		<bldg:BuildAnimation
+			ID="BarracksMakeAnim"
+			Filename="barrmake.shp"/>
+	</bldg:Structure>
+
+</bldg:StructureData>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ================================= -->
+<!-- Red Horizon XML - Neutral faction -->
+<!-- ================================= -->
+
+<faction:FactionData xmlns="http://www.westwood.com/redalert"
+	xmlns:faction="http://www.ultraq.net.nz/redhorizon/factions"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/factions ../../../Schema/Factions.xsd">
+
+	<!-- Neutral factions -->
+	<faction:Faction
+		ID="Civilian">
+
+		<!-- Civilians -->
+		<faction:SubFaction
+			ID="Neutral"
+			Colour="GOLD"/>
+
+	</faction:Faction>
+
+</faction:FactionData>

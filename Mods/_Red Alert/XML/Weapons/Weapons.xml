@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==================================== -->
+<!-- Red Horizon XML - Red Alert: Weapons -->
+<!-- ==================================== -->
+
+<weapon:WeaponData xmlns="http://www.westwood.com/redalert"
+	xmlns:weapon="http://www.ultraq.net.nz/redhorizon/weapons"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/weapons ../../../Schema/Weapons.xsd">
+
+	<!-- Weapon template/defaults -->
+	<weapon:Weapon
+		ID="DefaultWeapon"
+		Damage="0"
+		Range="0"
+		RateOfFire="1"
+		Speed="0"/>
+
+
+	<!-- M60 machine gun -->
+	<weapon:Weapon
+		ID="M60mg"
+		Template="DefaultWeapon"
+		Damage="15"
+		Range="96"
+		RateOfFire="1333"
+		Speed="100">
+		<weapon:Animation
+			ID="M60mgAnim"
+			Filename="minigun.shp"
+			Angles="8"
+			FramesPerAngle="6"/>
+		<weapon:Projectile
+			ID="M60mgProj"
+			Template="Invisible"/>
+		<weapon:SoundEffect
+			ID="M60mgSFX"
+			Filename="pillbox1.aud"/>
+		<weapon:Warhead
+			ID="M60mgWarhead"
+			Template="SA"/>
+	</weapon:Weapon>
+
+</weapon:WeaponData>

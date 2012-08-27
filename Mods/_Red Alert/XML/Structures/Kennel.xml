@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- =================================== -->
+<!-- Red Horizon XML - Red Alert: Kennel -->
+<!-- =================================== -->
+
+<bldg:StructureData xmlns="http://www.westwood.com/redalert"
+	xmlns:bldg="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<bldg:Structure
+		ID="KENN"
+		Template="DefaultStructure"
+		Armour="wood"
+		Cost="200"
+		Prerequisites="BARR"
+		Hitpoints="400"
+		Points="25"
+		Power="-10"
+		Sight="4"
+		TechLevel="3">
+		<bldg:Footprint width="24" height="24"/>
+		<bldg:Portrait
+			ID="KennelIcon"
+			Filename="kennicon.shp"/>
+		<bldg:Animation
+			ID="KennelAnim"
+			Filename="kenn.shp"
+			DamagedStartFrame="1">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="1"/>
+		</bldg:Animation>
+		<bldg:BuildAnimation
+			ID="KennelMakeAnim"
+			Filename="kennmake.shp"/>
+	</bldg:Structure>
+
+</bldg:StructureData>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ======================================= -->
+<!-- Red Horizon XML - Red Alert: Soundtrack -->
+<!-- ======================================= -->
+
+<track:SoundtrackData xmlns="http://www.westwood.com/redalert"
+	xmlns:track="http://www.ultraq.net.nz/redhorizon/rules-soundtrack"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/rules-soundtrack ../../Schema/Rules-Soundtrack.xsd">
+
+	<track:Soundtrack
+		ID="await"
+		Filename="await.aud"
+		TechLevel="4"/>
+	<track:Soundtrack
+		ID="bigf226m"
+		Filename="bigf226m.aud"
+		TechLevel="1"/>
+	<track:Soundtrack
+		ID="crus226m"
+		Filename="crus226m.aud"
+		TechLevel="1"/>
+	<track:Soundtrack
+		ID="dense_r"
+		Filename="dense_r.aud"
+		TechLevel="5"/>
+	<track:Soundtrack
+		ID="fac1226m"
+		Filename="fac1226m.aud"
+		TechLevel="1"/>
+	<track:Soundtrack
+		ID="fac2226m"
+		Filename="fac2226m.aud"
+		TechLevel="2"/>
+	<track:Soundtrack
+		ID="fogger1a"
+		Filename="fogger1a.aud"
+		TechLevel="5"/>
+	<track:Soundtrack
+		ID="hell226m"
+		Filename="hell226m.aud"
+		TechLevel="1"/>
+	<track:Soundtrack
+		ID="mud1a"
+		Filename="mud1a.aud"
+		TechLevel="6"/>
+	<track:Soundtrack
+		ID="radio2"
+		Filename="radio2.aud"
+		TechLevel="7"/>
+	<track:Soundtrack
+		ID="rollout"
+		Filename="rollout.aud"
+		TechLevel="7"/>
+	<track:Soundtrack
+		ID="run1226m"
+		Filename="run1226m.aud"
+		TechLevel="2"/>
+	<track:Soundtrack
+		ID="smsh226m"
+		Filename="smsh226m.aud"
+		TechLevel="11"/>
+	<track:Soundtrack
+		ID="snake"
+		Filename="snake.aud"
+		TechLevel="8"/>
+	<track:Soundtrack
+		ID="tren226m"
+		Filename="tren226m.aud"
+		TechLevel="3"/>
+	<track:Soundtrack
+		ID="terminat"
+		Filename="terminat.aud"
+		TechLevel="9"/>
+	<track:Soundtrack
+		ID="twin"
+		Filename="twin.aud"
+		TechLevel="9"/>
+	<track:Soundtrack
+		ID="vector1a"
+		Filename="vector1a.aud"
+		TechLevel="10"/>
+	<track:Soundtrack
+		ID="work226m"
+		Filename="work226m.aud"
+		TechLevel="3"/>
+
+</track:SoundtrackData>

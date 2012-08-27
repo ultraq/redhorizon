@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ============================================ -->
+<!-- Red Horizon XML: Red Alert - misc structures -->
+<!-- ============================================ -->
+
+<bldg:StructureData xmlns="http://www.westwood.com/redalert"
+	xmlns:bldg="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<!-- Barrel -->
+	<bldg:Structure
+		ID="BARL"
+		Template="DefaultStructure"
+		BuildDistance="0"
+		Hitpoints="10"
+		UnCharacteristics="BUILD_ADJACENT REPAIRABLE">
+		<bldg:Footprint width="24" height="24"/>
+		<bldg:Animation
+			ID="BarrelAnim"
+			Filename="barl.shp"
+			DamagedStartFrame="1">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="1"/>
+		</bldg:Animation>
+	</bldg:Structure>
+
+	<!-- Barrels -->
+	<bldg:Structure
+		ID="BRL3"
+		Template="DefaultStructure"
+		BuildDistance="0"
+		Hitpoints="10"
+		UnCharacteristics="BUILD_ADJACENT REPAIRABLE">
+		<bldg:Footprint width="24" height="24"/>
+		<bldg:Animation
+			ID="BarrelsAnim"
+			Filename="brl3.shp"
+			DamagedStartFrame="1">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="1"/>
+		</bldg:Animation>
+	</bldg:Structure>
+
+</bldg:StructureData>

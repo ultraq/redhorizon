@@ -1,0 +1,183 @@
+
+/**
+ * Gradle build script for the Red Horizon project.
+ *
+ * @author Emanuel Rabina
+ */
+
+// Global configuration
+allprojects {
+	project.group    = 'nz.net.ultraq.redhorizon'
+	project.version  = '0.30'
+}
+
+// Subproject configurations
+ext.rhprojects = subprojects.findAll {
+	it.name != 'Projects'
+}
+ext.utilitiesProject = project('Projects:Red Horizon - Utilities')
+subprojects {
+	if (project in rhprojects) {
+		apply plugin: 'java'
+//		apply from: 'https://raw.github.com/ultraq/gradle-support/master/java-support.gradle'
+		apply from: 'file:///D:/Scanner/Programming/Gradle Support/java-support.gradle'
+
+		project.archivesBaseName    = project.name.replace(' ', '').toLowerCase();
+		project.sourceCompatibility = '1.7'
+
+		repositories {
+			flatDir {
+				dirs "${project.rootDir}/Libraries"
+			}
+			mavenCentral()
+			maven {
+				url 'https://oss.sonatype.org/content/groups/public/'
+			}
+		}
+	}
+}
+
+// Root project configuration
+project.defaultTasks          = ['createBundle']
+project.description           = 'Red Horizon project.'
+project.ext.distributionsDir  = "${project.buildDir}/distributions"
+project.ext.docsDir           = 'Documentation'
+project.ext.javadocDir        = "${project.docsDir}/Javadoc"
+project.ext.librariesDir      = 'Libraries'
+project.ext.existingLibraries = ['blowfishj-*', 'swt-*']
+
+/**
+ * Delete all build-generated files/directories
+ */
+task clean(
+	description: 'Deletes all build-generated files/directories.',
+	type: Delete) {
+
+	delete file("${project.javadocDir}")
+	delete fileTree('.') {
+		include '*.jar'
+	}
+	delete fileTree("${project.librariesDir}") {
+		project.existingLibraries.each { lib ->
+			exclude lib
+		}
+	}
+	delete project.buildDir
+}
+
+/**
+ * Create Javadocs over the entire project.
+ */
+task createJavadocs(
+	description: 'Create Javadocs for the entire project',
+	type: Javadoc) {
+
+	dependsOn = []
+	source rhprojects.sourceSets.main.allJava
+	classpath      = files(rhprojects.sourceSets.main.compileClasspath)
+	destinationDir = file("${project.docsDir}/Javadoc")
+	title          = "${project.name} ${project.version} API"
+}
+
+/**
+ * Copy JARs to the project directory.
+ */
+task copyJars(
+	description: 'Copy subproject JARs to the project directory') {
+
+	dependsOn = [rhprojects.jar]
+	rhprojects.each { rhproject ->
+		inputs.files rhproject.jar.outputs.files
+		outputs.file rhproject.jar.archiveName
+	}
+	doLast {
+		ant.copy(todir: '.') {
+			rhprojects.each { rhproject ->
+				fileset(dir: rhproject.libsDir, includes: '*.jar')
+			}
+		}
+	}
+}
+
+/**
+ * Copy project dependencies to the project directory.
+ */
+task copyLibraries(
+	description: 'Copy subproject dependencies to the project directory',
+	type: Copy) {
+
+	dependsOn = []
+	destinationDir = file("${project.librariesDir}")
+	from(rhprojects.configurations.runtime) {
+		project.existingLibraries.each { lib ->
+			exclude lib
+		}
+		exclude 'redhorizon-*'
+	}
+}
+
+/**
+ * Recreates what the bundle will expand to, but right in the development
+ * directory.
+ */
+task createBundleLayout(
+	description: 'Emulate the overall distribution archive',
+	dependsOn: [createJavadocs, copyJars, copyLibraries]) {
+}
+
+/**
+ * Creates the distribution archive for standalone downloads, a ZIP file
+ * containing: the project JARs, source ZIP, Javadocs, and all required
+ * dependencies.
+ */
+task createBundle(
+	description: 'Create the overall distribution archive',
+	dependsOn: createBundleLayout,
+	type: Zip) {
+
+	archiveName = "${project.name} ${project.version}.zip"
+	destinationDir = file("${project.distributionsDir}")
+
+	ext.allLibs = []
+	doFirst {
+		allLibs.addAll(files(rhprojects.configurations.runtime).files)
+	}
+	from(allLibs) {
+		exclude 'redhorizon-*'
+		into 'Libraries'
+	}
+	from ('.') {
+		include 'Documentation/**/*'
+		include '*.jar'
+		include '*.bat'
+	}
+	into project.name
+}
+
+/**
+ * Creates the Utilities distrbution archive for standalone downloads, a ZIP
+ * file containing: the project JARs, source ZIP, batch scripts, and all
+ * required dependencies.
+ */
+task createUtilitiesBundle(
+	description: 'Create the Utilities distribution archive',
+	dependsOn: createBundleLayout,
+	type: Zip) {
+
+	archiveName = "${project.name} Utilities ${project.version}.zip"
+	destinationDir = file("${project.distributionsDir}")
+
+	ext.allLibs = []
+	doFirst {
+		allLibs.addAll(files(utilitiesProject.configurations.runtime).files)
+	}
+	from(allLibs) {
+		exclude 'redhorizon-*'
+		into 'Libraries'
+	}
+	from ('.') {
+		include '*.jar'
+		include '*.bat'
+	}
+	into project.name
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ========================================== -->
+<!-- Red Horizon XML - Red Alert: unit defaults -->
+<!-- ========================================== -->
+
+<unit:UnitData xmlns="http://www.westwood.com/redalert"
+	xmlns:unit="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../Schema/Units.xsd">
+
+	<unit:Vehicle
+		ID="DefaultVehicle"
+		Armour="none"
+		Points="0"
+		RateOfTurn="0"
+		Sight="1"
+		Speed="0"
+		TechLevel="-1"
+		Characteristics="CREWED"/>
+
+</unit:UnitData>

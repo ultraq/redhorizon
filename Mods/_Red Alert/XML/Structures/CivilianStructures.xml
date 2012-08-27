@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ================================================ -->
+<!-- Red Horizon XML: Red Alert - civilian structures -->
+<!-- ================================================ -->
+
+<bldg:StructureData xmlns="http://www.westwood.com/redalert"
+	xmlns:bldg="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<!-- Properties common to all civilian structures -->
+	<bldg:Structure
+		ID="DefaultCivilianStructure"
+		Template="DefaultStructure"
+		Armour="wood"
+		Hitpoints="400"
+		Points="5"
+		UnCharacteristics="REPAIRABLE"/>
+
+
+	<!-- Church -->
+	<bldg:Structure
+		ID="V01"
+		Template="DefaultCivilianStructure"
+		Characteristics="CAPTURABLE">
+		<bldg:Footprint width="48" height="48"/>
+		<bldg:Animation
+			ID="ChurchAnim"
+			Filename="v10"
+			TheaterDependent="true"
+			DamagedStartFrame="1">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="1"/>
+		</bldg:Animation>
+	</bldg:Structure>
+
+	<!-- Oil pump -->
+	<bldg:Structure
+		ID="V19"
+		Template="DefaultCivilianStructure">
+		<bldg:Footprint width="24" height="24"/>
+		<bldg:Animation
+			ID="OilPumpAnim"
+			Filename="v19.shp"
+			DamagedStartFrame="14"
+			DestroyedFrame="28">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="14"/>
+		</bldg:Animation>
+	</bldg:Structure>
+
+</bldg:StructureData>

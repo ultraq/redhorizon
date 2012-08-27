@@ -1,0 +1,13 @@
+
+/**
+ * Gradle settings for the Red Horizon project.
+ * 
+ * @author Emanuel Rabina
+ */
+
+include(
+	'Projects:Red Horizon - Aspects',
+	'Projects:Red Horizon - Filetypes',
+//	'Projects:Red Horizon - Launcher',
+	'Projects:Red Horizon - Utilities'
+)

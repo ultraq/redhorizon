@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ============================= -->
+<!-- Red Horizon - Red Alert rules -->
+<!-- ============================= -->
+
+<rules:RulesData xmlns="http://www.westwood.com/redalert"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:rules="http://www.ultraq.net.nz/redhorizon/rules"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/rules ../../Schema/Rules.xsd">
+
+	<!-- Soundtrack listing -->
+	<rules:Soundtrack>
+		<common:Include Source="Soundtrack.xml"/>
+	</rules:Soundtrack>
+
+	<!-- Faction files -->
+	<rules:Factions>
+		<common:Include Source="XML/Factions/Allies.xml"/>
+		<common:Include Source="XML/Factions/Soviet.xml"/>
+		<common:Include Source="XML/Factions/Neutral.xml"/>
+	</rules:Factions>
+
+	<!-- Unit files -->
+	<rules:Units>
+		<common:Include Source="XML/Template_Units.xml"/>
+		<common:Include Source="XML/Units/Jeep.xml"/>
+		<common:Include Source="XML/Units/OreTruck.xml"/>
+	</rules:Units>
+
+	<!-- Structure files -->
+	<rules:Structures>
+		<common:Include Source="XML/Template_Structures.xml"/>
+		<common:Include Source="XML/Structures/CivilianStructures.xml"/>
+		<common:Include Source="XML/Structures/MiscStructures.xml"/>
+		<common:Include Source="XML/Structures/Barracks.xml"/>
+		<common:Include Source="XML/Structures/ConstructionYard.xml"/>
+		<common:Include Source="XML/Structures/Kennel.xml"/>
+		<common:Include Source="XML/Structures/OreRefinery.xml"/>
+		<common:Include Source="XML/Structures/OreSilo.xml"/>
+		<common:Include Source="XML/Structures/PowerPlant.xml"/>
+		<common:Include Source="XML/Structures/RadarDome.xml"/>
+		<common:Include Source="XML/Structures/SovietTechCenter.xml"/>
+		<common:Include Source="XML/Structures/TeslaCoil.xml"/>
+		<common:Include Source="XML/Structures/WarFactory.xml"/>
+	</rules:Structures>
+
+	<!-- Weapon files -->
+	<rules:Weapons>
+		<common:Include Source="XML/Weapons/Weapons.xml"/>
+	</rules:Weapons>
+
+	<!-- Projectile files -->
+	<rules:Projectiles>
+		<common:Include Source="XML/Weapons/Projectiles.xml"/>
+	</rules:Projectiles>
+
+	<!-- Warhead files -->
+	<rules:Warheads>
+		<common:Include Source="XML/Weapons/Warheads.xml"/>
+	</rules:Warheads>
+
+</rules:RulesData>

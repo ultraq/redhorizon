@@ -1,0 +1,13 @@
+# Ignore in all directories
+.gradle/
+build/
+Classes/
+
+# Ignore in this directory
+/.logs
+/.preferences
+/Documentation/Javadoc/
+/Mods/_Red Alert/Mix/
+/Mods/_Tiberium Dawn/Mix/
+/Stuff
+/redhorizon-*

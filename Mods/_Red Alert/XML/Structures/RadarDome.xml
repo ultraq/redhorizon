@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ======================================= -->
+<!-- Red Horizon XML - Red Alert: Radar dome -->
+<!-- ======================================= -->
+
+<bldg:StructureData xmlns="http://www.westwood.com/redalert"
+	xmlns:bldg="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<bldg:Structure
+		ID="DOME"
+		Template="DefaultStructure"
+		Armour="wood"
+		Cost="1000"
+		Hitpoints="1000"
+		Points="60"
+		Power="-40"
+		Prerequisites="PROC"
+		Sight="10"
+		TechLevel="3"
+		Characteristics="BIB CAPTURABLE POWERED SENSORS CREWED">
+		<bldg:Footprint width="48" height="48"/>
+		<bldg:Portrait
+			ID="RadarDomeIcon"
+			Filename="domeicon.shp"/>
+		<bldg:Animation
+			ID="RadarDomeAnim"
+			Filename="dome.shp"
+			DamagedStartFrame="1">
+			<bldg:DefaultAnim
+				StartFrame="0" Angles="1" FramesPerAngle="1"/>
+		</bldg:Animation>
+		<bldg:BuildAnimation
+			ID="RadarDomeMakeAnim"
+			Filename="domemake.shp"/>
+	</bldg:Structure>
+
+</bldg:StructureData>

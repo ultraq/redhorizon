@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ======================================== -->
+<!-- Red Horizon XML - Red Alert: Projectiles -->
+<!-- ======================================== -->
+
+<projectile:ProjectileData xmlns="http://www.westwood.com/redalert"
+	xmlns:projectile="http://www.ultraq.net.nz/redhorizon/projectiles"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/projectiles ../../../Schema/Projectiles.xsd">
+
+	<!-- Invisible -->
+	<projectile:Projectile
+		ID="Invisible"
+		Characteristics="INVISIBLE"/>
+
+</projectile:ProjectileData>

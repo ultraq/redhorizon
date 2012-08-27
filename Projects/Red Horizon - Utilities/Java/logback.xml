@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ===================== -->
+<!-- Logback configuration -->
+<!-- ===================== -->
+
+<configuration>
+
+	<!-- Console output -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- File output -->
+	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>.logs/converter.log</file>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>.logs/converter-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- Logging level for the app and included libraries -->
+	<root level="off"/>
+	<logger name="redhorizon.utilities.converter" level="info">
+		<appender-ref ref="console"/>
+	</logger>
+	<logger name="redhorizon.utilities.converter" level="debug">
+		<appender-ref ref="file"/>
+	</logger>
+
+</configuration>

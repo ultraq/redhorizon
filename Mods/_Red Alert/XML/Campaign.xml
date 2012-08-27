@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==================================== -->
+<!-- Red Horizon - Red Alert mission tree -->
+<!-- ==================================== -->
+
+<campaign:CampaignData xmlns="http://www.westwood.com/redalert"
+	xmlns:campaign="http://www.ultraq.net.nz/redhorizon/campaign"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/campaign ../../Schema/Campaign.xsd">
+
+	<!-- Red Alert: Allied campaign -->
+	<campaign:Campaign GameType="RED_ALERT">
+		<campaign:Name Text="CAMPAIGN_RA_ALLIES"/>
+		<campaign:Description Text="DESCRIPTION_RA_ALLIES"/>
+
+		<campaign:Mission ID="Scg01ea"/>
+
+		<campaign:Ending ID="Win_Allies"/>
+		<campaign:Ending ID="Lose_Allies"/>
+
+		<campaign:MissionTree Root="Scg01">
+			<campaign:Node ID="Scg01">
+				<campaign:Mission Ref="Scg01ea"/>
+				<campaign:Ending Ref="Win_Allies"/>
+			</campaign:Node>
+		</campaign:MissionTree>
+	</campaign:Campaign>
+
+	<!-- Red Alert: Soviet Campaign -->
+	<campaign:Campaign GameType="RED_ALERT">
+		<campaign:Name Text="CAMPAIGN_RA_SOVIET"/>
+		<campaign:Description Text="DESCRIPTION_RA_SOVIET"/>
+
+		<campaign:Mission ID="Scu01ea"/>
+
+		<campaign:Ending ID="Win_Soviet"/>
+		<campaign:Ending ID="Lose_Soviet"/>
+
+		<campaign:MissionTree Root="Scu01">
+			<campaign:Node ID="Scu01">
+				<campaign:Mission Ref="Scu01ea"/>
+				<campaign:Ending Ref="Win_Soviet"/>
+			</campaign:Node>
+		</campaign:MissionTree>
+	</campaign:Campaign>
+
+</campaign:CampaignData>

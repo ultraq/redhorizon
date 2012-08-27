@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ================================= -->
+<!-- Red Horizon XML - Red Alert: Jeep -->
+<!-- ================================= -->
+
+<unit:UnitData xmlns="http://www.westwood.com/redalert"
+	xmlns:unit="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ultraq.net.nz/redhorizon/units ../../../Schema/Units.xsd">
+
+	<unit:Vehicle
+		ID="JEEP"
+		Template="DefaultVehicle"
+		Armour="light"
+		Cost="600"
+		Hitpoints="150"
+		Points="20"
+		Prerequisites="WEAP"
+		RateOfTurn="240"
+		Sight="144"
+		Speed="6"
+		TechLevel="3"
+		Characteristics="CREWED">
+		<unit:Footprint width="24" height="24"/>
+		<unit:WeaponSlot
+			HardpointsUsed="JeepTurretHardpoint">
+			<unit:Weapon
+				ID="JeepTurretWeapon"
+				Template="M60mg"/>
+		</unit:WeaponSlot>
+		<unit:Portrait
+			ID="JeepIcon"
+			Filename="jeepicon.shp"/>
+		<unit:Animation
+			ID="JeepUnitAnim"
+			Filename="jeep.shp">
+			<unit:DefaultAnim
+				StartFrame="0" Angles="32" FramesPerAngle="1"/>
+		</unit:Animation>
+		<unit:Turret>
+			<unit:Offset/>
+			<unit:Hardpoint
+				ID="JeepTurretHardpoint">
+				<unit:Offset/>
+			</unit:Hardpoint>
+			<unit:Animation
+				ID="JeepTurretAnim"
+				Filename="jeep.shp">
+				<unit:TurretAnim
+					StartFrame="32" Angles="32" FramesPerAngle="1"/>
+			</unit:Animation>
+		</unit:Turret>
+	</unit:Vehicle>
+
+</unit:UnitData>
