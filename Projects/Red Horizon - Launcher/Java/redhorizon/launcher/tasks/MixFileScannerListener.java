@@ -6,6 +6,9 @@ import redhorizon.filetypes.mix.MixRecord;
 import redhorizon.resourcemanager.ResourceLocator;
 import redhorizon.utilities.scanner.ScannerListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
@@ -20,6 +23,8 @@ import java.util.regex.Pattern;
  * @author Emanuel Rabina
  */
 public class MixFileScannerListener implements ScannerListener, ResourceLocator {
+
+	private static final Logger logger = LoggerFactory.getLogger(MixFileScannerListener.class);
 
 	private static final Pattern MIX_FILE_PATTERN = Pattern.compile(".*\\.mix");
 
@@ -68,7 +73,9 @@ public class MixFileScannerListener implements ScannerListener, ResourceLocator 
 	public void match(Path path) {
 
 		// Track the mix file
-		mixfiles.add(new MixFile(path.getFileName().toString(), FileChannel.open(path)));
+		String mixfilename = path.getFileName().toString();
+		logger.info("MIX file encountered: {}", mixfilename);
+		mixfiles.add(new MixFile(mixfilename, FileChannel.open(path)));
 	}
 
 	/**

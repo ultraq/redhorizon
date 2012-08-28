@@ -6,7 +6,6 @@ import redhorizon.resourcemanager.ResourceManager;
 import redhorizon.utilities.scanner.DirectoryScanner;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Common code for the loading of a mod in the Red Horzion Mods directory.
@@ -19,21 +18,19 @@ public abstract class LoadModTask implements SplashScreenTask {
 
 	protected static final String MOD_DIRECTORY = "Mods";
 
-	private final String moddir;
+	private final Path modpath;
 	private final String modname;
 
 	/**
 	 * Constructor, set the name/directory of the mod.
 	 * 
-	 * @param moddir Name of the directory the mod resides in, within the Mods
-	 * 				 directory.
+	 * @param modpath Path to the location of the mod to have loaded.
 	 */
-	protected LoadModTask(String moddir) {
+	protected LoadModTask(Path modpath) {
 
-		this.moddir = MOD_DIRECTORY + "/" + moddir;
+		this.modpath = modpath;
 
 		// Attempt to obtain mod information out of the given directory
-		Path modpath = Paths.get(this.moddir);
 		Mod mod = new Mod(modpath);
 		modname = mod.getName();
 	}
@@ -45,7 +42,7 @@ public abstract class LoadModTask implements SplashScreenTask {
 	public void doTask() {
 
 		MixFileScannerListener mixfilescannerlistener = new MixFileScannerListener();
-		new DirectoryScanner(moddir, mixfilescannerlistener).scan();
+		new DirectoryScanner(modpath.toString(), mixfilescannerlistener).scan();
 		ResourceManager.addResourceLocator(MIX_FILE_RESOURCE_LOCATOR, mixfilescannerlistener);
 	}
 

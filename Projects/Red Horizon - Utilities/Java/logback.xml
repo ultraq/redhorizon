@@ -27,10 +27,10 @@
 
 	<!-- Logging level for the app and included libraries -->
 	<root level="off"/>
-	<logger name="redhorizon.utilities.converter" level="info">
+	<logger name="redhorizon" level="info">
 		<appender-ref ref="console"/>
 	</logger>
-	<logger name="redhorizon.utilities.converter" level="debug">
+	<logger name="redhorizon" level="debug">
 		<appender-ref ref="file"/>
 	</logger>
 

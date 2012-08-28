@@ -24,8 +24,9 @@ public class IniFileReader {
 	private static final String SECTIONS        = "sections";
 	private static final String CURRENT_SECTION = "current-section";
 
-	private static final String PATTERN_SECTION_HEADER = "\\[(.+?)\\].*";
-	private static final String PATTERN_PROPERTY       = "([^;]+?)=(.*)";
+	private static final String PATTERN_COMMENT        = "[ \\t]*(?:;.*)?\\n";
+	private static final String PATTERN_SECTION_HEADER = "\\[(.+?)\\]" + PATTERN_COMMENT;
+	private static final String PATTERN_PROPERTY       = "(.+?)=(.*?)" + PATTERN_COMMENT;
 
 	private final Parser parser;
 	private final Grammar grammar;
@@ -53,7 +54,7 @@ public class IniFileReader {
 	 */
 	public Map<String,Map<String,String>> read(String contents) {
 
-		ParsingResult result = parser.parse(contents);
+		ParsingResult result = parser.parse(contents.replace("\r\n", "\n"));
 		return getSections(result);
 	}
 
@@ -68,7 +69,10 @@ public class IniFileReader {
 	 */
 	private static Rule StartingExpression() {
 
-		return Rule("S", ZeroOrMore(Rulex("Section")));
+		return Rule("S", Sequence(
+				ZeroOrMore(Rulex("Comment")),
+				Rulex("Section"),
+				ZeroOrMore(Rulex("Comment"))));
 	}
 
 	/**
@@ -79,8 +83,7 @@ public class IniFileReader {
 	private static Rule Section() {
 
 		return Rule("Section", Sequence(Rulex("SectionHeader"),
-				ZeroOrMore(OrderedChoice(Rulex("Comment"), Rulex("Property"))),
-				Optional(ZeroOrMore("\n"))));
+				ZeroOrMore(OrderedChoice(Rulex("Comment"), Rulex("Property")))));
 	}
 
 	/**
@@ -104,14 +107,14 @@ public class IniFileReader {
 	}
 
 	/**
-	 * Comment rule: any line whose first non-whitespace character is a
-	 * semi-colon.
+	 * Comment rule: whitespace or any line whose first non-whitespace character
+	 * is a semi-colon.
 	 * 
 	 * @return Comment rule.
 	 */
 	private static Rule Comment() {
 
-		return Rule("Comment", "\\s*?;.*");
+		return Rule("Comment", PATTERN_COMMENT);
 	}
 
 // =============================================================================
@@ -171,7 +174,8 @@ public class IniFileReader {
 			if (section != null) {
 				Pattern pattern = Pattern.compile(PATTERN_PROPERTY);
 				Matcher matcher = pattern.matcher(context.getMatchToken());
-				section.put(matcher.group(1), matcher.group(2));
+				matcher.matches();
+				section.put(matcher.group(1).trim(), matcher.group(2).trim());
 			}
 			return true;
 		}
@@ -187,6 +191,7 @@ public class IniFileReader {
 
 			Pattern pattern = Pattern.compile(PATTERN_SECTION_HEADER);
 			Matcher matcher = pattern.matcher(context.getMatchToken());
+			matcher.matches();
 
 			String sectionname = matcher.group(1);
 			IniFileSection section = new IniFileSection(sectionname);

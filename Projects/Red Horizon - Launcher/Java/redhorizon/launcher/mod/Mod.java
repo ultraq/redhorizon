@@ -58,7 +58,7 @@ public class Mod {
 			imagepath    = moddetails.get(MOD_KEY_IMAGE);
 
 			String requires = moddetails.get(MOD_KEY_REQUIRES);
-			dependencies = requires != null ? requires.split(",") : new String[0];
+			dependencies = requires != null && !requires.isEmpty() ? requires.split(",") : new String[0];
 			for (int i = 0; i < dependencies.length; i++) {
 				dependencies[i] = dependencies[i].trim();
 			}

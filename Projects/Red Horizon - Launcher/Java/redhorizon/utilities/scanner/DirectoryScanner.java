@@ -1,8 +1,12 @@
 
 package redhorizon.utilities.scanner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Enumerates all files in a directory, calling any registered listeners
@@ -12,6 +16,8 @@ import java.nio.file.Paths;
  * @author Emanuel Rabina
  */
 public class DirectoryScanner {
+
+	private static final Logger logger = LoggerFactory.getLogger(DirectoryScanner.class);
 
 	private final File directory;
 	private final ScannerListener[] listeners;
@@ -55,14 +61,20 @@ public class DirectoryScanner {
 	 */
 	private void scan(File dir) {
 
+		logger.info("Scanning files in directory {}", dir.getAbsolutePath());
 		File[] files = dir.listFiles();
+
 		for (File file: files) {
+			logger.info("Encountered file/dir {}", file.getName());
 			if (file.isDirectory()) {
 				scan(file);
 			}
 			else {
 				for (ScannerListener listener: listeners) {
-					if (listener.pattern().matcher(file.getName()).matches()) {
+					Pattern pattern = listener.pattern();
+					if (pattern.matcher(file.getName()).matches()) {
+						logger.info("{} pattern {} matches file name, invoking listener.",
+								listener.getClass().getSimpleName(), pattern);
 						listener.match(Paths.get(file.getAbsolutePath()));
 					}
 				}

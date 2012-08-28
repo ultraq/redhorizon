@@ -6,6 +6,8 @@ import redhorizon.launcher.Window;
 import redhorizon.launcher.tasks.LoadModRedAlertTask;
 
 import org.eclipse.swt.SWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * GUI version of the Red Horizon converter utility.
@@ -14,6 +16,8 @@ import org.eclipse.swt.SWT;
  */
 public class ConverterUI extends Window {
 
+	private static final Logger logger = LoggerFactory.getLogger(ConverterUI.class);
+
 	/**
 	 * Entry point for the Red Horizon converter utility.
 	 * 
@@ -21,14 +25,17 @@ public class ConverterUI extends Window {
 	 */
 	public static void main(String[] args) {
 
+		logger.info("Starting Converter UI...");
+
 		// Initialize the program
 		SplashScreen splashscreen = new SplashScreen(ConverterUI.class.getClassLoader()
-				.getResourceAsStream("Resources/Launcher_SplashScreen.png"),
-				"Red Horizon File Conversion Utility", "1.0");
+				.getResourceAsStream("Launcher_SplashScreen.png"),
+				"Red Horizon File Conversion Utility", "0.30");
 		splashscreen.addTask(new LoadModRedAlertTask());
 		splashscreen.open();
 
-		new ConverterUI();
+		ConverterUI converterui = new ConverterUI();
+		converterui.open();
 	}
 
 	/**

@@ -1,6 +1,8 @@
 
 package redhorizon.launcher.tasks;
 
+import java.nio.file.Paths;
+
 /**
  * Load all of the standard C&C Red Alert files as a mod.
  *
@@ -15,6 +17,6 @@ public class LoadModRedAlertTask extends LoadModTask {
 	 */
 	public LoadModRedAlertTask() {
 
-		super(RED_ALERT_MOD_DIRECTORY);
+		super(Paths.get(MOD_DIRECTORY, RED_ALERT_MOD_DIRECTORY));
 	}
 }
