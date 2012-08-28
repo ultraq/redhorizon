@@ -1,0 +1,17 @@
+
+/**
+ * Gradle build script for the Red Horizon - Resource Manager project.
+ * 
+ * @author Emanuel Rabina
+ */
+
+apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
+
+//project.name        = 'Red Horizon - Resource Manager'
+project.description = 'Resource management module for the Red Horizon project.'
+
+dependencies {
+	aspects(
+		project(':Projects:Red Horizon - Aspects')
+	)
+}

@@ -8,6 +8,7 @@
 include(
 	'Projects:Red Horizon - Aspects',
 	'Projects:Red Horizon - Filetypes',
-//	'Projects:Red Horizon - Launcher',
+	'Projects:Red Horizon - Launcher',
+	'Projects:Red Horizon - Resource Manager',
 	'Projects:Red Horizon - Utilities'
 )

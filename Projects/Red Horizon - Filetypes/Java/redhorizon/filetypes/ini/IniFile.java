@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Representation of an <tt>INI</tt> file.  These are the system configuration
- * files you'd usually find in a Windows environment which are simply lists of
+ * Representation of an INI file.  These are the system configuration files
+ * you'd usually find in a Windows environment which are simply lists of
  * key/value pairs grouped by sections.
  * 
  * @author Emanuel Rabina

@@ -12,8 +12,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -37,19 +35,6 @@ public class SplashScreen extends Window {
 	 * Constructor, create a new splash screen with the given image and text,
 	 * set to a default size ({@link #DEFAULT_WIDTH} x {@link #DEFAULT_HEIGHT}).
 	 * 
-	 * @param imagepath
-	 * @param text
-	 * @param version
-	 */
-	public SplashScreen(String imagepath, String text, String version) {
-
-		this(imagepath, text, version, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-	}
-
-	/**
-	 * Constructor, create a new splash screen with the given image and text,
-	 * set to a default size ({@link #DEFAULT_WIDTH} x {@link #DEFAULT_HEIGHT}).
-	 * 
 	 * @param imageinputstream
 	 * @param text
 	 * @param version
@@ -57,22 +42,6 @@ public class SplashScreen extends Window {
 	public SplashScreen(InputStream imageinputstream, String text, String version) {
 
 		this(imageinputstream, text, version, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-	}
-
-	/**
-	 * Constructor, create a new splash screen with the given image, text, and
-	 * dimensions.
-	 * 
-	 * @param imagepath
-	 * @param text
-	 * @param version
-	 * @param width
-	 * @param height
-	 */
-	@SuppressWarnings("resource")
-	public SplashScreen(String imagepath, String text, String version, int width, int height) {
-
-		this(new BufferedInputStream(new FileInputStream(imagepath)), text, version, width, height);
 	}
 
 	/**

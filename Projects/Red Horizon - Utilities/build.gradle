@@ -12,10 +12,13 @@ apply from: 'file:///D:/Scanner/Programming/Gradle Support/aspectj.gradle'
 project.description = 'Utilities subproject for the Red Horizon project.'
 
 dependencies {
+	aspects(
+		project(':Projects:Red Horizon - Aspects')
+	)
 	compile(
 		'org.slf4j:slf4j-api:1.6.6',
-		project(':Projects:Red Horizon - Filetypes')
-//		project(':Projects:Red Horizon - Launcher')
+		project(':Projects:Red Horizon - Filetypes'),
+		project(':Projects:Red Horizon - Launcher')
 	)
 	runtime(
 		'ch.qos.logback:logback-classic:1.0.3',

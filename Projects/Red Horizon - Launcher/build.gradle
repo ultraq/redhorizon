@@ -17,5 +17,6 @@ dependencies {
 	compile(
 		':swt:4.2',
 		project(':Projects:Red Horizon - Filetypes'),
+		project(':Projects:Red Horizon - Resource Manager')
 	)
 }
