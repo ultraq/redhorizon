@@ -3,7 +3,6 @@ package redhorizon.filetypes.cps;
 
 import redhorizon.filetypes.AbstractFile;
 import redhorizon.filetypes.ColourFormat;
-import redhorizon.filetypes.FileExtensions;
 import redhorizon.filetypes.FileType;
 import redhorizon.filetypes.ImageFile;
 import redhorizon.filetypes.Paletted;
@@ -31,7 +30,6 @@ import java.nio.channels.ReadableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions("cps")
 @FileType(ImageFile.class)
 public class CpsFile extends AbstractFile implements ImageFile, Paletted, PalettedInternal, WritableFile {
 

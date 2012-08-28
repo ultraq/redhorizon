@@ -12,9 +12,7 @@ import java.nio.channels.ReadableByteChannel;
 
 /**
  * Implementation of a Red Alert MIX file.  The MIX format is a file package,
- * much like a ZIP file, but without compression.  Documentation on this file
- * format, and other Red Alert file formats, can be found here:
- * <a href="http://xccu.sourceforge.net/">http://xccu.sourceforge.net/</a>
+ * much like a ZIP file, but without compression.
  * 
  * @author Emanuel Rabina
  */
