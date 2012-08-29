@@ -8,6 +8,7 @@ import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -29,7 +30,8 @@ public class SplashScreen extends Window {
 
 	private final Label tasktext;
 	private final ArrayList<SplashScreenTask> tasks = new ArrayList<>();
-	private final ExecutorService taskexecutor = Executors.newSingleThreadExecutor();
+	private final ExecutorService taskexecutor = Executors.newCachedThreadPool();
+	private Throwable taskexception;
 
 	/**
 	 * Constructor, create a new splash screen with the given image and text,
@@ -101,25 +103,20 @@ public class SplashScreen extends Window {
 					taskexecutor.execute(new Runnable() {
 						@Override
 						public void run() {
-
 							Thread.currentThread().setName("Splash Screen task execution thread");
 							Thread.sleep(1000);
-							for (SplashScreenTask task: tasks) {
-								executeTask(task);
-								Thread.sleep(500);
+							try {
+								for (SplashScreenTask task: tasks) {
+									executeTask(task);
+									Thread.sleep(500);
+								}
+							}
+							catch (Throwable ex) {
+								taskexception = ex;
 							}
 							close();
 						}
 					});
-				}
-
-				/**
-				 * Close the task executor.
-				 */
-				@Override
-				public void shellClosed(ShellEvent event) {
-
-					taskexecutor.shutdownNow();
 				}
 			});
 		}
@@ -139,6 +136,16 @@ public class SplashScreen extends Window {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void close() {
+
+		super.close();
+		taskexecutor.shutdownNow();
+	}
+
+	/**
 	 * Execute a splash screen task on the display thread.
 	 * 
 	 * @param task
@@ -152,5 +159,34 @@ public class SplashScreen extends Window {
 			}
 		});
 		task.doTask();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void open() {
+
+		super.open();
+
+		if (taskexception != null) {
+			System.out.println("java.library.path = " + System.getProperty("java.library.path"));
+			throw new RuntimeException("Unable to complete all splash screen tasks", taskexception);
+		}
+	}
+
+	/**
+	 * Centers the splash screen on the screen.
+	 */
+	@Override
+	protected void pack() {
+
+		shell.pack();
+		Rectangle resolution = shell.getDisplay().getPrimaryMonitor().getBounds();
+		Rectangle window = shell.getBounds();
+		shell.setBounds(new Rectangle(
+				(resolution.width >> 1)  - (window.width >> 1),
+				(resolution.height >> 1) - (window.height >> 1),
+				window.width, window.height));		
 	}
 }

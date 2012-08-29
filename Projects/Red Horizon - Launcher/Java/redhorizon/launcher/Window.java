@@ -28,7 +28,7 @@ public abstract class Window {
 	/**
 	 * Close the window.
 	 */
-	public final void close() {
+	public void close() {
 
 		display.syncExec(new Runnable() {
 			@Override
@@ -43,10 +43,9 @@ public abstract class Window {
 	 * closed, either by an action in the window itself, or another thread
 	 * calling the {@link #close()} method on this window.
 	 */
-	public final void open() {
+	public void open() {
 
-		shell.pack();
-		SWTUtility.centerShell(shell);
+		pack();
 		shell.open();
 
 		// Wait until closed
@@ -56,5 +55,13 @@ public abstract class Window {
 			}
 		}
 		display.dispose();
+	}
+
+	/**
+	 * Initialize the bounds (position and size) of the window.
+	 */
+	protected void pack() {
+
+		shell.pack();
 	}
 }

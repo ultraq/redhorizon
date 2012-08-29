@@ -50,6 +50,7 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 		// Find out if this file has a checksum/encryption
 		ByteBuffer flagbuffer = ByteBuffer.allocate(4);
 		filechannel.read(flagbuffer);
+		flagbuffer.rewind();
 		int flag = flagbuffer.getInt();
 		checksum  = (flag & FLAG_CHECKSUM)  != 0;
 		encrypted = (flag & FLAG_ENCRYPTED) != 0;

@@ -74,7 +74,7 @@ public class MixFileScannerListener implements ScannerListener, ResourceLocator 
 
 		// Track the mix file
 		String mixfilename = path.getFileName().toString();
-		logger.info("MIX file encountered: {}", mixfilename);
+		logger.info("Loading {}", mixfilename);
 		mixfiles.add(new MixFile(mixfilename, FileChannel.open(path)));
 	}
 
