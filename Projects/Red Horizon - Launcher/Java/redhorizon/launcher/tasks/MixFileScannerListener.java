@@ -4,7 +4,7 @@ package redhorizon.launcher.tasks;
 import redhorizon.filetypes.mix.MixFile;
 import redhorizon.filetypes.mix.MixRecord;
 import redhorizon.resourcemanager.ResourceLocator;
-import redhorizon.utilities.scanner.ScannerListener;
+import redhorizon.resourcemanager.scanner.ScannerListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,12 +67,13 @@ public class MixFileScannerListener implements ScannerListener, ResourceLocator 
 	}
 
 	/**
+	 * Tracks encountered mix files.
+	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void match(Path path) {
 
-		// Track the mix file
 		String mixfilename = path.getFileName().toString();
 		logger.info("Loading {}", mixfilename);
 		mixfiles.add(new MixFile(mixfilename, FileChannel.open(path)));

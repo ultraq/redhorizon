@@ -1,5 +1,5 @@
 
-package redhorizon.utilities.scanner;
+package redhorizon.resourcemanager.scanner;
 
 import java.nio.file.Path;
 import java.util.regex.Pattern;

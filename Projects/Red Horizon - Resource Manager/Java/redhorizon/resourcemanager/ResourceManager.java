@@ -1,15 +1,12 @@
 
 package redhorizon.resourcemanager;
 
-import java.io.File;
 import java.lang.reflect.ParameterizedType;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * This class is the main port-of-call for retrieving and preparing any kind of

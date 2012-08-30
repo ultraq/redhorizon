@@ -98,6 +98,7 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 			filechannel.position(0);
 			ByteBuffer headerbytes = ByteBuffer.allocate(MixFileHeader.HEADER_SIZE);
 			filechannel.read(headerbytes);
+			headerbytes.rewind();
 			mixheader = new MixFileHeader(headerbytes);
 
 			// Now figure-out how much more of the file is the index
@@ -106,6 +107,7 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 
 			ByteBuffer recordsbytes = ByteBuffer.allocate(numbytes);
 			filechannel.read(recordsbytes);
+			recordsbytes.rewind();
 
 			// Take all the data and turn it into the index records
 			mixrecords = new MixRecord[numFiles()];

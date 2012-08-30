@@ -1,5 +1,5 @@
 
-package redhorizon.utilities.scanner;
+package redhorizon.resourcemanager.scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +9,12 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 /**
- * Enumerates all files in a directory, calling any registered listeners
- * attached to this scanner when the file or directory matches a pattern set by
- * the listener.
+ * Enumerates all files in a directory and its subdirectories, calling any
+ * registered listeners attached to this scanner when a file or directory
+ * matches a pattern set by the listener.
  * 
  * @author Emanuel Rabina
+ * @see ScannerListener
  */
 public class DirectoryScanner {
 

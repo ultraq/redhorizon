@@ -170,13 +170,12 @@ public class SplashScreen extends Window {
 		super.open();
 
 		if (taskexception != null) {
-			System.out.println("java.library.path = " + System.getProperty("java.library.path"));
 			throw new RuntimeException("Unable to complete all splash screen tasks", taskexception);
 		}
 	}
 
 	/**
-	 * Centers the splash screen on the screen.
+	 * Centers the splash screen on the monitor.
 	 */
 	@Override
 	protected void pack() {

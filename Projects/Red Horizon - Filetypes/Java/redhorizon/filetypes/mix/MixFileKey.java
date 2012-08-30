@@ -31,7 +31,6 @@ public class MixFileKey {
 	 */
 	public static void getBlowfishKey(ByteBuffer source, ByteBuffer dest) {
 
-		source.rewind();
 		byte[] d = new byte[56];
 		getBlowfishKey(source.array(), d);
 		dest.put(d).rewind();
