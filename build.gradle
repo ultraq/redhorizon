@@ -115,6 +115,9 @@ task copyLibraries(
 		}
 		exclude 'redhorizon-*'
 	}
+	from(project(':Projects:Red Horizon - Filetypes').projectDir + 'Release') {
+		include '*.dll'
+	}
 }
 
 /**
