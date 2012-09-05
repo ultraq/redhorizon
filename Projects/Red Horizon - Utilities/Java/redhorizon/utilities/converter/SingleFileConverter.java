@@ -30,7 +30,7 @@ public class SingleFileConverter extends FileConverter {
 	 * @param tofile	 Name of the output file.
 	 * @param parameters Command-line parameters for the conversion, if any.
 	 */
-	SingleFileConverter(String fromtype, String fromfile, String totype, String tofile,
+	public SingleFileConverter(String fromtype, String fromfile, String totype, String tofile,
 		String... parameters) {
 
 		super(fromtype, totype, parameters);
@@ -42,7 +42,7 @@ public class SingleFileConverter extends FileConverter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void convert() throws UnsupportedConversionException, IOException {
+	public void convert() throws UnsupportedConversionException, IOException {
 
 		logger.info("Loading input file/s...");
 		try (File inputfile = buildInputFile(fromfile)) {

@@ -5,6 +5,8 @@
 
 package redhorizon.launcher;
 
+import redhorizon.ui.Window;
+
 import java.util.ServiceLoader;
 
 /**

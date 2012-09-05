@@ -35,7 +35,7 @@ public class MultiFileConverter extends FileConverter {
 	 * @param tofile		  Name of the output file.
 	 * @param parameters	  Command-line parameters for the conversion, if any.
 	 */
-	MultiFileConverter(String fromtype, String fromfilepattern, String totype, String tofile,
+	public MultiFileConverter(String fromtype, String fromfilepattern, String totype, String tofile,
 		String... parameters) {
 
 		super(fromtype, totype, parameters);
@@ -84,7 +84,7 @@ public class MultiFileConverter extends FileConverter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void convert() throws UnsupportedConversionException, IOException {
+	public void convert() throws UnsupportedConversionException, IOException {
 
 		logger.info("Loading input file/s...");
 		try {

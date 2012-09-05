@@ -4,6 +4,7 @@ package redhorizon.launcher.tasks;
 import redhorizon.launcher.mod.Mod;
 import redhorizon.resourcemanager.ResourceManager;
 import redhorizon.resourcemanager.scanner.DirectoryScanner;
+import redhorizon.ui.SplashScreenTask;
 
 import java.nio.file.Path;
 

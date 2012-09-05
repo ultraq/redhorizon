@@ -1,6 +1,8 @@
 
 package redhorizon.launcher;
 
+import redhorizon.ui.SWTUtility;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.opengl.GLCanvas;

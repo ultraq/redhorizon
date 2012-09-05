@@ -23,7 +23,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
  * 
  * @author Emanuel Rabina
  */
-abstract class FileConverter {
+public abstract class FileConverter {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileConverter.class);
 	private static final String REDHORIZON_FILETYPES_PACKAGE = "redhorizon.filetypes";
@@ -131,5 +131,5 @@ abstract class FileConverter {
 	 * 		   supported.
 	 * @throws IOException
 	 */
-	abstract void convert() throws UnsupportedConversionException, IOException;
+	public abstract void convert() throws UnsupportedConversionException, IOException;
 }

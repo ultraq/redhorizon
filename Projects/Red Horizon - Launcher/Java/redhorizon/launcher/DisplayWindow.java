@@ -1,6 +1,8 @@
 
 package redhorizon.launcher;
 
+import redhorizon.ui.Window;
+
 /**
  * Main display window.
  * 
