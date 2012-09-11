@@ -1,6 +1,7 @@
 
 package redhorizon.ui;
 
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -40,24 +41,44 @@ public abstract class Window {
 	}
 
 	/**
+	 * Creates a basic fill layout with the following settings:
+	 * <ul>
+	 *   <li>Margin Width:  10</li>
+	 *   <li>Margin Height: 10</li>
+	 *   <li>Spacing:       10</li>
+	 * </ul>
+	 * 
+	 * @return A new fill layout based on the above values.
+	 */
+	protected static FillLayout createFillLayout() {
+
+		FillLayout filllayout = new FillLayout();
+		filllayout.marginWidth  = 10;
+		filllayout.marginHeight = 10;
+		filllayout.spacing      = 10;
+
+		return filllayout;
+	}
+
+	/**
 	 * Creates a new single-item no-margin layout using the grid layout.  That
 	 * is, a layout with the following:
 	 * <ul>
 	 *   <li>Columns: 1</li>
 	 *   <li>Equal Width: yes</li>
-	 *   <li>Margin Top:    0</li>
-	 *   <li>Margin Right:  0</li>
-	 *   <li>Margin Bottom: 0</li>
-	 *   <li>Margin Left:   0</li>
-	 *   <li>Vertical Spacing:   0</li>
-	 *   <li>Horizontal Spacing: 0</li>
+	 *   <li>Margin Top:    10</li>
+	 *   <li>Margin Right:  10</li>
+	 *   <li>Margin Bottom: 10</li>
+	 *   <li>Margin Left:   10</li>
+	 *   <li>Vertical Spacing:   10</li>
+	 *   <li>Horizontal Spacing: 10</li>
 	 * </ul>
 	 * 
 	 * @return A new grid layout based on the above values.
 	 */
-	protected static GridLayout createLayout() {
+	protected static GridLayout createGridLayout() {
 
-		return createLayout(1, true, 0, 0, 0, 0, 0, 0);
+		return createGridLayout(1, true, 10, 10, 10, 10, 10, 10);
 	}
 
 	/**
@@ -73,7 +94,7 @@ public abstract class Window {
 	 * @param verspacing   Verticle spacing between widgets.
 	 * @return A grid layout using the specified values.
 	 */
-	protected static GridLayout createLayout(int numcolumns, boolean equalspace,
+	protected static GridLayout createGridLayout(int numcolumns, boolean equalspace,
 		int margintop, int marginright, int marginbottom, int marginleft,
 		int horspacing, int verspacing) {
 

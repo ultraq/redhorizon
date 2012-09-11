@@ -62,7 +62,7 @@ public class SplashScreen extends Window {
 			// Splash screen frame
 			shell.setBackground(display.getSystemColor(SWT.COLOR_WHITE));
 			shell.setBackgroundMode(SWT.INHERIT_FORCE);
-			shell.setLayout(createLayout());
+			shell.setLayout(createGridLayout());
 
 			// Splash screen image
 			Image image = new Image(display, width, height);
@@ -75,7 +75,7 @@ public class SplashScreen extends Window {
 
 			// Text area
 			Composite textgroup = new Composite(shell, SWT.NO_BACKGROUND);
-			textgroup.setLayout(createLayout(2, false, 5, 5, 5, 5, 0, 0));
+			textgroup.setLayout(createGridLayout(2, false, 5, 5, 5, 5, 0, 0));
 			textgroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 			// Task text area

@@ -59,7 +59,7 @@ public class SWTDisplayWindow extends DisplayWindow {
 				renderer.displayShutdown();
 			}
 		});
-		shell.setLayout(SWTUtility.createLayout());
+		shell.setLayout(SWTUtility.createGridLayout());
 
 		// OpenGL pixel descriptor
 		GLData gldata = new GLData();

@@ -9,16 +9,17 @@ import static redhorizon.utilities.converter.ui.ConverterUIPreferences.*;
 import nz.net.ultraq.preferences.Preferences;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Deque;
 
 /**
  * GUI version of the Red Horizon converter utility.
@@ -28,6 +29,8 @@ import org.slf4j.LoggerFactory;
 public class ConverterUI extends ApplicationWindow {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConverterUI.class);
+
+	private final Group recentconversions;
 
 	/**
 	 * Entry point for the Red Horizon converter utility.
@@ -59,6 +62,23 @@ public class ConverterUI extends ApplicationWindow {
 		// Menu items
 		Menu filemenu = menumanager.addMenu("&File");
 		{
+			MenuItem newitem = new MenuItem(filemenu, SWT.CASCADE);
+			newitem.setText("&New...");
+			Menu newmenu = new Menu(newitem);
+			newitem.setMenu(newmenu);
+			{
+				MenuItem mpng2shpd2item = new MenuItem(newmenu, SWT.PUSH);
+				mpng2shpd2item.setText("PNG (multiple) to SHP (Dune 2) conversion");
+				mpng2shpd2item.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent event) {
+						convert(ConversionFile.PNG_MULTIPLE, null, ConversionFile.SHP_D2, null);
+					}
+				});
+			}
+
+			new MenuItem(filemenu, SWT.SEPARATOR);
+
 			MenuItem exititem = new MenuItem(filemenu, SWT.PUSH);
 			exititem.setText("E&xit\tAlt+F4");
 			exititem.setAccelerator(SWT.ALT | SWT.F4);
@@ -70,20 +90,47 @@ public class ConverterUI extends ApplicationWindow {
 			});
 		}
 
-		// Splitter between file browser and app area
-		SashForm sash = new SashForm(shell, SWT.HORIZONTAL | SWT.SMOOTH);
-		sash.setLayout(new FillLayout());
+		// Display all recent conversion operations done by the user
+		recentconversions = new Group(shell, SWT.NONE);
+		recentconversions.setText("Conversion history");
 
-		Composite left = new Composite(sash, SWT.NONE);
-		left.setLayout(new FillLayout());
+		FillLayout historylayout = new FillLayout();
+		historylayout.marginWidth = 5;
+		historylayout.marginHeight = 5;
+		historylayout.spacing = 5;
+		recentconversions.setLayout(historylayout);
 
-		TreeFileManager filemanager = new TreeFileManager(left);
+		@SuppressWarnings("unchecked")
+		Deque<Conversion> conversionhistory = (Deque<Conversion>)Preferences.getObject(CONVERSION_HISTORY);
+		for (final Conversion conversion: conversionhistory) {
+			Link link = new Link(recentconversions, SWT.NONE);
+			link.setText(conversion.toString());
+			link.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent event) {
+					convert(conversion.source, conversion.inputfiles, conversion.target, conversion.outputfile);
+				}
+			});
+		}
+	}
 
-		Composite right = new Composite(sash, SWT.NONE);
-		right.setLayout(new FillLayout());
-		new Label(right, SWT.NONE).setText("Right");
+	/**
+	 * Start a conversion project with the specified parameters.
+	 * 
+	 * @param source
+	 * @param inputfiles
+	 * @param target
+	 * @param outputfile
+	 */
+	private void convert(ConversionFile source, String[] inputfiles, ConversionFile target, String outputfile) {
 
-		sash.setWeights(new int[]{ 25, 75 });
+		// Clear the recent conversions history
+		if (!recentconversions.isDisposed()) {
+			recentconversions.dispose();
+		}
+
+		// Create input panel
+		Group inputgroup = new Group(shell, SWT.NONE);
 	}
 
 	/**

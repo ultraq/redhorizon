@@ -3,7 +3,6 @@ package redhorizon.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
@@ -28,7 +27,9 @@ public abstract class ApplicationWindow extends Window {
 	protected ApplicationWindow(boolean addmenubar) {
 
 		super(SWT.SHELL_TRIM);
-		shell.setLayout(new FillLayout());
+
+		shell.setLayout(createFillLayout());
+
 		menumanager = addmenubar ? new MenuManager() : null;
 	}
 
