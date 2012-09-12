@@ -52,10 +52,24 @@ public abstract class Window {
 	 */
 	protected static FillLayout createFillLayout() {
 
+		return createFillLayout(10, 10, 10);
+	}
+
+	/**
+	 * Creates a new fill layout with the specified values.
+	 * 
+	 * @param marginwidth
+	 * @param marginheight
+	 * @param spacing
+	 * 
+	 * @return A new fill layout based on the above values.
+	 */
+	protected static FillLayout createFillLayout(int marginwidth, int marginheight, int spacing) {
+
 		FillLayout filllayout = new FillLayout();
-		filllayout.marginWidth  = 10;
-		filllayout.marginHeight = 10;
-		filllayout.spacing      = 10;
+		filllayout.marginWidth  = marginwidth;
+		filllayout.marginHeight = marginheight;
+		filllayout.spacing      = spacing;
 
 		return filllayout;
 	}

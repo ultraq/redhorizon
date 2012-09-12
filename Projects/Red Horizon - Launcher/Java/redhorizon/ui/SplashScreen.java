@@ -62,7 +62,7 @@ public class SplashScreen extends Window {
 			// Splash screen frame
 			shell.setBackground(display.getSystemColor(SWT.COLOR_WHITE));
 			shell.setBackgroundMode(SWT.INHERIT_FORCE);
-			shell.setLayout(createGridLayout());
+			shell.setLayout(createGridLayout(2, false, 0, 0, 0, 0, 0, 0));
 
 			// Splash screen image
 			Image image = new Image(display, width, height);
