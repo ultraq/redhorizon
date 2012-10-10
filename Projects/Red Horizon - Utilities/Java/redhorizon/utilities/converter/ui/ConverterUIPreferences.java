@@ -3,7 +3,7 @@ package redhorizon.utilities.converter.ui;
 
 import nz.net.ultraq.preferences.UserPreferencesKey;
 
-import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 /**
  * Enum of preferences used by the SMART notice generator.
@@ -18,7 +18,7 @@ public enum ConverterUIPreferences implements UserPreferencesKey {
 	WINDOW_BOUNDS_WIDTH  (1000),
 	WINDOW_BOUNDS_HEIGHT (750),
 
-	CONVERSION_HISTORY (new ArrayDeque<Conversion>());
+	CONVERSION_HISTORY (new ArrayList<Conversion>());
 
 	private final Object defaultvalue;
 
