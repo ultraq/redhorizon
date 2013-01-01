@@ -14,7 +14,4 @@ dependencies {
 	aspects(
 		project(':Projects:Red Horizon - Aspects')
 	)
-	compile (
-		'org.slf4j:slf4j-api:1.6.6',
-	)
 }

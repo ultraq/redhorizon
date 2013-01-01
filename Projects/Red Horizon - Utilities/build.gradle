@@ -17,14 +17,7 @@ dependencies {
 	compile(
 		'nz.net.ultraq.preferences:preferences:1.2.2-SNAPSHOT',
 		'nz.net.ultraq.preferences:preferences-xml:1.2.2',
-		'org.slf4j:slf4j-api:1.6.6',
 		project(':Projects:Red Horizon - Filetypes'),
 		project(':Projects:Red Horizon - Launcher')
-	)
-	runtime(
-		'ch.qos.logback:logback-classic:1.0.3',
-		'org.slf4j:jul-to-slf4j:1.6.6',
-		'org.slf4j:log4j-over-slf4j:1.6.6',
-		'org.slf4j:jcl-over-slf4j:1.6.6',
 	)
 }
