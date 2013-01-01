@@ -8,7 +8,7 @@
 // Global configuration
 allprojects {
 	project.group    = 'nz.net.ultraq.redhorizon'
-	project.version  = '0.30'
+	project.version  = '0.31-SNAPSHOT'
 }
 
 // Subproject configurations
@@ -19,8 +19,7 @@ ext.utilitiesProject = project('Projects:Red Horizon - Utilities')
 subprojects {
 	if (project in rhprojects) {
 		apply plugin: 'java'
-//		apply from: 'https://raw.github.com/ultraq/gradle-support/master/java-support.gradle'
-		apply from: 'file:///D:/Scanner/Programming/Gradle Support/java-support.gradle'
+		apply from: 'https://raw.github.com/ultraq/gradle-support/master/java-support.gradle'
 
 		project.archivesBaseName    = project.name.replace(' ', '').toLowerCase();
 		project.sourceCompatibility = '1.7'
@@ -29,11 +28,11 @@ subprojects {
 			flatDir {
 				dirs "${project.rootDir}/Libraries"
 			}
+			mavenLocal()
 			mavenCentral()
 			maven {
 				url 'https://oss.sonatype.org/content/groups/public/'
 			}
-			mavenLocal()
 		}
 	}
 }

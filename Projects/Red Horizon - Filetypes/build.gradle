@@ -5,8 +5,7 @@
  * @author Emanuel Rabina
  */
 
-//apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
-apply from: 'file:///D:/Scanner/Programming/Gradle Support/aspectj.gradle'
+apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
 
 //project.name        = 'Red Horizon - Filetypes'
 project.description = 'Filetypes module for the Red Horizon project.'
