@@ -4,7 +4,7 @@ Red Horizon
 
 An ongoing project of mine with the goal of recreating the original 2D Command &
 Conquer (C&C) games.  The focus is on backwards-compatibility with the original
-games, then to create an extensive tool suite aimed at modding the game.
+games, then to create a mission-editing tool suite aimed at modifying the game.
 
 This project has no _finish_ date, has already been going for 6-7 years, and is
 really just a way for me to keep my programming skills sharp and to maintain my
