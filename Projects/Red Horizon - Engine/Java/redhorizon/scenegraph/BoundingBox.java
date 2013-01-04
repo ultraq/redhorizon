@@ -61,6 +61,7 @@ public class BoundingBox extends BoundingVolume {
 	 */
 	@Override
 	public boolean intersects(Ray ray) {
+
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -71,32 +72,19 @@ public class BoundingBox extends BoundingVolume {
 	@Override
 	public BoundingVolume merge(BoundingVolume volume) {
 
-		// This volume's edges
-		float lx = center.x - (width / 2);
-		float ux = center.x + (width / 2);
-		float ly = center.y - (height / 2);
-		float uy = center.y + (height / 2);
-		float lz = center.z - (depth / 2);
-		float uz = center.z + (depth / 2);
-
-		// The other volume's edges
 		if (volume instanceof BoundingBox) {
 			BoundingBox bb = (BoundingBox)volume;
-			float olx = bb.center.x - (bb.width / 2);
-			float oux = bb.center.x + (bb.width / 2);
-			float oly = bb.center.y - (bb.height / 2);
-			float ouy = bb.center.y + (bb.height / 2);
-			float olz = bb.center.z - (bb.depth / 2);
-			float ouz = bb.center.z + (bb.depth / 2);
-
 			return new BoundingBox(
 					new Vector3f(
 							(center.x + volume.center.x) / 2,
 							(center.y + volume.center.y) / 2,
 							(center.z + volume.center.z) / 2),
-					Math.max(ux, oux) - Math.min(lx, olx),
-					Math.max(uy, ouy) - Math.min(ly, oly),
-					Math.max(uz, ouz) - Math.min(lz, olz)
+					Math.max(center.x + (width / 2), bb.center.x + (bb.width / 2)) -
+					Math.min(center.x - (width / 2), bb.center.x - (bb.width / 2)),
+					Math.max(center.y + (height / 2), bb.center.y + (bb.height / 2)) -
+					Math.min(center.y - (height / 2), bb.center.y - (bb.height / 2)),
+					Math.max(center.z + (depth / 2), bb.center.z + (bb.depth / 2)) -
+					Math.min(center.z - (depth / 2), bb.center.z - (bb.depth / 2))
 			);
 		}
 

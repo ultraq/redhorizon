@@ -1,33 +1,38 @@
+/*
+ * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package redhorizon.engine.graphics;
 
-import javax.media.opengl.GL;
-import static javax.media.opengl.GL.*;
-
 /**
- * OpenGL renderer for the graphics subsystem.
+ * Interface for the graphics renderer, used by the graphics subsystem to draw
+ * objects to the screen.
  * 
  * @author Emanuel Rabina
  */
-public class GraphicsRenderer {
-
-	private GL gl;
+public interface GraphicsRenderer {
 
 	/**
-	 * Render the viewport based off the given camera settings.
-	 * 
-	 * @param camera
+	 * Cleanup/destroy the graphics renderer.
 	 */
-	public void renderViewport(Camera camera) {
+	public void cleanup();
 
-		// Set up the viewport
-		gl.glViewport(0, 0, viewport.getWidth(), viewport.getHeight());
-		gl.glMatrixMode(GL_PROJECTION);
-		gl.glLoadIdentity();
-		gl.glOrtho(viewvolume.getLeft(), viewvolume.getRight(),
-				   viewvolume.getBottom(), viewvolume.getTop(),
-				   viewvolume.getFront(), viewvolume.getBack());
-		gl.glMatrixMode(GL_MODELVIEW);
-		gl.glLoadIdentity();
-	}
+	/**
+	 * Initialize the graphics renderer, making the current thread the graphics
+	 * rendering thread.
+	 */
+	public void initialize();
+
 }

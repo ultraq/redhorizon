@@ -15,8 +15,12 @@ dependencies {
 		project(':Projects:Red Horizon - Aspects')
 	)
 	compile(
+		'org.jogamp.gluegen:gluegen-rt:2.0-rc11',
+		'org.jogamp.gluegen:gluegen-rt:2.0-rc11:natives-windows-i586',
 		'org.jogamp.joal:joal:2.0-rc11',
 		'org.jogamp.joal:joal:2.0-rc11:natives-windows-i586',
+		'org.jogamp.jogl:jogl-all-noawt:2.0-rc11',
+		'org.jogamp.jogl:jogl-all:2.0-rc11:natives-windows-i586',
 		project(':Projects:Red Horizon - Launcher')
 	)
 }

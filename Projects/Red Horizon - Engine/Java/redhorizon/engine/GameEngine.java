@@ -16,7 +16,7 @@
 
 package redhorizon.engine;
 
-import redhorizon.engine.audio.AudioEngine;
+import redhorizon.engine.audio.AudioSubsystem;
 import redhorizon.scenegraph.Scene;
 
 import java.util.concurrent.CountDownLatch;
@@ -50,7 +50,7 @@ public class GameEngine implements SubsystemCallback {
 		// Create a new scene and start all subsystems connected to this scene,
 		// waiting until they're all started
 		Scene scene = new Scene();
-		engineexecutor.submit(new AudioEngine(scene, this));
+		engineexecutor.submit(new AudioSubsystem(scene, this));
 		initbarrier.await();
 
 	}

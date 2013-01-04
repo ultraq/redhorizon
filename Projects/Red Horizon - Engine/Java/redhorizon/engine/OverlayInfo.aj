@@ -6,9 +6,9 @@
 package redhorizon.debug;
 
 import redhorizon.engine.GameEngine;
-import redhorizon.engine.audio.AudioEngine;
+import redhorizon.engine.audio.AudioSubsystem;
 import redhorizon.engine.graphics.Camera;
-import redhorizon.engine.graphics.GraphicsEngine;
+import redhorizon.engine.graphics.GraphicsSubsystem;
 import redhorizon.engine.graphics.GraphicsEngineListener;
 import redhorizon.engine.input.InputEngine;
 import redhorizon.engine.input.MouseAction;
@@ -49,8 +49,8 @@ public privileged aspect OverlayInfo {
 	 * 
 	 * @param graphicsengine The graphics engine.
 	 */
-	after(GraphicsEngine graphicsengine):
-		call(public void GraphicsEngine.addListener(GraphicsEngineListener)) &&
+	after(GraphicsSubsystem graphicsengine):
+		call(public void GraphicsSubsystem.addListener(GraphicsEngineListener)) &&
 		target(graphicsengine) && within(GameEngine) {
 
 		graphicsengine.addListener(new OverlayRenderer());
@@ -136,7 +136,7 @@ public privileged aspect OverlayInfo {
 	 * Audio cycles-per-second.
 	 */
 	after():
-		execution(protected void AudioEngine.doRun()) {
+		execution(protected void AudioSubsystem.doRun()) {
 
 		SoundStats.audcycles++;
 	}

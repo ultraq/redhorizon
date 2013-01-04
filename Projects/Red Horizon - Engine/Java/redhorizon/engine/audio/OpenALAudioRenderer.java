@@ -17,6 +17,10 @@
 package redhorizon.engine.audio;
 
 import com.jogamp.openal.AL;
+import com.jogamp.openal.ALC;
+import com.jogamp.openal.ALCcontext;
+import com.jogamp.openal.ALCdevice;
+import com.jogamp.openal.ALFactory;
 import static com.jogamp.openal.AL.*;
 
 /**
@@ -27,16 +31,34 @@ import static com.jogamp.openal.AL.*;
  */
 public class OpenALAudioRenderer implements AudioRenderer {
 
-	private final AL al;
+	private OpenALContextManager contextmanager;
+	private AL al;
 
 	/**
-	 * Constructor, sets a valid OpenAL pipeline on this renderer.
-	 * 
-	 * @param al
+	 * Constructor, creates a new OpenAL audio renderer.
 	 */
-	OpenALAudioRenderer(AL al) {
+	OpenALAudioRenderer() {
+	}
 
-		this.al = al;
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void cleanup() {
+
+		contextmanager.releaseCurrentContext();
+		contextmanager.destroyCurrentContext();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void initialize() {
+
+		contextmanager = new OpenALContextManager();
+		contextmanager.makeCurrentContext();
+		al = ALFactory.getAL();
 	}
 
 	/**
@@ -48,5 +70,64 @@ public class OpenALAudioRenderer implements AudioRenderer {
 		al.alListenerfv(AL_POSITION, listener.getPosition().toArray(), 0);
 		al.alListenerfv(AL_VELOCITY, listener.getVelocity().toArray(), 0);
 		al.alListenerfv(AL_ORIENTATION, listener.getOrientation().toArray(), 0);
+	}
+
+	/**
+	 * OpenAL context (and device) manager for the audio engine class/thread.
+	 * For any OpenAL operations to take place, a context must be made current
+	 * on the executing thread.
+	 */
+	private class OpenALContextManager {
+
+		private final ALCdevice aldevice;
+		private ALCcontext alcontext;
+
+		/**
+		 * Constructor, creates the device to use for the context object.
+		 */
+		private OpenALContextManager() {
+
+			ALC alc = ALFactory.getALC();
+			aldevice = alc.alcOpenDevice(null);
+		}
+
+		/**
+		 * Destroys the OpenAL context for the currently executing thread.  Also
+		 * closes the OpenAL device handle.
+		 */
+		private void destroyCurrentContext() {
+
+			ALC alc = ALFactory.getALC();
+			if (alcontext != null) {
+				alc.alcDestroyContext(alcontext);
+				alcontext = null;
+			}
+			alc.alcCloseDevice(aldevice);
+		}
+
+		/**
+		 * Makes an OpenAL context current on the executing thread.
+		 */
+		private void makeCurrentContext() {
+
+			ALC alc = ALFactory.getALC();
+
+			// Use the current context, or make a new one
+			if (alcontext == null) {
+				alcontext = alc.alcCreateContext(aldevice, null);
+			}
+			alc.alcMakeContextCurrent(alcontext);
+		}
+
+		/**
+		 * Releases the OpenAL context that is current on the executing thread.
+		 */
+		private void releaseCurrentContext() {
+
+			ALC alc = ALFactory.getALC();
+			if (alcontext != null) {
+				alc.alcMakeContextCurrent(null);
+			}
+		}
 	}
 }

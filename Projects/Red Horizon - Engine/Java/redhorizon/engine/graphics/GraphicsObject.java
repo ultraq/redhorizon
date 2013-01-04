@@ -8,7 +8,7 @@ package redhorizon.engine.graphics;
 import javax.media.opengl.GL;
 
 /**
- * Interface defining methods that are used by the {@link GraphicsEngine} to
+ * Interface defining methods that are used by the {@link GraphicsSubsystem} to
  * perform initialization, rendering, and deletion of OpenGL renderables.  It is
  * in these methods that an OpenGL pipeline of a current context is guaranteed.
  * 
@@ -37,7 +37,7 @@ public interface GraphicsObject {
 
 	/**
 	 * Draws the image into the current graphics context.  This method is called
-	 * from the {@link GraphicsEngine}'s graphics rendering thread.
+	 * from the {@link GraphicsSubsystem}'s graphics rendering thread.
 	 * 
 	 * NOTE: Check all implementations of this method in future for when doing
 	 * 		 graphics rendering optimizations, noteably speed-ups.

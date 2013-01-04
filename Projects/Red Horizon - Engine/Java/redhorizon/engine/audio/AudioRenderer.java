@@ -25,6 +25,17 @@ package redhorizon.engine.audio;
 public interface AudioRenderer {
 
 	/**
+	 * Cleanup/destroy the audio renderer.
+	 */
+	public void cleanup();
+
+	/**
+	 * Initialize the audio renderer, making the current thread the audio
+	 * rendering thread.
+	 */
+	public void initialize();
+
+	/**
 	 * Update the listener attributes.
 	 * 
 	 * @param listener
