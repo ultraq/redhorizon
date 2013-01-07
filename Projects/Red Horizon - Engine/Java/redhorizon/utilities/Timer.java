@@ -1,7 +1,18 @@
-
-// ==============================
-// Scanner's Java - Timer utility
-// ==============================
+/*
+ * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package redhorizon.utilities;
 
@@ -22,13 +33,16 @@ import java.util.concurrent.Executors;
  */
 public class Timer implements Runnable {
 
+	// Global timer
+	public static final Timer GLOBAL_TIMER = new Timer("Global timer");
+
 	// Minimum number of milliseconds to sleep between checking for event changes
 	private static final int RESOLUTION_DEFAULT = 100;
 
 	// Animation parameters
 	private final String name;
 	private final int resolution;
-	private final TreeMap<Integer,TimerTask> tasks = new TreeMap<Integer,TimerTask>();
+	private final TreeMap<Integer,TimerTask> tasks = new TreeMap<>();
 
 	private volatile boolean running;
 	private volatile boolean paused;
@@ -116,11 +130,14 @@ public class Timer implements Runnable {
 	 * Executes the timer and checks for whether there is a timed task to call
 	 * in the time that has passed.
 	 */
+	@Override
 	public void run() {
+
+		Thread.currentThread().setName("Timer - " + name);
 
 		// Set of scheduled times in ascending order
 		ExecutorService threadpool = Executors.newCachedThreadPool();
-		final Queue<Integer> times = new LinkedList<Integer>(tasks.keySet());
+		final Queue<Integer> times = new LinkedList<>(tasks.keySet());
 
 		final long starttime = System.currentTimeMillis();
 		long runtime = 0;
@@ -139,6 +156,7 @@ public class Timer implements Runnable {
 			// Check for tasks to execute
 			while (times.size() > 0 && times.peek() <= runtime) {
 				threadpool.execute(new Runnable() {
+					@Override
 					public void run() {
 						tasks.get(times.remove()).begin();
 					}

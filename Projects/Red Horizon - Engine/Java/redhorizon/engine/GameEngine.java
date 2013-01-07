@@ -17,6 +17,9 @@
 package redhorizon.engine;
 
 import redhorizon.engine.audio.AudioSubsystem;
+import redhorizon.engine.display.GameWindow;
+import redhorizon.engine.graphics.GraphicsSubsystem;
+import redhorizon.engine.input.InputSubsystem;
 import redhorizon.scenegraph.Scene;
 
 import java.util.concurrent.CountDownLatch;
@@ -32,7 +35,7 @@ import java.util.concurrent.Executors;
 public class GameEngine implements SubsystemCallback {
 
 	private final ExecutorService engineexecutor = Executors.newCachedThreadPool();
-	private final CountDownLatch initbarrier = new CountDownLatch(1);
+	private final CountDownLatch initbarrier = new CountDownLatch(3);
 
 	/**
 	 * Starts all engine subsystems and waits until initialization of each one
@@ -47,10 +50,18 @@ public class GameEngine implements SubsystemCallback {
 			throw new IllegalStateException("Game engine already started");
 		}
 
-		// Create a new scene and start all subsystems connected to this scene,
-		// waiting until they're all started
+		// Create all the subsystems and all their prerequisites, hook them all up
+		// and then wait until they're all started
 		Scene scene = new Scene();
-		engineexecutor.submit(new AudioSubsystem(scene, this));
+		GameWindow window = new GameWindow();
+
+		AudioSubsystem audio = new AudioSubsystem(scene, this);
+		GraphicsSubsystem graphics = new GraphicsSubsystem(scene, window, this);
+		InputSubsystem input = new InputSubsystem(window, this);
+
+		engineexecutor.submit(audio);
+		engineexecutor.submit(graphics);
+		engineexecutor.submit(input);
 		initbarrier.await();
 
 	}

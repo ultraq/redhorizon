@@ -19,8 +19,9 @@ package redhorizon.engine.graphics;
 import redhorizon.engine.EngineException;
 import redhorizon.engine.EngineStrings;
 import redhorizon.engine.SubsystemCallback;
-import redhorizon.engine.display.DisplayCallback;
+import redhorizon.engine.display.RenderingDelegate;
 import redhorizon.engine.display.GameWindow;
+import redhorizon.engine.graphics.Camera.CameraProjection;
 import redhorizon.scenegraph.Scene;
 
 import java.util.Arrays;
@@ -32,30 +33,31 @@ import java.util.HashSet;
  * 
  * @author Emanuel Rabina
  */
-public class GraphicsSubsystem implements Runnable {
+public class GraphicsSubsystem implements RenderingDelegate, Runnable {
 
 	private final Scene scene;
+	private final GameWindow window;
 	private final SubsystemCallback callback;
-
-	private GameWindow gamewindow;
-	private Camera camera;
 
 	/**
 	 * Constructor, initializes the graphics engine and attaches it to the given
-	 * scene graph and event listener callback.
+	 * scene graph, display, and event listener callback.
 	 * 
 	 * @param scene
+	 * @param window
 	 * @param callback
 	 */
-	public GraphicsSubsystem(Scene scene, SubsystemCallback callback) {
+	public GraphicsSubsystem(Scene scene, GameWindow window, SubsystemCallback callback) {
 
 		this.scene    = scene;
+		this.window   = window;
 		this.callback = callback;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void displayClosed() {
 
 		for (GraphicsEngineListener listener: listeners) {
@@ -68,26 +70,20 @@ public class GraphicsSubsystem implements Runnable {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void displayInit() {
 
-		// Create context and pipeline once window is set up
-		contextmanager = new GLContextManager();
-		contextmanager.makeCurrentContext();
-		gl = GLU.getCurrentGL();
+		// Set the renderer context to be valid on this thread
+		renderer = new OpenGLGraphicsRenderer();
+		renderer.initialize();
 
-		testGL();
-		enableGL();
-
-		// Create viewport, camera, attach to render window
-		camera = new Camera(gl, gamewindow.getRenderingArea());
-		addListener(camera);
-
-		callback.initRendering();
+		callback.subsystemInit();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void displayRendering() {
 
 		// Clear color and depth buffer
@@ -97,26 +93,6 @@ public class GraphicsSubsystem implements Runnable {
 		for (GraphicsEngineListener listener: listeners) {
 			listener.rendering(gl);
 		}
-	}
-
-	/**
-	 * Returns the camera being used to render to the current viewport.
-	 * 
-	 * @return The camera for the current viewport.
-	 */
-	public Camera getCurrentCamera() {
-
-		return camera;
-	}
-
-	/**
-	 * Returns the current game window being rendered to.
-	 * 
-	 * @return The current rendering target (window).
-	 */
-	public GameWindow getCurrentGameWindow() {
-
-		return gamewindow;
 	}
 
 	/**
@@ -131,23 +107,18 @@ public class GraphicsSubsystem implements Runnable {
 		GraphicsRenderer renderer = null;
 		try {
 			// Startup
-			gamewindow = GameWindow.createGameWindow(GraphicsSubsystem.this);
-			renderer = new OpenGLGraphicsRenderer();
-			renderer.initialize();
-			scene.setCamera(new Camera());
-			callback.subsystemInit();
+			scene.setCamera(new Camera(CameraProjection.ORTHOGRAPHIC,
+					window.getCanvasWidth(), window.getCanvasHeight(), 100));
 
 			// Perform the rendering loop
-			gamewindow.open();
+			window.open();
 		}
 		finally {
 			// Shutdown
 			if (renderer != null) {
 				renderer.cleanup();
 			}
-			if (gamewindow != null) {
-				gamewindow.close();
-			}
+			window.close();
 			callback.subsystemStop();
 		}
 	}

@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-package redhorizon.utilities;
+package redhorizon.engine.display;
 
 /**
- * Timed event handler interface for repeat tasks.
+ * Interface for classes that wish to handle rendering events from the game
+ * window canvas.
  * 
  * @author Emanuel Rabina
  */
-public interface AnimatorTask extends TimerTask {
+public interface RenderingDelegate {
 
 	/**
-	 * Called when an animation begins.
+	 * Notification that the display area has been closed.
 	 */
-	@Override
-	public void begin();
+	public void displayClosed();
 
 	/**
-	 * Called when a animation is complete.
+	 * Notification that there is now a visible rendering space being actively
+	 * updated.
 	 */
-	public void end();
+	public void displayInit();
 
 	/**
-	 * Called at regular intervals, by the {@link Animator}, notifies the
-	 * handler implementation of how far along the animation has progressed.
-	 * 
-	 * @param fraction The fraction of the current animation cycle that has been
-	 * 				   completed.
+	 * Notification that a new rendering cycle has started.
 	 */
-	public void event(float fraction);
+	public void displayRendering();
 }

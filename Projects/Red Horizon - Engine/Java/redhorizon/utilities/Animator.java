@@ -1,7 +1,18 @@
-
-// =================================
-// Scanner's Java - Animator utility
-// =================================
+/*
+ * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package redhorizon.utilities;
 
@@ -24,6 +35,9 @@ public class Animator implements Runnable {
 	// Represents an infinitely-looping animation
 	public static final int CYCLE_INFINITE = -1;
 
+	// Global animator
+	public static final Animator GLOBAL_ANIMATOR = new Animator("Global animator", 1000, CYCLE_INFINITE);
+
 	// Minimum number of milliseconds to sleep between checking for event changes
 	private static final int RESOLUTION_DEFAULT = 20;
 
@@ -32,7 +46,7 @@ public class Animator implements Runnable {
 	private final long duration;
 	private final int cycles;
 	private final int resolution;
-	private final ArrayList<AnimatorTask> tasks = new ArrayList<AnimatorTask>();
+	private final ArrayList<AnimatorTask> tasks = new ArrayList<>();
 
 	private volatile boolean running;
 	private volatile boolean paused;
@@ -141,7 +155,10 @@ public class Animator implements Runnable {
 	 * Executes the animator and calls the {@link AnimatorTask} at regular
 	 * intervals, defined by the animator's resolution.
 	 */
+	@Override
 	public void run() {
+
+		Thread.currentThread().setName("Animator - " + name);
 
 		// Cached thread pool to run animation events
 		ExecutorService threadpool = Executors.newCachedThreadPool();
@@ -153,6 +170,7 @@ public class Animator implements Runnable {
 		// Notify tasks of start
 		for (final AnimatorTask task: tasks) {
 			threadpool.execute(new Runnable() {
+				@Override
 				public void run() {
 					task.begin();
 				}
@@ -177,6 +195,7 @@ public class Animator implements Runnable {
 				final float fraction = (float)runtime / (float)duration;
 				for (final AnimatorTask task: tasks) {
 					threadpool.execute(new Runnable() {
+						@Override
 						public void run() {
 							task.event(fraction);
 						}
@@ -201,6 +220,7 @@ public class Animator implements Runnable {
 		if (running) {
 			for (final AnimatorTask task: tasks) {
 				threadpool.execute(new Runnable() {
+					@Override
 					public void run() {
 						task.end();
 					}

@@ -35,4 +35,10 @@ public interface GraphicsRenderer {
 	 */
 	public void initialize();
 
+	/**
+	 * Update the camera attributes.
+	 * 
+	 * @param camera
+	 */
+	public void updateCamera(Camera camera);
 }

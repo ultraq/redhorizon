@@ -10,7 +10,7 @@ import redhorizon.engine.audio.AudioSubsystem;
 import redhorizon.engine.graphics.Camera;
 import redhorizon.engine.graphics.GraphicsSubsystem;
 import redhorizon.engine.graphics.GraphicsEngineListener;
-import redhorizon.engine.input.InputEngine;
+import redhorizon.engine.input.InputSubsystem;
 import redhorizon.engine.input.MouseAction;
 import redhorizon.engine.input.MouseEvent;
 import redhorizon.geometry.Point2D;
@@ -167,7 +167,7 @@ public privileged aspect OverlayInfo {
 	 * @param mouseevent The mouseevent being read.
 	 */
 	after() returning(MouseEvent mouseevent):
-		call(public * Iterator.next()) && withincode(protected void InputEngine.doRun()) {
+		call(public * Iterator.next()) && withincode(protected void InputSubsystem.doRun()) {
 
 		Point2D camerapos = camera.getPosition();
 

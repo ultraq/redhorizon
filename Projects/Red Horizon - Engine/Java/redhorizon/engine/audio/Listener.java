@@ -24,7 +24,7 @@ import redhorizon.scenegraph.BoundingVolume;
 import redhorizon.scenegraph.Spatial;
 
 /**
- * The player's 'ears' in the world.
+ * The player's ears into the world.
  * 
  * @author Emanuel Rabina
  */
@@ -78,7 +78,7 @@ public class Listener extends Spatial {
 	}
 
 	/**
-	 * Set the listener in the environment.
+	 * Set/update the listener in the environment.
 	 * 
 	 * @param renderer
 	 */

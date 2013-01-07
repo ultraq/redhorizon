@@ -1,159 +1,307 @@
-
-// ======================================
-// Scanner's Java - Interface for display
-// ======================================
+/*
+ * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package redhorizon.engine.display;
 
-import redhorizon.geometry.Area2D;
+import redhorizon.ui.Window;
+import redhorizon.utilities.Animator;
+import redhorizon.utilities.AnimatorTask;
 
-import nz.net.ultraq.common.preferences.Preferences;
-import nz.net.ultraq.gui.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.opengl.GLCanvas;
+import org.eclipse.swt.opengl.GLData;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 
-import java.util.Properties;
-import java.util.ServiceLoader;
+import java.util.HashMap;
 
 /**
- * Window/Canvas to which the graphics engine will be rendering to.
+ * A window containing the canvas onto which the graphics engine will be
+ * rendering to.  This window drives the rendering loop, as well as the input
+ * events that will be dispatched to the input subsystem.
  * <p>
- * To use, the application name must be a system property mapped to the
- * following key:
- * <tt>redhorizon.engine.display.appname</tt>
- * <p>
- * The default implementation uses a windowed implementation based on SWT, but
- * custom implementations can be used via the standard Java SPI mechanism.  In
- * this case, the file in <tt>META-INF/services</tt> should have the same name
- * as the fully qualified name of this class
- * (<tt>redhorizon.engine.display.GameWindow</tt>).  The first entry found using
- * this method, which supports the user-requested mode (windowed/fullscreen)
- * will be used.
- * <p>
- * All implementations are required to support windowed mode as a minimum.
+ * The main focus of this window will be the drawing area, and until a proper
+ * in-game menu system can be developed, the menu will be provided by the usual
+ * shell menu (File, Edit, etc).
  * 
  * @author Emanuel Rabina
  */
-public abstract class GameWindow implements Window {
+public class GameWindow extends Window {
 
-	// GameWindow configuration
-	private static final String WINDOW_TITLE = "Red Horizon Engine";
-	private static final String CONFIGURATION_FILE = "GameWindow.properties";
-	private static ServiceLoader<GameWindow> serviceloader;
+	private static final String WINDOW_TITLE = "Red Horizon";
+	private static final int CANVAS_WIDTH  = 1024;
+	private static final int CANVAS_HEIGHT = 768;
 
-	// Singleton GameWindow instance
-	private static GameWindow gamewindow;
+	// SWT components
+	private final GLCanvas canvas;
 
-	// Window attributes
-	protected final Properties config;
+	// Mouse-related
+	private Animator cursoranimator;
+	private boolean offscreen;
+
+	// Window event delegates
+	private RenderingDelegate renderingdelegate;
+	private InputEventDelegate inputeventdelegate;
 
 	/**
-	 * Default constructor, loads the window configuration from the
-	 * <tt>GameWindow.properties</tt> file.
+	 * Constructor, creates the window that produces all display and input
+	 * events.
 	 */
-	protected GameWindow() {
+	public GameWindow() {
 
-		config = new Properties();
-		config.load(getClass().getClassLoader().getResourceAsStream(CONFIGURATION_FILE));
+		super(SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.DOUBLE_BUFFERED);
+
+		shell.setText(WINDOW_TITLE);
+		shell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
+		shell.addShellListener(new ShellAdapter() {
+			@Override
+			public void shellClosed(ShellEvent event) {
+				close();
+				event.doit = false;
+			}
+		});
+
+		// Set up the OpenGL canvas
+		GLData gldata = new GLData();
+		gldata.doubleBuffer = true;
+		gldata.sampleBuffers = 1;
+		gldata.samples = 4;
+		canvas = new GLCanvas(shell, SWT.NONE, gldata);
 	}
 
 	/**
-	 * Returns a <tt>GameWindow</tt> suited to the requirements specified by the
-	 * user preferences.
-	 * 
-	 * @param callback Engine to be notified of window events.
-	 * @return New <tt>GameWindow</tt> implementation.
+	 * {@inheritDoc}
 	 */
-	public static synchronized GameWindow createGameWindow(DisplayCallback callback) {
+	@Override
+	public void close() {
 
-		if (serviceloader == null) {
-			serviceloader = ServiceLoader.load(GameWindow.class);
+		if (!shell.isDisposed()) {
+			super.close();
+			renderingdelegate.displayClosed();
 		}
+	}
 
-		// Return the first implementation that supports the requested mode
-		String mode = Preferences.get(DisplayPreferences.DISPLAY_MODE);
-		boolean fullscreen = !mode.equals("window");
+	/**
+	 * Return the height of the canvas the graphics will be drawn on.
+	 * 
+	 * @return OpenGL canvas height.
+	 */
+	public int getCanvasHeight() {
 
-		for (GameWindow windowimpl: serviceloader) {
-			if (fullscreen && windowimpl.isFullScreenSupported()) {
-				gamewindow = windowimpl;
-				gamewindow.setRenderingCallback(callback);
-				gamewindow.setWindowTitle(WINDOW_TITLE);
-				return windowimpl;
+		return CANVAS_HEIGHT;
+	}
+
+	/**
+	 * Return the width of the canvas the graphics will be drawn on.
+	 * 
+	 * @return OpenGL canvas width.
+	 */
+	public int getCanvasWidth() {
+
+		return CANVAS_WIDTH;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void open() {
+
+		pack();
+		shell.open();
+
+		canvas.setCurrent();
+		renderingdelegate.displayInit();
+
+		// Perform rendering loop
+		display.asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				if (!shell.isDisposed()) {
+					renderingdelegate.displayRendering();
+					canvas.swapBuffers();
+					display.timerExec(5, this);
+				}
+			}
+		});
+
+		// Don't hog CPU cycles
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
 			}
 		}
-
-		// Use the default
-		gamewindow = new GameWindowSWT();
-		gamewindow.setRenderingCallback(callback);
-		gamewindow.setWindowTitle(WINDOW_TITLE);
-
-		return gamewindow;
+		display.dispose();
 	}
 
 	/**
-	 * Returns the currently running <tt>GameWindow</tt> instance.
-	 * 
-	 * @return The current game window, or <tt>null</tt> if there is no
-	 * 		   current window.
+	 * {@inheritDoc}
 	 */
-	public static GameWindow currentGameWindow() {
+	@Override
+	protected void pack() {
 
-		return gamewindow;
+		// Size the window and canvas
+		shell.setLayout(createGridLayout(1, true, 0, 0, 0, 0, 0, 0));
+		canvas.setLayoutData(new GridData(CANVAS_WIDTH, CANVAS_HEIGHT));
+
+		super.pack();
 	}
 
 	/**
-	 * Returns the size of the rendering area.
+	 * Update the mouse cursor to use the one specified.
 	 * 
-	 * @return Rendering area size, in pixels.
+	 * @param cursor
 	 */
-	public abstract Area2D getRenderingArea();
+	public void setCursor(CursorTypes cursor) {
+
+		// Do nothing if no change in cursor
+		if (cursor == currentcursor) {
+			return;
+		}
+
+		// Stop current animator
+		if (cursoranimator != null) {
+			cursoranimator.stop();
+		}
+
+		Cursor[] cursorimages = cursors.get(cursor);
+
+		// Start new cursor animator for animated cursors
+		if (cursorimages.length > 1) {
+			SWTCursorAnimator handler = new SWTCursorAnimator(cursorimages);
+			cursoranimator = new Animator("GameWindowSWT - Cursor animator",
+					cursorimages.length * 200, Animator.CYCLE_INFINITE);
+			cursoranimator.addTask(handler);
+			cursoranimator.start();
+		}
+
+		// Set the cursor image for static cursors
+		else {
+			cursoranimator = null;
+			display.syncExec(new Runnable() {
+				@Override
+				public void run() {
+					shell.setCursor(cursorimages[0]);
+				}
+			});
+		}
+	}
 
 	/**
-	 * Returns whether or not the implementation can support a full-screen mode.
+	 * Sets the delegate for handling input events from the window.
 	 * 
-	 * @return <tt>true</tt> if it supports full-screen mode, <tt>false</tt>
-	 * 		   otherwise.
+	 * @param inputeventdelegate
 	 */
-	protected abstract boolean isFullScreenSupported();
+	public void setInputEventHandler(InputEventDelegate inputeventdelegate) {
+
+		// Clear prior listeners
+		if (this.inputeventdelegate != null) {
+			shell.removeKeyListener(this.inputeventdelegate);
+			shell.removeMouseListener(this.inputeventdelegate);
+			canvas.removeMouseMoveListener(this.inputeventdelegate);
+			shell.removeMouseTrackListener(this.inputeventdelegate);
+		}
+
+		// Set the new listeners
+		shell.addKeyListener(inputeventdelegate);
+		shell.addMouseListener(inputeventdelegate);
+		canvas.addMouseMoveListener(inputeventdelegate);
+		shell.addMouseTrackListener(inputeventdelegate);
+		this.inputeventdelegate = inputeventdelegate;
+	}
 
 	/**
-	 * Requests that the mouse cursor stored under the given name be displayed
-	 * as the current cursor.
+	 * Sets the delegate for handling rendering events from the window.
 	 * 
-	 * @param cursortype The type of cursor to display.
+	 * @param renderingdelegate
 	 */
-	public abstract void setCursor(CursorTypes cursortype);
+	public void setRenderingCallback(RenderingDelegate renderingdelegate) {
+
+		this.renderingdelegate = renderingdelegate;
+	}
 
 	/**
-	 * Sets the inputhandler for receiving and dealing with input events such as
-	 * mouse clicks/movement and keyboard presses.
-	 * 
-	 * @param inputhandler The object to handle input events.
+	 * Inner-class for handling the animation of SWT cursors over the game
+	 * window.
 	 */
-	public abstract void setInputEventHandler(InputEventHandler inputhandler);
+	private class SWTCursorAnimator implements AnimatorTask {
 
-	/**
-	 * Sets the inputhandler for rendering events defined by the
-	 * <tt>DisplayCallback</tt> interface.
-	 * 
-	 * @param callback The object to be notified of significant display events.
-	 */
-	protected abstract void setRenderingCallback(DisplayCallback callback);
+		private final Cursor[] cursorimages;
+		private int currentimage = 0;
 
-	/**
-	 * Sets the winow title.
-	 * 
-	 * @param title Window title.
-	 */
-	protected abstract void setWindowTitle(String title);
+		/**
+		 * Constructor, loads a cursor to animate
+		 * 
+		 * @param cursorimages Array of cursors representing the frames of this
+		 * 					   cursor's animation.
+		 */
+		private SWTCursorAnimator(Cursor[] cursorimages) {
 
-	/**
-	 * Sets that the implementation should render in full-screen mode.
-	 * 
-	 * @throws UnsupportedOperationException If full-screen mode is not
-	 * 		   supported by the implementation.
-	 */
-	protected void useFullScreen() {
+			this.cursorimages = cursorimages;
+		}
 
-		throw new UnsupportedOperationException("Full-screen mode not supported.");
+		/**
+		 * Sets the initial cursor.
+		 */
+		public void begin() {
+
+			setCursor0(cursorimages[0]);
+		}
+
+		/**
+		 * Does nothing.
+		 */
+		public void end() {
+		}
+
+		/**
+		 * Updates an animated cursor's image as necessary.
+		 * 
+		 * @param fraction Value close to which frame to display.
+		 */
+		public void event(float fraction) {
+
+			final int closestimage = (int)(fraction * cursorimages.length);
+
+			// Do nothing if no change in cursor used
+			if (currentimage == closestimage) {
+				return;
+			}
+
+			// Update cursor
+			setCursor0(cursorimages[closestimage]);
+			currentimage = closestimage;
+		}
 	}
 }

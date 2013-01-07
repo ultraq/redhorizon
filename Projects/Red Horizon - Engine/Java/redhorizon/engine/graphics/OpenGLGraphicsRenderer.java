@@ -97,16 +97,8 @@ public class OpenGLGraphicsRenderer implements GraphicsRenderer {
 		// Blending and blending function
 		gl.glEnable(GL_BLEND);
 		gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
 
-	/**
-	 * Render the viewport based off the given camera settings.
-	 * 
-	 * @param camera
-	 */
-	public void renderViewport(Camera camera) {
-
-		// Set up the viewport
+		// Set up the viewport based on the camera settings
 		gl.glViewport(0, 0, viewport.getWidth(), viewport.getHeight());
 		gl.glMatrixMode(GL_PROJECTION);
 		gl.glLoadIdentity();
@@ -115,6 +107,20 @@ public class OpenGLGraphicsRenderer implements GraphicsRenderer {
 				   viewvolume.getFront(), viewvolume.getBack());
 		gl.glMatrixMode(GL_MODELVIEW);
 		gl.glLoadIdentity();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateCamera(Camera camera) {
+
+		// Update the position of the camera
+		Point3D diff = getPosition().difference(lastpos);
+		if (!diff.equals(Point3D.DEFAULT)) {
+			gl.glTranslatef(-diff.getX(), -diff.getY(), -diff.getZ());
+			lastpos = lastpos.add(diff);
+		}
 	}
 
 	/**

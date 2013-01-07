@@ -14,32 +14,20 @@
  * limitations under the License.
  */
 
-package redhorizon.utilities;
+package redhorizon.engine.display;
+
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackListener;
 
 /**
- * Timed event handler interface for repeat tasks.
+ * Interface culminating all the input event types that the display will
+ * produce.
  * 
  * @author Emanuel Rabina
  */
-public interface AnimatorTask extends TimerTask {
+public interface InputEventDelegate extends KeyListener, MouseListener, MouseMoveListener,
+		MouseTrackListener {
 
-	/**
-	 * Called when an animation begins.
-	 */
-	@Override
-	public void begin();
-
-	/**
-	 * Called when a animation is complete.
-	 */
-	public void end();
-
-	/**
-	 * Called at regular intervals, by the {@link Animator}, notifies the
-	 * handler implementation of how far along the animation has progressed.
-	 * 
-	 * @param fraction The fraction of the current animation cycle that has been
-	 * 				   completed.
-	 */
-	public void event(float fraction);
 }

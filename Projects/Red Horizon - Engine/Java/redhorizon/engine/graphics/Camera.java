@@ -1,94 +1,129 @@
+/*
+ * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package redhorizon.engine.graphics;
 
-import redhorizon.geometry.Cube;
-import redhorizon.scenegraph.AbstractTransformable;
+import redhorizon.geometry.Ray;
+import redhorizon.scenegraph.BoundingBox;
+import redhorizon.scenegraph.BoundingVolume;
+import redhorizon.scenegraph.Spatial;
 
 /**
- * Basic orthographic-projection camera, used for sprite-based / 2D programs.
+ * The players eyes into the world.
  * 
  * @author Emanuel Rabina
  */
-public class Camera {
+public class Camera extends Spatial {
 
 	/**
 	 * Camera projection types.
 	 */
-	public static enum ProjectionTypes {
+	public static enum CameraProjection {
 
 		ORTHOGRAPHIC,
 		PERSPECTIVE;
 	}
 
-	// Camera defaults
-//	private static final int CAMERA_PROJECTION_WIDTH  = 800;
-//	private static final int CAMERA_PROJECTION_HEIGHT = 600;
-	private static final int CAMERA_PROJECTION_DEPTH  = 100;
+	private final CameraProjection projection;
+	private final float width;
+	private final float height;
+	private final float depth;
 
 	/**
-	 * Constructor, sets-up an orthographic-projection camera with the specified
-	 * viewing area.  The viewing depth defaults to 100.
+	 * Constructor, sets-up a camera with the given projection type and
+	 * viewing range.
 	 * 
+	 * @param projection
 	 * @param width	 Viewing width of the camera.
 	 * @param height Viewing height of the camera.
+	 * @param depth	 Viewing depth (draw distance) of the camera.
 	 */
-	Camera(int width, int height) {
+	Camera(CameraProjection projection, float width, float height, float depth) {
 
-		int depth  = CAMERA_PROJECTION_DEPTH;
-
+		this.projection = projection;
+		this.width  = width;
+		this.height = height;
+		this.depth  = depth;
 	}
 
 	/**
-	 * Returns the current viewing projection (the projection volume and the
-	 * current central position).
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BoundingVolume boundingVolume() {
+
+		return BoundingBox.ZERO;
+	}
+
+	/**
+	 * Returns this camera's projection type.
 	 * 
-	 * @return 3D section of the game world the camera is currently focused on.
+	 * @return Camera projection type.
 	 */
-	public Rectangle3D getCurrentProjection() {
+	public CameraProjection getProjectionType() {
 
-		return viewvolume.offset(getPosition());
+		return projection;
 	}
 
 	/**
-	 * Returns the type of projection (perspective or orthographic) used by this
-	 * camera.
+	 * Return this camera's viewing depth.
 	 * 
-	 * NOTE: Currently only supports orthographic projection.
+	 * @return Viewing depth.
+	 */
+	public float getDepth() {
+
+		return depth;
+	}
+
+	/**
+	 * Return this camera's viewing height.
 	 * 
-	 * @return One of the types in the {@link ProjectionTypes} enum.
+	 * @return Viewing height.
 	 */
-	public ProjectionTypes getProjectionType() {
+	public float getHeight() {
 
-		return ProjectionTypes.ORTHOGRAPHIC;
+		return height;
 	}
 
 	/**
-	 * Returns the projection volume of the camera.
+	 * Return this camera's viewing width.
 	 * 
-	 * @return The volume of space taken-up by the camera projection.
+	 * @return Viewing width.
 	 */
-	public Rectangle3D getProjectionVolume() {
+	public float getWidth() {
 
-		return viewvolume;
+		return width;
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public void rendering(GL gl) {
+	@Override
+	public boolean intersects(Ray ray) {
 
-		// Update the position of the camera
-		Point3D diff = getPosition().difference(lastpos);
-		if (!diff.equals(Point3D.DEFAULT)) {
-			gl.glTranslatef(-diff.getX(), -diff.getY(), -diff.getZ());
-			lastpos = lastpos.add(diff);
-		}
+		return false;
 	}
 
 	/**
-	 * @inheritDoc
+	 * Set/update the camera in the environment.
+	 * 
+	 * @param renderer
 	 */
-	public void shutdown(GL gl) {
+	public void render(GraphicsRenderer renderer) {
 
+		renderer.updateCamera(this);
 	}
 }
