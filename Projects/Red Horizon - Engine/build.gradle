@@ -5,15 +5,10 @@
  * @author Emanuel Rabina
  */
 
-apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
-
 //project.name        = 'Red Horizon - Engine'
 project.description = 'Game engine subproject for the Red Horizon project.'
 
 dependencies {
-	aspects(
-		project(':Projects:Red Horizon - Aspects')
-	)
 	compile(
 		'org.jogamp.gluegen:gluegen-rt:2.0-rc11',
 		'org.jogamp.gluegen:gluegen-rt:2.0-rc11:natives-windows-i586',

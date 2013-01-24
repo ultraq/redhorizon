@@ -78,8 +78,8 @@ public class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 	 */
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return name;
 	}
 
 	/**

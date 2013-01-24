@@ -5,15 +5,10 @@
  * @author Emanuel Rabina
  */
 
-apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
-
 //project.name        = 'Red Horizon - Utilities'
 project.description = 'Utilities subproject for the Red Horizon project.'
 
 dependencies {
-	aspects(
-		project(':Projects:Red Horizon - Aspects')
-	)
 	compile(
 		'nz.net.ultraq.preferences:preferences:1.2.2-SNAPSHOT',
 		'nz.net.ultraq.preferences:preferences-xml:1.2.2',

@@ -5,15 +5,10 @@
  * @author Emanuel Rabina
  */
 
-apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
-
 //project.name        = 'Red Horizon - Launcher'
 project.description = 'Launcher module for the Red Horizon project.'
 
 dependencies {
-	aspects(
-		project(':Projects:Red Horizon - Aspects')
-	)
 	compile(
 		':swt:4.2',
 		project(':Projects:Red Horizon - Filetypes'),

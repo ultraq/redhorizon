@@ -5,17 +5,15 @@
  * @author Emanuel Rabina
  */
 
-apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
-
 //project.name        = 'Red Horizon - Filetypes'
 project.description = 'Filetypes module for the Red Horizon project.'
 
 dependencies {
-	aspects(
-		project(':Projects:Red Horizon - Aspects')
-	)
 	compile(
 		':blowfishj:2.41',
 		'nz.net.ultraq.regexparser:regular-expression-parser:1.0-SNAPSHOT'
+	)
+	testCompile(
+		'junit:junit:4.10'
 	)
 }

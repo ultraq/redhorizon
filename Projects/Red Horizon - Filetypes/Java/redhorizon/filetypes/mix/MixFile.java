@@ -63,7 +63,7 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 		this.filechannel = filechannel;
 
 		// Find out if this file has a checksum/encryption
-		ByteBuffer flagbuffer = ByteBuffer.allocate(4);
+		ByteBuffer flagbuffer = ByteBuffer.allocate(FLAG_SIZE);
 		filechannel.read(flagbuffer);
 		flagbuffer.rewind();
 		int flag = flagbuffer.getInt();
@@ -209,6 +209,10 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 			}
 		}
 
+		// Set the name on the record
+		if (record != null) {
+			record.name = name;
+		}
 		return record;
 	}
 
