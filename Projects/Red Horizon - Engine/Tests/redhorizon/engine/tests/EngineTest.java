@@ -1,3 +1,4 @@
+package redhorizon.engine.tests;
 /*
  * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
@@ -18,6 +19,8 @@ import redhorizon.engine.GameEngine;
 import redhorizon.ui.SplashScreen;
 import redhorizon.ui.SplashScreenTask;
 
+import org.junit.Test;
+
 /**
  * Starts, runs, then shuts down the game engine.
  * 
@@ -25,7 +28,8 @@ import redhorizon.ui.SplashScreenTask;
  */
 public class EngineTest {
 
-	public static void main(String[] args) {
+	@Test
+	public void launchEngine() {
 
 		// Open up a splash screen
 		SplashScreen splashscreen = new SplashScreen(EngineTest.class.getClassLoader()

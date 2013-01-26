@@ -38,8 +38,11 @@ public class GameEngine implements SubsystemCallback {
 	private final CountDownLatch initbarrier = new CountDownLatch(3);
 
 	/**
-	 * Starts all engine subsystems and waits until initialization of each one
-	 * is complete before returning.
+	 * Starts all engine subsystems.
+	 * <p>
+	 * This method will not return until the engine has been stopped
+	 * {@link #stop()} or some other action occurred causing the subsystems to
+	 * shut down.
 	 * 
 	 * @throws IllegalStateException If this method is called when this game
 	 * 		   engine has already been started.
