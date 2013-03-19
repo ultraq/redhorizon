@@ -18,32 +18,13 @@ package redhorizon.engine.display;
 
 import redhorizon.ui.Window;
 import redhorizon.utilities.Animator;
-import redhorizon.utilities.AnimatorTask;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.opengl.GLCanvas;
 import org.eclipse.swt.opengl.GLData;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
-
-import java.util.HashMap;
 
 /**
  * A window containing the canvas onto which the graphics engine will be
@@ -183,7 +164,7 @@ public class GameWindow extends Window {
 	 * 
 	 * @param cursor
 	 */
-	public void setCursor(CursorTypes cursor) {
+/*	public void setCursor(CursorTypes cursor) {
 
 		// Do nothing if no change in cursor
 		if (cursor == currentcursor) {
@@ -217,7 +198,7 @@ public class GameWindow extends Window {
 			});
 		}
 	}
-
+*/
 	/**
 	 * Sets the delegate for handling input events from the window.
 	 * 
@@ -255,42 +236,42 @@ public class GameWindow extends Window {
 	 * Inner-class for handling the animation of SWT cursors over the game
 	 * window.
 	 */
-	private class SWTCursorAnimator implements AnimatorTask {
+/*	private class SWTCursorAnimator implements AnimatorTask {
 
 		private final Cursor[] cursorimages;
 		private int currentimage = 0;
-
+*/
 		/**
 		 * Constructor, loads a cursor to animate
 		 * 
 		 * @param cursorimages Array of cursors representing the frames of this
 		 * 					   cursor's animation.
 		 */
-		private SWTCursorAnimator(Cursor[] cursorimages) {
+/*		private SWTCursorAnimator(Cursor[] cursorimages) {
 
 			this.cursorimages = cursorimages;
 		}
-
+*/
 		/**
 		 * Sets the initial cursor.
 		 */
-		public void begin() {
+/*		public void begin() {
 
 			setCursor0(cursorimages[0]);
 		}
-
+*/
 		/**
 		 * Does nothing.
 		 */
-		public void end() {
+/*		public void end() {
 		}
-
+*/
 		/**
 		 * Updates an animated cursor's image as necessary.
 		 * 
 		 * @param fraction Value close to which frame to display.
 		 */
-		public void event(float fraction) {
+/*		public void event(float fraction) {
 
 			final int closestimage = (int)(fraction * cursorimages.length);
 
@@ -303,5 +284,5 @@ public class GameWindow extends Window {
 			setCursor0(cursorimages[closestimage]);
 			currentimage = closestimage;
 		}
-	}
+	}*/
 }

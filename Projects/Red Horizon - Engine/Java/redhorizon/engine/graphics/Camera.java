@@ -69,16 +69,6 @@ public class Camera extends Spatial {
 	}
 
 	/**
-	 * Returns this camera's projection type.
-	 * 
-	 * @return Camera projection type.
-	 */
-	public CameraProjection getProjectionType() {
-
-		return projection;
-	}
-
-	/**
 	 * Return this camera's viewing depth.
 	 * 
 	 * @return Viewing depth.
@@ -96,6 +86,16 @@ public class Camera extends Spatial {
 	public float getHeight() {
 
 		return height;
+	}
+
+	/**
+	 * Returns this camera's projection type.
+	 * 
+	 * @return Camera projection type.
+	 */
+	public CameraProjection getProjectionType() {
+
+		return projection;
 	}
 
 	/**
