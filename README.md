@@ -2,19 +2,16 @@
 Red Horizon
 ===========
 
-An ongoing project of mine with the goal of recreating the original 2D Command &
-Conquer (C&C) games.  The focus is on backwards-compatibility with the original
-games, then to create a mission-editing tool suite aimed at modifying the game.
+This repository is an archive of work I did several years ago to attempt to
+recreate the orignal 2D Command & Conquer (C&C) games.  The most useful outcome
+of this project has been a set of file conversion tools and working code
+examples of how to decode/encode various file formats from those games.
 
-This project has no _finish_ date, has already been going for 6-7 years, and is
-really just a way for me to keep my programming skills sharp and to maintain my
-interest in C&C and game programming in general.
+While I am no longer updating this project, I've left this code up here to act
+as a reference for anybody else wishing to develop file readers or other code
+that needs to interact with those old file formats.
 
-The most useful outcome of this project has been a set of command-line file
-conversion tools, particularly for file formats not already covered by existing
-tools.  A download bundle of the file conversion tools can be found [on my website](http://www.ultraq.net.nz/redhorizon/downloads/).
-
-I became interested in the C&C universe through Red Alert, for which I made a
-total conversion / campaign, [Campaign Ultraq](http://www.ultraq.net.nz/campaign/).
-Follow that link if you're interested in one of the last 'big' Red Alert
-projects ever released.
+All I'm doing with this now is updating it to work as an importable JAR file for
+those who want to use this code in JVM-based projects, and trying to replicate
+the download bundles that used to host the Windows command-line tools for file
+conversion.
