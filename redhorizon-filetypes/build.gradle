@@ -1,0 +1,17 @@
+/**
+ * Gradle build script for the Red Horizon - Filetypes project.
+ * 
+ * @author Emanuel Rabina
+ */
+
+project.description = 'Filetypes module for the Red Horizon project.'
+
+dependencies {
+	compile(
+		':blowfishj:2.41',
+		'nz.net.ultraq.regexparser:regular-expression-parser:1.0-SNAPSHOT'
+	)
+	testCompile(
+		'junit:junit:4.12'
+	)
+}

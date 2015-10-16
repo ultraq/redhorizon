@@ -1,0 +1,6 @@
+
+# IDE files/directories
+/.vs
+/Debug
+/Release
+*.sdf
