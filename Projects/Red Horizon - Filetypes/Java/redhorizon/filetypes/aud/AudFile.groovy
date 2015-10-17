@@ -1,7 +1,7 @@
 /*
  * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-package redhorizon.filetypes.aud;
+package nz.net.ultraq.redhorizon.aud
 
-import redhorizon.filetypes.AbstractFile;
-import redhorizon.filetypes.FileExtensions;
-import redhorizon.filetypes.SoundBitrate;
-import redhorizon.filetypes.SoundChannels;
-import redhorizon.filetypes.SoundFile;
-import redhorizon.filetypes.StreamingDataDecoder;
-import redhorizon.utilities.CodecUtility;
-import redhorizon.utilities.channels.DuplicateReadOnlyByteChannel;
-import static redhorizon.filetypes.SoundBitrate.*;
-import static redhorizon.filetypes.SoundChannels.*;
+import nz.net.ultraq.redhorizon.filetypes.NamedFile
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.SoundBitrate
+import nz.net.ultraq.redhorizon.filetypes.SoundChannels
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.StreamingDataDecoder
+import nz.net.ultraq.redhorizon.utilities.CodecUtility
+import nz.net.ultraq.redhorizon.utilities.channels.DuplicateReadOnlyByteChannel
+import static nz.net.ultraq.redhorizon.filetypes.SoundBitrate.*
+import static nz.net.ultraq.redhorizon.filetypes.SoundChannels.*
 
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.Pipe;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import static java.nio.file.StandardOpenOption.WRITE;
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import java.nio.channels.Pipe
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.SeekableByteChannel
+import java.nio.channels.WritableByteChannel
+import java.nio.file.Paths
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import static java.nio.file.StandardOpenOption.WRITE
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
  * file is the sound format of choice for these games, compressed using one of 2
- * schemes: IMA-ADPCM and WS-ADPCM; the latter being a Westwood proprietary
+ * schemes: IMA-ADPCM and WS-ADPCM the latter being a Westwood proprietary
  * format.
  * <p>
  * This is a streaming file type.
@@ -50,64 +49,46 @@ import static java.nio.file.StandardOpenOption.WRITE;
  * @author Emanuel Rabina
  */
 @FileExtensions("aud")
-public class AudFile extends AbstractFile implements SoundFile {
+class AudFile extends NamedFile implements SoundFile {
 
-	private static final byte TYPE_IMA_ADPCM = 99;
-	private static final byte TYPE_WS_ADPCM  = 1;
-	private static final byte FLAG_16BIT  = 0x02;
-	private static final byte FLAG_STEREO = 0x01;
+	private static final byte TYPE_IMA_ADPCM = 99
+	private static final byte TYPE_WS_ADPCM  = 1
+	private static final byte FLAG_16BIT  = 0x02
+	private static final byte FLAG_STEREO = 0x01
 
-	private final AudFileHeader audheader;
-	private final SeekableByteChannel bytechannel;
-	private final ExecutorService decoderthreadpool = Executors.newCachedThreadPool();
+	private final AudFileHeader header
+	private final SeekableByteChannel fileData
+	private final ExecutorService decoderthreadpool = Executors.newCachedThreadPool()
 
 	/**
 	 * Constructor, creates a new aud file with the given name and data.
 	 * 
-	 * @param name		  The name of this file.
-	 * @param bytechannel Data of this aud file.
+	 * @param name  The name of this file.
+	 * @param input Data of this aud file.
 	 */
-	public AudFile(String name, ReadableByteChannel bytechannel) {
+	AudFile(String name, ReadableByteChannel input) {
 
-		super(name);
+		super(name)
 
 		// AUD file header
-		ByteBuffer headerbytes = ByteBuffer.allocate(AudFileHeader.HEADER_SIZE);
-		bytechannel.read(headerbytes);
-		headerbytes.rewind();
-		audheader = new AudFileHeader(headerbytes);
+		def headerBytes = ByteBuffer.allocate(AudFileHeader.HEADER_SIZE)
+		input.read(headerBytes)
+		headerBytes.rewind()
+		header = new AudFileHeader(headerBytes)
 
 		// Store seekable channel types
-		if (bytechannel instanceof SeekableByteChannel) {
-			this.bytechannel = (SeekableByteChannel)bytechannel;
+		if (input instanceof SeekableByteChannel) {
+			this.fileData = (SeekableByteChannel)input
 		}
 
 		// If the input channel isn't seekable, create a temp file that is seekable
 		else {
-			File tempsounddatafile = File.createTempFile(name, null);
-			tempsounddatafile.deleteOnExit();
-			FileChannel filechannel = FileChannel.open(Paths.get(tempsounddatafile.getAbsolutePath()), WRITE);
-			filechannel.transferFrom(bytechannel, 0, audheader.filesize);
-			this.bytechannel = filechannel;
+			def tempsounddatafile = File.createTempFile(name, null)
+			tempsounddatafile.deleteOnExit()
+			def filechannel = FileChannel.open(Paths.get(tempsounddatafile.getAbsolutePath()), WRITE)
+			filechannel.transferFrom(input, 0, header.filesize)
+			this.fileData = filechannel
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SoundBitrate bitrate() {
-
-		return (audheader.flags & FLAG_16BIT) != 0 ? BITRATE_16 : BITRATE_8;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SoundChannels channels() {
-
-		return (audheader.flags & FLAG_STEREO) != 0 ? CHANNELS_STEREO : CHANNELS_MONO;
 	}
 
 	/**
@@ -116,17 +97,35 @@ public class AudFile extends AbstractFile implements SoundFile {
 	@Override
 	public void close() {
 
-		bytechannel.close();
-		decoderthreadpool.shutdownNow();
+		fileData.close()
+		decoderthreadpool.shutdownNow()
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int frequency() {
+	public SoundBitrate getBitRate() {
 
-		return audheader.frequency & 0xffff;
+		return (header.flags & FLAG_16BIT) != 0 ? BITRATE_16 : BITRATE_8
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SoundChannels getChannels() {
+
+		return (header.flags & FLAG_STEREO) != 0 ? CHANNELS_STEREO : CHANNELS_MONO
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getFrequency() {
+
+		return header.frequency & 0xffff
 	}
 
 	/**
@@ -135,10 +134,10 @@ public class AudFile extends AbstractFile implements SoundFile {
 	@Override
 	public ReadableByteChannel getSoundData() {
 
-		Pipe pipe = Pipe.open();
+		Pipe pipe = Pipe.open()
 		decoderthreadpool.execute(new SoundDataDecoder(
-				new DuplicateReadOnlyByteChannel(bytechannel), pipe.sink()));
-		return pipe.source();
+			new DuplicateReadOnlyByteChannel(fileData), pipe.sink()))
+		return pipe.source()
 	}
 
 	/**
@@ -149,12 +148,12 @@ public class AudFile extends AbstractFile implements SoundFile {
 		/**
 		 * Constructor, sets the input and output for the decoding.
 		 * 
-		 * @param inputchannel	Channel to read the encoded input from.
-		 * @param outputchannel Channel to write the decoded output to.
+		 * @param input	Channel to read the encoded input from.
+		 * @param output Channel to write the decoded output to.
 		 */
-		private SoundDataDecoder(ReadableByteChannel inputchannel, WritableByteChannel outputchannel) {
+		private SoundDataDecoder(ReadableByteChannel input, WritableByteChannel output) {
 
-			super(inputchannel, outputchannel);
+			super(input, output)
 		}
 
 		/**
@@ -169,21 +168,21 @@ public class AudFile extends AbstractFile implements SoundFile {
 		private ByteBuffer decodeChunk(AudChunkHeader chunkheader, int[] update) {
 
 			// Build buffers from chunk header
-			ByteBuffer source = ByteBuffer.allocate(chunkheader.filesize & 0xffff);
-			inputchannel.read(source);
-			source.rewind();
-			ByteBuffer dest = ByteBuffer.allocate(chunkheader.datasize & 0xffff);
+			ByteBuffer source = ByteBuffer.allocate(chunkheader.filesize & 0xffff)
+			input.read(source)
+			source.rewind()
+			ByteBuffer dest = ByteBuffer.allocate(chunkheader.datasize & 0xffff)
 
 			// Decode
-			switch (audheader.type) {
+			switch (header.type) {
 			case TYPE_WS_ADPCM:
-				CodecUtility.decode8bitWSADPCM(source, dest);
-				break;
+				CodecUtility.decode8bitWSADPCM(source, dest)
+				break
 			case TYPE_IMA_ADPCM:
-				CodecUtility.decode16bitIMAADPCM(source, dest, update);
-				break;
+				CodecUtility.decode16bitIMAADPCM(source, dest, update)
+				break
 			}
-			return dest;
+			return dest
 		}
 
 		/**
@@ -192,19 +191,19 @@ public class AudFile extends AbstractFile implements SoundFile {
 		@Override
 		protected void decode() {
 
-			ByteBuffer chunkheaderbytes = ByteBuffer.allocate(AudChunkHeader.CHUNK_HEADER_SIZE);
-			int[] update = new int[2];
+			ByteBuffer chunkheaderbytes = ByteBuffer.allocate(AudChunkHeader.CHUNK_HEADER_SIZE)
+			int[] update = new int[2]
 
 			// Decompress the aud file data by chunks
 			while (true) {
-				chunkheaderbytes.clear();
-				int read = inputchannel.read(chunkheaderbytes);
+				chunkheaderbytes.clear()
+				int read = input.read(chunkheaderbytes)
 				if (read == -1) {
-					break;
+					break
 				}
-				chunkheaderbytes.rewind();
-				ByteBuffer chunkbytes = decodeChunk(new AudChunkHeader(chunkheaderbytes), update);
-				outputchannel.write(chunkbytes);
+				chunkheaderbytes.rewind()
+				ByteBuffer chunkbytes = decodeChunk(new AudChunkHeader(chunkheaderbytes), update)
+				output.write(chunkbytes)
 			}
 		}
 
@@ -214,7 +213,7 @@ public class AudFile extends AbstractFile implements SoundFile {
 		@Override
 		protected String threadName() {
 
-			return "AudFile :: " + filename + " :: Sound data decoding thread";
+			return "AudFile :: " + filename + " :: Sound data decoding thread"
 		}
 	}
 }
