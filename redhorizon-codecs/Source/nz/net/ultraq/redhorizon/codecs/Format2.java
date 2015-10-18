@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.utilities.codecs;
+package nz.net.ultraq.redhorizon.codecs;
 
 import java.nio.ByteBuffer;
 

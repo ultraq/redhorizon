@@ -1,5 +1,5 @@
-/*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package redhorizon.utilities;
+package nz.net.ultraq.redhorizon;
 
-import redhorizon.utilities.codecs.Base64;
-import redhorizon.utilities.codecs.Format2;
-import redhorizon.utilities.codecs.Format40;
-import redhorizon.utilities.codecs.Format80;
-import redhorizon.utilities.codecs.IMAADPCM_16bit;
-import redhorizon.utilities.codecs.PackData;
-import redhorizon.utilities.codecs.RunLengthEncoding;
-import redhorizon.utilities.codecs.WSADPCM_8bit;
+import nz.net.ultraq.redhorizon.codecs.Base64;
+import nz.net.ultraq.redhorizon.codecs.Format2;
+import nz.net.ultraq.redhorizon.codecs.Format40;
+import nz.net.ultraq.redhorizon.codecs.Format80;
+import nz.net.ultraq.redhorizon.codecs.IMAADPCM_16bit;
+import nz.net.ultraq.redhorizon.codecs.PackData;
+import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding;
+import nz.net.ultraq.redhorizon.codecs.WSADPCM_8bit;
 
 import java.nio.ByteBuffer;
 
@@ -40,9 +40,6 @@ import java.nio.ByteBuffer;
  * 16bitIMAADPCM) have been adapted from code written by Vladan Bato.  Credit
  * also goes to Asatur V. Nazarian for the 8bitWSADPCM code.  Format2 is
  * something I came up with based on one rare document and my own observations.
- * <p>
- * All file format documentation can be found in the <tt>Documentation/File Formats</tt>
- * directory.
  * 
  * @author Emanuel Rabina
  */
