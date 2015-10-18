@@ -1,7 +1,7 @@
 /*
  * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs;
+package nz.net.ultraq.redhorizon.codecs
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
- * Interface for classes that can decode information.
- *
+ * Interface for classes that can encode information.
+ * 
  * @author Emanuel Rabina
  */
-public interface Decoder {
+interface Encoder {
 
 	/**
-	 * Decodes the information in the <tt>source</tt> buffer, putting it into
+	 * Encodes the information in the <tt>source</tt> buffer, putting it into
 	 * the <tt>dest</tt> buffer.
 	 * 
 	 * @param source
 	 * @param dest
-	 * @param extra	 Optional buffers to pass to the decoder.  Used in some
-	 * 				 decoders that require multiple source buffers to produce a
-	 * 				 decoded result (eg: XOR'ed images).
+	 * @param extra	 Optional buffers to pass to the encoder.  Used in some
+	 * 				 encoders that require multiple source buffers to produce an
+	 * 				 encoded result (eg: XOR'ed images).
 	 */
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
+	void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra)
 }

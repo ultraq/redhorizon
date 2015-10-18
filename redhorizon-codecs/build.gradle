@@ -1,0 +1,11 @@
+/**
+ * Gradle build script for Red Horizon codecs module.
+ * 
+ * @author Emanuel Rabina
+ */
+
+apply plugin: 'maven'
+apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.2.0/maven-support.gradle'
+
+project.description = 'A collection of encoders/decoders for old C&C file data'
+project.version = '1.0.0-SNAPSHOT'

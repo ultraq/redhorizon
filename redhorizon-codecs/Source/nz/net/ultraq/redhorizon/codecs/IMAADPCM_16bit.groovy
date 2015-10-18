@@ -1,7 +1,7 @@
-/*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs;
+package nz.net.ultraq.redhorizon.codecs
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Decoder for the 16-bit IMA-ADPCM encoding scheme.
  * 
  * @author Emanuel Rabina
  */
-public class IMAADPCM_16bit implements Decoder {
+class IMAADPCM_16bit implements Decoder {
 
 	// IMA-ADPCM adjustment table
-	private static final int[] IMA_ADJUST_TABLE = {
+	private static final int[] IMA_ADJUST_TABLE = [
 		-1, -1, -1, -1, 2, 4, 6, 8
-	};
+	]
 
 	// IMA-ADPCM step table
-	private static final int[] IMA_STEP_TABLE = {
+	private static final int[] IMA_STEP_TABLE = [
 		    7,     8,     9,    10,    11,    12,     13,    14,    16,
 		   17,    19,    21,    23,    25,    28,     31,    34,    37,
 		   41,    45,    50,    55,    60,    66,     73,    80,    88,
@@ -42,7 +42,7 @@ public class IMAADPCM_16bit implements Decoder {
 		 3024,  3327,  3660,  4026,  4428,  4871,   5358,  5894,  6484,
 		 7132,  7845,  8630,  9493, 10442, 11487,  12635, 13899, 15289,
 		16818, 18500, 20350, 22385, 24623, 27086,  29794, 32767
-	};
+	]
 
 	/**
 	 * {@inheritDoc}
@@ -53,53 +53,53 @@ public class IMAADPCM_16bit implements Decoder {
 	 * 				decoding.
 	 */
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
-		int index  = extra[0].getInt(0);
-		int sample = extra[1].getInt(0);
+		int index  = extra[0].getInt(0)
+		int sample = extra[1].getInt(0)
 
 		// Until all the compressed data has been decompressed
 		for (int sampleindex = 0; sampleindex < source.limit() << 1; sampleindex++) {
 
 			// The 4-bit command
-			byte code = source.get(sampleindex >> 1);
-			code = (sampleindex % 2 == 1) ? (byte)(code >>> 4) : (byte)(code & 0x0f);
+			byte code = source.get(sampleindex >> 1)
+			code = (sampleindex % 2 == 1) ? (byte)(code >>> 4) : (byte)(code & 0x0f)
 
-			int step = IMA_STEP_TABLE[index];
-			int delta = step >>> 3;
+			int step = IMA_STEP_TABLE[index]
+			int delta = step >>> 3
 
 			// Expansion of the multiplication in the original pseudo code
 			if ((code & 0x01) != 0) {
-				delta += step >>> 2;
+				delta += step >>> 2
 			}
 			if ((code & 0x02) != 0) {
-				delta += step >>> 1;
+				delta += step >>> 1
 			}
 			if ((code & 0x04) != 0) {
-				delta += step;
+				delta += step
 			}
 
 			// Sign bit = 1
 			if ((code & 0x08) != 0) {
-				sample -= delta;
-				sample = Math.max(sample, -32768);
+				sample -= delta
+				sample = Math.max(sample, -32768)
 			}
 			// Sign bit = 0
 			else {
-				sample += delta;
-				sample = Math.min(sample, 32767);
+				sample += delta
+				sample = Math.min(sample, 32767)
 			}
 
 			// Save result to destination buffer
-			dest.putShort((short)sample);
+			dest.putShort((short)sample)
 
 			// Index/Step adjustments
-			index += IMA_ADJUST_TABLE[code & 0x07];
-			index = Math.min(Math.max(index, 0), 88);
+			index += IMA_ADJUST_TABLE[code & 0x07]
+			index = Math.min(Math.max(index, 0), 88)
 		}
-		dest.flip();
+		dest.flip()
 
-		extra[0].putInt(0, index);
-		extra[1].putInt(0, sample);
+		extra[0].putInt(0, index)
+		extra[1].putInt(0, sample)
 	}
 }
