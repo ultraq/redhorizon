@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes;
 
 import java.nio.channels.ReadableByteChannel;
 

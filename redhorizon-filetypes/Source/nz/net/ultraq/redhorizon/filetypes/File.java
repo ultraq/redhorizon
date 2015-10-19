@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes;
+
+import java.io.Closeable;
 
 /**
- * Enumeration of the supported channel types.
+ * Top-level type for all files.
  * 
  * @author Emanuel Rabina
  */
-public enum SoundChannels {
-
-	CHANNELS_MONO(1),
-	CHANNELS_STEREO(2);
-
-	public final int size;
+public interface File extends Closeable {
 
 	/**
-	 * Constructor, sets the number of channels per track.
+	 * Returns the name of the file.
 	 * 
-	 * @param size
+	 * @return The file name.
 	 */
-	private SoundChannels(int size) {
-
-		this.size = size;
-	}
+	public String getFileName();
 }

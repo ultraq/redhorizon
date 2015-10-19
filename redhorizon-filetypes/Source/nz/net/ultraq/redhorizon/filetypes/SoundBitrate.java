@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package redhorizon.filetypes;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package nz.net.ultraq.redhorizon.filetypes;
 
 /**
- * Annotation for listing extensions known to be supported by a file format.
+ * Enumeration of the supported bitrates.
  * 
  * @author Emanuel Rabina
  */
-@Documented
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FileExtensions {
+public enum SoundBitrate {
 
-	String[] value();
+	BITRATE_8(8),
+	BITRATE_16(16);
+
+	public final int size;
+
+	/**
+	 * Constructor, sets the number of bits per sound sample.
+	 * 
+	 * @param size
+	 */
+	private SoundBitrate(int size) {
+
+		this.size = size;
+	}
 }

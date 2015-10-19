@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes;
 
-import java.io.Closeable;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Top-level type for all files.
+ * Annotation for listing extensions known to be supported by a file format.
  * 
  * @author Emanuel Rabina
  */
-public interface File extends Closeable {
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface FileExtensions {
 
-	/**
-	 * Returns the name of the file.
-	 * 
-	 * @return The file name.
-	 */
-	public String getFileName();
+	String[] value();
 }

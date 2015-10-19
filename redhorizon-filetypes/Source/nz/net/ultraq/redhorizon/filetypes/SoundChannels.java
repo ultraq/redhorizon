@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package redhorizon.filetypes;
+
+package nz.net.ultraq.redhorizon.filetypes;
 
 /**
- * Enumeration of the supported bitrates.
+ * Enumeration of the supported channel types.
  * 
  * @author Emanuel Rabina
  */
-public enum SoundBitrate {
+public enum SoundChannels {
 
-	BITRATE_8(8),
-	BITRATE_16(16);
+	CHANNELS_MONO(1),
+	CHANNELS_STEREO(2);
 
 	public final int size;
 
 	/**
-	 * Constructor, sets the number of bits per sound sample.
+	 * Constructor, sets the number of channels per track.
 	 * 
 	 * @param size
 	 */
-	private SoundBitrate(int size) {
+	private SoundChannels(int size) {
 
 		this.size = size;
 	}
