@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities;
+package nz.net.ultraq.redhorizon.utilities.channels
 
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
+import java.nio.channels.SeekableByteChannel
 
 /**
  * A class similar to what the {@link ByteBuffer#duplicate()} method does in
@@ -32,10 +32,10 @@ import java.nio.channels.SeekableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-public abstract class AbstractDuplicateByteChannel implements SeekableByteChannel {
+abstract class AbstractDuplicateByteChannel implements SeekableByteChannel {
 
-	protected long position;
-	protected boolean closed;
+	protected long position
+	protected boolean closed
 
 	/**
 	 * Create a duplicate channel.
@@ -47,18 +47,18 @@ public abstract class AbstractDuplicateByteChannel implements SeekableByteChanne
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final void close() {
+	final void close() {
 
-		closed = true;
+		closed = true
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final boolean isOpen() {
+	final boolean isOpen() {
 
-		return !closed && isOpenImpl();
+		return !closed && isOpenImpl()
 	}
 
 	/**
@@ -66,33 +66,33 @@ public abstract class AbstractDuplicateByteChannel implements SeekableByteChanne
 	 * 
 	 * @return <tt>true</tt> if the underlying source channel is open.
 	 */
-	protected abstract boolean isOpenImpl();
+	protected abstract boolean isOpenImpl()
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final long position() {
+	final long position() {
 
 		if (!isOpen()) {
-			throw new RuntimeException(new ClosedChannelException());
+			throw new RuntimeException(new ClosedChannelException())
 		}
-		return position;
+		return position
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final SeekableByteChannel position(long newposition) {
+	final SeekableByteChannel position(long newposition) {
 
 		if (newposition < 0) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException()
 		}
 		if (!isOpen()) {
-			throw new RuntimeException(new ClosedChannelException());
+			throw new RuntimeException(new ClosedChannelException())
 		}
-		position = newposition;
-		return this;
+		position = newposition
+		return this
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities;
+package nz.net.ultraq.redhorizon.utilities.channels
 
-import java.nio.ByteBuffer;
-import java.nio.channels.NonWritableChannelException;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.ByteBuffer
+import java.nio.channels.NonWritableChannelException
+import java.nio.channels.SeekableByteChannel
 
 /**
  * Most of the duplicate channels are read-only, so this implements many of the
@@ -26,7 +26,7 @@ import java.nio.channels.SeekableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-public abstract class AbstractDuplicateReadOnlyByteChannel extends AbstractDuplicateByteChannel {
+abstract class AbstractDuplicateReadOnlyByteChannel extends AbstractDuplicateByteChannel {
 
 	/**
 	 * Create a duplicate read-only channel.
@@ -38,17 +38,17 @@ public abstract class AbstractDuplicateReadOnlyByteChannel extends AbstractDupli
 	 * Throws a {@link NonWritableChannelException}.
 	 */
 	@Override
-	public final SeekableByteChannel truncate(long size) {
+	final SeekableByteChannel truncate(long size) {
 
-		throw new NonWritableChannelException();
+		throw new NonWritableChannelException()
 	}
 
 	/**
 	 * Throws a {@link NonWritableChannelException}.
 	 */
 	@Override
-	public final int write(ByteBuffer src) {
+	final int write(ByteBuffer src) {
 
-		throw new NonWritableChannelException();
+		throw new NonWritableChannelException()
 	}
 }

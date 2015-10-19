@@ -1,5 +1,5 @@
-/*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import java.nio.channels.ReadableByteChannel
+import java.nio.channels.WritableByteChannel
 
 /**
  * Basic template for data decoders used by some files which chose to implement
@@ -25,28 +25,31 @@ import java.nio.channels.WritableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-public abstract class StreamingDataDecoder implements Runnable {
+abstract class StreamingDataDecoder implements Runnable {
 
-	protected final ReadableByteChannel inputchannel;
-	protected final WritableByteChannel outputchannel;
+	protected final ReadableByteChannel input
+	protected final WritableByteChannel output
+	protected final String threadName
 
 	/**
 	 * Constructor, set the input and output channels for the decoder to use.
 	 * 
-	 * @param inputchannel
-	 * @param outputchannel
+	 * @param input
+	 * @param output
+	 * @param threadName
 	 */
-	protected StreamingDataDecoder(ReadableByteChannel inputchannel, WritableByteChannel outputchannel) {
+	protected StreamingDataDecoder(ReadableByteChannel input, WritableByteChannel output, String threadName) {
 
-		this.inputchannel  = inputchannel;
-		this.outputchannel = outputchannel;
+		this.input      = input
+		this.output     = output
+		this.threadName = threadName
 	}
 
 	/**
 	 * Decodes the file data in a streaming manner, reading from the provided
 	 * input channel and writing to the output channel.
 	 */
-	protected abstract void decode();
+	protected abstract void decode()
 
 	/**
 	 * Template implementation for a decoding thread.  Takes care of setting the
@@ -54,22 +57,15 @@ public abstract class StreamingDataDecoder implements Runnable {
 	 * complete.
 	 */
 	@Override
-	public final void run() {
+	final void run() {
 
-		Thread.currentThread().setName(threadName());
+		Thread.currentThread().name = threadName
 		try {
-			decode();
+			decode()
 		}
 		finally {
-			inputchannel.close();
-			outputchannel.close();
+			this.input.close()
+			this.output.close()
 		}
 	}
-
-	/**
-	 * Set a name to use for the thread when decoding starts.
-	 * 
-	 * @return Name of the decoding thread.
-	 */
-	protected abstract String threadName();
 }

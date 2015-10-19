@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.ReadableByteChannel
 
 /**
  * Interface for filetypes for sound data (eg: AUD, WAV, etc...).
  * 
  * @author Emanuel Rabina
  */
-public interface SoundFile extends File {
+interface SoundFile extends File {
 
 	/**
 	 * Returns the bitrate of the sound sample.
 	 * 
 	 * @return One of 8 or 16 bits.
 	 */
-	public SoundBitrate bitrate();
+	SoundBitrate getBitrate()
 
 	/**
 	 * Returns the channels used by the sound.
 	 * 
 	 * @return One of mono or stereo.
 	 */
-	public SoundChannels channels();
+	SoundChannels getChannels()
 
 	/**
 	 * Returns the frequency (number of samples/second) of the sound.
 	 * 
 	 * @return The frequency of the sound.
 	 */
-	public int frequency();
+	int getFrequency()
 
 	/**
 	 * Returns a byte channel to the sound data in the file.
 	 * 
-	 * @return Byte channel containin the sound data.
+	 * @return Byte channel containing the sound data.
 	 */
-	public ReadableByteChannel getSoundData();
+	ReadableByteChannel getSoundData()
 }

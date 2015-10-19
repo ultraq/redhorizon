@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes;
+package nz.net.ultraq.redhorizon.filetypes
 
 /**
- * Enumeration of the supported channel types.
+ * Top-level type for all files.
  * 
  * @author Emanuel Rabina
  */
-public enum SoundChannels {
-
-	CHANNELS_MONO(1),
-	CHANNELS_STEREO(2);
-
-	public final int size;
+interface File extends AutoCloseable {
 
 	/**
-	 * Constructor, sets the number of channels per track.
+	 * Returns the name of the file.
 	 * 
-	 * @param size
+	 * @return The file name.
 	 */
-	private SoundChannels(int size) {
-
-		this.size = size;
-	}
+	String getFilename()
 }

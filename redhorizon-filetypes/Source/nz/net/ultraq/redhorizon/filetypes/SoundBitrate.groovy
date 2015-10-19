@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nz.net.ultraq.redhorizon.filetypes;
+
+package nz.net.ultraq.redhorizon.filetypes
 
 /**
  * Enumeration of the supported bitrates.
  * 
  * @author Emanuel Rabina
  */
-public enum SoundBitrate {
+enum SoundBitrate {
 
-	BITRATE_8(8),
-	BITRATE_16(16);
+	BITRATE_8 (8),
+	BITRATE_16(16)
 
-	public final int size;
+	final int size
 
 	/**
 	 * Constructor, sets the number of bits per sound sample.
@@ -34,6 +35,6 @@ public enum SoundBitrate {
 	 */
 	private SoundBitrate(int size) {
 
-		this.size = size;
+		this.size = size
 	}
 }

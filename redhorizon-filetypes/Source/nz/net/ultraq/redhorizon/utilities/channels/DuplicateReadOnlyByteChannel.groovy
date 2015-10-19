@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities;
+package nz.net.ultraq.redhorizon.utilities.channels
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.ByteBuffer
+import java.nio.channels.SeekableByteChannel
 
 /**
  * A class similar to what the {@link ByteBuffer#duplicate()} method does in
@@ -31,18 +31,18 @@ import java.nio.channels.SeekableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-public class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteChannel {
+class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteChannel {
 
-	private final SeekableByteChannel bytechannel;
+	private final SeekableByteChannel bytechannel
 
 	/**
 	 * Constructor, builds a seekable byte channel over an existing one.
 	 * 
 	 * @param bytechannel
 	 */
-	public DuplicateReadOnlyByteChannel(SeekableByteChannel bytechannel) {
+	DuplicateReadOnlyByteChannel(SeekableByteChannel bytechannel) {
 
-		this.bytechannel = bytechannel;
+		this.bytechannel = bytechannel
 	}
 
 	/**
@@ -51,24 +51,24 @@ public class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteC
 	@Override
 	protected boolean isOpenImpl() {
 
-		return bytechannel.isOpen();
+		return bytechannel.isOpen()
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int read(ByteBuffer dst) {
+	int read(ByteBuffer dst) {
 
-		return bytechannel.read(dst);
+		return bytechannel.read(dst)
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public long size() {
+	long size() {
 
-		return bytechannel.size();
+		return bytechannel.size()
 	}
 }

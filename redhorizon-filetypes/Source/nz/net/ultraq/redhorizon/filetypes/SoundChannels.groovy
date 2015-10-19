@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package nz.net.ultraq.redhorizon.filetypes
 
 /**
- * Annotation for listing extensions known to be supported by a file format.
+ * Enumeration of the supported channel types.
  * 
  * @author Emanuel Rabina
  */
-@Documented
-@Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FileExtensions {
+enum SoundChannels {
 
-	String[] value();
+	CHANNELS_MONO  (1),
+	CHANNELS_STEREO(2)
+
+	final int size
+
+	/**
+	 * Constructor, sets the number of channels per track.
+	 * 
+	 * @param size
+	 */
+	private SoundChannels(int size) {
+
+		this.size = size
+	}
 }
