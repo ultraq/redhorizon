@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.utilities.channels;
+package nz.net.ultraq.redhorizon.utilities;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
