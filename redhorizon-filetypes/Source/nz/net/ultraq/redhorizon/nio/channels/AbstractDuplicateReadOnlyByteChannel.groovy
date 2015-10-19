@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities.channels
+package nz.net.ultraq.redhorizon.nio.channels
 
 import java.nio.ByteBuffer
 import java.nio.channels.NonWritableChannelException

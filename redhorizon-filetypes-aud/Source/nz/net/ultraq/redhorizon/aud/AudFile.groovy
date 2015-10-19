@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundBitrate
 import nz.net.ultraq.redhorizon.filetypes.SoundChannels
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.StreamingDataDecoder
-import nz.net.ultraq.redhorizon.utilities.channels.DuplicateReadOnlyByteChannel
+import nz.net.ultraq.redhorizon.nio.channels.DuplicateReadOnlyByteChannel
 import static nz.net.ultraq.redhorizon.filetypes.SoundBitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundChannels.*
 
