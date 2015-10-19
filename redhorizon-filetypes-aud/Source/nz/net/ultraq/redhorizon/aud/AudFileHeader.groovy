@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.aud;
+package nz.net.ultraq.redhorizon.aud
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Representation of the header section of an AUD file, which contains data on
  * the AUD file and it's contents.
- * 
+ *
  * @author Emanuel Rabina
  */
-public class AudFileHeader {
+class AudFileHeader {
 
-	static final int HEADER_SIZE = 12;
+	static final int HEADER_SIZE = 12
 
-	final short frequency;
-	final int filesize;
-	final int datasize;
-	final byte flags;
-	final byte type;
+	final short frequency
+	final int filesize
+	final int datasize
+	final byte flags
+	final byte type
 
 	/**
-	 * Constructor, assigns the variables of the header using the bytes from the
-	 * given {@link ByteBuffer}.
-	 * 
-	 * @param bytes Aud file header data.
+	 * Constructor, create an AUD file header from the given data.
+	 *
+	 * @param data
 	 */
-	AudFileHeader(ByteBuffer bytes) {
+	AudFileHeader(ByteBuffer data) {
 
-		frequency = bytes.getShort();
-		filesize  = bytes.getInt();
-		datasize  = bytes.getInt();
-		flags     = bytes.get();
-		type      = bytes.get();
+		frequency = data.getShort()
+		filesize  = data.getInt()
+		datasize  = data.getInt()
+		flags     = data.get()
+		type      = data.get()
 	}
 }
