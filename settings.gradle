@@ -6,10 +6,7 @@
  */
 
 include(
-	'Projects:Red Horizon - Aspects',
-	'Projects:Red Horizon - Engine',
-	'Projects:Red Horizon - Filetypes',
-	'Projects:Red Horizon - Launcher',
-	'Projects:Red Horizon - Resource Manager',
-	'Projects:Red Horizon - Utilities'
+	'redhorizon-codecs',
+	'redhorizon-filetypes',
+	'redhorizon-filetypes-aud'
 )
