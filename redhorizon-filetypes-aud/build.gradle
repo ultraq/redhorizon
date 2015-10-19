@@ -1,0 +1,14 @@
+/**
+ * Gradle build script for the AUD module of the Red Horizon Filetypes project.
+ * 
+ * @author Emanuel Rabina
+ */
+
+project.description = 'AUD module for the Red Horizon Filetypes project.'
+
+dependencies {
+	compile(
+		project(':redhorizon-codecs'),
+		project(':redhorizon-filetypes')
+	)
+}

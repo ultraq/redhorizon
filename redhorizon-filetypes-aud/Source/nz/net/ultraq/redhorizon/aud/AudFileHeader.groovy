@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.nio.ByteBuffer
 /**
  * Representation of the header section of an AUD file, which contains data on
  * the AUD file and it's contents.
- *
+ * 
  * @author Emanuel Rabina
  */
 class AudFileHeader {
@@ -36,7 +36,7 @@ class AudFileHeader {
 
 	/**
 	 * Constructor, create an AUD file header from the given data.
-	 *
+	 * 
 	 * @param data
 	 */
 	AudFileHeader(ByteBuffer data) {
