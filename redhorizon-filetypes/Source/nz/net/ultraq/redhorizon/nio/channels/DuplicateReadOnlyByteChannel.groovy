@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.nio.channels
 
 import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
+import java.nio.channels.NonWritableChannelException
 import java.nio.channels.SeekableByteChannel
 
 /**
@@ -24,16 +26,18 @@ import java.nio.channels.SeekableByteChannel
  * that this class creates a new {@link SeekableByteChannel} instance over an
  * existing {@link SeekableByteChannel} so that it shares the same data but
  * maintains its own position and limit, so as not to mess with the original
- * byte channel's position/limit.
+ * byte channel's position/limit.  This duplicate is read-only however.
  * <p>
  * While closing this channel has no effect, closing the original will close
  * this duplicate.
  * 
  * @author Emanuel Rabina
  */
-class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteChannel {
+class DuplicateReadOnlyByteChannel implements SeekableByteChannel {
 
 	private final SeekableByteChannel bytechannel
+	private long position
+	private boolean closed
 
 	/**
 	 * Constructor, builds a seekable byte channel over an existing one.
@@ -49,9 +53,46 @@ class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteChannel 
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected boolean isOpenImpl() {
+	final void close() {
 
-		return bytechannel.isOpen()
+		closed = true
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	final boolean isOpen() {
+
+		return !closed && bytechannel.isOpen()
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	final long position() {
+
+		if (!isOpen()) {
+			throw new RuntimeException(new ClosedChannelException())
+		}
+		return position
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	final SeekableByteChannel position(long newposition) {
+
+		if (newposition < 0) {
+			throw new IllegalArgumentException()
+		}
+		if (!isOpen()) {
+			throw new RuntimeException(new ClosedChannelException())
+		}
+		position = newposition
+		return this
 	}
 
 	/**
@@ -70,5 +111,23 @@ class DuplicateReadOnlyByteChannel extends AbstractDuplicateReadOnlyByteChannel 
 	long size() {
 
 		return bytechannel.size()
+	}
+
+	/**
+	 * Throws a {@link NonWritableChannelException}.
+	 */
+	@Override
+	final SeekableByteChannel truncate(long size) {
+
+		throw new NonWritableChannelException()
+	}
+
+	/**
+	 * Throws a {@link NonWritableChannelException}.
+	 */
+	@Override
+	final int write(ByteBuffer src) {
+
+		throw new NonWritableChannelException()
 	}
 }

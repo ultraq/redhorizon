@@ -147,7 +147,7 @@ class AudFile extends AbstractFile implements SoundFile {
 		protected void decode() {
 
 			ByteBuffer chunkHeaderBuffer = ByteBuffer.allocate(AudChunkHeader.CHUNK_HEADER_SIZE)
-			int[] update = new int[2]
+			int[] update = [0, 0]
 
 			// Decompress the aud file data by chunks
 			while (true) {
