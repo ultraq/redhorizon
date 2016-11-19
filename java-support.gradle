@@ -1,0 +1,44 @@
+
+/**
+ * Common Gradle script configuration for Java projects and tasks.
+ * 
+ * @author Emanuel Rabina
+ */
+
+/*
+ * Introduce 'optional' and 'provided' configuration modifiers.
+ */
+project.ext.optionalDependencies = []
+project.ext.optional = {
+	optionalDependencies << it
+}
+project.ext.providedDependencies = []
+project.ext.provided = {
+	providedDependencies << it
+}
+
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://oss.sonatype.org/content/repositories/snapshots/'
+	}
+}
+
+sourceSets {
+	main {
+		java.srcDirs      = ['Java']
+		resources.srcDirs = java.srcDirs
+		output.resourcesDir = output.classesDir
+	}
+	test {
+		java.srcDirs      = ['Tests']
+		resources.srcDirs = java.srcDirs
+		output.resourcesDir = output.classesDir
+	}
+}
+
+jar {
+	dependsOn test
+	duplicatesStrategy 'exclude'
+}

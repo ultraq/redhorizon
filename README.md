@@ -1,17 +1,25 @@
+Fork from [Red Horizon](https://github.com/ultraq/redhorizon), mainly to make it compile again.
 
-Red Horizon
-===========
+This serves as a file converter from/to ancient file types used in Westwood games, most notably Command & Conquer Red Alert and DuneII.
 
-This repository is an archive of work I did several years ago to attempt to
-recreate the orignal 2D Command & Conquer (C&C) games.  The most useful outcome
-of this project has been a set of file conversion tools and working code
-examples of how to decode/encode various file formats from those games.
+I mainly use this for DuneII so the following doc is focused on DuneII
 
-While I am no longer updating this project, I've left this code up here to act
-as a reference for anybody else wishing to develop file readers or other code
-that needs to interact with those old file formats.
+## File types in DuneII
 
-All I'm doing with this now is updating it to work as an importable JAR file for
-those who want to use this code in JVM-based projects, and trying to replicate
-the download bundles that used to host the Windows command-line tools for file
-conversion.
+- ENG: texts
+- VOC: wave files, can be played e.g. with VLC
+- CPS: background pictures
+- SHP: sprites of units
+
+## How to build
+
+```
+git clone https://github.com/philippkeller/redhorizon.git
+cd redhorizon/Projects/Red\ Horizon\ -\ Filetypes/
+make
+cd ../../
+gradle createBundleLayout
+```
+
+## How to convert
+
