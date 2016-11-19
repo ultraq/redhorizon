@@ -34,9 +34,9 @@ ext.utilitiesProject = project('Projects:Red Horizon - Utilities')
 subprojects {
 	if (project in rhprojects) {
 		apply plugin: 'java'
-		apply from: 'java-support.gradle'
+		apply from: '../../java-support.gradle'
 		if (project.name != 'Red Horizon - Aspects') {
-			apply from: 'aspectj.gradle'
+			apply from: '../../aspectj.gradle'
 		}
 
 		project.archivesBaseName    = project.name.replace(' ', '').toLowerCase();
