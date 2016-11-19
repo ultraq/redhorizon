@@ -34,7 +34,7 @@ ext.utilitiesProject = project('Projects:Red Horizon - Utilities')
 subprojects {
 	if (project in rhprojects) {
 		apply plugin: 'java'
-		apply from: 'https://raw.github.com/ultraq/gradle-support/master/java-support.gradle'
+		apply from: 'https://raw.github.com/ultraq/gradle-support/master/gradle-support.gradle'
 		if (project.name != 'Red Horizon - Aspects') {
 			apply from: 'https://raw.github.com/ultraq/gradle-support/master/aspectj.gradle'
 		}
