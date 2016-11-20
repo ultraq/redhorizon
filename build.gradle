@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Gradle build script for the Red Horizon project.
- * 
- * @author Emanuel Rabina
- */
-
 // Global configuration
 allprojects {
 	project.group = 'nz.net.ultraq.redhorizon'
@@ -32,8 +26,11 @@ project.description = 'Recreating the original 2D Command & Conquer games for a 
 // Subproject configuration
 subprojects {
 	apply plugin: 'groovy'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.1.0/gradle-support.gradle'
+	apply plugin: 'maven'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.3.2/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.3.2/maven-support.gradle'
 
+	project.year = '2007'
 	project.sourceCompatibility = '1.8'
 
 	repositories {
@@ -43,7 +40,7 @@ subprojects {
 	}
 
 	dependencies {
-		compile 'org.codehaus.groovy:groovy:2.4.3'
+		compile 'org.codehaus.groovy:groovy:2.4.7'
 	}
 }
 

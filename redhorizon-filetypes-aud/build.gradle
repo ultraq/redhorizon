@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-/**
- * Gradle build script for the AUD module of the Red Horizon Filetypes project.
- * 
- * @author Emanuel Rabina
- */
-
 project.description = 'AUD module for the Red Horizon Filetypes project.'
 project.version = '1.0.0-SNAPSHOT'
-project.year = '2007'
 
 dependencies {
 	compile(

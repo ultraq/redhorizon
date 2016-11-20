@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-/**
- * Gradle build script for the Red Horizon Filetypes project.
- * 
- * @author Emanuel Rabina
- */
-
 project.description = 'Filetypes module for the Red Horizon project.'
 project.version = '1.0.0-SNAPSHOT'
-project.year = '2007'
 
 dependencies {
 	compile(
