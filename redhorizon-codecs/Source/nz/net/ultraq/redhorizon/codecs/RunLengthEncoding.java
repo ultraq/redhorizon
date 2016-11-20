@@ -1,5 +1,5 @@
-/* 
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+/*
+ * Copyright 2012, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs
+package nz.net.ultraq.redhorizon.codecs;
 
-import java.nio.ByteBuffer
+import java.nio.ByteBuffer;
 
 /**
  * A basic, configurable, run-length decoder.
- * 
+ *
  * @author Emanuel Rabina
  */
-class RunLengthEncoding implements Decoder {
+public class RunLengthEncoding implements Decoder {
 
-	private final byte countbyte
+	private final byte countbyte;
 
 	/**
 	 * Constructor, configures the run-length decoding to recognize the given
@@ -33,34 +33,34 @@ class RunLengthEncoding implements Decoder {
 	 * 
 	 * @param countbyte
 	 */
-	RunLengthEncoding(byte countbyte) {
+	public RunLengthEncoding(byte countbyte) {
 
-		this.countbyte = countbyte
+		this.countbyte = countbyte;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
 		while (source.hasRemaining()) {
-			byte value = source.get()
+			byte value = source.get();
 
 			// Count byte & copy byte run
 			if ((value & countbyte) == countbyte) {
-				int count = value & ~countbyte
-				byte copy = source.get()
+				int count = value & ~countbyte;
+				byte copy = source.get();
 
 				while (count-- > 0) {
-					dest.put(copy)
+					dest.put(copy);
 				}
 			}
 			// Non-count byte
 			else {
-				dest.put(value)
+				dest.put(value);
 			}
 		}
-		dest.rewind()
+		dest.rewind();
 	}
 }

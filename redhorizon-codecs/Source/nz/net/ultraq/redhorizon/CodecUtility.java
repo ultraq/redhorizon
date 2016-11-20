@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon;
 
-import nz.net.ultraq.redhorizon.codecs.Base64
-import nz.net.ultraq.redhorizon.codecs.Format2
-import nz.net.ultraq.redhorizon.codecs.Format40
-import nz.net.ultraq.redhorizon.codecs.Format80
-import nz.net.ultraq.redhorizon.codecs.IMAADPCM_16bit
-import nz.net.ultraq.redhorizon.codecs.PackData
-import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding
-import nz.net.ultraq.redhorizon.codecs.WSADPCM_8bit
+import nz.net.ultraq.redhorizon.codecs.Base64;
+import nz.net.ultraq.redhorizon.codecs.Format2;
+import nz.net.ultraq.redhorizon.codecs.Format40;
+import nz.net.ultraq.redhorizon.codecs.Format80;
+import nz.net.ultraq.redhorizon.codecs.IMAADPCM_16bit;
+import nz.net.ultraq.redhorizon.codecs.PackData;
+import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding;
+import nz.net.ultraq.redhorizon.codecs.WSADPCM_8bit;
 
-import java.nio.ByteBuffer
+import java.nio.ByteBuffer;
 
 /**
- * Utility class that aggregates the various encoders/decoders used throughout
- * the Red Horizon project.
+ * Utility class to call upon the various encoders/decoders used throughout the
+ * project.
  * <p>
  * Encoding was not normally in the scope of this program, but a request for
  * some modern SHP file encoding led to it's creation.  That, and current SHP
@@ -43,22 +43,29 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class CodecUtility {
+public class CodecUtility {
 
 	// Generic decoders
-	private static final Base64   base64      = new Base64()
-	private static final PackData overlaypack = new PackData(2)
-	private static final PackData mappack     = new PackData(6)
-	private static final RunLengthEncoding rle67 = new RunLengthEncoding((byte)0xc0)
+	private static final Base64   base64      = new Base64();
+	private static final PackData overlaypack = new PackData(2);
+	private static final PackData mappack     = new PackData(6);
+	private static final RunLengthEncoding rle67 = new RunLengthEncoding((byte)0xc0);
 
 	// Audio decoders
-	private static final WSADPCM_8bit   wsadpcm8bit   = new WSADPCM_8bit()
-	private static final IMAADPCM_16bit imaadpcm16bit = new IMAADPCM_16bit()
+	private static final WSADPCM_8bit   wsadpcm8bit   = new WSADPCM_8bit();
+	private static final IMAADPCM_16bit imaadpcm16bit = new IMAADPCM_16bit();
 
 	// Image decoders
-	private static final Format2  format2  = new Format2()
-	private static final Format40 format40 = new Format40()
-	private static final Format80 format80 = new Format80()
+	private static final Format2  format2  = new Format2();
+	private static final Format40 format40 = new Format40();
+	private static final Format80 format80 = new Format80();
+
+	/**
+	 * Hidden default constructor, as this class is only ever meant to be used
+	 * statically.
+	 */
+	private CodecUtility() {
+	}
 
 	/**
 	 * Decompresses AUD file data using Westwood's proprietary 8-bit ADPCM
@@ -73,9 +80,9 @@ class CodecUtility {
 	 * @param source Original compressed audio data.
 	 * @param dest	 Buffer to store the uncompressed data.
 	 */
-	static void decode8bitWSADPCM(ByteBuffer source, ByteBuffer dest) {
+	public static void decode8bitWSADPCM(ByteBuffer source, ByteBuffer dest) {
 
-		wsadpcm8bit.decode(source, dest)
+		wsadpcm8bit.decode(source, dest);
 	}
 
 	/**
@@ -90,15 +97,15 @@ class CodecUtility {
 	 * @param update 2-<tt>int</tt> array, containing the latest index and
 	 * 				 sample values respectively.
 	 */
-	static void decode16bitIMAADPCM(ByteBuffer source, ByteBuffer dest, int[] update) {
+	public static void decode16bitIMAADPCM(ByteBuffer source, ByteBuffer dest, int[] update) {
 
-		ByteBuffer index  = ByteBuffer.allocate(4).putInt(0, update[0])
-		ByteBuffer sample = ByteBuffer.allocate(4).putInt(0, update[1])
+		ByteBuffer index  = ByteBuffer.allocate(4).putInt(0, update[0]);
+		ByteBuffer sample = ByteBuffer.allocate(4).putInt(0, update[1]);
 
-		imaadpcm16bit.decode(source, dest, index, sample)
+		imaadpcm16bit.decode(source, dest, index, sample);
 
-		update[0] = index.getInt(0)
-		update[1] = sample.getInt(0)
+		update[0] = index.getInt(0);
+		update[1] = sample.getInt(0);
 	}
 
 	/**
@@ -107,9 +114,9 @@ class CodecUtility {
 	 * @param source Original encoded data.
 	 * @param dest	 Buffer to store the decoded data.
 	 */
-	static void decodeBase64(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeBase64(ByteBuffer source, ByteBuffer dest) {
 
-		base64.decode(source, dest)
+		base64.decode(source, dest);
 	}
 
 	/**
@@ -118,9 +125,9 @@ class CodecUtility {
 	 * @param source Original encoded data.
 	 * @param dest	 Buffer to store the decoded data.
 	 */
-	static void decodeFormat2(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeFormat2(ByteBuffer source, ByteBuffer dest) {
 
-		format2.decode(source, dest)
+		format2.decode(source, dest);
 	}
 
 	/**
@@ -135,9 +142,9 @@ class CodecUtility {
 	 * @param base	 Bytes from the frame the new data is based upon.
 	 * @param dest	 Buffer to store the decoded data.
 	 */
-	static void decodeFormat20(ByteBuffer source, ByteBuffer base, ByteBuffer dest) {
+	public static void decodeFormat20(ByteBuffer source, ByteBuffer base, ByteBuffer dest) {
 
-		decodeFormat40(source, dest, base)
+		decodeFormat40(source, dest, base);
 	}
 
 	/**
@@ -147,9 +154,9 @@ class CodecUtility {
 	 * @param dest	 Buffer to store the decoded data.
 	 * @param base	 Bytes from the frame the new data is based upon.
 	 */
-	static void decodeFormat40(ByteBuffer source, ByteBuffer dest, ByteBuffer base) {
+	public static void decodeFormat40(ByteBuffer source, ByteBuffer dest, ByteBuffer base) {
 
-		format40.decode(source, dest, base)
+		format40.decode(source, dest, base);
 	}
 
 	/**
@@ -158,9 +165,9 @@ class CodecUtility {
 	 * @param source Original compressed image bytes.
 	 * @param dest	 Buffer to store the uncompressed image bytes.
 	 */
-	static void decodeFormat80(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeFormat80(ByteBuffer source, ByteBuffer dest) {
 
-		format80.decode(source, dest)
+		format80.decode(source, dest);
 	}
 
 	/**
@@ -174,9 +181,9 @@ class CodecUtility {
 	 * @param dest	 48k destination buffer containing full uncompressed binary
 	 * 				 data on the [MapPack] section.
 	 */
-	static void decodeMapPack(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeMapPack(ByteBuffer source, ByteBuffer dest) {
 
-		mappack.decode(source, dest)
+		mappack.decode(source, dest);
 	}
 
 	/**
@@ -191,9 +198,9 @@ class CodecUtility {
 	 * @param dest	 16k destination buffer containing full uncompressed binary
 	 * 				 data on the [OverlayPack] section.
 	 */
-	static void decodeOverlayPack(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeOverlayPack(ByteBuffer source, ByteBuffer dest) {
 
-		overlaypack.decode(source, dest)
+		overlaypack.decode(source, dest);
 	}
 
 	/**
@@ -204,9 +211,9 @@ class CodecUtility {
 	 * @param source Original encoded data.
 	 * @param dest	 Buffer to store the uncompressed data.
 	 */
-	static void decodeRLE67(ByteBuffer source, ByteBuffer dest) {
+	public static void decodeRLE67(ByteBuffer source, ByteBuffer dest) {
 
-		rle67.decode(source, dest)
+		rle67.decode(source, dest);
 	}
 
 	/**
@@ -215,9 +222,9 @@ class CodecUtility {
 	 * @param source Original raw data.
 	 * @param dest   Buffer to store the encoded data.
 	 */
-	static void encodeFormat2(ByteBuffer source, ByteBuffer dest) {
+	public static void encodeFormat2(ByteBuffer source, ByteBuffer dest) {
 
-		format2.encode(source, dest)
+		format2.encode(source, dest);
 	}
 
 	/**
@@ -227,9 +234,9 @@ class CodecUtility {
 	 * @param dest   Buffer to store the encoded data.
 	 * @param base	 Bytes from the frame the new data must be based upon.
 	 */
-	static void encodeFormat40(ByteBuffer source, ByteBuffer dest, ByteBuffer base) {
+	public static void encodeFormat40(ByteBuffer source, ByteBuffer dest, ByteBuffer base) {
 
-		format40.encode(source, dest, base)
+		format40.encode(source, dest, base);
 	}
 
 	/**
@@ -238,8 +245,8 @@ class CodecUtility {
 	 * @param source Original raw image bytes.
 	 * @param dest   Buffer to store the encoded image bytes.
 	 */
-	static void encodeFormat80(ByteBuffer source, ByteBuffer dest) {
+	public static void encodeFormat80(ByteBuffer source, ByteBuffer dest) {
 
-		format80.encode(source, dest)
+		format80.encode(source, dest);
 	}
 }
