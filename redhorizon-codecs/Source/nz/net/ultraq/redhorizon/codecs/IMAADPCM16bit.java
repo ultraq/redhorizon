@@ -19,11 +19,12 @@ package nz.net.ultraq.redhorizon.codecs;
 import java.nio.ByteBuffer;
 
 /**
- * Decoder for the 16-bit IMA-ADPCM encoding scheme.
+ * Decoder for the 16-bit IMA-ADPCM encoding scheme.  This decompression
+ * technique is used with Red Alert's and Tiberium Dawn's 16-bit audio files.
  * 
  * @author Emanuel Rabina
  */
-public class IMAADPCM_16bit implements Decoder {
+public class IMAADPCM16bit implements Decoder {
 
 	// IMA-ADPCM adjustment table
 	private static final int[] IMA_ADJUST_TABLE = {

@@ -16,7 +16,8 @@
 
 package nz.net.ultraq.redhorizon.aud
 
-import nz.net.ultraq.redhorizon.CodecUtility
+import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
+import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.AbstractFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundBitrate
@@ -129,6 +130,9 @@ class AudFile extends AbstractFile implements SoundFile {
 	 */
 	private class SoundDataDecoder extends StreamingDataDecoder {
 
+		private final WSADPCM8bit decoder8Bit = new WSADPCM8bit()
+		private final IMAADPCM16bit decoder16Bit = new IMAADPCM16bit()
+
 		/**
 		 * Constructor, sets the input and output for the decoding.
 		 * 
@@ -174,18 +178,22 @@ class AudFile extends AbstractFile implements SoundFile {
 		private ByteBuffer decodeChunk(AudChunkHeader chunkHeader, int[] update) {
 
 			// Build buffers from chunk header
-			ByteBuffer source = ByteBuffer.allocate(chunkHeader.filesize & 0xffff)
+			def source = ByteBuffer.allocate(chunkHeader.filesize & 0xffff)
 			input.read(source)
 			source.rewind()
-			ByteBuffer dest = ByteBuffer.allocate(chunkHeader.datasize & 0xffff)
+			def dest = ByteBuffer.allocate(chunkHeader.datasize & 0xffff)
 
 			// Decode
 			switch (header.type) {
 			case TYPE_WS_ADPCM:
-				CodecUtility.decode8bitWSADPCM(source, dest)
+				decoder8Bit.decode(source, dest)
 				break
 			case TYPE_IMA_ADPCM:
-				CodecUtility.decode16bitIMAADPCM(source, dest, update)
+				def index  = ByteBuffer.allocate(4).putInt(0, update[0]);
+				def sample = ByteBuffer.allocate(4).putInt(0, update[1]);
+				decoder16Bit.decode(source, dest, index, sample);
+				update[0] = index.getInt(0);
+				update[1] = sample.getInt(0);
 				break
 			}
 			return dest

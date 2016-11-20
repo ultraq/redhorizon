@@ -19,11 +19,15 @@ package nz.net.ultraq.redhorizon.codecs;
 import java.nio.ByteBuffer;
 
 /**
- * Decoder for the 8-bit Westwood Studios ADPCM encoding scheme.
+ * Decoder for the 8-bit Westwood Studios ADPCM encoding scheme.  This is used
+ * for very few sound samples in both Red Alert and Tiberium Dawn, most notably
+ * the infantry death sounds.
+ * <p>
+ * This decoder is only for mono sound data.
  * 
  * @author Emanuel Rabina
  */
-public class WSADPCM_8bit implements Decoder {
+public class WSADPCM8bit implements Decoder {
 
 	// WS-ADPCM 2-bit adjustment table
 	private static final int[] WS_TABLE_2BIT = {

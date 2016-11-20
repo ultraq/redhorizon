@@ -20,10 +20,8 @@ import nz.net.ultraq.redhorizon.codecs.Base64;
 import nz.net.ultraq.redhorizon.codecs.Format2;
 import nz.net.ultraq.redhorizon.codecs.Format40;
 import nz.net.ultraq.redhorizon.codecs.Format80;
-import nz.net.ultraq.redhorizon.codecs.IMAADPCM_16bit;
 import nz.net.ultraq.redhorizon.codecs.PackData;
 import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding;
-import nz.net.ultraq.redhorizon.codecs.WSADPCM_8bit;
 
 import java.nio.ByteBuffer;
 
@@ -51,10 +49,6 @@ public class CodecUtility {
 	private static final PackData mappack     = new PackData(6);
 	private static final RunLengthEncoding rle67 = new RunLengthEncoding((byte)0xc0);
 
-	// Audio decoders
-	private static final WSADPCM_8bit   wsadpcm8bit   = new WSADPCM_8bit();
-	private static final IMAADPCM_16bit imaadpcm16bit = new IMAADPCM_16bit();
-
 	// Image decoders
 	private static final Format2  format2  = new Format2();
 	private static final Format40 format40 = new Format40();
@@ -65,47 +59,6 @@ public class CodecUtility {
 	 * statically.
 	 */
 	private CodecUtility() {
-	}
-
-	/**
-	 * Decompresses AUD file data using Westwood's proprietary 8-bit ADPCM
-	 * decompression.  This is used for very few sound samples in both Red Alert
-	 * and Tiberium Dawn, most notably the infantry death sounds.
-	 * <p>
-	 * This decompression technique is only for mono sound data.
-	 * <p>
-	 * NOTE: does this method even get used?  I haven't found a single instance
-	 *       of an 8-bit file.
-	 * 
-	 * @param source Original compressed audio data.
-	 * @param dest	 Buffer to store the uncompressed data.
-	 */
-	public static void decode8bitWSADPCM(ByteBuffer source, ByteBuffer dest) {
-
-		wsadpcm8bit.decode(source, dest);
-	}
-
-	/**
-	 * Decompresses AUD file data using IMA-ADPCM decompression.  This
-	 * decompression technique is used with Red Alert's and Tiberium Dawn's
-	 * 16-bit audio files.  For the 8-bit, a proprietary format is used and can
-	 * be decoded/decompressed using
-	 * {@link #decode8bitWSADPCM(ByteBuffer,ByteBuffer)}.
-	 * 
-	 * @param source Original compressed audio data.
-	 * @param dest	 Buffer to store the uncompressed data.
-	 * @param update 2-<tt>int</tt> array, containing the latest index and
-	 * 				 sample values respectively.
-	 */
-	public static void decode16bitIMAADPCM(ByteBuffer source, ByteBuffer dest, int[] update) {
-
-		ByteBuffer index  = ByteBuffer.allocate(4).putInt(0, update[0]);
-		ByteBuffer sample = ByteBuffer.allocate(4).putInt(0, update[1]);
-
-		imaadpcm16bit.decode(source, dest, index, sample);
-
-		update[0] = index.getInt(0);
-		update[1] = sample.getInt(0);
 	}
 
 	/**
