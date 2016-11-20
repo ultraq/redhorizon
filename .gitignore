@@ -10,6 +10,7 @@
 .gradle/
 build/
 Classes/
+libMixFileKey.so
 
 # Ignore in this directory
 /.logs
