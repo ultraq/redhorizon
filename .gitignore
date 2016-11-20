@@ -1,15 +1,14 @@
 
 # IDE files/directories
-.idea/
-.settings/
+/.idea
+.settings
 .classpath
 .project
 *.iml
 
 # Ignore in all directories
-.gradle/
-build/
-Classes/
+/.gradle
+/build
 
 # Ignore in this directory
 /.logs
