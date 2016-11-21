@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +74,7 @@ class DuplicateReadOnlyByteChannel implements SeekableByteChannel {
 	final long position() {
 
 		if (!isOpen()) {
-			throw new RuntimeException(new ClosedChannelException())
+			throw new ClosedChannelException()
 		}
 		return position
 	}
@@ -89,7 +89,7 @@ class DuplicateReadOnlyByteChannel implements SeekableByteChannel {
 			throw new IllegalArgumentException()
 		}
 		if (!isOpen()) {
-			throw new RuntimeException(new ClosedChannelException())
+			throw new ClosedChannelException()
 		}
 		position = newposition
 		return this
