@@ -35,7 +35,7 @@ subprojects {
 
 	repositories {
 		flatDir {
-			dirs 'Libraries'
+			dirs "${project.rootDir}/Libraries"
 		}
 	}
 

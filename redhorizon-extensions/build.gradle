@@ -19,9 +19,18 @@ import org.apache.tools.ant.filters.ReplaceTokens
 project.description = 'Groovy extension module for the Red Horizon project'
 project.version = '1.0.0-SNAPSHOT'
 
+/**
+ * Replace module name and version tokens in the module descriptor.
+ */
 processResources {
 	filter(ReplaceTokens, tokens: [
 		name:    project.name,
 		version: project.version
 	])
+}
+
+dependencies {
+	testCompile(
+		'junit:junit:4.12',
+	)
 }
