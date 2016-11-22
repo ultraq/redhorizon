@@ -141,7 +141,7 @@ class AudFile extends AbstractFile implements SoundFile {
 		 */
 		private SoundDataDecoder(ReadableByteChannel input, WritableByteChannel output) {
 
-			super(input, output, "AudFile :: ${filename} :: Sound data decoding thread")
+			super(input, output, "AudFile :: ${AudFile.this.filename} :: Sound data decoding thread")
 		}
 
 		/**
