@@ -4,3 +4,6 @@
 /Debug
 /Release
 *.sdf
+
+# Generated code
+libMixFileKey.so

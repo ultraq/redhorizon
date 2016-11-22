@@ -1,9 +1,9 @@
 #!/bin/bash
 # Compiles the C++ part which I haven't converted to Java yet
 
-libMixFileKey.so: C++/MixFileKey.cpp C++/MixFileKey.h C++/MixFileKeyJNI.h
+libMixFileKey.so: Source/MixFileKey.cpp Source/MixFileKey.h Source/MixFileKeyJNI.h
 	g++ -fPIC -shared -o libMixFileKey.so \
-	-I $JAVA_HOME/include \
-	-I $JAVA_HOME/include/darwin \
-	-I $JAVA_HOME/include/linux \
-	C++/MixFileKey.cpp -lc
+	-I $(JAVA_HOME)/include \
+	-I $(JAVA_HOME)/include/darwin \
+	-I $(JAVA_HOME)/include/linux \
+	Source/MixFileKey.cpp -lc
