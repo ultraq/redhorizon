@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-project.description = 'Filetypes module for the Red Horizon project.'
-project.version = '1.0.0-SNAPSHOT'
+project.description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
 	compile(

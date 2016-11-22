@@ -9,5 +9,6 @@ include(
 	'redhorizon-codecs',
 	'redhorizon-extensions',
 	'redhorizon-filetypes',
-	'redhorizon-filetypes-aud'
+	'redhorizon-filetypes-aud',
+	'redhorizon-mediaplayer'
 )

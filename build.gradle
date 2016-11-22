@@ -17,6 +17,7 @@
 // Global configuration
 allprojects {
 	project.group = 'nz.net.ultraq.redhorizon'
+	project.version = '1.0.0-SNAPSHOT'
 }
 
 // Root project configuration

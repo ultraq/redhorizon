@@ -15,8 +15,8 @@ project using the following Maven coordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-codecs`
- - Version: `1.0.0-SNAPSHOT`
-
+ - Version: (see the [project releases](https://github.com/ultraq/redhorizon/releases)
+   for a list of available versions)
 
 Codecs
 ------

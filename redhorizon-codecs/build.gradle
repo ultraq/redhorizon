@@ -15,7 +15,6 @@
  */
 
 project.description = 'A collection of encoders/decoders for old C&C file data'
-project.version = '1.0.0-SNAPSHOT'
 
 dependencies {
 	compile(
