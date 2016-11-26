@@ -1,5 +1,5 @@
-/*
- * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.engine.audio;
-
-import com.jogamp.openal.AL;
-import com.jogamp.openal.ALC;
-import com.jogamp.openal.ALCcontext;
-import com.jogamp.openal.ALCdevice;
-import com.jogamp.openal.ALFactory;
-import static com.jogamp.openal.AL.*;
+package nz.net.ultraq.redhorizon.engine.audio;
 
 /**
  * OpenAL audio renderer, plays audio on the user's computer using the OpenAL

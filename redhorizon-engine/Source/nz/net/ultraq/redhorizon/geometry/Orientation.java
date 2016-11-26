@@ -1,5 +1,5 @@
-/*
- * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.geometry;
+package nz.net.ultraq.redhorizon.geometry;
 
 /**
  * The orientation of an object, consisting of a pair of 3-tuples: an 'up' and

@@ -1,5 +1,5 @@
-/*
- * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,23 @@
  * limitations under the License.
  */
 
-package redhorizon.engine.audio;
+package nz.net.ultraq.redhorizon.scenegraph;
 
 /**
- * Interface for the audio renderer, used by audio objects to play their sounds
- * on the audio hardware.
+ * Interface for game objects that are selectable from the game world via the
+ * user interface, and as such can response to user interface events.
  * 
  * @author Emanuel Rabina
  */
-public interface AudioRenderer {
+public interface Selectable {
 
 	/**
-	 * Cleanup/destroy the audio renderer.
+	 * Notification that this object has been deselected by the user.
 	 */
-	public void cleanup();
+	public void deselect();
 
 	/**
-	 * Initialize the audio renderer, making the current thread the audio
-	 * rendering thread.
+	 * Notification that this object has been selected by the user.
 	 */
-	public void initialize();
-
-	/**
-	 * Update the listener attributes.
-	 * 
-	 * @param listener
-	 */
-	public void updateListener(Listener listener);
+	public void select();
 }
