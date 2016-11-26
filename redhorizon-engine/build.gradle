@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-project.description = 'Core audio and graphics engine for Red Horizon'
+project.description = 'Core rendering engine for Red Horizon'
 
 dependencies {
 	compile(
-		'org.jogamp.gluegen:gluegen-rt:2.3.2',
-		'org.jogamp.joal:joal:2.3.2',
-		'org.jogamp.jogl:jogl-all-noawt:2.3.2'
+		'org.lwjgl:lwjgl:3.1.0',
+		'org.lwjgl:lwjgl-glfw:3.1.0',
+		'org.lwjgl:lwjgl-openal:3.1.0',
+		'org.lwjgl:lwjgl-opengl:3.1.0'
 	)
 	runtime(
-		'org.jogamp.gluegen:gluegen-rt:2.3.2:natives-macosx-universal',
-		'org.jogamp.gluegen:gluegen-rt:2.3.2:natives-windows-amd64',
-		'org.jogamp.joal:joal:2.3.2:natives-macosx-universal',
-		'org.jogamp.joal:joal:2.3.2:natives-windows-amd64',
-		'org.jogamp.jogl:jogl-all:2.3.2:natives-macosx-universal',
-		'org.jogamp.jogl:jogl-all:2.3.2:natives-windows-amd64'
+		'org.lwjgl:lwjgl:3.1.0:natives-macos',
+		'org.lwjgl:lwjgl:3.1.0:natives-windows',
+		'org.lwjgl:lwjgl-glfw:3.1.0:natives-macos',
+		'org.lwjgl:lwjgl-glfw:3.1.0:natives-windows',
+		'org.lwjgl:lwjgl-openal:3.1.0:natives-macos',
+		'org.lwjgl:lwjgl-openal:3.1.0:natives-windows'
 	)
 }
