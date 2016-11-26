@@ -14,6 +14,6 @@
 # limitations under the License.
 # 
 
-moduleName             = @name@
-moduleVersion          = @version@
+moduleName             = ${moduleName}
+moduleVersion          = ${moduleVersion}
 staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferOrdering
