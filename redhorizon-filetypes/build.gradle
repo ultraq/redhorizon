@@ -18,8 +18,7 @@ project.description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
 	compile(
-		':blowfishj:2.41',
-		'nz.net.ultraq.regexparser:regular-expression-parser:1.0-SNAPSHOT'
+		':blowfishj:2.41'
 	)
 	testCompile(
 		'junit:junit:4.12'
