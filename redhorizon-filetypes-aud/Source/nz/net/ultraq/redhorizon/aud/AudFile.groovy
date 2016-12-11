@@ -102,7 +102,7 @@ class AudFile extends AbstractFile implements SoundFile {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void close() {
+	void close() {
 
 		fileData.close()
 		if (decoderThreadPool) {
@@ -114,7 +114,7 @@ class AudFile extends AbstractFile implements SoundFile {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReadableByteChannel getSoundData() {
+	ReadableByteChannel getSoundData() {
 
 		Pipe pipe = Pipe.open()
 		if (!decoderThreadPool) {
