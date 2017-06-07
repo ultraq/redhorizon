@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-project.description = 'Groovy extension module for the Red Horizon project'
+description = 'Groovy extension module for the Red Horizon project'
 
 /**
  * Replace module name and version tokens in the module descriptor.
  */
 processResources {
 	expand([
-		moduleName:    project.name,
-		moduleVersion: project.version
+		moduleName:    name,
+		moduleVersion: version
 	])
 }
 

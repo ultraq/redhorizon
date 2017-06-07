@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-project.description = 'AUD module for the Red Horizon Filetypes project'
+description = 'AUD module for the Red Horizon Filetypes project'
 
 dependencies {
 	compile(

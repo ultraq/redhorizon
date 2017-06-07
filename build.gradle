@@ -16,151 +16,31 @@
 
 // Global configuration
 allprojects {
-	project.group = 'nz.net.ultraq.redhorizon'
-	project.version = '1.0.0-SNAPSHOT'
+	group = 'nz.net.ultraq.redhorizon'
+	version = '1.0.0-SNAPSHOT'
 }
 
 // Root project configuration
-//project.name        = 'Red Horizon'
-project.description = 'Recreating the original 2D Command & Conquer games for a modern programming community'
+//name        = 'Red Horizon'
+description = 'Recreating the original 2D Command & Conquer games for a modern programming community'
 
 // Subproject configuration
 subprojects {
 	apply plugin: 'groovy'
 	apply plugin: 'maven'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.3.2/gradle-support.gradle'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.3.2/maven-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.4.1/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.4.1/maven-support.gradle'
 
-	project.year = '2007'
-	project.sourceCompatibility = '1.8'
+	year = '2007'
+	sourceCompatibility = '1.8'
 
 	repositories {
 		flatDir {
-			dirs "${project.rootDir}/Libraries"
+			dirs "${rootDir}/Libraries"
 		}
 	}
 
 	dependencies {
-		compile 'org.codehaus.groovy:groovy:2.4.7'
+		compile 'org.codehaus.groovy:groovy:2.4.11'
 	}
 }
-
-/**
- * Create Javadocs over the entire project.
- */
-/*task createJavadocs(
-	description: 'Create Javadocs for the entire project',
-	type: Javadoc) {
-
-	dependsOn = []
-	source subprojects.sourceSets.main.allJava
-	classpath      = files(subprojects.sourceSets.main.compileClasspath)
-	destinationDir = file("${project.javadocDir}")
-	title          = "${project.name} ${project.version} API"
-}*/
-
-/**
- * Copy JARs to the project directory.
- */
-/*task copyJars(
-	description: 'Copy subproject JARs to the project directory') {
-
-	dependsOn = [subprojects.jar]
-	subprojects.each { subproject ->
-		inputs.files subproject.jar.outputs.files
-		outputs.file subproject.jar.archiveName
-	}
-	doLast {
-		ant.copy(todir: '.') {
-			subprojects.each { subproject ->
-				fileset(dir: subproject.libsDir, includes: '*.jar')
-			}
-		}
-	}
-}*/
-
-/**
- * Copy project dependencies to the project directory.
- */
-/*task copyLibraries(
-	description: 'Copy subproject dependencies to the project directory',
-	type: Copy) {
-
-	dependsOn = []
-	destinationDir = file("${project.librariesDir}")
-	from(subprojects.configurations.runtime) {
-		project.existingLibraries.each { lib ->
-			exclude lib
-		}
-		exclude 'redhorizon-*'
-	}
-	from(project(':Projects:Red Horizon - Filetypes').projectDir.path + 'Release') {
-		include '*.dll'
-	}
-}*/
-
-/**
- * Recreates what the bundle will expand to, but right in the development
- * directory.
- */
-/*task createBundleLayout(
-	description: 'Emulate the overall distribution archive',
-	dependsOn: [createJavadocs, copyJars, copyLibraries]) {
-}*/
-
-/**
- * Creates the distribution archive for standalone downloads, a ZIP file
- * containing: the project JARs, source ZIP, Javadocs, and all required
- * dependencies.
- */
-//task createBundle(
-//	description: 'Create the overall distribution archive',
-//	dependsOn: createBundleLayout,
-//	type: Zip) {
-//
-//	archiveName = "${project.name} ${project.version}.zip"
-//	destinationDir = file("${project.distributionsDir}")
-//
-//	ext.allLibs = []
-//	doFirst {
-//		allLibs.addAll(files(subprojects.configurations.runtime).files)
-//	}
-//	from(allLibs) {
-//		exclude 'redhorizon-*'
-//		into 'Libraries'
-//	}
-//	from ('.') {
-//		include 'Documentation/**/*'
-//		include '*.jar'
-//		include '*.bat'
-//	}
-//	into project.name
-//}
-
-/**
- * Creates the Utilities distrbution archive for standalone downloads, a ZIP
- * file containing: the project JARs, source ZIP, batch scripts, and all
- * required dependencies.
- */
-/*task createUtilitiesBundle(
-	description: 'Create the Utilities distribution archive',
-	dependsOn: createBundleLayout,
-	type: Zip) {
-
-	archiveName = "${project.name} Utilities ${project.version}.zip"
-	destinationDir = file("${project.distributionsDir}")
-
-	ext.allLibs = []
-	doFirst {
-		allLibs.addAll(files(utilitiesProject.configurations.runtime).files)
-	}
-	from(allLibs) {
-		exclude 'redhorizon-*'
-		into 'Libraries'
-	}
-	from ('.') {
-		include '*.jar'
-		include '*.bat'
-	}
-	into project.name
-}*/

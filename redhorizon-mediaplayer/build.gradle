@@ -14,4 +14,12 @@
  * limitations under the License.
  */
 
-project.description = 'Media player for the Red Horizon project'
+description = 'Media player for the Red Horizon project'
+
+dependencies {
+	compile(
+		project(':redhorizon-engine'),
+		project(':redhorizon-filetypes'),
+		project(':redhorizon-filetypes-aud')
+	)
+}
