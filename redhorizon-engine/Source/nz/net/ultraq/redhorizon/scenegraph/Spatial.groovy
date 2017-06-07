@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph;
+package nz.net.ultraq.redhorizon.scenegraph
 
-import redhorizon.geometry.Ray;
-import redhorizon.geometry.Vector3f;
+import nz.net.ultraq.redhorizon.geometry.Ray
+import nz.net.ultraq.redhorizon.geometry.Vector3f
 
 /**
  * Using jMonkeyEngine's word for it, a 'spatial' is an item that can exist
@@ -26,43 +26,22 @@ import redhorizon.geometry.Vector3f;
  * 
  * @author Emanuel Rabina
  */
-public abstract class Spatial {
+abstract class Spatial {
 
 	// Rotation limits
-	public static final float ROTATION_MIN = 0.0f;
-	public static final float ROTATION_MAX = 360.0f;
+	public static final float ROTATION_MIN = 0.0f
+	public static final float ROTATION_MAX = 360.0f
 
 	// Transformation attributes
-	protected Vector3f position = new Vector3f();
-	protected float rotation = ROTATION_MIN;
+	protected Vector3f position = new Vector3f()
+	protected float rotation = ROTATION_MIN
 
 	/**
 	 * Calculates the bounding volume of this object.
 	 * 
 	 * @return Bounding volume of this object.
 	 */
-	public abstract BoundingVolume boundingVolume();
-
-	/**
-	 * Returns the position of this object.
-	 * 
-	 * @return Object position.
-	 */
-	public Vector3f getPosition() {
-
-		return position;
-	}
-
-	/**
-	 * Returns the rotation of this object.  Rotation is a range between the
-	 * values of {@link #ROTATION_MIN} and {@link #ROTATION_MAX}.
-	 * 
-	 * @return Object rotation.
-	 */
-	public float getRotation() {
-
-		return rotation;
-	}
+	abstract BoundingVolume getBoundingVolume()
 
 	/**
 	 * Return whether or not this object is intersected by the given ray.
@@ -71,17 +50,7 @@ public abstract class Spatial {
 	 * @return <tt>true</tt> if the bounding volume of this object is
 	 * 		   intersected by the ray.
 	 */
-	public abstract boolean intersects(Ray ray);
-
-	/**
-	 * Set the position of this object.
-	 * 
-	 * @param position
-	 */
-	public void setPosition(Vector3f position) {
-
-		this.position = position;
-	}
+	abstract boolean intersects(Ray ray)
 
 	/**
 	 * Sets the rotation of this object.  Rotation values outside of the range
@@ -89,8 +58,8 @@ public abstract class Spatial {
 	 * 
 	 * @param rotation
 	 */
-	public void setRotation(float rotation) {
+	void setRotation(float rotation) {
 
-		this.rotation = Math.min(Math.max(rotation, ROTATION_MIN), ROTATION_MAX);
+		this.rotation = Math.min(Math.max(rotation, ROTATION_MIN), ROTATION_MAX)
 	}
 }

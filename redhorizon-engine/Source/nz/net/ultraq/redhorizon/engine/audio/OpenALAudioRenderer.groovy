@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio;
+package nz.net.ultraq.redhorizon.engine.audio
+
+import org.lwjgl.openal.AL
+import org.lwjgl.openal.ALC
+import org.lwjgl.openal.ALCCapabilities
+import org.lwjgl.openal.ALCapabilities
+import static org.lwjgl.openal.ALC10.*
 
 /**
  * OpenAL audio renderer, plays audio on the user's computer using the OpenAL
@@ -22,47 +28,36 @@ package nz.net.ultraq.redhorizon.engine.audio;
  * 
  * @author Emanuel Rabina
  */
-public class OpenALAudioRenderer implements AudioRenderer {
+class OpenALAudioRenderer implements AudioRenderer {
 
-	private OpenALContextManager contextmanager;
-	private AL al;
+	private OpenALContextManager contextManager
 
 	/**
-	 * Constructor, creates a new OpenAL audio renderer.
+	 * {@inheritDoc}
 	 */
-	OpenALAudioRenderer() {
+	@Override
+	void close() {
+
+		contextManager.releaseCurrentContext()
+		contextManager.destroyCurrentContext()
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void cleanup() {
+	void initialize() {
 
-		contextmanager.releaseCurrentContext();
-		contextmanager.destroyCurrentContext();
-	}
+		contextManager = new OpenALContextManager()
+		contextManager.makeCurrentContext()
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void initialize() {
+		ALCCapabilities alcCapabilities = ALC.createCapabilities(contextManager.aldevice)
+		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
 
-		contextmanager = new OpenALContextManager();
-		contextmanager.makeCurrentContext();
-		al = ALFactory.getAL();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateListener(Listener listener) {
-
-		al.alListenerfv(AL_POSITION, listener.getPosition().toArray(), 0);
-		al.alListenerfv(AL_VELOCITY, listener.getVelocity().toArray(), 0);
-		al.alListenerfv(AL_ORIENTATION, listener.getOrientation().toArray(), 0);
+		// Move to own Listener class that exists within a scene
+//		al.alListenerfv(AL_POSITION, listener.getPosition().toArray(), 0)
+//		al.alListenerfv(AL_VELOCITY, listener.getVelocity().toArray(), 0)
+//		al.alListenerfv(AL_ORIENTATION, listener.getOrientation().toArray(), 0)
 	}
 
 	/**
@@ -72,16 +67,16 @@ public class OpenALAudioRenderer implements AudioRenderer {
 	 */
 	private class OpenALContextManager {
 
-		private final ALCdevice aldevice;
-		private ALCcontext alcontext;
+		private final long aldevice
+		private long alcontext
 
 		/**
 		 * Constructor, creates the device to use for the context object.
 		 */
 		private OpenALContextManager() {
 
-			ALC alc = ALFactory.getALC();
-			aldevice = alc.alcOpenDevice(null);
+			def defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER)
+			aldevice = alcOpenDevice(defaultDeviceName)
 		}
 
 		/**
@@ -90,12 +85,8 @@ public class OpenALAudioRenderer implements AudioRenderer {
 		 */
 		private void destroyCurrentContext() {
 
-			ALC alc = ALFactory.getALC();
-			if (alcontext != null) {
-				alc.alcDestroyContext(alcontext);
-				alcontext = null;
-			}
-			alc.alcCloseDevice(aldevice);
+			alcDestroyContext(alcontext)
+			alcCloseDevice(aldevice)
 		}
 
 		/**
@@ -103,13 +94,11 @@ public class OpenALAudioRenderer implements AudioRenderer {
 		 */
 		private void makeCurrentContext() {
 
-			ALC alc = ALFactory.getALC();
-
 			// Use the current context, or make a new one
-			if (alcontext == null) {
-				alcontext = alc.alcCreateContext(aldevice, null);
+			if (!alcontext) {
+				alcontext = alcCreateContext(aldevice, [0] as int[])
 			}
-			alc.alcMakeContextCurrent(alcontext);
+			alcMakeContextCurrent(alcontext)
 		}
 
 		/**
@@ -117,10 +106,7 @@ public class OpenALAudioRenderer implements AudioRenderer {
 		 */
 		private void releaseCurrentContext() {
 
-			ALC alc = ALFactory.getALC();
-			if (alcontext != null) {
-				alc.alcMakeContextCurrent(null);
-			}
+			alcMakeContextCurrent(null)
 		}
 	}
 }

@@ -57,7 +57,9 @@ class AudFile extends AbstractFile implements SoundFile {
 
 	private final AudFileHeader header
 	private final SeekableByteChannel fileData
-	private ExecutorService decoderThreadPool
+
+	@Lazy
+	private ExecutorService decoderThreadPool = { Executors.newCachedThreadPool() }()
 
 	final SoundBitrate bitrate
 	final SoundChannels channels
@@ -74,7 +76,7 @@ class AudFile extends AbstractFile implements SoundFile {
 		super(name)
 
 		// AUD file header
-		def headerBytes = ByteBuffer.allocate(AudFileHeader.HEADER_SIZE)
+		def headerBytes = ByteBuffer.allocateNative(AudFileHeader.HEADER_SIZE)
 		input.read(headerBytes)
 		headerBytes.rewind()
 		header = new AudFileHeader(headerBytes)
@@ -105,9 +107,7 @@ class AudFile extends AbstractFile implements SoundFile {
 	void close() {
 
 		fileData.close()
-		if (decoderThreadPool) {
-			decoderThreadPool.shutdownNow()
-		}
+		decoderThreadPool.shutdownNow()
 	}
 
 	/**
@@ -117,9 +117,6 @@ class AudFile extends AbstractFile implements SoundFile {
 	ReadableByteChannel getSoundData() {
 
 		Pipe pipe = Pipe.open()
-		if (!decoderThreadPool) {
-			decoderThreadPool = Executors.newCachedThreadPool()
-		}
 		decoderThreadPool.execute(new SoundDataDecoder(
 			new DuplicateReadOnlyByteChannel(fileData), pipe.sink()))
 		return pipe.source()
@@ -130,8 +127,11 @@ class AudFile extends AbstractFile implements SoundFile {
 	 */
 	private class SoundDataDecoder extends StreamingDataDecoder {
 
-		private final WSADPCM8bit decoder8Bit = new WSADPCM8bit()
-		private final IMAADPCM16bit decoder16Bit = new IMAADPCM16bit()
+		@Lazy
+		private WSADPCM8bit decoder8Bit
+
+		@Lazy
+		private IMAADPCM16bit decoder16Bit
 
 		/**
 		 * Constructor, sets the input and output for the decoding.
@@ -150,7 +150,7 @@ class AudFile extends AbstractFile implements SoundFile {
 		@Override
 		protected void decode() {
 
-			ByteBuffer chunkHeaderBuffer = ByteBuffer.allocate(AudChunkHeader.CHUNK_HEADER_SIZE)
+			ByteBuffer chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
 			int[] update = [0, 0]
 
 			// Decompress the aud file data by chunks
@@ -178,10 +178,10 @@ class AudFile extends AbstractFile implements SoundFile {
 		private ByteBuffer decodeChunk(AudChunkHeader chunkHeader, int[] update) {
 
 			// Build buffers from chunk header
-			def source = ByteBuffer.allocate(chunkHeader.filesize & 0xffff)
+			def source = ByteBuffer.allocateNative(chunkHeader.filesize & 0xffff)
 			input.read(source)
 			source.rewind()
-			def dest = ByteBuffer.allocate(chunkHeader.datasize & 0xffff)
+			def dest = ByteBuffer.allocateNative(chunkHeader.datasize & 0xffff)
 
 			// Decode
 			switch (header.type) {
@@ -189,11 +189,11 @@ class AudFile extends AbstractFile implements SoundFile {
 				decoder8Bit.decode(source, dest)
 				break
 			case TYPE_IMA_ADPCM:
-				def index  = ByteBuffer.allocate(4).putInt(0, update[0]);
-				def sample = ByteBuffer.allocate(4).putInt(0, update[1]);
-				decoder16Bit.decode(source, dest, index, sample);
-				update[0] = index.getInt(0);
-				update[1] = sample.getInt(0);
+				def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
+				def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
+				decoder16Bit.decode(source, dest, index, sample)
+				update[0] = index.getInt(0)
+				update[1] = sample.getInt(0)
 				break
 			}
 			return dest

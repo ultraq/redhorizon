@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph;
+package nz.net.ultraq.redhorizon.scenegraph
 
-import redhorizon.engine.audio.AudioObject;
-import redhorizon.engine.audio.AudioRenderer;
-import redhorizon.engine.graphics.GraphicsObject;
-import redhorizon.geometry.Ray;
-import redhorizon.geometry.Vector3f;
+import nz.net.ultraq.redhorizon.engine.audio.AudioObject
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
+import nz.net.ultraq.redhorizon.geometry.Ray
+import nz.net.ultraq.redhorizon.geometry.Vector3f
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentSkipListSet
 
 /**
  * A node in the scene graph which can be used to hold other nodes or scene
@@ -34,50 +29,44 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * 
  * @author Emanuel Rabina
  */
-public class Node extends Spatial implements Comparable<Node> {
+class Node extends Spatial implements Comparable<Node> {
 
 	// Node parts
-	private Node parent;
-	private final SortedSet<Spatial> children = new ConcurrentSkipListSet<>();
+	private Node parent
+	private final SortedSet<Spatial> children = new ConcurrentSkipListSet<>()
 
 	// Calculated parts
-	private BoundingVolume boundingvolume = BoundingBox.ZERO;
-	private boolean volumeneedsupdate = true;
+	private BoundingVolume boundingvolume = BoundingBox.ZERO
+	private boolean volumeneedsupdate = true
 
 	// Multi-threaded rendering bits
-	private final ArrayList<AudioObject> audioinit   = new ArrayList<>();
-	private final ArrayList<AudioObject> audiodelete = new ArrayList<>();
-	private final ArrayList<GraphicsObject> graphicsinit   = new ArrayList<>();
-	private final ArrayList<GraphicsObject> graphicsdelete = new ArrayList<>();
-
-	/**
-	 * Default constructor, creates a new node.
-	 */
-	public Node() {
-	}
+	private final List<AudioObject> audioinit   = []
+	private final List<AudioObject> audiodelete = []
+//	private final ArrayList<GraphicsObject> graphicsinit   = new ArrayList<>();
+//	private final ArrayList<GraphicsObject> graphicsdelete = new ArrayList<>();
 
 	/**
 	 * Adds the given object as a child of this node.
 	 * 
 	 * @param child
 	 */
-	public void addChild(Spatial child) {
+	void addChild(Spatial child) {
 
 		if (children.add(child)) {
 
 			// Queue object for initialization
 			if (child instanceof AudioObject) {
-				audioinit.add((AudioObject)child);
+				audioinit << child
 			}
-			if (child instanceof GraphicsObject) {
-				graphicsinit.add((GraphicsObject)child);
-			}
+//			if (child instanceof GraphicsObject) {
+//				graphicsinit.add((GraphicsObject)child);
+//			}
 
 			if (child instanceof Node) {
-				((Node)child).parent = this;
+				child.parent = this
 			}
 
-			volumeneedsupdate = true;
+			volumeneedsupdate = true
 		}
 	}
 
@@ -87,16 +76,16 @@ public class Node extends Spatial implements Comparable<Node> {
 	 * @return Node's bounding volume.
 	 */
 	@Override
-	public BoundingVolume boundingVolume() {
+	BoundingVolume getBoundingVolume() {
 
 		// Recalculate the volume if necessary
 		if (volumeneedsupdate) {
 			for (Spatial child: children) {
-				boundingvolume = boundingvolume.merge(child.boundingVolume());
+				boundingvolume = boundingvolume.merge(child.getBoundingVolume())
 			}
-			volumeneedsupdate = false;
+			volumeneedsupdate = false
 		}
-		return boundingvolume;
+		return boundingvolume
 	}
 
 	/**
@@ -109,30 +98,20 @@ public class Node extends Spatial implements Comparable<Node> {
 	 * 		   greater-than the other node.
 	 */
 	@Override
-	public int compareTo(Node other) {
+	int compareTo(Node other) {
 
-		return (int)(position.z != other.position.z ? position.z - other.position.z :
-				position.y != other.position.y ? other.position.y - position.y :
-				position.x - other.position.x);
-	}
-
-	/**
-	 * Returns this node's children.
-	 * 
-	 * @return This node's children.
-	 */
-	Set<Spatial> getChildren() {
-
-		return children;
+		return position.z != other.position.z ? position.z - other.position.z :
+		       position.y != other.position.y ? other.position.y - position.y :
+		       position.x - other.position.x
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean intersects(Ray ray) {
+	boolean intersects(Ray ray) {
 
-		return boundingVolume().intersects(ray);
+		return getBoundingVolume().intersects(ray)
 	}
 
 	/**
@@ -140,32 +119,40 @@ public class Node extends Spatial implements Comparable<Node> {
 	 * 
 	 * @param child
 	 */
-	public void removeChild(Spatial child) {
+	void removeChild(Spatial child) {
 
 		if (children.remove(child)) {
 
 			// Queue object for deletion
 			if (child instanceof AudioObject) {
-				audioinit.remove(child);
-				audiodelete.add((AudioObject)child);
+				audioinit.remove(child)
+				audiodelete << child
 			}
-			if (child instanceof GraphicsObject) {
-				graphicsinit.remove(child);
-				graphicsdelete.add((GraphicsObject)child);
-			}
+//			if (child instanceof GraphicsObject) {
+//				graphicsinit.remove(child);
+//				graphicsdelete.add((GraphicsObject)child);
+//			}
 
 			// If a node is being removed, work through that node's children, adding
 			// any deletion objects to this node's deletion queue so they get processed
 			if (child instanceof Node) {
-				Node childnode = (Node)child;
-				for (Spatial childchild: childnode.children) {
-					childnode.removeChild(childchild);
+				def getChildren
+				getChildren = { Node node ->
+					if (node instanceof AudioObject) {
+						audiodelete << node
+					}
+					node.children.each { childNode ->
+						if (childNode instanceof Node) {
+							getChildren(childNode)
+						}
+					}
 				}
-				audiodelete.addAll(childnode.audiodelete);
-				graphicsdelete.addAll(childnode.graphicsdelete);
+				getChildren = getChildren.trampoline(child)
+
+//				graphicsdelete.addAll(childnode.graphicsdelete);
 			}
 
-			volumeneedsupdate = true;
+			volumeneedsupdate = true
 		}
 	}
 
@@ -178,19 +165,18 @@ public class Node extends Spatial implements Comparable<Node> {
 	void render(AudioRenderer renderer) {
 
 		// Initialize any items
-		for (Iterator<AudioObject> inititerator = audioinit.iterator(); inititerator.hasNext(); ) {
-			AudioObject audio = inititerator.next();
-			audio.init(renderer);
-			inititerator.remove();
+		audioinit.removeAll { audioObject ->
+			audioObject.init(renderer)
+			return true
 		}
 
 		// Render items
 		for (Spatial child: children) {
 			if (child instanceof AudioObject) {
-				((AudioObject)child).render(renderer);
+				child.render(renderer)
 			}
 			else if (child instanceof Node) {
-				((Node)child).render(renderer);
+				child.render(renderer)
 			}
 		}
 	}
@@ -226,22 +212,21 @@ public class Node extends Spatial implements Comparable<Node> {
 	}
 */
 	/**
-	 * {@inheritDoc}
+	 * Update this node's position.
 	 */
-	@Override
-	public void setPosition(Vector3f position) {
+	void setPosition(Vector3f position) {
 
-		super.setPosition(position);
-		volumeneedsupdate = true;
+		this.position = position
+		volumeneedsupdate = true
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setRotation(float rotation) {
+	void setRotation(float rotation) {
 
-		super.setRotation(rotation);
-		volumeneedsupdate = true;
+		super.setRotation(rotation)
+		volumeneedsupdate = true
 	}
 }

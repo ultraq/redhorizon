@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph;
+package nz.net.ultraq.redhorizon.scenegraph
 
-import redhorizon.geometry.Ray;
-import redhorizon.geometry.Vector3f;
+import nz.net.ultraq.redhorizon.geometry.Ray
+import nz.net.ultraq.redhorizon.geometry.Vector3f
 
 /**
  * Common code used for each of the bounding types.
  * 
  * @author Emanuel Rabina
  */
-public abstract class BoundingVolume {
+abstract class BoundingVolume {
 
-	protected Vector3f center = Vector3f.ZERO;
+	protected Vector3f center = Vector3f.ZERO
 
 	/**
 	 * Determine if a ray intersects this bounding volume.
@@ -34,7 +34,7 @@ public abstract class BoundingVolume {
 	 * @param ray Ray to test against
 	 * @return <tt>true</tt> if this volume is intersected by the ray.
 	 */
-	public abstract boolean intersects(Ray ray);
+	abstract boolean intersects(Ray ray)
 
 	/**
 	 * Combines this bounding volume with another, returning a new bounding
@@ -44,5 +44,5 @@ public abstract class BoundingVolume {
 	 * @return A bounding volume that encompasses both this volume and the given
 	 * 		   volume.
 	 */
-	public abstract BoundingVolume merge(BoundingVolume volume);
+	abstract BoundingVolume merge(BoundingVolume volume)
 }

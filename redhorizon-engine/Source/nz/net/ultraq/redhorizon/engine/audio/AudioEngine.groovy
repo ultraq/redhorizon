@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import groovy.transform.Canonical
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -30,7 +29,7 @@ import java.util.concurrent.Executors
  * 
  * @author Emanuel Rabina
  */
-class AudioSubsystem implements EngineSubsystem {
+class AudioEngine implements EngineSubsystem {
 
 	private final Scene scene
 
@@ -45,42 +44,20 @@ class AudioSubsystem implements EngineSubsystem {
 	 * 
 	 * @param scene
 	 */
-	AudioSubsystem(Scene scene) {
+	AudioEngine(Scene scene) {
 
 		this.scene = scene
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Starts the audio engine loop: builds a connection to the OpenAL device,
+	 * renders audio items found within the current scene, cleaning it all up when
+	 * made to shut down.
 	 */
 	@Override
 	void start() {
 
-		audioEngineExecutor.execute(new AudioEngine())
-		startLatch.await()
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	void stop() {
-
-		running = false
-		stopLatch.await()
-	}
-
-
-	/**
-	 * Audio engine loop: builds a connection to the OpenAL device, renders audio
-	 * items as necessary, cleans it all up when made to shut down.
-	 */
-	@Canonical
-	private class AudioEngine implements Runnable {
-
-		@Override
-		void run() {
-
+		audioEngineExecutor.execute { ->
 			Thread.currentThread().name = 'Red Horizon - Audio Engine'
 
 			// Initialization
@@ -101,5 +78,16 @@ class AudioSubsystem implements EngineSubsystem {
 			// Shutdown
 			stopLatch.countDown()
 		}
+		startLatch.await()
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void stop() {
+
+		running = false
+		stopLatch.await()
 	}
 }

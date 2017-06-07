@@ -1,16 +1,26 @@
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-// ==============================================
-// Scanner's Java - Handle to buffered sound data
-// ==============================================
+package nz.net.ultraq.redhorizon.media
 
-package redhorizon.media;
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
-import redhorizon.filetypes.SoundFile;
+import static org.lwjgl.openal.AL10.*
 
-import net.java.games.joal.AL;
-import static net.java.games.joal.AL.*;
-
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Class which contains handles and details of sound data obtained from a sound
@@ -24,7 +34,7 @@ import java.nio.ByteBuffer;
  */
 class SoundData {
 
-	private final int bufferid;
+	final int bufferId
 
 	/**
 	 * Constructor, stores the data, from these raw components of audio data,
@@ -37,39 +47,27 @@ class SoundData {
 	 * @param channels	Number of sound channels.
 	 * @param frequency	Frequency at which the sound is sampled.
 	 */
-	SoundData(AL al, ByteBuffer data, int bitrate, int channels, int frequency) {
+	SoundData(ByteBuffer data, int bitrate, int channels, int frequency) {
 
 		// Discover the format of the sound
 		int format = bitrate == 8 ?
 				(channels == 1 ? AL_FORMAT_MONO8  : AL_FORMAT_STEREO8) :
-				(channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16);
+				(channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16)
 
 		// Get a buffer ID
-		int[] bufferids = new int[1];
-		al.alGenBuffers(1, bufferids, 0);
-		bufferid = bufferids[0];
+		int[] bufferids = new int[1]
+		alGenBuffers(1, bufferids, 0)
+		bufferId = bufferids[0]
 
 		// Fill the buffer with audio data
-		al.alBufferData(bufferid, format, data, data.limit(), frequency);
+		alBufferData(bufferId, format, data, data.limit(), frequency)
 	}
 
 	/**
 	 * Deletes the buffer from memory.
-	 * 
-	 * @param al Current OpenAL pipeline.
 	 */
-	void delete(AL al) {
+	void delete() {
 
-		al.alDeleteBuffers(1, new int[]{ bufferid }, 0);
-	}
-
-	/**
-	 * Returns the handle to the buffer containing the audio data.
-	 * 
-	 * @return The sound's buffer ID.
-	 */
-	int getBufferID() {
-
-		return bufferid;
+		alDeleteBuffers([bufferId])
 	}
 }

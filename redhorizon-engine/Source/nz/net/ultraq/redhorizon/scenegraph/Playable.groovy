@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.scenegraph;
 
-import redhorizon.engine.audio.AudioObject;
+import nz.net.ultraq.redhorizon.engine.audio.AudioObject;
 
 /**
  * Interface defining methods for objects that can be heard by the player.
@@ -25,7 +25,7 @@ import redhorizon.engine.audio.AudioObject;
  * 
  * @author Emanuel Rabina
  */
-public interface Playable extends AudioObject {
+interface Playable extends AudioObject {
 
 	/**
 	 * Queries the state of the playable, whether or not it's playing.
@@ -33,16 +33,16 @@ public interface Playable extends AudioObject {
 	 * @return <tt>true</tt> if the sound is still playing, <tt>false</tt>
 	 * 		   otherwise.
 	 */
-	public boolean isPlaying();
+	boolean isPlaying()
 
 	/**
 	 * Requests that the object be played at the next audio rendering pass
 	 * onwards.
 	 */
-	public void play();
+	void play()
 
 	/**
 	 * Requests that the object stop any sounds that are currently playing.
 	 */
-	public void stop();
+	void stop()
 }
