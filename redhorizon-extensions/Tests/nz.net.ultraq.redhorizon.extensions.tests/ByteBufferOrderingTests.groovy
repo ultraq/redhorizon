@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package nz.net.ultraq.redhorizon.extensions.tests
+
 import nz.net.ultraq.redhorizon.extensions.ByteBufferOrdering
 
 import org.junit.Test
