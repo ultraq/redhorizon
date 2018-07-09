@@ -28,8 +28,8 @@ description = 'Recreating the original 2D Command & Conquer games for a modern p
 subprojects {
 	apply plugin: 'groovy'
 	apply plugin: 'maven'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.4.1/gradle-support.gradle'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/1.4.1/maven-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/2.1.0/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/2.1.0/maven-support.gradle'
 
 	year = '2007'
 	sourceCompatibility = '1.8'
