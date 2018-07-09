@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.aud
+package nz.net.ultraq.redhorizon.filetypes.aud
 
 import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit

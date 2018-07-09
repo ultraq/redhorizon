@@ -18,6 +18,7 @@ description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
 	compile(
+		project(':redhorizon-codecs'),
 		':blowfishj:2.41'
 	)
 	testCompile(

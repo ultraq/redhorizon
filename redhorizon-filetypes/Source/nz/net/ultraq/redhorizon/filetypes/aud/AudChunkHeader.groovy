@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.aud
+package nz.net.ultraq.redhorizon.filetypes.aud
 
 import java.nio.ByteBuffer
 

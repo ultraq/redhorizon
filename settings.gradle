@@ -19,6 +19,5 @@ include(
 	'redhorizon-engine',
 	'redhorizon-extensions',
 	'redhorizon-filetypes',
-	'redhorizon-filetypes-aud',
 	'redhorizon-mediaplayer'
 )
