@@ -17,7 +17,10 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
+import nz.net.ultraq.redhorizon.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
+import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -62,22 +65,46 @@ class AudioEngine implements EngineSubsystem {
 
 			// Initialization
 			def renderer = new OpenALAudioRenderer()
-			renderer.initialize()
 			startLatch.countDown()
 
-			// Rendering loop
 			renderer.withCloseable { ->
+				def audioElementStates = [:]
 				running = true
-				while (running) {
-					scene.accept({ audioObject ->
 
-					} as AudioRenderingVisitor)
+				// Rendering loop
+				while (running) {
+					scene.accept { element ->
+						if (element instanceof AudioElement) {
+
+							// Register the audio element
+							if (!audioElementStates.containsKey(element)) {
+								audioElementStates << [element: STATE_NEW]
+							}
+
+							def elementState = audioElementStates[element]
+
+							// Initialize the audio element
+							if (elementState == STATE_NEW) {
+								element.init(renderer)
+								elementState = STATE_INITIALIZED
+								audioElementStates << [element: elementState]
+							}
+
+							// Render the audio element
+							
+						}
+					} as SceneElementVisitor
+				}
+
+				// Shutdown
+				audioElementStates.keySet().each { audioElement ->
+					audioElement.delete(renderer)
 				}
 			}
 
-			// Shutdown
 			stopLatch.countDown()
 		}
+
 		startLatch.await()
 	}
 

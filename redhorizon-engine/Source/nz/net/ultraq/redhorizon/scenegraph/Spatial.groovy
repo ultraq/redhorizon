@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.geometry.Vector3f
  * 
  * @author Emanuel Rabina
  */
-abstract class Spatial {
+abstract class Spatial implements SceneElement {
 
 	// Rotation limits
 	public static final float ROTATION_MIN = 0.0f

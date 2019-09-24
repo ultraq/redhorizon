@@ -47,7 +47,7 @@ import static java.nio.file.StandardOpenOption.WRITE
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions("aud")
+@FileExtensions('aud')
 class AudFile extends AbstractFile implements SoundFile {
 
 	private static final byte TYPE_IMA_ADPCM = 99

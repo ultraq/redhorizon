@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix;
+package nz.net.ultraq.redhorizon.filetypes.mix
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Representation of a Red Alert MIX file header, which contains information
@@ -24,12 +24,12 @@ import java.nio.ByteBuffer;
  * 
  * @author Emanuel Rabina
  */
-public class MixFileHeader {
+class MixFileHeader {
 
-	static final int HEADER_SIZE = 6;
+	static final int HEADER_SIZE = 6
 
-	final short numfiles;
-	final int bodylength;
+	final short numfiles
+	final int bodylength
 
 	/**
 	 * Constructor, takes a <tt>ByteBuffer</tt> and assigns the bytes to the
@@ -39,7 +39,7 @@ public class MixFileHeader {
 	 */
 	MixFileHeader(ByteBuffer bytes) {
 
-		numfiles   = bytes.getShort();
-		bodylength = bytes.getInt();
+		numfiles   = bytes.getShort()
+		bodylength = bytes.getInt()
 	}
 }

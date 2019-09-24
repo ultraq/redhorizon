@@ -30,28 +30,20 @@ import static org.lwjgl.openal.ALC10.*
  */
 class OpenALAudioRenderer implements AudioRenderer {
 
-	private OpenALContextManager contextManager
+	private final long alDevice
+	private long alContext
 
 	/**
-	 * {@inheritDoc}
+	 * Constructor, creates a new OpenAL context on the current thread and makes
+	 * this thread useable for rendering sounds.
 	 */
-	@Override
-	void close() {
+	OpenALAudioRenderer() {
 
-		contextManager.releaseCurrentContext()
-		contextManager.destroyCurrentContext()
-	}
+		def defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER)
+		alDevice = alcOpenDevice(defaultDeviceName)
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	void initialize() {
 
-		contextManager = new OpenALContextManager()
-		contextManager.makeCurrentContext()
-
-		ALCCapabilities alcCapabilities = ALC.createCapabilities(contextManager.aldevice)
+		ALCCapabilities alcCapabilities = ALC.createCapabilities(alDevice)
 		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
 
 		// Move to own Listener class that exists within a scene
@@ -61,52 +53,33 @@ class OpenALAudioRenderer implements AudioRenderer {
 	}
 
 	/**
-	 * OpenAL context (and device) manager for the audio engine class/thread.
-	 * For any OpenAL operations to take place, a context must be made current
-	 * on the executing thread.
+	 * Destroys the OpenAL context for the currently executing thread.  Also
+	 * closes the OpenAL device handle.
 	 */
-	private class OpenALContextManager {
+	@Override
+	void close() {
 
-		private final long aldevice
-		private long alcontext
+		releaseCurrentContext()
+		alcDestroyContext(alContext)
+		alcCloseDevice(alDevice)
+	}
 
-		/**
-		 * Constructor, creates the device to use for the context object.
-		 */
-		private OpenALContextManager() {
+	/**
+	 * Makes an OpenAL context current on the executing thread.
+	 */
+	void makeCurrentContext() {
 
-			def defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER)
-			aldevice = alcOpenDevice(defaultDeviceName)
+		if (!alContext) {
+			alContext = alcCreateContext(alDevice, [0] as int[])
 		}
+		alcMakeContextCurrent(alContext)
+	}
 
-		/**
-		 * Destroys the OpenAL context for the currently executing thread.  Also
-		 * closes the OpenAL device handle.
-		 */
-		private void destroyCurrentContext() {
+	/**
+	 * Releases the OpenAL context that is current on the executing thread.
+	 */
+	void releaseCurrentContext() {
 
-			alcDestroyContext(alcontext)
-			alcCloseDevice(aldevice)
-		}
-
-		/**
-		 * Makes an OpenAL context current on the executing thread.
-		 */
-		private void makeCurrentContext() {
-
-			// Use the current context, or make a new one
-			if (!alcontext) {
-				alcontext = alcCreateContext(aldevice, [0] as int[])
-			}
-			alcMakeContextCurrent(alcontext)
-		}
-
-		/**
-		 * Releases the OpenAL context that is current on the executing thread.
-		 */
-		private void releaseCurrentContext() {
-
-			alcMakeContextCurrent(null)
-		}
+		alcMakeContextCurrent(null)
 	}
 }

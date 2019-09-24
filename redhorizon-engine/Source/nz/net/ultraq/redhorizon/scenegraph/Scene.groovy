@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 class Scene {
 
 	// Scene graph structure
+	@Delegate
 	final Node rootnode = new Node()
 //	private Listener listener;
 //	private Camera camera;

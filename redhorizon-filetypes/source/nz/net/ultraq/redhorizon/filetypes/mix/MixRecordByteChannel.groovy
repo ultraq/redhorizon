@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix;
+package nz.net.ultraq.redhorizon.filetypes.mix
 
-import nz.net.ultraq.redhorizon.utilities.channels.AbstractDuplicateReadOnlyByteChannel;
+import nz.net.ultraq.redhorizon.nio.channels.DuplicateReadOnlyByteChannel
 
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
 /**
  * Byte channel over a record in the mix file.
  * 
  * @author Emanuel Rabina
  */
-public class MixRecordByteChannel extends AbstractDuplicateReadOnlyByteChannel {
+public class MixRecordByteChannel extends DuplicateReadOnlyByteChannel {
 
-	private final FileChannel filechannel;
-	private final long lowerbound;
-	private final long upperbound;
+	private final FileChannel filechannel
+	private final long lowerbound
+	private final long upperbound
 
 	/**
 	 * Constructor, creates a byte channel backed by the mix file's file
@@ -42,11 +42,11 @@ public class MixRecordByteChannel extends AbstractDuplicateReadOnlyByteChannel {
 	 */
 	MixRecordByteChannel(FileChannel filechannel, int lowerbound, int size) {
 
-		this.filechannel = filechannel;
-		this.lowerbound  = lowerbound;
-		this.upperbound  = lowerbound + size;
+		this.filechannel = filechannel
+		this.lowerbound  = lowerbound
+		this.upperbound  = lowerbound + size
 
-		position = lowerbound;
+		position = lowerbound
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class MixRecordByteChannel extends AbstractDuplicateReadOnlyByteChannel {
 	@Override
 	protected boolean isOpenImpl() {
 
-		return filechannel.isOpen();
+		return filechannel.isOpen()
 	}
 
 	/**
@@ -65,15 +65,15 @@ public class MixRecordByteChannel extends AbstractDuplicateReadOnlyByteChannel {
 	public int read(ByteBuffer dst) {
 
 		// Prevent the read from going beyond the upper bound of the file entry
-		int remaining = (int)(upperbound - position);
+		int remaining = (int)(upperbound - position)
 		if (remaining == 0) {
-			return -1;
+			return -1
 		}
-		int oldlimit = dst.limit();
-		dst.limit(dst.position() + Math.min(dst.remaining(), remaining));
-		int read = filechannel.read(dst, position);
-		dst.limit(oldlimit);
-		return read;
+		int oldlimit = dst.limit()
+		dst.limit(dst.position() + Math.min(dst.remaining(), remaining))
+		int read = filechannel.read(dst, position)
+		dst.limit(oldlimit)
+		return read
 	}
 
 	/**
@@ -82,6 +82,6 @@ public class MixRecordByteChannel extends AbstractDuplicateReadOnlyByteChannel {
 	@Override
 	public long size() {
 
-		return upperbound - lowerbound;
+		return upperbound - lowerbound
 	}
 }

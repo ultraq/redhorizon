@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph;
-
-import nz.net.ultraq.redhorizon.engine.audio.AudioObject;
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
  * Interface defining methods for objects that can be heard by the player.
@@ -25,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioObject;
  * 
  * @author Emanuel Rabina
  */
-interface Playable extends AudioObject {
+interface Playable extends AudioElement {
 
 	/**
 	 * Queries the state of the playable, whether or not it's playing.

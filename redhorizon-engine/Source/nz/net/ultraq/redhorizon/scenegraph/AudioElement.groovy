@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.scenegraph
+
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 
 /**
  * Interface for audio objects 'rendered' to the audio hardware.
  * 
  * @author Emanuel Rabina
  */
-interface AudioObject {
+interface AudioElement {
 
 	/**
 	 * Delete the audio data associated with this object.

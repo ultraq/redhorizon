@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioObject
+import nz.net.ultraq.redhorizon.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.geometry.Vector3f
@@ -32,7 +32,7 @@ import static org.lwjgl.openal.AL10.*
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect extends Media implements AudioObject, Playable {
+class SoundEffect extends Media implements AudioElement, Playable {
 
 	// PlayableItem defaults
 	Vector3f direction = new Vector3f(0,0,0)

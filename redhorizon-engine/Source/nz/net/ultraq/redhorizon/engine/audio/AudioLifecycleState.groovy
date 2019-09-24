@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2017, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,17 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 /**
- * Interface for the audio renderer which is responsible for playing back sounds
- * through the audio device.
+ * Represents at which point in a lifecycle that an audio object is currently
+ * in.
+ * 
+ * TODO: Any lifecycle Java libraries out there?
  * 
  * @author Emanuel Rabina
  */
-interface AudioRenderer extends Closeable {
+enum AudioLifecycleState {
+
+	STATE_NEW,
+	STATE_INITIALIZED,
+	STATE_RENDERING,
+	STATE_DELETED
 }

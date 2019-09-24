@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2017, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-description = 'AUD module for the Red Horizon Filetypes project'
+package nz.net.ultraq.redhorizon.scenegraph
 
-dependencies {
-	compile(
-		project(':redhorizon-codecs'),
-		project(':redhorizon-filetypes')
-	)
+/**
+ * Interface for an element that can be a part of a scene.
+ * 
+ * @author Emanuel Rabina
+ */
+interface SceneElement {
+
+	/**
+	 * Accept any scene element visitor.
+	 * 
+	 * @param visitor
+	 */
+	void accept(SceneElementVisitor visitor)
 }

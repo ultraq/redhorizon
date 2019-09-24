@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.mediaplayer
 
-import nz.net.ultraq.redhorizon.aud.AudFile
+import nz.net.ultraq.redhorizon.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.scenegraph.Scene

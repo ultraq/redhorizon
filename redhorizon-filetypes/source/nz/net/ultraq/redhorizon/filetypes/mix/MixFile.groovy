@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix;
+package nz.net.ultraq.redhorizon.filetypes.mix
 
-import blowfishj.BlowfishECB;
-import nz.net.ultraq.redhorizon.filetypes.ArchiveFile;
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions;
-import nz.net.ultraq.redhorizon.filetypes.AbstractFile;
+import blowfishj.BlowfishECB
+import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.AbstractFile
 
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
+import java.nio.channels.ReadableByteChannel
 
 /**
  * Implementation of a Red Alert MIX file.  The MIX format is a file package,
@@ -31,25 +31,25 @@ import java.nio.channels.ReadableByteChannel;
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions("mix")
-public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
+@FileExtensions('mix')
+class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 
-	private static final int FLAG_CHECKSUM  = 0x00010000;
-	private static final int FLAG_ENCRYPTED = 0x00020000;
-	private static final int FLAG_SIZE      = 4;
+	private static final int FLAG_CHECKSUM  = 0x00010000
+	private static final int FLAG_ENCRYPTED = 0x00020000
+	private static final int FLAG_SIZE      = 4
 
-	private static final int KEY_SIZE_BLOWFISH = 56;
-	private static final int KEY_SIZE_SOURCE   = 80;
+	private static final int KEY_SIZE_BLOWFISH = 56
+	private static final int KEY_SIZE_SOURCE   = 80
 
-	private static final int   ENCRYPT_BLOCK_SIZEI = 8;
-	private static final float ENCRYPT_BLOCK_SIZEF = 8f;
+	private static final int   ENCRYPT_BLOCK_SIZEI = 8
+	private static final float ENCRYPT_BLOCK_SIZEF = 8f
 
-	private final FileChannel filechannel;
+	private final FileChannel filechannel
 
-	private boolean checksum;
-	private boolean encrypted;
-	private MixFileHeader mixheader;
-	private MixRecord[] mixrecords;
+	private boolean checksum
+	private boolean encrypted
+	private MixFileHeader mixheader
+	private MixRecord[] mixrecords
 
 	/**
 	 * Constructor, creates a mix file from a proper file on the file system.
@@ -57,77 +57,77 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	 * @param filename	  Name of the mix file.
 	 * @param filechannel The mix file proper.
 	 */
-	public MixFile(String filename, FileChannel filechannel) {
+	MixFile(String filename, FileChannel filechannel) {
 
-		super(filename);
-		this.filechannel = filechannel;
+		super(filename)
+		this.filechannel = filechannel
 
 		// Find out if this file has a checksum/encryption
-		ByteBuffer flagbuffer = ByteBuffer.allocate(FLAG_SIZE);
-		filechannel.read(flagbuffer);
-		flagbuffer.rewind();
-		int flag = flagbuffer.getInt();
-		checksum  = (flag & FLAG_CHECKSUM)  != 0;
-		encrypted = (flag & FLAG_ENCRYPTED) != 0;
+		ByteBuffer flagbuffer = ByteBuffer.allocate(FLAG_SIZE)
+		filechannel.read(flagbuffer)
+		flagbuffer.rewind()
+		int flag = flagbuffer.getInt()
+		checksum  = (flag & FLAG_CHECKSUM)  != 0
+		encrypted = (flag & FLAG_ENCRYPTED) != 0
 
 		// If encrypted, decrypt the mixheader and index
 		if (encrypted) {
 
 			// Perform the public -> private/Blowfish key function
-			ByteBuffer keysource = ByteBuffer.allocate(KEY_SIZE_SOURCE);
-			filechannel.read(keysource);
-			ByteBuffer key = ByteBuffer.allocate(KEY_SIZE_BLOWFISH);
-			MixFileKey.getBlowfishKey(keysource, key);
-			BlowfishECB blowfish = new BlowfishECB();
-			blowfish.initialize(key.array(), 0, key.capacity());
+			ByteBuffer keysource = ByteBuffer.allocate(KEY_SIZE_SOURCE)
+			filechannel.read(keysource)
+			ByteBuffer key = ByteBuffer.allocate(KEY_SIZE_BLOWFISH)
+			MixFileKey.getBlowfishKey(keysource, key)
+			BlowfishECB blowfish = new BlowfishECB()
+			blowfish.initialize(key.array(), 0, key.capacity())
 
 			// Decrypt the mixheader
-			ByteBuffer headerbytesenc = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI);
-			ByteBuffer headerbytesdec = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI);
-			filechannel.read(headerbytesenc);
-			blowfish.decrypt(headerbytesenc.array(), 0, headerbytesdec.array(), 0, headerbytesdec.capacity());
-			mixheader = new MixFileHeader(headerbytesdec);
+			ByteBuffer headerbytesenc = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI)
+			ByteBuffer headerbytesdec = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI)
+			filechannel.read(headerbytesenc)
+			blowfish.decrypt(headerbytesenc.array(), 0, headerbytesdec.array(), 0, headerbytesdec.capacity())
+			mixheader = new MixFileHeader(headerbytesdec)
 
 			// Now figure-out how many more on 8-byte blocks (+2) to decrypt
-			int numblocks = (int)Math.ceil((MixRecord.RECORD_SIZE * numFiles()) / ENCRYPT_BLOCK_SIZEF);
-			int numbytes = numblocks * 8;
+			int numblocks = (int)Math.ceil((MixRecord.RECORD_SIZE * numFiles()) / ENCRYPT_BLOCK_SIZEF)
+			int numbytes = numblocks * 8
 
-			ByteBuffer encryptedbytes = ByteBuffer.allocate(numbytes);
-			ByteBuffer decryptedbytes = ByteBuffer.allocate(numbytes);
-			filechannel.read(encryptedbytes);
-			blowfish.decrypt(encryptedbytes.array(), 0, decryptedbytes.array(), 0, decryptedbytes.capacity());
+			ByteBuffer encryptedbytes = ByteBuffer.allocate(numbytes)
+			ByteBuffer decryptedbytes = ByteBuffer.allocate(numbytes)
+			filechannel.read(encryptedbytes)
+			blowfish.decrypt(encryptedbytes.array(), 0, decryptedbytes.array(), 0, decryptedbytes.capacity())
 
-			ByteBuffer recordsbytes = ByteBuffer.allocate(numbytes + 2);
-			recordsbytes.put(headerbytesdec).put(decryptedbytes).rewind();
+			ByteBuffer recordsbytes = ByteBuffer.allocate(numbytes + 2)
+			recordsbytes.put(headerbytesdec).put(decryptedbytes).rewind()
 
 			// Take all the decrypted data and turn them into the index records
-			mixrecords = new MixRecord[numFiles()];
+			mixrecords = new MixRecord[numFiles()]
 			for (int i = 0; i < mixrecords.length; i++) {
-				mixrecords[i] = new MixRecord(recordsbytes);
+				mixrecords[i] = new MixRecord(recordsbytes)
 			}
 		}
 		// If not encrypted, just read the straight data
 		else {
 
 			// Read the mixheader
-			filechannel.position(0);
-			ByteBuffer headerbytes = ByteBuffer.allocate(MixFileHeader.HEADER_SIZE);
-			filechannel.read(headerbytes);
-			headerbytes.rewind();
-			mixheader = new MixFileHeader(headerbytes);
+			filechannel.position(0)
+			ByteBuffer headerbytes = ByteBuffer.allocate(MixFileHeader.HEADER_SIZE)
+			filechannel.read(headerbytes)
+			headerbytes.rewind()
+			mixheader = new MixFileHeader(headerbytes)
 
 			// Now figure-out how much more of the file is the index
-			int numblocks = MixRecord.RECORD_SIZE * numFiles();
-			int numbytes = numblocks * 8;
+			int numblocks = MixRecord.RECORD_SIZE * numFiles()
+			int numbytes = numblocks * 8
 
-			ByteBuffer recordsbytes = ByteBuffer.allocate(numbytes);
-			filechannel.read(recordsbytes);
-			recordsbytes.rewind();
+			ByteBuffer recordsbytes = ByteBuffer.allocate(numbytes)
+			filechannel.read(recordsbytes)
+			recordsbytes.rewind()
 
 			// Take all the data and turn it into the index records
-			mixrecords = new MixRecord[numFiles()];
+			mixrecords = new MixRecord[numFiles()]
 			for (int i = 0; i < mixrecords.length; i++) {
-				mixrecords[i] = new MixRecord(recordsbytes);
+				mixrecords[i] = new MixRecord(recordsbytes)
 			}
 		}
 	}
@@ -141,39 +141,39 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	 */
 	private static int calculateID(String filename) {
 
-		String name = filename.toUpperCase();
-		int id = 0;
+		String name = filename.toUpperCase()
+		int id = 0
 
 		for (int i = 0; i < name.length(); ) {
-			int a = 0;
+			int a = 0
 			for (int j = 0; j < 4; j++) {
-				a >>>= 8;
+				a >>>= 8
 				if (i < name.length()) {
-					a += name.charAt(i) << 24;
+					a += name.charAt(i) << 24
 				}
-				i++;
+				i++
 			}
-			id = (id << 1 | id >>> 31) + a;
+			id = (id << 1 | id >>> 31) + a
 		}
-		return id;
+		return id
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void close() {
+	void close() {
 
-		filechannel.close();
+		filechannel.close()
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReadableByteChannel getEntryData(MixRecord record) {
+	ReadableByteChannel getEntryData(MixRecord record) {
 
-		return new MixRecordByteChannel(filechannel, record.offset + offsetAdjustSize(), record.length);
+		return new MixRecordByteChannel(filechannel, record.offset + offsetAdjustSize(), record.length)
 	}
 
 	/**
@@ -186,34 +186,34 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	@Override
 	public MixRecord getEntry(String name) {
 
-		int itemid = calculateID(name);
+		int itemid = calculateID(name)
 
 		// Binary search for the record with the calculated value
-		MixRecord record = null;
-		int lo = 0;
-		int hi = mixrecords.length - 1;
+		MixRecord record = null
+		int lo = 0
+		int hi = mixrecords.length - 1
 
 		while (lo <= hi) {
-			int mid = (lo + hi) >> 1;
-			int midval = mixrecords[mid].id;
+			int mid = (lo + hi) >> 1
+			int midval = mixrecords[mid].id
 
 			if (itemid < midval) {
-				hi = mid - 1;
+				hi = mid - 1
 			}
 			else if (itemid > midval) {
-				lo = mid + 1;
+				lo = mid + 1
 			}
 			else {
-				record = mixrecords[mid];
-				break;
+				record = mixrecords[mid]
+				break
 			}
 		}
 
 		// Set the name on the record
 		if (record != null) {
-			record.name = name;
+			record.name = name
 		}
-		return record;
+		return record
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	 */
 	private int numFiles() {
 
-		return mixheader.numfiles & 0xffff;
+		return mixheader.numfiles & 0xffff
 	}
 
 	/**
@@ -235,14 +235,14 @@ public class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	 */
 	private int offsetAdjustSize() {
 
-		int flag = checksum || encrypted ? FLAG_SIZE : 0;
-		int encryption = encrypted ? KEY_SIZE_SOURCE : 0;
-		int header = encrypted ? MixFileHeader.HEADER_SIZE + 2 : MixFileHeader.HEADER_SIZE;
-		int index = MixRecord.RECORD_SIZE * numFiles();
+		int flag = checksum || encrypted ? FLAG_SIZE : 0
+		int encryption = encrypted ? KEY_SIZE_SOURCE : 0
+		int header = encrypted ? MixFileHeader.HEADER_SIZE + 2 : MixFileHeader.HEADER_SIZE
+		int index = MixRecord.RECORD_SIZE * numFiles()
 		if (encrypted) {
-			index = (int)Math.ceil(index / ENCRYPT_BLOCK_SIZEF) * ENCRYPT_BLOCK_SIZEI;
+			index = (int)Math.ceil(index / ENCRYPT_BLOCK_SIZEF) * ENCRYPT_BLOCK_SIZEI
 		}
 
-		return flag + header + encryption + index;
+		return flag + header + encryption + index
 	}
 }

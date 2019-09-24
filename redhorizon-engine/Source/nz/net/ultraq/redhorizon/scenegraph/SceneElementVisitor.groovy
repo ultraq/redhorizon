@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2017, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * Interface for the audio renderer which is responsible for playing back sounds
- * through the audio device.
+ * Interface for anything that wants to be able to traverse the scene graph.
  * 
  * @author Emanuel Rabina
  */
-interface AudioRenderer extends Closeable {
+interface SceneElementVisitor {
+
+	/**
+	 * Allow visiting any scene element.
+	 * 
+	 * @param element
+	 */
+	void visit(SceneElement element)
 }

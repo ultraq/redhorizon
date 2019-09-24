@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioObject
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f
@@ -29,7 +28,7 @@ import java.util.concurrent.ConcurrentSkipListSet
  * 
  * @author Emanuel Rabina
  */
-class Node extends Spatial implements Comparable<Node> {
+class Node extends Spatial implements SceneElement, Comparable<Node> {
 
 	// Node parts
 	private Node parent
@@ -40,10 +39,22 @@ class Node extends Spatial implements Comparable<Node> {
 	private boolean volumeneedsupdate = true
 
 	// Multi-threaded rendering bits
-	private final List<AudioObject> audioinit   = []
-	private final List<AudioObject> audiodelete = []
+	private final List<AudioElement> audioinit   = []
+	private final List<AudioElement> audiodelete = []
 //	private final ArrayList<GraphicsObject> graphicsinit   = new ArrayList<>();
 //	private final ArrayList<GraphicsObject> graphicsdelete = new ArrayList<>();
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	void accept(SceneElementVisitor visitor) {
+
+		visitor.visit(this)
+		for (SceneElement element: children) {
+			element.accept(visitor)
+		}
+	}
 
 	/**
 	 * Adds the given object as a child of this node.
@@ -55,7 +66,7 @@ class Node extends Spatial implements Comparable<Node> {
 		if (children.add(child)) {
 
 			// Queue object for initialization
-			if (child instanceof AudioObject) {
+			if (child instanceof AudioElement) {
 				audioinit << child
 			}
 //			if (child instanceof GraphicsObject) {
@@ -124,7 +135,7 @@ class Node extends Spatial implements Comparable<Node> {
 		if (children.remove(child)) {
 
 			// Queue object for deletion
-			if (child instanceof AudioObject) {
+			if (child instanceof AudioElement) {
 				audioinit.remove(child)
 				audiodelete << child
 			}
@@ -138,7 +149,7 @@ class Node extends Spatial implements Comparable<Node> {
 			if (child instanceof Node) {
 				def getChildren
 				getChildren = { Node node ->
-					if (node instanceof AudioObject) {
+					if (node instanceof AudioElement) {
 						audiodelete << node
 					}
 					node.children.each { childNode ->
@@ -172,7 +183,7 @@ class Node extends Spatial implements Comparable<Node> {
 
 		// Render items
 		for (Spatial child: children) {
-			if (child instanceof AudioObject) {
+			if (child instanceof AudioElement) {
 				child.render(renderer)
 			}
 			else if (child instanceof Node) {
