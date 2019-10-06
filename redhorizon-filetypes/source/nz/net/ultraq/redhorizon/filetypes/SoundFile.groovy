@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.filetypes
 
 import java.nio.channels.ReadableByteChannel
+import java.util.concurrent.ExecutorService
 
 /**
  * Interface for filetypes for sound data (eg: AUD, WAV, etc...).
@@ -49,7 +50,8 @@ interface SoundFile extends File {
 	/**
 	 * Returns a byte channel to the sound data in the file.
 	 * 
+	 * @param executorService
 	 * @return Byte channel containing the sound data.
 	 */
-	ReadableByteChannel getSoundData()
+	ReadableByteChannel getSoundData(ExecutorService executorService)
 }

@@ -20,11 +20,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Methods to create {@code ByteBuffer}s with native byte ordering.
+ * Extensions to the {@code ByteBuffer} class.
  * 
  * @author Emanuel Rabina
  */
-class ByteBufferOrdering {
+class ByteBufferExtensions {
 
 	/**
 	 * Allocates a direct {@code ByteBuffer} with native byte ordering.

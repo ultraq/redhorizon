@@ -41,6 +41,6 @@ subprojects {
 	}
 
 	dependencies {
-		compile 'org.codehaus.groovy:groovy:2.4.11'
+		compile 'org.codehaus.groovy:groovy:2.5.8'
 	}
 }

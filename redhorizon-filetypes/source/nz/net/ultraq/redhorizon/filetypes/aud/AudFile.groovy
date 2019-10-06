@@ -23,8 +23,6 @@ import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundBitrate
 import nz.net.ultraq.redhorizon.filetypes.SoundChannels
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.StreamingDataDecoder
-import nz.net.ultraq.redhorizon.nio.channels.DuplicateReadOnlyByteChannel
 import static nz.net.ultraq.redhorizon.filetypes.SoundBitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundChannels.*
 
@@ -33,10 +31,8 @@ import java.nio.channels.FileChannel
 import java.nio.channels.Pipe
 import java.nio.channels.ReadableByteChannel
 import java.nio.channels.SeekableByteChannel
-import java.nio.channels.WritableByteChannel
 import java.nio.file.Paths
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import static java.nio.file.StandardOpenOption.WRITE
 
 /**
@@ -57,9 +53,6 @@ class AudFile extends AbstractFile implements SoundFile {
 
 	private final AudFileHeader header
 	private final SeekableByteChannel fileData
-
-	@Lazy
-	private ExecutorService decoderThreadPool = { Executors.newCachedThreadPool() }()
 
 	final SoundBitrate bitrate
 	final SoundChannels channels
@@ -107,96 +100,60 @@ class AudFile extends AbstractFile implements SoundFile {
 	void close() {
 
 		fileData.close()
-		decoderThreadPool.shutdownNow()
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	ReadableByteChannel getSoundData() {
+	ReadableByteChannel getSoundData(ExecutorService executorService) {
 
-		Pipe pipe = Pipe.open()
-		decoderThreadPool.execute(new SoundDataDecoder(
-			new DuplicateReadOnlyByteChannel(fileData), pipe.sink()))
-		return pipe.source()
-	}
+		def pipe = Pipe.open()
+		def input = fileData as ReadableByteChannel
+		def output = pipe.sink()
 
-	/**
-	 * Decoder task.
-	 */
-	private class SoundDataDecoder extends StreamingDataDecoder {
+		executorService.execute({ ->
+			Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
 
-		@Lazy
-		private WSADPCM8bit decoder8Bit
+			def decoder8Bit = new WSADPCM8bit()
+			def decoder16Bit = new IMAADPCM16bit()
 
-		@Lazy
-		private IMAADPCM16bit decoder16Bit
-
-		/**
-		 * Constructor, sets the input and output for the decoding.
-		 * 
-		 * @param input	Channel to read the encoded input from.
-		 * @param output Channel to write the decoded output to.
-		 */
-		private SoundDataDecoder(ReadableByteChannel input, WritableByteChannel output) {
-
-			super(input, output, "AudFile :: ${AudFile.this.filename} :: Sound data decoding thread")
-		}
-
-		/**
-		 * Perform decoding of the sound data.
-		 */
-		@Override
-		protected void decode() {
-
-			ByteBuffer chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
+			def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
 			int[] update = [0, 0]
 
 			// Decompress the aud file data by chunks
 			while (true) {
 				chunkHeaderBuffer.clear()
-				int read = input.read(chunkHeaderBuffer)
+				int read = input.readAndRewind(chunkHeaderBuffer)
 				if (read == -1) {
 					break
 				}
-				chunkHeaderBuffer.rewind()
-				ByteBuffer chunkBuffer = decodeChunk(new AudChunkHeader(chunkHeaderBuffer), update)
-				output.write(chunkBuffer)
+
+				def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
+
+				// Build buffers from chunk header
+				def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.filesize & 0xffff)
+				input.readAndRewind(chunkSourceBuffer)
+				def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.datasize & 0xffff)
+
+				// Decode
+				switch (header.type) {
+				case TYPE_WS_ADPCM:
+					decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
+					break
+				case TYPE_IMA_ADPCM:
+					def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
+					def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
+					decoder16Bit.decode(chunkSourceBuffer, chunkDataBuffer, index, sample)
+					update[0] = index.getInt(0)
+					update[1] = sample.getInt(0)
+					break
+				}
+
+				output.write(chunkDataBuffer)
 			}
-		}
+		})
 
-		/**
-		 * Decodes the next chunk of audio data.  Assumes that the byte channel
-		 * is positioned immediately after the chunk that is being passed-in.
-		 * 
-		 * @param chunkHeader Header of the chunk to decode.
-		 * @param update 2-<tt>int</tt> array, containing the latest index and
-		 * 				 sample values respectively.
-		 * @return Decoded sound data.
-		 */
-		private ByteBuffer decodeChunk(AudChunkHeader chunkHeader, int[] update) {
-
-			// Build buffers from chunk header
-			def source = ByteBuffer.allocateNative(chunkHeader.filesize & 0xffff)
-			input.read(source)
-			source.rewind()
-			def dest = ByteBuffer.allocateNative(chunkHeader.datasize & 0xffff)
-
-			// Decode
-			switch (header.type) {
-			case TYPE_WS_ADPCM:
-				decoder8Bit.decode(source, dest)
-				break
-			case TYPE_IMA_ADPCM:
-				def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
-				def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
-				decoder16Bit.decode(source, dest, index, sample)
-				update[0] = index.getInt(0)
-				update[1] = sample.getInt(0)
-				break
-			}
-			return dest
-		}
+		return pipe.source()
 	}
 }

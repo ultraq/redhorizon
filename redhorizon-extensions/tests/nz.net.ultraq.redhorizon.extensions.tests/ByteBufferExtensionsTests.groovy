@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions.tests
 
-import nz.net.ultraq.redhorizon.extensions.ByteBufferOrdering
+import nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions
 
 import org.junit.Test
 
@@ -24,11 +24,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Tests for the {@link ByteBufferOrdering} extension module.
+ * Tests for the {@link ByteBufferExtensions} extension module.
  * 
  * @author Emanuel Rabina
  */
-class ByteBufferOrderingTests {
+class ByteBufferExtensionsTests {
 
 	/**
 	 * Test the {@code allocateDirectNative} method returns a natively ordered
