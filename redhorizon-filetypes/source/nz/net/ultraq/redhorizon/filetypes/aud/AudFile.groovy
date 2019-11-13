@@ -27,13 +27,9 @@ import static nz.net.ultraq.redhorizon.filetypes.SoundBitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundChannels.*
 
 import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
 import java.nio.channels.Pipe
 import java.nio.channels.ReadableByteChannel
-import java.nio.channels.SeekableByteChannel
-import java.nio.file.Paths
 import java.util.concurrent.ExecutorService
-import static java.nio.file.StandardOpenOption.WRITE
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
@@ -52,7 +48,7 @@ class AudFile extends AbstractFile implements SoundFile {
 	private static final byte FLAG_STEREO = 0x01
 
 	private final AudFileHeader header
-	private final SeekableByteChannel fileData
+	private final ReadableByteChannel input
 
 	final SoundBitrate bitrate
 	final SoundChannels channels
@@ -70,27 +66,14 @@ class AudFile extends AbstractFile implements SoundFile {
 
 		// AUD file header
 		def headerBytes = ByteBuffer.allocateNative(AudFileHeader.HEADER_SIZE)
-		input.read(headerBytes)
-		headerBytes.rewind()
+		input.readAndRewind(headerBytes)
 		header = new AudFileHeader(headerBytes)
 
 		bitrate = (header.flags & FLAG_16BIT) != 0 ? BITRATE_16 : BITRATE_8
 		channels = (header.flags & FLAG_STEREO) != 0 ? CHANNELS_STEREO : CHANNELS_MONO
 		frequency = header.frequency & 0xffff
 
-		// Store seekable channel types
-		if (input instanceof SeekableByteChannel) {
-			this.fileData = input
-		}
-
-		// If the input channel isn't seekable, create a temp file that is seekable
-		else {
-			def tempSoundFileData = File.createTempFile(name, null)
-			tempSoundFileData.deleteOnExit()
-			def fileChannel = FileChannel.open(Paths.get(tempSoundFileData.absolutePath), WRITE)
-			fileChannel.transferFrom(input, 0, header.filesize)
-			this.fileData = fileChannel
-		}
+		this.input = input
 	}
 
 	/**
@@ -99,7 +82,7 @@ class AudFile extends AbstractFile implements SoundFile {
 	@Override
 	void close() {
 
-		fileData.close()
+		input.close()
 	}
 
 	/**
@@ -109,7 +92,6 @@ class AudFile extends AbstractFile implements SoundFile {
 	ReadableByteChannel getSoundData(ExecutorService executorService) {
 
 		def pipe = Pipe.open()
-		def input = fileData as ReadableByteChannel
 		def output = pipe.sink()
 
 		executorService.execute({ ->
@@ -124,11 +106,9 @@ class AudFile extends AbstractFile implements SoundFile {
 			// Decompress the aud file data by chunks
 			while (true) {
 				chunkHeaderBuffer.clear()
-				int read = input.readAndRewind(chunkHeaderBuffer)
-				if (read == -1) {
+				if (input.readAndRewind(chunkHeaderBuffer) == -1) {
 					break
 				}
-
 				def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
 
 				// Build buffers from chunk header
@@ -138,16 +118,16 @@ class AudFile extends AbstractFile implements SoundFile {
 
 				// Decode
 				switch (header.type) {
-				case TYPE_WS_ADPCM:
-					decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
-					break
-				case TYPE_IMA_ADPCM:
-					def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
-					def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
-					decoder16Bit.decode(chunkSourceBuffer, chunkDataBuffer, index, sample)
-					update[0] = index.getInt(0)
-					update[1] = sample.getInt(0)
-					break
+					case TYPE_WS_ADPCM:
+						decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
+						break
+					case TYPE_IMA_ADPCM:
+						def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
+						def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
+						decoder16Bit.decode(chunkSourceBuffer, chunkDataBuffer, index, sample)
+						update[0] = index.getInt(0)
+						update[1] = sample.getInt(0)
+						break
 				}
 
 				output.write(chunkDataBuffer)

@@ -28,8 +28,8 @@ class MixFileHeader {
 
 	static final int HEADER_SIZE = 6
 
-	final short numfiles
-	final int bodylength
+	final short numFiles
+	final int bodyLength
 
 	/**
 	 * Constructor, takes a <tt>ByteBuffer</tt> and assigns the bytes to the
@@ -39,7 +39,7 @@ class MixFileHeader {
 	 */
 	MixFileHeader(ByteBuffer bytes) {
 
-		numfiles   = bytes.getShort()
-		bodylength = bytes.getInt()
+		numFiles   = bytes.getShort()
+		bodyLength = bytes.getInt()
 	}
 }

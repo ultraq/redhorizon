@@ -38,7 +38,6 @@ abstract class AbstractFile implements File {
 	 */
 	protected AbstractFile(String filename) {
 
-		this.filename = filename.contains(java.io.File.separator) ?
-			filename.substring(filename.lastIndexOf(java.io.File.separator) + 1) : filename
+		this.filename = filename.substring(filename.lastIndexOf(java.io.File.separator) + 1)
 	}
 }

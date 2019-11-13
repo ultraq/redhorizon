@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix;
+package nz.net.ultraq.redhorizon.filetypes.mix
 
-import java.nio.ByteBuffer;
+import nz.net.ultraq.redhorizon.filetypes.ArchiveFileEntry
 
-import nz.net.ultraq.redhorizon.filetypes.ArchiveFileEntry;
+import java.nio.ByteBuffer
 
 /**
  * Representation of a Red Alert MIX file index record, found in the header of
@@ -26,14 +26,14 @@ import nz.net.ultraq.redhorizon.filetypes.ArchiveFileEntry;
  * 
  * @author Emanuel Rabina
  */
-public class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
+class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 
-	static final int RECORD_SIZE = 12;
+	static final int RECORD_SIZE = 12
 
-	String name;	// Name cannot be determined initially
-	final int id;
-	final int offset;
-	final int length;
+	String name // Name cannot be determined initially
+	final int id
+	final int offset
+	final int size
 
 	/**
 	 * Constructor, assigns the ID, offset, and length of this entry from the
@@ -43,9 +43,9 @@ public class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 	 */
 	MixRecord(ByteBuffer bytes) {
 
-		id     = bytes.getInt();
-		offset = bytes.getInt();
-		length = bytes.getInt();
+		id     = bytes.getInt()
+		offset = bytes.getInt()
+		size   = bytes.getInt()
 	}
 
 	/**
@@ -57,37 +57,8 @@ public class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 	 * @return -1, 0, 1 :: less-than, equal to, greater than.
 	 */
 	@Override
-	public int compareTo(MixRecord other) {
+	int compareTo(MixRecord other) {
 
-		int thisid = this.id;
-		int otherid = other.id;
-
-		if (thisid < otherid) {
-			return -1;
-		}
-		else if (thisid > otherid) {
-			return 1;
-		}
-		else {
-			return 0;
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getName() {
-
-		return name;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public long getSize() {
-
-		return length;
+		return id <=> other.id
 	}
 }

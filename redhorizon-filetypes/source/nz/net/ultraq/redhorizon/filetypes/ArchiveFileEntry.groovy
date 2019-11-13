@@ -36,5 +36,5 @@ interface ArchiveFileEntry {
 	 * 
 	 * @return Size of the entry.
 	 */
-	long getSize()
+	int getSize()
 }

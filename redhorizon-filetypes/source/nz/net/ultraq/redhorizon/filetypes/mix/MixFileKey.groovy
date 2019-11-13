@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix;
+package nz.net.ultraq.redhorizon.filetypes.mix
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Interface class for the native C++ functions used to obtain the 56-byte
@@ -24,10 +24,10 @@ import java.nio.ByteBuffer;
  *  
  * @author Emanuel Rabina
  */
-public class MixFileKey {
+class MixFileKey {
 
 	static {
-		System.loadLibrary("MixFileKey");
+		System.loadLibrary('MixFileKey')
 	}
 
 	/**
@@ -44,11 +44,11 @@ public class MixFileKey {
 	 * @param source A buffer containing the 80-byte key source.
 	 * @param dest   A buffer store for the 56-byte Blowfish key.
 	 */
-	public static void getBlowfishKey(ByteBuffer source, ByteBuffer dest) {
+	static void getBlowfishKey(ByteBuffer source, ByteBuffer dest) {
 
-		byte[] d = new byte[56];
-		getBlowfishKey(source.array(), d);
-		dest.put(d).rewind();
+		def d = new byte[56]
+		getBlowfishKeyNative(source.array(), d)
+		dest.put(d).rewind()
 	}
 
 	/**
@@ -59,5 +59,5 @@ public class MixFileKey {
 	 * @param source A byte[] containing the 80-byte key source.
 	 * @param dest   A byte[] store for the 56-byte Blowfish key.
 	 */
-	private native static void getBlowfishKey(byte[] source, byte[] dest);
+	private native static void getBlowfishKeyNative(byte[] source, byte[] dest)
 }
