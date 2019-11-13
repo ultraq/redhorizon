@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.geometry.Vector3f
  */
 abstract class BoundingVolume {
 
-	protected Vector3f center = Vector3f.ZERO
+	Vector3f center
 
 	/**
 	 * Determine if a ray intersects this bounding volume.

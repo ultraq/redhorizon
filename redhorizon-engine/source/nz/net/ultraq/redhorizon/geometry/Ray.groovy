@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.geometry;
+package nz.net.ultraq.redhorizon.geometry
+
+import groovy.transform.TupleConstructor
 
 /**
  * A line segment in 3-dimensional space, which is a point of origin and a
@@ -22,20 +24,9 @@ package nz.net.ultraq.redhorizon.geometry;
  * 
  * @author Emanuel Rabina
  */
-public class Ray {
+@TupleConstructor(defaults = false)
+class Ray {
 
-	public Vector3f origin;
-	public Vector3f direction;
-
-	/**
-	 * Constructor, creates a new ray with the given origin and direction.
-	 * 
-	 * @param origin
-	 * @param direction
-	 */
-	public Ray(Vector3f origin, Vector3f direction) {
-
-		this.origin    = origin;
-		this.direction = direction;
-	}
+	Vector3f origin
+	Vector3f direction
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.geometry;
+package nz.net.ultraq.redhorizon.geometry
 
 /**
  * The orientation of an object, consisting of a pair of 3-tuples: an 'up' and
@@ -22,29 +22,33 @@ package nz.net.ultraq.redhorizon.geometry;
  * 
  * @author Emanuel Rabina
  */
-public class Orientation {
+class Orientation {
 
-	public Vector3f at;
-	public Vector3f up;
+	Vector3f at
+	Vector3f up
 
 	/**
 	 * Default constructor, creates an orientation looking down (0, 0, -1) with
 	 * up being (0, 1, 0).
 	 */
-	public Orientation() {
+	Orientation() {
 
-		at = new Vector3f(0, 0, -1);
-		up = new Vector3f(0, 1, 0);
+		at = new Vector3f(0, 0, -1)
+		up = new Vector3f(0, 1, 0)
 	}
 
 	/**
-	 * Returns this orientation as an array.  Used primarily for OpenGL/AL array
-	 * functions.
+	 * Use Groovy's type conversion for returning orientation as an array.  Useful
+	 * for OpenGL/AL array functions.
 	 * 
 	 * @return [at.x, at.y, at.z, up.x, up.y, up.z]
 	 */
-	public float[] toArray() {
+	Object asType(Class clazz) {
 
-		return new float[]{at.x, at.y, at.z, up.x, up.y, up.z};
+		if (clazz == Float[]) {
+			return [at.x, at.y, at.z, up.x, up.y, up.z] as float[]
+		}
+
+		return new IllegalArgumentException("Cannot convert Orientation to type ${clazz}")
 	}
 }

@@ -26,21 +26,21 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 interface AudioElement {
 
 	/**
-	 * Delete the audio data associated with this object.
+	 * Perform any cleanup for this element.
 	 * 
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	void delete(AudioRenderer renderer)
 
 	/**
-	 * Sets up the audio data associated with this object.
+	 * Perform any setup for this element.
 	 * 
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	void init(AudioRenderer renderer)
 
 	/**
-	 * Plays any audio associated with this object.
+	 * Update the element within a render loop.
 	 * 
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
