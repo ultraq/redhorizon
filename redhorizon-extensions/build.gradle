@@ -27,7 +27,7 @@ processResources {
 }
 
 dependencies {
-	testCompile(
-		'junit:junit:4.12',
+	testImplementation(
+		'org.spockframework:spock-core:1.3-groovy-2.5'
 	)
 }

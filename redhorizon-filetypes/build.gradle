@@ -17,11 +17,11 @@
 description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
-	compile(
+	implementation(
 		project(':redhorizon-codecs'),
 		':blowfishj:2.41'
 	)
-	testCompile(
-		'junit:junit:4.12'
+	testImplementation(
+		'org.spockframework:spock-core:1.3-groovy-2.5'
 	)
 }

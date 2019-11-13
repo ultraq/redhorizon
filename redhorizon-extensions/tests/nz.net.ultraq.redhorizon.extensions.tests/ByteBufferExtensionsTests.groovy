@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.extensions.tests
 
 import nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions
 
-import org.junit.Test
+import spock.lang.Specification
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -28,46 +28,25 @@ import java.nio.ByteOrder
  * 
  * @author Emanuel Rabina
  */
-class ByteBufferExtensionsTests {
+class ByteBufferExtensionsTests extends Specification {
 
-	/**
-	 * Test the {@code allocateDirectNative} method returns a natively ordered
-	 * buffer.
-	 */
-	@Test
-	void allocateDirectNative() {
-
-		def buffer = ByteBuffer.allocateDirectNative(8);
-		assert buffer.order() == ByteOrder.nativeOrder()
+	def "allocateDirectNative returns a natively ordered buffer"() {
+		expect:
+			ByteBuffer.allocateDirectNative(8).order() == ByteOrder.nativeOrder()
 	}
 
-	/**
-	 * Test the {@code allocateNative} method returns a natively ordered buffer.
-	 */
-	@Test
-	void allocateNative() {
-
-		def buffer = ByteBuffer.allocateNative(8);
-		assert buffer.order() == ByteOrder.nativeOrder()
+	def "allocateNative returns a natively ordered buffer"() {
+		expect:
+			ByteBuffer.allocateNative(8).order() == ByteOrder.nativeOrder()
 	}
 
-	/**
-	 * Test the {@code wrap} method returns a natively ordered buffer.
-	 */
-	@Test
-	void wrapNative() {
-
-		def buffer = ByteBuffer.wrapNative([0x0f] as byte[]);
-		assert buffer.order() == ByteOrder.nativeOrder()
+	def "wrapNative returns a natively ordered buffer"() {
+		expect:
+			ByteBuffer.wrapNative([0x0f] as byte[]).order() == ByteOrder.nativeOrder()
 	}
 
-	/**
-	 * Test the {@code wrap} method returns a natively ordered buffer.
-	 */
-	@Test
-	void wrapNativeOffsetLength() {
-
-		def buffer = ByteBuffer.wrapNative([0xca, 0xfe] as byte[], 0, 2);
-		assert buffer.order() == ByteOrder.nativeOrder()
+	def "wrapNative with offset & length returns a natively ordered buffer"() {
+		expect:
+			ByteBuffer.wrapNative([0xca, 0xfe] as byte[], 0, 2).order() == ByteOrder.nativeOrder()
 	}
 }
