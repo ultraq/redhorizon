@@ -1,15 +1,8 @@
-
-# IDE files/directories
-/.idea
-*.iml
-
-# Build files/directories
 /.gradle
-build/
-
-# Generated files/directories
+/.idea
 /.logs
 /.preferences
+build
 /Mods/_Red Alert/Mix/
 /Mods/_Tiberium Dawn/Mix/
 /MixFileKey.dll
