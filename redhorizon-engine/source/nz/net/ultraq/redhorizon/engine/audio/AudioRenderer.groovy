@@ -16,11 +16,23 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.geometry.Orientation
+import nz.net.ultraq.redhorizon.geometry.Vector3f
+
 /**
  * Interface for the audio renderer which is responsible for playing back sounds
  * through the audio device.
  * 
  * @author Emanuel Rabina
  */
-interface AudioRenderer extends Closeable {
+interface AudioRenderer {
+
+	/**
+	 * Update details about the listener.
+	 * 
+	 * @param position
+	 * @param velocity
+	 * @param orientation
+	 */
+	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation)
 }

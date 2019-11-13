@@ -22,8 +22,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -32,25 +32,14 @@ import java.util.concurrent.Executors
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class AudioEngine implements EngineSubsystem {
 
-	private final Scene scene
+	final Scene scene
 
-	@Lazy
-	private ExecutorService audioEngineExecutor = { Executors.newCachedThreadPool() }()
 	private CountDownLatch startLatch = new CountDownLatch(1)
 	private CountDownLatch stopLatch = new CountDownLatch(1)
 	private boolean running
-
-	/**
-	 * Constructor, initializes the audio engine for the given scene.
-	 * 
-	 * @param scene
-	 */
-	AudioEngine(Scene scene) {
-
-		this.scene = scene
-	}
 
 	/**
 	 * Starts the audio engine loop: builds a connection to the OpenAL device,
@@ -60,14 +49,19 @@ class AudioEngine implements EngineSubsystem {
 	@Override
 	void start() {
 
+		def audioEngineExecutor = Executors.newCachedThreadPool()
+
 		audioEngineExecutor.execute { ->
 			Thread.currentThread().name = 'Red Horizon - Audio Engine'
 
 			// Initialization
-			def renderer = new OpenALAudioRenderer()
-			startLatch.countDown()
+			def context = new OpenALContext()
+			context.makeCurrent()
+			context.withCloseable { ->
 
-			renderer.withCloseable { ->
+				def renderer = new OpenALAudioRenderer(context)
+				startLatch.countDown()
+
 				def audioElementStates = [:]
 				running = true
 
@@ -77,8 +71,8 @@ class AudioEngine implements EngineSubsystem {
 						if (element instanceof AudioElement) {
 
 							// Register the audio element
-							if (!audioElementStates.containsKey(element)) {
-								audioElementStates << [element: STATE_NEW]
+							if (!audioElementStates[element]) {
+								audioElementStates << [(element): STATE_NEW]
 							}
 
 							def elementState = audioElementStates[element]
@@ -87,11 +81,11 @@ class AudioEngine implements EngineSubsystem {
 							if (elementState == STATE_NEW) {
 								element.init(renderer)
 								elementState = STATE_INITIALIZED
-								audioElementStates << [element: elementState]
+								audioElementStates << [(element): elementState]
 							}
 
 							// Render the audio element
-							
+							element.render(renderer)
 						}
 					} as SceneElementVisitor
 				}

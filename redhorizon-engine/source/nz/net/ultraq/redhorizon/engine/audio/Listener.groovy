@@ -19,8 +19,10 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.geometry.Orientation
 import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f
+import nz.net.ultraq.redhorizon.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.BoundingBox
 import nz.net.ultraq.redhorizon.scenegraph.BoundingVolume
+import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 import nz.net.ultraq.redhorizon.scenegraph.Spatial
 
 /**
@@ -28,12 +30,35 @@ import nz.net.ultraq.redhorizon.scenegraph.Spatial
  * 
  * @author Emanuel Rabina
  */
-class Listener extends Spatial {
+class Listener extends Spatial implements AudioElement {
 
-	private Vector3f velocity = new Vector3f()
-	private Orientation orientation = new Orientation()
+	Vector3f velocity = new Vector3f()
+	Orientation orientation = new Orientation()
 
 	final BoundingVolume boundingVolume = BoundingBox.ZERO
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void accept(SceneElementVisitor visitor) {
+
+		visitor.visit(this)
+	}
+
+	/**
+	 * Does nothing.
+	 */
+	@Override
+	void delete(AudioRenderer renderer) {
+	}
+
+	/**
+	 * Does nothing.
+	 */
+	@Override
+	void init(AudioRenderer renderer) {
+	}
 
 	/**
 	 * Listeners never intersect anything.
@@ -48,12 +73,13 @@ class Listener extends Spatial {
 	}
 
 	/**
-	 * Set/update the listener in the environment.
+	 * Update the listener in the environment.
 	 * 
 	 * @param renderer
 	 */
+	@Override
 	void render(AudioRenderer renderer) {
 
-		renderer.updateListener(this)
+		renderer.updateListener(position, velocity, orientation)
 	}
 }
