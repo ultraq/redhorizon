@@ -19,11 +19,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
-
-import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
 
 /**
  * Audio subsystem, manages the connection to the audio hardware and rendering
@@ -31,34 +27,21 @@ import java.util.concurrent.CountDownLatch
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class AudioEngine implements EngineSubsystem {
+class AudioEngine extends EngineSubsystem {
 
 	private static final int TARGET_RENDER_TIME_MS = 100
 
-	final Scene scene
-
-	private CountDownLatch stopLatch = new CountDownLatch(1)
-	private boolean running
+	private final Scene scene
 
 	/**
-	 * Perform the render loop within a certain render budget, sleeping the thread
-	 * if necessary to not exceed it.
+	 * Constructor, build a new audio engine around the given scene.
 	 * 
-	 * @param renderLoop
+	 * @param scene
 	 */
-	private void renderLoop(Closure renderLoop) {
+	AudioEngine(Scene scene) {
 
-		while (running) {
-			def loopStart = System.currentTimeMillis()
-			renderLoop()
-			def loopEnd = System.currentTimeMillis()
-
-			def renderExecutionTime = loopEnd - loopStart
-			if (renderExecutionTime < TARGET_RENDER_TIME_MS) {
-				Thread.sleep(TARGET_RENDER_TIME_MS - renderExecutionTime)
-			}
-		}
+		super(TARGET_RENDER_TIME_MS)
+		this.scene = scene
 	}
 
 	/**
@@ -102,7 +85,7 @@ class AudioEngine implements EngineSubsystem {
 						// Render the audio element
 						element.render(renderer)
 					}
-				} as SceneElementVisitor
+				}
 			}
 
 			// Shutdown
@@ -112,15 +95,5 @@ class AudioEngine implements EngineSubsystem {
 		}
 
 		stopLatch.countDown()
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	void stop() {
-
-		running = false
-		stopLatch.await()
 	}
 }
