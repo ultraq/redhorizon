@@ -25,13 +25,11 @@ import java.nio.ByteBuffer
  */
 class AudChunkHeader {
 
-//	private static final int CHUNK_ID = 0x0000deaf;
-
 	static final int CHUNK_HEADER_SIZE = 8
 
 	// Chunk header data
-	final short filesize
-	final short datasize
+	final short compressedSize
+	final short uncompressedSize
 	final int id
 
 	/**
@@ -41,8 +39,10 @@ class AudChunkHeader {
 	 */
 	AudChunkHeader(ByteBuffer bytes) {
 
-		filesize = bytes.getShort()
-		datasize = bytes.getShort()
-		id       = bytes.getInt()
+		compressedSize   = bytes.getShort()
+		uncompressedSize = bytes.getShort()
+		id               = bytes.getInt()
+
+		assert id == 0x0000deaf
 	}
 }

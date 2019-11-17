@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
-import nz.net.ultraq.redhorizon.scenegraph.AudioElement
+import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 /**
  * Audio subsystem, manages the connection to the audio hardware and rendering
@@ -35,11 +34,32 @@ import java.util.concurrent.Executors
 @TupleConstructor(defaults = false)
 class AudioEngine implements EngineSubsystem {
 
+	private static final int TARGET_RENDER_TIME_MS = 100
+
 	final Scene scene
 
-	private CountDownLatch startLatch = new CountDownLatch(1)
 	private CountDownLatch stopLatch = new CountDownLatch(1)
 	private boolean running
+
+	/**
+	 * Perform the render loop within a certain render budget, sleeping the thread
+	 * if necessary to not exceed it.
+	 * 
+	 * @param renderLoop
+	 */
+	private void renderLoop(Closure renderLoop) {
+
+		while (running) {
+			def loopStart = System.currentTimeMillis()
+			renderLoop()
+			def loopEnd = System.currentTimeMillis()
+
+			def renderExecutionTime = loopEnd - loopStart
+			if (renderExecutionTime < TARGET_RENDER_TIME_MS) {
+				Thread.sleep(TARGET_RENDER_TIME_MS - renderExecutionTime)
+			}
+		}
+	}
 
 	/**
 	 * Starts the audio engine loop: builds a connection to the OpenAL device,
@@ -47,59 +67,51 @@ class AudioEngine implements EngineSubsystem {
 	 * made to shut down.
 	 */
 	@Override
-	void start() {
+	void run() {
 
-		def audioEngineExecutor = Executors.newCachedThreadPool()
+		Thread.currentThread().name = 'Red Horizon - Audio Engine'
 
-		audioEngineExecutor.execute { ->
-			Thread.currentThread().name = 'Red Horizon - Audio Engine'
-
-			// Initialization
-			def context = new OpenALContext()
+		// Initialization
+		def context = new OpenALContext()
+		context.withCloseable { ->
 			context.makeCurrent()
-			context.withCloseable { ->
 
-				def renderer = new OpenALAudioRenderer(context)
-				startLatch.countDown()
+			def renderer = new OpenALRenderer()
+			def audioElementStates = [:]
+			running = true
 
-				def audioElementStates = [:]
-				running = true
+			// Rendering loop
+			renderLoop { ->
+				scene.accept { element ->
+					if (element instanceof AudioElement) {
 
-				// Rendering loop
-				while (running) {
-					scene.accept { element ->
-						if (element instanceof AudioElement) {
-
-							// Register the audio element
-							if (!audioElementStates[element]) {
-								audioElementStates << [(element): STATE_NEW]
-							}
-
-							def elementState = audioElementStates[element]
-
-							// Initialize the audio element
-							if (elementState == STATE_NEW) {
-								element.init(renderer)
-								elementState = STATE_INITIALIZED
-								audioElementStates << [(element): elementState]
-							}
-
-							// Render the audio element
-							element.render(renderer)
+						// Register the audio element
+						if (!audioElementStates[element]) {
+							audioElementStates << [(element): STATE_NEW]
 						}
-					} as SceneElementVisitor
-				}
 
-				// Shutdown
-				audioElementStates.keySet().each { audioElement ->
-					audioElement.delete(renderer)
-				}
+						def elementState = audioElementStates[element]
+
+						// Initialize the audio element
+						if (elementState == STATE_NEW) {
+							element.init(renderer)
+							elementState = STATE_INITIALIZED
+							audioElementStates << [(element): elementState]
+						}
+
+						// Render the audio element
+						element.render(renderer)
+					}
+				} as SceneElementVisitor
 			}
 
-			stopLatch.countDown()
+			// Shutdown
+			audioElementStates.keySet().each { audioElement ->
+				audioElement.delete(renderer)
+			}
 		}
 
-		startLatch.await()
+		stopLatch.countDown()
 	}
 
 	/**

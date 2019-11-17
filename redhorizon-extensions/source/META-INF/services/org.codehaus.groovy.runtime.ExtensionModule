@@ -17,4 +17,5 @@
 moduleName             = ${moduleName}
 moduleVersion          = ${moduleVersion}
 staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions,\
+                         nz.net.ultraq.redhorizon.extensions.ExecutorServiceExtensions,\
                          nz.net.ultraq.redhorizon.extensions.ReadableByteChannelExtensions

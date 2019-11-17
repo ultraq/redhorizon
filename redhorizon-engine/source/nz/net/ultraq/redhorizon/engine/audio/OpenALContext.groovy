@@ -43,6 +43,10 @@ class OpenALContext implements Closeable {
 
 		ALCCapabilities alcCapabilities = ALC.createCapabilities(alDevice)
 		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
+
+		if (!alCapabilities.OpenAL10) {
+			throw new UnsupportedOperationException('OpenAL 1.0 not supported')
+		}
 	}
 
 	/**

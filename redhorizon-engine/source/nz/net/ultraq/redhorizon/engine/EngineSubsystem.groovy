@@ -21,12 +21,7 @@ package nz.net.ultraq.redhorizon.engine
  * 
  * @author Emanuel Rabina
  */
-interface EngineSubsystem {
-
-	/**
-	 * Tells the subsystem to start running on its own thread.
-	 */
-	void start()
+interface EngineSubsystem extends Runnable {
 
 	/**
 	 * Stops the subsystem and thread.

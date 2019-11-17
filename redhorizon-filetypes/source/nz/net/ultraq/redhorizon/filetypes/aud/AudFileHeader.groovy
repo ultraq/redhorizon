@@ -29,8 +29,8 @@ class AudFileHeader {
 	static final int HEADER_SIZE = 12
 
 	final short frequency
-	final int filesize
-	final int datasize
+	final int compressedSize
+	final int uncompressedSize
 	final byte flags
 	final byte type
 
@@ -41,10 +41,10 @@ class AudFileHeader {
 	 */
 	AudFileHeader(ByteBuffer data) {
 
-		frequency = data.getShort()
-		filesize  = data.getInt()
-		datasize  = data.getInt()
-		flags     = data.get()
-		type      = data.get()
+		frequency        = data.getShort()
+		compressedSize   = data.getInt()
+		uncompressedSize = data.getInt()
+		flags            = data.get()
+		type             = data.get()
 	}
 }

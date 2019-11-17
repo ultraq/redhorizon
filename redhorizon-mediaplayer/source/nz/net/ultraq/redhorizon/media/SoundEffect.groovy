@@ -16,49 +16,51 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.scenegraph.AudioElement
+import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.geometry.Vector3f
-import nz.net.ultraq.redhorizon.scenegraph.Playable
+import nz.net.ultraq.redhorizon.filetypes.Worker
+import nz.net.ultraq.redhorizon.scenegraph.Movable
+import nz.net.ultraq.redhorizon.scenegraph.Positionable
 
-import static org.lwjgl.openal.AL10.*
+import java.nio.ByteBuffer
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.ExecutorService
 
 /**
- * Basic sound in a 3D space.  Sounds are constructed from an instance of
- * {@link SoundData}, and then the data and any handles to that data are fed
- * into this class.  This class then maintains it's own set of attributes which
- * can transform the original sound when it's played.
+ * Basic sound in a 3D space.  Sound effects are constructed from data in
+ * {@link SoundFile}s, which can then be played through the audio engine.
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect extends Media implements AudioElement, Playable {
+class SoundEffect extends Media implements AudioElement, Movable, Playable, Positionable {
 
-	// PlayableItem defaults
-	Vector3f direction = new Vector3f(0,0,0)
-	Vector3f velocity  = new Vector3f(0,0,0)
-	boolean playing
-
-	// Sound file attributes
+	// Sound information
 	final int bitrate
 	final int channels
 	final int frequency
+	private final Worker soundDataWorker
+	private BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10, true)
 
-	// Sound parts
-	int sourceId
-	int bufferId
+	// Renderer information
+	private int sourceId
+	private List<Integer> bufferIds
 
 	/**
 	 * Constructor, loads the sound from the given <code>SoundFile</code>.
 	 * 
-	 * @param soundfile File which should be used to construct this sound.
+	 * @param soundFile File which should be used to construct this sound.
+	 * @param executor
 	 */
-	SoundEffect(SoundFile soundfile) {
+	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
 
-		super(soundfile.filename)
-		bitrate   = soundfile.bitrate.size
-		channels  = soundfile.channels.size
-		frequency = soundfile.frequency
+		super(soundFile.filename)
+		bitrate   = soundFile.bitrate.value
+		channels  = soundFile.channels.value
+		frequency = soundFile.frequency
+
+		soundDataWorker = soundFile.getSoundDataWorker(executorService)
 	}
 
 	/**
@@ -67,16 +69,8 @@ class SoundEffect extends Media implements AudioElement, Playable {
 	@Override
 	void delete(AudioRenderer renderer) {
 
-		// (Stop and) Delete the source if this sound has a handle on it
-		if (alIsSource(sourceId)) {
-
-			// Complete stop if still playing
-			if (playDelay) {
-				alSourceStop(sourceId)
-				stop0()
-			}
-			alDeleteSources([sourceId])
-		}
+		renderer.deleteSource(sourceId)
+		renderer.deleteBuffers(bufferIds as int[])
 	}
 
 	/**
@@ -85,23 +79,15 @@ class SoundEffect extends Media implements AudioElement, Playable {
 	@Override
 	void init(AudioRenderer renderer) {
 
-		// Load the appropriate sound data from the store, or create a new one
-		def soundData = new SoundData(sound, bitrate, channels, frequency)
-//		SoundData sounddata = ResourceManager.getSoundData(name)
-//		if (sounddata == null) {
-//			sounddata = new SoundData(al, sound, bitrate, channels, frequency)
-//			ResourceManager.storeSoundData(name, sounddata)
-//		}
-		bufferId = soundData.bufferId
-	}
+		if (!renderer.sourceExists(sourceId)) {
+			sourceId = renderer.createSource()
+			bufferIds = []
+		}
 
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	void play() {
-
-		playing = true
+		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
+		soundDataWorker.work { chunkBuffer ->
+			soundDataBuffer << chunkBuffer
+		}
 	}
 
 	/**
@@ -110,49 +96,31 @@ class SoundEffect extends Media implements AudioElement, Playable {
 	@Override
 	void render(AudioRenderer renderer) {
 
-		// Initial play of the sound effect
 		if (playing) {
+			def nextBuffer = soundDataBuffer.take()
+			def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
+			bufferIds << bufferId
+			renderer.queueBuffer(sourceId, bufferId)
+			renderer.updateSource(sourceId, position, direction, velocity)
 
-			// Generate a source if it doesn't already have one
-			if (!al.alIsSource(sourceId)) {
-				int[] sourceids = new int[1]
-				alGenSources(1, sourceids, 0)
-				sourceId = sourceids[0]
+			// Initial play of the sound effect
+			if (!renderer.sourcePlaying(sourceId)) {
+				renderer.playSource(sourceId)
 			}
-
-			// Attach buffer to source
-			alSourcei(sourceId, AL_BUFFER, bufferId)
-
-			// Setup source attributes
-			alSourceiv(sourceId, AL_POSITION, getAbsolutePosition().toArray(), 0)
-			alSourcefv(sourceId, AL_DIRECTION, direction.toArray(), 0)
-			alSourcefv(sourceId, AL_VELOCITY, velocity.toArray(), 0)
-
-			// Play
-			alSourcePlay(sourceId)
 		}
 
 		// Stop playing the sound effect, release the source
-		else {
-			alSourceStop(sourceId)
-			alDeleteSources([sourceId])
-			stop0()
-		}
+//		else {
+//			alSourceStop(sourceId)
+//			alDeleteSources([sourceId])
+//			stop0()
+//		}
 
 		// Check if the sound effect has stopped by itself
-		int[] state = new int[1]
-		alGetSourcei(sourceId, AL_SOURCE_STATE, state, 0)
-		if (state[0] == AL_STOPPED) {
-			stop()
-		}
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	void stop() {
-
-		playing = false
+//		int[] state = new int[1]
+//		alGetSourcei(sourceId, AL_SOURCE_STATE, state, 0)
+//		if (state[0] == AL_STOPPED) {
+//			stop()
+//		}
 	}
 }

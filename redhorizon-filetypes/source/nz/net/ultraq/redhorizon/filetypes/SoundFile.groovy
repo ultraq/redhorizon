@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.channels.ReadableByteChannel
+import groovy.transform.TupleConstructor
 import java.util.concurrent.ExecutorService
 
 /**
@@ -27,18 +27,42 @@ import java.util.concurrent.ExecutorService
 interface SoundFile extends File {
 
 	/**
+	 * Supported bitrates.
+	 */
+	@TupleConstructor
+	enum Bitrate {
+
+		BITRATE_8 (8),
+		BITRATE_16(16)
+
+		final int value
+	}
+
+	/**
+	 * Supported channel types.
+	 */
+	@TupleConstructor
+	enum Channels {
+
+		CHANNELS_MONO  (1),
+		CHANNELS_STEREO(2)
+
+		final int value
+	}
+
+	/**
 	 * Returns the bitrate of the sound sample.
 	 * 
 	 * @return One of 8 or 16 bits.
 	 */
-	SoundBitrate getBitrate()
+	Bitrate getBitrate()
 
 	/**
 	 * Returns the channels used by the sound.
 	 * 
 	 * @return One of mono or stereo.
 	 */
-	SoundChannels getChannels()
+	Channels getChannels()
 
 	/**
 	 * Returns the frequency (number of samples/second) of the sound.
@@ -48,10 +72,11 @@ interface SoundFile extends File {
 	int getFrequency()
 
 	/**
-	 * Returns a byte channel to the sound data in the file.
+	 * Returns a worker that can be executed to start streaming sound data to the
+	 * returned byte channel.
 	 * 
 	 * @param executorService
-	 * @return Byte channel containing the sound data.
+	 * @return Closure for streaming sound data.
 	 */
-	ReadableByteChannel getSoundData(ExecutorService executorService)
+	Worker getSoundDataWorker(ExecutorService executorService)
 }

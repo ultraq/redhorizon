@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.geometry.Orientation
 import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f
-import nz.net.ultraq.redhorizon.scenegraph.AudioElement
+import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.BoundingBox
 import nz.net.ultraq.redhorizon.scenegraph.BoundingVolume
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor

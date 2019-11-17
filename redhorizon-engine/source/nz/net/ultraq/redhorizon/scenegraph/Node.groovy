@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f

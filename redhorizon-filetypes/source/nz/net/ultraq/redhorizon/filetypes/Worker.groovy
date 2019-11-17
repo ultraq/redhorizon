@@ -1,5 +1,5 @@
 /* 
- * Copyright 2016, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-description = 'Media player for the Red Horizon project'
+package nz.net.ultraq.redhorizon.filetypes
 
-dependencies {
-	implementation(
-		project(':redhorizon-engine'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes'),
+/**
+ * An interface for a special type of class that returns streaming data.  The
+ * single method, {@link #work} uses the given closure to determine what to do
+ * with the data chunks, allowing callers to either let the data build up or to
+ * block until the data can be read.
+ * 
+ * @author Emanuel Rabina
+ */
+interface Worker {
 
-		'org.reflections:reflections:0.9.11'
-	)
+	/**
+	 * Start the worker, passing resulting chunks to the given closure.
+	 * 
+	 * @param handler
+	 */
+	void work(Closure handler)
 }

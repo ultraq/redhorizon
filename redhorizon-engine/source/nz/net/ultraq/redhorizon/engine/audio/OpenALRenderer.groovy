@@ -21,17 +21,86 @@ import nz.net.ultraq.redhorizon.geometry.Vector3f
 
 import static org.lwjgl.openal.AL10.*
 
-import groovy.transform.TupleConstructor
+import java.nio.ByteBuffer
 
 /**
  * An audio renderer using the OpenAL API.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class OpenALAudioRenderer implements AudioRenderer {
+class OpenALRenderer implements AudioRenderer {
 
-	final OpenALContext alContext
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency) {
+
+		return alGenBuffers()
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	int createSource() {
+
+		return alGenSources()
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void deleteBuffers(int[] bufferIds) {
+
+		alDeleteBuffers(bufferIds)
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void deleteSource(int sourceId) {
+
+		alDeleteSources(sourceId)
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void playSource(int sourceId) {
+
+		alSourcePlay(sourceId)
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void queueBuffer(int sourceId, int bufferId) {
+
+		alSourceQueueBuffers(sourceId, bufferId)
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	boolean sourceExists(int sourceId) {
+
+		return alIsSource(sourceId)
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	boolean sourcePlaying(int sourceId) {
+
+		return alGetSourcei(sourceId, AL_PLAYING)
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -42,5 +111,16 @@ class OpenALAudioRenderer implements AudioRenderer {
 		alListenerfv(AL_POSITION, position as float[])
 		alListenerfv(AL_VELOCITY, velocity as float[])
 		alListenerfv(AL_ORIENTATION, orientation as float[])
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
+
+		alSourcefv(sourceId, AL_POSITION, position as float[])
+		alSourcefv(sourceId, AL_DIRECTION, direction as float[])
+		alSourcefv(sourceId, AL_VELOCITY, velocity as float[])
 	}
 }

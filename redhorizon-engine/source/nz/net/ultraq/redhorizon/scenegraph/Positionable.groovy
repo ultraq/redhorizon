@@ -1,5 +1,5 @@
 /* 
- * Copyright 2016, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-description = 'Media player for the Red Horizon project'
+package nz.net.ultraq.redhorizon.scenegraph
 
-dependencies {
-	implementation(
-		project(':redhorizon-engine'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes'),
+import nz.net.ultraq.redhorizon.geometry.Vector3f
 
-		'org.reflections:reflections:0.9.11'
-	)
+/**
+ * Trait for objects that can be placed in the world.
+ * 
+ * @author Emanuel Rabina
+ */
+trait Positionable {
+
+	Vector3f position = new Vector3f(0, 0, 0)
 }

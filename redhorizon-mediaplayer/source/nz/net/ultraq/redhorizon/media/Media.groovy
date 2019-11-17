@@ -37,16 +37,4 @@ abstract class Media {
 
 		this.name = name + id.getAndIncrement()
 	}
-
-	/**
-	 * Checks if this media item is the same as another.
-	 * 
-	 * @param obj
-	 * @return {@code true} if both media objects are of the same type and name.
-	 */
-	@Override
-	boolean equals(Object obj) {
-
-		return obj instanceof Media && name == obj.name
-	}
 }

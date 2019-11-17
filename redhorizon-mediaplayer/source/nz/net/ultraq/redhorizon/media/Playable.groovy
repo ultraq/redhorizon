@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
+package nz.net.ultraq.redhorizon.media
 
 /**
- * Enumeration of the supported channel types.
+ * Trait for media that can be played forward.
  * 
  * @author Emanuel Rabina
  */
-enum SoundChannels {
+trait Playable {
 
-	CHANNELS_MONO  (1),
-	CHANNELS_STEREO(2)
-
-	final int size
+	boolean playing = false
 
 	/**
-	 * Constructor, sets the number of channels per track.
-	 * 
-	 * @param size
+	 * Put the object into the playing state.
 	 */
-	private SoundChannels(int size) {
+	void play() {
 
-		this.size = size
+		playing = true
+	}
+
+	/**
+	 * Take the object out of the playing state.
+	 */
+	void stop() {
+
+		playing = false
 	}
 }

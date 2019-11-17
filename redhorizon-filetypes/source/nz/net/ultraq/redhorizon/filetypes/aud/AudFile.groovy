@@ -20,14 +20,10 @@ import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.AbstractFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.SoundBitrate
-import nz.net.ultraq.redhorizon.filetypes.SoundChannels
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import static nz.net.ultraq.redhorizon.filetypes.SoundBitrate.*
-import static nz.net.ultraq.redhorizon.filetypes.SoundChannels.*
+import nz.net.ultraq.redhorizon.filetypes.Worker
 
 import java.nio.ByteBuffer
-import java.nio.channels.Pipe
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutorService
 
@@ -36,6 +32,8 @@ import java.util.concurrent.ExecutorService
  * file is the sound format of choice for these games, compressed using one of 2
  * schemes: IMA-ADPCM and WS-ADPCM the latter being a Westwood proprietary
  * format.
+ * 
+ * For more information, see: http://vladan.bato.net/cnc/aud3.txt
  * 
  * @author Emanuel Rabina
  */
@@ -50,8 +48,8 @@ class AudFile extends AbstractFile implements SoundFile {
 	private final AudFileHeader header
 	private final ReadableByteChannel input
 
-	final SoundBitrate bitrate
-	final SoundChannels channels
+	final Bitrate bitrate
+	final Channels channels
 	final int frequency
 
 	/**
@@ -89,51 +87,48 @@ class AudFile extends AbstractFile implements SoundFile {
 	 * {@inheritDoc}
 	 */
 	@Override
-	ReadableByteChannel getSoundData(ExecutorService executorService) {
+	Worker getSoundDataWorker(ExecutorService executorService) {
 
-		def pipe = Pipe.open()
-		def output = pipe.sink()
+		return { handler ->
+			executorService.execute({ ->
+				Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
 
-		executorService.execute({ ->
-			Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
+				def decoder8Bit = new WSADPCM8bit()
+				def decoder16Bit = new IMAADPCM16bit()
 
-			def decoder8Bit = new WSADPCM8bit()
-			def decoder16Bit = new IMAADPCM16bit()
+				def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
+				int[] update = [0, 0]
 
-			def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
-			int[] update = [0, 0]
-
-			// Decompress the aud file data by chunks
-			while (true) {
-				chunkHeaderBuffer.clear()
-				if (input.readAndRewind(chunkHeaderBuffer) == -1) {
-					break
-				}
-				def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
-
-				// Build buffers from chunk header
-				def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.filesize & 0xffff)
-				input.readAndRewind(chunkSourceBuffer)
-				def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.datasize & 0xffff)
-
-				// Decode
-				switch (header.type) {
-					case TYPE_WS_ADPCM:
-						decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
+				// Decompress the aud file data by chunks
+				while (true) {
+					chunkHeaderBuffer.clear()
+					if (input.readAndRewind(chunkHeaderBuffer) == -1) {
 						break
-					case TYPE_IMA_ADPCM:
-						def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
-						def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
-						decoder16Bit.decode(chunkSourceBuffer, chunkDataBuffer, index, sample)
-						update[0] = index.getInt(0)
-						update[1] = sample.getInt(0)
-						break
+					}
+					def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
+
+					// Build buffers from chunk header
+					def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize & 0xffff)
+					input.readAndRewind(chunkSourceBuffer)
+					def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.uncompressedSize & 0xffff)
+
+					// Decode
+					switch (header.type) {
+						case TYPE_WS_ADPCM:
+							decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
+							break
+						case TYPE_IMA_ADPCM:
+							def index  = ByteBuffer.allocateNative(4).putInt(0, update[0])
+							def sample = ByteBuffer.allocateNative(4).putInt(0, update[1])
+							decoder16Bit.decode(chunkSourceBuffer, chunkDataBuffer, index, sample)
+							update[0] = index.getInt(0)
+							update[1] = sample.getInt(0)
+							break
+					}
+
+					handler(chunkDataBuffer)
 				}
-
-				output.write(chunkDataBuffer)
-			}
-		})
-
-		return pipe.source()
+			})
+		}
 	}
 }

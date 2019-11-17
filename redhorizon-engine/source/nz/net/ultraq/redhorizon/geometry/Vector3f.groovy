@@ -28,8 +28,6 @@ import groovy.transform.TupleConstructor
 @EqualsAndHashCode
 class Vector3f {
 
-	static final Vector3f ZERO = new Vector3f()
-
 	float x
 	float y
 	float z

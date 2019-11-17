@@ -16,13 +16,17 @@
 
 package nz.net.ultraq.redhorizon.mediaplayer
 
-import nz.net.ultraq.redhorizon.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.reflections.Reflections
+
 import java.nio.channels.FileChannel
 import java.nio.file.Paths
+import java.util.concurrent.Executors
 
 /**
  * Basic media player, primarily used for presenting the data of the various
@@ -45,12 +49,7 @@ class MediaPlayer {
 	}
 
 
-	private final nz.net.ultraq.redhorizon.filetypes.File file
-
-	// TODO: Do I really need a scene for singular objects?  Can I create a
-	//       super-simple type of scene for these sorts of things?
-	private Scene scene = new Scene()
-	private AudioEngine audioEngine = new AudioEngine(scene)
+	private final SoundFile file
 
 	/**
 	 * Constructor, sets up the engine subsystems needed for playback.  Right now
@@ -60,40 +59,51 @@ class MediaPlayer {
 	 */
 	MediaPlayer(String pathToFile) {
 
-		// TODO: Figure out some sort of pluggable structure so that I don't have to
-		//       guess which file implementations to use based on file extension!
-		def suffix = pathToFile.substring(pathToFile.indexOf('.'))
-		switch (suffix) {
-		case '.aud':
+		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.'))
+		def soundFileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
+			.getTypesAnnotatedWith(FileExtensions)
+			.find { type ->
+				def annotation = type.getAnnotation(FileExtensions)
+				return annotation.value().contains(suffix)
+			}
 
-			// TODO: Should I push file opening down to the implementation too?  It
-			//       feels weird specifying how to get the file when it can have a
-			//       URI that can be used to determine what to use
-			file = new AudFile(pathToFile, FileChannel.open(Paths.get(pathToFile)))
-			break
+		if (soundFileClass) {
+			file = soundFileClass.newInstance(pathToFile, FileChannel.open(Paths.get(pathToFile)))
+		}
+		else {
+			throw new IllegalArgumentException("No implementation for ${suffix} filetype")
 		}
 	}
 
 	/**
-	 * 
+	 * Play the audio data coming out of the configured audio channel.
 	 */
 	void play() {
 
-		def soundEffect = new SoundEffect(file)
-		scene.rootnode.addChild(soundEffect)
+		// TODO: Do I really need a scene for singular objects?  Can I create a
+		//       super-simple type of scene for these sorts of things?
+		def scene = new Scene()
+		def audioEngine = new AudioEngine(scene)
 
-		audioEngine.start()
-		soundEffect.play()
+		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 
-		// TODO: This is dumb waiting.  Emit some sort of event or some way we can
-		//       wait on the sound to stop playing.
-		while (true) {
-			Thread.sleep(500)
-			if (!soundEffect.playing) {
-				break
+			executorService.execute(audioEngine)
+
+			def soundEffect = new SoundEffect(file, executorService)
+			scene.addChild(soundEffect)
+
+			soundEffect.play()
+
+			// TODO: This is dumb waiting.  Emit some sort of event or some way we can
+			//       wait on the sound to stop playing.
+			while (true) {
+				Thread.sleep(500)
+				if (!soundEffect.playing) {
+					break
+				}
 			}
-		}
 
-		audioEngine.stop()
+			audioEngine.stop()
+		}
 	}
 }
