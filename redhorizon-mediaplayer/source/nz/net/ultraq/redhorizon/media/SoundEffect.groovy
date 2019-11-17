@@ -22,6 +22,8 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.Positionable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -34,7 +36,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect extends Media implements AudioElement, Movable, Playable, Positionable {
+class SoundEffect extends Media implements AudioElement, Movable, Playable, Positionable, SceneElement {
 
 	// Sound information
 	final int bitrate
@@ -61,6 +63,15 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Posi
 		frequency = soundFile.frequency
 
 		soundDataWorker = soundFile.getSoundDataWorker(executorService)
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	void accept(SceneElementVisitor visitor) {
+
+		visitor.visit(this)
 	}
 
 	/**
@@ -107,20 +118,10 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Posi
 			if (!renderer.sourcePlaying(sourceId)) {
 				renderer.playSource(sourceId)
 			}
+			// Source has finished playing by itself
+			else if (!renderer.sourcePlaying(sourceId)) {
+				playing = false
+			}
 		}
-
-		// Stop playing the sound effect, release the source
-//		else {
-//			alSourceStop(sourceId)
-//			alDeleteSources([sourceId])
-//			stop0()
-//		}
-
-		// Check if the sound effect has stopped by itself
-//		int[] state = new int[1]
-//		alGetSourcei(sourceId, AL_SOURCE_STATE, state, 0)
-//		if (state[0] == AL_STOPPED) {
-//			stop()
-//		}
 	}
 }

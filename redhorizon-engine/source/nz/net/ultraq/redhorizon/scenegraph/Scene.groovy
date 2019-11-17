@@ -16,20 +16,15 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-
 /**
- * Entry point for the Red Horizon scene graph, holds and manages all of the
- * {@link Node}s, which in turn hold the spatial information of all of the
- * objects currently in the 'world'.
+ * Entry point for the Red Horizon scene graph, holds the root node and any
+ * other objects that make up the 'world'.
  * 
  * @author Emanuel Rabina
  */
 class Scene {
 
-	// Scene graph structure
-	@Delegate
-	final Node rootnode = new Node()
+	final Node root = new Node()
 //	private Listener listener;
 //	private Camera camera;
 
@@ -66,15 +61,4 @@ class Scene {
 //			}
 //		}
 //	}
-
-	/**
-	 * Renders all of the audio objects within this scene.
-	 * 
-	 * @param renderer
-	 */
-	void render(AudioRenderer renderer) {
-
-//		listener.render(renderer);
-		rootnode.render(renderer)
-	}
 }

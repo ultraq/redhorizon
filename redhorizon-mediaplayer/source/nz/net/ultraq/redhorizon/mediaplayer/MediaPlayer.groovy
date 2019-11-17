@@ -43,6 +43,10 @@ class MediaPlayer {
 	 */
 	static void main(String[] args) {
 
+		if (args.length == 0) {
+			throw new IllegalArgumentException('A path to a file must be supplied')
+		}
+
 		def (pathToFile) = args
 		def mediaPlayer = new MediaPlayer(pathToFile)
 		mediaPlayer.play()
@@ -80,17 +84,14 @@ class MediaPlayer {
 	 */
 	void play() {
 
-		// TODO: Do I really need a scene for singular objects?  Can I create a
-		//       super-simple type of scene for these sorts of things?
 		def scene = new Scene()
 		def audioEngine = new AudioEngine(scene)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-
 			executorService.execute(audioEngine)
 
 			def soundEffect = new SoundEffect(file, executorService)
-			scene.addChild(soundEffect)
+			scene.root.addChild(soundEffect)
 
 			soundEffect.play()
 

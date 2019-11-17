@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.AudioElement
-import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f
 
@@ -29,21 +28,15 @@ import java.util.concurrent.ConcurrentSkipListSet
  * 
  * @author Emanuel Rabina
  */
-class Node extends Spatial implements SceneElement, Comparable<Node> {
+class Node implements SceneElement, Comparable<Node>, Movable, Positionable {
 
 	// Node parts
 	private Node parent
-	private final SortedSet<Spatial> children = new ConcurrentSkipListSet<>()
+	private final SortedSet<SceneElement> children = new ConcurrentSkipListSet<>()
 
 	// Calculated parts
-	private BoundingVolume boundingvolume = BoundingBox.ZERO
-	private boolean volumeneedsupdate = true
-
-	// Multi-threaded rendering bits
-	private final List<AudioElement> audioinit   = []
-	private final List<AudioElement> audiodelete = []
-//	private final ArrayList<GraphicsObject> graphicsinit   = new ArrayList<>();
-//	private final ArrayList<GraphicsObject> graphicsdelete = new ArrayList<>();
+	private BoundingVolume boundingVolume = BoundingBox.ZERO
+	private boolean volumeNeedsUpdate = true
 
 	/**
 	 * @inheritDoc
@@ -52,8 +45,8 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	void accept(SceneElementVisitor visitor) {
 
 		visitor.visit(this)
-		for (SceneElement element: children) {
-			element.accept(visitor)
+		children.each { child ->
+			child.accept(visitor)
 		}
 	}
 
@@ -62,23 +55,13 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	 * 
 	 * @param child
 	 */
-	void addChild(Spatial child) {
+	void addChild(SceneElement child) {
 
 		if (children.add(child)) {
-
-			// Queue object for initialization
-			if (child instanceof AudioElement) {
-				audioinit << child
-			}
-//			if (child instanceof GraphicsObject) {
-//				graphicsinit.add((GraphicsObject)child);
-//			}
-
 			if (child instanceof Node) {
 				child.parent = this
 			}
-
-			volumeneedsupdate = true
+			volumeNeedsUpdate = true
 		}
 	}
 
@@ -87,17 +70,16 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	 * 
 	 * @return Node's bounding volume.
 	 */
-	@Override
 	BoundingVolume getBoundingVolume() {
 
 		// Recalculate the volume if necessary
-		if (volumeneedsupdate) {
+		if (volumeNeedsUpdate) {
 			for (Spatial child: children) {
-				boundingvolume = boundingvolume.merge(child.getBoundingVolume())
+				boundingVolume = boundingVolume.merge(child.getBoundingVolume())
 			}
-			volumeneedsupdate = false
+			volumeNeedsUpdate = false
 		}
-		return boundingvolume
+		return boundingVolume
 	}
 
 	/**
@@ -120,7 +102,6 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	boolean intersects(Ray ray) {
 
 		return getBoundingVolume().intersects(ray)
@@ -164,7 +145,7 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 //				graphicsdelete.addAll(childnode.graphicsdelete);
 			}
 
-			volumeneedsupdate = true
+			volumeNeedsUpdate = true
 		}
 	}
 
@@ -174,24 +155,24 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	 * 
 	 * @param renderer
 	 */
-	void render(AudioRenderer renderer) {
-
-		// Initialize any items
-		audioinit.removeAll { audioObject ->
-			audioObject.init(renderer)
-			return true
-		}
-
-		// Render items
-		for (Spatial child: children) {
-			if (child instanceof AudioElement) {
-				child.render(renderer)
-			}
-			else if (child instanceof Node) {
-				child.render(renderer)
-			}
-		}
-	}
+//	void render(AudioRenderer renderer) {
+//
+//		// Initialize any items
+//		audioinit.removeAll { audioObject ->
+//			audioObject.init(renderer)
+//			return true
+//		}
+//
+//		// Render items
+//		for (Spatial child: children) {
+//			if (child instanceof AudioElement) {
+//				child.render(renderer)
+//			}
+//			else if (child instanceof Node) {
+//				child.render(renderer)
+//			}
+//		}
+//	}
 
 	/**
 	 * Renders the graphics of the attached object and it's children, if they
@@ -229,16 +210,15 @@ class Node extends Spatial implements SceneElement, Comparable<Node> {
 	void setPosition(Vector3f position) {
 
 		this.position = position
-		volumeneedsupdate = true
+		volumeNeedsUpdate = true
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	void setRotation(float rotation) {
 
 		super.setRotation(rotation)
-		volumeneedsupdate = true
+		volumeNeedsUpdate = true
 	}
 }
