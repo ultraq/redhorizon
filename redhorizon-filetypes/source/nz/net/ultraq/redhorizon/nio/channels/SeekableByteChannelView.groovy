@@ -28,7 +28,7 @@ import java.nio.channels.SeekableByteChannel
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = ['source', 'start', 'size'])
+@TupleConstructor(defaults = false, includeFields = true, includes = ['source', 'start', 'size'])
 class SeekableByteChannelView implements SeekableByteChannel {
 
 	private final SeekableByteChannel source
