@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,7 +83,7 @@ static BigNumber130 global2;
  * @param source Byte array containing the 80-byte key source.
  * @param dest   Byte array store for the 56-byte Blowfish key.
  */
-JNIEXPORT void JNICALL Java_redhorizon_filetypes_mix_MixFileKey_getBlowfishKey
+JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_getBlowfishKeyNative
 	(JNIEnv *env, jclass cnckey, jbyteArray source, jbyteArray dest) {
 
 	static bool publickeyinit = false;

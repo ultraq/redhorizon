@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.mix
+package nz.net.ultraq.redhorizon.filetypes.mix;
 
-import java.nio.ByteBuffer
+import java.nio.ByteBuffer;
 
 /**
  * Interface class for the native C++ functions used to obtain the 56-byte
  * Blowfish key from the 80-byte key source found in Red Alert MIX files.
- *  
+ * 
  * @author Emanuel Rabina
  */
-class MixFileKey {
+public class MixFileKey {
 
 	static {
-		System.loadLibrary('MixFileKey')
+		System.loadLibrary("MixFileKey");
 	}
 
 	/**
@@ -46,9 +46,9 @@ class MixFileKey {
 	 */
 	static void getBlowfishKey(ByteBuffer source, ByteBuffer dest) {
 
-		def d = new byte[56]
-		getBlowfishKeyNative(source.array(), d)
-		dest.put(d).rewind()
+		byte[] d = new byte[56];
+		getBlowfishKeyNative(source.array(), d);
+		dest.put(d).rewind();
 	}
 
 	/**
@@ -59,5 +59,5 @@ class MixFileKey {
 	 * @param source A byte[] containing the 80-byte key source.
 	 * @param dest   A byte[] store for the 56-byte Blowfish key.
 	 */
-	private native static void getBlowfishKeyNative(byte[] source, byte[] dest)
+	private native static void getBlowfishKeyNative(byte[] source, byte[] dest);
 }

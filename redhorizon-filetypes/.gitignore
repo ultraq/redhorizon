@@ -1,9 +1,1 @@
-
-# Visual Studio files/directories
-/.vs
-/Debug
-/Release
-*.sdf
-
-# Generated code
 libMixFileKey.so
