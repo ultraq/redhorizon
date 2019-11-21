@@ -17,13 +17,14 @@
 description = 'Core rendering engine for Red Horizon'
 
 dependencies {
-	compile(
+	implementation(
+		project(':redhorizon-extensions'),
 		'org.lwjgl:lwjgl:3.1.0',
 		'org.lwjgl:lwjgl-glfw:3.1.0',
 		'org.lwjgl:lwjgl-openal:3.1.0',
 		'org.lwjgl:lwjgl-opengl:3.1.0'
 	)
-	runtime(
+	runtimeOnly(
 		'org.lwjgl:lwjgl:3.1.0:natives-macos',
 		'org.lwjgl:lwjgl:3.1.0:natives-windows',
 		'org.lwjgl:lwjgl-glfw:3.1.0:natives-macos',

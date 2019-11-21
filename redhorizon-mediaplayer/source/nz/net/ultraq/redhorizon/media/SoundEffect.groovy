@@ -21,9 +21,11 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
-import nz.net.ultraq.redhorizon.scenegraph.Positionable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -36,18 +38,21 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect extends Media implements AudioElement, Movable, Playable, Positionable, SceneElement {
+class SoundEffect extends Media implements AudioElement, Movable, Playable, SceneElement {
+
+	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
 
 	// Sound information
 	final int bitrate
 	final int channels
 	final int frequency
 	private final Worker soundDataWorker
-	private BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10, true)
+	private BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
 
 	// Renderer information
 	private int sourceId
 	private List<Integer> bufferIds
+	private int bufferCount
 
 	/**
 	 * Constructor, loads the sound from the given <code>SoundFile</code>.
@@ -63,6 +68,10 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Posi
 		frequency = soundFile.frequency
 
 		soundDataWorker = soundFile.getSoundDataWorker(executorService)
+		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
+		soundDataWorker.work { chunkBuffer ->
+			soundDataBuffer << chunkBuffer
+		}
 	}
 
 	/**
@@ -94,11 +103,6 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Posi
 			sourceId = renderer.createSource()
 			bufferIds = []
 		}
-
-		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-		soundDataWorker.work { chunkBuffer ->
-			soundDataBuffer << chunkBuffer
-		}
 	}
 
 	/**
@@ -108,19 +112,31 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Posi
 	void render(AudioRenderer renderer) {
 
 		if (playing) {
-			def nextBuffer = soundDataBuffer.take()
-			def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
-			bufferIds << bufferId
-			renderer.queueBuffer(sourceId, bufferId)
-			renderer.updateSource(sourceId, position, direction, velocity)
+			logger.debug('Playing')
 
-			// Initial play of the sound effect
-			if (!renderer.sourcePlaying(sourceId)) {
-				renderer.playSource(sourceId)
+			// Buffers to read and queue
+			if (!soundDataBuffer.empty) {
+				def nextBuffer = soundDataBuffer.take()
+				logger.debug("Retrieved buffer ${bufferCount++}")
+				def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
+				bufferIds << bufferId
+				renderer.queueBuffer(sourceId, bufferId)
+//				renderer.updateSource(sourceId, position, direction, velocity)
+
+				// Start playing the source
+				if (!renderer.sourcePlaying(sourceId)) {
+					logger.debug('Playing source')
+					renderer.playSource(sourceId)
+				}
 			}
-			// Source has finished playing by itself
-			else if (!renderer.sourcePlaying(sourceId)) {
-				playing = false
+
+			// No more buffers to read
+			else if (soundDataWorker.complete) {
+				logger.debug('Buffer empty and worker complete')
+				if (!renderer.sourcePlaying(sourceId)) {
+					logger.debug('Source stopped')
+					playing = false
+				}
 			}
 		}
 	}

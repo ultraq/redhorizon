@@ -30,7 +30,7 @@ interface SoundFile extends File {
 	 * Supported bitrates.
 	 */
 	@TupleConstructor
-	enum Bitrate {
+	static enum Bitrate {
 
 		BITRATE_8 (8),
 		BITRATE_16(16)
@@ -42,7 +42,7 @@ interface SoundFile extends File {
 	 * Supported channel types.
 	 */
 	@TupleConstructor
-	enum Channels {
+	static enum Channels {
 
 		CHANNELS_MONO  (1),
 		CHANNELS_STEREO(2)

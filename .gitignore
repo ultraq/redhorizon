@@ -3,6 +3,7 @@
 /.logs
 /.preferences
 build
+out
 /Mods/_Red Alert/Mix/
 /Mods/_Tiberium Dawn/Mix/
 /MixFileKey.dll

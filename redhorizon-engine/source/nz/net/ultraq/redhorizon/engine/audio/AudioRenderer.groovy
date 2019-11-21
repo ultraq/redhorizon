@@ -85,9 +85,9 @@ interface AudioRenderer {
 	boolean sourcePlaying(int sourceId)
 
 	/**
-	 * Queues a buffer to an existing source.
+	 * Queue a buffer to an existing source.
 	 * 
-	 * @param sounceId
+	 * @param sourceId
 	 * @param bufferId
 	 */
 	void queueBuffer(int sourceId, int bufferId)
@@ -110,4 +110,11 @@ interface AudioRenderer {
 	 * @param velocity
 	 */
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity)
+
+	/**
+	 * Update the volume of the listener.
+	 * 
+	 * @param volume
+	 */
+	void updateVolume(float volume)
 }

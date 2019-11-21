@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.audio.Listener
+
 /**
  * Entry point for the Red Horizon scene graph, holds the root node and any
  * other objects that make up the 'world'.
@@ -25,8 +27,19 @@ package nz.net.ultraq.redhorizon.scenegraph
 class Scene {
 
 	final Node root = new Node()
-//	private Listener listener;
+//	final Listener listener = new Listener()
 //	private Camera camera;
+
+	/**
+	 * Allow visitors into the scene for traversal.
+	 * 
+	 * @param visitor
+	 */
+	void accept(SceneElementVisitor visitor) {
+
+//		listener.accept(visitor)
+		root.accept(visitor)
+	}
 
 	/**
 	 * Select objects whose bounding volumes intersect the given ray.

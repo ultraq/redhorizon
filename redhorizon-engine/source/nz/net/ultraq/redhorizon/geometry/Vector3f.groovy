@@ -41,7 +41,7 @@ class Vector3f {
 	 */
 	Object asType(Class clazz) {
 
-		if (clazz == Float[]) {
+		if (clazz == float[]) {
 			return [x, y, z] as float[]
 		}
 

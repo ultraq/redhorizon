@@ -23,10 +23,13 @@ import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.reflections.Reflections
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.nio.channels.FileChannel
 import java.nio.file.Paths
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 /**
  * Basic media player, primarily used for presenting the data of the various
@@ -36,6 +39,8 @@ import java.util.concurrent.Executors
  */
 class MediaPlayer {
 
+	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
+
 	/**
 	 * Launch the media player and play the given file or media data.
 	 * 
@@ -43,27 +48,33 @@ class MediaPlayer {
 	 */
 	static void main(String[] args) {
 
-		if (args.length == 0) {
-			throw new IllegalArgumentException('A path to a file must be supplied')
-		}
+		try {
+			if (args.length == 0) {
+				throw new IllegalArgumentException('A path to a file must be supplied')
+			}
 
-		def (pathToFile) = args
-		def mediaPlayer = new MediaPlayer(pathToFile)
-		mediaPlayer.play()
+			def (pathToFile) = args
+			def soundFile = loadSoundFile(pathToFile)
+			soundFile.withCloseable { file ->
+				def mediaPlayer = new MediaPlayer(file)
+				mediaPlayer.play()
+			}
+		}
+		catch (Exception ex) {
+			logger.error(ex.message, ex)
+			System.exit(1)
+		}
 	}
 
-
-	private final SoundFile file
-
 	/**
-	 * Constructor, sets up the engine subsystems needed for playback.  Right now
-	 * just creates an OpenAL context to play a sound file through.
+	 * Read a file path and return it as a sound file.
 	 * 
 	 * @param pathToFile
+	 * @return
 	 */
-	MediaPlayer(String pathToFile) {
+	private static SoundFile loadSoundFile(String pathToFile) {
 
-		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.'))
+		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.') + 1)
 		def soundFileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
@@ -72,11 +83,26 @@ class MediaPlayer {
 			}
 
 		if (soundFileClass) {
-			file = soundFileClass.newInstance(pathToFile, FileChannel.open(Paths.get(pathToFile)))
+			return soundFileClass.newInstance(pathToFile, FileChannel.open(Paths.get(pathToFile)))
 		}
-		else {
-			throw new IllegalArgumentException("No implementation for ${suffix} filetype")
-		}
+
+		throw new IllegalArgumentException("No implementation for ${suffix} filetype")
+	}
+
+
+	private final SoundFile file
+	private final Scene scene = new Scene()
+	private final AudioEngine audioEngine = new AudioEngine(scene)
+
+	/**
+	 * Constructor, sets up the engine subsystems needed for playback.  Right now
+	 * just creates an OpenAL context to play a sound file through.
+	 * 
+	 * @param file
+	 */
+	MediaPlayer(SoundFile file) {
+
+		this.file = file
 	}
 
 	/**
@@ -84,10 +110,23 @@ class MediaPlayer {
 	 */
 	void play() {
 
-		def scene = new Scene()
-		def audioEngine = new AudioEngine(scene)
+		logger.debug('MediaPlayer.play()')
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
+		Throwable exception
+		def defaultThreadFactory = Executors.defaultThreadFactory()
+		def threadFactory = new ThreadFactory() {
+			@Override
+			Thread newThread(Runnable r) {
+				def thread = defaultThreadFactory.newThread(r)
+				thread.setUncaughtExceptionHandler({ t, e ->
+					logger.error("Error on thread ${t.name}", e)
+					exception = e
+				})
+				return thread
+			}
+		}
+
+		Executors.newCachedThreadPool(threadFactory).executeAndShutdown { executorService ->
 			executorService.execute(audioEngine)
 
 			def soundEffect = new SoundEffect(file, executorService)
@@ -97,14 +136,19 @@ class MediaPlayer {
 
 			// TODO: This is dumb waiting.  Emit some sort of event or some way we can
 			//       wait on the sound to stop playing.
-			while (true) {
+			while (exception == null) {
+				logger.debug('Loop')
 				Thread.sleep(500)
 				if (!soundEffect.playing) {
 					break
 				}
 			}
 
+			logger.debug('Quitting play loop')
 			audioEngine.stop()
+			if (exception != null) {
+				throw exception
+			}
 		}
 	}
 }

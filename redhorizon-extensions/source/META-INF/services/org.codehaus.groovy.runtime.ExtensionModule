@@ -14,8 +14,8 @@
 # limitations under the License.
 # 
 
-moduleName             = ${moduleName}
-moduleVersion          = ${moduleVersion}
-staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions,\
-                         nz.net.ultraq.redhorizon.extensions.ExecutorServiceExtensions,\
-                         nz.net.ultraq.redhorizon.extensions.ReadableByteChannelExtensions
+moduleName = redhorizon-extensions
+moduleVersion = ${moduleVersion}
+extensionClasses = nz.net.ultraq.redhorizon.extensions.ExecutorServiceExtensions,\
+                   nz.net.ultraq.redhorizon.extensions.ReadableByteChannelExtensions
+staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions

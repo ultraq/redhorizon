@@ -28,14 +28,18 @@ import java.util.concurrent.ConcurrentSkipListSet
  * 
  * @author Emanuel Rabina
  */
-class Node implements SceneElement, Comparable<Node>, Movable, Positionable {
+class Node implements Comparable<Node>, Movable, SceneElement {
 
 	// Node parts
 	private Node parent
-	private final SortedSet<SceneElement> children = new ConcurrentSkipListSet<>()
+	private final SortedSet<SceneElement> children = new ConcurrentSkipListSet<>({ s1, s2 ->
+		return s1.position.x <=> s2.position.x ?:
+		       s2.position.y <=> s2.position.y ?:
+		       s1.position.z <=> s2.position.z
+	})
 
 	// Calculated parts
-	private BoundingVolume boundingVolume = BoundingBox.ZERO
+	private BoundingVolume boundingVolume = new BoundingVolume(new Vector3f(0, 0, 0), 0, 0, 0)
 	private boolean volumeNeedsUpdate = true
 
 	/**
@@ -66,6 +70,23 @@ class Node implements SceneElement, Comparable<Node>, Movable, Positionable {
 	}
 
 	/**
+	 * Does a comparison of this node to the other.  Node ordering is based on
+	 * video rendering order for a 2D game, where the furthest object is first
+	 * and the closest object is last.
+	 * 
+	 * @param other The other node to compare against.
+	 * @return &lt; 0, 0, or &gt; 0 if this node is less-than, equal-to, or
+	 * 		   greater-than the other node.
+	 */
+	@Override
+	int compareTo(Node other) {
+
+		return position.z <=> other.position.z ?:
+		       position.y <=> other.position.y ?:
+		       position.x <=> other.position.x
+	}
+
+	/**
 	 * Calculates the bounding volume occupied by this node and its children.
 	 * 
 	 * @return Node's bounding volume.
@@ -80,23 +101,6 @@ class Node implements SceneElement, Comparable<Node>, Movable, Positionable {
 			volumeNeedsUpdate = false
 		}
 		return boundingVolume
-	}
-
-	/**
-	 * Does a comparison of this node to the other.  Node ordering is based on
-	 * video rendering order for a 2D game, where the furthest object is first
-	 * and the closest object is last.
-	 * 
-	 * @param other The other node to compare against.
-	 * @return &lt; 0, 0, or &gt; 0 if this node is less-than, equal-to, or
-	 * 		   greater-than the other node.
-	 */
-	@Override
-	int compareTo(Node other) {
-
-		return position.z != other.position.z ? position.z - other.position.z :
-		       position.y != other.position.y ? other.position.y - position.y :
-		       position.x - other.position.x
 	}
 
 	/**

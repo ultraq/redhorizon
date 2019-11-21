@@ -31,12 +31,46 @@ import java.nio.ByteBuffer
 class OpenALRenderer implements AudioRenderer {
 
 	/**
+	 * Wrapper function to check for any OpenAL errors, throwing them if they
+	 * occure.
+	 * 
+	 * @param methodName
+	 * @param closure
+	 */
+	private static <T> T checkForError(String methodName, Closure closure) {
+
+		def result = closure()
+		def error = alGetError()
+		if (error != AL_NO_ERROR) {
+			def errorCode =
+				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
+				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
+				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
+				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
+				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
+				error
+			throw new Exception("OpenAL error in ${methodName}: ${errorCode}")
+		}
+		return result
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency) {
 
-		return alGenBuffers()
+		return checkForError('createBuffer') { ->
+			def bufferId = alGenBuffers()
+			def format =
+				bitrate == 8 && channels == 1 ? AL_FORMAT_MONO8 :
+				bitrate == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
+				bitrate == 16 && channels == 1 ? AL_FORMAT_MONO16 :
+				bitrate == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
+				0
+			alBufferData(bufferId, format, data, frequency)
+			return bufferId
+		}
 	}
 
 	/**
@@ -45,7 +79,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	int createSource() {
 
-		return alGenSources()
+		return checkForError('createSource') { ->
+			return alGenSources()
+		}
 	}
 
 	/**
@@ -54,7 +90,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void deleteBuffers(int[] bufferIds) {
 
-		alDeleteBuffers(bufferIds)
+		checkForError('deleteBuffers') { ->
+			alDeleteBuffers(bufferIds)
+		}
 	}
 
 	/**
@@ -63,7 +101,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void deleteSource(int sourceId) {
 
-		alDeleteSources(sourceId)
+		checkForError('deleteSource') { ->
+			alDeleteSources(sourceId)
+		}
 	}
 
 	/**
@@ -72,7 +112,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void playSource(int sourceId) {
 
-		alSourcePlay(sourceId)
+		checkForError('playSource') { ->
+			alSourcePlay(sourceId)
+		}
 	}
 
 	/**
@@ -81,7 +123,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void queueBuffer(int sourceId, int bufferId) {
 
-		alSourceQueueBuffers(sourceId, bufferId)
+		checkForError('queueBuffer') { ->
+			alSourceQueueBuffers(sourceId, bufferId)
+		}
 	}
 
 	/**
@@ -90,7 +134,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	boolean sourceExists(int sourceId) {
 
-		return alIsSource(sourceId)
+		return checkForError('sourceExists') { ->
+			return alIsSource(sourceId)
+		}
 	}
 
 	/**
@@ -99,7 +145,10 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	boolean sourcePlaying(int sourceId) {
 
-		return alGetSourcei(sourceId, AL_PLAYING)
+		return checkForError('sourcePlaying') { ->
+			def state = alGetSourcei(sourceId, AL_SOURCE_STATE)
+			return state == AL_PLAYING
+		}
 	}
 
 	/**
@@ -108,9 +157,11 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation) {
 
-		alListenerfv(AL_POSITION, position as float[])
-		alListenerfv(AL_VELOCITY, velocity as float[])
-		alListenerfv(AL_ORIENTATION, orientation as float[])
+		checkForError('updateListener') { ->
+			alListenerfv(AL_POSITION, position as float[])
+			alListenerfv(AL_VELOCITY, velocity as float[])
+			alListenerfv(AL_ORIENTATION, orientation as float[])
+		}
 	}
 
 	/**
@@ -119,8 +170,21 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
 
-		alSourcefv(sourceId, AL_POSITION, position as float[])
-		alSourcefv(sourceId, AL_DIRECTION, direction as float[])
-		alSourcefv(sourceId, AL_VELOCITY, velocity as float[])
+		checkForError('updateSource') { ->
+			alSourcefv(sourceId, AL_POSITION, position as float[])
+			alSourcefv(sourceId, AL_DIRECTION, direction as float[])
+			alSourcefv(sourceId, AL_VELOCITY, velocity as float[])
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void updateVolume(float volume) {
+
+		checkForError('updateVolume') { ->
+			alListenerf(AL_GAIN, volume)
+		}
 	}
 }

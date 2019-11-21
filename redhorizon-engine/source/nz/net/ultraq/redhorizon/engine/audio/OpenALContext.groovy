@@ -21,6 +21,7 @@ import org.lwjgl.openal.ALC
 import org.lwjgl.openal.ALCCapabilities
 import org.lwjgl.openal.ALCapabilities
 import static org.lwjgl.openal.ALC10.*
+import static org.lwjgl.system.MemoryUtil.NULL
 
 /**
  * The OpenAL context, a concept used by OpenAL to control audio output.
@@ -40,6 +41,8 @@ class OpenALContext implements Closeable {
 		def defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER)
 		alDevice = alcOpenDevice(defaultDeviceName)
 		alContext = alcCreateContext(alDevice, [0] as int[])
+
+		makeCurrent()
 
 		ALCCapabilities alcCapabilities = ALC.createCapabilities(alDevice)
 		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
@@ -74,6 +77,6 @@ class OpenALContext implements Closeable {
 	 */
 	void releaseCurrentContext() {
 
-		alcMakeContextCurrent(null)
+		alcMakeContextCurrent(NULL)
 	}
 }

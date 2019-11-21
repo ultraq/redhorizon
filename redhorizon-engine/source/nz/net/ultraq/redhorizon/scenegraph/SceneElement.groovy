@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.scenegraph
  * 
  * @author Emanuel Rabina
  */
-interface SceneElement {
+interface SceneElement extends Positionable {
 
 	/**
 	 * Accept any scene element visitor.

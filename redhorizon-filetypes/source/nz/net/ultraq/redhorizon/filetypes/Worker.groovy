@@ -27,6 +27,13 @@ package nz.net.ultraq.redhorizon.filetypes
 interface Worker {
 
 	/**
+	 * Return whether the work is all done.
+	 * 
+	 * @return
+	 */
+	boolean isComplete()
+
+	/**
 	 * Start the worker, passing resulting chunks to the given closure.
 	 * 
 	 * @param handler

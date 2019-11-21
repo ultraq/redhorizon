@@ -24,7 +24,7 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
+@TupleConstructor
 class Ray {
 
 	Vector3f origin

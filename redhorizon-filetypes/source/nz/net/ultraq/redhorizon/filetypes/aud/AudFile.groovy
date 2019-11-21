@@ -22,6 +22,11 @@ import nz.net.ultraq.redhorizon.filetypes.AbstractFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
+import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
+import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
@@ -39,6 +44,8 @@ import java.util.concurrent.ExecutorService
  */
 @FileExtensions('aud')
 class AudFile extends AbstractFile implements SoundFile {
+
+	private static final Logger logger = LoggerFactory.getLogger(AudFile)
 
 	private static final byte TYPE_IMA_ADPCM = 99
 	private static final byte TYPE_WS_ADPCM  = 1
@@ -67,9 +74,9 @@ class AudFile extends AbstractFile implements SoundFile {
 		input.readAndRewind(headerBytes)
 		header = new AudFileHeader(headerBytes)
 
-		bitrate = (header.flags & FLAG_16BIT) != 0 ? BITRATE_16 : BITRATE_8
-		channels = (header.flags & FLAG_STEREO) != 0 ? CHANNELS_STEREO : CHANNELS_MONO
-		frequency = header.frequency & 0xffff
+		bitrate = (header.flags & FLAG_16BIT) ? BITRATE_16 : BITRATE_8
+		channels = (header.flags & FLAG_STEREO) ? CHANNELS_STEREO : CHANNELS_MONO
+		frequency = header.frequency
 
 		this.input = input
 	}
@@ -89,31 +96,37 @@ class AudFile extends AbstractFile implements SoundFile {
 	@Override
 	Worker getSoundDataWorker(ExecutorService executorService) {
 
-		return { handler ->
-			executorService.execute({ ->
-				Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
+		return new Worker() {
+			boolean complete
 
-				def decoder8Bit = new WSADPCM8bit()
-				def decoder16Bit = new IMAADPCM16bit()
+			@Override
+			void work(Closure handler) {
 
-				def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
-				int[] update = [0, 0]
+				executorService.execute({ ->
+					Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
 
-				// Decompress the aud file data by chunks
-				while (true) {
-					chunkHeaderBuffer.clear()
-					if (input.readAndRewind(chunkHeaderBuffer) == -1) {
-						break
-					}
-					def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
+					def decoder8Bit = new WSADPCM8bit()
+					def decoder16Bit = new IMAADPCM16bit()
 
-					// Build buffers from chunk header
-					def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize & 0xffff)
-					input.readAndRewind(chunkSourceBuffer)
-					def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.uncompressedSize & 0xffff)
+					def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
+					int[] update = [0, 0]
+					def chunkCount = 0
 
-					// Decode
-					switch (header.type) {
+					// Decompress the aud file data by chunks
+					while (true) {
+						chunkHeaderBuffer.clear()
+						if (input.readAndRewind(chunkHeaderBuffer) == -1) {
+							break
+						}
+						def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
+
+						// Build buffers from chunk header
+						def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize & 0xffff)
+						input.readAndRewind(chunkSourceBuffer)
+						def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.uncompressedSize & 0xffff)
+
+						// Decode
+						switch (header.type) {
 						case TYPE_WS_ADPCM:
 							decoder8Bit.decode(chunkSourceBuffer, chunkDataBuffer)
 							break
@@ -124,11 +137,16 @@ class AudFile extends AbstractFile implements SoundFile {
 							update[0] = index.getInt(0)
 							update[1] = sample.getInt(0)
 							break
+						}
+
+						logger.debug("Decoded chunk ${chunkCount++}")
+						handler(chunkDataBuffer)
 					}
 
-					handler(chunkDataBuffer)
-				}
-			})
+					logger.debug('Decoding complete')
+					complete = true
+				})
+			}
 		}
 	}
 }

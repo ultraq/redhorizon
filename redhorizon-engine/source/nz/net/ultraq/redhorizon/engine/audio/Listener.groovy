@@ -17,25 +17,21 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.geometry.Orientation
-import nz.net.ultraq.redhorizon.geometry.Ray
 import nz.net.ultraq.redhorizon.geometry.Vector3f
 import nz.net.ultraq.redhorizon.engine.AudioElement
-import nz.net.ultraq.redhorizon.scenegraph.BoundingBox
-import nz.net.ultraq.redhorizon.scenegraph.BoundingVolume
+import nz.net.ultraq.redhorizon.scenegraph.Positionable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
-import nz.net.ultraq.redhorizon.scenegraph.Spatial
 
 /**
  * The player's ears into the world.
  * 
  * @author Emanuel Rabina
  */
-class Listener extends Spatial implements AudioElement {
+class Listener implements AudioElement, Positionable, SceneElement {
 
-	Vector3f velocity = new Vector3f()
+	Vector3f velocity = new Vector3f(0, 0, 0)
 	Orientation orientation = new Orientation()
-
-	final BoundingVolume boundingVolume = BoundingBox.ZERO
 
 	/**
 	 * {@inheritDoc}
@@ -54,22 +50,12 @@ class Listener extends Spatial implements AudioElement {
 	}
 
 	/**
-	 * Does nothing.
+	 * Sets up initial listener properties, like volume.
 	 */
 	@Override
 	void init(AudioRenderer renderer) {
-	}
 
-	/**
-	 * Listeners never intersect anything.
-	 * 
-	 * @param ray
-	 * @return {@code false}
-	 */
-	@Override
-	boolean intersects(Ray ray) {
-
-		return false
+		renderer.updateVolume(1.0)
 	}
 
 	/**

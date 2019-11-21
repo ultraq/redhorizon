@@ -16,7 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Interface for engine subsystems.
@@ -24,6 +28,8 @@ import java.util.concurrent.CountDownLatch
  * @author Emanuel Rabina
  */
 abstract class EngineSubsystem implements Runnable {
+
+	private static final Logger logger = LoggerFactory.getLogger(EngineSubsystem)
 
 	protected final int targetRenderTimeMs
 	protected final CountDownLatch stopLatch = new CountDownLatch(1)
@@ -48,15 +54,27 @@ abstract class EngineSubsystem implements Runnable {
 	 */
 	protected void renderLoop(Closure renderLoop) {
 
-		while (running) {
-			def loopStart = System.currentTimeMillis()
-			renderLoop()
-			def loopEnd = System.currentTimeMillis()
+		try {
+			running = true
+			while (running) {
+				def loopStart = System.currentTimeMillis()
+				logger.debug('Render loop')
+				renderLoop()
+				def loopEnd = System.currentTimeMillis()
 
-			def renderExecutionTime = loopEnd - loopStart
-			if (renderExecutionTime < targetRenderTimeMs) {
-				Thread.sleep(targetRenderTimeMs - renderExecutionTime)
+				def renderExecutionTime = loopEnd - loopStart
+				if (renderExecutionTime < targetRenderTimeMs) {
+					def waitTime = targetRenderTimeMs - renderExecutionTime
+					logger.debug("Sleeping for ${waitTime}ms")
+					Thread.sleep(waitTime)
+				}
+				else {
+					logger.debug('Not sleeping')
+				}
 			}
+		}
+		finally {
+			stopLatch.countDown()
 		}
 	}
 
@@ -65,7 +83,8 @@ abstract class EngineSubsystem implements Runnable {
 	 */
 	void stop() {
 
+		logger.debug('Stop called')
 		running = false
-		stopLatch.await()
+		stopLatch.await(5, TimeUnit.SECONDS)
 	}
 }
