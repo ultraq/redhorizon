@@ -24,9 +24,9 @@ package nz.net.ultraq.redhorizon.scenegraph
 interface SceneElement extends Positionable {
 
 	/**
-	 * Accept any scene element visitor.
+	 * Accept any scene visitor.
 	 * 
 	 * @param visitor
 	 */
-	void accept(SceneElementVisitor visitor)
+	void accept(SceneVisitor visitor)
 }

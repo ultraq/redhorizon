@@ -16,15 +16,13 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.engine.audio.Listener
-
 /**
  * Entry point for the Red Horizon scene graph, holds the root node and any
  * other objects that make up the 'world'.
  * 
  * @author Emanuel Rabina
  */
-class Scene {
+class Scene implements SceneElement {
 
 	final Node root = new Node()
 //	final Listener listener = new Listener()
@@ -35,7 +33,7 @@ class Scene {
 	 * 
 	 * @param visitor
 	 */
-	void accept(SceneElementVisitor visitor) {
+	void accept(SceneVisitor visitor) {
 
 //		listener.accept(visitor)
 		root.accept(visitor)

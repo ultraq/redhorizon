@@ -20,13 +20,12 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.nio.channels.FileChannel
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
@@ -53,8 +52,7 @@ class MediaPlayer {
 				throw new IllegalArgumentException('A path to a file must be supplied')
 			}
 
-			def (pathToFile) = args
-			def soundFile = loadSoundFile(pathToFile)
+			def soundFile = loadSoundFile(args[0])
 			soundFile.withCloseable { file ->
 				def mediaPlayer = new MediaPlayer(file)
 				mediaPlayer.play()
@@ -83,7 +81,7 @@ class MediaPlayer {
 			}
 
 		if (soundFileClass) {
-			return soundFileClass.newInstance(pathToFile, FileChannel.open(Paths.get(pathToFile)))
+			return soundFileClass.newInstance(pathToFile, Files.newByteChannel(Paths.get(pathToFile)))
 		}
 
 		throw new IllegalArgumentException("No implementation for ${suffix} filetype")
@@ -91,8 +89,6 @@ class MediaPlayer {
 
 
 	private final SoundFile file
-	private final Scene scene = new Scene()
-	private final AudioEngine audioEngine = new AudioEngine(scene)
 
 	/**
 	 * Constructor, sets up the engine subsystems needed for playback.  Right now
@@ -110,8 +106,6 @@ class MediaPlayer {
 	 */
 	void play() {
 
-		logger.debug('MediaPlayer.play()')
-
 		Throwable exception
 		def defaultThreadFactory = Executors.defaultThreadFactory()
 		def threadFactory = new ThreadFactory() {
@@ -127,24 +121,23 @@ class MediaPlayer {
 		}
 
 		Executors.newCachedThreadPool(threadFactory).executeAndShutdown { executorService ->
-			executorService.execute(audioEngine)
-
 			def soundEffect = new SoundEffect(file, executorService)
-			scene.root.addChild(soundEffect)
+			def audioEngine = new AudioEngine(soundEffect)
+
+			executorService.execute(audioEngine)
 
 			soundEffect.play()
 
 			// TODO: This is dumb waiting.  Emit some sort of event or some way we can
 			//       wait on the sound to stop playing.
+			logger.debug('Waiting for sound to stop playing')
 			while (exception == null) {
-				logger.debug('Waiting for sound to stop playing')
 				Thread.sleep(500)
 				if (!soundEffect.playing) {
 					break
 				}
 			}
 
-			logger.debug('Quitting play loop')
 			audioEngine.stop()
 			if (exception != null) {
 				throw exception

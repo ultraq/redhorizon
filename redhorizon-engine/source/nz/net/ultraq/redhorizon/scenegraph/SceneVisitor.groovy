@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.scenegraph
  * 
  * @author Emanuel Rabina
  */
-interface SceneElementVisitor {
+interface SceneVisitor {
 
 	/**
 	 * Allow visiting any scene element.

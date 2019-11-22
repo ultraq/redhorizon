@@ -118,7 +118,7 @@ class AudFile extends AbstractFile implements SoundFile {
 						// Build buffers from chunk header
 						def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize & 0xffff)
 						input.readAndRewind(chunkSourceBuffer)
-						def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.uncompressedSize & 0xffff)
+						def chunkDataBuffer = ByteBuffer.allocateDirectNative(chunkHeader.uncompressedSize & 0xffff)
 
 						// Decode
 						switch (header.type) {

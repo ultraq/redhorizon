@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
+import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -72,7 +72,7 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 	 * @inheritDoc
 	 */
 	@Override
-	void accept(SceneElementVisitor visitor) {
+	void accept(SceneVisitor visitor) {
 
 		visitor.visit(this)
 	}

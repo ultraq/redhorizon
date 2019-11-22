@@ -46,7 +46,7 @@ class Node implements Comparable<Node>, Movable, SceneElement {
 	 * @inheritDoc
 	 */
 	@Override
-	void accept(SceneElementVisitor visitor) {
+	void accept(SceneVisitor visitor) {
 
 		visitor.visit(this)
 		children.each { child ->

@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.AudioElement
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
 
 /**
@@ -31,17 +31,17 @@ class AudioEngine extends EngineSubsystem {
 
 	private static final int TARGET_RENDER_TIME_MS = 20
 
-	private final Scene scene
+	private final SceneElement sceneElement
 
 	/**
-	 * Constructor, build a new audio engine around the given scene.
+	 * Constructor, build a new audio engine for rendering the given element.
 	 * 
-	 * @param scene
+	 * @param sceneElement
 	 */
-	AudioEngine(Scene scene) {
+	AudioEngine(SceneElement sceneElement) {
 
 		super(TARGET_RENDER_TIME_MS)
-		this.scene = scene
+		this.sceneElement = sceneElement
 	}
 
 	/**
@@ -63,7 +63,7 @@ class AudioEngine extends EngineSubsystem {
 
 			// Rendering loop
 			renderLoop { ->
-				scene.accept { element ->
+				sceneElement.accept { element ->
 					if (element instanceof AudioElement) {
 
 						// Register the audio element
