@@ -25,9 +25,6 @@ import nz.net.ultraq.redhorizon.filetypes.Worker
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutorService
@@ -44,8 +41,6 @@ import java.util.concurrent.ExecutorService
  */
 @FileExtensions('aud')
 class AudFile extends AbstractFile implements SoundFile {
-
-	private static final Logger logger = LoggerFactory.getLogger(AudFile)
 
 	private static final byte TYPE_IMA_ADPCM = 99
 	private static final byte TYPE_WS_ADPCM  = 1
@@ -139,11 +134,9 @@ class AudFile extends AbstractFile implements SoundFile {
 							break
 						}
 
-						logger.debug("Decoded chunk ${chunkCount++}")
 						handler(chunkDataBuffer)
 					}
 
-					logger.debug('Decoding complete')
 					complete = true
 				})
 			}

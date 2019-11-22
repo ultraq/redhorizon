@@ -31,25 +31,24 @@ import java.nio.ByteBuffer
 class OpenALRenderer implements AudioRenderer {
 
 	/**
-	 * Wrapper function to check for any OpenAL errors, throwing them if they
-	 * occure.
+	 * Check for any OpenAL errors created by the OpenAL call in the given
+	 * closure, throwing them if they occur.
 	 * 
-	 * @param methodName
 	 * @param closure
 	 */
-	private static <T> T checkForError(String methodName, Closure closure) {
+	private static <T> T checkForError(Closure closure) {
 
-		def result = closure()
+		T result = (T)closure()
 		def error = alGetError()
 		if (error != AL_NO_ERROR) {
-			def errorCode =
-				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
-				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
-				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
-				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
-				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
-				error
-			throw new Exception("OpenAL error in ${methodName}: ${errorCode}")
+//			def errorCode =
+//				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
+//				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
+//				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
+//				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
+//				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
+//				error
+			throw new Exception("OpenAL error: ${alGetString(error)}")
 		}
 		return result
 	}
@@ -60,17 +59,19 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency) {
 
-		return checkForError('createBuffer') { ->
-			def bufferId = alGenBuffers()
-			def format =
-				bitrate == 8 && channels == 1 ? AL_FORMAT_MONO8 :
-				bitrate == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
-				bitrate == 16 && channels == 1 ? AL_FORMAT_MONO16 :
-				bitrate == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
-				0
-			alBufferData(bufferId, format, data, frequency)
-			return bufferId
+		int bufferId = checkForError { ->
+			return alGenBuffers()
 		}
+		def format =
+			bitrate == 8 && channels == 1 ? AL_FORMAT_MONO8 :
+			bitrate == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
+			bitrate == 16 && channels == 1 ? AL_FORMAT_MONO16 :
+			bitrate == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
+			0
+		checkForError { ->
+			alBufferData(bufferId, format, data, frequency)
+		}
+		return bufferId
 	}
 
 	/**
@@ -79,7 +80,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	int createSource() {
 
-		return checkForError('createSource') { ->
+		return checkForError { ->
 			return alGenSources()
 		}
 	}
@@ -90,7 +91,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void deleteBuffers(int[] bufferIds) {
 
-		checkForError('deleteBuffers') { ->
+		checkForError { ->
 			alDeleteBuffers(bufferIds)
 		}
 	}
@@ -101,7 +102,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void deleteSource(int sourceId) {
 
-		checkForError('deleteSource') { ->
+		checkForError { ->
 			alDeleteSources(sourceId)
 		}
 	}
@@ -112,7 +113,10 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void playSource(int sourceId) {
 
-		checkForError('playSource') { ->
+		checkForError { ->
+			alSourcef(sourceId, AL_GAIN, 1f)
+		}
+		checkForError { ->
 			alSourcePlay(sourceId)
 		}
 	}
@@ -123,7 +127,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void queueBuffer(int sourceId, int bufferId) {
 
-		checkForError('queueBuffer') { ->
+		checkForError { ->
 			alSourceQueueBuffers(sourceId, bufferId)
 		}
 	}
@@ -134,7 +138,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	boolean sourceExists(int sourceId) {
 
-		return checkForError('sourceExists') { ->
+		return checkForError { ->
 			return alIsSource(sourceId)
 		}
 	}
@@ -145,7 +149,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	boolean sourcePlaying(int sourceId) {
 
-		return checkForError('sourcePlaying') { ->
+		return checkForError { ->
 			def state = alGetSourcei(sourceId, AL_SOURCE_STATE)
 			return state == AL_PLAYING
 		}
@@ -157,11 +161,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation) {
 
-		checkForError('updateListener') { ->
-			alListenerfv(AL_POSITION, position as float[])
-			alListenerfv(AL_VELOCITY, velocity as float[])
-			alListenerfv(AL_ORIENTATION, orientation as float[])
-		}
+		checkForError { -> alListenerfv(AL_POSITION, position as float[]) }
+//		checkForError { -> alListenerfv(AL_VELOCITY, velocity as float[]) }
+//		checkForError { -> alListenerfv(AL_ORIENTATION, orientation as float[]) }
 	}
 
 	/**
@@ -170,11 +172,9 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
 
-		checkForError('updateSource') { ->
-			alSourcefv(sourceId, AL_POSITION, position as float[])
-			alSourcefv(sourceId, AL_DIRECTION, direction as float[])
-			alSourcefv(sourceId, AL_VELOCITY, velocity as float[])
-		}
+		checkForError { -> alSourcefv(sourceId, AL_POSITION, position as float[]) }
+//		checkForError { -> alSourcefv(sourceId, AL_DIRECTION, direction as float[]) }
+//		checkForError { -> alSourcefv(sourceId, AL_VELOCITY, velocity as float[]) }
 	}
 
 	/**
@@ -183,7 +183,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateVolume(float volume) {
 
-		checkForError('updateVolume') { ->
+		checkForError { ->
 			alListenerf(AL_GAIN, volume)
 		}
 	}

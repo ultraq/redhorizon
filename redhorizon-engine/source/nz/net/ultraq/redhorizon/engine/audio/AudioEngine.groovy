@@ -21,9 +21,6 @@ import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 /**
  * Audio subsystem, manages the connection to the audio hardware and rendering
  * of audio objects.
@@ -32,7 +29,6 @@ import org.slf4j.LoggerFactory
  */
 class AudioEngine extends EngineSubsystem {
 
-	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 20
 
 	private final Scene scene
@@ -89,7 +85,6 @@ class AudioEngine extends EngineSubsystem {
 					}
 				}
 			}
-			logger.debug('Exiting render loop')
 
 			// Shutdown
 			audioElementStates.keySet().each { audioElement ->

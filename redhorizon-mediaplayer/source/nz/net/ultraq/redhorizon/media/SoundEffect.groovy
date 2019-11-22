@@ -24,9 +24,6 @@ import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneElementVisitor
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -40,8 +37,6 @@ import java.util.concurrent.ExecutorService
  */
 class SoundEffect extends Media implements AudioElement, Movable, Playable, SceneElement {
 
-	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
-
 	// Sound information
 	final int bitrate
 	final int channels
@@ -52,7 +47,6 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 	// Renderer information
 	private int sourceId
 	private List<Integer> bufferIds
-	private int bufferCount
 
 	/**
 	 * Constructor, loads the sound from the given <code>SoundFile</code>.
@@ -112,12 +106,10 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 	void render(AudioRenderer renderer) {
 
 		if (playing) {
-			logger.debug('Playing')
 
 			// Buffers to read and queue
 			if (!soundDataBuffer.empty) {
 				def nextBuffer = soundDataBuffer.take()
-				logger.debug("Retrieved buffer ${bufferCount++}")
 				def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
 				bufferIds << bufferId
 				renderer.queueBuffer(sourceId, bufferId)
@@ -125,16 +117,13 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 
 				// Start playing the source
 				if (!renderer.sourcePlaying(sourceId)) {
-					logger.debug('Playing source')
 					renderer.playSource(sourceId)
 				}
 			}
 
 			// No more buffers to read
 			else if (soundDataWorker.complete) {
-				logger.debug('Buffer empty and worker complete')
 				if (!renderer.sourcePlaying(sourceId)) {
-					logger.debug('Source stopped')
 					playing = false
 				}
 			}

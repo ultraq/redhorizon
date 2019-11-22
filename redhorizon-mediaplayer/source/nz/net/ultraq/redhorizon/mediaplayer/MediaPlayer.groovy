@@ -137,7 +137,7 @@ class MediaPlayer {
 			// TODO: This is dumb waiting.  Emit some sort of event or some way we can
 			//       wait on the sound to stop playing.
 			while (exception == null) {
-				logger.debug('Loop')
+				logger.debug('Waiting for sound to stop playing')
 				Thread.sleep(500)
 				if (!soundEffect.playing) {
 					break

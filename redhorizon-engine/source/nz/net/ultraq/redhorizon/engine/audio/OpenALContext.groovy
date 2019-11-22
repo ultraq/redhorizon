@@ -23,6 +23,9 @@ import org.lwjgl.openal.ALCapabilities
 import static org.lwjgl.openal.ALC10.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
+import java.nio.ByteBuffer
+import java.nio.IntBuffer
+
 /**
  * The OpenAL context, a concept used by OpenAL to control audio output.
  * 
@@ -38,17 +41,17 @@ class OpenALContext implements Closeable {
 	 */
 	OpenALContext() {
 
-		def defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER)
-		alDevice = alcOpenDevice(defaultDeviceName)
-		alContext = alcCreateContext(alDevice, [0] as int[])
-
-		makeCurrent()
-
+		alDevice = alcOpenDevice((ByteBuffer)null)
 		ALCCapabilities alcCapabilities = ALC.createCapabilities(alDevice)
-		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
+		if (!alcCapabilities.OpenALC10) {
+			throw new IllegalStateException()
+		}
 
+		alContext = alcCreateContext(alDevice, (IntBuffer)null)
+		makeCurrent()
+		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
 		if (!alCapabilities.OpenAL10) {
-			throw new UnsupportedOperationException('OpenAL 1.0 not supported')
+			throw new IllegalStateException()
 		}
 	}
 
