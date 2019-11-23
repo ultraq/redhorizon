@@ -20,7 +20,9 @@ dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
 		project(':redhorizon-extensions'),
-		':blowfishj:2.41'
+		':blowfishj:2.41',
+		'org.codehaus.groovy:groovy:2.5.8',
+		'org.slf4j:slf4j-api:1.7.29'
 	)
 	testImplementation(
 		'org.spockframework:spock-core:1.3-groovy-2.5'

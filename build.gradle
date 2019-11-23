@@ -39,11 +39,4 @@ subprojects {
 			dirs "${rootDir}/libraries"
 		}
 	}
-
-	dependencies {
-		implementation(
-			'org.codehaus.groovy:groovy:2.5.8',
-			'org.slf4j:slf4j-api:1.7.29'
-		)
-	}
 }
