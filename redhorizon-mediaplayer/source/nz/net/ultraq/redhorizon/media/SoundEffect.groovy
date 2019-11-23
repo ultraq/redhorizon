@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect extends Media implements AudioElement, Movable, Playable, SceneElement {
+class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
 
@@ -61,14 +61,13 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 	 */
 	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
 
-		super(soundFile.filename)
 		bitrate   = soundFile.bitrate.value
 		channels  = soundFile.channels.value
 		frequency = soundFile.frequency
 
-		soundDataWorker = soundFile.getSoundDataWorker(executorService)
+		soundDataWorker = soundFile.getSoundDataWorker()
 		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-		soundDataWorker.work { chunkBuffer ->
+		soundDataWorker.work(executorService) { chunkBuffer ->
 			soundDataBuffer << chunkBuffer
 		}
 	}

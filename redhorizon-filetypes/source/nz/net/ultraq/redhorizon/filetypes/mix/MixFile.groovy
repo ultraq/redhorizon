@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.filetypes.mix
 import blowfishj.BlowfishECB
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.AbstractFile
 import nz.net.ultraq.redhorizon.nio.channels.SeekableByteChannelView
 
 import java.nio.ByteBuffer
@@ -33,7 +32,7 @@ import java.nio.channels.ReadableByteChannel
  * @author Emanuel Rabina
  */
 @FileExtensions('mix')
-class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
+class MixFile implements ArchiveFile<MixRecord> {
 
 	private static final int FLAG_CHECKSUM  = 0x00010000
 	private static final int FLAG_ENCRYPTED = 0x00020000
@@ -79,12 +78,10 @@ class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 	/**
 	 * Constructor, creates a mix file from a proper file on the file system.
 	 * 
-	 * @param filename	  Name of the mix file.
 	 * @param fileChannel The mix file proper.
 	 */
-	MixFile(String filename, FileChannel fileChannel) {
+	MixFile(FileChannel fileChannel) {
 
-		super(filename)
 		this.fileChannel = fileChannel
 
 		// Find out if this file has a checksum/encryption
@@ -174,15 +171,6 @@ class MixFile extends AbstractFile implements ArchiveFile<MixRecord> {
 			id = (id << 1 | id >>> 31) + a
 		}
 		return id
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	void close() {
-
-		fileChannel.close()
 	}
 
 	/**

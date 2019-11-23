@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.filetypes
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.ExecutorService
 
 /**
  * Interface for filetypes for sound data (eg: AUD, WAV, etc...).
  * 
  * @author Emanuel Rabina
  */
-interface SoundFile extends File {
+interface SoundFile {
 
 	/**
 	 * Supported bitrates.
@@ -72,11 +71,10 @@ interface SoundFile extends File {
 	int getFrequency()
 
 	/**
-	 * Returns a worker that can be executed to start streaming sound data to the
-	 * returned byte channel.
+	 * Returns a worker that can be run to start streaming sound data to a handler
+	 * configured by the {@link Worker#work} method.
 	 * 
-	 * @param executorService
 	 * @return Closure for streaming sound data.
 	 */
-	Worker getSoundDataWorker(ExecutorService executorService)
+	Worker getSoundDataWorker()
 }

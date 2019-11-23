@@ -25,7 +25,7 @@ import java.nio.channels.ReadableByteChannel
  * @param <E> Archive file entry implementation.
  * @author Emanuel Rabina
  */
-interface ArchiveFile<E extends ArchiveFileEntry> extends File {
+interface ArchiveFile<E extends ArchiveFileEntry> {
 
 	/**
 	 * Get the descriptor for an entry in the archive file.

@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
+import java.util.concurrent.ExecutorService
+
 /**
  * An interface for a special type of class that returns streaming data.  The
  * single method, {@link #work} uses the given closure to determine what to do
@@ -36,7 +38,8 @@ interface Worker {
 	/**
 	 * Start the worker, passing resulting chunks to the given closure.
 	 * 
+	 * @param executorService
 	 * @param handler
 	 */
-	void work(Closure handler)
+	void work(ExecutorService executorService, Closure handler)
 }

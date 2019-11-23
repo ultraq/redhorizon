@@ -23,9 +23,6 @@ import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.nio.file.Files
-import java.nio.file.Paths
-
 /**
  * Basic media player, primarily used for testing the various file formats so
  * that I can check decoding has worked.
@@ -48,9 +45,11 @@ class MediaPlayer {
 				throw new IllegalArgumentException('A path to a file must be supplied')
 			}
 
-			def soundFile = loadSoundFile(args[0])
-			soundFile.withCloseable { file ->
-				def audioPlayer = new AudioPlayer(file)
+			def (pathToFile) = args
+			new FileInputStream(pathToFile).withCloseable { input ->
+				def soundFileClass = getSoundFileClass(pathToFile)
+				def soundFile = soundFileClass.newInstance(input)
+				def audioPlayer = new AudioPlayer(soundFile)
 				audioPlayer.play()
 			}
 		}
@@ -61,12 +60,13 @@ class MediaPlayer {
 	}
 
 	/**
-	 * Read a file path and return it as a sound file.
+	 * Find the {@link SoundFile} class that should be able to play the file at
+	 * the given path.
 	 * 
 	 * @param pathToFile
 	 * @return
 	 */
-	private static SoundFile loadSoundFile(String pathToFile) {
+	private static Class<SoundFile> getSoundFileClass(String pathToFile) {
 
 		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.') + 1)
 		def soundFileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
@@ -75,11 +75,9 @@ class MediaPlayer {
 				def annotation = type.getAnnotation(FileExtensions)
 				return annotation.value().contains(suffix)
 			}
-
-		if (soundFileClass) {
-			return soundFileClass.newInstance(pathToFile, Files.newByteChannel(Paths.get(pathToFile)))
+		if (!soundFileClass) {
+			throw new IllegalArgumentException("No implementation for ${suffix} filetype")
 		}
-
-		throw new IllegalArgumentException("No implementation for ${suffix} filetype")
+		return soundFileClass
 	}
 }
