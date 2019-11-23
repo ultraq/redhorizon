@@ -15,13 +15,27 @@
   -->
 
 <configuration>
+	<timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss"/>
+
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%msg%n</pattern>
 		</encoder>
 	</appender>
-	<logger name="org.reflections" level="INFO"/>
-	<root level="DEBUG">
+
+	<appender name="file" class="ch.qos.logback.core.FileAppender">
+		<file>.logs/mediaplayer-${timestamp}.log</file>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="org.reflections" level="WARN"/>
+	<logger name="nz.net.ultraq.redhorizon.filetypes.aud.AudFile" level="DEBUG"/>
+	<logger name="nz.net.ultraq.redhorizon.media.SoundEffect" level="DEBUG"/>
+
+	<root level="INFO">
 		<appender-ref ref="console"/>
+		<appender-ref ref="file"/>
 	</root>
 </configuration>
