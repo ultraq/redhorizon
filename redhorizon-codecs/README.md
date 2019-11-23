@@ -2,9 +2,9 @@
 Red Horizon - Codecs
 ====================
 
-A collection of encoders/decoders for old C&C file data.  The codecs here are
-used mostly by the `redhorizon-filetypes` packages and serve as working examples
-for JVM programmers.
+A collection of encoders/decoders for C&C file data.  The codecs here are used
+mostly by the `redhorizon-filetypes` packages and serve as working examples for
+JVM programmers.
 
 
 Installation
@@ -18,13 +18,9 @@ project using the following Maven coordinates:
  - Version: (see the [project releases](https://github.com/ultraq/redhorizon/releases)
    for a list of available versions)
 
+
 Codecs
 ------
-
-### CodecUtility
-
-Aggregates all of the codecs into this single class where static `encode`/`decode`
-methods delegate to their respective codecs.
 
 ### Base64
 
