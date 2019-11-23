@@ -29,7 +29,7 @@ import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
  */
 class AudioEngine extends EngineSubsystem {
 
-	private static final int TARGET_RENDER_TIME_MS = 20
+	private static final int TARGET_RENDER_TIME_MS = 50
 
 	private final SceneElement sceneElement
 

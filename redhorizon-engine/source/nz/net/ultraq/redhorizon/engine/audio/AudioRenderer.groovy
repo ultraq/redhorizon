@@ -30,6 +30,14 @@ import java.nio.ByteBuffer
 interface AudioRenderer {
 
 	/**
+	 * Attaches a single buffer to a source.
+	 * 
+	 * @param sourceId
+	 * @param bufferId
+	 */
+	void attachBufferToSource(int sourceId, int bufferId)
+
+	/**
 	 * Creates and fills a sound buffer with the given data.
 	 * 
 	 * @param data

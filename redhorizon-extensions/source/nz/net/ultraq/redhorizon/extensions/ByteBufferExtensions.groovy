@@ -55,6 +55,20 @@ class ByteBufferExtensions {
 	}
 
 	/**
+	 * Allocate a direct, native-ordered {@code ByteBuffer}, with data from
+	 * several other {@code ByteBuffer}s.
+	 * 
+	 * @param self
+	 * @param buffers
+	 * @return
+	 */
+	static ByteBuffer fromBuffersDirect(ByteBuffer self, Collection<ByteBuffer> buffers) {
+
+		def bufferCapacity = buffers.inject(0) { acc, b -> acc + b.limit() }
+		return (buffers.inject(ByteBuffer.allocateDirectNative(bufferCapacity)) { acc, b -> acc.put(b) }).rewind()
+	}
+
+	/**
 	 * Wraps a {@code byte[]} in a {@code ByteBuffer} with native byte ordering.
 	 * 
 	 * @param self

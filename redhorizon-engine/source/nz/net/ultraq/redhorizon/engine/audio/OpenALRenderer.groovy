@@ -57,6 +57,17 @@ class OpenALRenderer implements AudioRenderer {
 	 * {@inheritDoc}
 	 */
 	@Override
+	void attachBufferToSource(int sourceId, int bufferId) {
+
+		checkForError { ->
+			alSourcei(sourceId, AL_BUFFER, bufferId)
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency) {
 
 		int bufferId = checkForError { ->

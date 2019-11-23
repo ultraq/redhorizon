@@ -25,6 +25,9 @@ import nz.net.ultraq.redhorizon.filetypes.Worker
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
 import java.util.concurrent.ExecutorService
@@ -41,6 +44,8 @@ import java.util.concurrent.ExecutorService
  */
 @FileExtensions('aud')
 class AudFile extends AbstractFile implements SoundFile {
+
+	private static final Logger logger = LoggerFactory.getLogger(AudFile)
 
 	private static final byte TYPE_IMA_ADPCM = 99
 	private static final byte TYPE_WS_ADPCM  = 1
@@ -99,13 +104,13 @@ class AudFile extends AbstractFile implements SoundFile {
 
 				executorService.execute({ ->
 					Thread.currentThread().name = "AudFile :: ${filename} :: Decoding"
+					logger.debug('AudFile decoding started')
 
 					def decoder8Bit = new WSADPCM8bit()
 					def decoder16Bit = new IMAADPCM16bit()
 
 					def chunkHeaderBuffer = ByteBuffer.allocateNative(AudChunkHeader.CHUNK_HEADER_SIZE)
 					int[] update = [0, 0]
-					def chunkCount = 0
 
 					// Decompress the aud file data by chunks
 					while (true) {
@@ -116,9 +121,9 @@ class AudFile extends AbstractFile implements SoundFile {
 						def chunkHeader = new AudChunkHeader(chunkHeaderBuffer)
 
 						// Build buffers from chunk header
-						def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize & 0xffff)
+						def chunkSourceBuffer = ByteBuffer.allocateNative(chunkHeader.compressedSize)
 						input.readAndRewind(chunkSourceBuffer)
-						def chunkDataBuffer = ByteBuffer.allocateDirectNative(chunkHeader.uncompressedSize & 0xffff)
+						def chunkDataBuffer = ByteBuffer.allocateNative(chunkHeader.uncompressedSize)
 
 						// Decode
 						switch (header.type) {
@@ -137,6 +142,7 @@ class AudFile extends AbstractFile implements SoundFile {
 						handler(chunkDataBuffer)
 					}
 
+					logger.debug('AudFile decoding complete')
 					complete = true
 				})
 			}

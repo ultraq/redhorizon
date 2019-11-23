@@ -24,6 +24,9 @@ import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -36,6 +39,8 @@ import java.util.concurrent.ExecutorService
  * @author Emanuel Rabina
  */
 class SoundEffect extends Media implements AudioElement, Movable, Playable, SceneElement {
+
+	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
 
 	// Sound information
 	final int bitrate
@@ -109,7 +114,10 @@ class SoundEffect extends Media implements AudioElement, Movable, Playable, Scen
 
 			// Buffers to read and queue
 			if (!soundDataBuffer.empty) {
-				def nextBuffer = soundDataBuffer.take()
+				def nextData = []
+				soundDataBuffer.drainTo(nextData)
+
+				def nextBuffer = ByteBuffer.fromBuffersDirect(nextData)
 				def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
 				bufferIds << bufferId
 				renderer.queueBuffer(sourceId, bufferId)
