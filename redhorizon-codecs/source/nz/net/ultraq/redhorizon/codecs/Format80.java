@@ -31,6 +31,8 @@ import java.nio.ByteBuffer;
  *   <li>11111110 c c v = Write c bytes with v</li>
  *   <li>11111111 c c p p = Copy c bytes from p</li>
  * </ol>
+ * Credit goes to Vladan Bato for the description of Format80 and the original
+ * decompression code, which I have adapted below.  See: http://vladan.bato.net/cnc/ccfiles4.txt
  * 
  * @author Emanuel Rabina
  */

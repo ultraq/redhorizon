@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.codecs;
 import java.nio.ByteBuffer;
 
 /**
- * Encoder/decoder utilizing the Format80 compression scheme.
+ * Encoder/decoder utilizing the Format40 compression scheme.
  * <p>
  * The documentation of Format40 defines 6 special commands used depending upon
  * the head bits of the byte read.  Using a notation found in XCCU, they are as
@@ -32,6 +32,8 @@ import java.nio.ByteBuffer;
  *   <li>10000000 11c c v = Xor the next c bytes with v.</li>
  *   <li>1ccccccc = Skip the next c bytes.</li>
  * </ol>
+ * Credit goes to Vladan Bato for the description of Format40 and the original
+ * decompression code, which I have adapted below.  See: http://vladan.bato.net/cnc/ccfiles4.txt
  * 
  * @author Emanuel Rabina
  */

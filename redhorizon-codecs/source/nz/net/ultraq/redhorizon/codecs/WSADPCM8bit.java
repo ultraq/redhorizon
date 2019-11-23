@@ -23,7 +23,8 @@ import java.nio.ByteBuffer;
  * for very few sound samples in both Red Alert and Tiberium Dawn, most notably
  * the infantry death sounds.
  * <p>
- * This decoder is only for mono sound data.
+ * Credit goes to Asatur V. Nazarian for the original decompression code, which
+ * I have adapted below.  (No link to their original documents unfortunately 😢)
  * 
  * @author Emanuel Rabina
  */

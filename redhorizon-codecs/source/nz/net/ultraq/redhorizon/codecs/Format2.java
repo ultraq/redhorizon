@@ -19,7 +19,9 @@ package nz.net.ultraq.redhorizon.codecs;
 import java.nio.ByteBuffer;
 
 /**
- * Encoder/decoder utilizing the Format2 compression scheme.
+ * Encoder/decoder utilizing the "Format2" compression scheme.  (This is the
+ * name I've given it to be somewhat in line with the other community-named
+ * compression schemes derived from certain command bytes associated with them.)
  * <p>
  * Format2 is a very simple compression algorithm used by Dune 2.  It works much
  * like run-length-encoding schemes, but only for series' of 0s.  Non-zero

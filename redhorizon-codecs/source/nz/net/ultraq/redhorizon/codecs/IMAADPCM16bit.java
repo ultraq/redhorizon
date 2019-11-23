@@ -21,6 +21,9 @@ import java.nio.ByteBuffer;
 /**
  * Decoder for the 16-bit IMA-ADPCM encoding scheme.  This decompression
  * technique is used with Red Alert's and Tiberium Dawn's 16-bit audio files.
+ * <p>
+ * Credit goes to Vladan Bato for the original decompression code, which I have
+ * adapted below.  See: http://vladan.bato.net/cnc/aud3.txt
  * 
  * @author Emanuel Rabina
  */
