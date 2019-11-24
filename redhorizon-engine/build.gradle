@@ -26,6 +26,8 @@ dependencies {
 	)
 	runtimeOnly(
 		'org.lwjgl:lwjgl:3.1.0:natives-macos',
+		'org.lwjgl:lwjgl:3.1.0:natives-windows',
 		'org.lwjgl:lwjgl-openal:3.1.0:natives-macos',
+		'org.lwjgl:lwjgl-openal:3.1.0:natives-windows'
 	)
 }
