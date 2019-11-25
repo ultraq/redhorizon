@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,9 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
+class MixFileEntry implements ArchiveFileEntry, Comparable<MixFileEntry> {
 
-	static final int RECORD_SIZE = 12
+	static final int SIZE = 12
 
 	String name // Name cannot be determined initially
 	final int id
@@ -36,16 +36,27 @@ class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 	final int size
 
 	/**
-	 * Constructor, assigns the ID, offset, and length of this entry from the
-	 * current byte channel.
+	 * Constructor, assigns the fields of this record from the given input source.
 	 * 
-	 * @param bytes Buffer containing the entry bytes.
+	 * @param input
 	 */
-	MixRecord(ByteBuffer bytes) {
+	MixFileEntry(DataInput input) {
 
-		id     = bytes.getInt()
-		offset = bytes.getInt()
-		size   = bytes.getInt()
+		id     = input.readInt()
+		offset = input.readInt()
+		size   = input.readInt()
+	}
+
+	/**
+	 * Constructor, assigns the fields of this record from the given byte buffer.
+	 * 
+	 * @param input
+	 */
+	MixFileEntry(ByteBuffer input) {
+
+		id     = input.getInt()
+		offset = input.getInt()
+		size   = input.getInt()
 	}
 
 	/**
@@ -57,7 +68,7 @@ class MixRecord implements ArchiveFileEntry, Comparable<MixRecord> {
 	 * @return -1, 0, 1 :: less-than, equal to, greater than.
 	 */
 	@Override
-	int compareTo(MixRecord other) {
+	int compareTo(MixFileEntry other) {
 
 		return id <=> other.id
 	}

@@ -16,140 +16,65 @@
 
 package nz.net.ultraq.redhorizon.filetypes.mix
 
-import blowfishj.BlowfishECB
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.nio.channels.SeekableByteChannelView
+import nz.net.ultraq.redhorizon.io.NativeRandomAccessFile
 
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
-import java.nio.channels.ReadableByteChannel
+import java.util.concurrent.Semaphore
 
 /**
- * Implementation of a Red Alert MIX file.  The MIX format is a file package,
- * much like a ZIP file.
+ * Implementation of a MIX file.  The MIX format is a file package, much like a
+ * ZIP file.
+ * <p>
+ * Credit goes to Olaf van der Spek and Vladan Bato for their descriptions of
+ * the MIX file and some sample code, which I have adapted below.  See:
+ * <ul>
+ *   <li>http://xhp.xwis.net/documents/MIX_Format.html</li>
+ *   <li>http://vladan.bato.net/cnc/ccfiles4.txt</li>
+ * </ul>
  * 
  * @author Emanuel Rabina
  */
 @FileExtensions('mix')
-class MixFile implements ArchiveFile<MixRecord> {
+class MixFile implements ArchiveFile<MixFileEntry> {
 
 	private static final int FLAG_CHECKSUM  = 0x00010000
 	private static final int FLAG_ENCRYPTED = 0x00020000
-	private static final int FLAG_SIZE      = 4
 
-	private static final int KEY_SIZE_BLOWFISH = 56
-	private static final int KEY_SIZE_SOURCE   = 80
-
-	private static final int   ENCRYPT_BLOCK_SIZEI = 8
-	private static final float ENCRYPT_BLOCK_SIZEF = 8f
-
-	private final FileChannel fileChannel
+	private final NativeRandomAccessFile input
 	private final boolean checksum
 	private final boolean encrypted
-	private final MixFileHeader mixHeader
-	private final MixRecord[] mixRecords
+	private final Semaphore inputSemaphore = new Semaphore(1, true)
+
+	@Delegate
+	private final MixFileDelegate delegate
 
 	/**
-	 * The number of files inside the MIX file.
-	 */
-	@Lazy
-	private int numFiles = {
-		return mixHeader.numFiles & 0xffff
-	}()
-
-	/**
-	 * The number of bytes to adjust the offset values in a record, by calculating
-	 * the size of all the data that comes before the first internal file in the
-	 * MIX file.
-	 */
-	@Lazy
-	private int offsetAdjustSize = {
-		def flag = checksum || encrypted ? FLAG_SIZE : 0
-		def encryption = encrypted ? KEY_SIZE_SOURCE : 0
-		def header = encrypted ? MixFileHeader.HEADER_SIZE + 2 : MixFileHeader.HEADER_SIZE
-		def index = MixRecord.RECORD_SIZE * numFiles
-		if (encrypted) {
-			index = (int)Math.ceil(index / ENCRYPT_BLOCK_SIZEF) * ENCRYPT_BLOCK_SIZEI
-		}
-		return flag + header + encryption + index
-	}()
-
-	/**
-	 * Constructor, creates a mix file from a proper file on the file system.
+	 * Constructor, open a MIX file for the given File object.
 	 * 
-	 * @param fileChannel The mix file proper.
+	 * @param file
 	 */
-	MixFile(FileChannel fileChannel) {
+	MixFile(File file) {
 
-		this.fileChannel = fileChannel
+		input = new NativeRandomAccessFile(file)
 
 		// Find out if this file has a checksum/encryption
-		def flagBuffer = ByteBuffer.allocate(FLAG_SIZE)
-		fileChannel.readAndRewind(flagBuffer)
-		def flag = flagBuffer.getInt()
-		checksum  = (flag & FLAG_CHECKSUM)  != 0
+		def flag = input.readInt()
+		checksum  = (flag & FLAG_CHECKSUM) != 0
 		encrypted = (flag & FLAG_ENCRYPTED) != 0
-		ByteBuffer recordsBuffer
 
-		// If encrypted, decrypt the mixheader and index
 		if (encrypted) {
-
-			// Perform the public -> private/Blowfish key function
-			def keySource = ByteBuffer.allocate(KEY_SIZE_SOURCE)
-			fileChannel.read(keySource)
-			def key = ByteBuffer.allocate(KEY_SIZE_BLOWFISH)
-			MixFileKey.getBlowfishKey(keySource, key)
-			def blowfish = new BlowfishECB()
-			blowfish.initialize(key.array(), 0, key.capacity())
-
-			// Decrypt the mixheader
-			def headerEncrypted = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI)
-			def headerDecrypted = ByteBuffer.allocate(ENCRYPT_BLOCK_SIZEI)
-			fileChannel.read(headerEncrypted)
-			blowfish.decrypt(headerEncrypted.array(), 0, headerDecrypted.array(), 0, headerDecrypted.capacity())
-			mixHeader = new MixFileHeader(headerDecrypted)
-
-			// Now figure-out how many more on 8-byte blocks (+2) to decrypt
-			def numBlocks = (int)Math.ceil((MixRecord.RECORD_SIZE * numFiles) / ENCRYPT_BLOCK_SIZEF)
-			def numBytes = numBlocks * 8
-
-			def encryptedBuffer = ByteBuffer.allocate(numBytes)
-			def decryptedBuffer = ByteBuffer.allocate(numBytes)
-			fileChannel.read(encryptedBuffer)
-			blowfish.decrypt(encryptedBuffer.array(), 0, decryptedBuffer.array(), 0, decryptedBuffer.capacity())
-
-			recordsBuffer = ByteBuffer.allocate(numBytes + 2)
-			recordsBuffer.put(headerDecrypted).put(decryptedBuffer).rewind()
+			delegate = new MixFileDelegateEncrypted(input)
 		}
-
-		// If not encrypted, just read the straight data
 		else {
-
-			// Read the mixheader
-			fileChannel.position(0)
-			def headerBuffer = ByteBuffer.allocate(MixFileHeader.HEADER_SIZE)
-			fileChannel.readAndRewind(headerBuffer)
-			mixHeader = new MixFileHeader(headerBuffer)
-
-			// Now figure-out how much more of the file is the index
-			def numBlocks = MixRecord.RECORD_SIZE * numFiles
-			def numBytes = numBlocks * 8
-
-			recordsBuffer = ByteBuffer.allocate(numBytes)
-			fileChannel.readAndRewind(recordsBuffer)
-		}
-
-		// Take all the data and turn it into the index records
-		mixRecords = new MixRecord[numFiles]
-		for (int i = 0; i < mixRecords.length; i++) {
-			mixRecords[i] = new MixRecord(recordsBuffer)
+			input.seek(0)
+			delegate = new MixFileDelegateStandard(input)
 		}
 	}
 
 	/**
-	 * Calculates an ID for a {@link MixRecord} given the original file
-	 * name for the entry to which it is referring to.
+	 * Calculates an ID for a {@link MixFileEntry} given the original file name
+	 * for the entry to which it is referring to.
 	 * 
 	 * @param filename The original filename of the item in the MIX body.
 	 * @return The ID of the entry from the filename.
@@ -174,51 +99,60 @@ class MixFile implements ArchiveFile<MixRecord> {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Closes the MIX file.  This will also close any input streams returned by
+	 * the {@link #getEntryData} method.
 	 */
 	@Override
-	ReadableByteChannel getEntryData(MixRecord record) {
+	void close() {
 
-		return new SeekableByteChannelView(fileChannel, record.offset + offsetAdjustSize, record.size)
+		input.close()
 	}
 
 	/**
-	 * Returns a record for an item in the MIX file, instead of the item itself.
-	 * Uses a binary search algorithm to locate the record.
+	 * Returns an entry which describes an item's place in the MIX file.
 	 * 
 	 * @param name Name of the item and the record.
-	 * @return <tt>MixRecord</tt> object of the record for the item.
+	 * @return Entry for the item, or {@code null} if the item doesn't exist in
+	 *         the file.
 	 */
 	@Override
-	MixRecord getEntry(String name) {
+	MixFileEntry getEntry(String name) {
 
 		def itemId = calculateId(name)
+		def entry = entries.find { entry ->
+			return entry.id == itemId
+		}
+		if (!entry) {
+			return null
+		}
+		entry.name = name
+		return entry
+	}
 
-		// Binary search for the record with the calculated value
-		MixRecord record = null
-		def lo = 0
-		def hi = mixRecords.length - 1
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	InputStream getEntryData(MixFileEntry record) {
 
-		while (lo <= hi) {
-			def mid = (lo + hi) >> 1
-			def midval = mixRecords[mid].id
+		def lastPosition = entryOffset + record.offset
 
-			if (itemId < midval) {
-				hi = mid - 1
-			}
-			else if (itemId > midval) {
-				lo = mid + 1
-			}
-			else {
-				record = mixRecords[mid]
-				break
+		// Each input stream is a wrapper around the same RandomAccessFile, so we
+		// need to ensure that reads between threads do not disrupt each other by
+		// splitting positioning and making file accesses synchronous.
+		return new InputStream() {
+			@Override
+			int read() {
+				return inputSemaphore.acquireAndRelease { ->
+					if ((lastPosition - record.offset) == record.size) {
+						return -1
+					}
+					input.seek(lastPosition)
+					def b = input.read()
+					lastPosition++
+					return b
+				}
 			}
 		}
-
-		// Set the name on the record
-		if (record != null) {
-			record.name = name
-		}
-		return record
 	}
 }

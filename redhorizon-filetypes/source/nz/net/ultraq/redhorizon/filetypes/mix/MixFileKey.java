@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Interface class for the native C++ functions used to obtain the 56-byte
- * Blowfish key from the 80-byte key source found in Red Alert MIX files.
+ * Blowfish key from the 80-byte key source found in encrypted MIX files.
  * 
  * @author Emanuel Rabina
  */
@@ -46,9 +46,7 @@ public class MixFileKey {
 	 */
 	static void getBlowfishKey(ByteBuffer source, ByteBuffer dest) {
 
-		byte[] d = new byte[56];
-		getBlowfishKeyNative(source.array(), d);
-		dest.put(d).rewind();
+		getBlowfishKeyNative(source.array(), dest.array());
 	}
 
 	/**

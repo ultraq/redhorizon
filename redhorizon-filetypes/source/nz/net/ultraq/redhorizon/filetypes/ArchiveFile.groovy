@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.channels.ReadableByteChannel
-
 /**
  * Interface for file formats which are holders of other files (eg: MIX, ZIP,
  * etc...).
@@ -25,25 +23,24 @@ import java.nio.channels.ReadableByteChannel
  * @param <E> Archive file entry implementation.
  * @author Emanuel Rabina
  */
-interface ArchiveFile<E extends ArchiveFileEntry> {
+interface ArchiveFile<E extends ArchiveFileEntry> extends Closeable {
 
 	/**
 	 * Get the descriptor for an entry in the archive file.
 	 * 
 	 * @param name Name of the entry as it exists within the archive file.  If
-	 * 			   the archive file supports a directory structure within it,
-	 * 			   then this name can be prefixed by a path structure.
+	 *             the archive file supports a directory structure within it,
+	 *             then this name can contain a path structure.
 	 * @return Descriptor of the entry, or <tt>null</tt> if the entry cannot be
-	 * 		   found within the file.
+	 *         found within the file.
 	 */
 	E getEntry(String name)
 
 	/**
-	 * Returns a byte channel to the entry in the archive.  Closing the archive
-	 * will close all byte channels retrieved using this method.
+	 * Returns an input stream to the entry in the archive.
 	 * 
 	 * @param entry Descriptor of the entry in the archive file.
-	 * @return A byte channel bound to the entry within the archive.
+	 * @return An input stream for reading the entry within the archive.
 	 */
-	ReadableByteChannel getEntryData(E entry)
+	InputStream getEntryData(E entry)
 }
