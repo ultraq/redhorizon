@@ -38,12 +38,10 @@ import java.util.concurrent.Semaphore
 @FileExtensions('mix')
 class MixFile implements ArchiveFile<MixFileEntry> {
 
-	private static final int FLAG_CHECKSUM  = 0x00010000
-	private static final int FLAG_ENCRYPTED = 0x00020000
+	private static final short FLAG_CHECKSUM  = 0x0001
+	private static final short FLAG_ENCRYPTED = 0x0002
 
 	private final NativeRandomAccessFile input
-	private final boolean checksum
-	private final boolean encrypted
 	private final Semaphore inputSemaphore = new Semaphore(1, true)
 
 	@Delegate
@@ -59,11 +57,9 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 		input = new NativeRandomAccessFile(file)
 
 		// Find out if this file has a checksum/encryption
-		def flag = input.readInt()
-		checksum  = (flag & FLAG_CHECKSUM) != 0
-		encrypted = (flag & FLAG_ENCRYPTED) != 0
-
-		if (encrypted) {
+		def bufferBits = input.readShort()
+		def flag = input.readShort()
+		if (bufferBits == 0 && flag == FLAG_ENCRYPTED) {
 			delegate = new MixFileDelegateEncrypted(input)
 		}
 		else {
@@ -89,7 +85,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 			for (def j = 0; j < 4; j++) {
 				a >>>= 8
 				if (i < name.length()) {
-					a += name.charAt(i) << 24
+					a += (short)name.charAt(i) << 24
 				}
 				i++
 			}
@@ -133,24 +129,47 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	InputStream getEntryData(MixFileEntry record) {
-
-		def lastPosition = entryOffset + record.offset
+	InputStream getEntryData(MixFileEntry entry) {
 
 		// Each input stream is a wrapper around the same RandomAccessFile, so we
 		// need to ensure that reads between threads do not disrupt each other by
 		// splitting positioning and making file accesses synchronous.
 		return new InputStream() {
+			private int lastPosition = 0
+
 			@Override
 			int read() {
 				return inputSemaphore.acquireAndRelease { ->
-					if ((lastPosition - record.offset) == record.size) {
+					if (lastPosition >= entry.size) {
 						return -1
 					}
-					input.seek(lastPosition)
+					input.seek(entryOffset + lastPosition)
 					def b = input.read()
 					lastPosition++
 					return b
+				}
+			}
+
+			@Override
+			int read(byte[] b, int off, int len) {
+				return inputSemaphore.acquireAndRelease { ->
+					if (lastPosition >= entry.size) {
+						return -1
+					}
+					input.seek(entryOffset + lastPosition)
+					def toRead = Math.min(len, entry.size - lastPosition)
+					def bytesRead = input.read(b, off, toRead)
+					lastPosition += bytesRead
+					return bytesRead
+				}
+			}
+
+			@Override
+			long skip(long n) {
+				return inputSemaphore.acquireAndRelease { ->
+					def toSkip = Math.min(n, entry.size - lastPosition)
+					lastPosition += toSkip
+					return toSkip
 				}
 			}
 		}

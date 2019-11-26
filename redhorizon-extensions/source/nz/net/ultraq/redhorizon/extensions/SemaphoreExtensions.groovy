@@ -34,9 +34,12 @@ class SemaphoreExtensions {
 	 */
 	static <T> T acquireAndRelease(Semaphore self, Closure<T> closure) {
 
-		self.acquire()
-		T result = closure()
-		self.release()
-		return result
+		try {
+			self.acquire()
+			return closure()
+		}
+		finally {
+			self.release()
+		}
 	}
 }
