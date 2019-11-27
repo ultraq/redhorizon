@@ -59,7 +59,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 		// Find out if this file has a checksum/encryption
 		def bufferBits = input.readShort()
 		def flag = input.readShort()
-		if (bufferBits == 0 && flag == FLAG_ENCRYPTED) {
+		if ((bufferBits == 0) && (flag & FLAG_ENCRYPTED)) {
 			delegate = new MixFileDelegateEncrypted(input)
 		}
 		else {

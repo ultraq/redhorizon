@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.filetypes.mix
 
 import groovy.transform.PackageScope
-import static groovy.transform.PackageScopeTarget.*
 
 /**
  * A MIX file specific to the unencrypted format found in the original Command &
@@ -25,7 +24,7 @@ import static groovy.transform.PackageScopeTarget.*
  * 
  * @author Emanuel Rabina
  */
-@PackageScope([CLASS, CONSTRUCTORS])
+@PackageScope
 class MixFileDelegateStandard extends MixFileDelegate {
 
 	private final int SIZE_HEADER = 6

@@ -49,6 +49,7 @@ class MixReader {
 			mixFile.withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
+					logger.info("${entryName} found, writing to file")
 					mix.getEntryData(entry).withCloseable { entryInputStream ->
 						new FileOutputStream(entryName).withCloseable { entryOutputStream ->
 							entryInputStream.transferTo(entryOutputStream)

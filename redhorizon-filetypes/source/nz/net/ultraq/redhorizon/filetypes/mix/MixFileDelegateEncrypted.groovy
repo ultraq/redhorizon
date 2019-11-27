@@ -20,7 +20,6 @@ import blowfishj.BlowfishECB
 
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
-import static groovy.transform.PackageScopeTarget.*
 
 /**
  * A MIX file specific to the encrypted format found in the Red Alert game.
@@ -28,13 +27,13 @@ import static groovy.transform.PackageScopeTarget.*
  * 
  * @author Emanuel Rabina
  */
-@PackageScope([CLASS, CONSTRUCTORS])
+@PackageScope
 class MixFileDelegateEncrypted extends MixFileDelegate {
 
+	private static final int SIZE_ENCRYPTED_BLOCK = 8
 	private static final int SIZE_FLAG = 4
 	private static final int SIZE_BLOWFISH_SOURCE_KEY = 80
 	private static final int SIZE_BLOWFISH_KEY = 56
-	private static final int SIZE_ENCRYPTED_HEADER = 8
 
 	final short numEntries
 	final int dataSize
@@ -56,27 +55,32 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 		MixFileKey.getBlowfishKey(keySource, key)
 		def blowfish = new BlowfishECB(key.array(), 0, key.capacity())
 
-		// Decrypt and read the header
-		def headerEncrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_HEADER)
-		def headerDecrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_HEADER)
+		// Decrypt the first block to obtain the header
+		def headerEncrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
+		def headerDecrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
 		input.readFully(headerEncrypted.array())
 		blowfish.decrypt(headerEncrypted.array(), 0, headerDecrypted.array(), 0, headerDecrypted.capacity())
 
 		numEntries = headerDecrypted.getShort()
 		dataSize = headerDecrypted.getInt()
 
-		// Decrypt and read the file entry index
-		def numBytesForIndex = MixFileEntry.SIZE * numEntries
+		// Knowing the number of entries ahead, decrypt as many blocks that fit the
+		// index, reading it and the 2 unread bytes from the first block
+		def numBytesForIndex = (int)Math.ceil((MixFileEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
 		def encryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		def decryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		input.readFully(encryptedBuffer.array())
 		blowfish.decrypt(encryptedBuffer.array(), 0, decryptedBuffer.array(), 0, decryptedBuffer.capacity())
 
+		def decryptedIndexBuffer = ByteBuffer.allocateNative(numBytesForIndex + 2)
+			.put(headerDecrypted)
+			.put(decryptedBuffer)
+			.rewind()
 		entries = new MixFileEntry[numEntries]
 		numEntries.times { index ->
-			entries[index] = new MixFileEntry(decryptedBuffer)
+			entries[index] = new MixFileEntry(decryptedIndexBuffer)
 		}
 
-		entryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_HEADER + (MixFileEntry.SIZE * numEntries)
+		entryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_BLOCK + numBytesForIndex
 	}
 }
