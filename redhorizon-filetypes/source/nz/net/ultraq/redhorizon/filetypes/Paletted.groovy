@@ -16,37 +16,21 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
+import java.nio.channels.ReadableByteChannel
+
 /**
- * Interface containing parts common to all of the image file types in this
- * package.
+ * Interface which identifies the file format as using indexed data to represent
+ * the image information returned by the implementing class.  Thus requiring a
+ * matching palette to obtain the 'whole' image.
  * 
  * @author Emanuel Rabina
  */
-interface ImageCommon {
+interface Paletted {
 
 	/**
-	 * Returns the number of bytes used to represent the colour data of a single
-	 * pixel.
-	 * <p>
-	 * If the object implements the {@link Paletted} interface, then the return
-	 * value of this method is more of an expectation of the colour-depth,
-	 * rather than a given.
+	 * Returns the raw indexed data which constructs this file's image.
 	 * 
-	 * @return The image colour format.
+	 * @return The indexed image data.
 	 */
-	ColourFormat getFormat()
-
-	/**
-	 * Returns the height of the image.
-	 * 
-	 * @return Height of the image.
-	 */
-	int getHeight()
-
-	/**
-	 * Returns the width of the image.
-	 * 
-	 * @return Width of the image.
-	 */
-	int getWidth()
+	ReadableByteChannel getRawImageData()
 }

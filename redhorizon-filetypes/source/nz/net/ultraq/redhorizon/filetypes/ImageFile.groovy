@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
+import groovy.transform.TupleConstructor
 import java.nio.channels.ReadableByteChannel
 
 /**
@@ -23,7 +24,32 @@ import java.nio.channels.ReadableByteChannel
  * 
  * @author Emanuel Rabina
  */
-interface ImageFile extends ImageCommon, File {
+interface ImageFile {
+
+	/**
+	 * Supported colour formats.
+	 */
+	@TupleConstructor
+	static enum ColourFormat {
+
+		FORMAT_INDEXED(1),
+		FORMAT_RGB(3),
+		FORMAT_RGBA(4)
+
+		final int value
+	}
+
+	/**
+	 * Returns the number of bytes used to represent the colour data of a single
+	 * pixel.
+	 * <p>
+	 * If the object implements the {@link Paletted} interface, then the return
+	 * value of this method is more of an expectation of the colour-depth,
+	 * rather than a given.
+	 * 
+	 * @return The image colour format.
+	 */
+	ColourFormat getFormat()
 
 	/**
 	 * Returns a byte channel into the image data of the file.
@@ -31,4 +57,18 @@ interface ImageFile extends ImageCommon, File {
 	 * @return Byte channel containing the bytes in RGB(A) order for the image.
 	 */
 	ReadableByteChannel getImageData()
+
+	/**
+	 * Returns the height of the image.
+	 * 
+	 * @return Height of the image.
+	 */
+	int getHeight()
+
+	/**
+	 * Returns the width of the image.
+	 * 
+	 * @return Width of the image.
+	 */
+	int getWidth()
 }

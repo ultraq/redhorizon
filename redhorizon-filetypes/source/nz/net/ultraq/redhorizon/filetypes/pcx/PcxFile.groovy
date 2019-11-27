@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.pcx;
+package nz.net.ultraq.redhorizon.filetypes.pcx
 
-import nz.net.ultraq.redhorizon.filetypes.AbstractFile;
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat;
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions;
-import nz.net.ultraq.redhorizon.filetypes.FileType;
-import nz.net.ultraq.redhorizon.filetypes.ImageFile;
-import nz.net.ultraq.redhorizon.filetypes.PalettedInternal;
-import nz.net.ultraq.redhorizon.filetypes.UnsupportedFileException;
-import nz.net.ultraq.redhorizon.media.Palette;
-import nz.net.ultraq.redhorizon.utilities.BufferUtility;
-import nz.net.ultraq.redhorizon.utilities.CodecUtility;
-import nz.net.ultraq.redhorizon.utilities.ImageUtility;
-import nz.net.ultraq.redhorizon.utilities.channels.ReadableByteChannelAdapter;
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB;
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.filetypes.PalettedInternal
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
+import java.nio.ByteBuffer
+import java.nio.channels.ReadableByteChannel
 
 /**
  * Implementation of the PCX file format.  PCX files are used for the higher
@@ -40,23 +30,20 @@ import java.util.ArrayList;
  * <p>
  * PCX files can come in many flavours (8-bit, 16-bit, 24-bit, no palette, etc),
  * but for the purpose of Red Horizon, PCX files will be of the type used in the
- * old RA & TD games: a 256-colour file with an internal palette located at the
- * tail of the file.  Attempts to load any other types will result in an
- * {@link UnsupportedFileException}.  The addition of support for other sorts of
- * PCX files may be done in future.
+ * Command & Conquer games: a 256-colour file with an internal palette located
+ * at the tail of the file.
  * 
  * @author Emanuel Rabina.
  */
-@FileExtensions("pcx")
-@FileType(ImageFile.class)
-public class PcxFile extends AbstractFile implements ImageFile, PalettedInternal {
+@FileExtensions('pcx')
+class PcxFile implements ImageFile, PalettedInternal {
 
-	private static final int PALETTE_SIZE         = 768;
-	private static final int PALETTE_PADDING_SIZE = 1;
+	private static final int PALETTE_SIZE         = 768
+	private static final int PALETTE_PADDING_SIZE = 1
 
-	private PcxFileHeader pcxheader;
-	private PcxPalette pcxpalette;
-	private ByteBuffer pcximage;
+	private PcxFileHeader pcxheader
+	private PcxPalette pcxpalette
+	private ByteBuffer pcximage
 
 	/**
 	 * Constructor, creates a new pcx file with the given file name and file
@@ -65,48 +52,48 @@ public class PcxFile extends AbstractFile implements ImageFile, PalettedInternal
 	 * @param name		  Name of the pcx file.
 	 * @param bytechannel Input stream of the pcx file data.
 	 */
-	public PcxFile(String name, ReadableByteChannel bytechannel) {
+	PcxFile(String name, ReadableByteChannel bytechannel) {
 
-		super(name);
+		super(name)
 
 		try {
 			// Read header
-			ByteBuffer headerbytes = ByteBuffer.allocate(PcxFileHeader.HEADER_SIZE);
-			bytechannel.read(headerbytes);
-			headerbytes.rewind();
-			pcxheader  = new PcxFileHeader(headerbytes);
+			ByteBuffer headerbytes = ByteBuffer.allocate(PcxFileHeader.HEADER_SIZE)
+			bytechannel.read(headerbytes)
+			headerbytes.rewind()
+			pcxheader  = new PcxFileHeader(headerbytes)
 
 			// Read the rest of the stream
-			ByteBuffer pcxdata = BufferUtility.readRemaining(bytechannel);
+			ByteBuffer pcxdata = BufferUtility.readRemaining(bytechannel)
 
 			// Decode PCX run-length encoded image data scanline-by-scanline
-			ByteBuffer sourcebytes = ByteBuffer.allocate(pcxdata.limit() - PALETTE_SIZE);
-			ArrayList<ByteBuffer> scanlines = new ArrayList<>();
+			ByteBuffer sourcebytes = ByteBuffer.allocate(pcxdata.limit() - PALETTE_SIZE)
+			ArrayList<ByteBuffer> scanlines = new ArrayList<>()
 
 			while (sourcebytes.hasRemaining()) {
-				ByteBuffer scanline = ByteBuffer.allocate(pcxheader.planes * pcxheader.bytesperline);
-				CodecUtility.decodeRLE67(sourcebytes, scanline);
-				scanlines.add(scanline);
+				ByteBuffer scanline = ByteBuffer.allocate(pcxheader.planes * pcxheader.bytesperline)
+				CodecUtility.decodeRLE67(sourcebytes, scanline)
+				scanlines.add(scanline)
 			}
 
 			// Cull the image to the appropriate width/height dimensions (for when
 			// scanlines extend beyond the image borders)
-			pcximage = ByteBuffer.allocate(width() * height());
-			for (int y = pcxheader.ymin; y <= pcxheader.ymax; y++) {
-				ByteBuffer scanline = scanlines.get(y);
-				for (int x = pcxheader.xmin; x <= pcxheader.xmax; x++) {
-					pcximage.put(scanline.get(x));
+			pcximage = ByteBuffer.allocate(width() * height())
+			for (int y = pcxheader.ymin y <= pcxheader.ymax y++) {
+				ByteBuffer scanline = scanlines.get(y)
+				for (int x = pcxheader.xmin x <= pcxheader.xmax x++) {
+					pcximage.put(scanline.get(x))
 				}
 			}
-			pcximage.rewind();
+			pcximage.rewind()
 
 			// Assign palette (from tail of file, after the padding byte)
-			ByteBuffer palettebytes = ByteBuffer.allocate(PALETTE_SIZE);
-			palettebytes.put((ByteBuffer)pcxdata.position(pcxdata.position() + PALETTE_PADDING_SIZE));
-			pcxpalette = new PcxPalette(palettebytes);
+			ByteBuffer palettebytes = ByteBuffer.allocate(PALETTE_SIZE)
+			palettebytes.put((ByteBuffer)pcxdata.position(pcxdata.position() + PALETTE_PADDING_SIZE))
+			pcxpalette = new PcxPalette(palettebytes)
 		}
 		finally {
-			bytechannel.close();
+			bytechannel.close()
 		}
 	}
 
@@ -114,55 +101,55 @@ public class PcxFile extends AbstractFile implements ImageFile, PalettedInternal
 	 * Does nothing.
 	 */
 	@Override
-	public void close() {
+	void close() {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ColourFormat format() {
+	ColourFormat format() {
 
-		return FORMAT_RGB;
+		return FORMAT_RGB
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReadableByteChannel getImageData() {
+	ReadableByteChannel getImageData() {
 
 		// Apply internal palette
-		ByteBuffer rgbimage = ByteBuffer.allocate(width() * height() * format().size);
-		ImageUtility.applyPalette(pcximage, rgbimage, pcxpalette);
-		return new ReadableByteChannelAdapter(rgbimage);
+		ByteBuffer rgbimage = ByteBuffer.allocate(width() * height() * format().size)
+		ImageUtility.applyPalette(pcximage, rgbimage, pcxpalette)
+		return new ReadableByteChannelAdapter(rgbimage)
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Palette getPalette() {
+	Palette getPalette() {
 
-		return pcxpalette;
+		return pcxpalette
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReadableByteChannel getRawImageData() {
+	ReadableByteChannel getRawImageData() {
 
-		return pcxpalette != null ? new ReadableByteChannelAdapter(pcximage) : null;
+		return pcxpalette != null ? new ReadableByteChannelAdapter(pcximage) : null
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int height() {
+	int height() {
 
-		return pcxheader.ymax - pcxheader.ymin + 1;
+		return pcxheader.ymax - pcxheader.ymin + 1
 	}
 
 	/**
@@ -171,20 +158,20 @@ public class PcxFile extends AbstractFile implements ImageFile, PalettedInternal
 	 * @return PCX file info.
 	 */
 	@Override
-	public String toString() {
+	String toString() {
 
 		return filename + " (PCX file)" +
 			"\n  Image width: " + width() +
 			"\n  Image height: " + height() +
-			"\n  Colour depth: 8-bit " + (pcxpalette != null ? "(using internal palette)" : "");
+			"\n  Colour depth: 8-bit " + (pcxpalette != null ? "(using internal palette)" : "")
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int width() {
+	int width() {
 
-		return pcxheader.xmax - pcxheader.xmin + 1;
+		return pcxheader.xmax - pcxheader.xmin + 1
 	}
 }
