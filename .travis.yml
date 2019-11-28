@@ -1,6 +1,5 @@
 language: groovy
 jdk:
- - openjdk8
  - openjdk11
 
 # No need to run tasks for dependencies
