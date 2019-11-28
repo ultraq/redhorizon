@@ -16,13 +16,15 @@
 
 package nz.net.ultraq.redhorizon.filetypes.pcx
 
+import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.PalettedInternal
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
 import java.nio.ByteBuffer
-import java.nio.channels.ReadableByteChannel
 
 /**
  * Implementation of the PCX file format.  PCX files are used for the higher
@@ -36,120 +38,129 @@ import java.nio.channels.ReadableByteChannel
  * @author Emanuel Rabina.
  */
 @FileExtensions('pcx')
-class PcxFile implements ImageFile, PalettedInternal {
+class PcxFile implements ImageFile {
+
+	// Header constants
+	private static final int  HEADER_PALETTE_SIZE  = 48
+	private static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
+	private static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
+	private static final byte VERSION_PCP28_PAL    = 2 // PC Paintbrush 2.8 w/ palette
+	private static final byte VERSION_PCP28_NO_PAL = 3 // PC Paintbrush 2.8 w/o palette
+	private static final byte VERSION_PCP4WIN      = 4 // PC Paintbrush for Windows
+	private static final byte VERSION_PCPPLUS      = 5 // PC Paintbrush+
+	private static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
+	private static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
+
+	// Header data
+	final byte manufacturer
+	final byte version
+	final byte encoding
+	final byte bitsPerPixel
+	final short xMin
+	final short yMin
+	final short xMax
+	final short yMax
+	final short hdpi
+	final short vdpi
+	final byte[] egaPalette
+	final byte reserved
+	final byte planes
+	final short bytesPerLine
+	final short paletteInfo
+	final short hScreenSize
+	final short vScreenSize
+	final byte[] filler
 
 	private static final int PALETTE_SIZE         = 768
 	private static final int PALETTE_PADDING_SIZE = 1
 
-	private PcxFileHeader pcxheader
-	private PcxPalette pcxpalette
-	private ByteBuffer pcximage
+	final int width
+	final int height
+	final ColourFormat format = ColourFormat.FORMAT_RGB
+	private final ByteBuffer rawImageData
+	private final Palette palette
 
 	/**
-	 * Constructor, creates a new pcx file with the given file name and file
-	 * data..
+	 * Constructor, creates a new PCX file from data in the given input stream.
 	 * 
-	 * @param name		  Name of the pcx file.
-	 * @param bytechannel Input stream of the pcx file data.
+	 * @param inputStream Input stream of the PCX file data.
 	 */
-	PcxFile(String name, ReadableByteChannel bytechannel) {
+	PcxFile(InputStream inputStream) {
 
-		super(name)
+		def input = new NativeDataInputStream(inputStream)
 
-		try {
-			// Read header
-			ByteBuffer headerbytes = ByteBuffer.allocate(PcxFileHeader.HEADER_SIZE)
-			bytechannel.read(headerbytes)
-			headerbytes.rewind()
-			pcxheader  = new PcxFileHeader(headerbytes)
+		// File header
+		manufacturer = input.readByte()
+		assert manufacturer == MANUFACTURER_ZSOFT
 
-			// Read the rest of the stream
-			ByteBuffer pcxdata = BufferUtility.readRemaining(bytechannel)
+		version = input.readByte()
+		assert version == VERSION_PCP25 ||
+		       version == VERSION_PCP28_PAL ||
+		       version == VERSION_PCP28_NO_PAL ||
+		       version == VERSION_PCP4WIN ||
+		       version == VERSION_PCPPLUS
 
-			// Decode PCX run-length encoded image data scanline-by-scanline
-			ByteBuffer sourcebytes = ByteBuffer.allocate(pcxdata.limit() - PALETTE_SIZE)
-			ArrayList<ByteBuffer> scanlines = new ArrayList<>()
+		encoding = input.readByte()
+		assert encoding == ENCODING_RLE
 
-			while (sourcebytes.hasRemaining()) {
-				ByteBuffer scanline = ByteBuffer.allocate(pcxheader.planes * pcxheader.bytesperline)
-				CodecUtility.decodeRLE67(sourcebytes, scanline)
-				scanlines.add(scanline)
-			}
+		bitsPerPixel = input.readByte()
+		assert bitsPerPixel == BPP_8 : 'Only 8-bit (256 colour) PCX files are currently supported'
 
-			// Cull the image to the appropriate width/height dimensions (for when
-			// scanlines extend beyond the image borders)
-			pcximage = ByteBuffer.allocate(width() * height())
-			for (int y = pcxheader.ymin y <= pcxheader.ymax y++) {
-				ByteBuffer scanline = scanlines.get(y)
-				for (int x = pcxheader.xmin x <= pcxheader.xmax x++) {
-					pcximage.put(scanline.get(x))
-				}
-			}
-			pcximage.rewind()
+		xMin = input.readShort()
+		yMin = input.readShort()
+		xMax = input.readShort()
+		yMax = input.readShort()
+		hdpi = input.readShort()
+		vdpi = input.readShort()
 
-			// Assign palette (from tail of file, after the padding byte)
-			ByteBuffer palettebytes = ByteBuffer.allocate(PALETTE_SIZE)
-			palettebytes.put((ByteBuffer)pcxdata.position(pcxdata.position() + PALETTE_PADDING_SIZE))
-			pcxpalette = new PcxPalette(palettebytes)
+		egaPalette = new byte[HEADER_PALETTE_SIZE]
+		input.readFully(egaPalette)
+
+		reserved     = input.readByte()
+		planes       = input.readByte()
+		bytesPerLine = input.readShort()
+		paletteInfo  = input.readShort()
+		hScreenSize  = input.readShort()
+		vScreenSize  = input.readShort()
+		filler = new byte[56]
+		input.readFully(filler)
+
+		width = xMax - xMin + 1
+		height = yMax - yMin + 1
+
+		// Read the rest of the stream
+		def imageAndPaletteData = input.readAllBytes()
+		def encodedImageData = ByteBuffer.wrapNative(imageAndPaletteData, 0, imageAndPaletteData.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
+		def paletteData = ByteBuffer.wrapNative(imageAndPaletteData, imageAndPaletteData.length - PALETTE_SIZE, PALETTE_SIZE)
+
+		// Build up the raw image data for use with a palette later
+		def scanLines = new ArrayList<ByteBuffer>()
+		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
+		while (encodedImageData.hasRemaining()) {
+			def scanLine = ByteBuffer.allocateNative(planes * bytesPerLine)
+			runLengthEncoding.decode(encodedImageData, scanLine)
+			scanLines << scanLine
 		}
-		finally {
-			bytechannel.close()
+		rawImageData = ByteBuffer.allocateNative(width * height)
+		for (def y = yMin; y <= yMax; y++) {
+			def scanLine = scanLines[y]
+			for (def x = xMin; x <= xMax; x++) {
+				rawImageData.put(scanLine.get(x))
+			}
 		}
-	}
+		rawImageData.rewind()
 
-	/**
-	 * Does nothing.
-	 */
-	@Override
-	void close() {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	ColourFormat format() {
-
-		return FORMAT_RGB
+		// Assign palette (from tail of file, after the padding byte)
+		palette = new Palette(256, ColourFormat.FORMAT_RGB, paletteData)
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	ReadableByteChannel getImageData() {
+	ByteBuffer getImageData() {
 
-		// Apply internal palette
-		ByteBuffer rgbimage = ByteBuffer.allocate(width() * height() * format().size)
-		ImageUtility.applyPalette(pcximage, rgbimage, pcxpalette)
-		return new ReadableByteChannelAdapter(rgbimage)
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	Palette getPalette() {
-
-		return pcxpalette
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	ReadableByteChannel getRawImageData() {
-
-		return pcxpalette != null ? new ReadableByteChannelAdapter(pcximage) : null
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	int height() {
-
-		return pcxheader.ymax - pcxheader.ymin + 1
+		return ImageUtility.applyPalette(rawImageData, palette)
 	}
 
 	/**
@@ -160,18 +171,11 @@ class PcxFile implements ImageFile, PalettedInternal {
 	@Override
 	String toString() {
 
-		return filename + " (PCX file)" +
-			"\n  Image width: " + width() +
-			"\n  Image height: " + height() +
-			"\n  Colour depth: 8-bit " + (pcxpalette != null ? "(using internal palette)" : "")
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	int width() {
-
-		return pcxheader.xmax - pcxheader.xmin + 1
+		return """
+			(PCX file)
+			  Image width: ${width}
+			  Image height: ${height}
+			  Colour depth: 8-bit ${palette ? '(using internal palette)' : ''}
+		""".stripMargin()
 	}
 }

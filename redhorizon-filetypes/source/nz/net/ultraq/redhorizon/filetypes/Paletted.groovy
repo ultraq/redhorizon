@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.channels.ReadableByteChannel
+import java.nio.ByteBuffer
 
 /**
  * Interface which identifies the file format as using indexed data to represent
@@ -32,5 +32,5 @@ interface Paletted {
 	 * 
 	 * @return The indexed image data.
 	 */
-	ReadableByteChannel getRawImageData()
+	ByteBuffer getRawImageData()
 }

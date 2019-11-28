@@ -17,8 +17,7 @@
 package nz.net.ultraq.redhorizon.filetypes
 
 /**
- * Interface to expose an image file's internal palette and raw (indexed) image
- * data.
+ * Interface for images containing an internal palette.
  * 
  * @author Emanuel Rabina
  */

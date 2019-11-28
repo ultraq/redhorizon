@@ -16,8 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import groovy.transform.TupleConstructor
-import java.nio.channels.ReadableByteChannel
+import java.nio.ByteBuffer
 
 /**
  * Interface for image file formats.
@@ -25,19 +24,6 @@ import java.nio.channels.ReadableByteChannel
  * @author Emanuel Rabina
  */
 interface ImageFile {
-
-	/**
-	 * Supported colour formats.
-	 */
-	@TupleConstructor
-	static enum ColourFormat {
-
-		FORMAT_INDEXED(1),
-		FORMAT_RGB(3),
-		FORMAT_RGBA(4)
-
-		final int value
-	}
 
 	/**
 	 * Returns the number of bytes used to represent the colour data of a single
@@ -52,18 +38,18 @@ interface ImageFile {
 	ColourFormat getFormat()
 
 	/**
-	 * Returns a byte channel into the image data of the file.
-	 * 
-	 * @return Byte channel containing the bytes in RGB(A) order for the image.
-	 */
-	ReadableByteChannel getImageData()
-
-	/**
 	 * Returns the height of the image.
 	 * 
 	 * @return Height of the image.
 	 */
 	int getHeight()
+
+	/**
+	 * Return the image data of the file.
+	 * 
+	 * @return Buffer of the bytes in RGB(A) order for the image.
+	 */
+	ByteBuffer getImageData()
 
 	/**
 	 * Returns the width of the image.
