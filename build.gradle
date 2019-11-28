@@ -47,4 +47,10 @@ subprojects {
 			dirs "${rootDir}/libraries"
 		}
 	}
+
+	dependencies {
+		implementation(
+			'org.codehaus.groovy:groovy:2.5.8'
+		)
+	}
 }
