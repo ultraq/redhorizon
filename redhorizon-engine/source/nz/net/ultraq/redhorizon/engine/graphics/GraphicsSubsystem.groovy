@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.engine.graphics;
+package nz.net.ultraq.redhorizon.engine.graphics;
 
 import redhorizon.engine.EngineException;
 import redhorizon.engine.EngineStrings;

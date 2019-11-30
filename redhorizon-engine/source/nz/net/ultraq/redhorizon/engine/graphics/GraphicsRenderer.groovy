@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2013, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package redhorizon.engine.graphics;
+package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
  * Interface for the graphics renderer, used by the graphics subsystem to draw
@@ -22,23 +22,6 @@ package redhorizon.engine.graphics;
  * 
  * @author Emanuel Rabina
  */
-public interface GraphicsRenderer {
+interface GraphicsRenderer {
 
-	/**
-	 * Cleanup/destroy the graphics renderer.
-	 */
-	public void cleanup();
-
-	/**
-	 * Initialize the graphics renderer, making the current thread the graphics
-	 * rendering thread.
-	 */
-	public void initialize();
-
-	/**
-	 * Update the camera attributes.
-	 * 
-	 * @param camera
-	 */
-	public void updateCamera(Camera camera);
 }

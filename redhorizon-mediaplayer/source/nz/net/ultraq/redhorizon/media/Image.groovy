@@ -1,5 +1,5 @@
 
-package redhorizon.media;
+package nz.net.ultraq.redhorizon.media;
 
 import redhorizon.filetypes.ImageFile;
 import redhorizon.filetypes.ImagesFile;

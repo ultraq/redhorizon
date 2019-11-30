@@ -3,7 +3,7 @@
 // Scanner's Java - Image data handle
 // ==================================
 
-package redhorizon.media;
+package nz.net.ultraq.redhorizon.media;
 
 import redhorizon.engine.Capabilities;
 import redhorizon.filetypes.ImageFile;
