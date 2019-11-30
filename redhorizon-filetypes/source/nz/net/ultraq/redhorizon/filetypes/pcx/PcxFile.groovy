@@ -77,8 +77,7 @@ class PcxFile implements ImageFile {
 	final int width
 	final int height
 	final ColourFormat format = ColourFormat.FORMAT_RGB
-	private final ByteBuffer rawImageData
-	private final Palette palette
+	final ByteBuffer imageData
 
 	/**
 	 * Constructor, creates a new PCX file from data in the given input stream.
@@ -141,7 +140,7 @@ class PcxFile implements ImageFile {
 			runLengthEncoding.decode(encodedImageData, scanLine)
 			scanLines << scanLine
 		}
-		rawImageData = ByteBuffer.allocateNative(width * height)
+		def rawImageData = ByteBuffer.allocateNative(width * height)
 		for (def y = yMin; y <= yMax; y++) {
 			def scanLine = scanLines[y]
 			for (def x = xMin; x <= xMax; x++) {
@@ -151,16 +150,10 @@ class PcxFile implements ImageFile {
 		rawImageData.rewind()
 
 		// Assign palette (from tail of file, after the padding byte)
-		palette = new Palette(256, ColourFormat.FORMAT_RGB, paletteData)
-	}
+		def palette = new Palette(256, ColourFormat.FORMAT_RGB, paletteData)
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	ByteBuffer getImageData() {
-
-		return ImageUtility.applyPalette(rawImageData, palette)
+		// Apply palette to raw image data to create the final image
+		imageData = ImageUtility.applyPalette(rawImageData, palette)
 	}
 
 	/**
@@ -175,7 +168,7 @@ class PcxFile implements ImageFile {
 			(PCX file)
 			  Image width: ${width}
 			  Image height: ${height}
-			  Colour depth: 8-bit ${palette ? '(using internal palette)' : ''}
+			  Colour depth: 8-bit (using internal palette)
 		""".stripMargin()
 	}
 }
