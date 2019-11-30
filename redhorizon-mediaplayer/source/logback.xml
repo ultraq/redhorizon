@@ -31,8 +31,7 @@
 	</appender>
 
 	<logger name="org.reflections" level="WARN"/>
-	<logger name="nz.net.ultraq.redhorizon.filetypes.aud.AudFile" level="DEBUG"/>
-	<logger name="nz.net.ultraq.redhorizon.media.SoundEffect" level="DEBUG"/>
+	<logger name="nz.net.ultraq.redhorizon" level="DEBUG"/>
 
 	<root level="INFO">
 		<appender-ref ref="console"/>

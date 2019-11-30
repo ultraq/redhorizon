@@ -24,6 +24,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
@@ -37,7 +38,7 @@ class AudioPlayer {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioPlayer)
 
-	final SoundFile file
+	final SoundFile soundFile
 
 	/**
 	 * Play the configured audio file.
@@ -59,22 +60,20 @@ class AudioPlayer {
 		}
 
 		Executors.newCachedThreadPool(threadFactory).executeAndShutdown { executorService ->
-			def soundEffect = new SoundEffect(file, executorService)
+			def soundEffect = new SoundEffect(soundFile, executorService)
 			def audioEngine = new AudioEngine(soundEffect)
+			def completeLatch = new CountDownLatch(1)
 
 			executorService.execute(audioEngine)
 
+			soundEffect.addEventListener(SoundEffect.EVENT_NAME_STOP) { event ->
+				completeLatch.countDown()
+				logger.debug('Sound stopped')
+			}
 			soundEffect.play()
 
-			// TODO: This is dumb waiting.  Emit some sort of event or some way we can
-			//       wait on the sound to stop playing.
 			logger.debug('Waiting for sound to stop playing')
-			while (exception == null) {
-				Thread.sleep(500)
-				if (!soundEffect.playing) {
-					break
-				}
-			}
+			completeLatch.await()
 
 			audioEngine.stop()
 			if (exception != null) {

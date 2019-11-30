@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions('aud')
+@FileExtensions(['aud', 'v00'])
 class AudFile implements SoundFile {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudFile)

@@ -38,9 +38,11 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
+class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
+
+	static final String EVENT_NAME_STOP = 'Stop'
 
 	// Sound information
 	final int bitrate
@@ -132,6 +134,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
 			else if (soundDataWorker.complete) {
 				if (!renderer.sourcePlaying(sourceId)) {
 					playing = false
+					fireEvent(EVENT_NAME_STOP)
 				}
 			}
 		}
