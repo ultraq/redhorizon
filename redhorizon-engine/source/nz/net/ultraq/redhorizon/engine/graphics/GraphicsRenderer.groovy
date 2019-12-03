@@ -16,6 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Rectanglef
+
+import java.nio.ByteBuffer
+
 /**
  * Interface for the graphics renderer, used by the graphics subsystem to draw
  * objects to the screen.
@@ -24,4 +28,29 @@ package nz.net.ultraq.redhorizon.engine.graphics
  */
 interface GraphicsRenderer {
 
+	/**
+	 * Create and fill a texture with the given image data.
+	 * 
+	 * @param data
+	 * @param format
+	 * @param width
+	 * @param height
+	 * @return New texture handle.
+	 */
+	int createTexture(ByteBuffer data, int format, int width, int height)
+
+	/**
+	 * Delete texture handles.
+	 * 
+	 * @param textureIds
+	 */
+	void deleteTextures(int... textureIds)
+
+	/**
+	 * Draw the texture over the given rectangle.
+	 * 
+	 * @param textureId
+	 * @param rectangle
+	 */
+	void drawTexture(int textureId, Rectanglef rectangle)
 }

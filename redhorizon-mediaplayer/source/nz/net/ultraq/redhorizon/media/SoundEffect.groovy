@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.AudioElement
+import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
@@ -56,7 +56,7 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 	private List<Integer> bufferIds
 
 	/**
-	 * Constructor, loads the sound from the given <code>SoundFile</code>.
+	 * Constructor, use the data in {@code soundFile} for playing a sound effect.
 	 * 
 	 * @param soundFile File which should be used to construct this sound.
 	 * @param executor

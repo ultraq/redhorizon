@@ -16,7 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Rectanglef
+
 import static org.lwjgl.opengl.GL11.*
+
+import java.nio.ByteBuffer
 
 /**
  * A graphics renderer using the OpenGL API.
@@ -100,4 +104,73 @@ class OpenGLRenderer implements GraphicsRenderer {
 //			lastpos = lastpos.add(diff)
 //		}
 //	}
+
+	/**
+	 * Check for any OpenGL errors created by the OpenGL call in the given
+	 * closure, throwing them if they occur.
+	 * 
+	 * @param closure
+	 */
+	private static <T> T checkForError(Closure closure) {
+
+		T result = (T)closure()
+		def error = glGetError()
+		if (error != GL_NO_ERROR) {
+//			def errorCode =
+//				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
+//				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
+//				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
+//				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
+//				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
+//				error
+			throw new Exception("OpenGL error: ${glGetString(error)}")
+		}
+		return result
+	}
+
+	@Override
+	int createTexture(ByteBuffer data, int format, int width, int height) {
+
+		int textureId = checkForError { ->
+			return glGenTextures()
+		}
+		checkForError { ->
+			glBindTexture(GL_TEXTURE_2D, textureId)
+		}
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR) }
+
+		def colourFormat =
+			format == 3 ? GL_RGB :
+			format == 4 ? GL_RGBA :
+			0
+		checkForError { ->
+			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, data)
+		}
+
+		return textureId
+	}
+
+	@Override
+	void deleteTextures(int... textureIds) {
+
+		checkForError { ->
+			glDeleteTextures(textureIds)
+		}
+	}
+
+	@Override
+	void drawTexture(int textureId, Rectanglef rectangle) {
+
+		glBindTexture(GL_TEXTURE_2D, textureId)
+		glColor3f(1, 1, 1)
+		glBegin(GL_QUADS)
+			glTexCoord2f(0, 0); glVertex2f(rectangle.minX, rectangle.minY)
+			glTexCoord2f(0, 1); glVertex2f(rectangle.minX, rectangle.maxY)
+			glTexCoord2f(1, 1); glVertex2f(rectangle.maxX, rectangle.maxY)
+			glTexCoord2f(1, 0); glVertex2f(rectangle.maxX, rectangle.minY)
+		glEnd()
+	}
 }

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon
 
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
 import org.reflections.Reflections
@@ -47,10 +48,20 @@ class MediaPlayer {
 
 			def (pathToFile) = args
 			new FileInputStream(pathToFile).withCloseable { input ->
-				def soundFileClass = getSoundFileClass(pathToFile)
-				def soundFile = soundFileClass.newInstance(input)
-				def audioPlayer = new AudioPlayer(soundFile)
-				audioPlayer.play()
+				def fileClass = getFileClass(pathToFile)
+				def file = fileClass.newInstance(input)
+
+				if (file instanceof SoundFile) {
+					def audioPlayer = new AudioPlayer(file)
+					audioPlayer.play()
+				}
+				else if (file instanceof ImageFile) {
+					def imageViewer = new ImageViewer(file)
+					imageViewer.view()
+				}
+				else {
+					throw new UnsupportedOperationException("No media player for the associated file class of ${fileClass}")
+				}
 			}
 		}
 		catch (Exception ex) {
@@ -60,24 +71,23 @@ class MediaPlayer {
 	}
 
 	/**
-	 * Find the {@link SoundFile} class that should be able to play the file at
-	 * the given path.
+	 * Find the appropriate file class for reading the file at the given path.
 	 * 
 	 * @param pathToFile
 	 * @return
 	 */
-	private static Class<SoundFile> getSoundFileClass(String pathToFile) {
+	private static Class<?> getFileClass(String pathToFile) {
 
 		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.') + 1)
-		def soundFileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
+		def fileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
 				def annotation = type.getAnnotation(FileExtensions)
 				return annotation.value().contains(suffix)
 			}
-		if (!soundFileClass) {
+		if (!fileClass) {
 			throw new IllegalArgumentException("No implementation for ${suffix} filetype")
 		}
-		return soundFileClass
+		return fileClass
 	}
 }
