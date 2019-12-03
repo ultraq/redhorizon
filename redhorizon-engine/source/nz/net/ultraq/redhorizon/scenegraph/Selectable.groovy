@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph;
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
  * Interface for game objects that are selectable from the game world via the
@@ -22,15 +22,15 @@ package nz.net.ultraq.redhorizon.scenegraph;
  * 
  * @author Emanuel Rabina
  */
-public interface Selectable {
+interface Selectable {
 
 	/**
 	 * Notification that this object has been deselected by the user.
 	 */
-	public void deselect();
+	void deselect()
 
 	/**
 	 * Notification that this object has been selected by the user.
 	 */
-	public void select();
+	void select()
 }

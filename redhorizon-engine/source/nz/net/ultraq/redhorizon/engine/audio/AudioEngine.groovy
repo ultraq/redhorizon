@@ -17,9 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
-import nz.net.ultraq.redhorizon.engine.AudioElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import static nz.net.ultraq.redhorizon.engine.audio.AudioLifecycleState.*
+import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 /**
  * Audio subsystem, manages the connection to the audio hardware and rendering

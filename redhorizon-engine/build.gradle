@@ -19,14 +19,19 @@ description = 'Core rendering engine for Red Horizon'
 dependencies {
 	implementation(
 		project(':redhorizon-extensions'),
-		'org.lwjgl:lwjgl:3.1.0',
-		'org.lwjgl:lwjgl-openal:3.1.0',
+		platform('org.lwjgl:lwjgl-bom:3.2.3'),
+		'org.lwjgl:lwjgl',
+		'org.lwjgl:lwjgl-glfw',
+		'org.lwjgl:lwjgl-openal',
+		'org.lwjgl:lwjgl-opengl',
 		'org.slf4j:slf4j-api:1.7.29'
 	)
 	runtimeOnly(
-		'org.lwjgl:lwjgl:3.1.0:natives-macos',
-		'org.lwjgl:lwjgl:3.1.0:natives-windows',
-		'org.lwjgl:lwjgl-openal:3.1.0:natives-macos',
-		'org.lwjgl:lwjgl-openal:3.1.0:natives-windows'
+		'org.lwjgl:lwjgl::natives-macos',
+		'org.lwjgl:lwjgl::natives-windows',
+		'org.lwjgl:lwjgl-glfw::natives-macos',
+		'org.lwjgl:lwjgl-openal::natives-macos',
+		'org.lwjgl:lwjgl-openal::natives-windows',
+		'org.lwjgl:lwjgl-opengl::natives-macos'
 	)
 }

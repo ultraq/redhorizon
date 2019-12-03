@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC
-import org.lwjgl.openal.ALCCapabilities
-import org.lwjgl.openal.ALCapabilities
 import static org.lwjgl.openal.ALC10.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
@@ -42,17 +40,14 @@ class OpenALContext implements Closeable {
 	OpenALContext() {
 
 		alDevice = alcOpenDevice((ByteBuffer)null)
-		ALCCapabilities alcCapabilities = ALC.createCapabilities(alDevice)
+		def alcCapabilities = ALC.createCapabilities(alDevice)
 		if (!alcCapabilities.OpenALC10) {
 			throw new IllegalStateException()
 		}
 
 		alContext = alcCreateContext(alDevice, (IntBuffer)null)
 		makeCurrent()
-		ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities)
-		if (!alCapabilities.OpenAL10) {
-			throw new IllegalStateException()
-		}
+		AL.createCapabilities(alcCapabilities)
 	}
 
 	/**

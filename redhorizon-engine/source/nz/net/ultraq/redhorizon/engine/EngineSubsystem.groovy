@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit
  */
 abstract class EngineSubsystem implements Runnable {
 
-	protected final int targetRenderTimeMs
+	private final int targetRenderTimeMs
+	private final Closure renderLoopCondition
 	protected final CountDownLatch stopLatch = new CountDownLatch(1)
 
 	protected boolean running
@@ -35,10 +36,12 @@ abstract class EngineSubsystem implements Runnable {
 	 * Constructor, set the target render time.
 	 * 
 	 * @param targetRenderTimeMs
+	 * @param renderLoopCondition
 	 */
-	protected EngineSubsystem(int targetRenderTimeMs) {
+	protected EngineSubsystem(int targetRenderTimeMs = 0, Closure renderLoopCondition = null) {
 
 		this.targetRenderTimeMs = targetRenderTimeMs
+		this.renderLoopCondition = renderLoopCondition
 	}
 
 	/**
@@ -51,7 +54,7 @@ abstract class EngineSubsystem implements Runnable {
 
 		try {
 			running = true
-			while (running) {
+			while (running && (renderLoopCondition?.call() || true)) {
 				def loopStart = System.currentTimeMillis()
 				renderLoop()
 				def loopEnd = System.currentTimeMillis()
