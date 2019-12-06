@@ -44,7 +44,7 @@ public class RunLengthEncoding implements Decoder {
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
-		while (source.hasRemaining()) {
+		while (source.hasRemaining() && dest.hasRemaining()) {
 			byte value = source.get();
 
 			// Count byte & copy byte run
