@@ -121,7 +121,7 @@ class PcxFile implements ImageFile {
 		paletteInfo  = input.readShort()
 		hScreenSize  = input.readShort()
 		vScreenSize  = input.readShort()
-		filler = new byte[56]
+		filler = new byte[54]
 		input.readFully(filler)
 
 		width = xMax - xMin + 1
@@ -133,6 +133,9 @@ class PcxFile implements ImageFile {
 		def paletteData = ByteBuffer.wrapNative(imageAndPaletteData, imageAndPaletteData.length - PALETTE_SIZE, PALETTE_SIZE)
 
 		// Build up the raw image data for use with a palette later
+		// NOTE: The below is for the case when the scanline data exceeds the
+		//       width/height data, but have I ever encountered that?  Otherwise
+		//       this is double-handling the same data.
 		def scanLines = new ArrayList<ByteBuffer>()
 		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
 		while (encodedImageData.hasRemaining()) {
