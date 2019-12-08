@@ -29,6 +29,11 @@ import java.nio.ByteBuffer
 interface GraphicsRenderer {
 
 	/**
+	 * Clears the buffer.
+	 */
+	void clear()
+
+	/**
 	 * Create and fill a texture with the given image data.
 	 * 
 	 * @param data

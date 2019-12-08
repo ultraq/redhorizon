@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-
 /**
  * Interface for engine subsystems.
  * 
@@ -27,8 +24,6 @@ import java.util.concurrent.TimeUnit
 abstract class EngineSubsystem implements Runnable {
 
 	private final int targetRenderTimeMs
-	private final Closure renderLoopCondition
-	protected final CountDownLatch stopLatch = new CountDownLatch(1)
 
 	protected boolean running
 
@@ -38,45 +33,51 @@ abstract class EngineSubsystem implements Runnable {
 	 * @param targetRenderTimeMs
 	 * @param renderLoopCondition
 	 */
-	protected EngineSubsystem(int targetRenderTimeMs = 0, Closure renderLoopCondition = null) {
+	protected EngineSubsystem(int targetRenderTimeMs = 0) {
 
 		this.targetRenderTimeMs = targetRenderTimeMs
-		this.renderLoopCondition = renderLoopCondition
 	}
 
 	/**
 	 * Perform the render loop within a certain render budget, sleeping the thread
 	 * if necessary to not exceed it.
-	 *
+	 * 
 	 * @param renderLoop
 	 */
 	protected void renderLoop(Closure renderLoop) {
 
-		try {
-			running = true
-			while (running && (renderLoopCondition?.call() || true)) {
-				def loopStart = System.currentTimeMillis()
-				renderLoop()
-				def loopEnd = System.currentTimeMillis()
+		running = true
+		while (shouldRender()) {
+			def loopStart = System.currentTimeMillis()
+			renderLoop()
+			def loopEnd = System.currentTimeMillis()
 
-				def renderExecutionTime = loopEnd - loopStart
-				if (renderExecutionTime < targetRenderTimeMs) {
-					def waitTime = targetRenderTimeMs - renderExecutionTime
-					Thread.sleep(waitTime)
-				}
+			def renderExecutionTime = loopEnd - loopStart
+			if (renderExecutionTime < targetRenderTimeMs) {
+				def waitTime = targetRenderTimeMs - renderExecutionTime
+				Thread.sleep(waitTime)
 			}
-		}
-		finally {
-			stopLatch.countDown()
 		}
 	}
 
 	/**
-	 * Signal to stop this subsystem.
+	 * Return whether or not the render loop should be executed.  Used for
+	 * checking if the engine is in a state to continue or if it should be
+	 * shutting down for exiting.
+	 * 
+	 * @return
+	 */
+	protected boolean shouldRender() {
+
+		return running
+	}
+
+	/**
+	 * Stop this subsystem.  Signals to the subsystem to attempt a clean shutdown
+	 * at the next available opportunity.
 	 */
 	void stop() {
 
 		running = false
-		stopLatch.await(5, TimeUnit.SECONDS)
 	}
 }

@@ -36,19 +36,19 @@ class OpenALRenderer implements AudioRenderer {
 	 * 
 	 * @param closure
 	 */
-	private static <T> T checkForError(Closure closure) {
+	private static <T> T checkForError(Closure<T> closure) {
 
-		T result = (T)closure()
+		def result = closure()
 		def error = alGetError()
 		if (error != AL_NO_ERROR) {
-//			def errorCode =
-//				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
-//				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
-//				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
-//				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
-//				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
-//				error
-			throw new Exception("OpenAL error: ${alGetString(error)}")
+			def errorCode =
+				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
+				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
+				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
+				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
+				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
+				error
+			throw new Exception("OpenAL error: ${errorCode}")
 		}
 		return result
 	}

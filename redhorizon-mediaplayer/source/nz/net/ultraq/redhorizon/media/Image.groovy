@@ -50,12 +50,11 @@ class Image implements GraphicsElement, SceneElement {
 	 */
 	Image(ImageFile imageFile) {
 
-		width     = imageFile.width
-		height    = imageFile.height
-		format    = imageFile.format.value
-		imageData = imageFile.imageData
-
-		textureRect = new Rectanglef(0, 0, width, height)
+		width       = imageFile.width
+		height      = imageFile.height
+		format      = imageFile.format.value
+		imageData   = flipVertically(imageFile.imageData, width, height, format)
+		textureRect = new Rectanglef(-width / 2, -height / 2, width / 2, height / 2)
 	}
 
 //	/**
@@ -103,6 +102,29 @@ class Image implements GraphicsElement, SceneElement {
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteTextures(textureId)
+	}
+
+	/**
+	 * Because image data is usually goes from top-left to bottom-right, but
+	 * OpenGL texture coordinates are bottom-left to too-right, we need to flip
+	 * the image data vertically to get things the right way around for rendering.
+	 * 
+	 * @param imageData
+	 * @param width
+	 * @param height
+	 * @param format
+	 * @return A new direct buffer of the image data flipped on the vertical axis.
+	 */
+	private static ByteBuffer flipVertically(ByteBuffer imageData, int width, int height, int format) {
+
+		def flippedData = ByteBuffer.allocateDirectNative(imageData.limit())
+		for (def h = height - 1; h >= 0; h--) {
+			def line = new byte[width * format]
+			imageData.position(width * format * h).get(line)
+			flippedData.put(line)
+		}
+		flippedData.rewind()
+		return flippedData
 	}
 
 	@Override

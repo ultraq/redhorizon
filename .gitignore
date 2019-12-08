@@ -2,6 +2,10 @@
 /.idea
 /.logs
 /.preferences
-build
 /Mods/_Red Alert/Mix/
 /Mods/_Tiberium Dawn/Mix/
+build
+*.aud
+*.mix
+*.pcx
+*.v00

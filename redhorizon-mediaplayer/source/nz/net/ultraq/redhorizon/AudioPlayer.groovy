@@ -24,9 +24,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
 
 /**
  * A basic audio player, used primarily for testing purposes.
@@ -45,40 +43,20 @@ class AudioPlayer {
 	 */
 	void play() {
 
-		Throwable exception
-		def defaultThreadFactory = Executors.defaultThreadFactory()
-		def threadFactory = new ThreadFactory() {
-			@Override
-			Thread newThread(Runnable r) {
-				def thread = defaultThreadFactory.newThread(r)
-				thread.setUncaughtExceptionHandler({ t, e ->
-					logger.error("Error on thread ${t.name}", e)
-					exception = e
-				})
-				return thread
-			}
-		}
-
-		Executors.newCachedThreadPool(threadFactory).executeAndShutdown { executorService ->
+		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def soundEffect = new SoundEffect(soundFile, executorService)
 			def audioEngine = new AudioEngine(soundEffect)
-			def completeLatch = new CountDownLatch(1)
 
-			executorService.execute(audioEngine)
+			def engine = executorService.submit(audioEngine)
 
 			soundEffect.addEventListener(SoundEffect.EVENT_NAME_STOP) { event ->
-				completeLatch.countDown()
 				logger.debug('Sound stopped')
+				audioEngine.stop()
 			}
 			soundEffect.play()
 
 			logger.debug('Waiting for sound to stop playing')
-			completeLatch.await()
-
-			audioEngine.stop()
-			if (exception != null) {
-				throw exception
-			}
+			engine.get()
 		}
 	}
 }

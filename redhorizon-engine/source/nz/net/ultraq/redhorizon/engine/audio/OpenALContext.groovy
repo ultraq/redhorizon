@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.engine.AbstractContext
+
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC
 import static org.lwjgl.openal.ALC10.*
@@ -29,7 +31,7 @@ import java.nio.IntBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenALContext implements Closeable {
+class OpenALContext extends AbstractContext {
 
 	private final long alDevice
 	private final long alContext
@@ -46,8 +48,9 @@ class OpenALContext implements Closeable {
 		}
 
 		alContext = alcCreateContext(alDevice, (IntBuffer)null)
-		makeCurrent()
-		AL.createCapabilities(alcCapabilities)
+		withCurrent { ->
+			AL.createCapabilities(alcCapabilities)
+		}
 	}
 
 	/**
@@ -57,23 +60,18 @@ class OpenALContext implements Closeable {
 	@Override
 	void close() {
 
-		releaseCurrentContext()
 		alcDestroyContext(alContext)
 		alcCloseDevice(alDevice)
 	}
 
-	/**
-	 * Makes an OpenAL context current on the executing thread.
-	 */
+	@Override
 	void makeCurrent() {
 
 		alcMakeContextCurrent(alContext)
 	}
 
-	/**
-	 * Releases the OpenAL context that is current on the executing thread.
-	 */
-	void releaseCurrentContext() {
+	@Override
+	void releaseCurrent() {
 
 		alcMakeContextCurrent(NULL)
 	}

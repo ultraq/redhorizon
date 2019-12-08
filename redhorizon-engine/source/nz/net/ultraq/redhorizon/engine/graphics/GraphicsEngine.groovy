@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
+import java.util.concurrent.Callable
+import java.util.concurrent.FutureTask
+
 /**
  * Graphics subsystem, creates a display which drives the rendering loop of
  * drawing graphics objects.
@@ -29,16 +32,24 @@ import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 class GraphicsEngine extends EngineSubsystem {
 
 	private final SceneElement sceneElement
+	private final Closure needsMainThreadCallback
+
+	private OpenGLContext context
 
 	/**
 	 * Constructor, build a new graphics engine for rendering the given element.
 	 * 
 	 * @param sceneElement
+	 * @param needsMainThreadCallback
+	 *   Closure for notifying the caller that a given method (passed as the first
+	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
+	 *   be done on the main thread, so this indicates to the caller (which is
+	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(SceneElement sceneElement) {
+	GraphicsEngine(SceneElement sceneElement, Closure needsMainThreadCallback) {
 
-		super() { context -> !context.windowShouldClose() }
 		this.sceneElement = sceneElement
+		this.needsMainThreadCallback = needsMainThreadCallback
 	}
 
 	/**
@@ -51,45 +62,85 @@ class GraphicsEngine extends EngineSubsystem {
 		Thread.currentThread().name = 'Red Horizon - Graphics Engine'
 
 		// Initialization
-		new OpenGLContext().withCloseable { context ->
-			context.makeCurrent()
-
-			def renderer = new OpenGLRenderer()
+		context = waitForMainThread({ ->
+			return new OpenGLContext()
+		})
+		context.withCloseable {
+			def renderer
+			context.withCurrent { ->
+				renderer = new OpenGLRenderer(context)
+			}
 			def graphicsElementStates = [:]
 
 			// Rendering looop
 			renderLoop { ->
-				sceneElement.accept { element ->
-					if (element instanceof GraphicsElement) {
+				context.withCurrent { ->
+					renderer.clear()
 
-						// Register the graphics element
-						if (!graphicsElementStates[element]) {
-							graphicsElementStates << [(element): STATE_NEW]
+					sceneElement.accept { element ->
+						if (element instanceof GraphicsElement) {
+
+							// Register the graphics element
+							if (!graphicsElementStates[element]) {
+								graphicsElementStates << [(element): STATE_NEW]
+							}
+
+							def elementState = graphicsElementStates[element]
+
+							// Initialize the graphics element
+							if (elementState == STATE_NEW) {
+								element.init(renderer)
+								elementState = STATE_INITIALIZED
+								graphicsElementStates << [(element): elementState]
+							}
+
+							// Render the graphics element
+							element.render(renderer)
 						}
-
-						def elementState = graphicsElementStates[element]
-
-						// Initialize the graphics element
-						if (elementState == STATE_NEW) {
-							element.init(renderer)
-							elementState = STATE_INITIALIZED
-							graphicsElementStates << [(element): elementState]
-						}
-
-						// Render the graphics element
-						element.render(renderer)
 					}
+					context.swapBuffers()
 				}
-				context.swapBuffers()
-				context.pollEvents()
+				waitForMainThread({ ->
+					context.withCurrent { ->
+						context.pollEvents()
+					}
+				})
 			}
 
 			// Shutdown
-			graphicsElementStates.keySet().each { graphicsElement ->
-				graphicsElement.delete(renderer)
+			context.withCurrent { ->
+				graphicsElementStates.keySet().each { graphicsElement ->
+					graphicsElement.delete(renderer)
+				}
 			}
 		}
+	}
 
-		stopLatch.countDown()
+	@Override
+	protected boolean shouldRender() {
+
+		return super.shouldRender() && !context.windowShouldClose()
+	}
+
+	@Override
+	void stop() {
+
+		super.stop()
+		context.windowShouldClose(true)
+	}
+
+	/**
+	 * Put the graphics engine in a wait state until the given task has been
+	 * executed by the main thread, returning the result of execution in that
+	 * thread.
+	 * 
+	 * @param callable
+	 * @return
+	 */
+	private <T> T waitForMainThread(Callable<T> callable) {
+
+		def future = new FutureTask<T>(callable)
+		needsMainThreadCallback(future)
+		return future.get()
 	}
 }

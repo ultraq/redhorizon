@@ -55,42 +55,40 @@ class AudioEngine extends EngineSubsystem {
 
 		// Initialization
 		new OpenALContext().withCloseable { context ->
-			context.makeCurrent()
+			context.withCurrent { ->
+				def renderer = new OpenALRenderer()
+				def audioElementStates = [:]
 
-			def renderer = new OpenALRenderer()
-			def audioElementStates = [:]
+				// Rendering loop
+				renderLoop { ->
+					sceneElement.accept { element ->
+						if (element instanceof AudioElement) {
 
-			// Rendering loop
-			renderLoop { ->
-				sceneElement.accept { element ->
-					if (element instanceof AudioElement) {
+							// Register the audio element
+							if (!audioElementStates[element]) {
+								audioElementStates << [(element): STATE_NEW]
+							}
 
-						// Register the audio element
-						if (!audioElementStates[element]) {
-							audioElementStates << [(element): STATE_NEW]
+							def elementState = audioElementStates[element]
+
+							// Initialize the audio element
+							if (elementState == STATE_NEW) {
+								element.init(renderer)
+								elementState = STATE_INITIALIZED
+								audioElementStates << [(element): elementState]
+							}
+
+							// Render the audio element
+							element.render(renderer)
 						}
-
-						def elementState = audioElementStates[element]
-
-						// Initialize the audio element
-						if (elementState == STATE_NEW) {
-							element.init(renderer)
-							elementState = STATE_INITIALIZED
-							audioElementStates << [(element): elementState]
-						}
-
-						// Render the audio element
-						element.render(renderer)
 					}
 				}
-			}
 
-			// Shutdown
-			audioElementStates.keySet().each { audioElement ->
-				audioElement.delete(renderer)
+				// Shutdown
+				audioElementStates.keySet().each { audioElement ->
+					audioElement.delete(renderer)
+				}
 			}
 		}
-
-		stopLatch.countDown()
 	}
 }

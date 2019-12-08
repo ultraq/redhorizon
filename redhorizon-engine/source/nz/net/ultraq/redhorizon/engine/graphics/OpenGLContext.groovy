@@ -16,8 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.AbstractContext
+
 import org.lwjgl.glfw.GLFWErrorCallback
-import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -25,10 +26,11 @@ import static org.lwjgl.system.MemoryUtil.NULL
 
 /**
  * The OpenGL context, a concept used by OpenGL to control rendering threads.
+ * Using GLFW, this object represents both the window and the OpenGL context.
  * 
  * @author Emanuel Rabina
  */
-class OpenGLContext implements Closeable {
+class OpenGLContext extends AbstractContext {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
 
@@ -52,14 +54,19 @@ class OpenGLContext implements Closeable {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
+		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
+
 		window = glfwCreateWindow(width, height, 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
-		makeCurrent()
-		GL.createCapabilities()
-//		glfwSwapInterval(1)
+		withCurrent { ->
+			glfwSwapInterval(1)
+		}
 	}
 
 	/**
@@ -73,9 +80,7 @@ class OpenGLContext implements Closeable {
 		glfwTerminate()
 	}
 
-	/**
-	 * Make the OpenGL context current on the executing thread.
-	 */
+	@Override
 	void makeCurrent() {
 
 		glfwMakeContextCurrent(window)
@@ -89,10 +94,8 @@ class OpenGLContext implements Closeable {
 		glfwPollEvents()
 	}
 
-	/**
-	 * Releases the OpenGL context that is current on the executing thread.
-	 */
-	void releaseCurrentContext() {
+	@Override
+	void releaseCurrent() {
 
 		glfwMakeContextCurrent(NULL)
 	}
@@ -114,5 +117,15 @@ class OpenGLContext implements Closeable {
 	boolean windowShouldClose() {
 
 		return glfwWindowShouldClose(window)
+	}
+
+	/**
+	 * Manually set whether or not the underlying window should close.
+	 * 
+	 * @param close
+	 */
+	void windowShouldClose(boolean close) {
+
+		glfwSetWindowShouldClose(window, close)
 	}
 }

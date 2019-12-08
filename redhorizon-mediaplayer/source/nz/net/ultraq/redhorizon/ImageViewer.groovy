@@ -24,9 +24,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
+import java.util.concurrent.FutureTask
 
 /**
  * A basic image viewer, used primarily for testing purposes.
@@ -45,29 +44,31 @@ class ImageViewer {
 	 */
 	void view() {
 
-		Throwable exception
-		def defaultThreadFactory = Executors.defaultThreadFactory()
-		def threadFactory = new ThreadFactory() {
-			@Override
-			Thread newThread(Runnable r) {
-				def thread = defaultThreadFactory.newThread(r)
-				thread.setUncaughtExceptionHandler({ t, e ->
-					logger.error("Error on thread ${t.name}", e)
-					exception = e
-				})
-				return thread
-			}
-		}
-
-		Executors.newCachedThreadPool(threadFactory).executeAndShutdown { executorService ->
+		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def image = new Image(imageFile)
-			def graphicsEngine = new GraphicsEngine(image)
 
-			executorService.execute(graphicsEngine)
+			// To allow the graphics engine to submit items to execute in this thread
+			FutureTask executable = null
+			def graphicsEngine = new GraphicsEngine(image, { toExecute ->
+				executable = toExecute
+			})
 
-			if (exception != null) {
-				throw exception
+			def engine = executorService.submit(graphicsEngine)
+
+			logger.debug('Waiting for the window to be closed')
+
+			// Execute things from this thread when possible
+			while (!engine.done) {
+				while (!engine.done && !executable) {
+					Thread.onSpinWait()
+				}
+				if (executable) {
+					executable.run()
+					executable = null
+				}
 			}
+
+			engine.get()
 		}
 	}
 }
