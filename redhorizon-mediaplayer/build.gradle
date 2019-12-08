@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'application'
+}
+
 description = 'Media player for the Red Horizon project'
 
 dependencies {
@@ -22,8 +26,22 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.3',
+		'info.picocli:picocli:4.1.1',
 		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11',
 		'org.slf4j:slf4j-api:1.7.29'
 	)
+}
+
+processResources {
+	filesMatching('**/*.properties') {
+		expand([
+			version: version
+		])
+	}
+}
+
+application {
+	applicationName = 'play'
+	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
 }

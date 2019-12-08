@@ -23,6 +23,12 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import picocli.CommandLine.IVersionProvider
+import picocli.CommandLine.Option
+
+import java.util.concurrent.Callable
 
 /**
  * Basic media player, primarily used for testing the various file formats so
@@ -30,55 +36,50 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class MediaPlayer {
+@Command(name = "play", mixinStandardHelpOptions = true, version = '0.30.0-SNAPSHOT')
+class MediaPlayer implements Callable<Integer>, IVersionProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
+	@Option(names = ['-f', '--file'], description = 'Path to the input file to play/view', required = true)
+	String file
+
 	/**
-	 * Launch the media player and present the given file.
+	 * Launch the media player and present the given file in the most appropriate
+	 * manner.
 	 * 
-	 * @param args
+	 * @return
 	 */
-	static void main(String[] args) {
+	@Override
+	Integer call() {
 
-		try {
-			if (args.length == 0) {
-				throw new IllegalArgumentException('A path to a file must be supplied')
+		new FileInputStream(file).withCloseable { input ->
+			def fileClass = getFileClass()
+			def file = fileClass.newInstance(input)
+
+			if (file instanceof SoundFile) {
+				def audioPlayer = new AudioPlayer(file)
+				audioPlayer.play()
 			}
-
-			def (pathToFile) = args
-			new FileInputStream(pathToFile).withCloseable { input ->
-				def fileClass = getFileClass(pathToFile)
-				def file = fileClass.newInstance(input)
-
-				if (file instanceof SoundFile) {
-					def audioPlayer = new AudioPlayer(file)
-					audioPlayer.play()
-				}
-				else if (file instanceof ImageFile) {
-					def imageViewer = new ImageViewer(file)
-					imageViewer.view()
-				}
-				else {
-					throw new UnsupportedOperationException("No media player for the associated file class of ${fileClass}")
-				}
+			else if (file instanceof ImageFile) {
+				def imageViewer = new ImageViewer(file)
+				imageViewer.view()
 			}
-		}
-		catch (Exception ex) {
-			logger.error(ex.message, ex)
-			System.exit(1)
+			else {
+				logger.error("No media player for the associated file class of ${fileClass}")
+				throw new UnsupportedOperationException()
+			}
 		}
 	}
 
 	/**
 	 * Find the appropriate file class for reading the file at the given path.
 	 * 
-	 * @param pathToFile
 	 * @return
 	 */
-	private static Class<?> getFileClass(String pathToFile) {
+	private Class<?> getFileClass() {
 
-		def suffix = pathToFile.substring(pathToFile.lastIndexOf('.') + 1)
+		def suffix = file.substring(file.lastIndexOf('.') + 1)
 		def fileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
@@ -86,8 +87,32 @@ class MediaPlayer {
 				return annotation.value().contains(suffix)
 			}
 		if (!fileClass) {
-			throw new IllegalArgumentException("No implementation for ${suffix} filetype")
+			logger.error("No implementation for ${suffix} filetype")
+			throw new IllegalArgumentException()
 		}
 		return fileClass
+	}
+
+	@Override
+	String[] getVersion() {
+
+		def properties = new Properties()
+		getClass().getResourceAsStream('/nz/net/ultraq/redhorizon/mediaplayer.properties').withCloseable { inputStream ->
+			properties.load(inputStream)
+		}
+		return [
+			properties.getProperty('version')
+		]
+	}
+
+	/**
+	 * Bootstrap the application using Picocli.
+	 * 
+	 * @param args
+	 */
+	static void main(String[] args) {
+//		System.err = new PrintStream(OutputStream.nullOutputStream())
+//		System.out = new PrintStream(OutputStream.nullOutputStream())
+		System.exit(new CommandLine(new MediaPlayer()).execute(args))
 	}
 }
