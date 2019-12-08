@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.media
+plugins {
+	id 'application'
+}
 
-/**
- * Inspired by the DOM, an event listener is a method which is applied to an
- * {@link EventTarget} and invoked when that target emits the event being
- * listened for.
- * 
- * @author Emanuel Rabina
- */
-interface EventListener {
+description = 'Mix file reader and extractor for the Red Horizon project'
 
-	/**
-	 * The action for handling the event for which the listener was registered.
-	 * 
-	 * @param event
-	 */
-	public <E extends Event> void handleEvent(E event)
+dependencies {
+	implementation(
+		project(':redhorizon-extensions'),
+		project(':redhorizon-filetypes'),
+		'ch.qos.logback:logback-classic:1.2.3',
+		'info.picocli:picocli:4.1.1',
+		'org.slf4j:slf4j-api:1.7.29'
+	)
+}
+
+application {
+	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
+	applicationName = 'mix'
+	applicationDefaultJvmArgs = [
+		"-Dredhorizon.version=${version}"
+	]
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.media
+package nz.net.ultraq.redhorizon.events
 
 /**
  * Inspired by the DOM, an event target is a class that can generate events

@@ -35,7 +35,7 @@ import java.util.concurrent.Callable
  * 
  * @author Emanuel Rabina
  */
-@Command(name = "play", mixinStandardHelpOptions = true, version = '0.30.0-SNAPSHOT')
+@Command(name = "play", mixinStandardHelpOptions = true, version = '${sys:redhorizon.version}')
 class MediaPlayer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)

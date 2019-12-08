@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable

@@ -32,7 +32,7 @@ import java.util.concurrent.Callable
  * 
  * @author Emanuel Rabina
  */
-@Command(name = 'mix', mixinStandardHelpOptions = true, version = '0.30.0-SNAPSHOT')
+@Command(name = 'mix', mixinStandardHelpOptions = true, version = '${sys:redhorizon.version}')
 class MixReader implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MixReader)
@@ -70,12 +70,12 @@ class MixReader implements Callable<Integer> {
 
 	/**
 	 * Bootstrap the application using Picocli.
-	 *
+	 * 
 	 * @param args
 	 */
 	static void main(String[] args) {
 //		System.err = new PrintStream(OutputStream.nullOutputStream())
 //		System.out = new PrintStream(OutputStream.nullOutputStream())
-		System.exit(new CommandLine(new MediaPlayer()).execute(args))
+		System.exit(new CommandLine(new MixReader()).execute(args))
 	}
 }
