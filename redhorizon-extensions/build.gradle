@@ -16,9 +16,6 @@
 
 description = 'Groovy extension module for the Red Horizon project'
 
-/**
- * Replace module name and version tokens in the module descriptor.
- */
 processResources {
 	expand([
 		moduleVersion: version
@@ -26,6 +23,9 @@ processResources {
 }
 
 dependencies {
+	implementation(
+		'org.joml:joml:1.9.19'
+	)
 	testImplementation(
 		'org.spockframework:spock-core:1.3-groovy-2.5'
 	)

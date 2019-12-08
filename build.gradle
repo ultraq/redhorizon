@@ -22,7 +22,7 @@ allprojects {
 
 // Root project configuration
 //name        = 'Red Horizon'
-description = 'Recreating the original 2D Command & Conquer games for a modern programming community'
+description = 'Recreating the original 2D Command & Conquer games'
 
 // Subproject configuration
 subprojects {

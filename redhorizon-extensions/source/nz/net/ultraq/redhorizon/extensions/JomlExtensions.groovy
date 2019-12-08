@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.geometry.extensions
+package nz.net.ultraq.redhorizon.extensions
 
 import org.joml.Vector3f
 
