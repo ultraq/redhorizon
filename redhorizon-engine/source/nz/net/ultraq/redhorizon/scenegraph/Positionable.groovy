@@ -25,5 +25,5 @@ import org.joml.Vector3f
  */
 trait Positionable {
 
-	Vector3f position = new Vector3f(0, 0, 0)
+	final Vector3f position = new Vector3f(0, 0, 0)
 }

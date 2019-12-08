@@ -41,9 +41,6 @@ public class PackData implements Decoder {
 		this.chunks = chunks;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 

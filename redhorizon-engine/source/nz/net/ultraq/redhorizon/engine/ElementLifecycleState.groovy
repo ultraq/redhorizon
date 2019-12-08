@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine
 /**
  * Represents at which point in a lifecycle that a render target is currently
  * in.
- * 
+ * <p>
  * TODO: Any lifecycle Java libraries out there?
  * 
  * @author Emanuel Rabina

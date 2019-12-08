@@ -26,8 +26,8 @@ import java.nio.ByteBuffer;
 public interface Decoder {
 
 	/**
-	 * Decodes the information in the <tt>source</tt> buffer, putting it into
-	 * the <tt>dest</tt> buffer.
+	 * Decodes the information in the {@code source} buffer, putting it into the
+	 * {@code dest} buffer.
 	 * 
 	 * @param source
 	 * @param dest
@@ -35,5 +35,5 @@ public interface Decoder {
 	 * 				 decoders that require multiple source buffers to produce a
 	 * 				 decoded result (eg: XOR'ed images).
 	 */
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
+	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
 }

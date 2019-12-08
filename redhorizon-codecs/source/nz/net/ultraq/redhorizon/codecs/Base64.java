@@ -31,9 +31,6 @@ public class Base64 implements Decoder {
 	private static final String BASE64_ALPHABET =
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 

@@ -73,10 +73,8 @@ public class Format40 implements Encoder, Decoder {
 //	private static final int   CMD_XOR_L_THRESHOLD = 2;
 
 	/**
-	 * {@inheritDoc}
-	 * 
-	 * @param extra A single 'base' buffer that the decoded data will be based
-	 * 				upon.
+	 * @param extra
+	 *   A single 'base' buffer that the decoded data will be based upon.
 	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
@@ -163,10 +161,8 @@ public class Format40 implements Encoder, Decoder {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * 
-	 * @param extra A single 'base' buffer that the encoded data will be based
-	 * 				upon.
+	 * @param extra
+	 *   A single 'base' buffer that the encoded data will be based upon.
 	 */
 	@Override
 	public void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {

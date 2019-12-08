@@ -63,9 +63,6 @@ public class Format80 implements Encoder, Decoder {
 	private static final int  CMD_FILL_MAX         = 65535;			// 11111111 11111111, 0xffff
 	private static final int  CMD_FILL_THRESHOLD   = 3;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
@@ -137,9 +134,6 @@ public class Format80 implements Encoder, Decoder {
 		dest.flip();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 

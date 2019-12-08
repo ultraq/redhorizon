@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine
 
 /**
- * Interface for engine subsystems.
+ * Common code for the engine subsystems.
  * 
  * @author Emanuel Rabina
  */

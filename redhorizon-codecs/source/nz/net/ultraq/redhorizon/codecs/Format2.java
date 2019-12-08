@@ -39,9 +39,6 @@ public class Format2 implements Encoder, Decoder {
 	private static final byte CMD_FILL     = 0;
 	private static final byte CMD_FILL_VAL = 0;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
@@ -63,9 +60,6 @@ public class Format2 implements Encoder, Decoder {
 		dest.flip();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 

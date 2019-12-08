@@ -25,22 +25,19 @@ import java.nio.ByteBuffer;
  */
 public class RunLengthEncoding implements Decoder {
 
-	private final byte countbyte;
+	private final byte countByte;
 
 	/**
 	 * Constructor, configures the run-length decoding to recognize the given
 	 * byte as the 'count' byte.
 	 * 
-	 * @param countbyte
+	 * @param countByte
 	 */
-	public RunLengthEncoding(byte countbyte) {
+	public RunLengthEncoding(byte countByte) {
 
-		this.countbyte = countbyte;
+		this.countByte = countByte;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
@@ -48,8 +45,8 @@ public class RunLengthEncoding implements Decoder {
 			byte value = source.get();
 
 			// Count byte & copy byte run
-			if ((value & countbyte) == countbyte) {
-				int count = value & ~countbyte;
+			if ((value & countByte) == countByte) {
+				int count = value & ~countByte;
 				byte copy = source.get();
 
 				while (count-- > 0) {

@@ -15,7 +15,7 @@
  */
 
 /**
- * A collection of encoders/decoders for C&C file data.  The codecs here are
+ * A collection of encoders/decoders for C&amp;C file data.  The codecs here are
  * used mostly by the {@code redhorizon-filetypes} packages and serve as working
  * examples for JVM programmers.
  */

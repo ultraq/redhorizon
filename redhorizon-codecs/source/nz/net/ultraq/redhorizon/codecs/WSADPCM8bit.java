@@ -40,9 +40,6 @@ public class WSADPCM8bit implements Decoder {
 		-9, -8, -6, -5, -4, -3, -2, -1, 0,  1,  2,  3,  4,  5,  6,  8
 	};
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 

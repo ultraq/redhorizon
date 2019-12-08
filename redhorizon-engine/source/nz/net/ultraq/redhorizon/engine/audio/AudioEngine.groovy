@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 /**
- * Audio subsystem, manages the connection to the audio hardware and rendering
+ * Audio subsystem, manages the connection to the audio hardware and playback
  * of audio objects.
  * 
  * @author Emanuel Rabina

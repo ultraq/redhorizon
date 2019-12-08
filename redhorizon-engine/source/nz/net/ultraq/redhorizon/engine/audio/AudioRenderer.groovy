@@ -23,7 +23,7 @@ import org.joml.Vector3f
 import java.nio.ByteBuffer
 
 /**
- * Interface for the audio renderer which is responsible for playing back sounds
+ * The audio renderer is responsible for setting up and playing back sounds
  * through the audio device.
  * 
  * @author Emanuel Rabina

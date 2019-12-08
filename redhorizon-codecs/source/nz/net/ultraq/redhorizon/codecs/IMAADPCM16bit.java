@@ -49,12 +49,10 @@ public class IMAADPCM16bit implements Decoder {
 	};
 
 	/**
-	 * {@inheritDoc}
-	 * 
-	 * @param extra 2 additional buffers, the first holding the last decoded
-	 * 				PCM index value, the second holding the last decoded PCM
-	 * 				sample value.  The buffer values are then updated after
-	 * 				decoding.
+	 * @param extra
+	 *   2 additional buffers, the first holding the last decoded PCM index value,
+	 *   the second holding the last decoded PCM sample value.  The buffer values
+	 *   are then updated after decoding.
 	 */
 	@Override
 	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {

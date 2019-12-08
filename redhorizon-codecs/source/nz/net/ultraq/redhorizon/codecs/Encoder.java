@@ -26,8 +26,8 @@ import java.nio.ByteBuffer;
 public interface Encoder {
 
 	/**
-	 * Encodes the information in the <tt>source</tt> buffer, putting it into
-	 * the <tt>dest</tt> buffer.
+	 * Encodes the information in the {@code source} buffer, putting it into the
+	 * {@code dest} buffer.
 	 * 
 	 * @param source
 	 * @param dest
@@ -35,5 +35,5 @@ public interface Encoder {
 	 * 				 encoders that require multiple source buffers to produce an
 	 * 				 encoded result (eg: XOR'ed images).
 	 */
-	public void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
+	void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
 }
