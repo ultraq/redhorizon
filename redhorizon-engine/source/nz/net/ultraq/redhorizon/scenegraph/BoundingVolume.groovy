@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.geometry.Ray
-import nz.net.ultraq.redhorizon.geometry.Vector3f
+import org.joml.Rayf
+import org.joml.Vector3f
 
 import groovy.transform.TupleConstructor
 
@@ -42,7 +42,7 @@ class BoundingVolume {
 	 * @param ray Ray to test against
 	 * @return <tt>true</tt> if this volume is intersected by the ray.
 	 */
-	boolean intersects(Ray ray) {
+	boolean intersects(Rayf ray) {
 
 		return false
 	}

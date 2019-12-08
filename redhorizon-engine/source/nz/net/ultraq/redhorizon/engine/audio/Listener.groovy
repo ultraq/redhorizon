@@ -17,10 +17,11 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.geometry.Orientation
-import nz.net.ultraq.redhorizon.geometry.Vector3f
 import nz.net.ultraq.redhorizon.scenegraph.Positionable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
+
+import org.joml.Vector3f
 
 /**
  * The player's ears into the world.

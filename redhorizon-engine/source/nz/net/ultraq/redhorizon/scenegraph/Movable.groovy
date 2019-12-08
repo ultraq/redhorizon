@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.geometry.Vector3f
+import org.joml.Vector3f
 
 /**
  * Trait for objects that have movement characteristics associated with them,

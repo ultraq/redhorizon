@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.geometry.Rectanglef
+import org.joml.Rectanglef
 
 import java.nio.ByteBuffer
 

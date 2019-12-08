@@ -17,7 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.geometry.Orientation
-import nz.net.ultraq.redhorizon.geometry.Vector3f
+
+import org.joml.Vector3f
 
 import java.nio.ByteBuffer
 

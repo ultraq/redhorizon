@@ -17,8 +17,9 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
-import nz.net.ultraq.redhorizon.geometry.Ray
-import nz.net.ultraq.redhorizon.geometry.Vector3f
+
+import org.joml.Rayf
+import org.joml.Vector3f
 
 import java.util.concurrent.ConcurrentSkipListSet
 
@@ -106,7 +107,7 @@ class Node implements Comparable<Node>, Movable, SceneElement {
 	/**
 	 * {@inheritDoc}
 	 */
-	boolean intersects(Ray ray) {
+	boolean intersects(Rayf ray) {
 
 		return getBoundingVolume().intersects(ray)
 	}

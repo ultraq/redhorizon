@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.geometry.Ray
-import nz.net.ultraq.redhorizon.geometry.Vector3f
+import org.joml.Rayf
+import org.joml.Vector3f
 
 /**
  * Using jMonkeyEngine's word for it, a 'spatial' is an item that can exist
@@ -50,7 +50,7 @@ abstract class Spatial implements SceneElement {
 	 * @return <tt>true</tt> if the bounding volume of this object is
 	 * 		   intersected by the ray.
 	 */
-	abstract boolean intersects(Ray ray)
+	abstract boolean intersects(Rayf ray)
 
 	/**
 	 * Sets the rotation of this object.  Rotation values outside of the range

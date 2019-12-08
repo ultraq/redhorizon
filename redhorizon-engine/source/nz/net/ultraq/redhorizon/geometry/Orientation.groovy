@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.geometry
 
+import org.joml.Vector3f
+
 /**
  * The orientation of an object, consisting of a pair of 3-tuples: an 'up' and
  * an 'at'.

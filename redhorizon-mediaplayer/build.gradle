@@ -22,6 +22,7 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.3',
+		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11',
 		'org.slf4j:slf4j-api:1.7.29'
 	)

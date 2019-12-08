@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.geometry
+package nz.net.ultraq.redhorizon.geometry.extensions
 
-import groovy.transform.TupleConstructor
+import org.joml.Vector3f
 
 /**
- * A classic rectangle, 
+ * Extensions to JOMLs objects to work with Red Horizon.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class Rectanglef {
+class JomlExtensions {
 
-	float minX
-	float minY
-	float maxX
-	float maxY
+	/**
+	 * Return a vector's values as a {@code float[]}.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	static Object asType(Vector3f self, Class clazz) {
+
+		if (clazz == float[]) {
+			return [self.x, self.y, self.z]
+		}
+		throw new IllegalArgumentException("Cannot convert Vector3f to type ${clazz}")
+	}
 }
