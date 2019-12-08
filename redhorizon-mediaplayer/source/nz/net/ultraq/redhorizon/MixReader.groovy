@@ -20,6 +20,11 @@ import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import picocli.CommandLine.Parameters
+
+import java.util.concurrent.Callable
 
 /**
  * Write the data for a named entry in a MIX file, used primarily for testing
@@ -27,44 +32,50 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class MixReader {
+@Command(name = 'mix', mixinStandardHelpOptions = true, version = '0.30.0-SNAPSHOT')
+class MixReader implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MixReader)
+
+	@Parameters(index = '0', arity = '1', description = 'Path to the mix file to read')
+	String mixFile
+
+	@Parameters(index = '1', arity = '1', description = 'Name of the entry in the mix file')
+	String entryName
 
 	/**
 	 * Read from a MIX file the entry with the given name, writing it out to the
 	 * same name on the file system.
-	 * 
+	 */
+	@Override
+	Integer call() {
+
+		def mixFile = new MixFile(new File(mixFile))
+		mixFile.withCloseable { mix ->
+			def entry = mix.getEntry(entryName)
+			if (entry) {
+				logger.info("${entryName} found, writing to file")
+				mix.getEntryData(entry).withCloseable { entryInputStream ->
+					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
+						entryInputStream.transferTo(entryOutputStream)
+					}
+				}
+			}
+			else {
+				logger.error("${entryName} not found in ${mixFile}")
+				throw new IllegalArgumentException()
+			}
+		}
+	}
+
+	/**
+	 * Bootstrap the application using Picocli.
+	 *
 	 * @param args
 	 */
 	static void main(String[] args) {
-
-		try {
-			if (args.length != 2) {
-				throw new IllegalArgumentException('Path to mix file and name of entry required')
-			}
-
-			def (pathToMixFile, entryName) = args
-			def mixFile = new MixFile(new File(pathToMixFile))
-			mixFile.withCloseable { mix ->
-				def entry = mix.getEntry(entryName)
-				if (entry) {
-					logger.info("${entryName} found, writing to file")
-					mix.getEntryData(entry).withCloseable { entryInputStream ->
-						new FileOutputStream(entryName).withCloseable { entryOutputStream ->
-							entryInputStream.transferTo(entryOutputStream)
-						}
-					}
-				}
-				else {
-					logger.error("${entryName} not found in ${pathToMixFile}")
-					System.exit(1)
-				}
-			}
-		}
-		catch (Exception ex) {
-			logger.error(ex.message, ex)
-			System.exit(1)
-		}
+//		System.err = new PrintStream(OutputStream.nullOutputStream())
+//		System.out = new PrintStream(OutputStream.nullOutputStream())
+		System.exit(new CommandLine(new MediaPlayer()).execute(args))
 	}
 }

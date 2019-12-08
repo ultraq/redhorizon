@@ -25,8 +25,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
-import picocli.CommandLine.IVersionProvider
-import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
 
 import java.util.concurrent.Callable
 
@@ -37,11 +36,11 @@ import java.util.concurrent.Callable
  * @author Emanuel Rabina
  */
 @Command(name = "play", mixinStandardHelpOptions = true, version = '0.30.0-SNAPSHOT')
-class MediaPlayer implements Callable<Integer>, IVersionProvider {
+class MediaPlayer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
-	@Option(names = ['-f', '--file'], description = 'Path to the input file to play/view', required = true)
+	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
 
 	/**
@@ -91,18 +90,6 @@ class MediaPlayer implements Callable<Integer>, IVersionProvider {
 			throw new IllegalArgumentException()
 		}
 		return fileClass
-	}
-
-	@Override
-	String[] getVersion() {
-
-		def properties = new Properties()
-		getClass().getResourceAsStream('/nz/net/ultraq/redhorizon/mediaplayer.properties').withCloseable { inputStream ->
-			properties.load(inputStream)
-		}
-		return [
-			properties.getProperty('version')
-		]
 	}
 
 	/**
