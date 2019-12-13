@@ -1,9 +1,11 @@
 /.gradle
 /.idea
-/.logs
 /.preferences
+/bin
+/lib
 /Mods/_Red Alert/Mix/
 /Mods/_Tiberium Dawn/Mix/
+.logs
 build
 *.aud
 *.mix

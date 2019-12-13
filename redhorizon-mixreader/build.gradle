@@ -34,6 +34,22 @@ application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
 	applicationName = 'mix'
 	applicationDefaultJvmArgs = [
+		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
 	]
+}
+
+installDist {
+	doLast {
+		copy {
+			from "${buildDir}/install/${applicationName}"
+			into '..'
+		}
+		copy {
+			from('../redhorizon-filetypes') {
+				include '*MixFileKey*'
+			}
+			into '../lib'
+		}
+	}
 }
