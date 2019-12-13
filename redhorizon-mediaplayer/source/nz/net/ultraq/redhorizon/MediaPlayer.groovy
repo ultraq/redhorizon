@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 
 import org.reflections.Reflections
 import org.slf4j.Logger
@@ -43,6 +44,9 @@ class MediaPlayer implements Callable<Integer> {
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
 
+	@Parameters(index = '1', description = 'If the first parameter is a mix file, this is the name of the entry in the mix file to play')
+	String entryName
+
 	/**
 	 * Launch the media player and present the given file in the most appropriate
 	 * manner.
@@ -52,33 +56,38 @@ class MediaPlayer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		new FileInputStream(file).withCloseable { input ->
-			def fileClass = getFileClass()
-			def file = fileClass.newInstance(input)
-
-			if (file instanceof SoundFile) {
-				def audioPlayer = new AudioPlayer(file)
-				audioPlayer.play()
-			}
-			else if (file instanceof ImageFile) {
-				def imageViewer = new ImageViewer(file)
-				imageViewer.view()
-			}
-			else {
-				logger.error("No media player for the associated file class of ${fileClass}")
-				throw new UnsupportedOperationException()
+		if (file.endsWith('.mix')) {
+			new MixFile(new File(file)).withCloseable { mix ->
+				def entry = mix.getEntry(entryName)
+				if (entry) {
+					mix.getEntryData(entry).withCloseable { entryInputStream ->
+						play(entryName, entryInputStream)
+					}
+				}
+				else {
+					logger.error("${entryName} not found in ${file}")
+					throw new IllegalArgumentException()
+				}
 			}
 		}
+		else {
+			new FileInputStream(file).withCloseable { input ->
+				play(file, input)
+			}
+		}
+		return 0
 	}
 
 	/**
-	 * Find the appropriate file class for reading the file at the given path.
+	 * Given the input, load the appropriate file type and launch the appropriate
+	 * media player.
 	 * 
-	 * @return
+	 * @param filename
+	 * @param input
 	 */
-	private Class<?> getFileClass() {
+	private void play(String filename, InputStream input) {
 
-		def suffix = file.substring(file.lastIndexOf('.') + 1)
+		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
 		def fileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
@@ -89,7 +98,20 @@ class MediaPlayer implements Callable<Integer> {
 			logger.error("No implementation for ${suffix} filetype")
 			throw new IllegalArgumentException()
 		}
-		return fileClass
+
+		def file = fileClass.newInstance(input)
+		if (file instanceof SoundFile) {
+			def audioPlayer = new AudioPlayer(file)
+			audioPlayer.play()
+		}
+		else if (file instanceof ImageFile) {
+			def imageViewer = new ImageViewer(file)
+			imageViewer.view()
+		}
+		else {
+			logger.error("No media player for the associated file class of ${fileClass}")
+			throw new UnsupportedOperationException()
+		}
 	}
 
 	/**

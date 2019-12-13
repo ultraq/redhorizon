@@ -50,8 +50,7 @@ class MixReader implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		def mixFile = new MixFile(new File(mixFile))
-		mixFile.withCloseable { mix ->
+		new MixFile(new File(mixFile)).withCloseable { mix ->
 			def entry = mix.getEntry(entryName)
 			if (entry) {
 				logger.info("${entryName} found, writing to file")
