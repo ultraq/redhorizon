@@ -15,7 +15,7 @@
   -->
 
 <configuration>
-	<timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss"/>
+	<timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -24,7 +24,7 @@
 	</appender>
 
 	<appender name="file" class="ch.qos.logback.core.FileAppender">
-		<file>.logs/mediaplayer-${timestamp}.log</file>
+		<file>.logs/mixreader-${timestamp}.log</file>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
