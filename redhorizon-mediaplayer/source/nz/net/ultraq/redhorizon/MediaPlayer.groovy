@@ -44,7 +44,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
 
-	@Parameters(index = '1', description = 'If the first parameter is a mix file, this is the name of the entry in the mix file to play')
+	@Parameters(index = '1', arity = '0..1', description = 'If the first parameter is a mix file, this is the name of the entry in the mix file to play')
 	String entryName
 
 	/**
@@ -120,8 +120,6 @@ class MediaPlayer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-//		System.err = new PrintStream(OutputStream.nullOutputStream())
-//		System.out = new PrintStream(OutputStream.nullOutputStream())
 		System.exit(new CommandLine(new MediaPlayer()).execute(args))
 	}
 }

@@ -73,8 +73,6 @@ class MixReader implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-//		System.err = new PrintStream(OutputStream.nullOutputStream())
-//		System.out = new PrintStream(OutputStream.nullOutputStream())
 		System.exit(new CommandLine(new MixReader()).execute(args))
 	}
 }
