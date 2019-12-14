@@ -25,8 +25,7 @@ dependencies {
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw',
 		'org.lwjgl:lwjgl-openal',
-		'org.lwjgl:lwjgl-opengl',
-		'org.slf4j:slf4j-api:1.7.29'
+		'org.lwjgl:lwjgl-opengl'
 	)
 	runtimeOnly(
 		'org.lwjgl:lwjgl::natives-macos',
