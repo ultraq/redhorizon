@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'distribution'
+}
+
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
@@ -23,6 +27,19 @@ allprojects {
 // Root project configuration
 //name        = 'Red Horizon'
 description = 'Recreating the original 2D Command & Conquer games'
+
+distributions {
+	main {
+		contents {
+			from 'redhorizon-mediaplayer/build/install/play'
+			from 'redhorizon-mixreader/build/install/mix'
+			from('.') {
+				include 'LICENSE.txt'
+				include 'README.md'
+			}
+		}
+	}
+}
 
 // Subproject configuration
 subprojects {

@@ -38,17 +38,13 @@ application {
 	]
 }
 
-installDist {
-	doLast {
-		copy {
-			from "${buildDir}/install/${applicationName}"
-			into '..'
-		}
-		copy {
+distributions {
+	main {
+		contents {
 			from('../redhorizon-filetypes') {
 				include '*MixFileKey*'
+				into 'lib'
 			}
-			into '../lib'
 		}
 	}
 }
