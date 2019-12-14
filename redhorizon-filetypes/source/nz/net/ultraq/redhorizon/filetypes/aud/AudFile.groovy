@@ -91,6 +91,12 @@ class AudFile implements SoundFile {
 
 		return new Worker() {
 			boolean complete
+			boolean running
+
+			@Override
+			void stop() {
+				running = false
+			}
 
 			@Override
 			void work(ExecutorService executorService, Closure handler) {
@@ -98,6 +104,7 @@ class AudFile implements SoundFile {
 				executorService.execute({ ->
 					Thread.currentThread().name = "AudFile :: Decoding"
 					logger.debug('AudFile decoding started')
+					running = true
 
 					def bytesRead = 0
 					def decoder =
@@ -108,7 +115,7 @@ class AudFile implements SoundFile {
 					def sample = new byte[4]
 
 					// Decompress the aud file data by chunks
-					while (bytesRead < compressedSize) {
+					while (running && (bytesRead < compressedSize)) {
 
 						// Chunk header
 						def compressedSize   = input.readShort()
@@ -135,10 +142,29 @@ class AudFile implements SoundFile {
 						bytesRead += 8 + compressedSize
 					}
 
-					logger.debug('AudFile decoding complete')
+					// TODO: This running state might exist in the FutureTask class
+					if (!running) {
+						logger.debug('AudFile decoding complete')
+					}
 					complete = true
+					running = false
 				})
 			}
 		}
+	}
+
+	/**
+	 * Return a summary of this file.
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		return """
+			AUD file, ${frequency}hz ${bitrate.value} bit ${channels == CHANNELS_STEREO ? 'Stereo' : 'Mono'}
+			Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm
+			Compressed: ${compressedSize} bytes => Uncompressed: ${uncompressedSize} bytes
+		""".stripIndent().trim()
 	}
 }

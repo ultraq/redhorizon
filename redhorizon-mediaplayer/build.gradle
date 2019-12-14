@@ -31,13 +31,27 @@ dependencies {
 	)
 }
 
+def openJavaPackages = [
+  'java.io',
+	'java.lang',
+	'java.lang.annotation',
+	'java.lang.invoke',
+	'java.lang.reflect',
+	'java.nio',
+	'java.util',
+	'java.util.concurrent',
+	'sun.nio.ch'
+]
+
 application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
 	applicationName = 'play'
 	applicationDefaultJvmArgs = [
 		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
-	]
+	] + openJavaPackages.inject([]) { acc, javaPackage ->
+		return acc << '--add-opens' << "java.base/${javaPackage}=ALL-UNNAMED"
+	}
 }
 
 installDist {

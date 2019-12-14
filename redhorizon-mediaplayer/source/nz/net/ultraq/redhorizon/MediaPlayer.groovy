@@ -40,6 +40,7 @@ import java.util.concurrent.Callable
 class MediaPlayer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
+	private static final String version = System.getProperty('redhorizon.version')
 
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
@@ -56,10 +57,14 @@ class MediaPlayer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
+		logger.info("Red Horizon Media Player ${version ?: '(development)'}")
+
+		logger.info("Loading ${file}")
 		if (file.endsWith('.mix')) {
 			new MixFile(new File(file)).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
+					logger.info("Loading ${entryName}...")
 					mix.getEntryData(entry).withCloseable { entryInputStream ->
 						play(entryName, entryInputStream)
 					}

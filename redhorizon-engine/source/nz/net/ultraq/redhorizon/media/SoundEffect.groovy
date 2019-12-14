@@ -25,9 +25,6 @@ import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -40,8 +37,6 @@ import java.util.concurrent.ExecutorService
  * @author Emanuel Rabina
  */
 class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SceneElement {
-
-	private static final Logger logger = LoggerFactory.getLogger(SoundEffect)
 
 	static final String EVENT_NAME_STOP = 'Stop'
 
@@ -90,6 +85,8 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 	@Override
 	void delete(AudioRenderer renderer) {
 
+		soundDataWorker.stop()
+		soundDataBuffer.drainTo([])
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(bufferIds as int[])
 	}

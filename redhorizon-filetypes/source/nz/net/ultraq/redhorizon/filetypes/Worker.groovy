@@ -36,6 +36,11 @@ interface Worker {
 	boolean isComplete()
 
 	/**
+	 * Signal to the worker to stop.
+	 */
+	void stop()
+
+	/**
 	 * Start the worker, passing resulting chunks to the given closure.
 	 * 
 	 * @param executorService

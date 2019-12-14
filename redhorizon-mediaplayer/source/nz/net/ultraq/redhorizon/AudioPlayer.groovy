@@ -43,6 +43,8 @@ class AudioPlayer {
 	 */
 	void play() {
 
+		logger.info("File details: ${soundFile}")
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def soundEffect = new SoundEffect(soundFile, executorService)
 			def audioEngine = new AudioEngine(soundEffect)
@@ -55,7 +57,16 @@ class AudioPlayer {
 			}
 			soundEffect.play()
 
-			logger.debug('Waiting for sound to stop playing')
+			logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
+
+			executorService.submit({ ->
+				def reader = new InputStreamReader(System.in)
+				if (reader.read()) {
+					logger.debug('Keyboard input received')
+					audioEngine.stop()
+				}
+			})
+
 			engine.get()
 		}
 	}
