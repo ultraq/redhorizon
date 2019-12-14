@@ -31,18 +31,6 @@ dependencies {
 	)
 }
 
-def openJavaPackages = [
-  'java.io',
-	'java.lang',
-	'java.lang.annotation',
-	'java.lang.invoke',
-	'java.lang.reflect',
-	'java.nio',
-	'java.util',
-	'java.util.concurrent',
-	'sun.nio.ch'
-]
-
 application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
 	applicationName = 'play'
@@ -50,8 +38,18 @@ application {
 		'-XstartOnFirstThread',
 		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
-	] + openJavaPackages.inject([]) { acc, javaPackage ->
-		return acc << '--add-opens' << "java.base/${javaPackage}=ALL-UNNAMED"
+	] + [
+		'java.io',
+		'java.lang',
+		'java.lang.annotation',
+		'java.lang.invoke',
+		'java.lang.reflect',
+		'java.nio',
+		'java.util',
+		'java.util.concurrent',
+		'sun.nio.ch'
+	].inject([]) { acc, javaPackage ->
+		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
 	}
 }
 

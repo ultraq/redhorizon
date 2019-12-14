@@ -35,7 +35,19 @@ application {
 	applicationDefaultJvmArgs = [
 		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
-	]
+	] + [
+		'java.io',
+		'java.lang',
+		'java.lang.annotation',
+		'java.lang.invoke',
+		'java.lang.reflect',
+		'java.nio',
+		'java.util',
+		'java.util.concurrent',
+		'sun.nio.ch'
+	].inject([]) { acc, javaPackage ->
+		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
+	}
 }
 
 distributions {

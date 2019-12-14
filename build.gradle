@@ -41,6 +41,13 @@ distributions {
 	}
 }
 
+[distTar, distZip].each {
+	it.dependsOn = [
+		':redhorizon-mediaplayer:installDist',
+		':redhorizon-mixreader:installDist'
+	]
+}
+
 // Subproject configuration
 subprojects {
 	apply plugin: 'groovy'
@@ -61,7 +68,7 @@ subprojects {
 
 	repositories {
 		flatDir {
-			dirs "${rootDir}/libraries"
+			dirs "$rootDir/libraries"
 		}
 	}
 
