@@ -44,6 +44,8 @@ class ImageViewer {
 	 */
 	void view() {
 
+		logger.info("File details: ${imageFile}")
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def image = new Image(imageFile)
 
@@ -55,7 +57,7 @@ class ImageViewer {
 
 			def engine = executorService.submit(graphicsEngine)
 
-			logger.debug('Waiting for the window to be closed')
+			logger.info('Displaying the image in another window.  Close the window to exit.')
 
 			// Execute things from this thread when possible
 			while (!engine.done) {

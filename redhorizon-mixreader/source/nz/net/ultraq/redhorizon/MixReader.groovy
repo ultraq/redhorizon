@@ -22,7 +22,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters
+import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
 
@@ -37,6 +39,9 @@ class MixReader implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MixReader)
 
+	@Spec
+	CommandSpec commandSpec
+
 	@Parameters(index = '0', arity = '1', description = 'Path to the mix file to read')
 	String mixFile
 
@@ -50,10 +55,13 @@ class MixReader implements Callable<Integer> {
 	@Override
 	Integer call() {
 
+		logger.info("Red Horizon Mix Reader ${commandSpec.version()[0] ?: '(development)'}")
+
+		logger.info("Loading ${mixFile}...")
 		new MixFile(new File(mixFile)).withCloseable { mix ->
 			def entry = mix.getEntry(entryName)
 			if (entry) {
-				logger.info("${entryName} found, writing to file")
+				logger.info("${entryName} found, writing to file...")
 				mix.getEntryData(entry).withCloseable { entryInputStream ->
 					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
 						entryInputStream.transferTo(entryOutputStream)

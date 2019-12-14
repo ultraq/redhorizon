@@ -167,11 +167,6 @@ class PcxFile implements ImageFile {
 	@Override
 	String toString() {
 
-		return """
-			(PCX file)
-			  Image width: ${width}
-			  Image height: ${height}
-			  Colour depth: 8-bit (using internal palette)
-		""".stripMargin()
+		return "PCX file, ${width}x${height}, 8-bit with internal palette"
 	}
 }

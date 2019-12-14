@@ -26,7 +26,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters
+import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
 
@@ -40,7 +42,9 @@ import java.util.concurrent.Callable
 class MediaPlayer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
-	private static final String version = System.getProperty('redhorizon.version')
+
+	@Spec
+	CommandSpec commandSpec
 
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
@@ -57,16 +61,16 @@ class MediaPlayer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		logger.info("Red Horizon Media Player ${version ?: '(development)'}")
+		logger.info("Red Horizon Media Player ${commandSpec.version()[0] ?: '(development)'}")
 
-		logger.info("Loading ${file}")
+		logger.info("Loading ${file}...")
 		if (file.endsWith('.mix')) {
 			new MixFile(new File(file)).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info("Loading ${entryName}...")
 					mix.getEntryData(entry).withCloseable { entryInputStream ->
-						play(entryName, entryInputStream)
+						play(getFileClass(entryName).newInstance(entryInputStream))
 					}
 				}
 				else {
@@ -77,20 +81,19 @@ class MediaPlayer implements Callable<Integer> {
 		}
 		else {
 			new FileInputStream(file).withCloseable { input ->
-				play(file, input)
+				play(getFileClass(file).newInstance(input))
 			}
 		}
 		return 0
 	}
 
 	/**
-	 * Given the input, load the appropriate file type and launch the appropriate
-	 * media player.
+	 * Find the appropriate class for reading a file with the given name.
 	 * 
 	 * @param filename
-	 * @param input
+	 * @return
 	 */
-	private void play(String filename, InputStream input) {
+	private Class<?> getFileClass(String filename) {
 
 		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
 		def fileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
@@ -103,8 +106,16 @@ class MediaPlayer implements Callable<Integer> {
 			logger.error("No implementation for ${suffix} filetype")
 			throw new IllegalArgumentException()
 		}
+		return fileClass
+	}
 
-		def file = fileClass.newInstance(input)
+	/**
+	 * Launch the appropriate media player for the given file.
+	 * 
+	 * @param file
+	 */
+	private void play(Object file) {
+
 		if (file instanceof SoundFile) {
 			def audioPlayer = new AudioPlayer(file)
 			audioPlayer.play()
@@ -114,7 +125,7 @@ class MediaPlayer implements Callable<Integer> {
 			imageViewer.view()
 		}
 		else {
-			logger.error("No media player for the associated file class of ${fileClass}")
+			logger.error("No media player for the associated file class of ${file}")
 			throw new UnsupportedOperationException()
 		}
 	}
