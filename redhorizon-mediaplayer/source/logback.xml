@@ -18,6 +18,9 @@
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
 		<encoder>
 			<pattern>%msg%n</pattern>
 		</encoder>
