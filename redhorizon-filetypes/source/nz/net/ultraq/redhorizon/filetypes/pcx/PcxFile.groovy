@@ -133,24 +133,28 @@ class PcxFile implements ImageFile {
 		def paletteData = ByteBuffer.wrapNative(imageAndPaletteData, imageAndPaletteData.length - PALETTE_SIZE, PALETTE_SIZE)
 
 		// Build up the raw image data for use with a palette later
+		def rawImageData = ByteBuffer.allocateNative(width * height)
+		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
+		runLengthEncoding.decode(encodedImageData, rawImageData)
+
 		// NOTE: The below is for the case when the scanline data exceeds the
 		//       width/height data, but have I ever encountered that?  Otherwise
 		//       this is double-handling the same data.
-		def scanLines = new ArrayList<ByteBuffer>()
-		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
-		while (encodedImageData.hasRemaining()) {
-			def scanLine = ByteBuffer.allocateNative(planes * bytesPerLine)
-			runLengthEncoding.decode(encodedImageData, scanLine)
-			scanLines << scanLine
-		}
-		def rawImageData = ByteBuffer.allocateNative(width * height)
-		for (def y = yMin; y <= yMax; y++) {
-			def scanLine = scanLines[y]
-			for (def x = xMin; x <= xMax; x++) {
-				rawImageData.put(scanLine.get(x))
-			}
-		}
-		rawImageData.rewind()
+//		def scanLines = new ArrayList<ByteBuffer>()
+//		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
+//		while (encodedImageData.hasRemaining()) {
+//			def scanLine = ByteBuffer.allocateNative(planes * bytesPerLine)
+//			runLengthEncoding.decode(encodedImageData, scanLine)
+//			scanLines << scanLine
+//		}
+//		def rawImageData = ByteBuffer.allocateNative(width * height)
+//		for (def y = yMin; y <= yMax; y++) {
+//			def scanLine = scanLines[y]
+//			for (def x = xMin; x <= xMax; x++) {
+//				rawImageData.put(scanLine.get(x))
+//			}
+//		}
+//		rawImageData.rewind()
 
 		// Assign palette (from tail of file, after the padding byte)
 		def palette = new Palette(256, ColourFormat.FORMAT_RGB, paletteData)
