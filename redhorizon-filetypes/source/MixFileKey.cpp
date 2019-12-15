@@ -28,7 +28,7 @@
  * @comments Emanuel Rabina
  */
 
-#include <memory>
+#include <memory.h>
 #include "MixFileKey.h"
 #include "MixFileKeyJNI.h"
 
