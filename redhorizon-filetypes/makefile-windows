@@ -1,0 +1,7 @@
+# Compiles the C++ part which I haven't converted to Java yet
+
+MixFileKey.dll: source\MixFileKey.cpp source\MixFileKey.h source\MixFileKeyJNI.h
+	cl /I "%JAVA_HOME%\include" /I "%JAVA_HOME%\include\win32" /LD source\MixFileKey.cpp
+	del MixFileKey.exp
+	del MixFileKey.lib
+	del MixFileKey.obj

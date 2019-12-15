@@ -30,9 +30,12 @@ task compileMixFileKey(type: Exec) {
 	if (Os.isFamily(Os.FAMILY_UNIX)) {
 		commandLine 'make', "--makefile=${Os.isFamily(Os.FAMILY_MAC) ? 'makefile-macos' : 'makefile-linux'}"
 	}
+	else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+		commandLine 'nmake', '/F', 'makefile-windows'
+	}
 	else {
 		doLast {
-			println 'No C++ build configuration for the current platform'
+			println 'No C++ build configuration for this platform'
 		}
 	}
 }
