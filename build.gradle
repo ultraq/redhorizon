@@ -46,6 +46,7 @@ distributions {
 		':redhorizon-mediaplayer:installDist',
 		':redhorizon-mixreader:installDist'
 	]
+	it.duplicatesStrategy = 'exclude'
 }
 
 // Subproject configuration
