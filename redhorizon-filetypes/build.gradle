@@ -28,7 +28,7 @@ dependencies {
 
 task compileMixFileKey(type: Exec) {
 	if (Os.isFamily(Os.FAMILY_UNIX)) {
-		commandLine 'make', Os.isFamily(Os.FAMILY_MAC) ? 'makefile-macos' : 'makefile-linux'
+		commandLine 'make', "--makefile=${Os.isFamily(Os.FAMILY_MAC) ? 'makefile-macos' : 'makefile-linux'}"
 	}
 	else {
 		doLast {
