@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
@@ -22,4 +24,19 @@ dependencies {
 		project(':redhorizon-extensions'),
 		':blowfishj:2.41'
 	)
+}
+
+task compileMixFileKey(type: Exec) {
+	if (Os.isFamily(Os.FAMILY_UNIX)) {
+		commandLine 'make', Os.isFamily(Os.FAMILY_MAC) ? 'makefile-macos' : 'makefile-linux'
+	}
+	else {
+		doLast {
+			println 'No C++ build configuration for the current platform'
+		}
+	}
+}
+
+build {
+	dependsOn 'compileMixFileKey'
 }
