@@ -2,13 +2,13 @@
 # Compiles the C++ part which I haven't converted to Java yet
 
 linux: source/MixFileKey.cpp source/MixFileKey.h source/MixFileKeyJNI.h
-	g++ -fPIC -shared -o libMixFileKey.so \
+	g++ -shared -o libMixFileKey.so \
 	-I $(JAVA_HOME)/include \
 	-I $(JAVA_HOME)/include/linux \
 	source/MixFileKey.cpp -lc
 
 macos: source/MixFileKey.cpp source/MixFileKey.h source/MixFileKeyJNI.h
-	g++ -fPIC -shared -o libMixFileKey.dylib \
+	g++ -shared -o libMixFileKey.dylib \
 	-I $(JAVA_HOME)/include \
 	-I $(JAVA_HOME)/include/darwin \
 	source/MixFileKey.cpp -lc
