@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 
 /**
  * Interface for classes that can encode information.
- *
+ * 
  * @author Emanuel Rabina
  */
 public interface Encoder {
