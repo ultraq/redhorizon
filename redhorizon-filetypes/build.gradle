@@ -28,10 +28,10 @@ dependencies {
 
 task compileMixFileKey(type: Exec) {
 	if (Os.isFamily(Os.FAMILY_UNIX)) {
-		commandLine 'make', "--makefile=${Os.isFamily(Os.FAMILY_MAC) ? 'makefile-macos' : 'makefile-linux'}"
+		commandLine 'make', Os.isFamily(Os.FAMILY_MAC) ? 'macos' : 'linux'
 	}
 	else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-		commandLine 'nmake', '/F', 'makefile-windows'
+		commandLine 'nmake', 'windows'
 	}
 	else {
 		doLast {
