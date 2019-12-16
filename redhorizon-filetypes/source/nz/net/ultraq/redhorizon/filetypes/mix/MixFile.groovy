@@ -143,7 +143,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 					if (lastPosition >= entry.size) {
 						return -1
 					}
-					input.seek(entryOffset + lastPosition)
+					input.seek(entryOffset + entry.offset + lastPosition)
 					def b = input.read()
 					lastPosition++
 					return b
@@ -156,7 +156,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 					if (lastPosition >= entry.size) {
 						return -1
 					}
-					input.seek(entryOffset + lastPosition)
+					input.seek(entryOffset + entry.offset + lastPosition)
 					def toRead = Math.min(len, entry.size - lastPosition)
 					def bytesRead = input.read(b, off, toRead)
 					lastPosition += bytesRead
