@@ -25,6 +25,8 @@ on GitHub, so you can follow along there.
 Installation
 ------------
 
+Requires Java 11+ on macOS 10.12+ (Sierra+) or Windows 10 64-bit.
+
 Download the distribution bundle from the [project releases](https://github.com/ultraq/redhorizon/releases)
 page, then unzip it to somewhere on your computer.
 
