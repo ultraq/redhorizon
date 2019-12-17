@@ -52,9 +52,7 @@ distributions {
 // Subproject configuration
 subprojects {
 	apply plugin: 'groovy'
-	apply plugin: 'maven'
 	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/2.1.0/gradle-support.gradle'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/2.1.0/maven-support.gradle'
 
 	apply plugin: 'idea'
 	idea {
@@ -64,7 +62,6 @@ subprojects {
 		}
 	}
 
-	year = '2007'
 	sourceCompatibility = 11
 
 	repositories {
