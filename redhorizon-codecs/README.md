@@ -7,18 +7,6 @@ mostly by the `redhorizon-filetypes` packages and serve as working examples for
 JVM programmers.
 
 
-Installation
-------------
-
-Either build the project from the source code here on GitHub, or add it to your
-project using the following Maven coordinates:
-
- - GroupId: `nz.net.ultraq.redhorizon`
- - ArtifactId: `redhorizon-codecs`
- - Version: (see the [project releases](https://github.com/ultraq/redhorizon/releases)
-   for a list of available versions)
-
-
 Codecs
 ------
 
