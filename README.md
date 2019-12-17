@@ -20,3 +20,20 @@ web development.
 
 These smaller goals can be observed as [milestones](https://github.com/ultraq/redhorizon/milestones)
 on GitHub, so you can follow along there.
+
+
+Installation
+------------
+
+Download the distribution bundle from the [project releases](https://github.com/ultraq/redhorizon/releases)
+page, then unzip it to somewhere on your computer.
+
+
+Usage
+-----
+
+Open up a console to where you extracted the bundle.  From there, you can run
+the Mix file reader by running `bin/mix` or the Media Player by running
+`bin/play`.  Either by supplying a `--help`/`-h` option or by entering no
+parameters, the help text should be printed out showing you how to use these
+commands.
