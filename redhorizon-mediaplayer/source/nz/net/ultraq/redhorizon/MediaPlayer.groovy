@@ -38,7 +38,17 @@ import java.util.concurrent.Callable
  * 
  * @author Emanuel Rabina
  */
-@Command(name = "play", mixinStandardHelpOptions = true, version = '${sys:redhorizon.version}')
+@Command(
+	name = "play",
+	header = [
+		'',
+		'Red Horizon Media Player',
+		'========================',
+		''
+	],
+	mixinStandardHelpOptions = true,
+	version = '${sys:redhorizon.version}'
+)
 class MediaPlayer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
@@ -49,7 +59,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
 	String file
 
-	@Parameters(index = '1', arity = '0..1', description = 'If the first parameter is a mix file, this is the name of the entry in the mix file to play')
+	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the entry in the mix file to play')
 	String entryName
 
 	/**

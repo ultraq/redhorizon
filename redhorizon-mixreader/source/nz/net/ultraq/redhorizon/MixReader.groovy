@@ -34,7 +34,18 @@ import java.util.concurrent.Callable
  * 
  * @author Emanuel Rabina
  */
-@Command(name = 'mix', mixinStandardHelpOptions = true, version = '${sys:redhorizon.version}')
+@Command(
+	name = 'mix',
+	header = [
+		'',
+		'Red Horizon Mix Reader',
+		'======================',
+		''
+	],
+	description = 'Extract an entry from a mix file, saving it to disk with the same name.',
+	mixinStandardHelpOptions = true,
+	version = '${sys:redhorizon.version}'
+)
 class MixReader implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MixReader)
