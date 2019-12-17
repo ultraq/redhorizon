@@ -1,5 +1,5 @@
-/*
- * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
+/* 
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,25 @@ package nz.net.ultraq.redhorizon.filetypes.wsa;
 import java.nio.ByteBuffer;
 
 /**
- * Representation of a WSA file's header.  Much like the SHP file, it is just
- * basic information on the contents of the file.
+ * Representation of a Dune 2 WSA file header.
  * 
  * @author Emanuel Rabina
  */
-public class WsaFileHeaderCNC extends WsaFileHeader {
+public class WsaFileHeaderDune2 extends WsaFileHeader {
 
-	static final int HEADER_SIZE = 14;
+	static final int HEADER_SIZE = 10;
 
-	final short x, y;
 	final short width, height;
 	final int delta;
 
 	/**
-	 * Constructor, generates header data from the given <tt>ByteBuffer</tt>.
+	 * Constructor, fills-out the header from the <tt>ByteBuffer</tt>.
 	 * 
-	 * @param bytes <tt>ByteBuffer</tt> containing WSA header data.
+	 * @param bytes <tt>ByteBuffer</tt> to the Dune 2 WSA file.
 	 */
-	WsaFileHeaderCNC(ByteBuffer bytes) {
+	WsaFileHeaderDune2(ByteBuffer bytes) {
 
 		super(bytes.getShort());
-		x      = bytes.getShort();
-		y      = bytes.getShort();
 		width  = bytes.getShort();
 		height = bytes.getShort();
 		delta  = bytes.getInt();
@@ -51,17 +47,13 @@ public class WsaFileHeaderCNC extends WsaFileHeader {
 	 * Constructor, uses the given parameters to complete this header.
 	 * 
 	 * @param numframes Number of frames in the file.
-	 * @param x			X offset to position animation.
-	 * @param y			Y offset to position animation.
 	 * @param width		Width of each frame.
 	 * @param height	Height of each frame.
 	 * @param delta		Animation delta.
 	 */
-	WsaFileHeaderCNC(short numframes, short x, short y, short width, short height, int delta) {
+	WsaFileHeaderDune2(short numframes, short width, short height, int delta) {
 
 		super(numframes);
-		this.x      = x;
-		this.y      = y;
 		this.width  = width;
 		this.height = height;
 		this.delta  = delta;
@@ -75,8 +67,6 @@ public class WsaFileHeaderCNC extends WsaFileHeader {
 
 		ByteBuffer header = ByteBuffer.allocate(HEADER_SIZE);
 		header.putShort(numframes);
-		header.putShort(x);
-		header.putShort(y);
 		header.putShort(width);
 		header.putShort(height);
 		header.putInt(delta);
