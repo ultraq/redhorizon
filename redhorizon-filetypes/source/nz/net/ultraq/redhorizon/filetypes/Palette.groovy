@@ -91,6 +91,34 @@ class Palette {
 //	}
 
 	/**
+	 * Constructor, build the palette parts but without any data.
+	 * 
+	 * @param size
+	 * @param format
+	 */
+	private Palette(int size, ColourFormat format) {
+
+		this.size    = size
+		this.format  = format
+		this.palette = new byte[size][format.value]
+	}
+
+	/**
+	 * Constructor, create a palette from an input stream.
+	 * 
+	 * @param size	 Number of colours in the palette.
+	 * @param format Colour format of the palette.
+	 * @param input
+	 */
+	Palette(int size, ColourFormat format, InputStream input) {
+
+		this(size, format)
+		size.times { i ->
+			palette[i] = input.readNBytes(format.value)
+		}
+	}
+
+	/**
 	 * Constructor, create a palette using the given data.
 	 * 
 	 * @param size	 Number of colours in the palette.
@@ -99,10 +127,8 @@ class Palette {
 	 */
 	Palette(int size, ColourFormat format, ByteBuffer bytes) {
 
-		this.size    = size
-		this.format  = format
-		this.palette = new byte[size][format.value]
-		(0..<size).each { i ->
+		this(size, format)
+		size.times { i ->
 			palette[i] = new byte[format.value]
 			bytes.get(palette[i])
 		}

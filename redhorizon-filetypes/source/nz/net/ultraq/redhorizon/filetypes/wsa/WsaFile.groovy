@@ -14,205 +14,135 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.wsa;
+package nz.net.ultraq.redhorizon.filetypes.wsa
 
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile;
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat;
-import nz.net.ultraq.redhorizon.filetypes.AbstractFile;
-import nz.net.ultraq.redhorizon.filetypes.ImageFile;
-import nz.net.ultraq.redhorizon.filetypes.PalettedInternal;
-import nz.net.ultraq.redhorizon.utilities.ImageUtility;
+import nz.net.ultraq.redhorizon.codecs.Format40
+import nz.net.ultraq.redhorizon.codecs.Format80
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.Worker
+import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
-import java.nio.ByteBuffer;
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import java.nio.ByteBuffer
 
 /**
- * Abstract WSA file class containing only the parts similar between both C&C
- * WSA files and Dune 2 WSA files.
+ * Implementation of the WSA file format as used in Tiberium Dawn and Red Alert.
+ * A WSA file is a full-screen animation (Westwood Studios Animation?) that is
+ * typically looped or played to the last frame, with some other sounds taking
+ * up background music duties.
+ * <p>
+ * For more information about the C&C WSA file, see: http://vladan.bato.net/cnc/ccfiles4.txt
  * 
  * @author Emanuel Rabina
- * @param <H> WSA header implementation type.
  */
-public abstract class WsaFile<H extends WsaFileHeader> extends AbstractFile implements AnimationFile {
+@FileExtensions('wsa')
+class WsaFile implements AnimationFile {
 
-	// Save-to information
-	static final String PARAM_WIDTH     = "-w:";
-	static final String PARAM_HEIGHT    = "-h:";
-	static final String PARAM_NUMIMGS   = "-n:";
-	static final String PARAM_FRAMERATE = "-f:";
-	static final String PARAM_LOOPING   = "-loop";
+	private static final Logger logger = LoggerFactory.getLogger(WsaFile)
 
-	static final int MAX_WIDTH   = 65535;
-	static final int MAX_HEIGHT  = 65535;
-	static final int MAX_NUMIMGS = 65534;	// -1 to make room for loop frame
+	private final NativeDataInputStream input
 
-	H wsaheader;
-	int[] wsaoffsets;
-	ByteBuffer[] wsaframes;
+	// File header
+	final int numFrames // Stored in file as short
+	final short x
+	final short y
+	final int width     // Stored in file as short
+	final int height    // stored in file as short
+	final int delta
+	final int[] frameOffsets
+	final Palette palette
+
+	final ColourFormat format = ColourFormat.FORMAT_RGBA
+	final float frameRate
+	final boolean looping
 
 	/**
-	 * Constructor, creates a new WSA file with the given name.
+	 * Constructor, creates a new WSA file from the data in the input stream.
 	 * 
-	 * @param name The name of this file.
+	 * @param input
 	 */
-	WsaFile(String name) {
+	WsaFile(InputStream inputStream) {
 
-		super(name);
+		input = new NativeDataInputStream(inputStream)
+
+		// File header
+		numFrames = input.readShort()
+		x         = input.readShort()
+		y         = input.readShort()
+		width     = input.readShort()
+		height    = input.readShort()
+		delta     = input.readInt()
+
+		frameRate = 1 / (delta / 1024) * 1000
+
+		// Frame offsets
+		frameOffsets = new int[numFrames + 2]
+		frameOffsets.length.times { i ->
+			frameOffsets[i] = input.readInt()
+		}
+
+		looping = frameOffsets.last() != 0
+
+		// Internal palette
+		palette = new Palette(256, format, input)
+	}
+
+	@Override
+	Worker getFrameDataWorker(Closure frameHandler) {
+
+		return new Worker() {
+			@Override
+			void work() {
+
+				Thread.currentThread().name = 'WsaFile :: Decoding'
+				logger.debug('WsaFile decoding started')
+
+				def frameSize = width * height
+				def format40Decoder = new Format40()
+				def format80Decoder = new Format80()
+				def lastIndexedFrame = ByteBuffer.allocateNative(frameSize)
+
+				// Decode frame by frame
+				for (def frame = 0; canContinue && frame < numFrames; frame++) {
+					def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
+					def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
+
+					def intermediateFrame = ByteBuffer.allocateNative(frameSize)
+					def indexedFrame = ByteBuffer.allocateNative(frameSize)
+
+					format80Decoder.decode(compressedFrame, intermediateFrame)
+					format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
+
+					def colouredFrame = ImageUtility.applyPalette(indexedFrame, palette)
+
+					frameHandler(colouredFrame)
+					lastIndexedFrame = indexedFrame
+				}
+
+				if (!stopped) {
+					logger.debug('WsaFile decoding complete')
+				}
+			}
+		}
 	}
 
 	/**
-	 * Constructor, builds this file from an existing {@link ImageFile}.
+	 * Returns some information on this WSA file.
 	 * 
-	 * @param name		Name of this file.
-	 * @param imagefile File to source data from.
-	 * @param params	Additonal parameters: width, height, numimgs, framerate,
-	 * 					looping.
-	 */
-	WsaFile(String name, ImageFile imagefile, String... params) {
-
-		super(name);
-
-		int width = -1;
-		int height = -1;
-		int numimgs = -1;
-		float framerate = -1f;
-		boolean looping = false;
-
-		// Grab the parameters
-		for (String param: params) {
-			if (param.startsWith(PARAM_WIDTH)) {
-				width = Integer.parseInt(param.substring(PARAM_WIDTH.length()));
-			}
-			else if (param.startsWith(PARAM_HEIGHT)) {
-				height = Integer.parseInt(param.substring(PARAM_HEIGHT.length()));
-			}
-			else if (param.startsWith(PARAM_NUMIMGS)) {
-				numimgs = Integer.parseInt(param.substring(PARAM_NUMIMGS.length()));
-			}
-			else if (param.startsWith(PARAM_FRAMERATE)) {
-				framerate = Float.parseFloat(param.substring(PARAM_FRAMERATE.length()));
-			}
-			else if (param.equals(PARAM_LOOPING)) {
-				looping = true;
-			}
-		}
-
-		// Ensure each parameter was filled
-		if (width == -1 || height == -1 || numimgs == -1 || framerate == -1f) {
-			throw new IllegalArgumentException();
-		}
-
-		// Add loop frame if applicable
-		if (looping) {
-			numimgs++;
-		}
-
-		// Check source will 'fit' into WSA file
-		String sourcename = imagefile.getFileName();
-		String sourceclass = getClass().getSimpleName();
-
-		ImageUtility.checkSize(sourcename, sourceclass, width, height, MAX_WIDTH, MAX_HEIGHT);
-		ImageUtility.checkNumImages(sourcename, sourceclass, numimgs, MAX_NUMIMGS);
-		ImageUtility.checkPaletted(sourcename, sourceclass, imagefile);
-
-		// Build file
-		ByteBuffer[] frames = imagefile instanceof PalettedInternal ?
-				ImageUtility.splitImage(width, height, numimgs, imagefile.width(),
-					imagefile.height(), FORMAT_INDEXED, ((PalettedInternal)imagefile).getRawImageData()):
-				ImageUtility.splitImage(width, height, numimgs, imagefile);
-		buildFile(width, height, framerate, looping, frames);
-	}
-
-	/**
-	 * Constructor, builds this file from a series of {@link ImageFile}s.
-	 * 
-	 * @param name		 Name of this file.
-	 * @param imagefiles File to source data from.
-	 * @param params	 Additonal parameters: framerate, looping, nohires.
-	 */
-	WsaFile(String name, ImageFile[] imagefiles, String... params) {
-
-		super(name);
-
-		float framerate = -1f;
-		boolean looping = false;
-
-		// Grab the parameters
-		for (String param: params) {
-			if (param.startsWith(PARAM_FRAMERATE)) {
-				framerate = Float.parseFloat(param.substring(PARAM_FRAMERATE.length()));
-			}
-			else if (param.equals(PARAM_LOOPING)) {
-				looping = true;
-			}
-		}
-
-		// Ensure each parameter was filled
-		if (framerate == -1f) {
-			throw new IllegalArgumentException();
-		}
-
-		// Check source will 'fit' into WSA file
-		String sourceclass = getClass().getSimpleName();
-		ImageUtility.checkNumImages("(list of images)", sourceclass, looping ? imagefiles.length - 1 :
-				imagefiles.length, MAX_NUMIMGS);
-		ImageUtility.checkConsistentImages(imagefiles);
-		for (ImageFile imagefile: imagefiles) {
-			String sourcename = imagefile.getFileName();
-			ImageUtility.checkSize(sourcename, sourceclass, imagefile.width(), imagefile.height(),
-					MAX_WIDTH, MAX_HEIGHT);
-			ImageUtility.checkPaletted(sourcename, sourceclass, imagefile);
-		}
-
-		// Build file
-		ByteBuffer[] images = new ByteBuffer[imagefiles.length];
-		for (int i = 0; i < images.length; i++) {
-			ImageFile imagefile = imagefiles[i];
-			ByteBuffer imagedata = ByteBuffer.allocate(imagefile.width() * imagefile.height() *
-					imagefile.format().size);
-			(imagefile instanceof PalettedInternal ?
-					((PalettedInternal)imagefile).getRawImageData() : imagefile.getImageData())
-					.read(imagedata);
-			images[i] = (ByteBuffer)imagedata.rewind();
-		}
-		buildFile(imagefiles[0].width(), imagefiles[0].height(), framerate, looping, images);
-	}
-
-	/**
-	 * Constructs this file from the parts of various other objects.
-	 * 
-	 * @param width		Width of each frame.
-	 * @param height	Height of each frame.
-	 * @param framerate Framerate of the animation.
-	 * @param looping	Whether the animation loops or not.
-	 * @param frames	Array of frame data.
-	 */
-	abstract void buildFile(int width, int height, float framerate, boolean looping, ByteBuffer[] frames);
-
-	/**
-	 * {@inheritDoc}
+	 * @return WSA file info.
 	 */
 	@Override
-	public ColourFormat format() {
+	String toString() {
 
-		return FORMAT_RGB;
-	}
-
-	/**
-	 * Returns whether or not this animation loops.
-	 * 
-	 * @return <tt>true</tt> if the animation loops, <tt>false</tt> otherwise.
-	 */
-	public boolean isLooping() {
-
-		return wsaoffsets[wsaheader.numframes + 1] != 0;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public int numImages() {
-
-		return wsaheader.numframes & 0xffff;
+		return """
+			WSA file (C&C), ${width}x${height}, 8-bit with internal palette
+			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
+		""".stripIndent().trim()
 	}
 }

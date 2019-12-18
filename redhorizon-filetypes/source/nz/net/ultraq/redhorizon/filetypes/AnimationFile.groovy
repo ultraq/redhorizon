@@ -21,23 +21,57 @@ package nz.net.ultraq.redhorizon.filetypes
  *
  * @author Emanuel Rabina
  */
-interface AnimationFile extends ImagesFile {
+interface AnimationFile {
 
 	/**
-	 * Returns the adjustment factor for the height of the animation.  Used
-	 * mainly for older file formats of C&C where the display was either 320x200
-	 * or 640x400 (a 8:5 or 1.6 pixel ratio).
+	 * Returns the number of bytes used to represent the colour data of a single
+	 * pixel.
+	 * <p>
+	 * If the object implements the {@link Paletted} interface, then the return
+	 * value of this method is more of an expectation of the colour-depth,
+	 * rather than a given.
 	 * 
-	 * @return A value to multiply the height of the animation by to get the
-	 * 		   right look and feel.  Returns 1 if no adjustment is necessary.
+	 * @return The image colour format.
 	 */
-	float getAspectRatio()
+	ColourFormat getFormat()
+
+	/**
+	 * Return a worker that can be used for streaming the animation's frames to
+	 * the {@code frameHandler} closure.
+	 * 
+	 * @param frameHandler
+	 *   Closure that is called by the worker for doing something with a single
+	 *   frame.
+	 * @return Worker that can be run to start streaming frame data.
+	 */
+	Worker getFrameDataWorker(Closure frameHandler)
 
 	/**
 	 * Returns the speed at which this animation should be run, in
-	 * frames/second.
+	 * frames-per-second.
 	 * 
-	 * @return Animation speed, as the frames component of frames/second.
+	 * @return
 	 */
 	float getFrameRate()
+
+	/**
+	 * Returns the height of the image.
+	 * 
+	 * @return Height of the image.
+	 */
+	int getHeight()
+
+	/**
+	 * Return the number of frames that make up this animation.
+	 * 
+	 * @return
+	 */
+	int getNumFrames()
+
+	/**
+	 * Returns the width of the image.
+	 * 
+	 * @return Width of the image.
+	 */
+	int getWidth()
 }
