@@ -29,7 +29,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
@@ -83,72 +82,55 @@ class AudFile implements SoundFile {
 		channels = (flags & FLAG_STEREO) ? CHANNELS_STEREO : CHANNELS_MONO
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	Worker getSoundDataWorker() {
+	Worker getSoundDataWorker(Closure sampleHandler) {
 
 		return new Worker() {
-			boolean complete
-			boolean running
-
 			@Override
-			void stop() {
-				running = false
-			}
+			void work() {
 
-			@Override
-			void work(ExecutorService executorService, Closure handler) {
+				Thread.currentThread().name = "AudFile :: Decoding"
+				logger.debug('AudFile decoding started')
 
-				executorService.execute({ ->
-					Thread.currentThread().name = "AudFile :: Decoding"
-					logger.debug('AudFile decoding started')
-					running = true
+				def bytesRead = 0
+				def decoder =
+					type == TYPE_WS_ADPCM ? new WSADPCM8bit() :
+					type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() :
+					null
+				def index = new byte[4]
+				def sample = new byte[4]
 
-					def bytesRead = 0
-					def decoder =
-						type == TYPE_WS_ADPCM ? new WSADPCM8bit() :
-						type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() :
-						null
-					def index = new byte[4]
-					def sample = new byte[4]
+				// Decompress the aud file data by chunks
+				while (canContinue && (bytesRead < compressedSize)) {
 
-					// Decompress the aud file data by chunks
-					while (running && (bytesRead < compressedSize)) {
+					// Chunk header
+					def compressedSize   = input.readShort()
+					def uncompressedSize = input.readShort()
+					assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
 
-						// Chunk header
-						def compressedSize   = input.readShort()
-						def uncompressedSize = input.readShort()
-						assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
+					// Build buffers from chunk header
+					def chunkSourceBuffer = ByteBuffer.allocateNative(compressedSize)
+					input.readFully(chunkSourceBuffer.array())
+					def chunkDataBuffer = ByteBuffer.allocateNative(uncompressedSize)
 
-						// Build buffers from chunk header
-						def chunkSourceBuffer = ByteBuffer.allocateNative(compressedSize)
-						input.readFully(chunkSourceBuffer.array())
-						def chunkDataBuffer = ByteBuffer.allocateNative(uncompressedSize)
-
-						// Decode
-						switch (type) {
-						case TYPE_WS_ADPCM:
-							decoder.decode(chunkSourceBuffer, chunkDataBuffer)
-							break
-						case TYPE_IMA_ADPCM:
-							decoder.decode(chunkSourceBuffer, chunkDataBuffer,
-								ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
-							break
-						}
-
-						handler(chunkDataBuffer)
-						bytesRead += 8 + compressedSize
+					// Decode
+					switch (type) {
+					case TYPE_WS_ADPCM:
+						decoder.decode(chunkSourceBuffer, chunkDataBuffer)
+						break
+					case TYPE_IMA_ADPCM:
+						decoder.decode(chunkSourceBuffer, chunkDataBuffer,
+							ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
+						break
 					}
 
-					// TODO: This running state might exist in the FutureTask class
-					if (!running) {
-						logger.debug('AudFile decoding complete')
-					}
-					complete = true
-					running = false
-				})
+					sampleHandler(chunkDataBuffer)
+					bytesRead += 8 + compressedSize
+				}
+
+				if (!stopped) {
+					logger.debug('AudFile decoding complete')
+				}
 			}
 		}
 	}
@@ -162,7 +144,7 @@ class AudFile implements SoundFile {
 	String toString() {
 
 		return """
-			AUD file, ${frequency}hz ${bitrate.value} bit ${channels == CHANNELS_STEREO ? 'Stereo' : 'Mono'}
+			AUD file, ${frequency}hz ${bitrate.value}-bit ${channels == CHANNELS_STEREO ? 'Stereo' : 'Mono'}
 			Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm
 			Compressed: ${compressedSize} bytes => Uncompressed: ${uncompressedSize} bytes
 		""".stripIndent().trim()

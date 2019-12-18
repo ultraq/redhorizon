@@ -71,10 +71,13 @@ interface SoundFile {
 	int getFrequency()
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data to a handler
-	 * configured by the {@link Worker#work} method.
+	 * Returns a worker that can be run to start streaming sound data to the
+	 * {@code bufferHandler} closure.
 	 * 
+	 * @param sampleHandler
+	 *   Closure that is called by the worker for doing something with a small
+	 *   sample of sound.
 	 * @return Closure for streaming sound data.
 	 */
-	Worker getSoundDataWorker()
+	Worker getSoundDataWorker(Closure sampleHandler)
 }

@@ -16,35 +16,52 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.util.concurrent.ExecutorService
-
 /**
- * An interface for a special type of class that returns streaming data.  The
- * single method, {@link #work} uses the given closure to determine what to do
- * with the data chunks, allowing callers to either let the data build up or to
- * block until the data can be read.
+ * A special {@link Runnable} with the ability to be controlled and queried from
+ * other threads.  Worker implementations must check in with the various state
+ * flags of this class to know when to continue/stop while performing their
+ * work.
  * 
  * @author Emanuel Rabina
  */
-interface Worker {
+abstract class Worker implements Runnable {
+
+	protected boolean canContinue
+	protected boolean complete
+	protected boolean running
+	protected boolean stopped
 
 	/**
 	 * Return whether the work is all done.
 	 * 
 	 * @return
 	 */
-	boolean isComplete()
+	boolean isComplete() {
+
+		return complete
+	}
+
+	@Override
+	final void run() {
+
+		running = true
+		canContinue = true
+		work()
+		running = false
+		complete = true
+	}
 
 	/**
 	 * Signal to the worker to stop.
 	 */
-	void stop()
+	void stop() {
+
+		canContinue = false
+		stopped = true
+	}
 
 	/**
-	 * Start the worker, passing resulting chunks to the given closure.
-	 * 
-	 * @param executorService
-	 * @param handler
+	 * Start the worker.
 	 */
-	void work(ExecutorService executorService, Closure handler)
+	abstract void work()
 }

@@ -63,11 +63,11 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 		channels  = soundFile.channels.value
 		frequency = soundFile.frequency
 
-		soundDataWorker = soundFile.getSoundDataWorker()
 		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-		soundDataWorker.work(executorService) { chunkBuffer ->
-			soundDataBuffer << chunkBuffer
+		soundDataWorker = soundFile.getSoundDataWorker { sampleBuffer ->
+			soundDataBuffer << sampleBuffer
 		}
+		executorService.execute(soundDataWorker)
 	}
 
 	/**
