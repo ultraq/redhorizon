@@ -22,8 +22,7 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
+import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -36,7 +35,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SceneElement {
+class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SelfVisitable {
 
 	static final String EVENT_NAME_STOP = 'Stop'
 
@@ -70,18 +69,6 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 		executorService.execute(soundDataWorker)
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	@Override
-	void accept(SceneVisitor visitor) {
-
-		visitor.visit(this)
-	}
-
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	void delete(AudioRenderer renderer) {
 
@@ -91,9 +78,6 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 		renderer.deleteBuffers(bufferIds as int[])
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	void init(AudioRenderer renderer) {
 
@@ -103,9 +87,6 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, Scene
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	void render(AudioRenderer renderer) {
 

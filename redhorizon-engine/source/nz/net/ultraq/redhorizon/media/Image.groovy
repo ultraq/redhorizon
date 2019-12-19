@@ -19,20 +19,18 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
+import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
 
 import java.nio.ByteBuffer
 
 /**
- * Parent class for all image types, contains the most basic methods for images
- * used throughout the game.
+ * A basic image / texture / 2D sprite.
  * 
  * @author Emanuel Rabina
  */
-class Image implements GraphicsElement, SceneElement {
+class Image implements GraphicsElement, SelfVisitable {
 
 	// Image file attributes
 	final int width
@@ -92,12 +90,6 @@ class Image implements GraphicsElement, SceneElement {
 //		texturewidth  = width
 //		textureheight = height
 //	}
-
-	@Override
-	void accept(SceneVisitor visitor) {
-
-		visitor.visit(this)
-	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
