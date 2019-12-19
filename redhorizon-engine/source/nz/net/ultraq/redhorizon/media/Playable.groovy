@@ -16,14 +16,29 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 /**
  * Trait for media that can be played forward.
  * 
  * @author Emanuel Rabina
  */
-trait Playable {
+trait Playable extends EventTarget {
 
-	boolean playing = false
+	static final String EVENT_NAME_PLAY = 'Play'
+	static final String EVENT_NAME_STOP = 'Stop'
+
+	private boolean playing = false
+
+	/**
+	 * Return whether or not the media is currently playing.
+	 * 
+	 * @return
+	 */
+	boolean isPlaying() {
+
+		return playing
+	}
 
 	/**
 	 * Put the object into the playing state.
@@ -31,6 +46,7 @@ trait Playable {
 	void play() {
 
 		playing = true
+		fireEvent(EVENT_NAME_PLAY)
 	}
 
 	/**
@@ -39,5 +55,6 @@ trait Playable {
 	void stop() {
 
 		playing = false
+		fireEvent(EVENT_NAME_STOP)
 	}
 }

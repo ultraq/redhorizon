@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
@@ -35,16 +34,14 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SelfVisitable {
-
-	static final String EVENT_NAME_STOP = 'Stop'
+class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 	// Sound information
 	final int bitrate
 	final int channels
 	final int frequency
 	private final Worker soundDataWorker
-	private BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
+	private final BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
 
 	// Renderer information
 	private int sourceId
@@ -53,8 +50,8 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SelfV
 	/**
 	 * Constructor, use the data in {@code soundFile} for playing a sound effect.
 	 * 
-	 * @param soundFile File which should be used to construct this sound.
-	 * @param executor
+	 * @param soundFile
+	 * @param executorService
 	 */
 	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
 
@@ -112,10 +109,11 @@ class SoundEffect implements AudioElement, EventTarget, Movable, Playable, SelfV
 			// No more buffers to read
 			else if (soundDataWorker.complete) {
 				if (!renderer.sourcePlaying(sourceId)) {
-					playing = false
-					fireEvent(EVENT_NAME_STOP)
+					stop()
 				}
 			}
 		}
+
+		// TODO: Clear samples/buffers as the sound progresses to reduce memory usage
 	}
 }
