@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.events
  */
 trait EventTarget {
 
-	final Map<String, List<EventListener>> eventListeners = [:]
+	private final Map<String, List<EventListener>> eventListeners = [:]
 
 	/**
 	 * Register an event listener on this event target.  When the event is fired
