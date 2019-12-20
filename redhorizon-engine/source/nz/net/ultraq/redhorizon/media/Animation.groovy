@@ -95,18 +95,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void init(GraphicsRenderer renderer) {
 
 		framesInfo = new ArrayList<>(numFrames)
-		loadFrames()
-	}
-
-	/**
-	 * Transfer any decoded frames to the frame info buffer in an effort to get
-	 * ahead of the current frame to play.
-	 */
-	private void loadFrames() {
-
-		frameDataBuffer.drain().each { frame ->
-			framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
-		}
 	}
 
 	@Override
@@ -120,10 +108,17 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
-			loadFrames()
+
+			// Frames to load
+			if (!frameDataBuffer.empty) {
+				frameDataBuffer.drain().each { frame ->
+					framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
+				}
+			}
+
+			def currentFrameIndex = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
 			// Draw the current frame
-			def currentFrameIndex = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 			if (currentFrameIndex < numFrames) {
 				def currentFrameInfo = framesInfo[currentFrameIndex]
 				if (!currentFrameInfo.textureId) {
@@ -133,6 +128,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 				// TODO: Clear frames/textures as the animation progresses to reduce memory usage
 			}
+
+			// Animation over
 			else {
 				stop()
 			}
