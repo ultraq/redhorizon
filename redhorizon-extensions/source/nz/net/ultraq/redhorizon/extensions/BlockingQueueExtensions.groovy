@@ -34,7 +34,7 @@ class BlockingQueueExtensions {
 	static <E> Collection<E> drain(BlockingQueue<E> self) {
 
 		def remaining = []
-		self.drainTo([])
+		self.drainTo(remaining)
 		return remaining
 	}
 }
