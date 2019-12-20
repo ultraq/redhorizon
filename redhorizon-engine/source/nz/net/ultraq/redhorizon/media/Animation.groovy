@@ -49,7 +49,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 	// Rendering information
 	private Rectanglef textureRect
-	private final List<FrameInfo> framesInfo = []
+	private List<FrameInfo> framesInfo
 
 	/**
 	 * Information about the rendering state of a frame.
@@ -86,11 +86,27 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTextures(framesInfo.textureId)
+		frameDataWorker.stop()
+		frameDataBuffer.drain()
+		renderer.deleteTextures(framesInfo.textureId as int[])
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
+
+		framesInfo = new ArrayList<>(numFrames)
+		loadFrames()
+	}
+
+	/**
+	 * Transfer any decoded frames to the frame info buffer in an effort to get
+	 * ahead of the current frame to play.
+	 */
+	private void loadFrames() {
+
+		frameDataBuffer.drain().each { frame ->
+			framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
+		}
 	}
 
 	@Override
@@ -104,29 +120,15 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
-
-			// Frames to read and queue
-			if (!frameDataBuffer.empty) {
-				def nextFrames = []
-				frameDataBuffer.drainTo(nextFrames)
-				nextFrames.each { frame ->
-					framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
-				}
-			}
+			loadFrames()
 
 			// Draw the current frame
-			def now = System.currentTimeMillis()
-			def timeSinceStart = now - animationTimeStart
-			def currentFrameIndex = Math.floor(timeSinceStart / frameRate) as int
-
+			def currentFrameIndex = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 			if (currentFrameIndex < numFrames) {
 				def currentFrameInfo = framesInfo[currentFrameIndex]
-
-				// Load up the frame as a texture
 				if (!currentFrameInfo.textureId) {
 					currentFrameInfo.textureId = renderer.createTexture(currentFrameInfo.frame, format, width, height)
 				}
-
 				renderer.drawTexture(currentFrameInfo.textureId, textureRect)
 
 				// TODO: Clear frames/textures as the animation progresses to reduce memory usage

@@ -70,7 +70,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	void delete(AudioRenderer renderer) {
 
 		soundDataWorker.stop()
-		soundDataBuffer.drainTo([])
+		soundDataBuffer.drain()
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(bufferIds as int[])
 	}
@@ -91,11 +91,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 			// Buffers to read and queue
 			if (!soundDataBuffer.empty) {
-				def nextData = []
-				soundDataBuffer.drainTo(nextData)
-
-				def nextBuffer = ByteBuffer.fromBuffersDirect(nextData)
-				def bufferId = renderer.createBuffer(nextBuffer, bitrate, channels, frequency)
+				def bufferId = renderer.createBuffer(ByteBuffer.fromBuffersDirect(soundDataBuffer.drain()), bitrate, channels, frequency)
 				bufferIds << bufferId
 				renderer.queueBuffer(sourceId, bufferId)
 //				renderer.updateSource(sourceId, position, direction, velocity)

@@ -41,7 +41,7 @@ class Image implements GraphicsElement, SelfVisitable {
 
 	// Rendering information
 	private int textureId
-	private Rectanglef textureRect
+	private final Rectanglef textureRect
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
