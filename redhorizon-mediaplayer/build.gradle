@@ -27,6 +27,7 @@ dependencies {
 		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.3',
 		'info.picocli:picocli:4.1.1',
+		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11'
 	)
 }

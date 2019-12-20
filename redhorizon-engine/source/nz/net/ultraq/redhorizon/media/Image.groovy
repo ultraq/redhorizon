@@ -33,28 +33,29 @@ import java.nio.ByteBuffer
  */
 class Image implements GraphicsElement, SelfVisitable {
 
-	// Image file attributes
+	// Image attributes
 	final int width
 	final int height
 	final int format
-	ByteBuffer imageData
+	final ByteBuffer imageData
+	final Rectanglef dimensions
 
 	// Rendering information
 	private int textureId
-	private final Rectanglef textureRect
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
 	 * 
-	 * @param imageFile The file containing the image to make.
+	 * @param imageFile  Image source.
+	 * @param dimensions Dimensions over which to display the image over.
 	 */
-	Image(ImageFile imageFile) {
+	Image(ImageFile imageFile, Rectanglef dimensions) {
 
-		width       = imageFile.width
-		height      = imageFile.height
-		format      = imageFile.format.value
-		imageData   = ImageUtility.flipVertically(imageFile.imageData, width, height, format)
-		textureRect = new Rectanglef(-width / 2, -height / 2, width / 2, height / 2)
+		width     = imageFile.width
+		height    = imageFile.height
+		format    = imageFile.format.value
+		imageData = ImageUtility.flipVertically(imageFile.imageData, width, height, format)
+		this.dimensions = dimensions
 	}
 
 //	/**
@@ -107,6 +108,6 @@ class Image implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(textureId, textureRect)
+		renderer.drawTexture(textureId, dimensions)
 	}
 }

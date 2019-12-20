@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
 
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -38,6 +39,7 @@ class ImageViewer {
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
 	final ImageFile imageFile
+	final boolean fixAspectRatio
 
 	/**
 	 * View the configured file.
@@ -47,7 +49,9 @@ class ImageViewer {
 		logger.info("File details: ${imageFile}")
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def image = new Image(imageFile)
+			def width = imageFile.width
+			def height = fixAspectRatio ? imageFile.height * 1.2 : imageFile.height
+			def image = new Image(imageFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2))
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null

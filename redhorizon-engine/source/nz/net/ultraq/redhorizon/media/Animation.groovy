@@ -43,12 +43,12 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final int format
 	final int numFrames
 	final float frameRate
+	private Rectanglef dimensions
 	private final Worker frameDataWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
 	private long animationTimeStart
 
 	// Rendering information
-	private Rectanglef textureRect
 	private List<FrameInfo> framesInfo
 
 	/**
@@ -62,16 +62,18 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	/**
 	 * Constructor, create an animation out of animation file data.
 	 * 
-	 * @param animationFile
+	 * @param animationFile   Animation source.
+	 * @param dimensions      Dimensions over which to display the image over.
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, Rectanglef dimensions, ExecutorService executorService) {
 
 		width     = animationFile.width
 		height    = animationFile.height
 		format    = animationFile.format.value
 		numFrames = animationFile.numFrames
 		frameRate = animationFile.frameRate
+		this.dimensions = dimensions
 
 		frameDataBuffer = new ArrayBlockingQueue<>(Math.ceil(animationFile.frameRate) as int)
 		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
@@ -79,8 +81,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			frameDataBuffer << frameData
 		}
 		executorService.execute(frameDataWorker)
-
-		textureRect = new Rectanglef(-width / 2, -height / 2, width / 2, height / 2)
 	}
 
 	@Override
@@ -124,7 +124,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 				if (!currentFrameInfo.textureId) {
 					currentFrameInfo.textureId = renderer.createTexture(currentFrameInfo.frame, format, width, height)
 				}
-				renderer.drawTexture(currentFrameInfo.textureId, textureRect)
+				renderer.drawTexture(currentFrameInfo.textureId, dimensions)
 
 				// TODO: Clear frames/textures as the animation progresses to reduce memory usage
 			}

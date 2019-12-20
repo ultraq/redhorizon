@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.media.Animation
 
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -38,6 +39,7 @@ class AnimationPlayer {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
 	final AnimationFile animationFile
+	final boolean fixAspectRatio
 
 	/**
 	 * Play the configured animation file.
@@ -47,7 +49,9 @@ class AnimationPlayer {
 		logger.info("File details: ${animationFile}")
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def animation = new Animation(animationFile, executorService)
+			def width = animationFile.width * 2
+			def height = (fixAspectRatio ? animationFile.height * 1.2 : animationFile.height) * 2
+			def animation = new Animation(animationFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
