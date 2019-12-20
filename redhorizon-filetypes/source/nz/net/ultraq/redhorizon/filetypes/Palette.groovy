@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.filetypes
 import java.nio.ByteBuffer
 
 /**
- * A basic colour palette.
+ * A 24-bit colour palette for modern colour systems.
  * 
  * @author Emanuel Rabina
  */

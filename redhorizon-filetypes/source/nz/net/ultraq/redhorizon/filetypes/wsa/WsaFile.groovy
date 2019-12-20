@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import nz.net.ultraq.redhorizon.utilities.ImageUtility
@@ -58,7 +59,7 @@ class WsaFile implements AnimationFile {
 	final int[] frameOffsets
 	final Palette palette
 
-	final ColourFormat format = ColourFormat.FORMAT_RGBA
+	final ColourFormat format = ColourFormat.FORMAT_RGB
 	final float frameRate
 	final boolean looping
 
@@ -87,10 +88,10 @@ class WsaFile implements AnimationFile {
 			frameOffsets[i] = input.readInt()
 		}
 
-		looping = frameOffsets.last() != 0
+		looping = frameOffsets[frameOffsets.length - 1] != 0
 
-		// Internal palette
-		palette = new Palette(256, format, input)
+		// Internal VGA palette
+		palette = new VgaPalette(256, format, input)
 	}
 
 	@Override
@@ -141,7 +142,7 @@ class WsaFile implements AnimationFile {
 	String toString() {
 
 		return """
-			WSA file (C&C), ${width}x${height}, 8-bit with internal palette
+			WSA file (C&C), ${width}x${height}, 18-bit with internal palette of 256 colours
 			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
 		""".stripIndent().trim()
 	}

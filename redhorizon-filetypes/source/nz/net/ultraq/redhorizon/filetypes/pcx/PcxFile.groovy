@@ -167,6 +167,6 @@ class PcxFile implements ImageFile {
 	@Override
 	String toString() {
 
-		return "PCX file, ${width}x${height}, 8-bit with internal palette"
+		return "PCX file, ${width}x${height}, 24-bit with internal palette of 256 colours"
 	}
 }
