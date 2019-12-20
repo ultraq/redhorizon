@@ -94,19 +94,17 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 				def bufferId = renderer.createBuffer(ByteBuffer.fromBuffersDirect(soundDataBuffer.drain()), bitrate, channels, frequency)
 				bufferIds << bufferId
 				renderer.queueBuffer(sourceId, bufferId)
-//				renderer.updateSource(sourceId, position, direction, velocity)
-
-				// Start playing the source
-				if (!renderer.sourcePlaying(sourceId)) {
-					renderer.playSource(sourceId)
-				}
 			}
 
-			// No more buffers to read
-			else if (soundDataWorker.complete) {
-				if (!renderer.sourcePlaying(sourceId)) {
-					stop()
-				}
+			// Start playing the source
+//			renderer.updateSource(sourceId, position, direction, velocity)
+			if (!renderer.sourcePlaying(sourceId)) {
+				renderer.playSource(sourceId)
+			}
+
+			// Source finished
+			if (!renderer.sourcePlaying(sourceId)) {
+				stop()
 			}
 		}
 
