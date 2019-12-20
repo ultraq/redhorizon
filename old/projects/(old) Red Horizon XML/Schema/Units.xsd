@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ======================================= -->
+<!-- Red Horizon XSD - Unit/Structure schema -->
+<!-- ======================================= -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns="http://www.ultraq.net.nz/redhorizon/units"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:media="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns:weapon="http://www.ultraq.net.nz/redhorizon/weapons"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Common.xsd" namespace="http://www.ultraq.net.nz/redhorizon/common"/>
+	<xsd:import schemaLocation="Media.xsd" namespace="http://www.ultraq.net.nz/redhorizon/media"/>
+	<xsd:import schemaLocation="Weapons.xsd" namespace="http://www.ultraq.net.nz/redhorizon/weapons"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.units"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+
+	<!-- Root element, unit -->
+	<xsd:element name="UnitData">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLUnitData"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element name="Infantry" type="Infantry"/>
+				<xsd:element name="Vehicle" type="Vehicle"/>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- Root element, structure -->
+	<xsd:element name="StructureData">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLStructureData"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:element name="Structure" type="Structure"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+
+	<!-- Human unit -->
+	<xsd:complexType name="Infantry">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLInfantry"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Unit"/>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Vehicle -->
+	<xsd:complexType name="Vehicle">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLVehicle"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Unit">
+				<xsd:sequence>
+					<xsd:element name="Animation" type="UnitAnimation" minOccurs="0"/>
+					<xsd:element name="Turret" type="Turret" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Structure -->
+	<xsd:complexType name="Structure">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLStructure"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Unit">
+				<xsd:sequence>
+					<xsd:element name="Animation" type="StructureAnimation" minOccurs="0" maxOccurs="unbounded"/>
+					<xsd:element name="BuildAnimation" type="media:Animation" minOccurs="0"/>
+					<xsd:element name="Turret" type="Turret" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+				<xsd:attribute name="BuildDistance" type="xsd:nonNegativeInteger"/>
+				<xsd:attribute name="Power" type="xsd:int"/>
+				<xsd:attribute name="Storage" type="common:nonNegativeInt"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Base unit/structure type -->
+	<xsd:complexType name="Unit" abstract="true">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLUnit"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ExtendableObject">
+				<xsd:sequence>
+					<xsd:element name="Footprint" type="common:Area2D" minOccurs="0">
+						<xsd:annotation>
+							<xsd:appinfo>
+								<jxb:property generateIsSetMethod="true"/>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="Hardpoint" type="UnitHardpoint" minOccurs="0"/>
+					<xsd:element name="WeaponSlot" type="WeaponSlot" minOccurs="0"/>
+					<xsd:element name="Portrait" type="media:Image" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="Armour" type="xsd:string"/>
+				<xsd:attribute name="Cost" type="common:nonNegativeInt"/>
+				<xsd:attribute name="Hitpoints" type="common:positiveInt"/>
+				<xsd:attribute name="Points" type="common:nonNegativeInt"/>
+				<xsd:attribute name="Prerequisites">
+					<xsd:simpleType>
+						<xsd:list itemType="xsd:string"/>
+					</xsd:simpleType>
+				</xsd:attribute>
+				<xsd:attribute name="RateOfTurn" type="common:nonNegativeInt"/>
+				<xsd:attribute name="Sight" type="common:nonNegativeInt"/>
+				<xsd:attribute name="Speed" type="common:nonNegativeInt"/>
+				<xsd:attribute name="TechLevel" type="common:negativeOnePlusInt"/>
+				<xsd:attribute name="Characteristics">
+					<xsd:simpleType>
+						<xsd:list itemType="UnitCharacteristics"/>
+					</xsd:simpleType>
+				</xsd:attribute>
+				<xsd:attribute name="UnCharacteristics">
+					<xsd:simpleType>
+						<xsd:list itemType="UnitCharacteristics"/>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Characteristics of units/structures -->
+	<xsd:simpleType name="UnitCharacteristics">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLUnitCharacteristics"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="BIB"/>
+			<xsd:enumeration value="BUILD_ADJACENT"/>
+			<xsd:enumeration value="CAPTURABLE"/>
+			<xsd:enumeration value="CREWED"/>
+			<xsd:enumeration value="POWERED"/>
+			<xsd:enumeration value="REPAIRABLE"/>
+			<xsd:enumeration value="SELF_HEALING"/>
+			<xsd:enumeration value="SENSORS"/>
+			<xsd:enumeration value="TRACKED"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Unit-mounted weapon -->
+	<xsd:complexType name="WeaponSlot">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLWeaponSlot"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Weapon" type="weapon:Weapon"/>
+		</xsd:sequence>
+		<xsd:attribute name="AmmoCapacity" type="common:negativeOnePlusInt" default="-1"/>
+		<xsd:attribute name="ReloadRate" type="common:nonNegativeInt" default="0"/>
+		<xsd:attribute name="HardpointsUsed">
+			<xsd:simpleType>
+				<xsd:list itemType="xsd:string"/>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="Characteristics">
+			<xsd:simpleType>
+				<xsd:list itemType="WeaponCharacteristics"/>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute name="UnCharacteristics">
+			<xsd:simpleType>
+				<xsd:list itemType="WeaponCharacteristics"/>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<!-- Characteristics of weapons mounted on a unit -->
+	<xsd:simpleType name="WeaponCharacteristics">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLWeaponCharacteristics"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FULL_SALVO_FIRING"/>
+			<xsd:enumeration value="MUST_STOP_TO_FIRE"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Turret component -->
+	<xsd:complexType name="Turret">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLTurret"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Offset" type="common:Point2D"/>
+			<xsd:element name="Hardpoint" type="UnitHardpoint" minOccurs="0"/>
+			<xsd:element name="Animation" type="TurretAnimation" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="RateOfTurn" type="common:nonNegativeInt"/>
+	</xsd:complexType>
+
+	<!-- Weapon hardpoint -->
+	<xsd:complexType name="UnitHardpoint">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLUnitHardpoint"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ReferenceableObject">
+				<xsd:sequence>
+					<xsd:element name="Offset" type="common:Point2D"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+
+	<!-- Specialized animation type for structures -->
+	<xsd:complexType name="StructureAnimation">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLStructureAnimation"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="UnitAnimation">
+				<xsd:attribute name="DamagedStartFrame" type="common:nonNegativeInt"/>
+				<xsd:attribute name="DestroyedFrame" type="common:nonNegativeInt"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Basic animation type for units/structures -->
+	<xsd:complexType name="UnitAnimation">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLUnitAnimation"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="media:Animation">
+				<xsd:sequence>
+					<xsd:element name="DefaultAnim" type="IncludedAnim"/>
+					<xsd:element name="IncludedAnim" type="SpecialAnim" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Default animation, used for stationary display and as a fallback -->
+	<xsd:complexType name="IncludedAnim">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLIncludedAnim"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:attribute name="StartFrame" type="common:nonNegativeInt" use="required"/>
+		<xsd:attribute name="Angles" type="common:positiveInt" use="required"/>
+		<xsd:attribute name="FramesPerAngle" type="common:nonNegativeInt" use="required"/>
+	</xsd:complexType>
+
+	<!-- Special animations (anim within an anim) and their frame numbers -->
+	<xsd:complexType name="SpecialAnim">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLSpecialAnim"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="IncludedAnim">
+				<xsd:attribute name="Usage" type="SpecialAnims" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- List of special animation types that units/structures can have -->
+	<xsd:simpleType name="SpecialAnims">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLSpecialAnims"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FACTORY_BUILD"/>
+			<xsd:enumeration value="FIRING"/>
+			<xsd:enumeration value="HARVESTER_DROPOFF"/>
+			<xsd:enumeration value="HARVESTER_HARVESTING"/>
+			<xsd:enumeration value="MOVING"/>
+			<xsd:enumeration value="SILO_FILL_25%"/>
+			<xsd:enumeration value="SILO_FILL_50%"/>
+			<xsd:enumeration value="SILO_FILL_75%"/>
+			<xsd:enumeration value="SILO_FILL_100%"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Animation type for structures to include 'damaged' animations -->
+	<xsd:complexType name="StructureDamagedAnimation">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLStructureDamagedAnimation"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:sequence minOccurs="0">
+			<xsd:element name="DefaultAnim" type="IncludedAnim"/>
+			<xsd:element name="IncludedAnim" type="SpecialAnim" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="StartFrame" type="common:nonNegativeInt" use="required"/>
+	</xsd:complexType>
+
+	<!-- Basic animation type for turrets -->
+	<xsd:complexType name="TurretAnimation">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLTurretAnimation"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="media:Animation">
+				<xsd:sequence>
+					<xsd:element name="TurretAnim" type="IncludedAnim"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

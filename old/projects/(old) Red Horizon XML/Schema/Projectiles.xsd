@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==================================== -->
+<!-- Red Horizon XSD - Projectiles schema -->
+<!-- ==================================== -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/projectiles"
+	xmlns="http://www.ultraq.net.nz/redhorizon/projectiles"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:media="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Common.xsd" namespace="http://www.ultraq.net.nz/redhorizon/common"/>
+	<xsd:import schemaLocation="Media.xsd" namespace="http://www.ultraq.net.nz/redhorizon/media"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.projectiles"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<!-- Root element, projectile declaration -->
+	<xsd:element name="ProjectileData">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLProjectileData"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:element name="Projectile" type="Projectile"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- Projectile type -->
+	<xsd:complexType name="Projectile">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLProjectile"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ExtendableObject">
+				<xsd:sequence>
+					<xsd:element name="Animation" type="media:Animation" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="Characteristics">
+					<xsd:simpleType>
+						<xsd:list itemType="CharsProjectiles"/>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Projectile characteristics -->
+	<xsd:simpleType name="CharsProjectiles">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLCharsProjectiles"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="INVISIBLE"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

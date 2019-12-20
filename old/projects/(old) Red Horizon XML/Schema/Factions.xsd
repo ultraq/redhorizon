@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ================================= -->
+<!-- Red Horizon XSD - Factions schema -->
+<!-- ================================= -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/factions"
+	xmlns="http://www.ultraq.net.nz/redhorizon/factions"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:media="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Common.xsd" namespace="http://www.ultraq.net.nz/redhorizon/common"/>
+	<xsd:import schemaLocation="Media.xsd" namespace="http://www.ultraq.net.nz/redhorizon/media"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.factions"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<!-- Root element, faction declaration -->
+	<xsd:element name="FactionData">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLFactionData"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:element name="Faction" type="Faction"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- Faction -->
+	<xsd:complexType name="Faction">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLFaction"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="AbstractFaction">
+				<xsd:sequence>
+					<xsd:element name="Radar" type="media:Animation" minOccurs="0"/>
+					<xsd:element name="SubFaction" type="SubFaction" maxOccurs="unbounded"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Sub-faction -->
+	<xsd:complexType name="SubFaction">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLSubFaction"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="AbstractFaction">
+				<xsd:attribute name="Colour" type="SubFactionColour" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Available sub-faction colours (from the RA/CNC palette) -->
+	<xsd:simpleType name="SubFactionColour">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLSubFactionColour"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="GOLD"/>
+			<xsd:enumeration value="BLUE"/>
+			<xsd:enumeration value="RED"/>
+			<xsd:enumeration value="GREEN"/>
+			<xsd:enumeration value="ORANGE"/>
+			<xsd:enumeration value="BROWN"/>
+			<xsd:enumeration value="TEAL"/>
+			<xsd:enumeration value="MAROON"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<!-- Base faction type -->
+	<xsd:complexType name="AbstractFaction" abstract="true">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLAbstractFaction"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ReferenceableObject">
+				<xsd:sequence>
+					<xsd:element name="Multiplayer" type="MultiplayerStats" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="Playable">
+					<xsd:simpleType>
+						<xsd:list itemType="Playable"/>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Multiplayer stat adjustments -->
+	<xsd:complexType name="MultiplayerStats">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLMultiplayerStats"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:attribute name="AirSpeed" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="Armour" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="BuildTime" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="Cost" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="Firepower" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="GroundSpeed" type="common:nonNegativeFloat" default="1.0"/>
+		<xsd:attribute name="RateOfFire" type="common:nonNegativeFloat" default="1.0"/>
+	</xsd:complexType>
+
+	<!-- Playable enumeration -->
+	<xsd:simpleType name="Playable">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:typesafeEnumClass name="XMLPlayable"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SINGLE"/>
+			<xsd:enumeration value="MULTI"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+</xsd:schema>

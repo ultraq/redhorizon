@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- =============================== -->
+<!-- Red Horizon - Soundtrack schema -->
+<!-- =============================== -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/soundtrack"
+	xmlns="http://www.ultraq.net.nz/redhorizon/soundtrack"
+	xmlns:media="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Media.xsd" namespace="http://www.ultraq.net.nz/redhorizon/media"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.soundtrack"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<!-- Root element, soundtrack listing -->
+	<xsd:element name="SoundtrackData">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLSoundtrackData"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded">
+				<xsd:element name="Soundtrack" type="media:Soundtrack"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

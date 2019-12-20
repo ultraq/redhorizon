@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==================================== -->
+<!-- Red Horizon XSD - Common media types -->
+<!-- ==================================== -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns="http://www.ultraq.net.nz/redhorizon/media"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Common.xsd" namespace="http://www.ultraq.net.nz/redhorizon/common"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.media"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<!-- Base media type (object derivative) -->
+	<xsd:complexType name="Media">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLMedia"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="common:ReferenceableObject">
+				<xsd:attribute name="Filename" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Basic end-to-end animation -->
+	<xsd:complexType name="Animation">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLAnimation"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Media">
+				<xsd:attribute name="TheaterDependent" type="xsd:boolean" default="false"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Simple image -->
+	<xsd:complexType name="Image">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLImage"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Media">
+				<xsd:attribute name="TheaterDependent" type="xsd:boolean" default="false"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Soundeffect type -->
+	<xsd:complexType name="SoundEffect">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLSoundEffect"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Media"/>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<!-- Soundtrack type -->
+	<xsd:complexType name="Soundtrack">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLSoundTrack"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="Media">
+				<xsd:attribute name="TechLevel" type="common:negativeOnePlusInt" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

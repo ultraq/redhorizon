@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ========================================= -->
+<!-- Red Horizon XSD - All-in-one rules schema -->
+<!-- ========================================= -->
+
+<xsd:schema targetNamespace="http://www.ultraq.net.nz/redhorizon/rules"
+	xmlns="http://www.ultraq.net.nz/redhorizon/rules"
+	xmlns:common="http://www.ultraq.net.nz/redhorizon/common"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" jxb:version="2.1"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:import schemaLocation="Common.xsd" namespace="http://www.ultraq.net.nz/redhorizon/common"/>
+	<xsd:import schemaLocation="Campaign.xsd" namespace="http://www.ultraq.net.nz/redhorizon/campaign"/>
+	<xsd:import schemaLocation="Factions.xsd" namespace="http://www.ultraq.net.nz/redhorizon/factions"/>
+	<xsd:import schemaLocation="Projectiles.xsd" namespace="http://www.ultraq.net.nz/redhorizon/projectiles"/>
+	<xsd:import schemaLocation="Soundtrack.xsd" namespace="http://www.ultraq.net.nz/redhorizon/soundtrack"/>
+	<xsd:import schemaLocation="Units.xsd" namespace="http://www.ultraq.net.nz/redhorizon/units"/>
+	<xsd:import schemaLocation="Warheads.xsd" namespace="http://www.ultraq.net.nz/redhorizon/warheads"/>
+	<xsd:import schemaLocation="Weapons.xsd" namespace="http://www.ultraq.net.nz/redhorizon/weapons"/>
+
+	<!-- Map schema to custom package -->
+	<xsd:annotation>
+		<xsd:appinfo>
+			<jxb:schemaBindings>
+				<jxb:package name="redhorizon.xml.rules"/>
+			</jxb:schemaBindings>
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<!-- Root element, list of included rules XML files -->
+	<xsd:element name="Rules">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<jxb:class name="XMLRules"/>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Soundtrack" type="common:XMLIncludes"/>
+				<xsd:element name="Factions" type="common:XMLIncludes"/>
+				<xsd:element name="Units" type="common:XMLIncludes"/>
+				<xsd:element name="Structures" type="common:XMLIncludes"/>
+				<xsd:element name="Weapons" type="common:XMLIncludes"/>
+				<xsd:element name="Projectiles" type="common:XMLIncludes"/>
+				<xsd:element name="Warheads" type="common:XMLIncludes"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>
