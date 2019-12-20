@@ -51,7 +51,7 @@ class AudioPlayer {
 
 			def engine = executorService.submit(audioEngine)
 
-			soundEffect.addEventListener(SoundEffect.EVENT_NAME_STOP) { event ->
+			soundEffect.on(SoundEffect.EVENT_STOP) { event ->
 				logger.debug('Sound stopped')
 				audioEngine.stop()
 			}

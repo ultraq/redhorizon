@@ -59,7 +59,7 @@ class ImageViewer {
 
 			logger.info('Displaying the image in another window.  Close the window to exit.')
 
-			// Execute things from this thread when possible
+			// Execute things from this thread when needed
 			while (!engine.done) {
 				while (!engine.done && !executable) {
 					Thread.onSpinWait()
