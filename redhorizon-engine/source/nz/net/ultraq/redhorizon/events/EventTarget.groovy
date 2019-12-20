@@ -33,7 +33,7 @@ trait EventTarget {
 	 * @param eventName
 	 * @param eventListener
 	 */
-	void addEventListener(String eventName, EventListener eventListener) {
+	void on(String eventName, EventListener eventListener) {
 
 		def listenersForEvent = eventListeners[eventName]
 		if (listenersForEvent == null) {
@@ -48,7 +48,7 @@ trait EventTarget {
 	 * 
 	 * @param eventName
 	 */
-	void fireEvent(String eventName) {
+	void trigger(String eventName) {
 
 		def listenersForEvent = eventListeners[eventName]
 		if (listenersForEvent != null) {
