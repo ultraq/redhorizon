@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon
 
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
@@ -71,6 +72,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
+		Thread.currentThread().name = 'Media Player [main]'
 		logger.info("Red Horizon Media Player ${commandSpec.version()[0] ?: '(development)'}")
 
 		logger.info("Loading ${file}...")
@@ -126,7 +128,11 @@ class MediaPlayer implements Callable<Integer> {
 	 */
 	private void play(Object file) {
 
-		if (file instanceof SoundFile) {
+		if (file instanceof AnimationFile) {
+			def animationPlayer = new AnimationPlayer(file)
+			animationPlayer.play()
+		}
+		else if (file instanceof SoundFile) {
 			def audioPlayer = new AudioPlayer(file)
 			audioPlayer.play()
 		}
