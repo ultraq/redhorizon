@@ -25,8 +25,8 @@ import nz.net.ultraq.redhorizon.events.EventTarget
  */
 trait Playable extends EventTarget {
 
-	static final String EVENT_NAME_PLAY = 'Play'
-	static final String EVENT_NAME_STOP = 'Stop'
+	static final String EVENT_PLAY = 'Playable/Play'
+	static final String EVENT_STOP = 'Playable/Stop'
 
 	private boolean playing = false
 
@@ -46,7 +46,7 @@ trait Playable extends EventTarget {
 	void play() {
 
 		playing = true
-		fireEvent(EVENT_NAME_PLAY)
+		trigger(EVENT_PLAY)
 	}
 
 	/**
@@ -55,6 +55,6 @@ trait Playable extends EventTarget {
 	void stop() {
 
 		playing = false
-		fireEvent(EVENT_NAME_STOP)
+		trigger(EVENT_STOP)
 	}
 }
