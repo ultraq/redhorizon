@@ -16,12 +16,17 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 /**
  * Common code for the engine subsystems.
  * 
  * @author Emanuel Rabina
  */
-abstract class EngineSubsystem implements Runnable {
+abstract class EngineSubsystem implements EventTarget, Runnable {
+
+	static final EVENT_RENDER_LOOP_START = 'Enging/RenderLoop/Start'
+	static final EVENT_RENDER_LOOP_STOP  = 'Engine/RenderLoop/Stop'
 
 	private final int targetRenderTimeMs
 
@@ -47,6 +52,7 @@ abstract class EngineSubsystem implements Runnable {
 	protected void renderLoop(Closure renderLoop) {
 
 		running = true
+		trigger(EVENT_RENDER_LOOP_START)
 		while (shouldRender()) {
 			def loopStart = System.currentTimeMillis()
 			renderLoop()
@@ -58,6 +64,7 @@ abstract class EngineSubsystem implements Runnable {
 				Thread.sleep(waitTime)
 			}
 		}
+		trigger(EVENT_RENDER_LOOP_STOP)
 	}
 
 	/**

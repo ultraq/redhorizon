@@ -165,7 +165,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void deleteTextures(int... textureIds) {
+	void deleteTextures(int[] textureIds) {
 
 		checkForError { ->
 			glDeleteTextures(textureIds)

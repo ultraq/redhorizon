@@ -59,7 +59,7 @@ class GraphicsEngine extends EngineSubsystem {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Red Horizon - Graphics Engine'
+		Thread.currentThread().name = 'Graphics Engine'
 
 		// Initialization
 		context = waitForMainThread({ ->

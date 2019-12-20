@@ -49,7 +49,7 @@ interface GraphicsRenderer {
 	 * 
 	 * @param textureIds
 	 */
-	void deleteTextures(int... textureIds)
+	void deleteTextures(int[] textureIds)
 
 	/**
 	 * Draw the texture over the given rectangle.

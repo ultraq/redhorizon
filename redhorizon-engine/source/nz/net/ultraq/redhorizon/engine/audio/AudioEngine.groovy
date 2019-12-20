@@ -55,7 +55,7 @@ class AudioEngine extends EngineSubsystem {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Red Horizon - Audio Engine'
+		Thread.currentThread().name = 'Audio Engine'
 		logger.debug('Starting audio engine')
 
 		// Initialization
