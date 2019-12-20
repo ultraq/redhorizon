@@ -157,7 +157,7 @@ class Palette {
 	 * Return the colour data at the specified index.
 	 * 
 	 * @param index Position in the palette.
-	 * @return <tt>byte</tt> array of the RGB(A) values of the requested colour.
+	 * @return {@code byte} values representing the requested colour.
 	 */
 	byte[] getAt(int index) {
 
