@@ -38,59 +38,6 @@ class Palette {
 	protected final byte[][] palette
 
 	/**
-	 * Constructor, copy an existing palette into this one.
-	 * 
-	 * @param palette
-	 */
-//	protected AbstractPalette(Palette palette) {
-//
-//		size   = palette.size
-//		format = palette.format
-//		this.palette = new byte[size][format.value]
-//		(0..<size).each { i ->
-//			this.palette[i] = palette.getColour(i)
-//		}
-//	}
-
-	/**
-	 * Constructor, create a palette from a palette file.
-	 * 
-	 * @param palettefile
-	 */
-//	protected AbstractPalette(PaletteFile palettefile) {
-//
-//		this.size = palettefile.size()
-//		this.format = palettefile.format()
-//		this.palette = new byte[size][format.size]
-//
-//		try (ReadableByteChannel palettedata = palettefile.getPaletteData()) {
-//			for (int i = 0 i < size i++) {
-//				ByteBuffer colourbytes = ByteBuffer.allocate(format.size)
-//				palettedata.read(colourbytes)
-//				palette[i] = colourbytes.array()
-//			}
-//		}
-//		// TODO: Should be able to soften the auto-close without needing this
-//		catch (IOException ex) {
-//			throw new RuntimeException(ex)
-//		}
-//	}
-
-	/**
-	 * Constructor, create a palette using the given data.
-	 * 
-	 * @param size	 Number of colours in the palette
-	 * @param format Colour format of the palette
-	 * @param bytes	 Palette data.
-	 */
-//	protected AbstractPalette(int size, ColourFormat format, byte[][] bytes) {
-//
-//		this.size    = size
-//		this.format  = format
-//		this.palette = bytes
-//	}
-
-	/**
 	 * Constructor, build the palette parts but without any data.
 	 * 
 	 * @param size
@@ -133,25 +80,6 @@ class Palette {
 			bytes.get(palette[i])
 		}
 	}
-
-	/**
-	 * Constructor, create a palette using the given data.
-	 * 
-	 * @param size		  Number of colours in the palette.
-	 * @param format	  Colour format of the palette.
-	 * @param bytechannel Palette data.
-	 */
-//	protected AbstractPalette(int size, ColourFormat format, ReadableByteChannel bytechannel) {
-//
-//		this.size    = size
-//		this.format  = format
-//		this.palette = new byte[size][format.size]
-//		for (int i = 0 i < palette.length i++) {
-//			ByteBuffer colourbytes = ByteBuffer.allocate(format.size)
-//			bytechannel.read(colourbytes)
-//			palette[i] = colourbytes.array()
-//		}
-//	}
 
 	/**
 	 * Return the colour data at the specified index.

@@ -48,7 +48,7 @@ class Orientation {
 	Object asType(Class clazz) {
 
 		if (clazz == float[]) {
-			return [at.x, at.y, at.z, up.x, up.y, up.z] as float[]
+			return [at.x, at.y, at.z, up.x, up.y, up.z]
 		}
 
 		return new IllegalArgumentException("Cannot convert Orientation to type ${clazz}")
