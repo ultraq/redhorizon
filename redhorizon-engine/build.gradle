@@ -31,8 +31,10 @@ dependencies {
 		'org.lwjgl:lwjgl::natives-macos',
 		'org.lwjgl:lwjgl::natives-windows',
 		'org.lwjgl:lwjgl-glfw::natives-macos',
+		'org.lwjgl:lwjgl-glfw::natives-windows',
 		'org.lwjgl:lwjgl-openal::natives-macos',
 		'org.lwjgl:lwjgl-openal::natives-windows',
-		'org.lwjgl:lwjgl-opengl::natives-macos'
+		'org.lwjgl:lwjgl-opengl::natives-macos',
+		'org.lwjgl:lwjgl-opengl::natives-windows'
 	)
 }
