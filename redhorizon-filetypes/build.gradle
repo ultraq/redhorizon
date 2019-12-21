@@ -26,11 +26,27 @@ dependencies {
 	)
 }
 
+def isMac = Os.isFamily(Os.FAMILY_MAC)
+def isUnix = Os.isFamily(Os.FAMILY_UNIX)
+def isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
+
 task compileMixFileKey(type: Exec) {
-	if (Os.isFamily(Os.FAMILY_UNIX)) {
-		commandLine 'make', Os.isFamily(Os.FAMILY_MAC) ? 'macos' : 'linux'
+	inputs.files(
+		fileTree('source') {
+			include '*.cpp', '*.h'
+		}
+	)
+	outputs.files (
+		isMac ? file('libMixFileKey.dylib') :
+		isUnix ? file('libMixFileKey.so') :
+		isWindows ? file('MixFileKey.dll') :
+		null
+	)
+
+	if (isUnix) {
+		commandLine 'make', isMac ? 'macos' : 'linux'
 	}
-	else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+	else if (isWindows) {
 		commandLine 'nmake', 'windows'
 	}
 	else {
