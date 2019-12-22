@@ -34,6 +34,7 @@ distributions {
 			from 'redhorizon-mediaplayer/build/install/play'
 			from 'redhorizon-mixreader/build/install/mix'
 			from('.') {
+				include 'CHANGELOG.md'
 				include 'LICENSE.txt'
 				include 'README.md'
 			}
