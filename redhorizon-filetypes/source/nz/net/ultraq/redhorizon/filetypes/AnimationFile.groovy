@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.filetypes
 
 /**
  * Interface for animation filetypes.
- *
+ * 
  * @author Emanuel Rabina
  */
 interface AnimationFile {

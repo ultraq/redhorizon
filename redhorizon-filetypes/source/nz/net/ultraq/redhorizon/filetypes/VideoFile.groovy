@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.vqa;
-
-import java.nio.ByteBuffer;
+package nz.net.ultraq.redhorizon.filetypes
 
 /**
- * Representation of the VQA file's offset data.
+ * A video file format, containing both frames and an audio stream.
  * 
  * @author Emanuel Rabina
  */
-public class VqaFrameOffset {
-
-	static final int FRAME_OFFSET_SIZE = 4;
-
-	final int offset;
-
-	/**
-	 * Constructor, creates an offset record from the given {@link ByteBuffer}.
-	 * 
-	 * @param bytes {@link ByteBuffer} to a VQA offset record.
-	 */
-	VqaFrameOffset(ByteBuffer bytes) {
-
-		offset = (bytes.getInt() & 0x3fffffff) << 1;
-	}
+interface VideoFile extends AnimationFile, SoundFile {
 }

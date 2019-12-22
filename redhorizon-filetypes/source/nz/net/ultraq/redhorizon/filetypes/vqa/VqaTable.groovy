@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.vqa;
+package nz.net.ultraq.redhorizon.filetypes.vqa
 
-import java.nio.ByteBuffer;
+import groovy.transform.PackageScope
+import groovy.transform.TupleConstructor
+import java.nio.ByteBuffer
 
 /**
  * Representation of the VQA file's lookup table.  In the first chunk, there is
@@ -26,28 +28,20 @@ import java.nio.ByteBuffer;
  * 
  * @author Emanuel Rabina
  */
-public class VqaTable {
+@PackageScope
+@TupleConstructor(defaults = false)
+class VqaTable {
 
-	final ByteBuffer table;
-
-	/**
-	 * Constructor, builds an initial lookup table of the given dimensions.
-	 * 
-	 * @param bytes <tt>ByteBuffer</tt> containing a complete lookup table.
-	 */
-	VqaTable(ByteBuffer bytes) {
-
-		table = bytes;
-	}
+	final ByteBuffer table
 
 	/**
-	 * Returns the value at the given position in the lookup table.
+	 * Let the table data be looked up with the map syntax.
 	 * 
 	 * @param index Position in the lookup table.
 	 * @return The value at the given position.
 	 */
-	byte getValueAt(int index) {
+	byte getAt(int index) {
 
-		return table.get(index);
+		return table.get(index)
 	}
 }

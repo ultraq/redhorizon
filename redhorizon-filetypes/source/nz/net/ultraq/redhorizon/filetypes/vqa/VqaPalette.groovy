@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
+package nz.net.ultraq.redhorizon.filetypes.vqa
+
+import nz.net.ultraq.redhorizon.filetypes.Palette
+
+import groovy.transform.InheritConstructors
 
 /**
- * Interface for video files.
+ * Dynamic palette found within a vqa file.
  * 
  * @author Emanuel Rabina
  */
-interface VideoFile extends AnimationFile, SoundFile {
+@InheritConstructors
+class VqaPalette extends Palette {
 }
