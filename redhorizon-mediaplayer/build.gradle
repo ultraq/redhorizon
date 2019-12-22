@@ -41,6 +41,7 @@ application {
 		"-Dredhorizon.version=${version}"
 	] + [
 		'java.io',
+		'java.math',
 		'java.lang',
 		'java.lang.annotation',
 		'java.lang.invoke',
