@@ -36,7 +36,6 @@ application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
 	applicationName = 'play'
 	applicationDefaultJvmArgs = [
-		'-XstartOnFirstThread',
 		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
 	] + [
@@ -63,5 +62,19 @@ distributions {
 				into 'lib'
 			}
 		}
+	}
+}
+
+startScripts {
+	unixStartScriptGenerator = new CustomUnixStartScriptGenerator(generator: unixStartScriptGenerator)
+}
+
+class CustomUnixStartScriptGenerator implements ScriptGenerator {
+	@Delegate
+	ScriptGenerator generator
+	@Override
+	void generateScript(JavaAppStartScriptGenerationDetails details, Writer writer) {
+		details.defaultJvmOpts.add(0, '-XstartOnFirstThread')
+		generator.generateScript(details, writer)
 	}
 }
