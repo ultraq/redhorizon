@@ -16,25 +16,26 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
-import java.util.concurrent.BlockingQueue
-
 /**
- * Extensions to the {@link BlockingQueue} interface.
+ * Extensions for primitive array types.
  * 
  * @author Emanuel Rabina
  */
-class BlockingQueueExtensions {
+class PrimitiveArrayExtensions {
 
 	/**
-	 * Drains all available elements to a new list which is returned.
+	 * Fast collect method for {@code byte[]}.
 	 * 
 	 * @param self
+	 * @param transform
 	 * @return
 	 */
-	static <E> List<E> drain(BlockingQueue<E> self) {
+	static byte[] collect(byte[] self, Closure transform) {
 
-		def remaining = []
-		self.drainTo(remaining)
-		return remaining
+		def newArray = new byte[self.length]
+		for (def i = 0; i < self.length; i++) {
+			newArray[i] = (byte)transform(self[i])
+		}
+		return newArray
 	}
 }

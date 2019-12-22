@@ -62,10 +62,11 @@ class ByteBufferExtensions {
 	 * @param buffers
 	 * @return
 	 */
-	static ByteBuffer fromBuffersDirect(ByteBuffer self, Collection<ByteBuffer> buffers) {
+	static ByteBuffer fromBuffersDirect(ByteBuffer self, List<ByteBuffer> buffers) {
 
-		def bufferCapacity = buffers.inject(0) { acc, b -> acc + b.limit() }
-		return (buffers.inject(ByteBuffer.allocateDirectNative(bufferCapacity)) { acc, b -> acc.put(b) }).rewind()
+		return buffers
+			.inject(ByteBuffer.allocateDirectNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }
+			.rewind()
 	}
 
 	/**

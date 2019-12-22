@@ -35,6 +35,7 @@ class GraphicsEngine extends EngineSubsystem {
 	private final Closure needsMainThreadCallback
 
 	private OpenGLContext context
+	private boolean started
 
 	/**
 	 * Constructor, build a new graphics engine for rendering the given element.
@@ -50,6 +51,26 @@ class GraphicsEngine extends EngineSubsystem {
 
 		this.sceneElement = sceneElement
 		this.needsMainThreadCallback = needsMainThreadCallback
+	}
+
+	/**
+	 * Return whether or not the graphics engine has been started.
+	 * 
+	 * @return
+	 */
+	boolean isStarted() {
+
+		return started
+	}
+
+	/**
+	 * Return whether or not the graphics engine has been stopped.
+	 * 
+	 * @return
+	 */
+	boolean isStopped() {
+
+		return !running || context.windowShouldClose()
 	}
 
 	/**
@@ -73,6 +94,7 @@ class GraphicsEngine extends EngineSubsystem {
 			def graphicsElementStates = [:]
 
 			// Rendering looop
+			started = true
 			renderLoop { ->
 				context.withCurrent { ->
 					renderer.clear()

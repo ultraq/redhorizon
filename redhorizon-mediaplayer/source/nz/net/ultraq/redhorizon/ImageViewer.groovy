@@ -25,6 +25,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 
@@ -53,24 +55,35 @@ class ImageViewer {
 			def height = fixAspectRatio ? imageFile.height * 1.2 : imageFile.height
 			def image = new Image(imageFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2))
 
+			def executionBarrier = new CyclicBarrier(2)
+			def finishBarrier = new CountDownLatch(1)
+
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
 			def graphicsEngine = new GraphicsEngine(image, { toExecute ->
 				executable = toExecute
+				executionBarrier.await()
 			})
-
+			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+				finishBarrier.countDown()
+			}
 			def engine = executorService.submit(graphicsEngine)
 
 			logger.info('Displaying the image in another window.  Close the window to exit.')
 
 			// Execute things from this thread when needed
 			while (!engine.done) {
-				while (!engine.done && !executable) {
-					Thread.onSpinWait()
-				}
+				executionBarrier.await()
 				if (executable) {
 					executable.run()
 					executable = null
+					executionBarrier.reset()
+				}
+
+				// Shutdown phase
+				if (graphicsEngine.started && graphicsEngine.stopped) {
+					finishBarrier.await()
+					break
 				}
 			}
 

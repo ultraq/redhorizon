@@ -25,6 +25,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 
@@ -53,12 +55,15 @@ class AnimationPlayer {
 			def height = (fixAspectRatio ? animationFile.height * 1.2 : animationFile.height) * 2
 			def animation = new Animation(animationFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
 
+			def executionBarrier = new CyclicBarrier(2)
+			def finishBarrier = new CountDownLatch(1)
+
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
 			def graphicsEngine = new GraphicsEngine(animation, { toExecute ->
 				executable = toExecute
+				executionBarrier.await()
 			})
-			def engine = executorService.submit(graphicsEngine)
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
 					Thread.currentThread().sleep(500)
@@ -66,6 +71,10 @@ class AnimationPlayer {
 					animation.play()
 				}
 			}
+			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+				finishBarrier.countDown()
+			}
+			def engine = executorService.submit(graphicsEngine)
 
 			animation.on(Animation.EVENT_STOP) { event ->
 				logger.debug('Animation stopped')
@@ -76,12 +85,17 @@ class AnimationPlayer {
 
 			// Execute things from this thread when needed
 			while (!engine.done) {
-				while (!engine.done && !executable) {
-					Thread.onSpinWait()
-				}
+				executionBarrier.await()
 				if (executable) {
 					executable.run()
 					executable = null
+					executionBarrier.reset()
+				}
+
+				// Shutdown phase
+				if (graphicsEngine.started && graphicsEngine.stopped) {
+					finishBarrier.await()
+					break
 				}
 			}
 
