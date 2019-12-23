@@ -55,6 +55,21 @@ class ByteBufferExtensions {
 	}
 
 	/**
+	 * Allocate a native-ordered {@code ByteBuffer}, with data from several other
+	 * {@code ByteBuffer}s.
+	 * 
+	 * @param self
+	 * @param buffers
+	 * @return
+	 */
+	static ByteBuffer fromBuffers(ByteBuffer self, List<ByteBuffer> buffers) {
+
+		return buffers
+			.inject(ByteBuffer.allocateNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }
+			.rewind()
+	}
+
+	/**
 	 * Allocate a direct, native-ordered {@code ByteBuffer}, with data from
 	 * several other {@code ByteBuffer}s.
 	 * 

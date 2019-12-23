@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
@@ -31,6 +32,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 
 /**
  * Implementation of the WSA file format as used in Tiberium Dawn and Red Alert.
@@ -43,7 +45,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @FileExtensions('wsa')
-class WsaFile implements AnimationFile {
+class WsaFile implements AnimationFile, Streaming {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsaFile)
 
@@ -95,7 +97,24 @@ class WsaFile implements AnimationFile {
 	}
 
 	@Override
-	Worker getFrameDataWorker(Closure frameHandler) {
+	ByteBuffer[] getFrameData(ExecutorService executorService) {
+
+		def frames = []
+		executorService
+			.submit(getStreamingDataWorker { frames << it })
+			.get()
+		return frames
+	}
+
+	/**
+	 * Return a worker that can be used for streaming the animation's frames to
+	 * the {@code frameHandler} closure.
+	 * 
+	 * @param frameHandler
+	 * @return Worker for streaming animation data.
+	 */
+	@Override
+	Worker getStreamingDataWorker(Closure frameHandler) {
 
 		return new Worker() {
 			@Override

@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 import nz.net.ultraq.redhorizon.utilities.ImageUtility
@@ -49,7 +50,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	private long animationTimeStart
 
 	// Rendering information
-	private List<FrameInfo> framesInfo
+	private final List<FrameInfo> framesInfo
 
 	/**
 	 * Information about the rendering state of a frame.
@@ -75,26 +76,33 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		frameRate = animationFile.frameRate
 		this.dimensions = dimensions
 
-		frameDataBuffer = new ArrayBlockingQueue<>(Math.ceil(animationFile.frameRate) as int)
-		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-		frameDataWorker = animationFile.getFrameDataWorker { frameData ->
-			frameDataBuffer << frameData
+		framesInfo = new ArrayList<>(numFrames)
+
+		if (animationFile instanceof Streaming) {
+			frameDataBuffer = new ArrayBlockingQueue<>(Math.ceil(animationFile.frameRate) as int)
+			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
+			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
+				frameDataBuffer << frame
+			}
+			executorService.execute(frameDataWorker)
 		}
-		executorService.execute(frameDataWorker)
+		else {
+			animationFile.getFrameData(executorService).each { frame ->
+				framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
+			}
+		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		frameDataWorker.stop()
-		frameDataBuffer.drain()
+		frameDataWorker?.stop()
+		frameDataBuffer?.drain()
 		renderer.deleteTextures(framesInfo.textureId as int[])
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
-
-		framesInfo = new ArrayList<>(numFrames)
 	}
 
 	@Override
@@ -110,7 +118,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		if (playing) {
 
 			// Frames to load
-			if (!frameDataBuffer.empty) {
+			if (!frameDataBuffer?.empty) {
 				frameDataBuffer.drain().each { frame ->
 					framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
 				}

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
@@ -29,6 +30,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
@@ -41,7 +43,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @FileExtensions(['aud', 'v00'])
-class AudFile implements SoundFile {
+class AudFile implements SoundFile, Streaming {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudFile)
 
@@ -53,7 +55,7 @@ class AudFile implements SoundFile {
 	private final NativeDataInputStream input
 
 	// File header
-	final int frequency
+	final int frequency // Stored in file as short
 	final int compressedSize
 	final int uncompressedSize
 	final byte flags
@@ -83,7 +85,26 @@ class AudFile implements SoundFile {
 	}
 
 	@Override
-	Worker getSoundDataWorker(Closure sampleHandler) {
+	ByteBuffer getSoundData(ExecutorService executorService) {
+
+		def samples = []
+		executorService
+			.submit(getStreamingDataWorker { samples << it })
+			.get()
+		return ByteBuffer.fromBuffers(samples)
+	}
+
+	/**
+	 * Returns a worker that can be run to start streaming sound data to the
+	 * {@code sampleHandler} closure.
+	 * 
+	 * @param sampleHandler
+	 *   Closure that is called by the worker for doing something with a small
+	 *   sample of sound.
+	 * @return Worker for streaming sound data.
+	 */
+	@Override
+	Worker getStreamingDataWorker(Closure sampleHandler) {
 
 		return new Worker() {
 			@Override

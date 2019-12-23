@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
@@ -41,7 +42,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	final int channels
 	final int frequency
 	private final Worker soundDataWorker
-	private final BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
+	private final BlockingQueue<ByteBuffer> soundDataBuffer
 
 	// Renderer information
 	private int sourceId
@@ -59,11 +60,15 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		channels  = soundFile.channels.value
 		frequency = soundFile.frequency
 
-		// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-		soundDataWorker = soundFile.getSoundDataWorker { sampleBuffer ->
-			soundDataBuffer << sampleBuffer
+		// TODO: Maybe move streaming to a "sound track" class?
+		if (soundFile instanceof Streaming) {
+			soundDataBuffer = new ArrayBlockingQueue<>(10)
+			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
+			soundDataWorker = soundFile.getStreamingDataWorker { sampleBuffer ->
+				soundDataBuffer << sampleBuffer
+			}
+			executorService.execute(soundDataWorker)
 		}
-		executorService.execute(soundDataWorker)
 	}
 
 	@Override

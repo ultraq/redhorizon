@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.filetypes
 
 import groovy.transform.TupleConstructor
+import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 
 /**
  * Interface for filetypes for sound data (eg: AUD, WAV, etc...).
@@ -71,13 +73,13 @@ interface SoundFile {
 	int getFrequency()
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data to the
-	 * {@code bufferHandler} closure.
+	 * Returns uncompressed sound data that can be used for playback.
 	 * 
-	 * @param sampleHandler
-	 *   Closure that is called by the worker for doing something with a small
-	 *   sample of sound.
-	 * @return Closure for streaming sound data.
+	 * @param executorService
+	 *   Executor that can be used for running the streaming data worker in its
+	 *   own thread, if this file is of a streaming nature.  Can be {@code null}
+	 *   otherwise.
+	 * @return The buffer of sound data.
 	 */
-	Worker getSoundDataWorker(Closure sampleHandler)
+	ByteBuffer getSoundData(ExecutorService executorService)
 }

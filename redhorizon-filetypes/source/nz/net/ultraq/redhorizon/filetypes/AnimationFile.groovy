@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
+import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
+
 /**
  * Interface for animation filetypes.
  * 
@@ -36,15 +39,16 @@ interface AnimationFile {
 	ColourFormat getFormat()
 
 	/**
-	 * Return a worker that can be used for streaming the animation's frames to
-	 * the {@code frameHandler} closure.
+	 * Get the uncompressed data for each frame of the animation that can be used
+	 * for rendering.
 	 * 
-	 * @param frameHandler
-	 *   Closure that is called by the worker for doing something with a single
-	 *   frame.
-	 * @return Worker that can be run to start streaming frame data.
+	 * @param executorService
+	 *   Executor that can be used for running the streaming data worker in its
+	 *   own thread, if this file is of a streaming nature.  Can be {@code null}
+	 *   otherwise.
+	 * @return Buffer for each frame.
 	 */
-	Worker getFrameDataWorker(Closure frameHandler)
+	ByteBuffer[] getFrameData(ExecutorService executorService)
 
 	/**
 	 * Returns the speed at which this animation should be run, in
