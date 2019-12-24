@@ -64,6 +64,14 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
+	@Override
+	int buffersProcessed(int sourceId) {
+
+		return checkForError { ->
+			return alGetSourcei(sourceId, AL_BUFFERS_PROCESSED)
+		}
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -100,7 +108,7 @@ class OpenALRenderer implements AudioRenderer {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void deleteBuffers(int[] bufferIds) {
+	void deleteBuffers(int... bufferIds) {
 
 		checkForError { ->
 			alDeleteBuffers(bufferIds)
@@ -136,10 +144,10 @@ class OpenALRenderer implements AudioRenderer {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void queueBuffer(int sourceId, int bufferId) {
+	void queueBuffers(int sourceId, int... bufferIds) {
 
 		checkForError { ->
-			alSourceQueueBuffers(sourceId, bufferId)
+			alSourceQueueBuffers(sourceId, bufferIds)
 		}
 	}
 
@@ -163,6 +171,14 @@ class OpenALRenderer implements AudioRenderer {
 		return checkForError { ->
 			def state = alGetSourcei(sourceId, AL_SOURCE_STATE)
 			return state == AL_PLAYING
+		}
+	}
+
+	@Override
+	void unqueueBuffers(int sourceId, int... bufferIds) {
+
+		checkForError { ->
+			alSourceUnqueueBuffers(sourceId, bufferIds)
 		}
 	}
 

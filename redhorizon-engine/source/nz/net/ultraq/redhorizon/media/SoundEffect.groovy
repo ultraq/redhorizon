@@ -77,7 +77,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		soundDataWorker.stop()
 		soundDataBuffer.drain()
 		renderer.deleteSource(sourceId)
-		renderer.deleteBuffers(bufferIds as int[])
+		renderer.deleteBuffers(*bufferIds)
 	}
 
 	@Override
@@ -111,8 +111,17 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 			if (!renderer.sourcePlaying(sourceId)) {
 				stop()
 			}
-		}
 
-		// TODO: Clear samples/buffers as the sound progresses to reduce memory usage
+			// Delete played buffers as the track progresses to free up memory
+			if (soundDataBuffer != null) {
+				def buffersProcessed = renderer.buffersProcessed(sourceId)
+				if (buffersProcessed) {
+					def processedBufferIds = bufferIds.subList(0, buffersProcessed)
+					renderer.unqueueBuffers(sourceId, *processedBufferIds)
+					renderer.deleteBuffers(*processedBufferIds)
+					bufferIds -= processedBufferIds
+				}
+			}
+		}
 	}
 }

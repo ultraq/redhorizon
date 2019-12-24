@@ -39,6 +39,15 @@ interface AudioRenderer {
 	void attachBufferToSource(int sourceId, int bufferId)
 
 	/**
+	 * Return the number of buffers that have been processed for the given source,
+	 * which is the number of buffers that can be safely unqueued from the source.
+	 * 
+	 * @param sourceId
+	 * @return Number of processed buffers.
+	 */
+	int buffersProcessed(int sourceId)
+
+	/**
 	 * Creates and fills a sound buffer with the given data.
 	 * 
 	 * @param data
@@ -61,7 +70,7 @@ interface AudioRenderer {
 	 * 
 	 * @param bufferIds
 	 */
-	void deleteBuffers(int[] bufferIds)
+	void deleteBuffers(int... bufferIds)
 
 	/**
 	 * Delete a source.
@@ -76,6 +85,14 @@ interface AudioRenderer {
 	 * @param sourceId
 	 */
 	void playSource(int sourceId)
+
+	/**
+	 * Queue some buffers to an existing source.
+	 * 
+	 * @param sourceId
+	 * @param bufferIds
+	 */
+	void queueBuffers(int sourceId, int... bufferId)
 
 	/**
 	 * Return whether a source with the given ID exists or not.
@@ -94,12 +111,12 @@ interface AudioRenderer {
 	boolean sourcePlaying(int sourceId)
 
 	/**
-	 * Queue a buffer to an existing source.
+	 * Unqueue some buffers from an existing source.
 	 * 
 	 * @param sourceId
-	 * @param bufferId
+	 * @param bufferIds
 	 */
-	void queueBuffer(int sourceId, int bufferId)
+	void unqueueBuffers(int sourceId, int... bufferId)
 
 	/**
 	 * Update details about the listener.
