@@ -44,27 +44,21 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final int format
 	final int numFrames
 	final float frameRate
-	private Rectanglef dimensions
+	final Rectanglef dimensions
 	private final Worker frameDataWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
 	private long animationTimeStart
 
 	// Rendering information
-	private final List<FrameInfo> framesInfo
-
-	/**
-	 * Information about the rendering state of a frame.
-	 */
-	private class FrameInfo {
-		int textureId
-		ByteBuffer frame
-	}
+	private final List<ByteBuffer> frames = [] // TODO: This still keeps frames around in memory 🤔
+	private final List<Integer> textureIds = [].withDefault { null }
+	private int lastFrame = -1
 
 	/**
 	 * Constructor, create an animation out of animation file data.
 	 * 
 	 * @param animationFile   Animation source.
-	 * @param dimensions      Dimensions over which to display the image over.
+	 * @param dimensions      Dimensions over which to display the animation over.
 	 * @param executorService
 	 */
 	Animation(AnimationFile animationFile, Rectanglef dimensions, ExecutorService executorService) {
@@ -76,29 +70,26 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		frameRate = animationFile.frameRate
 		this.dimensions = dimensions
 
-		framesInfo = new ArrayList<>(numFrames)
-
 		if (animationFile instanceof Streaming) {
-			frameDataBuffer = new ArrayBlockingQueue<>(Math.ceil(animationFile.frameRate) as int)
+			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
-				frameDataBuffer << frame
+				frameDataBuffer << ImageUtility.flipVertically(frame, width, height, format)
 			}
 			executorService.execute(frameDataWorker)
 		}
 		else {
-			animationFile.getFrameData(executorService).each { frame ->
-				framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
-			}
+			throw new UnsupportedOperationException(
+				'Only streaming animations currently supported - loading all the frame data isn\'t good for memory usage!')
 		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		frameDataWorker?.stop()
-		frameDataBuffer?.drain()
-		renderer.deleteTextures(framesInfo.textureId as int[])
+		frameDataWorker.stop()
+		frameDataBuffer.drain()
+		renderer.deleteTextures(*textureIds)
 	}
 
 	@Override
@@ -118,29 +109,37 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		if (playing) {
 
 			// Frames to load
-			if (!frameDataBuffer?.empty) {
+			if (!frameDataBuffer.empty) {
 				frameDataBuffer.drain().each { frame ->
-					framesInfo << new FrameInfo(frame: ImageUtility.flipVertically(frame, width, height, format))
+					frames << frame // TODO: 🤔
 				}
 			}
 
-			def currentFrameIndex = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
+			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
 			// Draw the current frame
-			if (currentFrameIndex < numFrames) {
-				def currentFrameInfo = framesInfo[currentFrameIndex]
-				if (!currentFrameInfo.textureId) {
-					currentFrameInfo.textureId = renderer.createTexture(currentFrameInfo.frame, format, width, height)
+			if (currentFrame < numFrames) {
+				def textureId = textureIds[currentFrame]
+				if (!textureId) {
+					textureId = renderer.createTexture(frames[currentFrame], format, width, height)
+					textureIds[currentFrame] = textureId
 				}
-				renderer.drawTexture(currentFrameInfo.textureId, dimensions)
-
-				// TODO: Clear frames/textures as the animation progresses to reduce memory usage
+				renderer.drawTexture(textureId, dimensions)
 			}
 
 			// Animation over
 			else {
 				stop()
 			}
+
+			// Delete used frames as the animation progresses to free up memory
+			if (lastFrame != -1 && lastFrame != currentFrame) {
+				renderer.deleteTextures(textureIds[lastFrame])
+				lastFrame..<currentFrame.each { i ->
+					frames[i] = null
+				}
+			}
+			lastFrame = currentFrame
 		}
 	}
 }
