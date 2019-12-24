@@ -18,12 +18,17 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 /**
  * Common code for the engine subsystems.
  * 
  * @author Emanuel Rabina
  */
 abstract class EngineSubsystem implements EventTarget, Runnable {
+
+	private static final Logger logger = LoggerFactory.getLogger(EngineSubsystem)
 
 	static final EVENT_RENDER_LOOP_START = 'Enging/RenderLoop/Start'
 	static final EVENT_RENDER_LOOP_STOP  = 'Engine/RenderLoop/Stop'
@@ -53,18 +58,27 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 
 		running = true
 		trigger(EVENT_RENDER_LOOP_START)
-		while (shouldRender()) {
-			def loopStart = System.currentTimeMillis()
-			renderLoop()
-			def loopEnd = System.currentTimeMillis()
 
-			def renderExecutionTime = loopEnd - loopStart
-			if (renderExecutionTime < targetRenderTimeMs) {
-				def waitTime = targetRenderTimeMs - renderExecutionTime
-				Thread.sleep(waitTime)
+		try {
+			while (shouldRender()) {
+				def loopStart = System.currentTimeMillis()
+				renderLoop()
+				def loopEnd = System.currentTimeMillis()
+
+				def renderExecutionTime = loopEnd - loopStart
+				if (renderExecutionTime < targetRenderTimeMs) {
+					def waitTime = targetRenderTimeMs - renderExecutionTime
+					Thread.sleep(waitTime)
+				}
 			}
 		}
-		trigger(EVENT_RENDER_LOOP_STOP)
+		catch (Exception ex) {
+			logger.error('An error occurred during the render loop', ex)
+			throw ex
+		}
+		finally {
+			trigger(EVENT_RENDER_LOOP_STOP)
+		}
 	}
 
 	/**

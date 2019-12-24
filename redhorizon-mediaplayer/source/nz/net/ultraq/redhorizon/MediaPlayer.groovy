@@ -77,20 +77,20 @@ class MediaPlayer implements Callable<Integer> {
 	Integer call() {
 
 		Thread.currentThread().name = 'Media Player [main]'
-		logger.info("Red Horizon Media Player ${commandSpec.version()[0] ?: '(development)'}")
+		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info("Loading ${file}...")
+		logger.info('Loading {}...', file)
 		if (file.endsWith('.mix')) {
 			new MixFile(new File(file)).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
-					logger.info("Loading ${entryName}...")
+					logger.info('Loading {}...', entryName)
 					mix.getEntryData(entry).withCloseable { entryInputStream ->
 						play(getFileClass(entryName).newInstance(entryInputStream))
 					}
 				}
 				else {
-					logger.error("${entryName} not found in ${file}")
+					logger.error('{} not found in {}', entryName, file)
 					throw new IllegalArgumentException()
 				}
 			}
@@ -119,7 +119,7 @@ class MediaPlayer implements Callable<Integer> {
 				return annotation.value().contains(suffix)
 			}
 		if (!fileClass) {
-			logger.error("No implementation for ${suffix} filetype")
+			logger.error('No implementation for {} filetype', suffix)
 			throw new IllegalArgumentException()
 		}
 		return fileClass
@@ -145,7 +145,7 @@ class MediaPlayer implements Callable<Integer> {
 			imageViewer.view()
 		}
 		else {
-			logger.error("No media player for the associated file class of ${file}")
+			logger.error('No media player for the associated file class of {}', file)
 			throw new UnsupportedOperationException()
 		}
 	}

@@ -48,7 +48,7 @@ class AnimationPlayer {
 	 */
 	void play() {
 
-		logger.info("File details: ${animationFile}")
+		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def width = animationFile.width * 2
@@ -66,7 +66,6 @@ class AnimationPlayer {
 			})
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					Thread.currentThread().sleep(500)
 					logger.debug('Animation started')
 					animation.play()
 				}

@@ -66,13 +66,13 @@ class MixReader implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		logger.info("Red Horizon Mix Reader ${commandSpec.version()[0] ?: '(development)'}")
+		logger.info('Red Horizon Mix Reader {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info("Loading ${mixFile}...")
+		logger.info('Loading {}...', mixFile)
 		new MixFile(new File(mixFile)).withCloseable { mix ->
 			def entry = mix.getEntry(entryName)
 			if (entry) {
-				logger.info("${entryName} found, writing to file...")
+				logger.info('{} found, writing to file...', entryName)
 				mix.getEntryData(entry).withCloseable { entryInputStream ->
 					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
 						entryInputStream.transferTo(entryOutputStream)
@@ -80,7 +80,7 @@ class MixReader implements Callable<Integer> {
 				}
 			}
 			else {
-				logger.error("${entryName} not found in ${mixFile}")
+				logger.error('{} not found in {}', entryName, mixFile)
 				throw new IllegalArgumentException()
 			}
 		}

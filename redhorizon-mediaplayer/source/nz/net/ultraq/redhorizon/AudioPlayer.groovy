@@ -43,7 +43,7 @@ class AudioPlayer {
 	 */
 	void play() {
 
-		logger.info("File details: ${soundFile}")
+		logger.info('File details: {}', soundFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def soundEffect = new SoundEffect(soundFile, executorService)

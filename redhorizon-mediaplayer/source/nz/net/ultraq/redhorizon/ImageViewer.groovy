@@ -48,7 +48,7 @@ class ImageViewer {
 	 */
 	void view() {
 
-		logger.info("File details: ${imageFile}")
+		logger.info('File details: {}', imageFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def width = imageFile.width
