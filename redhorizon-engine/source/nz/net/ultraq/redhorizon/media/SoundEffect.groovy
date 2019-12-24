@@ -115,16 +115,16 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 			if (!renderer.sourcePlaying(sourceId)) {
 				stop()
 			}
+		}
 
-			// Delete played buffers as the track progresses to free up memory
-			if (soundDataBuffer != null) {
-				def buffersProcessed = renderer.buffersProcessed(sourceId)
-				if (buffersProcessed) {
-					def processedBufferIds = bufferIds.subList(0, buffersProcessed)
-					renderer.unqueueBuffers(sourceId, *processedBufferIds)
-					renderer.deleteBuffers(*processedBufferIds)
-					bufferIds -= processedBufferIds
-				}
+		// Delete played buffers as the track progresses to free up memory
+		if (soundDataBuffer != null) {
+			def buffersProcessed = renderer.buffersProcessed(sourceId)
+			if (buffersProcessed) {
+				def processedBufferIds = bufferIds.subList(0, buffersProcessed)
+				renderer.unqueueBuffers(sourceId, *processedBufferIds)
+				renderer.deleteBuffers(*processedBufferIds)
+				bufferIds -= processedBufferIds
 			}
 		}
 	}
