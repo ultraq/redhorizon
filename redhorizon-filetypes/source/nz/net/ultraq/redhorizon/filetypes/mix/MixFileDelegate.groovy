@@ -39,7 +39,7 @@ abstract class MixFileDelegate {
 	 * 
 	 * @return
 	 */
-	abstract int getEntryOffset()
+	abstract int getBaseEntryOffset()
 
 	/**
 	 * The index of entries packaged within the MIX file.

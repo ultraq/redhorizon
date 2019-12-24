@@ -30,6 +30,12 @@ class NativeRandomAccessFile implements Closeable, DataInput {
 	private final RandomAccessFile raf
 	private final boolean isLittleEndian
 
+	/**
+	 * Constructor, opens the file as a {@link RandomAccessFile} in read mode, but
+	 * reads primitive values from it in native byte order.
+	 * 
+	 * @param inputStream
+	 */
 	NativeRandomAccessFile(File file) {
 		raf = new RandomAccessFile(file, 'r')
 		isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN

@@ -38,7 +38,7 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 	final short numEntries
 	final int dataSize
 	final MixFileEntry[] entries
-	final int entryOffset
+	final int baseEntryOffset
 
 	/**
 	 * Constructor, start building out a MIX file using the spec from the Red
@@ -81,6 +81,6 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 			entries[index] = new MixFileEntry(decryptedIndexBuffer)
 		}
 
-		entryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_BLOCK + numBytesForIndex
+		baseEntryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_BLOCK + numBytesForIndex
 	}
 }

@@ -32,7 +32,7 @@ class MixFileDelegateStandard extends MixFileDelegate {
 	final short numEntries
 	final int dataSize
 	final MixFileEntry[] entries
-	final int entryOffset
+	final int baseEntryOffset
 
 	/**
 	 * Constructor, start building out a MIX file using the spec from the original
@@ -52,6 +52,6 @@ class MixFileDelegateStandard extends MixFileDelegate {
 			entries[index] = new MixFileEntry(input)
 		}
 
-		entryOffset = SIZE_HEADER + (MixFileEntry.SIZE * numEntries)
+		baseEntryOffset = SIZE_HEADER + (MixFileEntry.SIZE * numEntries)
 	}
 }

@@ -135,7 +135,18 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 		// need to ensure that reads between threads do not disrupt each other by
 		// splitting positioning and making file accesses synchronous.
 		return new InputStream() {
+			private int lastMark = -1
 			private int lastPosition = 0
+
+			@Override
+			synchronized void mark(int readLimit) {
+				lastMark = lastPosition
+			}
+
+			@Override
+			boolean markSupported() {
+				return true
+			}
 
 			@Override
 			int read() {
@@ -143,7 +154,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 					if (lastPosition >= entry.size) {
 						return -1
 					}
-					input.seek(entryOffset + entry.offset + lastPosition)
+					input.seek(baseEntryOffset + entry.offset + lastPosition)
 					def b = input.read()
 					lastPosition++
 					return b
@@ -156,12 +167,17 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 					if (lastPosition >= entry.size) {
 						return -1
 					}
-					input.seek(entryOffset + entry.offset + lastPosition)
+					input.seek(baseEntryOffset + entry.offset + lastPosition)
 					def toRead = Math.min(len, entry.size - lastPosition)
 					def bytesRead = input.read(b, off, toRead)
 					lastPosition += bytesRead
 					return bytesRead
 				}
+			}
+
+			@Override
+			synchronized void reset() {
+				lastPosition = lastMark
 			}
 
 			@Override

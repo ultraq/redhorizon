@@ -30,9 +30,28 @@ class NativeDataInputStream extends InputStream implements DataInput {
 	private final DataInputStream dis
 	private final boolean isLittleEndian
 
+	/**
+	 * Constructor, wraps the given input stream so that values read from it are
+	 * in native byte order.
+	 * 
+	 * @param inputStream
+	 */
 	NativeDataInputStream(InputStream inputStream) {
+
 		dis = new DataInputStream(inputStream)
 		isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
+	}
+
+	@Override
+	synchronized void mark(int readLimit) {
+
+		dis.mark(readLimit)
+	}
+
+	@Override
+	boolean markSupported() {
+
+		return dis.markSupported()
 	}
 
 	/**
@@ -76,5 +95,11 @@ class NativeDataInputStream extends InputStream implements DataInput {
 	@Override
 	short readShort() {
 		return isLittleEndian ? readLittleEndian(2) : dis.readShort()
+	}
+
+	@Override
+	synchronized void reset() {
+
+		dis.reset()
 	}
 }
