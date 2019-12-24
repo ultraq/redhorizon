@@ -71,13 +71,13 @@ class ByteBufferExtensions {
 
 	/**
 	 * Allocate a direct, native-ordered {@code ByteBuffer}, with data from
-	 * several other {@code ByteBuffer}s.
+	 * one or more {@code ByteBuffer}s.
 	 * 
 	 * @param self
 	 * @param buffers
 	 * @return
 	 */
-	static ByteBuffer fromBuffersDirect(ByteBuffer self, List<ByteBuffer> buffers) {
+	static ByteBuffer fromBuffersDirect(ByteBuffer self, ByteBuffer... buffers) {
 
 		return buffers
 			.inject(ByteBuffer.allocateDirectNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }

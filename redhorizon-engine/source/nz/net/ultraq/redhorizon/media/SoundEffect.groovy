@@ -65,7 +65,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 			soundDataBuffer = new ArrayBlockingQueue<>(10)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			soundDataWorker = soundFile.getStreamingDataWorker { sampleBuffer ->
-				soundDataBuffer << sampleBuffer
+				soundDataBuffer << ByteBuffer.fromBuffersDirect(sampleBuffer)
 			}
 			executorService.execute(soundDataWorker)
 		}
@@ -96,9 +96,13 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 			// Buffers to read and queue
 			if (!soundDataBuffer.empty) {
-				def bufferId = renderer.createBuffer(ByteBuffer.fromBuffersDirect(soundDataBuffer.drain()), bitrate, channels, frequency)
-				bufferIds << bufferId
-				renderer.queueBuffer(sourceId, bufferId)
+				def buffers = soundDataBuffer.drain()
+				def newBufferIds = buffers.collect { buffer ->
+					def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
+					bufferIds << newBufferId
+					return newBufferId
+				}
+				renderer.queueBuffers(sourceId, *newBufferIds)
 			}
 
 			// Start playing the source
