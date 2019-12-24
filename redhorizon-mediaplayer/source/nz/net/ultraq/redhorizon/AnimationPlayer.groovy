@@ -67,6 +67,7 @@ class AnimationPlayer {
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
 					logger.debug('Animation started')
+					Thread.sleep(500)
 					animation.play()
 				}
 			}
