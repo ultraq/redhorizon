@@ -41,8 +41,9 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	final int bitrate
 	final int channels
 	final int frequency
+
 	private final Worker soundDataWorker
-	private final BlockingQueue<ByteBuffer> soundDataBuffer
+	private final BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
 
 	// Renderer information
 	private int sourceId
@@ -62,7 +63,6 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 		// TODO: Maybe move streaming to a "sound track" class?
 		if (soundFile instanceof Streaming) {
-			soundDataBuffer = new ArrayBlockingQueue<>(10)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			soundDataWorker = soundFile.getStreamingDataWorker { sampleBuffer ->
 				soundDataBuffer << ByteBuffer.fromBuffersDirect(sampleBuffer)
@@ -96,24 +96,25 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 			// Buffers to read and queue
 			if (!soundDataBuffer.empty) {
-				def buffers = soundDataBuffer.drain()
-				def newBufferIds = buffers.collect { buffer ->
+				def newBufferIds = soundDataBuffer.drain().collect { buffer ->
 					def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
 					bufferIds << newBufferId
 					return newBufferId
 				}
 				renderer.queueBuffers(sourceId, *newBufferIds)
+
+				// Start playing the source
+//				renderer.updateSource(sourceId, position, direction, velocity)
+				if (!renderer.sourcePlaying(sourceId)) {
+					renderer.playSource(sourceId)
+				}
 			}
 
-			// Start playing the source
-//			renderer.updateSource(sourceId, position, direction, velocity)
-			if (!renderer.sourcePlaying(sourceId)) {
-				renderer.playSource(sourceId)
-			}
-
-			// Source finished
-			if (!renderer.sourcePlaying(sourceId)) {
-				stop()
+			// No more buffers to read, wait for the source to complete
+			else if (soundDataWorker.complete) {
+				if (!renderer.sourcePlaying(sourceId)) {
+					stop()
+				}
 			}
 		}
 
@@ -121,10 +122,9 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		if (soundDataBuffer != null) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
-				def processedBufferIds = bufferIds.subList(0, buffersProcessed)
+				def processedBufferIds = buffersProcessed.collect { bufferIds.removeAt(0) }
 				renderer.unqueueBuffers(sourceId, *processedBufferIds)
 				renderer.deleteBuffers(*processedBufferIds)
-				bufferIds -= processedBufferIds
 			}
 		}
 	}
