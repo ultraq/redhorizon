@@ -45,8 +45,10 @@ trait Playable extends EventTarget {
 	 */
 	void play() {
 
+		if (!playing) {
+			trigger(EVENT_START)
+		}
 		playing = true
-		trigger(EVENT_START)
 	}
 
 	/**
@@ -54,7 +56,9 @@ trait Playable extends EventTarget {
 	 */
 	void stop() {
 
+		if (playing) {
+			trigger(EVENT_STOP)
+		}
 		playing = false
-		trigger(EVENT_STOP)
 	}
 }
