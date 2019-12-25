@@ -25,6 +25,8 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
 import org.joml.Rectanglef
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -38,6 +40,8 @@ import java.util.concurrent.ExecutorService
  */
 class Animation implements GraphicsElement, Playable, SelfVisitable {
 
+	private static final Logger logger = LoggerFactory.getLogger(Animation)
+
 	// Animation file attributes
 	final int width
 	final int height
@@ -45,14 +49,15 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final int numFrames
 	final float frameRate
 	final Rectanglef dimensions
+
 	private final Worker frameDataWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
 	private long animationTimeStart
 
 	// Rendering information
-	private final List<ByteBuffer> frames = [] // TODO: This still keeps frames around in memory 🤔
-	private final List<Integer> textureIds = [].withDefault { null }
-	private int lastFrame = -1
+	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
+	private int lastFrame
+	private List<Integer> textureIds
 
 	/**
 	 * Constructor, create an animation out of animation file data.
@@ -94,6 +99,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 	@Override
 	void init(GraphicsRenderer renderer) {
+
+		frames = []
+		lastFrame = -1
+		textureIds = [].withDefault { null as Integer }
 	}
 
 	@Override
@@ -110,21 +119,28 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 			// Frames to load
 			if (!frameDataBuffer.empty) {
-				frameDataBuffer.drain().each { frame ->
-					frames << frame // TODO: 🤔
-				}
+				frames.addAll(frameDataBuffer.drain())
 			}
 
 			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
-			// Draw the current frame
+			// Draw the current frame if available
 			if (currentFrame < numFrames) {
 				def textureId = textureIds[currentFrame]
 				if (!textureId) {
-					textureId = renderer.createTexture(frames[currentFrame], format, width, height)
-					textureIds[currentFrame] = textureId
+					def frame = frames[currentFrame]
+					if (frame) {
+						textureId = renderer.createTexture(frame, format, width, height)
+						renderer.drawTexture(textureId, dimensions)
+						textureIds[currentFrame] = textureId
+					}
+					else {
+						logger.debug('Frame {} not available, skipping', currentFrame)
+					}
 				}
-				renderer.drawTexture(textureId, dimensions)
+				else {
+					renderer.drawTexture(textureId, dimensions)
+				}
 			}
 
 			// Animation over
@@ -134,7 +150,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 			// Delete used frames as the animation progresses to free up memory
 			if (lastFrame != -1 && lastFrame != currentFrame) {
-				renderer.deleteTextures(textureIds[lastFrame])
+				def lastTextureId = textureIds[lastFrame]
+				if (lastTextureId) {
+					renderer.deleteTextures(lastTextureId)
+				}
 				lastFrame..<currentFrame.each { i ->
 					frames[i] = null
 				}
