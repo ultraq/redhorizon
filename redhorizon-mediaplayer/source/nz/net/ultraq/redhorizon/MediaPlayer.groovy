@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 
 import org.reflections.Reflections
@@ -132,21 +133,26 @@ class MediaPlayer implements Callable<Integer> {
 	 */
 	private void play(Object file) {
 
-		if (file instanceof AnimationFile) {
-			def animationPlayer = new AnimationPlayer(file, fixAspectRatio)
-			animationPlayer.play()
-		}
-		else if (file instanceof SoundFile) {
-			def audioPlayer = new AudioPlayer(file)
-			audioPlayer.play()
-		}
-		else if (file instanceof ImageFile) {
-			def imageViewer = new ImageViewer(file, fixAspectRatio)
-			imageViewer.view()
-		}
-		else {
-			logger.error('No media player for the associated file class of {}', file)
-			throw new UnsupportedOperationException()
+		switch (file) {
+			case VideoFile:
+				def videoPlayer = new VideoPlayer(file, fixAspectRatio)
+				videoPlayer.play()
+				break
+			case AnimationFile:
+				def animationPlayer = new AnimationPlayer(file, fixAspectRatio)
+				animationPlayer.play()
+				break
+			case SoundFile:
+				def audioPlayer = new AudioPlayer(file)
+				audioPlayer.play()
+				break
+			case ImageFile:
+				def imageViewer = new ImageViewer(file, fixAspectRatio)
+				imageViewer.view()
+				break
+			default:
+				logger.error('No media player for the associated file class of {}', file)
+				throw new UnsupportedOperationException()
 		}
 	}
 

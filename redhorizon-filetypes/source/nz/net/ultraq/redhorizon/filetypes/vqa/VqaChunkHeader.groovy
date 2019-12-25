@@ -19,44 +19,41 @@ package nz.net.ultraq.redhorizon.filetypes.vqa
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
 import groovy.transform.PackageScope
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
+import groovy.transform.TupleConstructor
 
 /**
- * Representation of a "chunk" in a VQA file.  Each chunk consists of a 4-letter
- * name, the length of the data that follows in big-endian order, then that
- * data.
+ * Header for a "chunk" in a VQA file.  Each chunk header consists of a 4-letter
+ * name, then the length of the data that follows in big-endian order.  Rounding
+ * out the chunk will be the data afterwards.
  * 
  * @author Emanuel Rabina
  */
 @PackageScope
-class VqaChunk {
+@TupleConstructor(defaults = false, force = true)
+class VqaChunkHeader {
 
 	static final String SUFFIX_UNCOMPRESSED = "0"
 	static final String SUFFIX_COMPRESSED = "Z"
 
 	final String name
 	final int length
-	final ByteBuffer data
 
 	/**
-	 * Constructor, takes the chunk data from the given <tt>ByteBuffer</tt>.
+	 * Constructor, read a chunk header from the input stream.
 	 * 
-	 * @param bytes <tt>ByteBuffer</tt> containing the next chunk of data.
+	 * @param input
 	 */
-	VqaChunk(NativeDataInputStream input) {
+	VqaChunkHeader(NativeDataInputStream input) {
 
-		name = Charset.defaultCharset().decode(ByteBuffer.wrapNative(input.readNBytes(4))).toString()
-		length = Integer.reverseBytes(input.readInt())
-		data = ByteBuffer.wrapNative(input.readNBytes(length))
+		this(new String(input.readNBytes(4)), Integer.reverseBytes(input.readInt()))
 	}
 
 	/**
-	 * Returns whether or not the chunk data is compressed.
+	 * Returns whether or not the chunk data that follows is compressed.
 	 * 
 	 * @return
 	 */
-	boolean isCompressed() {
+	boolean isDataCompressed() {
 
 		return !name.endsWith(SUFFIX_UNCOMPRESSED)
 	}

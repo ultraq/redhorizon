@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes.vqa
 
-import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 
 import groovy.transform.InheritConstructors
 
@@ -26,5 +26,5 @@ import groovy.transform.InheritConstructors
  * @author Emanuel Rabina
  */
 @InheritConstructors
-class VqaPalette extends Palette {
+class VqaPalette extends VgaPalette {
 }

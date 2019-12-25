@@ -42,6 +42,12 @@ class VqaTable {
 	 */
 	byte getAt(int index) {
 
-		return table.get(index)
+		try {
+			return table.get(index)
+		}
+		catch (Exception ex) {
+			ex.printStackTrace()
+			throw ex
+		}
 	}
 }
