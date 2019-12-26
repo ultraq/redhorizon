@@ -40,3 +40,5 @@ the Mix file reader by running `bin/mix` or the Media Player by running
 `bin/play`.  Either by supplying a `--help`/`-h` option or by entering no
 parameters, the help text should be printed out showing you how to use these
 commands.
+
+[![Red Horizon - Play WSA file demo](screenshot-of-wsa-demo.png)](https://www.youtube.com/watch?v=mp7A6EMWupY)
