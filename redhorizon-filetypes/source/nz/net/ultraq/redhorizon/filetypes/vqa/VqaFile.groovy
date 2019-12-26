@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import nz.net.ultraq.redhorizon.utilities.ImageUtility
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
 import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
@@ -289,9 +288,7 @@ class VqaFile implements Streaming, VideoFile {
 						block++
 					}
 				}
-				frameBytes.rewind()
-
-				return ImageUtility.applyPalette(frameBytes, vqaPalette)
+				return frameBytes.applyPalette(vqaPalette)
 			}
 
 			@Override

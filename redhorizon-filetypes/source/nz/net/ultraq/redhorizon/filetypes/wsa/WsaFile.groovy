@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -139,7 +138,7 @@ class WsaFile implements AnimationFile, Streaming {
 					format80Decoder.decode(compressedFrame, intermediateFrame)
 					format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
 
-					def colouredFrame = ImageUtility.applyPalette(indexedFrame, palette)
+					def colouredFrame = indexedFrame.applyPalette(palette)
 
 					frameHandler(colouredFrame)
 					lastIndexedFrame = indexedFrame

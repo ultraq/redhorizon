@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
-import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
 import org.joml.Rectanglef
 import org.slf4j.Logger

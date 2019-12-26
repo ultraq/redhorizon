@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import nz.net.ultraq.redhorizon.utilities.ImageUtility
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import java.nio.ByteBuffer
 
@@ -51,6 +51,10 @@ class PcxFile implements ImageFile {
 	private static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
 	private static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
 
+	private static final int PALETTE_COLOURS      = 256
+	private static final int PALETTE_SIZE         = PALETTE_COLOURS * FORMAT_RGB.value
+	private static final int PALETTE_PADDING_SIZE = 1
+
 	// Header data
 	final byte manufacturer
 	final byte version
@@ -71,12 +75,9 @@ class PcxFile implements ImageFile {
 	final short vScreenSize
 	final byte[] filler
 
-	private static final int PALETTE_SIZE         = 768
-	private static final int PALETTE_PADDING_SIZE = 1
-
 	final int width
 	final int height
-	final ColourFormat format = ColourFormat.FORMAT_RGB
+	final ColourFormat format = FORMAT_RGB
 	final ByteBuffer imageData
 
 	/**
@@ -128,9 +129,9 @@ class PcxFile implements ImageFile {
 		height = yMax - yMin + 1
 
 		// Read the rest of the stream
-		def imageAndPaletteData = input.readAllBytes()
-		def encodedImageData = ByteBuffer.wrapNative(imageAndPaletteData, 0, imageAndPaletteData.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
-		def paletteData = ByteBuffer.wrapNative(imageAndPaletteData, imageAndPaletteData.length - PALETTE_SIZE, PALETTE_SIZE)
+		def imageAndPalette = input.readAllBytes()
+		def encodedImage = ByteBuffer.wrapNative(imageAndPalette, 0, imageAndPalette.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
+		def palette = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 
 		// Build up the raw image data for use with a palette later
 		// NOTE: The below is for the case when the scanline data exceeds the
@@ -138,9 +139,9 @@ class PcxFile implements ImageFile {
 		//       this is double-handling the same data.
 		def scanLines = new ArrayList<ByteBuffer>()
 		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
-		while (encodedImageData.hasRemaining()) {
+		while (encodedImage.hasRemaining()) {
 			def scanLine = ByteBuffer.allocateNative(planes * bytesPerLine)
-			runLengthEncoding.decode(encodedImageData, scanLine)
+			runLengthEncoding.decode(encodedImage, scanLine)
 			scanLines << scanLine
 		}
 		def rawImageData = ByteBuffer.allocateNative(width * height)
@@ -152,11 +153,8 @@ class PcxFile implements ImageFile {
 		}
 		rawImageData.rewind()
 
-		// Assign palette (from tail of file, after the padding byte)
-		def palette = new Palette(256, ColourFormat.FORMAT_RGB, paletteData)
-
 		// Apply palette to raw image data to create the final image
-		imageData = ImageUtility.applyPalette(rawImageData, palette)
+		imageData = rawImageData.applyPalette(new Palette(256, FORMAT_RGB, palette))
 	}
 
 	/**
