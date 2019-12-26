@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutorService
  */
 interface SoundFile {
 
+	// TODO: Do I really need enums for these?  I always end up having to
+	//       translate them back/forth if I do.
+
 	/**
 	 * Supported bitrates.
 	 */
