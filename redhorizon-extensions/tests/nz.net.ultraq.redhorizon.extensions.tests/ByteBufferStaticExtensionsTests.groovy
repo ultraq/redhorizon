@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions.tests
 
-import nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions
+import nz.net.ultraq.redhorizon.extensions.ByteBufferStaticExtensions
 
 import spock.lang.Specification
 
@@ -24,11 +24,11 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Tests for the {@link ByteBufferExtensions} extension module.
+ * Tests for the {@link ByteBufferStaticExtensions} extension module.
  * 
  * @author Emanuel Rabina
  */
-class ByteBufferExtensionsTests extends Specification {
+class ByteBufferStaticExtensionsTests extends Specification {
 
 	def "allocateDirectNative returns a natively ordered buffer"() {
 		expect:

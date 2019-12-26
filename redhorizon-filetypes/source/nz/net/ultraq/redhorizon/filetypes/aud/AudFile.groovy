@@ -91,7 +91,7 @@ class AudFile implements SoundFile, Streaming {
 		executorService
 			.submit(getStreamingDataWorker { samples << it })
 			.get()
-		return ByteBuffer.fromBuffers(samples)
+		return ByteBuffer.fromBuffers(*samples)
 	}
 
 	/**

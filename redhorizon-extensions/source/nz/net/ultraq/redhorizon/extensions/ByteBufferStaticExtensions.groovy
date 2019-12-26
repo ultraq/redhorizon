@@ -24,7 +24,7 @@ import java.nio.ByteOrder
  * 
  * @author Emanuel Rabina
  */
-class ByteBufferExtensions {
+class ByteBufferStaticExtensions {
 
 	/**
 	 * Allocates a direct {@code ByteBuffer} with native byte ordering.
@@ -62,7 +62,7 @@ class ByteBufferExtensions {
 	 * @param buffers
 	 * @return
 	 */
-	static ByteBuffer fromBuffers(ByteBuffer self, List<ByteBuffer> buffers) {
+	static ByteBuffer fromBuffers(ByteBuffer self, ByteBuffer... buffers) {
 
 		return buffers
 			.inject(ByteBuffer.allocateNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }

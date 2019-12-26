@@ -177,12 +177,12 @@ class VqaFile implements Streaming, VideoFile {
 		def samples = []
 		executorService
 			.submit(getStreamingDataWorker { frame, sample ->
-				if (frame) {
+				if (sample) {
 					samples << sample
 				}
 			})
 			.get()
-		return ByteBuffer.fromBuffers(samples)
+		return ByteBuffer.fromBuffers(*samples)
 	}
 
 	/**
@@ -389,7 +389,7 @@ class VqaFile implements Streaming, VideoFile {
 
 							// If full, replace the old lookup table
 							if (partialCodebooks.size() == cbParts) {
-								def codebookData = ByteBuffer.fromBuffers(partialCodebooks)
+								def codebookData = ByteBuffer.fromBuffers(*partialCodebooks)
 								codebook = codebookCompressed ? decompressData(codebookData, numBlocks * blockSize) : codebookData
 								partialCodebooks.clear()
 							}

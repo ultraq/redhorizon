@@ -22,4 +22,4 @@ extensionClasses = nz.net.ultraq.redhorizon.extensions.BlockingQueueExtensions,\
                    nz.net.ultraq.redhorizon.extensions.ObjectExtensions,\
                    nz.net.ultraq.redhorizon.extensions.PrimitiveArrayExtensions,\
                    nz.net.ultraq.redhorizon.extensions.SemaphoreExtensions
-staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions
+staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferStaticExtensions
