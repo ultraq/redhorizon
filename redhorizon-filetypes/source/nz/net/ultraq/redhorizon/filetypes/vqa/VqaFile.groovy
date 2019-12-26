@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
@@ -206,51 +207,14 @@ class VqaFile implements Streaming, VideoFile {
 			private final IMAADPCM16bit imaadpcm16bit = new IMAADPCM16bit()
 			private final WSADPCM8bit wsadpcm8bit = new WSADPCM8bit()
 
-			private final int blocksHor  = width / blockWidth
-			private final int blocksVer  = height / blockHeight
-			private final int blockSize  = blockWidth * blockHeight
-			private final int blockParts = blocksHor * blocksVer
-			private final int tableSize  = maxBlocks * blockSize
+			private final int blocksHor = width / blockWidth
+			private final int blocksVer = height / blockHeight
+			private final int blockSize = blockWidth * blockHeight
+			private final int numBlocks = blocksHor * blocksVer
+			private final int vptSize   = numBlocks * 2
 
 			/**
-			 * Decodes the complete lookup table (CBF chunk) of a VQA file.
-			 * 
-			 * @param data The CBF chunk data.
-			 * @return A full lookup table.
-			 */
-			private VqaTable decodeCBFChunk(ByteBuffer data) {
-
-				return new VqaTable(data)
-			}
-
-			/**
-			 * Decodes the partial lookup table (CBP chunk) of a VQA file.
-			 * 
-			 * @param header        The CBP chunk header.
-			 * @param data          The CBP chunk data.
-			 * @param partialTables List of partial lookup tables.
-			 * @return {@code true} if the partials are compressed, {@code false}
-			 *   otherwise.
-			 */
-			private boolean decodeCBPChunk(VqaChunkHeader header, ByteBuffer data, List<ByteBuffer> partialTables) {
-
-				partialTables << data
-				return header.dataCompressed
-			}
-
-			/**
-			 * Decodes the palette data (CPL chunk) of a VQA file.
-			 * 
-			 * @param data The CPL chunk data.
-			 * @return The palette from this chunk.
-			 */
-			private VqaPalette decodeCPLChunk(ByteBuffer data) {
-
-				return new VqaPalette(numColours, format, data)
-			}
-
-			/**
-			 * Decodes the SND chunk of a VQA file.
+			 * Decodes a chunk of sound, found in an SND* chunk.
 			 * 
 			 * @param header The SND chunk header.
 			 * @param data   The SND chunk data.
@@ -258,7 +222,7 @@ class VqaFile implements Streaming, VideoFile {
 			 * @param sample Last sample value from any previous sound decoding.
 			 * @return The sound data from this chunk.
 			 */
-			private ByteBuffer decodeSNDChunk(VqaChunkHeader header, ByteBuffer data, byte[] index, byte[] sample) {
+			private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data, byte[] index, byte[] sample) {
 
 				def soundBytes
 				if (header.dataCompressed) {
@@ -277,98 +241,58 @@ class VqaFile implements Streaming, VideoFile {
 			}
 
 			/**
-			 * Decodes the video data (VPT chunk) of a VQA file.
+			 * Decodes a frame of video, found in a VPT* chunk.
 			 * 
 			 * @param data       The VPT chunk data.
-			 * @param vqaTable   Current lookup table.
+			 * @param codebook   Current lookup table for screen block data.
 			 * @param vqaPalette Current palette.
 			 * @return A fully decoded frame of video.
 			 */
-			private ByteBuffer decodeVPTChunk(ByteBuffer data, VqaTable vqaTable, VqaPalette vqaPalette) {
+			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codebook, Palette vqaPalette) {
 
 				def frameBytes = ByteBuffer.allocateNative(width * height)
 
-				def fillBlock = { int bx, int by, byte val ->
-					for (def y = 0; y < blockHeight; y++) {
-						for (def x = 0; x < blockWidth; x++) {
-							frameBytes.put(((by * blockHeight) + y) * width + ((bx * blockWidth) + x), val)
-						}
-					}
-				}
-
-				byte modifier = blockHeight == 2 ? 0x0f : 0xff
-
-				// Decode every block, going from top-left to bottom-right
-				for (def by = 0; by < blocksVer; by++) {
-					for (def bx = 0; bx < blocksHor; bx++) {
-						int blockOffset = by * blocksHor + bx
-						byte topVal = data.get(blockOffset)
-						byte botVal = data.get((blocksHor * blocksVer) + blockOffset)
-
-						fillBlock(bx, by, botVal == modifier ?
-							topVal : // Fill the block with 1 colour
-							vqaTable[((botVal & 0xff) << 8) + (topVal & 0xff)] // Fill the block with a value in the lookup table
-						)
-					}
-				}
-
 				// Now decode every block
-//				int nextline = width - blockWidth
-//				int modifier = blockHeight == 2 ? 0xf : 0xff
-//				int block = 0
+				int nextline = width - blockWidth
+				int modifier = blockHeight == 2 ? 0xf : 0xff
+				int block = 0
 
 				// Go across first, then down
-//				for (def y = 0; y < height; y += blockHeight) {
-//					for (def x = 0; x < width; x += blockWidth) {
-//
-//						frameBytes.position(y * width + x)
-//
-//						// Get the proper lookup value for the block
-//						int topVal = data.get(block) & 0xff
-//						int botVal = data.get(block + blockParts) & 0xff
-//
-//						// Fill the block with 1 colour
-//						if (botVal == modifier) {
-//							for (def i = 1; i <= blockSize; i++) {
-//								frameBytes.put((byte)topVal)
-//								if ((i % blockWidth == 0) && (i != blockSize)) {
-//									frameBytes.position(frameBytes.position() + nextline)
-//								}
-//							}
-//						}
-//						// Otherwise, fill the block with the value in the lookup table
-//						else {
-//							int ref = ((botVal << 8) + topVal) * blockSize
-//							for (def i = 1; i <= blockSize; i++) {
-//								frameBytes.put(vqaTable[ref++])
-//								if ((i % blockWidth == 0) && (i != blockSize)) {
-//									frameBytes.position(frameBytes.position() + nextline)
-//								}
-//							}
-//						}
-//
-//						block++
-//					}
-//				}
-//				frameBytes.rewind()
+				for (def y = 0; y < height; y += blockHeight) {
+					for (def x = 0; x < width; x += blockWidth) {
+
+						frameBytes.position(y * width + x)
+
+						// Get the proper lookup value for the block
+						int topVal = data.get(block) & 0xff
+						int botVal = data.get(block + numBlocks) & 0xff
+
+						// Fill the block with 1 colour
+						if (botVal == modifier) {
+							for (def i = 1; i <= blockSize; i++) {
+								frameBytes.put((byte)topVal)
+								if ((i % blockWidth == 0) && (i != blockSize)) {
+									frameBytes.position(frameBytes.position() + nextline)
+								}
+							}
+						}
+						// Otherwise, fill the block with the referenced block in the lookup table
+						else {
+							int ref = ((botVal << 8) + topVal) * blockSize
+							for (def i = 1; i <= blockSize; i++) {
+								frameBytes.put(codebook.get(ref++))
+								if ((i % blockWidth == 0) && (i != blockSize)) {
+									frameBytes.position(frameBytes.position() + nextline)
+								}
+							}
+						}
+
+						block++
+					}
+				}
+				frameBytes.rewind()
 
 				return ImageUtility.applyPalette(frameBytes, vqaPalette)
-			}
-
-			/**
-			 * Replaces the VQA lookup table with the complete construction of
-			 * several partials.
-			 * 
-			 * @param partialTables List of partials so far.
-			 * @param compressed    Whether or not the array of partials is compressed.
-			 * @return The replacement lookup table.
-			 */
-			private VqaTable replaceLookupTable(List<ByteBuffer> partialTables, boolean compressed) {
-
-				return decodeCBFChunk(
-					new VqaChunkHeader(compressed ? VqaChunkHeader.SUFFIX_COMPRESSED : VqaChunkHeader.SUFFIX_UNCOMPRESSED, 0),
-					ByteBuffer.fromBuffers(partialTables)
-				)
 			}
 
 			@Override
@@ -380,9 +304,9 @@ class VqaFile implements Streaming, VideoFile {
 				def index = new byte[4]
 				def sample = new byte[4]
 
-				def partialTables = []
-				def vqaTable = null
-				def tablesCompressed = false
+				def codebook = null
+				def codebookCompressed = false
+				def partialCodebooks = []
 				def vqaPalette = null
 
 				def discardNullByte = { ->
@@ -397,21 +321,22 @@ class VqaFile implements Streaming, VideoFile {
 					return !nextByte
 				}
 
-				def handleCompressedChunk = { VqaChunkHeader header, int decompressedSize, Closure handler ->
+				def decompressData = { ByteBuffer data, int decompressedSize ->
+					def decompressedData = ByteBuffer.allocateNative(decompressedSize)
+					format80.decode(data, decompressedData)
+					return decompressedData
+				}
+
+				def readChunkData = { VqaChunkHeader header, int decompressedSize = 0 ->
 					def data = ByteBuffer.wrapNative(input.readNBytes(header.length))
-					if (header.dataCompressed) {
-						def decompressedData = ByteBuffer.allocateNative(decompressedSize)
-						format80.decode(data, decompressedData)
-						return handler(decompressedData)
+					if (header.dataCompressed && decompressedSize) {
+						return decompressData(data, decompressedSize)
 					}
-					return handler(data)
+					return data
 				}
 
 				// Header + Offsets
 				for (def bytesRead = 62 + finfLength; bytesRead < formLength && canContinue; ) {
-					if (discardNullByte()) {
-						bytesRead++
-					}
 					def chunkHeader = new VqaChunkHeader(input)
 					bytesRead += 8
 
@@ -419,76 +344,67 @@ class VqaFile implements Streaming, VideoFile {
 
 						// Decode sound data
 						case ~/SND./:
-							videoHandler(null, decodeSNDChunk(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)), index, sample))
+							videoHandler(null, decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)), index, sample))
 							bytesRead += chunkHeader.length
 							break
 
 						// Decode image and image-related data
 						case 'VQFR':
-							def bytesSkipped = input.skip(chunkHeader.length)
-							assert bytesSkipped == chunkHeader.length
-							bytesRead += bytesSkipped
-							break
+							for (def innerBytesRead = 0; innerBytesRead < chunkHeader.length; ) {
+								def innerChunkHeader = new VqaChunkHeader(input)
+								innerBytesRead += 8
 
-//							def innerBytesRead = 0
-//
-//							while (innerBytesRead < chunkHeader.length) {
-//								if (discardNullByte()) {
-//									innerBytesRead++
-//								}
-//								def innerChunkHeader = new VqaChunkHeader(input)
-//								innerBytesRead += 8
-//
-//								switch (innerChunkHeader.name) {
-//
-//									// Full lookup table
-//									case ~/CBF./:
-//										vqaTable = handleCompressedChunk(innerChunkHeader, tableSize) { data ->
-//											return decodeCBFChunk(data)
-//										}
-//										break
-//
-//									// Partial lookup table
-//									case ~/CBP./:
-//										tablesCompressed = decodeCBPChunk(innerChunkHeader,
-//											ByteBuffer.wrapNative(input.readNBytes(innerChunkHeader.length)),
-//											partialTables)
-//										break
-//
-//									// Palette
-//									case ~/CPL./:
-//										vqaPalette = handleCompressedChunk(innerChunkHeader, blockSize) { data ->
-//											return decodeCPLChunk(data)
-//										}
-//										break
-//
-//									// Video data
-//									case ~/VPT./:
-//										def frameData = handleCompressedChunk(innerChunkHeader, blocksHor * blocksVer * 2) { data ->
-//											return decodeVPTChunk(data, vqaTable, vqaPalette)
-//										}
-//										videoHandler(frameData, null)
-//										break
-//
-//									default:
-//										logger.debug('Unknown chunk "{}", skipping', innerChunkHeader.name)
-//										input.skip(chunkHeader.length)
-//								}
-//
-//								innerBytesRead += innerChunkHeader.length
-//							}
-//
-//							// If full, replace the old lookup table
-//							if (partialTables.size() == cbParts) {
-//								vqaTable = replaceLookupTable(partialTables, tablesCompressed)
-//							}
-//
-//							bytesRead += innerBytesRead
-//							break
+								switch (innerChunkHeader.name) {
+
+									// Full codebook
+									case ~/CBF./:
+										codebook = readChunkData(innerChunkHeader, numBlocks * blockSize)
+										break
+
+									// Partial codebook
+									case ~/CBP./:
+										partialCodebooks << readChunkData(innerChunkHeader)
+										codebookCompressed = innerChunkHeader.dataCompressed
+										break
+
+									// Palette
+									case ~/CPL./:
+										vqaPalette = new Palette(numColours, format, readChunkData(innerChunkHeader, numColours * format.value))
+										break
+
+									// Video data
+									case ~/VPT./:
+										videoHandler(decodeFrame(readChunkData(innerChunkHeader, vptSize), codebook, vqaPalette), null)
+										break
+
+									default:
+										logger.debug('Unknown chunk "{}", skipping', innerChunkHeader.name)
+										input.skip(chunkHeader.length)
+								}
+
+								innerBytesRead += innerChunkHeader.length
+								if (discardNullByte()) {
+									innerBytesRead++
+								}
+							}
+
+							// If full, replace the old lookup table
+							if (partialCodebooks.size() == cbParts) {
+								def codebookData = ByteBuffer.fromBuffers(partialCodebooks)
+								codebook = codebookCompressed ? decompressData(codebookData, numBlocks * blockSize) : codebookData
+								partialCodebooks.clear()
+							}
+
+							bytesRead += chunkHeader.length
+							break
 
 						default:
 							logger.debug('Unknown chunk "{}", skipping', chunkHeader.name)
 							bytesRead += input.skip(chunkHeader.length)
+					}
+
+					if (discardNullByte()) {
+						bytesRead++
 					}
 				}
 

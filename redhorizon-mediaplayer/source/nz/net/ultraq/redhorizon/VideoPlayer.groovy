@@ -58,26 +58,19 @@ class VideoPlayer {
 			def video = new Video(videoFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
 
 			def executionBarrier = new CyclicBarrier(2)
-			def finishBarrier = new CountDownLatch(1)
+			def finishBarrier = new CountDownLatch(2)
 
 			def audioEngine = new AudioEngine(video)
 
 			// To allow the graphics engine to submit items to execute in this thread
-//			FutureTask executable = null
-//			def graphicsEngine = new GraphicsEngine(video, { toExecute ->
-//				executable = toExecute
-//				executionBarrier.await()
-//			})
-//			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
-//				executorService.submit { ->
-//					Thread.currentThread().sleep(2000)
-//					logger.debug('Video started')
-//					video.play()
-//				}
-//			}
-			audioEngine.on(AudioEngine.EVENT_RENDER_LOOP_START) { event ->
+			FutureTask executable = null
+			def graphicsEngine = new GraphicsEngine(video, { toExecute ->
+				executable = toExecute
+				executionBarrier.await()
+			})
+			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					Thread.currentThread().sleep(2000)
+					Thread.currentThread().sleep(10000)
 					logger.debug('Video started')
 					video.play()
 				}
@@ -85,43 +78,43 @@ class VideoPlayer {
 
 			// Stop both engines if one goes down
 			audioEngine.on(AudioEngine.EVENT_RENDER_LOOP_STOP) { event ->
-//				graphicsEngine.stop()
+				graphicsEngine.stop()
 				finishBarrier.countDown()
 			}
-//			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
-//				audioEngine.stop()
-//				finishBarrier.countDown()
-//			}
+			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+				audioEngine.stop()
+				finishBarrier.countDown()
+			}
 
 			video.on(Animation.EVENT_STOP) { event ->
 				logger.debug('Video stopped')
 				audioEngine.stop()
-//				graphicsEngine.stop()
+				graphicsEngine.stop()
 			}
 
 			def audioEngineTask = executorService.submit(audioEngine)
-//			def graphicsEngineTask = executorService.submit(graphicsEngine)
+			def graphicsEngineTask = executorService.submit(graphicsEngine)
 
 			logger.info('Waiting for video to finish.  Close the window to exit.')
 
 			// Execute things from this thread when needed
-//			while (!graphicsEngineTask.done) {
-//				executionBarrier.await()
-//				if (executable) {
-//					executable.run()
-//					executable = null
-//					executionBarrier.reset()
-//				}
-//
-//				// Shutdown phase
-//				if (graphicsEngine.started && graphicsEngine.stopped) {
-//					finishBarrier.await()
-//					break
-//				}
-//			}
+			while (!graphicsEngineTask.done) {
+				executionBarrier.await()
+				if (executable) {
+					executable.run()
+					executable = null
+					executionBarrier.reset()
+				}
+
+				// Shutdown phase
+				if (graphicsEngine.started && graphicsEngine.stopped) {
+					finishBarrier.await()
+					break
+				}
+			}
 
 			audioEngineTask.get()
-//			graphicsEngineTask.get()
+			graphicsEngineTask.get()
 		}
 	}
 }

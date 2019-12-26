@@ -94,12 +94,11 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		frequency = videoFile.frequency
 
 		if (videoFile instanceof Streaming) {
-			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
-			sampleDataBuffer = new ArrayBlockingQueue<>(10)
+			frameDataBuffer = new ArrayBlockingQueue<>(frameRate * 5 as int)
+			sampleDataBuffer = new ArrayBlockingQueue<>(frameRate * 5 as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			videoWorker = videoFile.getStreamingDataWorker { frame, sample ->
 				if (frame) {
-					System.out.println('Adding frame')
 					frameDataBuffer << ImageUtility.flipVertically(frame, width, height, format)
 				}
 				if (sample) {
@@ -206,7 +205,6 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 			}
 
 			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
-			System.out.println("Current frame: ${currentFrame}")
 
 			// Draw the current frame if available
 			if (currentFrame < numFrames) {

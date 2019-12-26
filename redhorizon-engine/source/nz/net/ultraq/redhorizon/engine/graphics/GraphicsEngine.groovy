@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
 
@@ -30,6 +33,8 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 class GraphicsEngine extends EngineSubsystem {
+
+	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
 	private final SceneElement sceneElement
 	private final Closure needsMainThreadCallback
@@ -93,7 +98,8 @@ class GraphicsEngine extends EngineSubsystem {
 			}
 			def graphicsElementStates = [:]
 
-			// Rendering looop
+			// Rendering loop
+			logger.debug('Graphics engine in render loop...')
 			started = true
 			renderLoop { ->
 				context.withCurrent { ->
@@ -130,6 +136,7 @@ class GraphicsEngine extends EngineSubsystem {
 			}
 
 			// Shutdown
+			logger.debug('Shutting down graphics engine')
 			context.withCurrent { ->
 				graphicsElementStates.keySet().each { graphicsElement ->
 					graphicsElement.delete(renderer)
