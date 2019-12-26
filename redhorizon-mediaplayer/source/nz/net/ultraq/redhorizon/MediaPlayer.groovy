@@ -86,8 +86,8 @@ class MediaPlayer implements Callable<Integer> {
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
-					mix.getEntryData(entry).withCloseable { entryInputStream ->
-						play(getFileClass(entryName).newInstance(entryInputStream))
+					new BufferedInputStream(mix.getEntryData(entry)).withCloseable { entryInput ->
+						play(getFileClass(entryName).newInstance(entryInput))
 					}
 				}
 				else {
@@ -97,7 +97,7 @@ class MediaPlayer implements Callable<Integer> {
 			}
 		}
 		else {
-			new FileInputStream(file).withCloseable { input ->
+			new BufferedInputStream(new FileInputStream(file)).withCloseable { input ->
 				play(getFileClass(file).newInstance(input))
 			}
 		}
