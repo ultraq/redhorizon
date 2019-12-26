@@ -94,8 +94,8 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		frequency = videoFile.frequency
 
 		if (videoFile instanceof Streaming) {
-			frameDataBuffer = new ArrayBlockingQueue<>(frameRate * 5 as int)
-			sampleDataBuffer = new ArrayBlockingQueue<>(frameRate * 5 as int)
+			frameDataBuffer = new ArrayBlockingQueue<>(frameRate * 3 as int)
+			sampleDataBuffer = new ArrayBlockingQueue<>(frameRate * 3 as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			videoWorker = videoFile.getStreamingDataWorker { frame, sample ->
 				if (frame) {

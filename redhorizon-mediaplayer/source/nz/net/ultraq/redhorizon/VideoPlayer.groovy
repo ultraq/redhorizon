@@ -70,7 +70,7 @@ class VideoPlayer {
 			})
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					Thread.currentThread().sleep(10000)
+					Thread.currentThread().sleep(2000)
 					logger.debug('Video started')
 					video.play()
 				}
@@ -113,8 +113,8 @@ class VideoPlayer {
 				}
 			}
 
-			audioEngineTask.get()
 			graphicsEngineTask.get()
+			audioEngineTask.get()
 		}
 	}
 }
