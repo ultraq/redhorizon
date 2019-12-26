@@ -99,7 +99,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			videoWorker = videoFile.getStreamingDataWorker { frame, sample ->
 				if (frame) {
-					frameDataBuffer << ImageUtility.flipVertically(frame, width, height, format)
+					frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
 				}
 				if (sample) {
 					sampleDataBuffer << ByteBuffer.fromBuffersDirect(sample)

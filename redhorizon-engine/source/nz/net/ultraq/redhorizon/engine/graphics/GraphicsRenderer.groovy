@@ -58,4 +58,16 @@ interface GraphicsRenderer {
 	 * @param rectangle
 	 */
 	void drawTexture(int textureId, Rectanglef rectangle)
+
+	/**
+	 * Draw the texture over the given rectangle.
+	 * 
+	 * @param textureId
+	 * @param rectangle
+	 * @param flipVertical
+	 *   Whether or not to flip the texture on its vertical axis to compensate for
+	 *   image data often having Y-coords in the opposite way to the rendering
+	 *   coordinates.
+	 */
+	void drawTexture(int textureId, Rectanglef rectangle, boolean flipVertical)
 }

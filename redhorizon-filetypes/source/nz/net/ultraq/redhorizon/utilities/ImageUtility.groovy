@@ -287,29 +287,6 @@ class ImageUtility {
 //	}
 
 	/**
-	 * Because image data is usually goes from top-left to bottom-right, but
-	 * OpenGL texture coordinates are bottom-left to top-right, we need to flip
-	 * the image data vertically to get things the corrent way around for
-	 * rendering.
-	 * 
-	 * @param imageData
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @return A new direct buffer of the image data flipped on the vertical axis.
-	 */
-	static ByteBuffer flipVertically(ByteBuffer imageData, int width, int height, int format) {
-
-		def flippedData = ByteBuffer.allocateDirectNative(imageData.limit())
-		for (def h = height - 1; h >= 0; h--) {
-			def line = new byte[width * format]
-			imageData.position(width * format * h).get(line)
-			flippedData.put(line)
-		}
-		return flippedData.rewind()
-	}
-
-	/**
 	 * Creates a series of images built from a single image, split using the
 	 * given dimensions for the resulting images.  The source can be either
 	 * indexed or non-indexed data the result will be of the same type.

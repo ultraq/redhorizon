@@ -79,7 +79,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
-				frameDataBuffer << ImageUtility.flipVertically(frame, width, height, format)
+				frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
 			}
 			executorService.execute(frameDataWorker)
 		}

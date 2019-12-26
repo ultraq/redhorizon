@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
-import nz.net.ultraq.redhorizon.utilities.ImageUtility
 
 import org.joml.Rectanglef
 
@@ -54,7 +53,7 @@ class Image implements GraphicsElement, SelfVisitable {
 		width     = imageFile.width
 		height    = imageFile.height
 		format    = imageFile.format.value
-		imageData = ImageUtility.flipVertically(imageFile.imageData, width, height, format)
+		imageData = ByteBuffer.fromBuffersDirect(imageFile.imageData)
 		this.dimensions = dimensions
 	}
 

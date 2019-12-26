@@ -173,15 +173,15 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void drawTexture(int textureId, Rectanglef rectangle) {
+	void drawTexture(int textureId, Rectanglef rectangle, boolean flipVertical = true) {
 
 		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
 		checkForError { -> glColor4f(1, 1, 1, 1) }
 		glBegin(GL_QUADS)
-			glTexCoord2f(0, 0); glVertex2f(rectangle.minX, rectangle.minY)
-			glTexCoord2f(0, 1); glVertex2f(rectangle.minX, rectangle.maxY)
-			glTexCoord2f(1, 1); glVertex2f(rectangle.maxX, rectangle.maxY)
-			glTexCoord2f(1, 0); glVertex2f(rectangle.maxX, rectangle.minY)
+			glTexCoord2f(0, flipVertical ? 1 : 0); glVertex2f(rectangle.minX, rectangle.minY)
+			glTexCoord2f(0, flipVertical ? 0 : 1); glVertex2f(rectangle.minX, rectangle.maxY)
+			glTexCoord2f(1, flipVertical ? 0 : 1); glVertex2f(rectangle.maxX, rectangle.maxY)
+			glTexCoord2f(1, flipVertical ? 1 : 0); glVertex2f(rectangle.maxX, rectangle.minY)
 		checkForError { -> glEnd() }
 	}
 }
