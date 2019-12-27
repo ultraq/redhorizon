@@ -88,8 +88,8 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		frameRate = videoFile.frameRate
 		this.dimensions = dimensions
 
-		bitrate   = videoFile.bitrate.value
-		channels  = videoFile.channels.value
+		bitrate   = videoFile.bitrate
+		channels  = videoFile.channels
 		frequency = videoFile.frequency
 
 		if (videoFile instanceof Streaming) {
@@ -168,14 +168,13 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 				renderer.queueBuffers(sourceId, *newBufferIds)
 
 				// Start playing the source
-//				renderer.updateSource(sourceId, position, direction, velocity)
 				if (!renderer.sourcePlaying(sourceId)) {
 					renderer.playSource(sourceId)
 				}
 			}
 
 			// No more buffers to read, wait for the source to complete
-			else if (videoWorker.complete) {
+			if (videoWorker.complete) {
 				if (!renderer.sourcePlaying(sourceId)) {
 					stop()
 				}
@@ -183,7 +182,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (sampleDataBuffer != null) {
+		if (sampleDataBuffer) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
 				def processedBufferIds = buffersProcessed.collect { bufferIds.removeAt(0) }

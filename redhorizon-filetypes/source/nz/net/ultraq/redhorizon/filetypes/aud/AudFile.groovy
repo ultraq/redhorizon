@@ -23,8 +23,6 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
-import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -61,8 +59,8 @@ class AudFile implements SoundFile, Streaming {
 	final byte flags
 	final byte type
 
-	final Bitrate bitrate
-	final Channels channels
+	final int bitrate
+	final int channels
 
 	/**
 	 * Constructor, creates a new AUD file from the data in the input stream.
@@ -80,8 +78,8 @@ class AudFile implements SoundFile, Streaming {
 		flags            = input.readByte()
 		type             = input.readByte()
 
-		bitrate = (flags & FLAG_16BIT) ? BITRATE_16 : BITRATE_8
-		channels = (flags & FLAG_STEREO) ? CHANNELS_STEREO : CHANNELS_MONO
+		bitrate = (flags & FLAG_16BIT) ? 16 : 8
+		channels = (flags & FLAG_STEREO) ? 2 : 1
 	}
 
 	@Override
@@ -154,7 +152,7 @@ class AudFile implements SoundFile, Streaming {
 	String toString() {
 
 		return """
-			AUD file, ${frequency}hz ${bitrate.value}-bit ${channels == CHANNELS_STEREO ? 'Stereo' : 'Mono'}
+			AUD file, ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}
 			Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm
 			Compressed: ${compressedSize} bytes => Uncompressed: ${uncompressedSize} bytes
 		""".stripIndent().trim()

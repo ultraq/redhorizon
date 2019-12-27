@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 
@@ -27,51 +26,18 @@ import java.util.concurrent.ExecutorService
  */
 interface SoundFile {
 
-	// TODO: Do I really need enums for these?  I always end up having to
-	//       translate them back/forth if I do.
+	/**
+	 * Returns the number of bits used for each sound sample.
+	 */
+	int getBitrate()
 
 	/**
-	 * Supported bitrates.
+	 * Returns the number of sound channels in this file.
 	 */
-	@TupleConstructor
-	static enum Bitrate {
-
-		BITRATE_8 (8),
-		BITRATE_16(16)
-
-		final int value
-	}
-
-	/**
-	 * Supported channel types.
-	 */
-	@TupleConstructor
-	static enum Channels {
-
-		CHANNELS_MONO  (1),
-		CHANNELS_STEREO(2)
-
-		final int value
-	}
-
-	/**
-	 * Returns the bitrate of the sound sample.
-	 * 
-	 * @return One of 8 or 16 bits.
-	 */
-	Bitrate getBitrate()
-
-	/**
-	 * Returns the channels used by the sound.
-	 * 
-	 * @return One of mono or stereo.
-	 */
-	Channels getChannels()
+	int getChannels()
 
 	/**
 	 * Returns the frequency (number of samples/second) of the sound.
-	 * 
-	 * @return The frequency of the sound.
 	 */
 	int getFrequency()
 

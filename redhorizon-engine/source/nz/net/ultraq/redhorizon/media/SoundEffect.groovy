@@ -57,8 +57,8 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	 */
 	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
 
-		bitrate   = soundFile.bitrate.value
-		channels  = soundFile.channels.value
+		bitrate   = soundFile.bitrate
+		channels  = soundFile.channels
 		frequency = soundFile.frequency
 
 		// TODO: Maybe move streaming to a "sound track" class?
@@ -104,14 +104,13 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 				renderer.queueBuffers(sourceId, *newBufferIds)
 
 				// Start playing the source
-//				renderer.updateSource(sourceId, position, direction, velocity)
 				if (!renderer.sourcePlaying(sourceId)) {
 					renderer.playSource(sourceId)
 				}
 			}
 
 			// No more buffers to read, wait for the source to complete
-			else if (soundDataWorker.complete) {
+			if (soundDataWorker.complete) {
 				if (!renderer.sourcePlaying(sourceId)) {
 					stop()
 				}
@@ -119,7 +118,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (soundDataBuffer != null) {
+		if (soundDataBuffer) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
 				def processedBufferIds = buffersProcessed.collect { bufferIds.removeAt(0) }

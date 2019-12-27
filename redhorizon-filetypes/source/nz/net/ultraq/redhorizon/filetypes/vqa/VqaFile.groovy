@@ -29,8 +29,6 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
-import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Bitrate.*
-import static nz.net.ultraq.redhorizon.filetypes.SoundFile.Channels.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -82,19 +80,18 @@ class VqaFile implements Streaming, VideoFile {
 	final int unknown1
 	final short unknown2
 	final int frequency     // Stored in file as short
-	final byte channelsData
-	final byte bitrateData
+	final int channels      // Stored in file as byte
+	final int bitrate       // Stored in file as byte
 	final int unknown3
 	final short unknown4
 	final int maxCbfzSize
 	final int unknown5
 
+	// Frame offsets
 	final String finf
 	final int finfLength
 	final int[] offsets
 
-	final Bitrate bitrate
-	final Channels channels
 	final ColourFormat format = FORMAT_RGB
 
 	/**
@@ -134,15 +131,12 @@ class VqaFile implements Streaming, VideoFile {
 		unknown1     = input.readInt()
 		unknown2     = input.readShort()
 		frequency    = input.readShort()
-		channelsData = input.readByte()
-		bitrateData  = input.readByte()
+		channels     = input.readByte()
+		bitrate      = input.readByte()
 		unknown3     = input.readInt()
 		unknown4     = input.readShort()
 		maxCbfzSize  = input.readInt()
 		unknown5     = input.readInt()
-
-		bitrate = bitrateData == 8 ? BITRATE_8 : BITRATE_16
-		channels = channelsData == 1 ? CHANNELS_MONO : CHANNELS_STEREO
 
 		// Chunk (frame and sound) offsets
 		finf = new String(input.readNBytes(4))
@@ -201,11 +195,8 @@ class VqaFile implements Streaming, VideoFile {
 
 		return new Worker() {
 
-			private static final String CHUNK_SND_TYPE_WS_ADPCM  = 'SND1'
-			private static final String CHUNK_SND_TYPE_IMA_ADPCM = 'SND2'
-
 			private final Format80 format80 = new Format80()
-			private final Decoder audioDecoder = bitrate == BITRATE_16 ? new IMAADPCM16bit() : new WSADPCM8bit()
+			private final Decoder audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			private final int blocksHor = width / blockWidth
 			private final int blocksVer = height / blockHeight
@@ -226,12 +217,6 @@ class VqaFile implements Streaming, VideoFile {
 				if (header.dataCompressed) {
 					soundBytes = ByteBuffer.allocateNative(524288) // 512K
 					audioDecoder.decode(data, soundBytes)
-//					if (header.name == CHUNK_SND_TYPE_WS_ADPCM) {
-//						wsadpcm8bit.decode(data, soundBytes)
-//					}
-//					else if (header.name == CHUNK_SND_TYPE_IMA_ADPCM) {
-//						imaadpcm16bit.decode(data, soundBytes, ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
-//					}
 				}
 				else {
 					soundBytes = data
@@ -419,7 +404,7 @@ class VqaFile implements Streaming, VideoFile {
 		return """
 			VQA file, ${width}x${height} 18-bit colour with internal palette of up to 256 colours
 			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
-			Sound data of ${frequency}hz ${bitrate.value}-bit ${channels == CHANNELS_STEREO ? 'Stereo' : 'Mono'}
+			Sound data of ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}
 		""".stripIndent().trim()
 	}
 }
