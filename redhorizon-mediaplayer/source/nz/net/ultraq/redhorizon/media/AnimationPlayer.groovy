@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
-import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.media.Animation
-import nz.net.ultraq.redhorizon.media.Video
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -33,72 +30,60 @@ import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 
 /**
- * A basic video player, used primarily for testing purposes.
+ * A basic animation player, used primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer {
+class AnimationPlayer {
 
-	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
+	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
-	final VideoFile videoFile
+	final AnimationFile animationFile
 	final boolean fixAspectRatio
 
 	/**
-	 * Play the video file.
+	 * Play the configured animation file.
 	 */
 	void play() {
 
-		logger.info('File details: {}', videoFile)
+		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def width = videoFile.width * 2
-			def height = (fixAspectRatio ? videoFile.height * 1.2 : videoFile.height) * 2
-			def video = new Video(videoFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
+			def width = animationFile.width * 2
+			def height = (fixAspectRatio ? animationFile.height * 1.2 : animationFile.height) * 2
+			def animation = new Animation(animationFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
 
 			def executionBarrier = new CyclicBarrier(2)
-			def finishBarrier = new CountDownLatch(2)
-
-			def audioEngine = new AudioEngine(video)
+			def finishBarrier = new CountDownLatch(1)
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(video, { toExecute ->
+			def graphicsEngine = new GraphicsEngine(animation, { toExecute ->
 				executable = toExecute
 				executionBarrier.await()
 			})
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					Thread.currentThread().sleep(2000)
-					logger.debug('Video started')
-					video.play()
+					logger.debug('Animation started')
+					Thread.sleep(500)
+					animation.play()
 				}
 			}
-
-			// Stop both engines if one goes down
-			audioEngine.on(AudioEngine.EVENT_RENDER_LOOP_STOP) { event ->
-				graphicsEngine.stop()
-				finishBarrier.countDown()
-			}
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
-				audioEngine.stop()
 				finishBarrier.countDown()
 			}
+			def engine = executorService.submit(graphicsEngine)
 
-			video.on(Animation.EVENT_STOP) { event ->
-				logger.debug('Video stopped')
-				audioEngine.stop()
+			animation.on(Animation.EVENT_STOP) { event ->
+				logger.debug('Animation stopped')
 				graphicsEngine.stop()
 			}
 
-			def audioEngineTask = executorService.submit(audioEngine)
-			def graphicsEngineTask = executorService.submit(graphicsEngine)
-
-			logger.info('Waiting for video to finish.  Close the window to exit.')
+			logger.info('Waiting for animation to finish.  Close the window to exit.')
 
 			// Execute things from this thread when needed
-			while (!graphicsEngineTask.done) {
+			while (!engine.done) {
 				executionBarrier.await()
 				if (executable) {
 					executable.run()
@@ -113,8 +98,7 @@ class VideoPlayer {
 				}
 			}
 
-			graphicsEngineTask.get()
-			audioEngineTask.get()
+			engine.get()
 		}
 	}
 }

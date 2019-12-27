@@ -81,12 +81,13 @@ class OpenGLRenderer implements GraphicsRenderer {
 //		gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport based on the camera settings
-		glViewport(0, 0, context.width, context.height)
+		def windowSize = context.windowSize
+		glViewport(0, 0, windowSize.width, windowSize.height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(
-			-context.width / 2, context.width / 2,
-			-context.height / 2, context.height / 2,
+			-windowSize.width / 2, windowSize.width / 2,
+			-windowSize.height / 2, windowSize.height / 2,
 			0, 100
 		)
 		glMatrixMode(GL_MODELVIEW)

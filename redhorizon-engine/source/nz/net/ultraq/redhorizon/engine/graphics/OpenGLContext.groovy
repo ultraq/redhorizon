@@ -17,8 +17,10 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.media.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.glfw.GLFWVidMode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -34,16 +36,32 @@ class OpenGLContext extends AbstractContext {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
 
-	private final long window
-	final int width = 640
-	final int height = 480
+	// The width of most full-screen graphics in C&C
+	private static final int BASE_WIDTH = 320
 
 	/**
-	 * Constructor, create a new OpenGL context.  A limitation of using GLFW is
-	 * that this also creates the underlying window object, through which input
-	 * events are received.
+	 * The aspect ratio of a 320x200 image on VGA screens with non-square pixels
 	 */
-	OpenGLContext() {
+	static final float ASPECT_RATIO_VGA = 4 / 3
+
+	/**
+	 * The aspect ratio of a 320x200 image on modern displays
+	 */
+	static final float ASPECT_RATIO_MODERN = 16 / 10
+
+	final Dimension windowSize
+
+	private final long window
+
+	/**
+	 * Constructor, create a new OpenGL window and context.
+	 * <p>
+	 * A limitation of using GLFW is that this also creates the underlying window
+	 * object, through which input events are received.
+	 * 
+	 * @param aspectRatio
+	 */
+	OpenGLContext(float aspectRatio) {
 
 		glfwSetErrorCallback({ int error, long description ->
 			def message = getDescription(description)
@@ -54,18 +72,46 @@ class OpenGLContext extends AbstractContext {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
+		// Try get the dimensions of the main monitor for putting the window in
+		def monitor = glfwGetPrimaryMonitor()
+		def videoMode = glfwGetVideoMode(monitor)
+		windowSize = calculateWindowSizeForFit(videoMode, aspectRatio)
+
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 
-		window = glfwCreateWindow(width, height, 'Red Horizon', NULL, NULL)
+		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
 		withCurrent { ->
 			glfwSwapInterval(1)
+		}
+	}
+
+	/**
+	 * Calculate the dimensions for a rendering window that will fit the given
+	 * screen size and respect the target aspect ratio. 
+	 * 
+	 * @param videoMode
+	 * @param aspectRatio
+	 * @return
+	 */
+	private static Dimension calculateWindowSizeForFit(GLFWVidMode videoMode, float aspectRatio) {
+
+		def shift = 1
+		def widthGap = videoMode.width() / 1.5
+		def heightGap = videoMode.height() / 1.5
+		while (true) {
+			def testWidth = BASE_WIDTH << shift
+			def testHeight = Math.ceil(testWidth / aspectRatio)
+			if (videoMode.width() - testWidth < widthGap || videoMode.height() - testHeight < heightGap) {
+				return new Dimension(testWidth, testHeight as int)
+			}
+			shift++
 		}
 	}
 

@@ -14,18 +14,45 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.events
+package nz.net.ultraq.redhorizon.media
+
+import org.joml.Rectanglef
 
 import groovy.transform.TupleConstructor
 
 /**
- * Base type for all events.
+ * A width/height value, plus calculated aspect ratio.
  * 
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class Event {
+class Dimension {
 
-	final String name
-	final Map<String,Object> parameters
+	final int width
+	final int height
+
+	/**
+	 * Convert this object into another that can also represent width/height
+	 * values.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	Object asType(Class clazz) {
+
+		if (clazz == Rectanglef) {
+			return new Rectanglef(0, 0, width, height)
+		}
+		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
+	}
+
+	/**
+	 * Calculate the aspect ratio between the width and height.
+	 * 
+	 * @return
+	 */
+	float getAspectRatio() {
+
+		return width / height
+	}
 }

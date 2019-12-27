@@ -30,7 +30,7 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(EngineSubsystem)
 
-	static final EVENT_RENDER_LOOP_START = 'Enging/RenderLoop/Start'
+	static final EVENT_RENDER_LOOP_START = 'Engine/RenderLoop/Start'
 	static final EVENT_RENDER_LOOP_STOP  = 'Engine/RenderLoop/Stop'
 
 	private final int targetRenderTimeMs

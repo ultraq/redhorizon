@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.media.Image
 
-import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -36,7 +34,7 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImageViewer {
+class ImageViewer implements Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
@@ -51,22 +49,28 @@ class ImageViewer {
 		logger.info('File details: {}', imageFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def width = imageFile.width
-			def height = fixAspectRatio ? imageFile.height * 1.2 : imageFile.height
-			def image = new Image(imageFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2))
 
 			def executionBarrier = new CyclicBarrier(2)
 			def finishBarrier = new CountDownLatch(1)
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(image, { toExecute ->
+			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
 				executable = toExecute
 				executionBarrier.await()
 			})
+
+			// Add the image to the engine once we have the window dimensions
+			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
+				graphicsEngine.addSceneElement(new Image(imageFile, centerImageCoordinates(
+					calculateImageDimensionsForWindow(imageFile.width, imageFile.height, event.parameters['windowSize'])
+				)))
+			}
+
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
 				finishBarrier.countDown()
 			}
+
 			def engine = executorService.submit(graphicsEngine)
 
 			logger.info('Displaying the image in another window.  Close the window to exit.')

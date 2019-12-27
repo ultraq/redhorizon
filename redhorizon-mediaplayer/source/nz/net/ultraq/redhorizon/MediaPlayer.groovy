@@ -22,6 +22,10 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.media.AnimationPlayer
+import nz.net.ultraq.redhorizon.media.AudioPlayer
+import nz.net.ultraq.redhorizon.media.ImageViewer
+import nz.net.ultraq.redhorizon.media.VideoPlayer
 
 import org.reflections.Reflections
 import org.slf4j.Logger

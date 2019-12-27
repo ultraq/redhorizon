@@ -47,12 +47,15 @@ trait EventTarget {
 	 * Fire the event, invoking all listeners registered for that event.
 	 * 
 	 * @param eventName
+	 * @param eventParameters
+	 *   Optional parameters which will be included with the event when invoking
+	 *   any listeners.
 	 */
-	void trigger(String eventName) {
+	void trigger(String eventName, Map<String,Object> eventParameters = [:]) {
 
 		def listenersForEvent = eventListeners[eventName]
 		if (listenersForEvent != null) {
-			def event = new Event(eventName)
+			def event = new Event(eventName, eventParameters)
 			listenersForEvent.each { listener ->
 				listener.handleEvent(event)
 			}

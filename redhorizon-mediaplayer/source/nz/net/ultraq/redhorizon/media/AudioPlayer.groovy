@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.media.SoundEffect
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

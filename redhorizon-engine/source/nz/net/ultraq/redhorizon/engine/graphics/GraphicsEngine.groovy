@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
+import static nz.net.ultraq.redhorizon.engine.graphics.OpenGLContext.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,26 +37,43 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
-	private final SceneElement sceneElement
+	/**
+	 * Fired when the OpenGL window and context have been created.  Passes them
+	 * along to event listeners so they can be queried.
+	 */
+	static final String EVENT_WINDOW_CREATED = 'GraphicsEngine/Window/Created'
+
+	private final boolean fixAspectRatio
 	private final Closure needsMainThreadCallback
+	private final List<SceneElement> sceneElements = []
 
 	private OpenGLContext context
 	private boolean started
 
 	/**
-	 * Constructor, build a new graphics engine for rendering the given element.
+	 * Constructor, build a new engine for rendering graphics.
 	 * 
-	 * @param sceneElement
+	 * @param fixAspectRatio
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(SceneElement sceneElement, Closure needsMainThreadCallback) {
+	GraphicsEngine(boolean fixAspectRatio, Closure needsMainThreadCallback) {
 
-		this.sceneElement = sceneElement
+		this.fixAspectRatio = fixAspectRatio
 		this.needsMainThreadCallback = needsMainThreadCallback
+	}
+
+	/**
+	 * Add an element to render at the next pass.
+	 * 
+	 * @param sceneElement
+	 */
+	void addSceneElement(SceneElement sceneElement) {
+
+		sceneElements << sceneElement
 	}
 
 	/**
@@ -89,10 +107,14 @@ class GraphicsEngine extends EngineSubsystem {
 
 		// Initialization
 		context = waitForMainThread({ ->
-			return new OpenGLContext()
+			def openGlContext = new OpenGLContext(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
+			trigger(EVENT_WINDOW_CREATED, [
+			  windowSize: openGlContext.windowSize
+			])
+			return openGlContext
 		})
 		context.withCloseable {
-			def renderer
+			OpenGLRenderer renderer
 			context.withCurrent { ->
 				renderer = new OpenGLRenderer(context)
 			}
@@ -105,25 +127,27 @@ class GraphicsEngine extends EngineSubsystem {
 				context.withCurrent { ->
 					renderer.clear()
 
-					sceneElement.accept { element ->
-						if (element instanceof GraphicsElement) {
+					sceneElements.each { sceneElement ->
+						sceneElement.accept { element ->
+							if (element instanceof GraphicsElement) {
 
-							// Register the graphics element
-							if (!graphicsElementStates[element]) {
-								graphicsElementStates << [(element): STATE_NEW]
+								// Register the graphics element
+								if (!graphicsElementStates[element]) {
+									graphicsElementStates << [(element): STATE_NEW]
+								}
+
+								def elementState = graphicsElementStates[element]
+
+								// Initialize the graphics element
+								if (elementState == STATE_NEW) {
+									element.init(renderer)
+									elementState = STATE_INITIALIZED
+									graphicsElementStates << [(element): elementState]
+								}
+
+								// Render the graphics element
+								element.render(renderer)
 							}
-
-							def elementState = graphicsElementStates[element]
-
-							// Initialize the graphics element
-							if (elementState == STATE_NEW) {
-								element.init(renderer)
-								elementState = STATE_INITIALIZED
-								graphicsElementStates << [(element): elementState]
-							}
-
-							// Render the graphics element
-							element.render(renderer)
 						}
 					}
 					context.swapBuffers()
