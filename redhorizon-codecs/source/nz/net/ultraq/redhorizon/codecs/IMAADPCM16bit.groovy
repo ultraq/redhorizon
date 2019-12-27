@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs;
+package nz.net.ultraq.redhorizon.codecs
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Decoder for the 16-bit IMA-ADPCM encoding scheme.  This decompression
  * technique is used with Red Alert's and Tiberium Dawn's 16-bit audio files.
+ * <p>
+ * A decoder instance will retain some state after each call to {@link #decode},
+ * which is useful for decoding the next chunk in the same sequence.  A new
+ * decoder should be created for each sound sequence being worked with.
  * <p>
  * Credit goes to Vladan Bato for the original decompression code, which I have
  * adapted below.  See: http://vladan.bato.net/cnc/aud3.txt
  * 
  * @author Emanuel Rabina
  */
-public class IMAADPCM16bit implements Decoder {
+class IMAADPCM16bit implements Decoder {
 
 	// IMA-ADPCM adjustment table
-	private static final int[] IMA_ADJUST_TABLE = {
+	private static final int[] IMA_ADJUST_TABLE = [
 		-1, -1, -1, -1, 2, 4, 6, 8
-	};
+	]
 
 	// IMA-ADPCM step table
-	private static final int[] IMA_STEP_TABLE = {
+	private static final int[] IMA_STEP_TABLE = [
 		    7,     8,     9,    10,    11,    12,     13,    14,    16,
 		   17,    19,    21,    23,    25,    28,     31,    34,    37,
 		   41,    45,    50,    55,    60,    66,     73,    80,    88,
@@ -46,62 +50,56 @@ public class IMAADPCM16bit implements Decoder {
 		 3024,  3327,  3660,  4026,  4428,  4871,   5358,  5894,  6484,
 		 7132,  7845,  8630,  9493, 10442, 11487,  12635, 13899, 15289,
 		16818, 18500, 20350, 22385, 24623, 27086,  29794, 32767
-	};
+	]
+
+	private int lastIndex = 0
+	private int lastSample = 0
 
 	/**
-	 * @param extra
-	 *   2 additional buffers, the first holding the last decoded PCM index value,
-	 *   the second holding the last decoded PCM sample value.  The buffer values
-	 *   are then updated after decoding.
+	 * Decode a sound chunk in IMA-ADPCM format.  Note that this relies 
 	 */
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
-
-		int index  = extra[0].getInt(0);
-		int sample = extra[1].getInt(0);
+	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
 		// Until all the compressed data has been decompressed
-		for (int sampleindex = 0; sampleindex < source.limit() << 1; sampleindex++) {
+		for (int sampleIndex = 0; sampleIndex < source.limit() << 1; sampleIndex++) {
 
 			// The 4-bit command
-			byte code = source.get(sampleindex >> 1);
-			code = (sampleindex % 2 == 1) ? (byte)(code >>> 4) : (byte)(code & 0x0f);
+			def code = source.get(sampleIndex >> 1)
+			code = sampleIndex % 2 == 1 ? code >>> 4 : code & 0x0f
 
-			int step = IMA_STEP_TABLE[index];
-			int delta = step >>> 3;
+			def step = IMA_STEP_TABLE[lastIndex]
+			def delta = step >>> 3
 
 			// Expansion of the multiplication in the original pseudo code
-			if ((code & 0x01) != 0) {
-				delta += step >>> 2;
+			if (code & 0x01) {
+				delta += step >>> 2
 			}
-			if ((code & 0x02) != 0) {
-				delta += step >>> 1;
+			if (code & 0x02) {
+				delta += step >>> 1
 			}
-			if ((code & 0x04) != 0) {
-				delta += step;
+			if (code & 0x04) {
+				delta += step
 			}
 
 			// Sign bit = 1
-			if ((code & 0x08) != 0) {
-				sample -= delta;
-				sample = Math.max(sample, -32768);
+			if (code & 0x08) {
+				lastSample -= delta
+				lastSample = Math.max(lastSample, Short.MIN_VALUE)
 			}
 			// Sign bit = 0
 			else {
-				sample += delta;
-				sample = Math.min(sample, 32767);
+				lastSample += delta
+				lastSample = Math.min(lastSample, Short.MAX_VALUE)
 			}
 
 			// Save result to destination buffer
-			dest.putShort((short)sample);
+			dest.putShort((short)lastSample)
 
 			// Index/Step adjustments
-			index += IMA_ADJUST_TABLE[code & 0x07];
-			index = Math.min(Math.max(index, 0), 88);
+			lastIndex += IMA_ADJUST_TABLE[code & 0x07]
+			lastIndex = Math.min(Math.max(0, lastIndex), 88)
 		}
-		dest.flip();
-
-		extra[0].putInt(0, index);
-		extra[1].putInt(0, sample);
+		dest.flip()
 	}
 }

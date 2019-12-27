@@ -113,19 +113,16 @@ class AudFile implements SoundFile, Streaming {
 				Thread.currentThread().name = "AudFile :: Decoding"
 				logger.debug('AudFile decoding started')
 
-				def bytesRead = 0
 				def decoder =
 					type == TYPE_WS_ADPCM ? new WSADPCM8bit() :
 					type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() :
 					null
-				def index = new byte[4]
-				def sample = new byte[4]
 
 				// Decompress the aud file data by chunks
-				while (canContinue && (bytesRead < compressedSize)) {
+				for (def bytesRead = 0; bytesRead < compressedSize && canContinue; ) {
 
 					// Chunk header
-					def compressedSize   = input.readShort()
+					def compressedSize = input.readShort()
 					def uncompressedSize = input.readShort()
 					assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
 
@@ -135,15 +132,7 @@ class AudFile implements SoundFile, Streaming {
 					def chunkDataBuffer = ByteBuffer.allocateNative(uncompressedSize)
 
 					// Decode
-					switch (type) {
-					case TYPE_WS_ADPCM:
-						decoder.decode(chunkSourceBuffer, chunkDataBuffer)
-						break
-					case TYPE_IMA_ADPCM:
-						decoder.decode(chunkSourceBuffer, chunkDataBuffer,
-							ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
-						break
-					}
+					decoder.decode(chunkSourceBuffer, chunkDataBuffer)
 
 					sampleHandler(chunkDataBuffer)
 					bytesRead += 8 + compressedSize

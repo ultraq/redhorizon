@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes.vqa
 
+import nz.net.ultraq.redhorizon.codecs.Decoder
 import nz.net.ultraq.redhorizon.codecs.Format80
 import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
@@ -204,8 +205,7 @@ class VqaFile implements Streaming, VideoFile {
 			private static final String CHUNK_SND_TYPE_IMA_ADPCM = 'SND2'
 
 			private final Format80 format80 = new Format80()
-			private final IMAADPCM16bit imaadpcm16bit = new IMAADPCM16bit()
-			private final WSADPCM8bit wsadpcm8bit = new WSADPCM8bit()
+			private final Decoder audioDecoder = bitrate == BITRATE_16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			private final int blocksHor = width / blockWidth
 			private final int blocksVer = height / blockHeight
@@ -218,21 +218,20 @@ class VqaFile implements Streaming, VideoFile {
 			 * 
 			 * @param header The SND chunk header.
 			 * @param data   The SND chunk data.
-			 * @param index  Last index value from any previous sound decoding.
-			 * @param sample Last sample value from any previous sound decoding.
 			 * @return The sound data from this chunk.
 			 */
-			private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data, byte[] index, byte[] sample) {
+			private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data) {
 
 				def soundBytes
 				if (header.dataCompressed) {
 					soundBytes = ByteBuffer.allocateNative(524288) // 512K
-					if (header.name == CHUNK_SND_TYPE_WS_ADPCM) {
-						wsadpcm8bit.decode(data, soundBytes)
-					}
-					else if (header.name == CHUNK_SND_TYPE_IMA_ADPCM) {
-						imaadpcm16bit.decode(data, soundBytes, ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
-					}
+					audioDecoder.decode(data, soundBytes)
+//					if (header.name == CHUNK_SND_TYPE_WS_ADPCM) {
+//						wsadpcm8bit.decode(data, soundBytes)
+//					}
+//					else if (header.name == CHUNK_SND_TYPE_IMA_ADPCM) {
+//						imaadpcm16bit.decode(data, soundBytes, ByteBuffer.wrapNative(index), ByteBuffer.wrapNative(sample))
+//					}
 				}
 				else {
 					soundBytes = data
@@ -298,9 +297,6 @@ class VqaFile implements Streaming, VideoFile {
 				Thread.currentThread().name = 'VqaFile :: Decoding'
 				logger.debug('VqaFile decoding started')
 
-				def index = new byte[4]
-				def sample = new byte[4]
-
 				def codebook = null
 				def codebookCompressed = false
 				def partialCodebooks = []
@@ -341,7 +337,7 @@ class VqaFile implements Streaming, VideoFile {
 
 						// Decode sound data
 						case ~/SND./:
-							videoHandler(null, decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)), index, sample))
+							videoHandler(null, decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length))))
 							bytesRead += chunkHeader.length
 							break
 
