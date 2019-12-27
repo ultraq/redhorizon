@@ -36,7 +36,7 @@ import java.util.concurrent.Semaphore
  * @author Emanuel Rabina
  */
 @FileExtensions('mix')
-class MixFile implements ArchiveFile<MixFileEntry> {
+class MixFile implements ArchiveFile<MixEntry> {
 
 	private static final short FLAG_CHECKSUM  = 0x0001
 	private static final short FLAG_ENCRYPTED = 0x0002
@@ -69,7 +69,7 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 	}
 
 	/**
-	 * Calculates an ID for a {@link MixFileEntry} given the original file name
+	 * Calculates an ID for a {@link MixEntry} given the original file name
 	 * for the entry to which it is referring to.
 	 * 
 	 * @param filename The original filename of the item in the MIX body.
@@ -112,82 +112,23 @@ class MixFile implements ArchiveFile<MixFileEntry> {
 	 *         the file.
 	 */
 	@Override
-	MixFileEntry getEntry(String name) {
+	MixEntry getEntry(String name) {
 
 		def itemId = calculateId(name)
-		def entry = entries.find { entry ->
-			return entry.id == itemId
+		def entry = entries.find { entry -> entry.id == itemId }
+		if (entry) {
+			entry.name = name
+			return entry
 		}
-		if (!entry) {
-			return null
-		}
-		entry.name = name
-		return entry
+		return null
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	InputStream getEntryData(MixFileEntry entry) {
+	InputStream getEntryData(MixEntry entry) {
 
-		// Each input stream is a wrapper around the same RandomAccessFile, so we
-		// need to ensure that reads between threads do not disrupt each other by
-		// splitting positioning and making file accesses synchronous.
-		return new InputStream() {
-			private int lastMark = -1
-			private int lastPosition = 0
-
-			@Override
-			synchronized void mark(int readLimit) {
-				lastMark = lastPosition
-			}
-
-			@Override
-			boolean markSupported() {
-				return true
-			}
-
-			@Override
-			int read() {
-				return inputSemaphore.acquireAndRelease { ->
-					if (lastPosition >= entry.size) {
-						return -1
-					}
-					input.seek(baseEntryOffset + entry.offset + lastPosition)
-					def b = input.read()
-					lastPosition++
-					return b
-				}
-			}
-
-			@Override
-			int read(byte[] b, int off, int len) {
-				return inputSemaphore.acquireAndRelease { ->
-					if (lastPosition >= entry.size) {
-						return -1
-					}
-					input.seek(baseEntryOffset + entry.offset + lastPosition)
-					def toRead = Math.min(len, entry.size - lastPosition)
-					def bytesRead = input.read(b, off, toRead)
-					lastPosition += bytesRead
-					return bytesRead
-				}
-			}
-
-			@Override
-			synchronized void reset() {
-				lastPosition = lastMark
-			}
-
-			@Override
-			long skip(long n) {
-				return inputSemaphore.acquireAndRelease { ->
-					def toSkip = Math.min(n, entry.size - lastPosition)
-					lastPosition += toSkip
-					return toSkip
-				}
-			}
-		}
+		return new MixEntryInputStream(input, inputSemaphore, baseEntryOffset, entry)
 	}
 }

@@ -27,13 +27,6 @@ import groovy.transform.PackageScope
 abstract class MixFileDelegate {
 
 	/**
-	 * The number of bytes used to occupy the MIX file body.
-	 * 
-	 * @return
-	 */
-	abstract int getDataSize()
-
-	/**
 	 * The number of bytes to adjust an entry offset value by, which is the number
 	 * of bytes in the MIX file before the first entry.
 	 * 
@@ -46,12 +39,5 @@ abstract class MixFileDelegate {
 	 * 
 	 * @return
 	 */
-	abstract MixFileEntry[] getEntries()
-
-	/**
-	 * The number of entries in the MIX file.
-	 * 
-	 * @return
-	 */
-	abstract short getNumEntries()
+	abstract MixEntry[] getEntries()
 }

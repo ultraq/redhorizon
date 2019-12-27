@@ -37,7 +37,7 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 
 	final short numEntries
 	final int dataSize
-	final MixFileEntry[] entries
+	final MixEntry[] entries
 	final int baseEntryOffset
 
 	/**
@@ -64,9 +64,9 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 		numEntries = headerDecrypted.getShort()
 		dataSize = headerDecrypted.getInt()
 
-		// Knowing the number of entries ahead, decrypt as many blocks that fit the
-		// index, reading it and the 2 unread bytes from the first block
-		def numBytesForIndex = (int)Math.ceil((MixFileEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
+		// Knowing the number of entries ahead, decrypt as many 8 byte blocks that
+		// fit the index, reading it and the 2 unread bytes from the first block
+		def numBytesForIndex = (int)Math.ceil((MixEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
 		def encryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		def decryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		input.readFully(encryptedBuffer.array())
@@ -76,9 +76,9 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 			.put(headerDecrypted)
 			.put(decryptedBuffer)
 			.rewind()
-		entries = new MixFileEntry[numEntries]
+		entries = new MixEntry[numEntries]
 		numEntries.times { index ->
-			entries[index] = new MixFileEntry(decryptedIndexBuffer)
+			entries[index] = new MixEntry(decryptedIndexBuffer)
 		}
 
 		baseEntryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_BLOCK + numBytesForIndex

@@ -22,7 +22,7 @@ package nz.net.ultraq.redhorizon.filetypes
  * 
  * @author Emanuel Rabina
  */
-interface ArchiveFileEntry {
+interface ArchiveEntry {
 
 	/**
 	 * Returns the name of the entry.

@@ -27,11 +27,11 @@ import groovy.transform.PackageScope
 @PackageScope
 class MixFileDelegateStandard extends MixFileDelegate {
 
-	private final int SIZE_HEADER = 6
+	private static final int SIZE_HEADER = 6
 
 	final short numEntries
 	final int dataSize
-	final MixFileEntry[] entries
+	final MixEntry[] entries
 	final int baseEntryOffset
 
 	/**
@@ -47,11 +47,11 @@ class MixFileDelegateStandard extends MixFileDelegate {
 		dataSize = input.readInt()
 
 		// File entry index
-		entries = new MixFileEntry[numEntries]
+		entries = new MixEntry[numEntries]
 		numEntries.times { index ->
-			entries[index] = new MixFileEntry(input)
+			entries[index] = new MixEntry(input)
 		}
 
-		baseEntryOffset = SIZE_HEADER + (MixFileEntry.SIZE * numEntries)
+		baseEntryOffset = SIZE_HEADER + (MixEntry.SIZE * numEntries)
 	}
 }

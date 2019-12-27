@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes.mix
 
-import nz.net.ultraq.redhorizon.filetypes.ArchiveFileEntry
+import nz.net.ultraq.redhorizon.filetypes.ArchiveEntry
 
 import java.nio.ByteBuffer
 
@@ -26,7 +26,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MixFileEntry implements ArchiveFileEntry, Comparable<MixFileEntry> {
+class MixEntry implements ArchiveEntry, Comparable<MixEntry> {
 
 	static final int SIZE = 12
 
@@ -40,7 +40,7 @@ class MixFileEntry implements ArchiveFileEntry, Comparable<MixFileEntry> {
 	 * 
 	 * @param input
 	 */
-	MixFileEntry(DataInput input) {
+	MixEntry(DataInput input) {
 
 		id     = input.readInt()
 		offset = input.readInt()
@@ -52,7 +52,7 @@ class MixFileEntry implements ArchiveFileEntry, Comparable<MixFileEntry> {
 	 * 
 	 * @param input
 	 */
-	MixFileEntry(ByteBuffer input) {
+	MixEntry(ByteBuffer input) {
 
 		id     = input.getInt()
 		offset = input.getInt()
@@ -68,7 +68,7 @@ class MixFileEntry implements ArchiveFileEntry, Comparable<MixFileEntry> {
 	 * @return -1, 0, 1 :: less-than, equal to, greater than.
 	 */
 	@Override
-	int compareTo(MixFileEntry other) {
+	int compareTo(MixEntry other) {
 
 		return id <=> other.id
 	}
