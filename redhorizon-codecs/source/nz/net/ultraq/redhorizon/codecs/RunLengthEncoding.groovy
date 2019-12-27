@@ -14,50 +14,44 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs;
+package nz.net.ultraq.redhorizon.codecs
 
-import java.nio.ByteBuffer;
+import groovy.transform.TupleConstructor
+import java.nio.ByteBuffer
 
 /**
  * A basic, configurable, run-length decoder.
- *
+ * 
  * @author Emanuel Rabina
  */
-public class RunLengthEncoding implements Decoder {
-
-	private final byte countByte;
+@TupleConstructor
+class RunLengthEncoding implements Decoder {
 
 	/**
-	 * Constructor, configures the run-length decoding to recognize the given
-	 * byte as the 'count' byte.
-	 * 
-	 * @param countByte
+	 * The value to recognize as the "count" byte.
 	 */
-	public RunLengthEncoding(byte countByte) {
-
-		this.countByte = countByte;
-	}
+	final byte countByte
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
 
 		while (source.hasRemaining() && dest.hasRemaining()) {
-			byte value = source.get();
+			def value = source.get()
 
 			// Count byte & copy byte run
 			if ((value & countByte) == countByte) {
-				int count = value & ~countByte;
-				byte copy = source.get();
+				def count = value & ~countByte
+				def copy = source.get()
 
 				while (count-- > 0) {
-					dest.put(copy);
+					dest.put(copy)
 				}
 			}
 			// Non-count byte
 			else {
-				dest.put(value);
+				dest.put(value)
 			}
 		}
-		dest.rewind();
+		dest.rewind()
 	}
 }
