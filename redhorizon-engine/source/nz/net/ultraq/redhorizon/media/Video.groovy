@@ -229,17 +229,16 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 			}
 
 			// Delete used frames as the video progresses to free up memory
-//			if (lastFrame != -1 && lastFrame != currentFrame) {
-//				System.out.println("Deleting frame: ${lastFrame}")
-//				def lastTextureId = textureIds[lastFrame]
-//				if (lastTextureId) {
-//					renderer.deleteTextures(lastTextureId)
-//				}
-//				lastFrame..<currentFrame.each { i ->
-//					frames[i] = null
-//				}
-//			}
-//			lastFrame = currentFrame
+			if (lastFrame != -1 && lastFrame != currentFrame) {
+				def lastTextureId = textureIds[lastFrame]
+				if (lastTextureId) {
+					renderer.deleteTextures(lastTextureId)
+				}
+				lastFrame..<currentFrame.each { i ->
+					frames[i] = null
+				}
+			}
+			lastFrame = currentFrame
 		}
 	}
 }
