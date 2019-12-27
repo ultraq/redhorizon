@@ -39,7 +39,7 @@ class ByteBufferImageExtensions {
 
 		def dest = ByteBuffer.allocateNative(self.limit() * palette.format.value)
 		for (def i = 0; i < self.limit(); i++) {
-			dest.put(palette[self.get(i)])
+			dest.put(palette[self.get(i) & 0xff])
 		}
 		return dest.rewind()
 	}

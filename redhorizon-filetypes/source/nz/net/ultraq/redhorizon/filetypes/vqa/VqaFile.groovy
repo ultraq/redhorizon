@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
@@ -365,7 +366,7 @@ class VqaFile implements Streaming, VideoFile {
 
 									// Palette
 									case ~/CPL./:
-										vqaPalette = new Palette(numColours, format, readChunkData(innerChunkHeader, numColours * format.value))
+										vqaPalette = new VgaPalette(numColours, format, readChunkData(innerChunkHeader, numColours * format.value))
 										break
 
 									// Video data
