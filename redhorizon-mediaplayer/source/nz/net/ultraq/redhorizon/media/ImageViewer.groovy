@@ -49,7 +49,6 @@ class ImageViewer implements Visual {
 		logger.info('File details: {}', imageFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-
 			def executionBarrier = new CyclicBarrier(2)
 			def finishBarrier = new CountDownLatch(1)
 
@@ -63,7 +62,7 @@ class ImageViewer implements Visual {
 			// Add the image to the engine once we have the window dimensions
 			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
 				graphicsEngine.addSceneElement(new Image(imageFile, centerImageCoordinates(
-					calculateImageDimensionsForWindow(imageFile.width, imageFile.height, event.parameters['windowSize'])
+					calculateImageDimensionsForWindow(imageFile.width, imageFile.height, fixAspectRatio, event.parameters['windowSize'])
 				)))
 			}
 

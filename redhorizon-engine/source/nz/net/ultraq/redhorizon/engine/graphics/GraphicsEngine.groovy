@@ -67,7 +67,7 @@ class GraphicsEngine extends EngineSubsystem {
 	}
 
 	/**
-	 * Add an element to render at the next pass.
+	 * Add an element to start rendering from the next pass.
 	 * 
 	 * @param sceneElement
 	 */

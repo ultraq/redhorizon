@@ -21,7 +21,7 @@ import org.joml.Rectanglef
 import groovy.transform.TupleConstructor
 
 /**
- * A width/height value, plus calculated aspect ratio.
+ * A width/height value.
  * 
  * @author Emanuel Rabina
  */
@@ -44,15 +44,5 @@ class Dimension {
 			return new Rectanglef(0, 0, width, height)
 		}
 		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
-	}
-
-	/**
-	 * Calculate the aspect ratio between the width and height.
-	 * 
-	 * @return
-	 */
-	float getAspectRatio() {
-
-		return width / height
 	}
 }

@@ -26,19 +26,23 @@ import org.joml.Rectanglef
 trait Visual {
 
 	/**
-	 * Figure out what the new image dimensions should be to fit comfortably
-	 * within the given window and with the correct aspect ratio.
+	 * Figure out what the image dimensions should be to fit comfortably within
+	 * the given window.
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
+	 * @param fixAspectRatio
 	 * @param window
 	 * @return
 	 */
-	Dimension calculateImageDimensionsForWindow(int imageWidth, int imageHeight, Dimension window) {
+	Dimension calculateImageDimensionsForWindow(int imageWidth, int imageHeight, boolean fixAspectRatio, Dimension window) {
 
 		def width = window.width
-		def height = Math.ceil(imageHeight * (width / imageWidth) * ((imageWidth / imageHeight) / window.aspectRatio))
-		return new Dimension(width, height as int)
+		def height = imageHeight * (width / imageWidth)
+		if (fixAspectRatio) {
+			height *= 1.2
+		}
+		return new Dimension(width, Math.ceil(height) as int)
 	}
 
 	/**

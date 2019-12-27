@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 
-import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -35,7 +34,7 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationPlayer {
+class AnimationPlayer implements Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
@@ -50,19 +49,29 @@ class AnimationPlayer {
 		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def width = animationFile.width * 2
-			def height = (fixAspectRatio ? animationFile.height * 1.2 : animationFile.height) * 2
-			def animation = new Animation(animationFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
-
 			def executionBarrier = new CyclicBarrier(2)
 			def finishBarrier = new CountDownLatch(1)
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(animation, { toExecute ->
+			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
 				executable = toExecute
 				executionBarrier.await()
 			})
+
+			// Add the animation to the engine once we have the window dimensions
+			def animation
+			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
+				animation = new Animation(animationFile, centerImageCoordinates(
+					calculateImageDimensionsForWindow(animationFile.width, animationFile.height, fixAspectRatio, event.parameters['windowSize'])
+				), executorService)
+				animation.on(Animation.EVENT_STOP) { stopEvent ->
+					logger.debug('Animation stopped')
+					graphicsEngine.stop()
+				}
+				graphicsEngine.addSceneElement(animation)
+			}
+
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
 					logger.debug('Animation started')
@@ -74,11 +83,6 @@ class AnimationPlayer {
 				finishBarrier.countDown()
 			}
 			def engine = executorService.submit(graphicsEngine)
-
-			animation.on(Animation.EVENT_STOP) { event ->
-				logger.debug('Animation stopped')
-				graphicsEngine.stop()
-			}
 
 			logger.info('Waiting for animation to finish.  Close the window to exit.')
 

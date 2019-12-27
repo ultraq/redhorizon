@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
-import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -36,7 +35,7 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer {
+class VideoPlayer implements Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
@@ -51,24 +50,36 @@ class VideoPlayer {
 		logger.info('File details: {}', videoFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def width = videoFile.width * 2
-			def height = (fixAspectRatio ? videoFile.height * 1.2 : videoFile.height) * 2
-			def video = new Video(videoFile, new Rectanglef(-width / 2, -height / 2, width / 2, height / 2), executorService)
-
 			def executionBarrier = new CyclicBarrier(2)
 			def finishBarrier = new CountDownLatch(2)
 
-			def audioEngine = new AudioEngine(video)
+			def audioEngine = new AudioEngine()
 
 			// To allow the graphics engine to submit items to execute in this thread
 			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(video, { toExecute ->
+			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
 				executable = toExecute
 				executionBarrier.await()
 			})
+
+			// Add the video to the engines once we have the window dimensions
+			def video
+			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
+				video = new Video(videoFile, centerImageCoordinates(
+					calculateImageDimensionsForWindow(videoFile.width, videoFile.height, fixAspectRatio, event.parameters['windowSize'])
+				), executorService)
+				video.on(Animation.EVENT_STOP) { stopEvent ->
+					logger.debug('Video stopped')
+					audioEngine.stop()
+					graphicsEngine.stop()
+				}
+				audioEngine.addSceneElement(video)
+				graphicsEngine.addSceneElement(video)
+			}
+
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					Thread.currentThread().sleep(2000)
+					Thread.currentThread().sleep(3000)
 					logger.debug('Video started')
 					video.play()
 				}
@@ -82,12 +93,6 @@ class VideoPlayer {
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
 				audioEngine.stop()
 				finishBarrier.countDown()
-			}
-
-			video.on(Animation.EVENT_STOP) { event ->
-				logger.debug('Video stopped')
-				audioEngine.stop()
-				graphicsEngine.stop()
 			}
 
 			def audioEngineTask = executorService.submit(audioEngine)

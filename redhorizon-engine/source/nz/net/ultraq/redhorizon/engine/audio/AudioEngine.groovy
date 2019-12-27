@@ -34,17 +34,24 @@ class AudioEngine extends EngineSubsystem {
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 50
 
-	private final SceneElement sceneElement
+	private final List<SceneElement> sceneElements = []
 
 	/**
-	 * Constructor, build a new audio engine for rendering the given element.
-	 * 
-	 * @param sceneElement
+	 * Constructor, build a new engine for rendering audio.
 	 */
-	AudioEngine(SceneElement sceneElement) {
+	AudioEngine() {
 
 		super(TARGET_RENDER_TIME_MS)
-		this.sceneElement = sceneElement
+	}
+
+	/**
+	 * Add an element to start rendering from the next pass.
+	 *
+	 * @param sceneElement
+	 */
+	void addSceneElement(SceneElement sceneElement) {
+
+		sceneElements << sceneElement
 	}
 
 	/**
@@ -67,25 +74,27 @@ class AudioEngine extends EngineSubsystem {
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
 				renderLoop { ->
-					sceneElement.accept { element ->
-						if (element instanceof AudioElement) {
+					sceneElements.each { sceneElement ->
+						sceneElement.accept { element ->
+							if (element instanceof AudioElement) {
 
-							// Register the audio element
-							if (!audioElementStates[element]) {
-								audioElementStates << [(element): STATE_NEW]
+								// Register the audio element
+								if (!audioElementStates[element]) {
+									audioElementStates << [(element): STATE_NEW]
+								}
+
+								def elementState = audioElementStates[element]
+
+								// Initialize the audio element
+								if (elementState == STATE_NEW) {
+									element.init(renderer)
+									elementState = STATE_INITIALIZED
+									audioElementStates << [(element): elementState]
+								}
+
+								// Render the audio element
+								element.render(renderer)
 							}
-
-							def elementState = audioElementStates[element]
-
-							// Initialize the audio element
-							if (elementState == STATE_NEW) {
-								element.init(renderer)
-								elementState = STATE_INITIALIZED
-								audioElementStates << [(element): elementState]
-							}
-
-							// Render the audio element
-							element.render(renderer)
 						}
 					}
 				}
