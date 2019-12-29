@@ -43,26 +43,11 @@ class Palette {
 	 * @param size
 	 * @param format
 	 */
-	private Palette(int size, ColourFormat format) {
+	protected Palette(int size, ColourFormat format) {
 
 		this.size    = size
 		this.format  = format
 		this.palette = new byte[size][format.value]
-	}
-
-	/**
-	 * Constructor, create a palette from an input stream.
-	 * 
-	 * @param size	 Number of colours in the palette.
-	 * @param format Colour format of the palette.
-	 * @param input
-	 */
-	Palette(int size, ColourFormat format, InputStream input) {
-
-		this(size, format)
-		size.times { i ->
-			palette[i] = input.readNBytes(format.value)
-		}
 	}
 
 	/**
@@ -78,6 +63,21 @@ class Palette {
 		size.times { i ->
 			palette[i] = new byte[format.value]
 			bytes.get(palette[i])
+		}
+	}
+
+	/**
+	 * Constructor, create a palette from an input stream.
+	 * 
+	 * @param size	 Number of colours in the palette.
+	 * @param format Colour format of the palette.
+	 * @param input
+	 */
+	Palette(int size, ColourFormat format, InputStream input) {
+
+		this(size, format)
+		size.times { i ->
+			palette[i] = input.readNBytes(format.value)
 		}
 	}
 

@@ -254,7 +254,9 @@ class VqaFile implements Streaming, VideoFile {
 						block++
 					}
 				}
-				return frameBytes.applyPalette(vqaPalette)
+				return timeWithAverage('Applying palette', 10) { ->
+					return frameBytes.applyPalette(vqaPalette)
+				}
 			}
 
 			/**

@@ -16,8 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import groovy.transform.InheritConstructors
-import groovy.transform.Memoized
+import java.nio.ByteBuffer
 
 /**
  * An 18-bit VGA colour palette.  VGA used 6-bits per channel (for a total of
@@ -26,13 +25,37 @@ import groovy.transform.Memoized
  * 
  * @author Emanuel Rabina
  */
-@InheritConstructors
 class VgaPalette extends Palette {
 
-	@Memoized
-	@Override
-	byte[] getAt(int index) {
+	/**
+	 * Constructor, create a palette using the given data.
+	 * 
+	 * @param size	 Number of colours in the palette.
+	 * @param format Colour format of the palette.
+	 * @param bytes	 Palette data.
+	 */
+	VgaPalette(int size, ColourFormat format, ByteBuffer bytes) {
 
-		return super.getAt(index).collect { it << 2 }
+		super(size, format)
+		size.times { i ->
+			def rgb = new byte[format.value]
+			bytes.get(rgb)
+			palette[i] = rgb.collect { it << 2 }
+		}
+	}
+
+	/**
+	 * Constructor, create a palette from an input stream.
+	 * 
+	 * @param size	 Number of colours in the palette.
+	 * @param format Colour format of the palette.
+	 * @param input
+	 */
+	VgaPalette(int size, ColourFormat format, InputStream input) {
+
+		super(size, format)
+		size.times { i ->
+			palette[i] = input.readNBytes(format.value).collect { it << 2 }
+		}
 	}
 }

@@ -32,8 +32,8 @@ class PrimitiveArrayExtensions {
 	 */
 	static byte[] collect(byte[] self, Closure transform) {
 
-		def newArray = new byte[self.length]
-		for (def i = 0; i < self.length; i++) {
+		byte[] newArray = new byte[self.length]
+		for (int i = 0; i < self.length; i++) {
 			newArray[i] = (byte)transform(self[i])
 		}
 		return newArray

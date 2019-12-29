@@ -154,7 +154,7 @@ class PcxFile implements ImageFile {
 		rawImageData.rewind()
 
 		// Apply palette to raw image data to create the final image
-		imageData = rawImageData.applyPalette(new Palette(256, FORMAT_RGB, palette))
+		imageData = rawImageData.applyPalette(new Palette(PALETTE_COLOURS, FORMAT_RGB, palette))
 	}
 
 	/**
