@@ -22,7 +22,8 @@ dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
 		project(':redhorizon-extensions'),
-		':blowfishj:2.41'
+		':blowfishj:2.41',
+		'nz.net.ultraq.extensions:profiling-extensions:0.2.0-SNAPSHOT'
 	)
 }
 
