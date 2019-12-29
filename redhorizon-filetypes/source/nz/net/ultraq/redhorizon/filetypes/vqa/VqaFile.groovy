@@ -208,26 +208,6 @@ class VqaFile implements Streaming, VideoFile {
 			private final int vptSize   = numBlocks * 2
 
 			/**
-			 * Decodes a chunk of sound, found in an SND* chunk.
-			 * 
-			 * @param header The SND chunk header.
-			 * @param data   The SND chunk data.
-			 * @return The sound data from this chunk.
-			 */
-			private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data) {
-
-				def soundBytes
-				if (header.dataCompressed) {
-					soundBytes = ByteBuffer.allocateNative(524288) // 512K
-					audioDecoder.decode(data, soundBytes)
-				}
-				else {
-					soundBytes = data
-				}
-				return soundBytes
-			}
-
-			/**
 			 * Decodes a frame of video, found in a VPT* chunk.
 			 * 
 			 * @param data       The VPT chunk data.
@@ -275,6 +255,23 @@ class VqaFile implements Streaming, VideoFile {
 					}
 				}
 				return frameBytes.applyPalette(vqaPalette)
+			}
+
+			/**
+			 * Decodes a chunk of sound, found in an SND* chunk.
+			 * 
+			 * @param header The SND chunk header.
+			 * @param data   The SND chunk data.
+			 * @return The sound data from this chunk.
+			 */
+			private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data) {
+
+				if (header.dataCompressed) {
+					def soundBytes = ByteBuffer.allocateNative(header.length << 2) // IMA ADPCM is always 4x the compression?
+					audioDecoder.decode(data, soundBytes)
+					return soundBytes
+				}
+				return data
 			}
 
 			@Override
