@@ -199,13 +199,10 @@ class VqaFile implements Streaming, VideoFile {
 			private final Decoder audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			// Precalculated values to aid frame decoding
-			private final int blocksHor = width / blockWidth
-			private final int blocksVer = height / blockHeight
 			private final int blockSize = blockWidth * blockHeight
 			private final int modifier  = blockHeight == 2 ? 0xf : 0xff
 			private final int nextLine  = width - blockWidth
-			private final int numBlocks = blocksHor * blocksVer
-			private final int vptSize   = numBlocks * 2
+			private final int numBlocks = (width / blockWidth) * (height / blockHeight)
 
 			/**
 			 * Decodes a frame of video, found in a VPT* chunk.
@@ -351,7 +348,7 @@ class VqaFile implements Streaming, VideoFile {
 									// Video data
 									case ~/VPT./:
 										def frame = timeWithAverage('Decoding frame', 10) { ->
-											return decodeFrame(readChunkData(innerChunkHeader, vptSize), codebook, vqaPalette)
+											return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 										}
 										videoHandler(frame, null)
 										break
