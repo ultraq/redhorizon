@@ -63,10 +63,13 @@ class OpenGLContext extends AbstractContext {
 	 */
 	OpenGLContext(float aspectRatio) {
 
-		glfwSetErrorCallback({ int error, long description ->
-			def message = getDescription(description)
-			logger.error(message)
-		} as GLFWErrorCallback)
+		glfwSetErrorCallback(new GLFWErrorCallback() {
+			@Override
+			void invoke(int error, long description) {
+				def message = getDescription(description)
+				logger.error(message)
+			}
+		})
 
 		if (!glfwInit()) {
 			throw new IllegalStateException('Unable to initialize GLFW')
