@@ -129,19 +129,21 @@ class WsaFile implements AnimationFile, Streaming {
 
 				// Decode frame by frame
 				for (def frame = 0; canContinue && frame < numFrames; frame++) {
-					def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
-					def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
+					timeWithAverage('Decoding frame', 10) { ->
+						def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
+						def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 
-					def intermediateFrame = ByteBuffer.allocateNative(frameSize)
-					def indexedFrame = ByteBuffer.allocateNative(frameSize)
+						def intermediateFrame = ByteBuffer.allocateNative(frameSize)
+						def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
-					format80Decoder.decode(compressedFrame, intermediateFrame)
-					format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
+						format80Decoder.decode(compressedFrame, intermediateFrame)
+						format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
 
-					def colouredFrame = indexedFrame.applyPalette(palette)
+						def colouredFrame = indexedFrame.applyPalette(palette)
 
-					frameHandler(colouredFrame)
-					lastIndexedFrame = indexedFrame
+						frameHandler(colouredFrame)
+						lastIndexedFrame = indexedFrame
+					}
 				}
 
 				if (!stopped) {
