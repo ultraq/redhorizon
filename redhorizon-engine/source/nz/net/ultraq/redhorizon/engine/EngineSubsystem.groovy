@@ -77,6 +77,7 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 			throw ex
 		}
 		finally {
+			running = false
 			trigger(EVENT_RENDER_LOOP_STOP)
 		}
 	}

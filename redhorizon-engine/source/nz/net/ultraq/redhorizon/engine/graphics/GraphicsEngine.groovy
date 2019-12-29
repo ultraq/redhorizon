@@ -172,14 +172,16 @@ class GraphicsEngine extends EngineSubsystem {
 	@Override
 	protected boolean shouldRender() {
 
-		return super.shouldRender() && !context.windowShouldClose()
+		return !context.windowShouldClose() && super.shouldRender()
 	}
 
 	@Override
 	void stop() {
 
+		if (running) {
+			context.windowShouldClose(true)
+		}
 		super.stop()
-		context.windowShouldClose(true)
 	}
 
 	/**
