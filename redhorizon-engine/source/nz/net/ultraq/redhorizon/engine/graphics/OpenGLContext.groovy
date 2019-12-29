@@ -105,16 +105,16 @@ class OpenGLContext extends AbstractContext {
 	 */
 	private static Dimension calculateWindowSizeForFit(GLFWVidMode videoMode, float aspectRatio) {
 
-		def shift = 1
-		def widthGap = videoMode.width() / 1.5
-		def heightGap = videoMode.height() / 1.5
+		def multiplier = 1
+		def widthGap = videoMode.width() / 2
+		def heightGap = videoMode.height() / 2
 		while (true) {
-			def testWidth = BASE_WIDTH << shift
+			def testWidth = BASE_WIDTH * multiplier
 			def testHeight = Math.ceil(testWidth / aspectRatio)
 			if (videoMode.width() - testWidth < widthGap || videoMode.height() - testHeight < heightGap) {
 				return new Dimension(testWidth, testHeight as int)
 			}
-			shift++
+			multiplier++
 		}
 	}
 
