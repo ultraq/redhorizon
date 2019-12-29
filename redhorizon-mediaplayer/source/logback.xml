@@ -26,8 +26,12 @@
 		</encoder>
 	</appender>
 
-	<appender name="file" class="ch.qos.logback.core.FileAppender">
+	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>.logs/mediaplayer-${timestamp}.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>.logs/mediaplayer-%d.gz</fileNamePattern>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
