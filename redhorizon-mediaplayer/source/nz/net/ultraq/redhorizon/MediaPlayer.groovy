@@ -121,7 +121,9 @@ class MediaPlayer implements Callable<Integer> {
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
 				def annotation = type.getAnnotation(FileExtensions)
-				return annotation.value().contains(suffix)
+				return annotation.value().any { extension ->
+					return extension.equalsIgnoreCase(suffix)
+				}
 			}
 		if (!fileClass) {
 			logger.error('No implementation for {} filetype', suffix)
