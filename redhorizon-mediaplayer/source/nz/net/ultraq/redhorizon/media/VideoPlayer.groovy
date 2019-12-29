@@ -87,10 +87,12 @@ class VideoPlayer implements Visual {
 
 			// Stop both engines if one goes down
 			audioEngine.on(AudioEngine.EVENT_RENDER_LOOP_STOP) { event ->
+				video.stop()
 				graphicsEngine.stop()
 				finishBarrier.countDown()
 			}
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+				video.stop()
 				audioEngine.stop()
 				finishBarrier.countDown()
 			}
