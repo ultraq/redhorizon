@@ -207,6 +207,9 @@ class VqaFile implements Streaming, VideoFile {
 			private final int numBlocks = blocksHor * blocksVer
 			private final int vptSize   = numBlocks * 2
 
+			private final ByteBuffer frameBytes = ByteBuffer.allocateNative(width * height)
+			private final ByteBuffer colourBytes = ByteBuffer.allocateNative(width * height * format.value)
+
 			/**
 			 * Decodes a frame of video, found in a VPT* chunk.
 			 * 
@@ -217,7 +220,7 @@ class VqaFile implements Streaming, VideoFile {
 			 */
 			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codebook, Palette vqaPalette) {
 
-				ByteBuffer frameBytes = ByteBuffer.allocateNative(width * height)
+				frameBytes.clear()
 
 				// Now decode every block
 				int block = 0
@@ -254,7 +257,9 @@ class VqaFile implements Streaming, VideoFile {
 						block++
 					}
 				}
-				return frameBytes.applyPalette(vqaPalette)
+				colourBytes.clear()
+				frameBytes.applyPalette(vqaPalette, colourBytes)
+				return colourBytes
 			}
 
 			/**

@@ -37,10 +37,24 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer applyPalette(ByteBuffer self, Palette palette) {
 
-		def dest = ByteBuffer.allocateNative(self.limit() * palette.format.value)
+		ByteBuffer colourBytes = ByteBuffer.allocateNative(self.limit() * palette.format.value)
+		applyPalette(self, palette, colourBytes)
+		return colourBytes
+	}
+
+	/**
+	 * Applies a palette to indexed image data, filling the colour buffer with the
+	 * full colour image data.
+	 * 
+	 * @param self
+	 * @param palette Palette data to use.
+	 * @param colourBytes
+	 */
+	static ByteBuffer applyPalette(ByteBuffer self, Palette palette, ByteBuffer colourBytes) {
+
 		for (int i = 0; i < self.limit(); i++) {
-			dest.put(palette[self.get(i) & 0xff])
+			colourBytes.put(palette[self.get(i) & 0xff])
 		}
-		return dest.rewind()
+		return colourBytes.rewind()
 	}
 }
