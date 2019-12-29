@@ -15,7 +15,7 @@
   -->
 
 <configuration>
-	<timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
+	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -34,6 +34,7 @@
 	</appender>
 
 	<logger name="org.reflections" level="WARN"/>
+	<logger name="nz.net.ultraq.extensions" level="DEBUG"/>
 	<logger name="nz.net.ultraq.redhorizon" level="DEBUG"/>
 
 	<root level="INFO">
