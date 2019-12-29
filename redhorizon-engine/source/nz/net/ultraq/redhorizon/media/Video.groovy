@@ -126,7 +126,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		videoWorker.stop()
 		frameDataBuffer.drain()
-		renderer.deleteTextures(*(textureIds.findAll { textureId -> !textureId }))
+		renderer.deleteTextures(*(textureIds.findAll { textureId -> textureId }))
 	}
 
 	@Override
