@@ -202,8 +202,8 @@ class VqaFile implements Streaming, VideoFile {
 			private final int blocksHor = width / blockWidth
 			private final int blocksVer = height / blockHeight
 			private final int blockSize = blockWidth * blockHeight
-			private final int modifier = blockHeight == 2 ? 0xf : 0xff
-			private final int nextLine = width - blockWidth
+			private final int modifier  = blockHeight == 2 ? 0xf : 0xff
+			private final int nextLine  = width - blockWidth
 			private final int numBlocks = blocksHor * blocksVer
 			private final int vptSize   = numBlocks * 2
 
@@ -254,9 +254,7 @@ class VqaFile implements Streaming, VideoFile {
 						block++
 					}
 				}
-				return timeWithAverage('Applying palette', 10) { ->
-					return frameBytes.applyPalette(vqaPalette)
-				}
+				return frameBytes.applyPalette(vqaPalette)
 			}
 
 			/**
