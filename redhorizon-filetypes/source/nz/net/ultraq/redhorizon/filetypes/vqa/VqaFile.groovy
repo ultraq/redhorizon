@@ -198,9 +198,12 @@ class VqaFile implements Streaming, VideoFile {
 			private final Format80 format80 = new Format80()
 			private final Decoder audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
+			// Precalculated values to aid frame decoding
 			private final int blocksHor = width / blockWidth
 			private final int blocksVer = height / blockHeight
 			private final int blockSize = blockWidth * blockHeight
+			private final int modifier = blockHeight == 2 ? 0xf : 0xff
+			private final int nextLine = width - blockWidth
 			private final int numBlocks = blocksHor * blocksVer
 			private final int vptSize   = numBlocks * 2
 
@@ -234,16 +237,14 @@ class VqaFile implements Streaming, VideoFile {
 			 */
 			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codebook, Palette vqaPalette) {
 
-				def frameBytes = ByteBuffer.allocateNative(width * height)
+				ByteBuffer frameBytes = ByteBuffer.allocateNative(width * height)
 
 				// Now decode every block
-				int nextLine = width - blockWidth
-				int modifier = blockHeight == 2 ? 0xf : 0xff
 				int block = 0
 
 				// Go across first, then down
-				for (def y = 0; y < height; y += blockHeight) {
-					for (def x = 0; x < width; x += blockWidth) {
+				for (int y = 0; y < height; y += blockHeight) {
+					for (int x = 0; x < width; x += blockWidth) {
 						int framePointer = y * width + x
 
 						// Get the proper lookup value for the block
@@ -252,7 +253,7 @@ class VqaFile implements Streaming, VideoFile {
 
 						// Fill the block with 1 colour
 						if (hiByte == modifier) {
-							for (def i = 1; i <= blockSize; i++) {
+							for (int i = 1; i <= blockSize; i++) {
 								frameBytes.put(framePointer++, (byte)loByte)
 								if (i % blockWidth == 0) {
 									framePointer += nextLine
@@ -262,7 +263,7 @@ class VqaFile implements Streaming, VideoFile {
 						// Otherwise, fill the block with the referenced block in the lookup table
 						else {
 							int ref = ((hiByte << 8) | loByte) * blockSize
-							for (def i = 1; i <= blockSize; i++) {
+							for (int i = 1; i <= blockSize; i++) {
 								frameBytes.put(framePointer++, codebook.get(ref++))
 								if (i % blockWidth == 0) {
 									framePointer += nextLine
