@@ -123,9 +123,8 @@ class WsaFile implements AnimationFile, Streaming {
 				logger.debug('WsaFile decoding started')
 
 				def frameSize = width * height
-				def format40Decoder = new Format40()
-				def format80Decoder = new Format80()
-				def lastIndexedFrame = ByteBuffer.allocateNative(frameSize)
+				def format40 = new Format40()
+				def format80 = new Format80()
 
 				// Decode frame by frame
 				for (def frame = 0; canContinue && frame < numFrames; frame++) {
@@ -136,13 +135,10 @@ class WsaFile implements AnimationFile, Streaming {
 						def intermediateFrame = ByteBuffer.allocateNative(frameSize)
 						def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
-						format80Decoder.decode(compressedFrame, intermediateFrame)
-						format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
+						format80.decode(compressedFrame, intermediateFrame)
+						format40.decode(intermediateFrame, indexedFrame)
 
-						def colouredFrame = indexedFrame.applyPalette(palette)
-
-						frameHandler(colouredFrame)
-						lastIndexedFrame = indexedFrame
+						frameHandler(indexedFrame.applyPalette(palette))
 					}
 				}
 

@@ -32,7 +32,7 @@ public class Base64 implements Decoder {
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Find out how many bits to cut from the end
 		int cullbits = 0;

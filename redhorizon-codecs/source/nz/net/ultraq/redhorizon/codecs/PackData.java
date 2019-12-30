@@ -42,7 +42,7 @@ public class PackData implements Decoder {
 	}
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Decode base64 data into standard binary
 		ByteBuffer mapbytes2 = ByteBuffer.allocate(8192 * chunks);

@@ -56,10 +56,10 @@ class IMAADPCM16bit implements Decoder {
 	private int lastSample = 0
 
 	/**
-	 * Decode a sound chunk in IMA-ADPCM format.  Note that this relies 
+	 * Decode a sound sample in IMA-ADPCM format.
 	 */
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	void decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Until all the compressed data has been decompressed
 		for (int sampleIndex = 0; sampleIndex < source.limit() << 1; sampleIndex++) {

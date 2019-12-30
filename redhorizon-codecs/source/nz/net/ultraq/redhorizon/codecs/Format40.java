@@ -17,9 +17,14 @@
 package nz.net.ultraq.redhorizon.codecs;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Encoder/decoder utilizing the Format40 compression scheme.
+ * <p>
+ * A decoder instance will retain some state after each call to {@link #decode},
+ * which is useful for decoding the next image in the same sequence.  A new
+ * decoder should be created for each image sequence being worked with.
  * <p>
  * The documentation of Format40 defines 6 special commands used depending upon
  * the head bits of the byte read.  Using a notation found in XCCU, they are as
@@ -40,46 +45,46 @@ import java.nio.ByteBuffer;
 public class Format40 implements Encoder, Decoder {
 
 	// Small skip command
-	private static final byte CMD_SKIP_S           = (byte)0x80;		// 10000000
-	private static final int  CMD_SKIP_S_MAX       = 63;				// 01111111, 0x7f
+	private static final byte CMD_SKIP_S           = (byte)0x80; // 10000000
+	private static final int  CMD_SKIP_S_MAX       = 63;         // 01111111, 0x7f
 	private static final int  CMD_SKIP_S_THRESHOLD = 0;
 
 	// Large skip command
-	private static final byte  CMD_SKIP_L1          = (byte)0x80;		// 10000000
-	private static final short CMD_SKIP_L2          = (short)0x0000;	// 00000000 00000000
-	private static final int   CMD_SKIP_L_MAX       = 32767;			// 01111111 11111111, 0x7fff
+	private static final byte  CMD_SKIP_L1          = (byte)0x80;    // 10000000
+	private static final short CMD_SKIP_L2          = (short)0x0000; // 00000000 00000000
+	private static final int   CMD_SKIP_L_MAX       = 32767;         // 01111111 11111111, 0x7fff
 //	private static final int   CMD_SKIP_L_THRESHOLD = 2;
 
 	// Small fill command
-	private static final byte CMD_FILL_S           = (byte)0x00;		// 00000000
-	private static final int  CMD_FILL_S_MAX       = 255;				// 11111111, 0xff
+	private static final byte CMD_FILL_S           = (byte)0x00; // 00000000
+	private static final int  CMD_FILL_S_MAX       = 255;        // 11111111, 0xff
 	private static final int  CMD_FILL_S_THRESHOLD = 2;
 
 	// Large fill command
-	private static final byte  CMD_FILL_L1          = (byte)0x80;		// 10000000
-	private static final short CMD_FILL_L2          = (short)0xc000;	// 11000000 00000000
-	private static final int   CMD_FILL_L_MAX       = 16383;			// 00111111 11111111, 0x3fff
+	private static final byte  CMD_FILL_L1          = (byte)0x80;    // 10000000
+	private static final short CMD_FILL_L2          = (short)0xc000; // 11000000 00000000
+	private static final int   CMD_FILL_L_MAX       = 16383;         // 00111111 11111111, 0x3fff
 //	private static final int   CMD_FILL_L_THRESHOLD = 3;
 
 	// Small XOR command
-	private static final byte CMD_XOR_S           = (byte)0x00;		// 00000000
-	private static final byte CMD_XOR_S_MAX       = 63;				// 01111111, 0x7f
+	private static final byte CMD_XOR_S           = (byte)0x00; // 00000000
+	private static final byte CMD_XOR_S_MAX       = 63;         // 01111111, 0x7f
 //	private static final int  CMD_XOR_S_THRESHOLD = 0;
 
 	// Large XOR command
-	private static final byte  CMD_XOR_L1          = (byte)0x80;		// 10000000
-	private static final short CMD_XOR_L2          = (short)0x8000;	// 10000000 00000000
-	private static final int   CMD_XOR_L_MAX       = 16383;			// 00111111 11111111, 0x3fff
+	private static final byte  CMD_XOR_L1          = (byte)0x80;    // 10000000
+	private static final short CMD_XOR_L2          = (short)0x8000; // 10000000 00000000
+	private static final int   CMD_XOR_L_MAX       = 16383;         // 00111111 11111111, 0x3fff
 //	private static final int   CMD_XOR_L_THRESHOLD = 2;
 
-	/**
-	 * @param extra
-	 *   A single 'base' buffer that the decoded data will be based upon.
-	 */
-	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	private ByteBuffer xorSource;
 
-		ByteBuffer base = extra[0];
+	@Override
+	public void decode(ByteBuffer source, ByteBuffer dest) {
+
+		if (xorSource == null) {
+			xorSource = ByteBuffer.allocate(dest.capacity()).order(ByteOrder.nativeOrder());
+		}
 		int count;
 
 		while (true) {
@@ -93,14 +98,14 @@ public class Format40 implements Encoder, Decoder {
 					count = source.get() & 0xff;
 					byte fill = source.get();
 					while (count-- > 0) {
-						dest.put((byte)(base.get() ^ fill));
+						dest.put((byte)(xorSource.get() ^ fill));
 					}
 				}
 				// Command #2 - small XOR source with base for count
 				else {
 					count = command;
 					while (count-- > 0) {
-						dest.put((byte)(source.get() ^ base.get()));
+						dest.put((byte)(source.get() ^ xorSource.get()));
 					}
 				}
 			}
@@ -123,7 +128,7 @@ public class Format40 implements Encoder, Decoder {
 
 						// Command #3 - large copy base to dest for count
 						while (count-- > 0) {
-							dest.put(base.get());
+							dest.put(xorSource.get());
 						}
 					}
 					// b7 of next byte = 1
@@ -133,14 +138,14 @@ public class Format40 implements Encoder, Decoder {
 						// Command #4 - large XOR source with base for count
 						if ((command & 0x40) == 0) {
 							while (count-- > 0) {
-								dest.put((byte)(source.get() ^ base.get()));
+								dest.put((byte)(source.get() ^ xorSource.get()));
 							}
 						}
 						// Command #5 - large XOR base with value
 						else {
 							byte fill = source.get();
 							while (count-- > 0) {
-								dest.put((byte)(base.get() ^ fill));
+								dest.put((byte)(xorSource.get() ^ fill));
 							}
 						}
 					}
@@ -150,14 +155,14 @@ public class Format40 implements Encoder, Decoder {
 
 					// Command #6 - small copy base to dest for count
 					while (count-- > 0) {
-						dest.put(base.get());
+						dest.put(xorSource.get());
 					}
 				}
 			}
 		}
 		source.rewind();
-		base.rewind();
 		dest.flip();
+		xorSource = dest;
 	}
 
 	/**

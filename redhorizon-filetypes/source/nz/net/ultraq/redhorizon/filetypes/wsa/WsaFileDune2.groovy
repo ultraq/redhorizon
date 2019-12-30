@@ -79,9 +79,8 @@ class WsaFileDune2 {
 
 		// Frame data
 		def frameSize = width * height
-		def format40Decoder = new Format40()
-		def format80Decoder = new Format80()
-		def lastIndexedFrame = ByteBuffer.allocateNative(frameSize)
+		def format40 = new Format40()
+		def format80 = new Format80()
 
 		frames = new ByteBuffer[numFrames]
 		frames.length.times { frame ->
@@ -91,8 +90,8 @@ class WsaFileDune2 {
 			def intermediateFrame = ByteBuffer.allocateNative(frameSize)
 			def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
-			format80Decoder.decode(compressedFrame, intermediateFrame)
-			format40Decoder.decode(intermediateFrame, indexedFrame, lastIndexedFrame)
+			format80.decode(compressedFrame, intermediateFrame)
+			format40.decode(intermediateFrame, indexedFrame)
 
 			frames[frame] = indexedFrame
 		}

@@ -39,32 +39,32 @@ import java.nio.ByteBuffer;
 public class Format80 implements Encoder, Decoder {
 
 	// Transfer command
-	private static final byte CMD_TRANSFER       = (byte)0x80;		// 10000000
-	private static final int  CMD_TRANSFER_MAX	 = 63;				// 00111111, 0x3f
+	private static final byte CMD_TRANSFER       = (byte)0x80; // 10000000
+	private static final int  CMD_TRANSFER_MAX	 = 63;         // 00111111, 0x3f
 
 	// Offset copy command
-	private static final byte CMD_OFFSET           = (byte)0x00;	// 00000000
-	private static final int  CMD_OFFSET_MAX       = 10;			// -3 = 111, 0x07
-	private static final int  CMD_OFFSET_THRESHOLD = 2;				// Must encode at least 3 bytes
-	private static final int  CMD_OFFSET_RANGE     = 4095;			// 00001111 11111111, 0x0fff
+	private static final byte CMD_OFFSET           = (byte)0x00; // 00000000
+	private static final int  CMD_OFFSET_MAX       = 10;         // -3 = 111, 0x07
+	private static final int  CMD_OFFSET_THRESHOLD = 2;          // Must encode at least 3 bytes
+	private static final int  CMD_OFFSET_RANGE     = 4095;       // 00001111 11111111, 0x0fff
 
 	// Small copy command
-	private static final byte CMD_COPY_S           = (byte)0xc0;	// 11000000
-	private static final int  CMD_COPY_S_MAX       = 64;			// -3 = 00111101, 0x3d
+	private static final byte CMD_COPY_S           = (byte)0xc0; // 11000000
+	private static final int  CMD_COPY_S_MAX       = 64;         // -3 = 00111101, 0x3d
 	private static final int  CMD_COPY_S_THRESHOLD = 2;
 
 	// Large copy command
-	private static final byte CMD_COPY_L           = (byte)0xff;	// 11111111
-	private static final int  CMD_COPY_L_MAX       = 65535;			// 11111111 11111111, 0xffff
+	private static final byte CMD_COPY_L           = (byte)0xff; // 11111111
+	private static final int  CMD_COPY_L_MAX       = 65535;      // 11111111 11111111, 0xffff
 //	private static final int  CMD_COPY_L_THRESHOLD = 4;
 
 	// Colour command
-	private static final byte CMD_FILL             = (byte)0xfe;	// 11111110
-	private static final int  CMD_FILL_MAX         = 65535;			// 11111111 11111111, 0xffff
+	private static final byte CMD_FILL             = (byte)0xfe; // 11111110
+	private static final int  CMD_FILL_MAX         = 65535;      // 11111111 11111111, 0xffff
 	private static final int  CMD_FILL_THRESHOLD   = 3;
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest) {
 
 		int count;
 		int copypos;

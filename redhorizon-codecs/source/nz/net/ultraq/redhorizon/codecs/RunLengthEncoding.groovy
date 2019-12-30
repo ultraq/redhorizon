@@ -33,7 +33,7 @@ class RunLengthEncoding implements Decoder {
 	final byte countByte
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	void decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (source.hasRemaining() && dest.hasRemaining()) {
 			def value = source.get()

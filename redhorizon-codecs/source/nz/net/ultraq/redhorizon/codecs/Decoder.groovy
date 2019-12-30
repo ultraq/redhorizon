@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.codecs;
+package nz.net.ultraq.redhorizon.codecs
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Interface for classes that can decode information.
  * 
  * @author Emanuel Rabina
  */
-public interface Decoder {
+interface Decoder {
 
 	/**
 	 * Decodes the information in the {@code source} buffer, putting it into the
@@ -31,9 +31,6 @@ public interface Decoder {
 	 * 
 	 * @param source
 	 * @param dest
-	 * @param extra	 Optional buffers to pass to the decoder.  Used in some
-	 * 				 decoders that require multiple source buffers to produce a
-	 * 				 decoded result (eg: XOR'ed images).
 	 */
-	void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra);
+	void decode(ByteBuffer source, ByteBuffer dest)
 }

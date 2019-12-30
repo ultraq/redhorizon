@@ -40,7 +40,7 @@ public class Format2 implements Encoder, Decoder {
 	private static final byte CMD_FILL_VAL = 0;
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (source.hasRemaining()) {
 			byte command = source.get();

@@ -41,7 +41,7 @@ public class WSADPCM8bit implements Decoder {
 	};
 
 	@Override
-	public void decode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Mere copy if chunk is uncompressed
 		if (source.limit() == dest.limit()) {
