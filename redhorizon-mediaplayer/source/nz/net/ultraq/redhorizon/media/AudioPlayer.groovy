@@ -46,7 +46,8 @@ class AudioPlayer {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			def soundEffect = new SoundEffect(soundFile, executorService)
-			def audioEngine = new AudioEngine(soundEffect)
+			def audioEngine = new AudioEngine()
+			audioEngine.addSceneElement(soundEffect)
 
 			def engine = executorService.submit(audioEngine)
 
