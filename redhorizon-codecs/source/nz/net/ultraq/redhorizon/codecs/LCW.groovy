@@ -65,7 +65,6 @@ class LCW implements Encoder, Decoder {
 	private static final int  CMD_FILL_THRESHOLD   = 3
 
 	@Override
-	@SuppressWarnings("GroovyNegatedIf")
 	void decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (true) {
@@ -98,7 +97,7 @@ class LCW implements Encoder, Decoder {
 
 					// Command #2 - copy the next count bytes as is from source to dest.
 					dest.put(source.array(), source.position(), count)
-					source.position(source.position() + count)
+					source.advance(count)
 				}
 				// b6 = 1
 				else {

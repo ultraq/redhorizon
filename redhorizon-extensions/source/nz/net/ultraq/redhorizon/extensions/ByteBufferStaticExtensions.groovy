@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Extensions to the {@code ByteBuffer} class.
+ * Static method extensions to the {@code ByteBuffer} class.
  * 
  * @author Emanuel Rabina
  */

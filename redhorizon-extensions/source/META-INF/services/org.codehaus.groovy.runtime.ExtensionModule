@@ -17,6 +17,7 @@
 moduleName = redhorizon-extensions
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.extensions.BlockingQueueExtensions,\
+                   nz.net.ultraq.redhorizon.extensions.BufferExtensions,\
                    nz.net.ultraq.redhorizon.extensions.ExecutorServiceExtensions,\
                    nz.net.ultraq.redhorizon.extensions.JomlExtensions,\
                    nz.net.ultraq.redhorizon.extensions.PrimitiveArrayExtensions,\

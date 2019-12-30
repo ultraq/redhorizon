@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes.wsa
 
-import nz.net.ultraq.redhorizon.codecs.Format40
+import nz.net.ultraq.redhorizon.codecs.XORDelta
 import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
@@ -79,8 +79,8 @@ class WsaFileDune2 {
 
 		// Frame data
 		def frameSize = width * height
-		def format40 = new Format40()
-		def format80 = new LCW()
+		def xorDelta = new XORDelta(frameSize)
+		def lcw = new LCW()
 
 		frames = new ByteBuffer[numFrames]
 		frames.length.times { frame ->
@@ -90,8 +90,8 @@ class WsaFileDune2 {
 			def intermediateFrame = ByteBuffer.allocateNative(frameSize)
 			def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
-			format80.decode(compressedFrame, intermediateFrame)
-			format40.decode(intermediateFrame, indexedFrame)
+			lcw.decode(compressedFrame, intermediateFrame)
+			xorDelta.decode(intermediateFrame, indexedFrame)
 
 			frames[frame] = indexedFrame
 		}
