@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.filetypes.vqa
 
 import nz.net.ultraq.redhorizon.codecs.Decoder
-import nz.net.ultraq.redhorizon.codecs.Format80
+import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
@@ -195,7 +195,7 @@ class VqaFile implements Streaming, VideoFile {
 
 		return new Worker() {
 
-			private final Format80 format80 = new Format80()
+			private final LCW lcw = new LCW()
 			private final Decoder audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			// Precalculated values to aid frame decoding
@@ -289,7 +289,7 @@ class VqaFile implements Streaming, VideoFile {
 
 				def decompressData = { ByteBuffer data, int decompressedSize ->
 					def decompressedData = ByteBuffer.allocateNative(decompressedSize)
-					format80.decode(data, decompressedData)
+					lcw.decode(data, decompressedData)
 					return decompressedData
 				}
 

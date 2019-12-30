@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.filetypes.wsa
 
 import nz.net.ultraq.redhorizon.codecs.Format40
-import nz.net.ultraq.redhorizon.codecs.Format80
+import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -124,7 +124,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 				def frameSize = width * height
 				def format40 = new Format40()
-				def format80 = new Format80()
+				def lcw = new LCW()
 
 				// Decode frame by frame
 				for (def frame = 0; canContinue && frame < numFrames; frame++) {
@@ -135,7 +135,7 @@ class WsaFile implements AnimationFile, Streaming {
 						def intermediateFrame = ByteBuffer.allocateNative(frameSize)
 						def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
-						format80.decode(compressedFrame, intermediateFrame)
+						lcw.decode(compressedFrame, intermediateFrame)
 						format40.decode(intermediateFrame, indexedFrame)
 
 						frameHandler(indexedFrame.applyPalette(palette))

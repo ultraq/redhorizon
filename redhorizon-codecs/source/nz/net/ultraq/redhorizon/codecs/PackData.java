@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 public class PackData implements Decoder {
 
 	private final Base64 base64 = new Base64();
-	private final Format80 format80 = new Format80();
+	private final LCW lcw = new LCW();
 
 	private final int chunks;
 
@@ -64,7 +64,7 @@ public class PackData implements Decoder {
 			int chunksize = (c << 16) | (b << 8) | a;
 
 			// Decode that chunk, put it into one of the buffers in the array
-			format80.decode(mapbytes2, mapchunks[i]);
+			lcw.decode(mapbytes2, mapchunks[i]);
 			pos += 4 + chunksize;
 			mapbytes2.position(pos);
 		}

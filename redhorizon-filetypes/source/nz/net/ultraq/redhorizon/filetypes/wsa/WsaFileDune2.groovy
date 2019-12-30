@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.filetypes.wsa
 
 import nz.net.ultraq.redhorizon.codecs.Format40
-import nz.net.ultraq.redhorizon.codecs.Format80
+import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
 import java.nio.ByteBuffer
@@ -80,7 +80,7 @@ class WsaFileDune2 {
 		// Frame data
 		def frameSize = width * height
 		def format40 = new Format40()
-		def format80 = new Format80()
+		def format80 = new LCW()
 
 		frames = new ByteBuffer[numFrames]
 		frames.length.times { frame ->
