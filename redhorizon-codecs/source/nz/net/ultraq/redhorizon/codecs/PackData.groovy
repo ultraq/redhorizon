@@ -52,7 +52,7 @@ class PackData implements Decoder {
 			int a = mapBytes2.get() & 0xff
 			int b = mapBytes2.get() & 0xff
 			int c = mapBytes2.get() & 0xff
-					mapBytes2.position(mapBytes2.position() + 1)
+					mapBytes2.advance(1)
 			int chunksize = (c << 16) | (b << 8) | a
 
 			// Decode that chunk, put it into one of the buffers in the array
