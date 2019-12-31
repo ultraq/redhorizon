@@ -26,8 +26,8 @@ import org.joml.Rectanglef
 trait Visual {
 
 	/**
-	 * Figure out what the image dimensions should be to fit comfortably within
-	 * the given window.
+	 * Calculate the ideal centered dimensions for the image that stretches to fit
+	 * the window while maintaining the target aspect ratio.
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
@@ -35,25 +35,13 @@ trait Visual {
 	 * @param window
 	 * @return
 	 */
-	Dimension calculateImageDimensionsForWindow(int imageWidth, int imageHeight, boolean fixAspectRatio, Dimension window) {
+	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, boolean fixAspectRatio, Dimension window) {
 
 		def width = window.width
 		def height = imageHeight * (width / imageWidth)
 		if (fixAspectRatio) {
 			height *= 1.2
 		}
-		return new Dimension(width, Math.ceil(height) as int)
-	}
-
-	/**
-	 * Return a set of image coordinates centered around the origin for the given
-	 * image size.
-	 * 
-	 * @param imageSize
-	 * @return
-	 */
-	Rectanglef centerImageCoordinates(Dimension imageSize) {
-
-		return (imageSize as Rectanglef).translate(-imageSize.width / 2, -imageSize.height / 2)
+		return new Rectanglef(0, 0, width, height).translate(-width / 2, -height / 2)
 	}
 }

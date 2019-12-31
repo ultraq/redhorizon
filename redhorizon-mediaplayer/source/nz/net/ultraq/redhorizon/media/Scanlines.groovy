@@ -1,0 +1,82 @@
+/*
+ * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.media
+
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+
+import org.joml.Rectanglef
+
+import java.nio.ByteBuffer
+
+/**
+ * A scanline overlay to use with a low-resolution image of some kind.
+ * 
+ * @author Emanuel Rabina
+ */
+class Scanlines implements GraphicsElement, SelfVisitable {
+
+	private final Dimension overlay
+	private final Rectanglef dimensions
+	private int textureId
+
+	/**
+	 * Constructor, set the dimensions over which the scanlines are to show.
+	 * 
+	 * @param overlay
+	 * @param dimensions
+	 */
+	Scanlines(Dimension overlay, Rectanglef dimensions) {
+
+		// Modify overlay and coordinates so that scanlines appear between lines
+		def scale = (dimensions.maxY - dimensions.minY) / overlay.height
+
+		this.overlay = new Dimension(overlay.width, overlay.height * 2 + 1)
+
+		this.dimensions = new Rectanglef(dimensions)
+		this.dimensions.maxY += scale
+		this.dimensions.translate(0, -scale / 2 as float)
+	}
+
+	@Override
+	void delete(GraphicsRenderer renderer) {
+
+		renderer.deleteTextures(textureId)
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		// Build a texture to look like scanlines
+		def scanlineTexture = ByteBuffer.allocateDirectNative(overlay.width * overlay.height * 4)
+		for (def y = 0; y < overlay.height; y += 2) {
+			scanlineTexture.position(y * overlay.width * 4)
+			for (def x = 0; x < overlay.width; x++) {
+				scanlineTexture.advance(3).put((byte)0x40)
+			}
+		}
+		scanlineTexture.rewind()
+		textureId = renderer.createTexture(scanlineTexture, 4, overlay.width, overlay.height, true)
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+		renderer.drawTexture(textureId, dimensions)
+	}
+}

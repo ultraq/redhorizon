@@ -39,6 +39,8 @@ class ImageViewer implements Visual {
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
 	final ImageFile imageFile
+
+	final boolean filtering
 	final boolean fixAspectRatio
 
 	/**
@@ -61,9 +63,8 @@ class ImageViewer implements Visual {
 
 			// Add the image to the engine once we have the window dimensions
 			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
-				graphicsEngine.addSceneElement(new Image(imageFile, centerImageCoordinates(
-					calculateImageDimensionsForWindow(imageFile.width, imageFile.height, fixAspectRatio, event.parameters['windowSize'])
-				)))
+				graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(imageFile.width, imageFile.height,
+					fixAspectRatio, event.parameters['windowSize']), filtering))
 			}
 
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->

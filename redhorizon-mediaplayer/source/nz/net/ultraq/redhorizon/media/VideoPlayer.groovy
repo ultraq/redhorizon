@@ -40,7 +40,10 @@ class VideoPlayer implements Visual {
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
 	final VideoFile videoFile
+
+	final boolean filtering
 	final boolean fixAspectRatio
+	final boolean scanlines
 
 	/**
 	 * Play the video file.
@@ -65,9 +68,10 @@ class VideoPlayer implements Visual {
 			// Add the video to the engines once we have the window dimensions
 			def video
 			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
-				video = new Video(videoFile, centerImageCoordinates(
-					calculateImageDimensionsForWindow(videoFile.width, videoFile.height, fixAspectRatio, event.parameters['windowSize'])
-				), executorService)
+				def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
+					fixAspectRatio, event.parameters['windowSize'])
+
+				video = new Video(videoFile, videoCoordinates, filtering, executorService)
 				video.on(Animation.EVENT_STOP) { stopEvent ->
 					logger.debug('Video stopped')
 					audioEngine.stop()
@@ -75,6 +79,13 @@ class VideoPlayer implements Visual {
 				}
 				audioEngine.addSceneElement(video)
 				graphicsEngine.addSceneElement(video)
+
+				if (scanlines) {
+					graphicsEngine.addSceneElement(new Scanlines(
+						new Dimension(videoFile.width, videoFile.height),
+						videoCoordinates
+					))
+				}
 			}
 
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->

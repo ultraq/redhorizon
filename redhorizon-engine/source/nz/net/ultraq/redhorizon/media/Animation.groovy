@@ -49,6 +49,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final int numFrames
 	final float frameRate
 	final Rectanglef dimensions
+	final boolean filter
 
 	private final Worker frameDataWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
@@ -65,9 +66,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * 
 	 * @param animationFile   Animation source.
 	 * @param dimensions      Dimensions over which to display the animation over.
+	 * @param filter          Filter the frames of the animation.
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, Rectanglef dimensions, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, ExecutorService executorService) {
 
 		width     = animationFile.width
 		height    = animationFile.height
@@ -75,6 +77,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		numFrames = animationFile.numFrames
 		frameRate = animationFile.frameRate
 		this.dimensions = dimensions
+		this.filter = filter
 
 		if (animationFile instanceof Streaming) {
 			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
@@ -136,7 +139,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 				if (!textureId) {
 					def frame = frames[currentFrame]
 					if (frame) {
-						textureId = renderer.createTexture(frame, format, width, height)
+						textureId = renderer.createTexture(frame, format, width, height, filter)
 						renderer.drawTexture(textureId, dimensions)
 						textureIds[currentFrame] = textureId
 					}

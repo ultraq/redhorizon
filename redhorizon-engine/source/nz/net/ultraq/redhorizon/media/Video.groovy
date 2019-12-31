@@ -59,6 +59,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	final int channels
 	final int frequency
 	final Rectanglef dimensions
+	final boolean filter
 
 	private long animationTimeStart
 	private final Worker videoWorker
@@ -79,9 +80,10 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	 * 
 	 * @param videoFile       Video source.
 	 * @param dimensions      Dimensions over which to display the video over.
+	 * @param filter          Filter the frames of the video.
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, Rectanglef dimensions, ExecutorService executorService) {
+	Video(VideoFile videoFile, Rectanglef dimensions, boolean filter, ExecutorService executorService) {
 
 		width     = videoFile.width
 		height    = videoFile.height
@@ -89,6 +91,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		numFrames = videoFile.numFrames
 		frameRate = videoFile.frameRate
 		this.dimensions = dimensions
+		this.filter = filter
 
 		bitrate   = videoFile.bitrate
 		channels  = videoFile.channels
@@ -217,7 +220,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 				if (!textureId) {
 					def frame = frames[currentFrame]
 					if (frame) {
-						textureId = renderer.createTexture(frame, format, width, height)
+						textureId = renderer.createTexture(frame, format, width, height, filter)
 						renderer.drawTexture(textureId, dimensions)
 						textureIds[currentFrame] = textureId
 					}

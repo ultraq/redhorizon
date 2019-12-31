@@ -39,7 +39,10 @@ class AnimationPlayer implements Visual {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
 	final AnimationFile animationFile
+
+	final boolean filtering
 	final boolean fixAspectRatio
+	final boolean scanlines
 
 	/**
 	 * Play the configured animation file.
@@ -62,14 +65,22 @@ class AnimationPlayer implements Visual {
 			// Add the animation to the engine once we have the window dimensions
 			def animation
 			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
-				animation = new Animation(animationFile, centerImageCoordinates(
-					calculateImageDimensionsForWindow(animationFile.width, animationFile.height, fixAspectRatio, event.parameters['windowSize'])
-				), executorService)
+				def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
+					fixAspectRatio, event.parameters['windowSize'])
+
+				animation = new Animation(animationFile, animationCoordinates, filtering, executorService)
 				animation.on(Animation.EVENT_STOP) { stopEvent ->
 					logger.debug('Animation stopped')
 					graphicsEngine.stop()
 				}
 				graphicsEngine.addSceneElement(animation)
+
+				if (scanlines) {
+					graphicsEngine.addSceneElement(new Scanlines(
+						new Dimension(animationFile.width, animationFile.height),
+						animationCoordinates
+					))
+				}
 			}
 
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
