@@ -35,13 +35,13 @@ import java.nio.ByteBuffer
  *   <li>NumFrames (2 bytes) - the number of frames of animation in the file</li>
  *   <li>FrameWidth (2 bytes) - width of each frame</li>
  *   <li>FrameHeight (2 bytes) - height of each frame</li>
- *   <li>Delta (4 bytes) - frames/sec = delta/1024</li>
+ *   <li>Delta (2 bytes) - buffer size required to unpack frame data</li>
+ *   <li>Flags (2 bytes) - unused in the Dune 2 version?</li>
  *   <li>Offsets[NumImages + 1] (4 bytes each) - offset to the image data for
  *     each frame.  The last offset points to the end of the file.</li>
  * </ul>
  * After that begins the image data.  Each image needs to be decompressed using
- * Format80, then Format40 (XOR'ed over the previous image data, or a black
- * frame for the first image).
+ * LCW, then XORDelta.
  * 
  * @author Emanuel Rabina
  */
@@ -51,7 +51,8 @@ class WsaFileDune2 {
 	final short numFrames
 	final short width
 	final short height
-	final int delta
+	final short delta
+	final short flags
 	final int[] frameOffsets
 	final ByteBuffer[] frames
 
@@ -69,7 +70,8 @@ class WsaFileDune2 {
 		numFrames = input.readShort()
 		width     = input.readShort()
 		height    = input.readShort()
-		delta     = input.readInt()
+		delta     = input.readShort() + 33 // https://github.com/ultraq/redhorizon/issues/4
+		flags     = input.readShort()
 
 		// Frame offsets
 		frameOffsets = new int[numFrames + 1]
@@ -87,7 +89,7 @@ class WsaFileDune2 {
 			def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
 			def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 
-			def intermediateFrame = ByteBuffer.allocateNative(frameSize)
+			def intermediateFrame = ByteBuffer.allocateNative(delta)
 			def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
 			lcw.decode(compressedFrame, intermediateFrame)

@@ -40,6 +40,8 @@ import java.util.concurrent.ExecutorService
  * up background music duties.
  * <p>
  * For more information about the C&C WSA file, see: http://vladan.bato.net/cnc/ccfiles4.txt
+ * For all the weird nuances surrounding the WSA file and the versions it has
+ * gone through, see: http://www.shikadi.net/moddingwiki/Westwood_WSA_Format
  * 
  * @author Emanuel Rabina
  */
@@ -47,6 +49,8 @@ import java.util.concurrent.ExecutorService
 class WsaFile implements AnimationFile, Streaming {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsaFile)
+
+	private static final short FLAG_HAS_PALETTE = 0x01
 
 	private final NativeDataInputStream input
 
@@ -56,12 +60,13 @@ class WsaFile implements AnimationFile, Streaming {
 	final short y
 	final int width     // Stored in file as short
 	final int height    // stored in file as short
-	final int delta
+	final short delta
+	final short flags
 	final int[] frameOffsets
 	final Palette palette
 
 	final ColourFormat format = ColourFormat.FORMAT_RGB
-	final float frameRate
+	final float frameRate = 15f
 	final boolean looping
 
 	/**
@@ -79,9 +84,8 @@ class WsaFile implements AnimationFile, Streaming {
 		y         = input.readShort()
 		width     = input.readShort()
 		height    = input.readShort()
-		delta     = input.readInt()
-
-		frameRate = 1 / (delta / 1024) * 1000
+		delta     = input.readShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
+		flags     = input.readShort()
 
 		// Frame offsets
 		frameOffsets = new int[numFrames + 2]
@@ -92,7 +96,9 @@ class WsaFile implements AnimationFile, Streaming {
 		looping = frameOffsets[frameOffsets.length - 1] != 0
 
 		// Internal VGA palette
-		palette = new VgaPalette(256, format, input)
+		if (flags & FLAG_HAS_PALETTE) {
+			palette = new VgaPalette(256, format, input)
+		}
 	}
 
 	@Override
@@ -132,7 +138,7 @@ class WsaFile implements AnimationFile, Streaming {
 						def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
 						def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 
-						def intermediateFrame = ByteBuffer.allocateNative(frameSize)
+						def intermediateFrame = ByteBuffer.allocateNative(delta)
 						def indexedFrame = ByteBuffer.allocateNative(frameSize)
 
 						lcw.decode(compressedFrame, intermediateFrame)
@@ -158,7 +164,7 @@ class WsaFile implements AnimationFile, Streaming {
 	String toString() {
 
 		return """
-			WSA file (C&C), ${width}x${height}, 18-bit with internal palette of 256 colours
+			WSA file (C&C), ${width}x${height}, ${palette ? '18-bit with internal palette of 256 colours' : '(no palette)'}
 			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
 		""".stripIndent().trim()
 	}
