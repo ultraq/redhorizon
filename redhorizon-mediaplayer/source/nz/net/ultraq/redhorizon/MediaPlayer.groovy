@@ -69,13 +69,13 @@ class MediaPlayer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the entry in the mix file to play')
 	String entryName
 
-	@Option(names = ['--filtering'], description = 'Use nearest-neighbour filtering to smooth the appearance of textures')
+	@Option(names = ['--filtering'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
 	boolean filtering
 
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays (images/animations/videos only)')
 	boolean fixAspectRatio
 
-	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, helps with the illusion of sharpness, particularly without filtering')
+	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
 	boolean scanlines
 
 	/**
