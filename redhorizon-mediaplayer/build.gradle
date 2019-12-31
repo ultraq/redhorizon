@@ -48,6 +48,7 @@ application {
 		'java.nio',
 		'java.util',
 		'java.util.concurrent',
+		'java.util.regex',
 		'sun.nio.ch'
 	].inject([]) { acc, javaPackage ->
 		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
