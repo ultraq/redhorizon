@@ -70,7 +70,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	// Rendering information
 	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
 	private int lastFrame
-	private List<Integer> textureIds
+	private int[] textureIds
 
 	private int sourceId
 	private List<Integer> bufferIds
@@ -134,7 +134,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		videoWorker.stop()
 		frameDataBuffer.drain()
-		renderer.deleteTextures(*(textureIds.findAll { textureId -> textureId }))
+		renderer.deleteTextures(textureIds.findAll { it } as int[])
 	}
 
 	@Override
@@ -151,7 +151,8 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		frames = []
 		lastFrame = -1
-		textureIds = [].withDefault { null as Integer }
+		textureIds = new int[numFrames]
+		Arrays.fill(textureIds, 0)
 	}
 
 	@Override
