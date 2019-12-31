@@ -22,9 +22,11 @@ dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
 		project(':redhorizon-extensions'),
-		':blowfishj:2.41',
-		'nz.net.ultraq.extensions:profiling-extensions:0.2.0'
+		':blowfishj:2.41'
 	)
+	implementation('nz.net.ultraq.extensions:profiling-extensions:0.2.0') {
+		exclude module: 'groovy'
+	}
 }
 
 def isMac = Os.isFamily(Os.FAMILY_MAC)
