@@ -66,7 +66,7 @@ class WsaFile implements AnimationFile, Streaming {
 	final Palette palette
 
 	final ColourFormat format = ColourFormat.FORMAT_RGB
-	final float frameRate = 15f
+	final float frameRate = 10f
 	final boolean looping
 
 	/**
