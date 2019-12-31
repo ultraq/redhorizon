@@ -35,9 +35,9 @@ class ByteBufferStaticExtensions {
 	 */
 	static ByteBuffer allocateDirectNative(ByteBuffer self, int capacity) {
 
-		def buffer = ByteBuffer.allocateDirect(capacity)
-		buffer.order(ByteOrder.nativeOrder())
-		return buffer
+		return ByteBuffer
+			.allocateDirect(capacity)
+			.order(ByteOrder.nativeOrder())
 	}
 
 	/**
@@ -49,9 +49,9 @@ class ByteBufferStaticExtensions {
 	 */
 	static ByteBuffer allocateNative(ByteBuffer self, int capacity) {
 
-		def buffer = ByteBuffer.allocate(capacity)
-		buffer.order(ByteOrder.nativeOrder())
-		return buffer
+		return ByteBuffer
+			.allocate(capacity)
+			.order(ByteOrder.nativeOrder())
 	}
 
 	/**
@@ -65,7 +65,7 @@ class ByteBufferStaticExtensions {
 	static ByteBuffer fromBuffers(ByteBuffer self, ByteBuffer... buffers) {
 
 		return buffers
-			.inject(ByteBuffer.allocateNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }
+			.inject(ByteBuffer.allocateNative(buffers.sum { it.limit() })) { acc, b -> acc.put(b) }
 			.rewind()
 	}
 
@@ -80,7 +80,7 @@ class ByteBufferStaticExtensions {
 	static ByteBuffer fromBuffersDirect(ByteBuffer self, ByteBuffer... buffers) {
 
 		return buffers
-			.inject(ByteBuffer.allocateDirectNative(buffers*.limit().sum())) { acc, b -> acc.put(b) }
+			.inject(ByteBuffer.allocateDirectNative(buffers.sum { it.limit() })) { acc, b -> acc.put(b) }
 			.rewind()
 	}
 
@@ -93,9 +93,9 @@ class ByteBufferStaticExtensions {
 	 */
 	static ByteBuffer wrapNative(ByteBuffer self, byte[] array) {
 
-		def buffer = ByteBuffer.wrap(array)
-		buffer.order(ByteOrder.nativeOrder())
-		return buffer
+		return ByteBuffer
+			.wrap(array)
+			.order(ByteOrder.nativeOrder())
 	}
 
 	/**
@@ -109,8 +109,8 @@ class ByteBufferStaticExtensions {
 	 */
 	static ByteBuffer wrapNative(ByteBuffer self, byte[] array, int offset, int length) {
 
-		def buffer = ByteBuffer.wrap(array, offset, length)
-		buffer.order(ByteOrder.nativeOrder())
-		return buffer
+		return ByteBuffer
+			.wrap(array, offset, length)
+			.order(ByteOrder.nativeOrder())
 	}
 }
