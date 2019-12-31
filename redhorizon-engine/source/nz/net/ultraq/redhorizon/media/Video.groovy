@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 
 /**
@@ -63,6 +64,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	private final Worker videoWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
 	private final BlockingQueue<ByteBuffer> sampleDataBuffer
+	private final CountDownLatch bufferReady = new CountDownLatch(1)
 
 	// Rendering information
 	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
@@ -97,6 +99,9 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 			sampleDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			videoWorker = videoFile.getStreamingDataWorker { frame, sample ->
+				if ((!frameDataBuffer.remainingCapacity() || !sampleDataBuffer.remainingCapacity()) && bufferReady.count) {
+					bufferReady.countDown()
+				}
 				if (frame) {
 					frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
 				}
@@ -149,6 +154,8 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	@Override
 	void play() {
 
+		// Wait until the frame buffer is filled before starting play
+		bufferReady.await()
 		animationTimeStart = System.currentTimeMillis()
 		Playable.super.play()
 	}

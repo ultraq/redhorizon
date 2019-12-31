@@ -74,9 +74,8 @@ class AnimationPlayer implements Visual {
 
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
 				executorService.submit { ->
-					logger.debug('Animation started')
-					Thread.sleep(500)
 					animation.play()
+					logger.debug('Animation started')
 				}
 			}
 			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->

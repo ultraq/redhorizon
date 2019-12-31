@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 
 /**
@@ -51,6 +52,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 	private final Worker frameDataWorker
 	private final BlockingQueue<ByteBuffer> frameDataBuffer
+	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private long animationTimeStart
 
 	// Rendering information
@@ -78,6 +80,9 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
+				if (!frameDataBuffer.remainingCapacity() && bufferReady.count) {
+					bufferReady.countDown()
+				}
 				frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
 			}
 			executorService.execute(frameDataWorker)
@@ -107,6 +112,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	@Override
 	void play() {
 
+		// Wait until the frame buffer is filled before starting play
+		bufferReady.await()
 		animationTimeStart = System.currentTimeMillis()
 		Playable.super.play()
 	}
