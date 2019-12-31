@@ -96,8 +96,7 @@ class LCW implements Encoder, Decoder {
 					}
 
 					// Command #2 - copy the next count bytes as is from source to dest.
-					dest.put(source.array(), source.position(), count)
-					source.advance(count)
+					dest.put(source, count)
 				}
 				// b6 = 1
 				else {

@@ -16,25 +16,29 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
-import java.nio.Buffer
+import java.nio.ByteBuffer
 
 /**
- * Instance method extensions to the {@code Buffer} class.
+ * Instance method extensions to the {@code ByteBuffer} class.
  * 
  * @author Emanuel Rabina
  */
-class BufferExtensions {
+class ByteBufferExtensions {
 
 	/**
-	 * Advance the current position of the {@code Buffer} by the given amount.
-	 * Negative values can be used to move the position backwards in the buffer.
+	 * A relative bulk <i>put</i> method using another {@code ByteBuffer} but only
+	 * reading up to {@code length} bytes from that buffer.  The position of both
+	 * buffers will be increased by {@code length}.
 	 * 
 	 * @param self
-	 * @param advanceBy
+	 * @param src
+	 * @param length
 	 * @return
 	 */
-	static Buffer advance(Buffer self, int advanceBy) {
+	static ByteBuffer put(ByteBuffer self, ByteBuffer src, int length) {
 
-		return self.position(self.position() + advanceBy)
+		self.put(src.array(), src.position(), length)
+		src.position(src.position() + length)
+		return self
 	}
 }

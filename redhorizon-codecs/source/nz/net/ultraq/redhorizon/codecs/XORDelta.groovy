@@ -133,8 +133,7 @@ class XORDelta implements Encoder, Decoder {
 						}
 
 						// Command #3 - large copy base to dest for count
-						dest.put(xorSource.array(), xorSource.position(), count)
-						xorSource.advance(count)
+						dest.put(xorSource, count)
 					}
 					// b7 of next byte = 1
 					else {
@@ -142,14 +141,14 @@ class XORDelta implements Encoder, Decoder {
 
 						// Command #4 - large XOR source with base for count
 						if (!(command & 0x40)) {
-							while (count-- > 0) {
+							while (count--) {
 								dest.put((byte)(source.get() ^ xorSource.get()))
 							}
 						}
 						// Command #5 - large XOR base with value
 						else {
 							byte fill = source.get()
-							while (count-- > 0) {
+							while (count--) {
 								dest.put((byte)(xorSource.get() ^ fill))
 							}
 						}
@@ -159,8 +158,7 @@ class XORDelta implements Encoder, Decoder {
 				else {
 
 					// Command #6 - small copy base to dest for count
-					dest.put(xorSource.array(), xorSource.position(), count)
-					xorSource.advance(count)
+					dest.put(xorSource, count)
 				}
 			}
 		}
