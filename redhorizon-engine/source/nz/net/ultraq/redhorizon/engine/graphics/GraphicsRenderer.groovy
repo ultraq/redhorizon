@@ -40,9 +40,10 @@ interface GraphicsRenderer {
 	 * @param format
 	 * @param width
 	 * @param height
+	 * @param filter Whether to use nearest-neighbour filtering on textures.
 	 * @return New texture handle.
 	 */
-	int createTexture(ByteBuffer data, int format, int width, int height)
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
 
 	/**
 	 * Delete texture handles.

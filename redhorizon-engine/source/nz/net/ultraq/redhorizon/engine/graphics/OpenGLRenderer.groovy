@@ -70,15 +70,15 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		// Depth testing
 		glEnable(GL_DEPTH_TEST)
-//		gl.glDepthFunc(GL_LEQUAL)
+		glDepthFunc(GL_LEQUAL)
 
 		// Alpha testing
 		glEnable(GL_ALPHA_TEST)
-//		gl.glAlphaFunc(GL_GREATER, 0)
+		glAlphaFunc(GL_GREATER, 0)
 
 		// Blending and blending function
-//		gl.glEnable(GL_BLEND)
-//		gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+		glEnable(GL_BLEND)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport based on the camera settings
 		def windowSize = context.windowSize
@@ -141,7 +141,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height) {
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
 
 		int textureId = checkForError { ->
 			return glGenTextures()
@@ -151,8 +151,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		}
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP) }
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 
 		def colourFormat =
 			format == 3 ? GL_RGB :
