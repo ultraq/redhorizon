@@ -98,7 +98,7 @@ class IMAADPCM16bit implements Decoder {
 
 			// Index/Step adjustments
 			lastIndex += IMA_ADJUST_TABLE[code & 0x07]
-			lastIndex = Math.min(Math.max(0, lastIndex), 88)
+			lastIndex = Math.clamp(lastIndex, 0, 88)
 		}
 		dest.flip()
 	}

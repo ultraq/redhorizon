@@ -60,6 +60,6 @@ abstract class Spatial implements SceneElement {
 	 */
 	void setRotation(float rotation) {
 
-		this.rotation = Math.min(Math.max(rotation, ROTATION_MIN), ROTATION_MAX)
+		this.rotation = Math.clamp(rotation, ROTATION_MIN, ROTATION_MAX)
 	}
 }
