@@ -61,7 +61,7 @@ public class Format2 implements Encoder, Decoder {
 	}
 
 	@Override
-	public void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	public void encode(ByteBuffer source, ByteBuffer dest) {
 
 		int count = 0;
 		int limit = Math.min(source.limit(), 255);

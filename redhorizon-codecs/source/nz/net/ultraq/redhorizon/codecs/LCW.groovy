@@ -133,7 +133,7 @@ class LCW implements Encoder, Decoder {
 	}
 
 	@Override
-	void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
+	void encode(ByteBuffer source, ByteBuffer dest) {
 
 		// Format80 data must be opened by the transfer command
 		dest.put((byte)(CMD_TRANSFER | 1))

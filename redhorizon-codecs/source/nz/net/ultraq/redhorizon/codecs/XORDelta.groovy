@@ -167,22 +167,16 @@ class XORDelta implements Encoder, Decoder {
 		xorSource = dest
 	}
 
-	/**
-	 * @param extra
-	 *   A single 'base' buffer that the encoded data will be based upon.
-	 */
 	@Override
-	void encode(ByteBuffer source, ByteBuffer dest, ByteBuffer... extra) {
-
-		ByteBuffer base = extra[0]
+	void encode(ByteBuffer source, ByteBuffer dest) {
 
 		// Encode the source
 		while (source.hasRemaining()) {
 
 			// Select the method that provdes the best results for the coming bytes
-			int skiplength = isCandidateForSkipCommand(source, base)
-			int filllength = isCandidateForFillCommand(source, base)
-			int xorlength  = isCandidateForXORCommand(source, base)
+			int skiplength = isCandidateForSkipCommand(source, xorSource)
+			int filllength = isCandidateForFillCommand(source, xorSource)
+			int xorlength  = isCandidateForXORCommand(source, xorSource)
 
 			int bestmethod = Math.max(skiplength, Math.max(filllength, xorlength))
 
@@ -201,12 +195,12 @@ class XORDelta implements Encoder, Decoder {
 				}
 
 				source.position(source.position() + skiplength)
-				base.position(base.position() + skiplength)
+				xorSource.position(xorSource.position() + skiplength)
 			}
 
 			// Either small or large XOR fill
 			else if (bestmethod == filllength) {
-				byte xorfillval = (byte)(source.get() ^ base.get())
+				byte xorfillval = (byte)(source.get() ^ xorSource.get())
 
 				// Command #1 - small XOR fill
 				if (filllength <= CMD_FILL_S_MAX) {
@@ -222,7 +216,7 @@ class XORDelta implements Encoder, Decoder {
 
 				dest.put(xorfillval)
 				source.position(source.position() - 1 + filllength)
-				base.position(base.position() - 1 + filllength)
+				xorSource.position(xorSource.position() - 1 + filllength)
 			}
 
 			// Either small or large XOR
@@ -240,7 +234,7 @@ class XORDelta implements Encoder, Decoder {
 				}
 
 				while (xorlength-- > 0) {
-					dest.put((byte)(source.get() ^ base.get()))
+					dest.put((byte)(source.get() ^ xorSource.get()))
 				}
 			}
 		}
@@ -250,7 +244,7 @@ class XORDelta implements Encoder, Decoder {
 		dest.putShort(CMD_SKIP_L2)
 
 		source.rewind()
-		base.rewind()
+		xorSource.rewind()
 		dest.flip()
 	}
 
