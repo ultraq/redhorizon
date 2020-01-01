@@ -199,9 +199,10 @@ class VqaFile implements Streaming, VideoFile {
 			private final Decoder audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			// Precalculated values to aid frame decoding
+			private final int blocksX   = (width / blockWidth)
 			private final int blockSize = blockWidth * blockHeight
 			private final int modifier  = blockHeight == 2 ? 0xf : 0xff
-			private final int numBlocks = (width / blockWidth) * (height / blockHeight)
+			private final int numBlocks = blocksX * (height / blockHeight)
 
 			/**
 			 * Decodes a frame of video, found in a VPT* chunk.
@@ -215,33 +216,28 @@ class VqaFile implements Streaming, VideoFile {
 
 				ByteBuffer frameBytes = ByteBuffer.allocateNative(width * height)
 
-				// Decode block by block, going across first, then down
-				int block = 0
-				for (int y = 0; y < height; y += blockHeight) {
-					for (int x = 0; x < width; x += blockWidth) {
-						int framePointer = y * width + x
+				// Decode block by block
+				for (int block = 0; block < numBlocks; block++) {
+					int framePointer = (block / blocksX as int) * width + (block * blockWidth)
 
-						// Get the proper lookup value for the block
-						int loByte = data.get(block) & 0xff
-						int hiByte = data.get(block + numBlocks) & 0xff
+					// Get the proper lookup value for the block
+					int loByte = data.get(block) & 0xff
+					int hiByte = data.get(block + numBlocks) & 0xff
 
-						// Fill the block with 1 colour
-						if (hiByte == modifier) {
-							for (int i = 0; i < blockSize; i += blockWidth) {
-								Arrays.fill(frameBytes.array(), framePointer, framePointer + blockWidth, (byte)loByte)
-								framePointer += width
-							}
+					// Fill the block with 1 colour
+					if (hiByte == modifier) {
+						for (int i = 0; i < blockHeight; i++) {
+							Arrays.fill(frameBytes.array(), framePointer, framePointer + blockWidth, (byte)loByte)
+							framePointer += width
 						}
-						// Otherwise, fill the block with the one referenced in the lookup table
-						else {
-							codeBook.position(((hiByte << 8) | loByte) * blockSize)
-							for (int i = 0; i < blockSize; i += blockWidth) {
-								codeBook.get(frameBytes.array(), framePointer, blockWidth)
-								framePointer += width
-							}
+					}
+					// Otherwise, fill the block with the one referenced in the lookup table
+					else {
+						codeBook.position(((hiByte << 8) | loByte) * blockSize)
+						for (int i = 0; i < blockHeight; i++) {
+							codeBook.get(frameBytes.array(), framePointer, blockWidth)
+							framePointer += width
 						}
-
-						block++
 					}
 				}
 				return frameBytes.applyPalette(vqaPalette)
