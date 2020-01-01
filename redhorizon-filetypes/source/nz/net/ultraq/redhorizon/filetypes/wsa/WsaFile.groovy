@@ -134,7 +134,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 				// Decode frame by frame
 				for (def frame = 0; canContinue && frame < numFrames; frame++) {
-					timeWithAverage('Decoding frame', 10) { ->
+					average('WsaFile - Decoding frame', 10) { ->
 						def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
 						def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 

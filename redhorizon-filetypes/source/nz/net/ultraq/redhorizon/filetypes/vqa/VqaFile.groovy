@@ -340,7 +340,7 @@ class VqaFile implements Streaming, VideoFile {
 
 									// Video data
 									case ~/VPT./:
-										def frame = timeWithAverage('Decoding frame', 10) { ->
+										def frame = average('Decoding frame', 15) { ->
 											return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 										}
 										videoHandler(frame, null)
