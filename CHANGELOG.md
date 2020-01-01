@@ -2,6 +2,14 @@
 Changelog
 =========
 
+### 0.30.2
+ - Support for playing VQA files through the media player
+ - Performance improvements when streaming files, reducing memory usage by
+   deleting old sound buffers / animation frames
+ - Media player window is no longer fixed to 640x480, now growing to some value
+   that is almost as large as the primary display, while maintaining the desired
+   aspect ratio
+
 ### 0.30.1
  - Support for playing WSA files through the media player
  - Can now view images and animations on Windows
