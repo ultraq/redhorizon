@@ -30,6 +30,7 @@
 		</encoder>
 	</appender>
 
+	<logger name="nz.net.ultraq.extensions" level="DEBUG"/>
 	<logger name="nz.net.ultraq.redhorizon" level="DEBUG"/>
 	<logger name="org.reflections" level="WARN"/>
 
