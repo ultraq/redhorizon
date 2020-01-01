@@ -15,15 +15,3 @@
  */
 
 description = 'Groovy extension module for the Red Horizon project'
-
-processResources {
-	expand([
-		moduleVersion: version
-	])
-}
-
-dependencies {
-	implementation(
-		'org.joml:joml:1.9.19'
-	)
-}
