@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.codecs
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
@@ -31,6 +32,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 class IMAADPCM16bit implements Decoder {
 
 	// IMA-ADPCM adjustment table

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.codecs
 
+import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 
@@ -24,6 +25,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 @TupleConstructor
 class RunLengthEncoding implements Decoder {
 

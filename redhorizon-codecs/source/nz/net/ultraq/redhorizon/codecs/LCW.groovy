@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.codecs
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
@@ -37,6 +38,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 class LCW implements Encoder, Decoder {
 
 	// Transfer command
@@ -269,7 +271,7 @@ class LCW implements Encoder, Decoder {
 		return [
 			candidatelength > CMD_OFFSET_THRESHOLD ? candidatelength : 0,
 			candidateposition
-		]
+		] as int[]
 	}
 
 	/**
@@ -336,7 +338,7 @@ class LCW implements Encoder, Decoder {
 		return [
 		  candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0,
 			candidateposition
-		]
+		] as int[]
 	}
 
 	/**
