@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+  ~ Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
   ~ 
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
 		<encoder>
-			<pattern>%msg%n</pattern>
+			<pattern>%-5level - %msg%n</pattern>
 		</encoder>
 	</appender>
 
