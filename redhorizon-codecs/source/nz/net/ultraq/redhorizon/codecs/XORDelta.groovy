@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.codecs
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
@@ -42,6 +43,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 class XORDelta implements Encoder, Decoder {
 
 	// Small skip command

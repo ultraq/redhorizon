@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.codecs
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
@@ -28,6 +29,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 class WSADPCM8bit implements Decoder {
 
 	// WS-ADPCM 2-bit adjustment table
@@ -50,7 +52,7 @@ class WSADPCM8bit implements Decoder {
 		}
 
 		// Decompression
-		short sample = 0x80
+		int sample = 0x80
 		while (dest.hasRemaining()) {
 
 			short input = source.getShort()
