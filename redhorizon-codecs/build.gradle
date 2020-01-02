@@ -20,4 +20,7 @@ dependencies {
 	implementation(
 		project(':redhorizon-extensions')
 	)
+	implementation(
+		'nz.net.ultraq.extensions:groovy-extensions:0.1.0-SNAPSHOT'
+	)
 }
