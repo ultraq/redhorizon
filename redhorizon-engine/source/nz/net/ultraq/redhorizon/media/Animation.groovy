@@ -59,7 +59,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	// Rendering information
 	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
 	private int lastFrame
-	private List<Integer> textureIds
+	private int[] textureIds
 
 	/**
 	 * Constructor, create an animation out of animation file data.
@@ -101,7 +101,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		frameDataWorker.stop()
 		frameDataBuffer.drain()
-		renderer.deleteTextures(*textureIds)
+		renderer.deleteTextures(textureIds.findAll { it } as int[])
 	}
 
 	@Override
@@ -109,7 +109,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		frames = []
 		lastFrame = -1
-		textureIds = [].withDefault { null as Integer }
+		textureIds = new int[numFrames]
+		Arrays.fill(textureIds, 0)
 	}
 
 	@Override
