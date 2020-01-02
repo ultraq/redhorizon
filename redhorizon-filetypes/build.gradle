@@ -27,6 +27,12 @@ dependencies {
 	)
 }
 
+processResources {
+	expand([
+		moduleVersion: version
+	])
+}
+
 def isMac = Os.isFamily(Os.FAMILY_MAC)
 def isUnix = Os.isFamily(Os.FAMILY_UNIX)
 def isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
