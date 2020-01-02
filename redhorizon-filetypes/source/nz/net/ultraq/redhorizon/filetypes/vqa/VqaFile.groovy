@@ -33,6 +33,7 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 
@@ -205,28 +206,32 @@ class VqaFile implements Streaming, VideoFile {
 			private final int numBlocks = blocksX * (height / blockHeight)
 
 			/**
-			 * Decodes a frame of video, found in a VPT* chunk.
+			 * Decodes a frame of a video, found in a VPT* chunk.
 			 * 
-			 * @param data       The VPT chunk data.
-			 * @param codeBook   Current lookup table for screen block data.
-			 * @param vqaPalette Current palette.
+			 * This method was split from the other one of the same name so it could
+			 * be optimized for performance, utilizing {@code @CompileStatic} and
+			 * mostly standard Java coding.
+			 * 
+			 * @param data     The VPT chunk data.
+			 * @param codeBook Current lookup table for screen block data.
 			 * @return A fully decoded frame of video.
 			 */
-			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook, Palette vqaPalette) {
+			@CompileStatic
+			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook) {
 
-				ByteBuffer frameBytes = ByteBuffer.allocateNative(width * height)
+				def frameBytes = ByteBuffer.allocateNative(width * height)
 
 				// Decode block by block
-				for (int block = 0; block < numBlocks; block++) {
-					int framePointer = (block / blocksX as int) * width + (block * blockWidth)
+				for (def block = 0; block < numBlocks; block++) {
+					def framePointer = (block / blocksX as int) * width + (block * blockWidth)
 
 					// Get the proper lookup value for the block
-					int loByte = data.get(block) & 0xff
-					int hiByte = data.get(block + numBlocks) & 0xff
+					def loByte = data.get(block) & 0xff
+					def hiByte = data.get(block + numBlocks) & 0xff
 
 					// Fill the block with 1 colour
 					if (hiByte == modifier) {
-						for (int i = 0; i < blockHeight; i++) {
+						for (def i = 0; i < blockHeight; i++) {
 							Arrays.fill(frameBytes.array(), framePointer, framePointer + blockWidth, (byte)loByte)
 							framePointer += width
 						}
@@ -234,13 +239,26 @@ class VqaFile implements Streaming, VideoFile {
 					// Otherwise, fill the block with the one referenced in the lookup table
 					else {
 						codeBook.position(((hiByte << 8) | loByte) * blockSize)
-						for (int i = 0; i < blockHeight; i++) {
+						for (def i = 0; i < blockHeight; i++) {
 							codeBook.get(frameBytes.array(), framePointer, blockWidth)
 							framePointer += width
 						}
 					}
 				}
-				return frameBytes.applyPalette(vqaPalette)
+				return frameBytes.rewind()
+			}
+
+			/**
+			 * Decodes a frame of video, found in a VPT* chunk.
+			 * 
+			 * @param data       The VPT chunk data.
+			 * @param codeBook   Current lookup table for screen block data.
+			 * @param vqaPalette Current palette.
+			 * @return A fully coloured frame of video.
+			 */
+			private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook, Palette vqaPalette) {
+
+				return decodeFrame(data, codeBook).applyPalette(vqaPalette)
 			}
 
 			/**
