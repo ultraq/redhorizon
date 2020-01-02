@@ -38,9 +38,10 @@ class ByteBufferImageExtensions {
 	static ByteBuffer applyPalette(ByteBuffer self, Palette palette) {
 
 		ByteBuffer dest = ByteBuffer.allocateNative(self.limit() * palette.format.value)
-		for (int i = 0; i < self.limit(); i++) {
-			dest.put(palette[self.get(i) & 0xff])
+		while (self.hasRemaining()) {
+			dest.put(palette[self.get() & 0xff])
 		}
+		self.rewind()
 		return dest.rewind()
 	}
 }
