@@ -23,10 +23,10 @@ description = 'Media player for the Red Horizon project'
 dependencies {
 	implementation(
 		project(':redhorizon-engine'),
-		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.3',
 		'info.picocli:picocli:4.1.1',
+		'nz.net.ultraq.extensions:groovy-extensions:0.1.0-SNAPSHOT',
 		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11'
 	)
