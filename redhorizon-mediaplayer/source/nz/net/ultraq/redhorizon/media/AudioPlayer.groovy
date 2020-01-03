@@ -50,7 +50,7 @@ class AudioPlayer {
 			// Try determine the appropriate media for the sound file
 			def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
 				new SoundTrack(soundFile, executorService) :
-				null
+				new SoundEffect(soundFile, executorService)
 
 			def audioEngine = new AudioEngine()
 			audioEngine.addSceneElement(sound)

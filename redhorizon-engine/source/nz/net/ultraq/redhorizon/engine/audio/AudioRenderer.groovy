@@ -103,12 +103,20 @@ interface AudioRenderer {
 	boolean sourceExists(int sourceId)
 
 	/**
-	 * Return whether a source is currently playing or not.
+	 * Return whether a source is currently playing.
 	 * 
 	 * @param sourceId
 	 * @return
 	 */
 	boolean sourcePlaying(int sourceId)
+
+	/**
+	 * Return whether a source is currently stopped.
+	 * 
+	 * @param sourceId
+	 * @return
+	 */
+	boolean sourceStopped(int sourceId)
 
 	/**
 	 * Unqueue some buffers from an existing source.

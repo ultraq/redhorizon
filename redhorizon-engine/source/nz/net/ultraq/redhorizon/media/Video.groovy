@@ -185,18 +185,21 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 					renderer.queueBuffers(sourceId, *newBufferIds)
 					samplesQueued += newBufferIds.size()
 				}
-
-				// Start playing the source
-				if (!renderer.sourcePlaying(sourceId)) {
-					renderer.playSource(sourceId)
-				}
 			}
 
-			// No more buffers to read, wait for the source to complete
-			if (videoWorker.complete) {
-				if (!renderer.sourcePlaying(sourceId)) {
-					stop()
-				}
+			// Buffers exhausted
+			if (renderer.sourceStopped(sourceId)) {
+				stop()
+			}
+			// Start playing the source
+			else if (!renderer.sourcePlaying(sourceId)) {
+				renderer.playSource(sourceId)
+			}
+		}
+		else {
+			// Sound stopped, but source still playing
+			if (renderer.sourcePlaying(sourceId)) {
+				stop()
 			}
 		}
 

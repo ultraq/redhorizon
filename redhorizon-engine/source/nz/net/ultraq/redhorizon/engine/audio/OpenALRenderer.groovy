@@ -53,9 +53,6 @@ class OpenALRenderer implements AudioRenderer {
 		return result
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void attachBufferToSource(int sourceId, int bufferId) {
 
@@ -72,9 +69,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	int createBuffer(ByteBuffer data, int bits, int channels, int frequency) {
 
@@ -93,9 +87,6 @@ class OpenALRenderer implements AudioRenderer {
 		return bufferId
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	int createSource() {
 
@@ -104,9 +95,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void deleteBuffers(int... bufferIds) {
 
@@ -115,9 +103,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void deleteSource(int sourceId) {
 
@@ -126,9 +111,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void playSource(int sourceId) {
 
@@ -140,9 +122,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void queueBuffers(int sourceId, int... bufferIds) {
 
@@ -151,9 +130,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	boolean sourceExists(int sourceId) {
 
@@ -162,15 +138,19 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	boolean sourcePlaying(int sourceId) {
 
 		return checkForError { ->
-			def state = alGetSourcei(sourceId, AL_SOURCE_STATE)
-			return state == AL_PLAYING
+			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING
+		}
+	}
+
+	@Override
+	boolean sourceStopped(int sourceId) {
+
+		return checkForError { ->
+			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_STOPPED
 		}
 	}
 
@@ -182,9 +162,6 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation) {
 
@@ -193,9 +170,6 @@ class OpenALRenderer implements AudioRenderer {
 //		checkForError { -> alListenerfv(AL_ORIENTATION, orientation as float[]) }
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
 
@@ -204,9 +178,6 @@ class OpenALRenderer implements AudioRenderer {
 //		checkForError { -> alSourcefv(sourceId, AL_VELOCITY, velocity as float[]) }
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	void updateVolume(float volume) {
 
