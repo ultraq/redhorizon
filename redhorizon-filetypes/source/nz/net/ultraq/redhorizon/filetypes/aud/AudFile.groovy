@@ -151,10 +151,10 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	String toString() {
 
-		return """
-			AUD file, ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}
-			Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm
-			Compressed: ${compressedSize} bytes => Uncompressed: ${uncompressedSize} bytes
-		""".stripIndent().trim()
+		return [
+			"AUD file, ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
+			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm",
+			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
+		].join(', ')
 	}
 }

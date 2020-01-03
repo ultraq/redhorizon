@@ -406,10 +406,10 @@ class VqaFile implements Streaming, VideoFile {
 	@Override
 	String toString() {
 
-		return """
-			VQA file, ${width}x${height} 18-bit colour with internal palette of up to 256 colours
-			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
-			Sound data of ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}
-		""".stripIndent().trim()
+		return [
+			"VQA file, ${width}x${height} 18-bit w/ 256 colour palette",
+			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps",
+			"Sound data of ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}"
+		].join(', ')
 	}
 }

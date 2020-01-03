@@ -107,9 +107,9 @@ class WsaFileDune2 {
 	@Override
 	String toString() {
 
-		return """
-			WSA file (Dune 2), ${width}x${height}, 8-bit (requires external palette)
-			Contains ${numFrames} frames to run at ${String.format('%.2f', delta / 1024)}fps
-		""".stripIndent().trim()
+		return [
+		  "WSA file (Dune 2), ${width}x${height} (requires external palette)",
+			"Contains ${numFrames} frames to run at ${String.format('%.2f', delta / 1024)}fps"
+		].join(', ')
 	}
 }

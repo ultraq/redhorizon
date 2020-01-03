@@ -164,9 +164,9 @@ class WsaFile implements AnimationFile, Streaming {
 	@Override
 	String toString() {
 
-		return """
-			WSA file (C&C), ${width}x${height}, ${palette ? '18-bit with internal palette of 256 colours' : '(no palette)'}
-			Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps
-		""".stripIndent().trim()
+		return [
+			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}",
+			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps"
+		].join(', ')
 	}
 }
