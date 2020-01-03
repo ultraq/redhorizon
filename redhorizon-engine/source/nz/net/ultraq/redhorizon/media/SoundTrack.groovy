@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
-import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import java.nio.ByteBuffer
@@ -30,12 +29,11 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 
 /**
- * Basic sound in a 3D space.  Sound effects are constructed from data in
- * {@link SoundFile}s, which can then be played through the audio engine.
+ * A long piece of audio that is streamed from its source.
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
+class SoundTrack implements AudioElement, Playable, SelfVisitable {
 
 	// Sound information
 	final int bits
@@ -52,24 +50,26 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	private List<Integer> bufferIds
 
 	/**
-	 * Constructor, use the data in {@code soundFile} for playing a sound effect.
+	 * Constructor, use the data in {@code soundFile} for playing the sound track.
 	 * 
 	 * @param soundFile
 	 * @param executorService
 	 */
-	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
+	SoundTrack(SoundFile soundFile, ExecutorService executorService) {
 
 		bits      = soundFile.bits
 		channels  = soundFile.channels
 		frequency = soundFile.frequency
 
-		// TODO: Maybe move streaming to a "sound track" class?
 		if (soundFile instanceof Streaming) {
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			soundDataWorker = soundFile.getStreamingDataWorker { sample ->
 				sampleBuffer << ByteBuffer.fromBuffersDirect(sample)
 			}
 			executorService.execute(soundDataWorker)
+		}
+		else {
+			throw new UnsupportedOperationException('The SoundTrack media type should only be used for streaming audio')
 		}
 	}
 

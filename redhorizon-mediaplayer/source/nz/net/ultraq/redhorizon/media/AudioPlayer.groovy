@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.aud.AudFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,17 +46,22 @@ class AudioPlayer {
 		logger.info('File details: {}', soundFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def soundEffect = new SoundEffect(soundFile, executorService)
+
+			// Try determine the appropriate media for the sound file
+			def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
+				new SoundTrack(soundFile, executorService) :
+				null
+
 			def audioEngine = new AudioEngine()
-			audioEngine.addSceneElement(soundEffect)
+			audioEngine.addSceneElement(sound)
 
 			def engine = executorService.submit(audioEngine)
 
-			soundEffect.on(SoundEffect.EVENT_STOP) { event ->
+			sound.on(SoundTrack.EVENT_STOP) { event ->
 				logger.debug('Sound stopped')
 				audioEngine.stop()
 			}
-			soundEffect.play()
+			sound.play()
 
 			logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
 
