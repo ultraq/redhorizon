@@ -43,7 +43,9 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	final int frequency
 
 	private final Worker soundDataWorker
-	private final BlockingQueue<ByteBuffer> soundDataBuffer = new ArrayBlockingQueue<>(10)
+	private final int sampleBufferTarget = 10
+	private final BlockingQueue<ByteBuffer> sampleBuffer = new ArrayBlockingQueue<>(sampleBufferTarget)
+	private int samplesQueued
 
 	// Renderer information
 	private int sourceId
@@ -64,8 +66,8 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		// TODO: Maybe move streaming to a "sound track" class?
 		if (soundFile instanceof Streaming) {
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-			soundDataWorker = soundFile.getStreamingDataWorker { sampleBuffer ->
-				soundDataBuffer << ByteBuffer.fromBuffersDirect(sampleBuffer)
+			soundDataWorker = soundFile.getStreamingDataWorker { sample ->
+				sampleBuffer << ByteBuffer.fromBuffersDirect(sample)
 			}
 			executorService.execute(soundDataWorker)
 		}
@@ -75,7 +77,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	void delete(AudioRenderer renderer) {
 
 		soundDataWorker.stop()
-		soundDataBuffer.drain()
+		sampleBuffer.drain()
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(*bufferIds)
 	}
@@ -85,8 +87,9 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 		if (!renderer.sourceExists(sourceId)) {
 			sourceId = renderer.createSource()
-			bufferIds = []
 		}
+		bufferIds = []
+		samplesQueued = 0
 	}
 
 	@Override
@@ -95,13 +98,17 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		if (playing) {
 
 			// Buffers to read and queue
-			if (!soundDataBuffer.empty) {
-				def newBufferIds = soundDataBuffer.drain().collect { buffer ->
-					def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
-					bufferIds << newBufferId
-					return newBufferId
+			if (sampleBuffer.size()) {
+				def numBuffersToRead = sampleBufferTarget - samplesQueued
+				if (numBuffersToRead) {
+					def newBufferIds = sampleBuffer.drain(numBuffersToRead).collect { buffer ->
+						def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
+						bufferIds << newBufferId
+						return newBufferId
+					}
+					renderer.queueBuffers(sourceId, *newBufferIds)
+					samplesQueued += newBufferIds.size()
 				}
-				renderer.queueBuffers(sourceId, *newBufferIds)
 
 				// Start playing the source
 				if (!renderer.sourcePlaying(sourceId)) {
@@ -118,12 +125,16 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (soundDataBuffer) {
+		if (samplesQueued) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
-				def processedBufferIds = buffersProcessed.collect { bufferIds.removeAt(0) }
+				def processedBufferIds = []
+				buffersProcessed.times {
+					processedBufferIds << bufferIds.removeAt(0)
+				}
 				renderer.unqueueBuffers(sourceId, *processedBufferIds)
 				renderer.deleteBuffers(*processedBufferIds)
+				samplesQueued -= buffersProcessed
 			}
 		}
 	}

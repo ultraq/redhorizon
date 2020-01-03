@@ -37,4 +37,19 @@ class BlockingQueueExtensions {
 		self.drainTo(remaining)
 		return remaining
 	}
+
+	/**
+	 * Drain at most the given number of elements into a new list which is
+	 * returned.
+	 * 
+	 * @param self
+	 * @param maxElements
+	 * @return
+	 */
+	static <E> List<E> drain(BlockingQueue<E> self, int maxElements) {
+
+		def elements = []
+		self.drainTo(elements, maxElements)
+		return elements
+	}
 }

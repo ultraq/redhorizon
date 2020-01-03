@@ -134,7 +134,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 				// Decode frame by frame
 				for (def frame = 0; canContinue && frame < numFrames; frame++) {
-					average('WsaFile - Decoding frame', 10) { ->
+					def colouredFrame = average('WsaFile - Decoding frame', 10) { ->
 						def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
 						def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 
@@ -144,8 +144,9 @@ class WsaFile implements AnimationFile, Streaming {
 						lcw.decode(compressedFrame, intermediateFrame)
 						xorDelta.decode(intermediateFrame, indexedFrame)
 
-						frameHandler(indexedFrame.applyPalette(palette))
+						return indexedFrame.applyPalette(palette)
 					}
+					frameHandler(colouredFrame)
 				}
 
 				if (!stopped) {

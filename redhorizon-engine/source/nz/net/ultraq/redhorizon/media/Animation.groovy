@@ -52,12 +52,13 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final boolean filter
 
 	private final Worker frameDataWorker
-	private final BlockingQueue<ByteBuffer> frameDataBuffer
+	private final int frameBufferTarget
+	private final BlockingQueue<ByteBuffer> frameBuffer
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private long animationTimeStart
 
 	// Rendering information
-	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
+	private List<ByteBuffer> frames
 	private int lastFrame
 	private int[] textureIds
 
@@ -80,13 +81,14 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.filter = filter
 
 		if (animationFile instanceof Streaming) {
-			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
+			frameBufferTarget = frameRate as int
+			frameBuffer = new ArrayBlockingQueue<>(frameBufferTarget)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
-				if (!frameDataBuffer.remainingCapacity() && bufferReady.count) {
+				if (!frameBuffer.remainingCapacity() && bufferReady.count) {
 					bufferReady.countDown()
 				}
-				frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
+				frameBuffer << ByteBuffer.fromBuffersDirect(frame)
 			}
 			executorService.execute(frameDataWorker)
 		}
@@ -100,7 +102,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void delete(GraphicsRenderer renderer) {
 
 		frameDataWorker.stop()
-		frameDataBuffer.drain()
+		frameBuffer.drain()
 		renderer.deleteTextures(textureIds.findAll { it } as int[])
 	}
 
@@ -126,13 +128,19 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
-
-			// Frames to load
-			if (!frameDataBuffer.empty) {
-				frames.addAll(frameDataBuffer.drain())
-			}
-
 			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
+
+			// Try to load up to frameBufferTarget frames ahead
+			if (frameBuffer.size()) {
+				def framesAhead = Math.min(currentFrame + frameBufferTarget, numFrames)
+				if (!frames[framesAhead]) {
+					def numFramesToRead = framesAhead - frames.size()
+					if (numFramesToRead) {
+						def newFrames = frameBuffer.drain(numFramesToRead)
+						frames.addAll(newFrames)
+					}
+				}
+			}
 
 			// Draw the current frame if available
 			if (currentFrame < numFrames) {

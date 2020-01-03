@@ -61,14 +61,16 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	final Rectanglef dimensions
 	final boolean filter
 
-	private long animationTimeStart
 	private final Worker videoWorker
-	private final BlockingQueue<ByteBuffer> frameDataBuffer
-	private final BlockingQueue<ByteBuffer> sampleDataBuffer
+	private final int bufferTarget
+	private final BlockingQueue<ByteBuffer> frameBuffer
+	private final BlockingQueue<ByteBuffer> sampleBuffer
+	private int samplesQueued
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
+	private long videoTimeStart
 
 	// Rendering information
-	private List<ByteBuffer> frames // TODO: This still keeps frames around in memory 🤔
+	private List<ByteBuffer> frames
 	private int lastFrame
 	private int[] textureIds
 
@@ -98,18 +100,19 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		frequency = videoFile.frequency
 
 		if (videoFile instanceof Streaming) {
-			frameDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
-			sampleDataBuffer = new ArrayBlockingQueue<>(frameRate as int)
+			bufferTarget = frameRate as int
+			frameBuffer = new ArrayBlockingQueue<>(bufferTarget)
+			sampleBuffer = new ArrayBlockingQueue<>(bufferTarget)
 			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
 			videoWorker = videoFile.getStreamingDataWorker { frame, sample ->
-				if ((!frameDataBuffer.remainingCapacity() || !sampleDataBuffer.remainingCapacity()) && bufferReady.count) {
+				if ((!frameBuffer.remainingCapacity() || !sampleBuffer.remainingCapacity()) && bufferReady.count) {
 					bufferReady.countDown()
 				}
 				if (frame) {
-					frameDataBuffer << ByteBuffer.fromBuffersDirect(frame)
+					frameBuffer << ByteBuffer.fromBuffersDirect(frame)
 				}
 				if (sample) {
-					sampleDataBuffer << ByteBuffer.fromBuffersDirect(sample)
+					sampleBuffer << ByteBuffer.fromBuffersDirect(sample)
 				}
 			}
 			executorService.execute(videoWorker)
@@ -124,7 +127,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	void delete(AudioRenderer renderer) {
 
 		videoWorker.stop()
-		sampleDataBuffer.drain()
+		sampleBuffer.drain()
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(*bufferIds)
 	}
@@ -133,7 +136,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	void delete(GraphicsRenderer renderer) {
 
 		videoWorker.stop()
-		frameDataBuffer.drain()
+		frameBuffer.drain()
 		renderer.deleteTextures(textureIds.findAll { it } as int[])
 	}
 
@@ -142,8 +145,9 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		if (!renderer.sourceExists(sourceId)) {
 			sourceId = renderer.createSource()
-			bufferIds = []
 		}
+		bufferIds = []
+		samplesQueued = 0
 	}
 
 	@Override
@@ -160,7 +164,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		// Wait until the frame buffer is filled before starting play
 		bufferReady.await()
-		animationTimeStart = System.currentTimeMillis()
+		videoTimeStart = System.currentTimeMillis()
 		Playable.super.play()
 	}
 
@@ -170,13 +174,17 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		if (playing) {
 
 			// Buffers to read and queue
-			if (!sampleDataBuffer.empty) {
-				def newBufferIds = sampleDataBuffer.drain().collect { buffer ->
-					def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
-					bufferIds << newBufferId
-					return newBufferId
+			if (sampleBuffer.size()) {
+				def numBuffersToRead = bufferTarget - samplesQueued
+				if (numBuffersToRead) {
+					def newBufferIds = sampleBuffer.drain(numBuffersToRead).collect { buffer ->
+						def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
+						bufferIds << newBufferId
+						return newBufferId
+					}
+					renderer.queueBuffers(sourceId, *newBufferIds)
+					samplesQueued += newBufferIds.size()
 				}
-				renderer.queueBuffers(sourceId, *newBufferIds)
 
 				// Start playing the source
 				if (!renderer.sourcePlaying(sourceId)) {
@@ -193,12 +201,16 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (sampleDataBuffer) {
+		if (samplesQueued) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
-				def processedBufferIds = buffersProcessed.collect { bufferIds.removeAt(0) }
+				def processedBufferIds = []
+				buffersProcessed.times {
+					processedBufferIds << bufferIds.removeAt(0)
+				}
 				renderer.unqueueBuffers(sourceId, *processedBufferIds)
 				renderer.deleteBuffers(*processedBufferIds)
+				samplesQueued -= buffersProcessed
 			}
 		}
 	}
@@ -207,13 +219,19 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
+			def currentFrame = Math.floor((System.currentTimeMillis() - videoTimeStart) / 1000 * frameRate) as int
 
-			// Frames to load
-			if (!frameDataBuffer.empty) {
-				frames.addAll(frameDataBuffer.drain())
+			// Try to load up to frameBufferTarget frames ahead
+			if (frameBuffer.size()) {
+				def framesAhead = Math.min(currentFrame + bufferTarget, numFrames)
+				if (!frames[framesAhead]) {
+					def numFramesToRead = framesAhead - frames.size()
+					if (numFramesToRead) {
+						def newFrames = frameBuffer.drain(numFramesToRead)
+						frames.addAll(newFrames)
+					}
+				}
 			}
-
-			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
 			// Draw the current frame if available
 			if (currentFrame < numFrames) {
