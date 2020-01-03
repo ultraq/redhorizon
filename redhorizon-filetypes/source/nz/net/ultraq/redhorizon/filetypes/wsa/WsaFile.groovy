@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes.wsa
 
-import nz.net.ultraq.redhorizon.codecs.XORDelta
-import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -26,9 +24,6 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -47,8 +42,6 @@ import java.util.concurrent.ExecutorService
  */
 @FileExtensions('wsa')
 class WsaFile implements AnimationFile, Streaming {
-
-	private static final Logger logger = LoggerFactory.getLogger(WsaFile)
 
 	private static final short FLAG_HAS_PALETTE = 0x01
 
@@ -121,39 +114,7 @@ class WsaFile implements AnimationFile, Streaming {
 	@Override
 	Worker getStreamingDataWorker(Closure frameHandler) {
 
-		return new Worker() {
-			@Override
-			void work() {
-
-				Thread.currentThread().name = 'WsaFile :: Decoding'
-				logger.debug('WsaFile decoding started')
-
-				def frameSize = width * height
-				def xorDelta = new XORDelta(frameSize)
-				def lcw = new LCW()
-
-				// Decode frame by frame
-				for (def frame = 0; canContinue && frame < numFrames; frame++) {
-					def colouredFrame = average('WsaFile - Decoding frame', 10) { ->
-						def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
-						def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
-
-						def intermediateFrame = ByteBuffer.allocateNative(delta)
-						def indexedFrame = ByteBuffer.allocateNative(frameSize)
-
-						lcw.decode(compressedFrame, intermediateFrame)
-						xorDelta.decode(intermediateFrame, indexedFrame)
-
-						return indexedFrame.applyPalette(palette)
-					}
-					frameHandler(colouredFrame)
-				}
-
-				if (!stopped) {
-					logger.debug('WsaFile decoding complete')
-				}
-			}
-		}
+		return new WsaFileWorker(this, input, frameHandler)
 	}
 
 	/**

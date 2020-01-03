@@ -16,16 +16,11 @@
 
 package nz.net.ultraq.redhorizon.filetypes.aud
 
-import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
-import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
@@ -43,12 +38,10 @@ import java.util.concurrent.ExecutorService
 @FileExtensions(['aud', 'v00'])
 class AudFile implements SoundFile, Streaming {
 
-	private static final Logger logger = LoggerFactory.getLogger(AudFile)
-
-	private static final byte TYPE_IMA_ADPCM = 99
-	private static final byte TYPE_WS_ADPCM  = 1
-	private static final byte FLAG_16BIT  = 0x02
-	private static final byte FLAG_STEREO = 0x01
+	static final byte TYPE_IMA_ADPCM = 99
+	static final byte TYPE_WS_ADPCM  = 1
+	static final byte FLAG_16BIT  = 0x02
+	static final byte FLAG_STEREO = 0x01
 
 	private final NativeDataInputStream input
 
@@ -77,6 +70,7 @@ class AudFile implements SoundFile, Streaming {
 		uncompressedSize = input.readInt()
 		flags            = input.readByte()
 		type             = input.readByte()
+		assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
 
 		bitrate = (flags & FLAG_16BIT) ? 16 : 8
 		channels = (flags & FLAG_STEREO) ? 2 : 1
@@ -104,43 +98,7 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	Worker getStreamingDataWorker(Closure sampleHandler) {
 
-		return new Worker() {
-			@Override
-			void work() {
-
-				Thread.currentThread().name = "AudFile :: Decoding"
-				logger.debug('AudFile decoding started')
-
-				def decoder =
-					type == TYPE_WS_ADPCM ? new WSADPCM8bit() :
-					type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() :
-					null
-
-				// Decompress the aud file data by chunks
-				for (def bytesRead = 0; bytesRead < compressedSize && canContinue; ) {
-
-					// Chunk header
-					def compressedSize = input.readShort()
-					def uncompressedSize = input.readShort()
-					assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
-
-					// Build buffers from chunk header
-					def chunkSourceBuffer = ByteBuffer.allocateNative(compressedSize)
-					input.readFully(chunkSourceBuffer.array())
-					def chunkDataBuffer = ByteBuffer.allocateNative(uncompressedSize)
-
-					// Decode
-					decoder.decode(chunkSourceBuffer, chunkDataBuffer)
-
-					sampleHandler(chunkDataBuffer)
-					bytesRead += 8 + compressedSize
-				}
-
-				if (!stopped) {
-					logger.debug('AudFile decoding complete')
-				}
-			}
-		}
+		return new AudFileWorker(this, input, sampleHandler)
 	}
 
 	/**
