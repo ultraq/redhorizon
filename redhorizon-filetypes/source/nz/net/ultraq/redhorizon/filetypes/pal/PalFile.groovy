@@ -14,35 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
+package nz.net.ultraq.redhorizon.filetypes.pal
 
-import java.nio.channels.ReadableByteChannel
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.VgaPalette
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 /**
- * Interface for files that represent a colour palette.
+ * Implementation of the PAL file, which is an array of 256 colours (in VGA
+ * 6-bits-per-channel format).
  * 
  * @author Emanuel Rabina
  */
-interface PaletteFile extends File {
+@FileExtensions('pal')
+class PalFile extends VgaPalette {
+
+	private static final int PALETTE_SIZE = 256
 
 	/**
-	 * Colour format used by this palette.
+	 * Constructor, builds a PAL file from an input stream.
 	 * 
-	 * @return Palette colour format, RGB(A).
+	 * @param input
 	 */
-	ColourFormat getFormat()
+	PalFile(InputStream inputStream) {
 
-	/**
-	 * Returns a byte channel into the palette's data.
-	 * 
-	 * @return Palette data.
-	 */
-	ReadableByteChannel getPaletteData()
-
-	/**
-	 * The number of colours in the palette.
-	 * 
-	 * @return Number of colours.
-	 */
-	int getNumColours()
+		super(PALETTE_SIZE, FORMAT_RGB, inputStream)
+	}
 }
