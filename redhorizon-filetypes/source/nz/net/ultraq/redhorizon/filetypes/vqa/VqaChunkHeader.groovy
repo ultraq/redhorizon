@@ -29,7 +29,6 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @PackageScope
-@TupleConstructor(defaults = false, force = true)
 class VqaChunkHeader {
 
 	static final String SUFFIX_UNCOMPRESSED = "0"
@@ -45,7 +44,8 @@ class VqaChunkHeader {
 	 */
 	VqaChunkHeader(NativeDataInputStream input) {
 
-		this(new String(input.readNBytes(4)), Integer.reverseBytes(input.readInt()))
+		name = new String(input.readNBytes(4))
+		length = Integer.reverseBytes(input.readInt())
 	}
 
 	/**
