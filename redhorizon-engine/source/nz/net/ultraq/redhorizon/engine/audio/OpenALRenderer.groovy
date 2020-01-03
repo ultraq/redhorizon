@@ -76,16 +76,16 @@ class OpenALRenderer implements AudioRenderer {
 	 * {@inheritDoc}
 	 */
 	@Override
-	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency) {
+	int createBuffer(ByteBuffer data, int bits, int channels, int frequency) {
 
 		int bufferId = checkForError { ->
 			return alGenBuffers()
 		}
 		def format =
-			bitrate == 8 && channels == 1 ? AL_FORMAT_MONO8 :
-			bitrate == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
-			bitrate == 16 && channels == 1 ? AL_FORMAT_MONO16 :
-			bitrate == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
+			bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
+			bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
+			bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
+			bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
 			0
 		checkForError { ->
 			alBufferData(bufferId, format, data, frequency)

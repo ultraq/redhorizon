@@ -69,7 +69,7 @@ class VqaFileWorker extends Worker {
 		this.input = input
 		this.videoHandler = videoHandler
 
-		audioDecoder = bitrate == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
+		audioDecoder = bits == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 		blocksX   = (width / blockWidth)
 		blockSize = blockWidth * blockHeight

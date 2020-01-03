@@ -52,7 +52,7 @@ class AudFile implements SoundFile, Streaming {
 	final byte flags
 	final byte type
 
-	final int bitrate
+	final int bits
 	final int channels
 
 	/**
@@ -72,7 +72,7 @@ class AudFile implements SoundFile, Streaming {
 		type             = input.readByte()
 		assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
 
-		bitrate = (flags & FLAG_16BIT) ? 16 : 8
+		bits = (flags & FLAG_16BIT) ? 16 : 8
 		channels = (flags & FLAG_STEREO) ? 2 : 1
 	}
 
@@ -110,7 +110,7 @@ class AudFile implements SoundFile, Streaming {
 	String toString() {
 
 		return [
-			"AUD file, ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
+			"AUD file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
 			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm",
 			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
 		].join(', ')

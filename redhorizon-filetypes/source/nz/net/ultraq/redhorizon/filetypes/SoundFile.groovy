@@ -29,7 +29,7 @@ interface SoundFile {
 	/**
 	 * Returns the number of bits used for each sound sample.
 	 */
-	int getBitrate()
+	int getBits()
 
 	/**
 	 * Returns the number of sound channels in this file.

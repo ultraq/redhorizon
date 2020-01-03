@@ -70,7 +70,7 @@ class VqaFile implements Streaming, VideoFile {
 	final short unknown2
 	final int frequency     // Stored in file as short
 	final int channels      // Stored in file as byte
-	final int bitrate       // Stored in file as byte
+	final int bits          // Stored in file as byte
 	final int unknown3
 	final short unknown4
 	final int maxCbfzSize
@@ -121,7 +121,7 @@ class VqaFile implements Streaming, VideoFile {
 		unknown2     = input.readShort()
 		frequency    = input.readShort()
 		channels     = input.readByte()
-		bitrate      = input.readByte()
+		bits         = input.readByte()
 		unknown3     = input.readInt()
 		unknown4     = input.readShort()
 		maxCbfzSize  = input.readInt()
@@ -196,7 +196,7 @@ class VqaFile implements Streaming, VideoFile {
 		return [
 			"VQA file, ${width}x${height} 18-bit w/ 256 colour palette",
 			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps",
-			"Sound data of ${frequency}hz ${bitrate}-bit ${channels == 2 ? 'Stereo' : 'Mono'}"
+			"Sound data of ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}"
 		].join(', ')
 	}
 }

@@ -55,7 +55,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	final int format
 	final int numFrames
 	final float frameRate
-	final int bitrate
+	final int bits
 	final int channels
 	final int frequency
 	final Rectanglef dimensions
@@ -95,7 +95,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		this.dimensions = dimensions
 		this.filter = filter
 
-		bitrate   = videoFile.bitrate
+		bits      = videoFile.bits
 		channels  = videoFile.channels
 		frequency = videoFile.frequency
 
@@ -178,7 +178,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 				def numBuffersToRead = bufferTarget - samplesQueued
 				if (numBuffersToRead) {
 					def newBufferIds = sampleBuffer.drain(numBuffersToRead).collect { buffer ->
-						def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
+						def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
 						bufferIds << newBufferId
 						return newBufferId
 					}

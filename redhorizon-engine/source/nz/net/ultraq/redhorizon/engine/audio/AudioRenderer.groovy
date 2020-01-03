@@ -51,12 +51,12 @@ interface AudioRenderer {
 	 * Creates and fills a sound buffer with the given data.
 	 * 
 	 * @param data
-	 * @param bitrate
+	 * @param bits
 	 * @param channels
 	 * @param frequency
 	 * @return Buffer ID.
 	 */
-	int createBuffer(ByteBuffer data, int bitrate, int channels, int frequency)
+	int createBuffer(ByteBuffer data, int bits, int channels, int frequency)
 
 	/**
 	 * Creates a new source through which to play sound data.

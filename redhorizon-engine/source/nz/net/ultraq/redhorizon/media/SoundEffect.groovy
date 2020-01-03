@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutorService
 class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 
 	// Sound information
-	final int bitrate
+	final int bits
 	final int channels
 	final int frequency
 
@@ -59,7 +59,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	 */
 	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
 
-		bitrate   = soundFile.bitrate
+		bits      = soundFile.bits
 		channels  = soundFile.channels
 		frequency = soundFile.frequency
 
@@ -102,7 +102,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 				def numBuffersToRead = sampleBufferTarget - samplesQueued
 				if (numBuffersToRead) {
 					def newBufferIds = sampleBuffer.drain(numBuffersToRead).collect { buffer ->
-						def newBufferId = renderer.createBuffer(buffer, bitrate, channels, frequency)
+						def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
 						bufferIds << newBufferId
 						return newBufferId
 					}
