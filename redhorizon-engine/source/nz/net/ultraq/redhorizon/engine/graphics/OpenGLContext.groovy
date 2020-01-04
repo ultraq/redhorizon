@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.AbstractContext
 import nz.net.ultraq.redhorizon.media.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
-import org.lwjgl.glfw.GLFWVidMode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -75,10 +74,7 @@ class OpenGLContext extends AbstractContext {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
-		// Try get the dimensions of the main monitor for putting the window in
-		def monitor = glfwGetPrimaryMonitor()
-		def videoMode = glfwGetVideoMode(monitor)
-		windowSize = calculateWindowSizeForFit(videoMode, aspectRatio)
+		windowSize = calculateWindowSize(aspectRatio)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
@@ -96,22 +92,32 @@ class OpenGLContext extends AbstractContext {
 	}
 
 	/**
-	 * Calculate the dimensions for a rendering window that will fit the given
-	 * screen size and respect the target aspect ratio. 
+	 * Calculate the dimensions for window that will fit any monitor in a user's
+	 * setup, while respecting the target aspect ratio.
 	 * 
-	 * @param videoMode
 	 * @param aspectRatio
 	 * @return
 	 */
-	private static Dimension calculateWindowSizeForFit(GLFWVidMode videoMode, float aspectRatio) {
+	private static Dimension calculateWindowSize(float aspectRatio) {
+
+		// Try get the smallest dimensions of each monitor so that a window cannot
+		// be created that exceeds any monitor
+		def monitors = glfwGetMonitors()
+		def minWidth = 0
+		def minHeight = 0
+		for (def m = 0; m < monitors.limit(); m++) {
+			def monitorVideoMode = glfwGetVideoMode(monitors.get(m))
+			minWidth = minWidth ? Math.min(minWidth, monitorVideoMode.width()) : monitorVideoMode.width()
+			minHeight = minHeight ? Math.min(minHeight, monitorVideoMode.height()) : monitorVideoMode.height()
+		}
 
 		def multiplier = 1
-		def widthGap = videoMode.width() / 4
-		def heightGap = videoMode.height() / 4
+		def widthGap = minWidth / 4
+		def heightGap = minHeight / 4
 		while (true) {
 			def testWidth = BASE_WIDTH * multiplier
 			def testHeight = Math.ceil(testWidth / aspectRatio)
-			if (videoMode.width() - testWidth < widthGap || videoMode.height() - testHeight < heightGap) {
+			if (minWidth - testWidth < widthGap || minHeight - testHeight < heightGap) {
 				return new Dimension(testWidth, testHeight as int)
 			}
 			multiplier++
