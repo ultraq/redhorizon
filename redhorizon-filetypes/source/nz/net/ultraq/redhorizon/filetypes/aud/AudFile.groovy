@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
@@ -77,14 +77,16 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	@Override
-	ByteBuffer getSoundData(ExecutorService executorService) {
+	ByteBuffer getSoundData() {
 
 		def samples = []
-		executorService
-			.submit(streamingDataWorker.addDataHandler { type, data ->
-				samples << data
-			})
-			.get()
+		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			executorService
+				.submit(streamingDataWorker.addDataHandler { type, data ->
+					samples << data
+				})
+				.get()
+		}
 		return ByteBuffer.fromBuffers(*samples)
 	}
 

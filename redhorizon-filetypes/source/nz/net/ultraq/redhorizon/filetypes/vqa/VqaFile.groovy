@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Implementation of a VQA file, which is the video format used in Red Alert and
@@ -142,30 +142,34 @@ class VqaFile implements Streaming, VideoFile {
 	}
 
 	@Override
-	ByteBuffer[] getFrameData(ExecutorService executorService) {
+	ByteBuffer[] getFrameData() {
 
 		def frames = []
-		executorService
-			.submit(streamingDataWorker.addDataHandler { type, data ->
-				if (type == 'frame') {
-					frames << data
-				}
-			})
-			.get()
+		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			executorService
+				.submit(streamingDataWorker.addDataHandler { type, data ->
+					if (type == 'frame') {
+						frames << data
+					}
+				})
+				.get()
+		}
 		return frames
 	}
 
 	@Override
-	ByteBuffer getSoundData(ExecutorService executorService) {
+	ByteBuffer getSoundData() {
 
 		def samples = []
-		executorService
-			.submit(streamingDataWorker.addDataHandler { type, data ->
-				if (type == 'sample') {
-					samples << data
-				}
-			})
-			.get()
+		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			executorService
+				.submit(streamingDataWorker.addDataHandler { type, data ->
+					if (type == 'sample') {
+						samples << data
+					}
+				})
+				.get()
+		}
 		return ByteBuffer.fromBuffers(*samples)
 	}
 

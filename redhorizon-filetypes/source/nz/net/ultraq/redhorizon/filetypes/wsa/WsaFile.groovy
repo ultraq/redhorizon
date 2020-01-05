@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Implementation of the WSA file format as used in Tiberium Dawn and Red Alert.
@@ -95,14 +95,16 @@ class WsaFile implements AnimationFile, Streaming {
 	}
 
 	@Override
-	ByteBuffer[] getFrameData(ExecutorService executorService) {
+	ByteBuffer[] getFrameData() {
 
 		def frames = []
-		executorService
-			.submit(streamingDataWorker.addDataHandler { type, data ->
-				frames << data
-			})
-			.get()
+		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			executorService
+				.submit(streamingDataWorker.addDataHandler { type, data ->
+					frames << data
+				})
+				.get()
+		}
 		return frames
 	}
 
