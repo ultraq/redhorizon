@@ -42,7 +42,6 @@ class WsaFileWorker extends Worker {
 	@Delegate
 	final WsaFile wsaFile
 	final NativeDataInputStream input
-	final Closure frameHandler
 
 	@Override
 	void work() {
@@ -68,7 +67,7 @@ class WsaFileWorker extends Worker {
 
 				return indexedFrame.applyPalette(palette)
 			}
-			frameHandler(colouredFrame)
+			notifyHandlers('frame', colouredFrame)
 		}
 
 		if (!stopped) {

@@ -45,7 +45,6 @@ class VqaFileWorker extends Worker {
 	@Delegate
 	final VqaFile vqaFile
 	final NativeDataInputStream input
-	final Closure videoHandler
 
 	private final LCW lcw = new LCW()
 	private final Decoder audioDecoder
@@ -61,13 +60,11 @@ class VqaFileWorker extends Worker {
 	 * 
 	 * @param vqaFile
 	 * @param input
-	 * @param videoHandler
 	 */
-	VqaFileWorker(VqaFile vqaFile, NativeDataInputStream input, Closure videoHandler) {
+	VqaFileWorker(VqaFile vqaFile, NativeDataInputStream input) {
 
 		this.vqaFile = vqaFile
 		this.input = input
-		this.videoHandler = videoHandler
 
 		audioDecoder = bits == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
@@ -196,7 +193,8 @@ class VqaFileWorker extends Worker {
 
 			// Decode sound data
 			case ~/SND./:
-				videoHandler(null, decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length))))
+				def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
+				notifyHandlers('sample', sample)
 				bytesRead += chunkHeader.length
 				break
 
@@ -229,7 +227,7 @@ class VqaFileWorker extends Worker {
 						def frame = average('Decoding frame', 15) { ->
 							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 						}
-						videoHandler(frame, null)
+						notifyHandlers('frame', frame)
 						break
 
 					default:

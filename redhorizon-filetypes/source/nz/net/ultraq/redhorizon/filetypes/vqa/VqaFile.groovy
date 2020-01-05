@@ -146,9 +146,9 @@ class VqaFile implements Streaming, VideoFile {
 
 		def frames = []
 		executorService
-			.submit(getStreamingDataWorker { frame, sample ->
-				if (frame) {
-					frames << frame
+			.submit(streamingDataWorker.addDataHandler { type, data ->
+				if (type == 'frame') {
+					frames << data
 				}
 			})
 			.get()
@@ -160,9 +160,9 @@ class VqaFile implements Streaming, VideoFile {
 
 		def samples = []
 		executorService
-			.submit(getStreamingDataWorker { frame, sample ->
-				if (sample) {
-					samples << sample
+			.submit(streamingDataWorker.addDataHandler { type, data ->
+				if (type == 'sample') {
+					samples << data
 				}
 			})
 			.get()
@@ -170,19 +170,16 @@ class VqaFile implements Streaming, VideoFile {
 	}
 
 	/**
-	 * Return a worker that can be used for streaming the video's frame and sound
-	 * data to the {@code videoHandler} closure.
+	 * Return a worker that can be used for streaming video.  The data will be
+	 * passed to the configured handlers using the {@code frame} key for image
+	 * data, and the {@code sample} key for sound data.
 	 * 
-	 * @param videoHandler
-	 *   A closure that, when called, will be given 2 parameters: the first is
-	 *   frame data, the second is sound data.  There is no guarantee that both
-	 *   will be set on every call.
 	 * @return Worker for streaming video data.
 	 */
 	@Override
-	Worker getStreamingDataWorker(Closure videoHandler) {
+	Worker getStreamingDataWorker() {
 
-		return new VqaFileWorker(this, input, videoHandler)
+		return new VqaFileWorker(this, input)
 	}
 
 	/**

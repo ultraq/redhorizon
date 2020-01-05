@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
+import groovy.transform.PackageScope
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -41,9 +42,9 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	final int frequency
 
 	private final Worker soundDataWorker
-	private final int sampleBufferTarget = 10
-	private final BlockingQueue<ByteBuffer> sampleBuffer = new ArrayBlockingQueue<>(sampleBufferTarget)
-	private int samplesQueued
+	private final BlockingQueue<ByteBuffer> samples
+	private final int bufferSize
+	private int buffersQueued
 
 	// Renderer information
 	private int sourceId
@@ -57,19 +58,38 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	 */
 	SoundTrack(SoundFile soundFile, ExecutorService executorService) {
 
-		bits      = soundFile.bits
-		channels  = soundFile.channels
-		frequency = soundFile.frequency
+		this(soundFile.bits, soundFile.channels, soundFile.frequency,
+			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null)
 
-		if (soundFile instanceof Streaming) {
-			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-			soundDataWorker = soundFile.getStreamingDataWorker { sample ->
-				sampleBuffer << ByteBuffer.fromBuffersDirect(sample)
-			}
-			executorService.execute(soundDataWorker)
+		executorService.execute(soundDataWorker)
+	}
+
+	/**
+	 * Constructor, use all of the given data for building a sound track.
+	 * 
+	 * @param bits
+	 * @param channels
+	 * @param frequency
+	 * @param bufferSize
+	 * @param soundDataWorker
+	 */
+	@PackageScope
+	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker) {
+
+		if (!soundDataWorker) {
+			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
-		else {
-			throw new UnsupportedOperationException('The SoundTrack media type should only be used for streaming audio')
+
+		this.bits      = bits
+		this.channels  = channels
+		this.frequency = frequency
+
+		samples = new ArrayBlockingQueue<>(bufferSize)
+		this.bufferSize = bufferSize
+		this.soundDataWorker = soundDataWorker.addDataHandler { type, data ->
+			if (type == 'sample') {
+				samples << ByteBuffer.fromBuffersDirect(data)
+			}
 		}
 	}
 
@@ -77,7 +97,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	void delete(AudioRenderer renderer) {
 
 		soundDataWorker.stop()
-		sampleBuffer.drain()
+		samples.drain()
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(*bufferIds)
 	}
@@ -89,7 +109,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 			sourceId = renderer.createSource()
 		}
 		bufferIds = []
-		samplesQueued = 0
+		buffersQueued = 0
 	}
 
 	@Override
@@ -98,16 +118,16 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		if (playing) {
 
 			// Buffers to read and queue
-			if (sampleBuffer.size()) {
-				def numBuffersToRead = sampleBufferTarget - samplesQueued
+			if (samples.size()) {
+				def numBuffersToRead = bufferSize - buffersQueued
 				if (numBuffersToRead) {
-					def newBufferIds = sampleBuffer.drain(numBuffersToRead).collect { buffer ->
+					def newBufferIds = samples.drain(numBuffersToRead).collect { buffer ->
 						def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
 						bufferIds << newBufferId
 						return newBufferId
 					}
 					renderer.queueBuffers(sourceId, *newBufferIds)
-					samplesQueued += newBufferIds.size()
+					buffersQueued += newBufferIds.size()
 				}
 			}
 
@@ -128,7 +148,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (samplesQueued) {
+		if (buffersQueued) {
 			def buffersProcessed = renderer.buffersProcessed(sourceId)
 			if (buffersProcessed) {
 				def processedBufferIds = []
@@ -137,7 +157,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 				}
 				renderer.unqueueBuffers(sourceId, *processedBufferIds)
 				renderer.deleteBuffers(*processedBufferIds)
-				samplesQueued -= buffersProcessed
+				buffersQueued -= buffersProcessed
 			}
 		}
 	}

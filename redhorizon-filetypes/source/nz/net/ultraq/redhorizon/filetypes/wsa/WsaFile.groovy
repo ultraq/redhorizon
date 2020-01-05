@@ -99,22 +99,23 @@ class WsaFile implements AnimationFile, Streaming {
 
 		def frames = []
 		executorService
-			.submit(getStreamingDataWorker { frames << it })
+			.submit(streamingDataWorker.addDataHandler { type, data ->
+				frames << data
+			})
 			.get()
 		return frames
 	}
 
 	/**
-	 * Return a worker that can be used for streaming the animation's frames to
-	 * the {@code frameHandler} closure.
+	 * Return a worker that can be used for streaming the animation's frames.  The
+	 * data will be passed to the configured handlers under the {@code frame} key.
 	 * 
-	 * @param frameHandler
 	 * @return Worker for streaming animation data.
 	 */
 	@Override
-	Worker getStreamingDataWorker(Closure frameHandler) {
+	Worker getStreamingDataWorker() {
 
-		return new WsaFileWorker(this, input, frameHandler)
+		return new WsaFileWorker(this, input)
 	}
 
 	/**

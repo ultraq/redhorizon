@@ -42,7 +42,6 @@ class AudFileWorker extends Worker {
 	@Delegate
 	final AudFile audFile
 	final NativeDataInputStream input
-	final Closure sampleHandler
 
 	@Override
 	void work() {
@@ -60,15 +59,14 @@ class AudFileWorker extends Worker {
 			def uncompressedSize = input.readShort()
 			assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
 
-			// Build buffers from chunk header
-			def chunkSourceBuffer = ByteBuffer.allocateNative(compressedSize)
-			input.readFully(chunkSourceBuffer.array())
-			def chunkDataBuffer = ByteBuffer.allocateNative(uncompressedSize)
+			// Build buffers from chunk header values
+			def compressedSample = ByteBuffer.wrapNative(input.readNBytes(compressedSize))
+			def sample = ByteBuffer.allocateNative(uncompressedSize)
 
 			// Decode
-			decoder.decode(chunkSourceBuffer, chunkDataBuffer)
+			decoder.decode(compressedSample, sample)
 
-			sampleHandler(chunkDataBuffer)
+			notifyHandlers('sample', sample)
 			bytesRead += 8 + compressedSize
 		}
 

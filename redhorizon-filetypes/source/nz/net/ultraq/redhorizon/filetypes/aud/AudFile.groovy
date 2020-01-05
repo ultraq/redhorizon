@@ -81,24 +81,23 @@ class AudFile implements SoundFile, Streaming {
 
 		def samples = []
 		executorService
-			.submit(getStreamingDataWorker { samples << it })
+			.submit(streamingDataWorker.addDataHandler { type, data ->
+				samples << data
+			})
 			.get()
 		return ByteBuffer.fromBuffers(*samples)
 	}
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data to the
-	 * {@code sampleHandler} closure.
+	 * Returns a worker that can be run to start streaming sound data.  The data
+	 * will be passed to configured handlers under the {@code sample} key.
 	 * 
-	 * @param sampleHandler
-	 *   Closure that is called by the worker for doing something with a small
-	 *   sample of sound.
 	 * @return Worker for streaming sound data.
 	 */
 	@Override
-	Worker getStreamingDataWorker(Closure sampleHandler) {
+	Worker getStreamingDataWorker() {
 
-		return new AudFileWorker(this, input, sampleHandler)
+		return new AudFileWorker(this, input)
 	}
 
 	/**

@@ -27,16 +27,17 @@ package nz.net.ultraq.redhorizon.filetypes
  */
 interface Streaming {
 
+	// TODO: This seems very much like events.  Maybe I should extract the event
+	//       system in the engine package so it can be used here?
+
 	/**
-	 * Returns a worker that can be used to stream file data to the configured
-	 * closure.  What that closure needs to provide will vary based on the kind of
-	 * data being streamed.
+	 * Returns a worker that can be used for streaming file data.  Closures can
+	 * then be attached to the worker for handling the data as it comes.  The
+	 * parameters to that closure will always be {@code String} describing the
+	 * kind of data, and the {@code ByteBuffer} of said data.
 	 * 
-	 * @param streamingDataHandler
-	 *   Closure that is called by the worker when some data for streaming is
-	 *   available for consumption.
 	 * @return A worker that can be executed as its own thread for generating the
 	 *   streaming data.
 	 */
-	Worker getStreamingDataWorker(Closure streamingDataHandler)
+	Worker getStreamingDataWorker()
 }

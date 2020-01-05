@@ -27,6 +27,7 @@ import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.PackageScope
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -52,13 +53,13 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final boolean filter
 
 	private final Worker frameDataWorker
-	private final int frameBufferTarget
 	private final BlockingQueue<ByteBuffer> frameBuffer
+	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private long animationTimeStart
 
 	// Rendering information
-	private List<ByteBuffer> frames
+	private List<ByteBuffer> frames // TODO: Can we do without this?  ie: turn every frame into a texture
 	private int lastFrame
 	private int[] textureIds
 
@@ -72,29 +73,51 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 */
 	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, ExecutorService executorService) {
 
-		width     = animationFile.width
-		height    = animationFile.height
-		format    = animationFile.format.value
-		numFrames = animationFile.numFrames
-		frameRate = animationFile.frameRate
-		this.dimensions = dimensions
-		this.filter = filter
+		this(animationFile.width, animationFile.height, animationFile.format.value, animationFile.numFrames, animationFile.frameRate,
+			dimensions, filter, animationFile.frameRate as int,
+			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
 
-		if (animationFile instanceof Streaming) {
-			frameBufferTarget = frameRate as int
-			frameBuffer = new ArrayBlockingQueue<>(frameBufferTarget)
-			// TODO: Some kind of cached buffer so that some items don't need to be decoded again
-			frameDataWorker = animationFile.getStreamingDataWorker { frame ->
-				if (!frameBuffer.remainingCapacity() && bufferReady.count) {
-					bufferReady.countDown()
-				}
-				frameBuffer << ByteBuffer.fromBuffersDirect(frame)
-			}
-			executorService.execute(frameDataWorker)
+		executorService.execute(frameDataWorker)
+	}
+
+	/**
+	 * Constructor, use all of the given data for building an animation.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param format
+	 * @param numFrames
+	 * @param frameRate
+	 * @param dimensions
+	 * @param filter
+	 * @param bufferSize
+	 * @param frameDataWorker
+	 */
+	@PackageScope
+	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions, boolean filter,
+		int bufferSize = 10, Worker frameDataWorker) {
+
+		if (!frameDataWorker) {
+			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
-		else {
-			throw new UnsupportedOperationException(
-				'Only streaming animations currently supported - loading all the frame data isn\'t good for memory usage!')
+
+		this.width      = width
+		this.height     = height
+		this.format     = format
+		this.numFrames  = numFrames
+		this.frameRate  = frameRate
+		this.dimensions = dimensions
+		this.filter     = filter
+
+		frameBuffer = new ArrayBlockingQueue<>(bufferSize)
+		this.bufferSize = bufferSize
+		this.frameDataWorker = frameDataWorker.addDataHandler { type, data ->
+			if (type == 'frame') {
+				frameBuffer << ByteBuffer.fromBuffersDirect(data)
+			}
+			if (!frameBuffer.remainingCapacity() && bufferReady.count) {
+				bufferReady.countDown()
+			}
 		}
 	}
 
@@ -132,7 +155,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 			// Try to load up to frameBufferTarget frames ahead
 			if (frameBuffer.size()) {
-				def framesAhead = Math.min(currentFrame + frameBufferTarget, numFrames)
+				def framesAhead = Math.min(currentFrame + bufferSize, numFrames)
 				if (!frames[framesAhead]) {
 					def numFramesToRead = framesAhead - frames.size()
 					if (numFramesToRead) {
