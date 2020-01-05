@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-description = 'A collection of encoders/decoders for C&C file data'
+package nz.net.ultraq.redhorizon.events
 
-dependencies {
-	implementation(
-		project(':redhorizon-extensions')
-	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:0.2.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
+/**
+ * Base type for all events.
+ * 
+ * @author Emanuel Rabina
+ */
+abstract class Event {
 }

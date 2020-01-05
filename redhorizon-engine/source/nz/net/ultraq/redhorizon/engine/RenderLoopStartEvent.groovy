@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.events
+package nz.net.ultraq.redhorizon.engine
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Base type for all events.
+ * Event for when the render loop of an engine has begun.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class Event {
-
-	final String name
-	final Map<String,Object> parameters
+class RenderLoopStartEvent extends Event {
 }

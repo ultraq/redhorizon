@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-description = 'A collection of encoders/decoders for C&C file data'
+package nz.net.ultraq.redhorizon.engine.graphics
 
-dependencies {
-	implementation(
-		project(':redhorizon-extensions')
-	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:0.2.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
+import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.media.Dimension
+
+import groovy.transform.TupleConstructor
+
+/**
+ * Fired when the OpenGL window and context have been created.  Passes them
+ * along to event listeners so they can be queried.
+ * 
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class WindowCreatedEvent extends Event {
+
+	final Dimension windowSize
 }

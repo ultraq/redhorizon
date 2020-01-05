@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-description = 'A collection of encoders/decoders for C&C file data'
+package nz.net.ultraq.redhorizon.engine
 
-dependencies {
-	implementation(
-		project(':redhorizon-extensions')
-	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:0.2.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
+import nz.net.ultraq.redhorizon.events.Event
+
+/**
+ * Event for when the render loop of an engine has ended.
+ * 
+ * @author Emanuel Rabina
+ */
+class RenderLoopStopEvent extends Event {
 }

@@ -16,7 +16,9 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
 import org.slf4j.Logger
@@ -62,12 +64,13 @@ class ImageViewer implements Visual {
 			})
 
 			// Add the image to the engine once we have the window dimensions
-			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
-				graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(imageFile.width, imageFile.height,
-					fixAspectRatio, event.parameters['windowSize']), filtering))
+			graphicsEngine.on(WindowCreatedEvent) { event ->
+				graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
+					imageFile.width, imageFile.height, fixAspectRatio, event.windowSize), filtering
+				))
 			}
 
-			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+			graphicsEngine.on(RenderLoopStopEvent) { event ->
 				finishBarrier.countDown()
 			}
 

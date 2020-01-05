@@ -16,8 +16,11 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.slf4j.Logger
@@ -67,12 +70,12 @@ class VideoPlayer implements Visual {
 
 			// Add the video to the engines once we have the window dimensions
 			def video
-			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
+			graphicsEngine.on(WindowCreatedEvent) { event ->
 				def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
-					fixAspectRatio, event.parameters['windowSize'])
+					fixAspectRatio, event.windowSize)
 
 				video = new Video(videoFile, videoCoordinates, filtering, executorService)
-				video.on(Animation.EVENT_STOP) { stopEvent ->
+				video.on(StopEvent) { stopEvent ->
 					logger.debug('Video stopped')
 					audioEngine.stop()
 					graphicsEngine.stop()
@@ -88,7 +91,7 @@ class VideoPlayer implements Visual {
 				}
 			}
 
-			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
+			graphicsEngine.on(RenderLoopStartEvent) { event ->
 				executorService.submit { ->
 					video.play()
 					logger.debug('Video started')
@@ -96,12 +99,12 @@ class VideoPlayer implements Visual {
 			}
 
 			// Stop both engines if one goes down
-			audioEngine.on(AudioEngine.EVENT_RENDER_LOOP_STOP) { event ->
+			audioEngine.on(RenderLoopStopEvent) { event ->
 				video.stop()
 				graphicsEngine.stop()
 				finishBarrier.countDown()
 			}
-			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+			graphicsEngine.on(RenderLoopStopEvent) { event ->
 				video.stop()
 				audioEngine.stop()
 				finishBarrier.countDown()

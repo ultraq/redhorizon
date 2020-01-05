@@ -18,6 +18,7 @@ description = 'Core rendering engine for Red Horizon'
 
 dependencies {
 	implementation(
+		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),

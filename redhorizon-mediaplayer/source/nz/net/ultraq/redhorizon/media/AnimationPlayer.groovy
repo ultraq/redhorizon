@@ -16,7 +16,10 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 
 import org.slf4j.Logger
@@ -64,12 +67,12 @@ class AnimationPlayer implements Visual {
 
 			// Add the animation to the engine once we have the window dimensions
 			def animation
-			graphicsEngine.on(GraphicsEngine.EVENT_WINDOW_CREATED) { event ->
+			graphicsEngine.on(WindowCreatedEvent) { event ->
 				def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
-					fixAspectRatio, event.parameters['windowSize'])
+					fixAspectRatio, event.windowSize)
 
 				animation = new Animation(animationFile, animationCoordinates, filtering, executorService)
-				animation.on(Animation.EVENT_STOP) { stopEvent ->
+				animation.on(StopEvent) { stopEvent ->
 					logger.debug('Animation stopped')
 					graphicsEngine.stop()
 				}
@@ -83,13 +86,13 @@ class AnimationPlayer implements Visual {
 				}
 			}
 
-			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_START) { event ->
+			graphicsEngine.on(RenderLoopStartEvent) { event ->
 				executorService.submit { ->
 					animation.play()
 					logger.debug('Animation started')
 				}
 			}
-			graphicsEngine.on(GraphicsEngine.EVENT_RENDER_LOOP_STOP) { event ->
+			graphicsEngine.on(RenderLoopStopEvent) { event ->
 				finishBarrier.countDown()
 			}
 			def engine = executorService.submit(graphicsEngine)

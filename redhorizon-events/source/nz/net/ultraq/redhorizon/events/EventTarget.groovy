@@ -24,41 +24,36 @@ package nz.net.ultraq.redhorizon.events
  */
 trait EventTarget {
 
-	private final Map<String, List<EventListener>> eventListeners = [:]
+	private final Map<Class<? extends Event>, List<EventListener>> eventListeners = [:]
 
 	/**
 	 * Register an event listener on this event target.  When the event is fired
 	 * by the target, then the listener will be invoked with that event.
 	 * 
-	 * @param eventName
+	 * @param event
 	 * @param eventListener
+	 * @return This object.
 	 */
-	void on(String eventName, EventListener eventListener) {
+	public <E extends Event> EventTarget on(Class<E> event, EventListener<E> eventListener) {
 
-		def listenersForEvent = eventListeners[eventName]
-		if (listenersForEvent == null) {
-			listenersForEvent = []
-			eventListeners[eventName] = listenersForEvent
+		def listenersForEvent = eventListeners.getOrCreate(event) { ->
+			return new ArrayList<EventListener>()
 		}
 		listenersForEvent << eventListener
+		return this
 	}
 
 	/**
 	 * Fire the event, invoking all listeners registered for that event.
 	 * 
-	 * @param eventName
-	 * @param eventParameters
-	 *   Optional parameters which will be included with the event when invoking
-	 *   any listeners.
+	 * @param event
+	 * @return This object.
 	 */
-	void trigger(String eventName, Map<String,Object> eventParameters = [:]) {
+	public <E extends Event> EventTarget trigger(E event) {
 
-		def listenersForEvent = eventListeners[eventName]
-		if (listenersForEvent != null) {
-			def event = new Event(eventName, eventParameters)
-			listenersForEvent.each { listener ->
-				listener.handleEvent(event)
-			}
+		eventListeners[(Class<? extends Event>)event.class]?.each { listener ->
+			listener.handleEvent(event)
 		}
+		return this
 	}
 }

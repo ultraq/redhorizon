@@ -37,12 +37,6 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
-	/**
-	 * Fired when the OpenGL window and context have been created.  Passes them
-	 * along to event listeners so they can be queried.
-	 */
-	static final String EVENT_WINDOW_CREATED = 'GraphicsEngine/Window/Created'
-
 	private final boolean fixAspectRatio
 	private final Closure needsMainThreadCallback
 	private final List<SceneElement> sceneElements = []
@@ -108,9 +102,7 @@ class GraphicsEngine extends EngineSubsystem {
 		// Initialization
 		context = waitForMainThread({ ->
 			def openGlContext = new OpenGLContext(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
-			trigger(EVENT_WINDOW_CREATED, [
-			  windowSize: openGlContext.windowSize
-			])
+			trigger(new WindowCreatedEvent(openGlContext.windowSize))
 			return openGlContext
 		})
 		context.withCloseable {

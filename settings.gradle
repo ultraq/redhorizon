@@ -19,6 +19,7 @@ rootProject.name = 'redhorizon'
 include(
 	'redhorizon-codecs',
 	'redhorizon-engine',
+	'redhorizon-events',
 	'redhorizon-extensions',
 	'redhorizon-filetypes',
 	'redhorizon-mediaplayer',

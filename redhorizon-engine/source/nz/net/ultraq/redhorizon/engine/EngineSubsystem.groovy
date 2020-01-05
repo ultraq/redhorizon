@@ -30,9 +30,6 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(EngineSubsystem)
 
-	static final EVENT_RENDER_LOOP_START = 'Engine/RenderLoop/Start'
-	static final EVENT_RENDER_LOOP_STOP  = 'Engine/RenderLoop/Stop'
-
 	private final int targetRenderTimeMs
 
 	protected boolean running
@@ -57,7 +54,7 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 	protected void renderLoop(Closure renderLoop) {
 
 		running = true
-		trigger(EVENT_RENDER_LOOP_START)
+		trigger(new RenderLoopStartEvent())
 
 		try {
 			while (shouldRender()) {
@@ -78,7 +75,7 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 		}
 		finally {
 			running = false
-			trigger(EVENT_RENDER_LOOP_STOP)
+			trigger(new RenderLoopStopEvent())
 		}
 	}
 
