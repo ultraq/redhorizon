@@ -24,7 +24,7 @@ import java.nio.ByteOrder
  * 
  * @author Emanuel Rabina
  */
-class NativeDataInputStream extends InputStream implements DataInput {
+class NativeDataInputStream extends InputStream implements DataInput, NativeReader {
 
 	@Delegate
 	private final DataInputStream dis
@@ -63,26 +63,8 @@ class NativeDataInputStream extends InputStream implements DataInput {
 	 */
 	@Override
 	int readInt() {
-		return isLittleEndian ? readLittleEndian(4) : dis.readInt()
-	}
 
-	/**
-	 * Read the given number of bytes in little endian byte order, returning the
-	 * expected primitive that comprises those bytes.
-	 * 
-	 * @param numBytes
-	 * @return
-	 */
-	private long readLittleEndian(int numBytes) {
-		long result = 0
-		for (def i = 0; i < numBytes; i++) {
-			def b = read()
-			if (b < 0) {
-				throw new EOFException()
-			}
-			result += b << (8 * i)
-		}
-		return result
+		return isLittleEndian ? readLittleEndian(4) : dis.readInt()
 	}
 
 	/**
@@ -94,6 +76,7 @@ class NativeDataInputStream extends InputStream implements DataInput {
 	 */
 	@Override
 	short readShort() {
+
 		return isLittleEndian ? readLittleEndian(2) : dis.readShort()
 	}
 

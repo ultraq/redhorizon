@@ -24,7 +24,7 @@ import java.nio.ByteOrder
  * 
  * @author Emanuel Rabina
  */
-class NativeRandomAccessFile implements Closeable, DataInput {
+class NativeRandomAccessFile implements Closeable, DataInput, NativeReader {
 
 	@Delegate
 	private final RandomAccessFile raf
@@ -37,6 +37,7 @@ class NativeRandomAccessFile implements Closeable, DataInput {
 	 * @param inputStream
 	 */
 	NativeRandomAccessFile(File file) {
+
 		raf = new RandomAccessFile(file, 'r')
 		isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
 	}
@@ -50,26 +51,8 @@ class NativeRandomAccessFile implements Closeable, DataInput {
 	 */
 	@Override
 	int readInt() {
-		return isLittleEndian ? readLittleEndian(4) : raf.readInt()
-	}
 
-	/**
-	 * Read the given number of bytes in little endian byte order, returning the
-	 * expected primitive that comprises those bytes.
-	 * 
-	 * @param numBytes
-	 * @return
-	 */
-	private long readLittleEndian(int numBytes) {
-		long result = 0
-		for (def i = 0; i < numBytes; i++) {
-			def b = read()
-			if (b < 0) {
-				throw new EOFException()
-			}
-			result += b << (8 * i)
-		}
-		return result
+		return isLittleEndian ? readLittleEndian(4) : raf.readInt()
 	}
 
 	/**
@@ -81,6 +64,7 @@ class NativeRandomAccessFile implements Closeable, DataInput {
 	 */
 	@Override
 	short readShort() {
+
 		return isLittleEndian ? readLittleEndian(2) : raf.readShort()
 	}
 }
