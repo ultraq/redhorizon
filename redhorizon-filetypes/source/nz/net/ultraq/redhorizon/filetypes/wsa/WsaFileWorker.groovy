@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.filetypes.wsa
 
 import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.codecs.XORDelta
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
@@ -67,7 +68,7 @@ class WsaFileWorker extends Worker {
 
 				return indexedFrame.applyPalette(palette)
 			}
-			notifyHandlers('frame', colouredFrame)
+			trigger(new StreamingFrameEvent(colouredFrame))
 		}
 
 		if (!stopped) {

@@ -50,7 +50,7 @@ class AudioPlayer {
 			// Try determine the appropriate media for the sound file
 			def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
 				new SoundTrack(soundFile, executorService) :
-				new SoundEffect(soundFile, executorService)
+				new SoundEffect(soundFile)
 
 			def audioEngine = new AudioEngine()
 			audioEngine.addSceneElement(sound)
@@ -65,6 +65,7 @@ class AudioPlayer {
 
 			logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
 
+			// TODO: I think this is what's holding up execution - see if I can't kill it on program end
 			executorService.submit({ ->
 				def reader = new InputStreamReader(System.in)
 				if (reader.read()) {

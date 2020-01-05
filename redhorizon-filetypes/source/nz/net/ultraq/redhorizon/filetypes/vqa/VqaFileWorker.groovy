@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
@@ -194,7 +196,7 @@ class VqaFileWorker extends Worker {
 			// Decode sound data
 			case ~/SND./:
 				def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
-				notifyHandlers('sample', sample)
+				trigger(new StreamingSampleEvent(sample))
 				bytesRead += chunkHeader.length
 				break
 
@@ -227,7 +229,7 @@ class VqaFileWorker extends Worker {
 						def frame = average('Decoding frame', 15) { ->
 							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 						}
-						notifyHandlers('frame', frame)
+						trigger(new StreamingFrameEvent(frame))
 						break
 
 					default:

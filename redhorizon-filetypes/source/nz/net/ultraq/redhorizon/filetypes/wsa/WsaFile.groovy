@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.filetypes.wsa
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
@@ -99,10 +100,12 @@ class WsaFile implements AnimationFile, Streaming {
 
 		def frames = []
 		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			def worker = streamingDataWorker
+			worker.on(StreamingFrameEvent) { event ->
+				frames << event.frame
+			}
 			executorService
-				.submit(streamingDataWorker.addDataHandler { type, data ->
-					frames << data
-				})
+				.submit(worker)
 				.get()
 		}
 		return frames
@@ -110,7 +113,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 	/**
 	 * Return a worker that can be used for streaming the animation's frames.  The
-	 * data will be passed to the configured handlers under the {@code frame} key.
+	 * worker will emit {@link StreamingFrameEvent}s for new frames available.
 	 * 
 	 * @return Worker for streaming animation data.
 	 */

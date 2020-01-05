@@ -21,6 +21,7 @@ description = 'Filetypes module for the Red Horizon project'
 dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
+		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
 		':blowfishj:2.41'
 	)

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
@@ -86,10 +87,9 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 
 		samples = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
-		this.soundDataWorker = soundDataWorker.addDataHandler { type, data ->
-			if (type == 'sample') {
-				samples << ByteBuffer.fromBuffersDirect(data)
-			}
+		this.soundDataWorker = soundDataWorker
+		this.soundDataWorker.on(StreamingSampleEvent) { event ->
+			samples << ByteBuffer.fromBuffersDirect(event.sample)
 		}
 	}
 

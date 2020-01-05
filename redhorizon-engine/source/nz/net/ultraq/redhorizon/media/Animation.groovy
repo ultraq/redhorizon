@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
@@ -111,10 +112,9 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		frameBuffer = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
-		this.frameDataWorker = frameDataWorker.addDataHandler { type, data ->
-			if (type == 'frame') {
-				frameBuffer << ByteBuffer.fromBuffersDirect(data)
-			}
+		this.frameDataWorker = frameDataWorker
+		this.frameDataWorker.on(StreamingFrameEvent) { event ->
+			frameBuffer << ByteBuffer.fromBuffersDirect(event.frame)
 			if (!frameBuffer.remainingCapacity() && bufferReady.count) {
 				bufferReady.countDown()
 			}

@@ -19,12 +19,15 @@ package nz.net.ultraq.redhorizon.filetypes.vqa
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -146,12 +149,12 @@ class VqaFile implements Streaming, VideoFile {
 
 		def frames = []
 		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			def worker = streamingDataWorker
+			worker.on(StreamingFrameEvent) { event ->
+				frames << event.frame
+			}
 			executorService
-				.submit(streamingDataWorker.addDataHandler { type, data ->
-					if (type == 'frame') {
-						frames << data
-					}
-				})
+				.submit(worker)
 				.get()
 		}
 		return frames
@@ -161,22 +164,22 @@ class VqaFile implements Streaming, VideoFile {
 	ByteBuffer getSoundData() {
 
 		def samples = []
-		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+		Executors.newSingleThreadExecutor().executeAndShutdown { ExecutorService executorService ->
+			def worker = streamingDataWorker
+			worker.on(StreamingSampleEvent) { event ->
+				samples << event.sample
+			}
 			executorService
-				.submit(streamingDataWorker.addDataHandler { type, data ->
-					if (type == 'sample') {
-						samples << data
-					}
-				})
+				.submit(worker)
 				.get()
 		}
 		return ByteBuffer.fromBuffers(*samples)
 	}
 
 	/**
-	 * Return a worker that can be used for streaming video.  The data will be
-	 * passed to the configured handlers using the {@code frame} key for image
-	 * data, and the {@code sample} key for sound data.
+	 * Return a worker that can be used for streaming video.  The worker will emit
+	 * {@link StreamingFrameEvent}s for new frames, and
+	 * {@link StreamingSampleEvent}s for new samples.
 	 * 
 	 * @return Worker for streaming video data.
 	 */

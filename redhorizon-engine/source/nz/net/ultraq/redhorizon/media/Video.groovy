@@ -52,10 +52,18 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
+
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format.value, videoFile.numFrames, videoFile.frameRate,
 				dimensions, filter, videoFile.frameRate as int, videoWorker)
+			animation.on(StopEvent) { event ->
+				stop()
+			}
+
 			soundTrack = new SoundTrack(videoFile.bits, videoFile.channels, videoFile.frequency,
 				videoFile.frameRate + 1 as int, videoWorker)
+			soundTrack.on(StopEvent) { event ->
+				stop()
+			}
 
 			executorService.execute(videoWorker)
 		}
@@ -75,6 +83,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		animation.play()
 		soundTrack.play()
+		Playable.super.play()
 	}
 
 	@Override
@@ -82,5 +91,6 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 
 		animation.stop()
 		soundTrack.stop()
+		Playable.super.stop()
 	}
 }

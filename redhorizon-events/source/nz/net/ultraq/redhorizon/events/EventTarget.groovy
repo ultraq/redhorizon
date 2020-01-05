@@ -32,15 +32,13 @@ trait EventTarget {
 	 * 
 	 * @param event
 	 * @param eventListener
-	 * @return This object.
 	 */
-	public <E extends Event> EventTarget on(Class<E> event, EventListener<E> eventListener) {
+	public <E extends Event> void on(Class<E> event, EventListener<E> eventListener) {
 
 		def listenersForEvent = eventListeners.getOrCreate(event) { ->
 			return new ArrayList<EventListener>()
 		}
 		listenersForEvent << eventListener
-		return this
 	}
 
 	/**
@@ -49,11 +47,10 @@ trait EventTarget {
 	 * @param event
 	 * @return This object.
 	 */
-	public <E extends Event> EventTarget trigger(E event) {
+	public <E extends Event> void trigger(E event) {
 
 		eventListeners[(Class<? extends Event>)event.class]?.each { listener ->
 			listener.handleEvent(event)
 		}
-		return this
 	}
 }

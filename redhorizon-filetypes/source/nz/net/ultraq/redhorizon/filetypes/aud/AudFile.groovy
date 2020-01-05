@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.filetypes.aud
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
@@ -81,18 +82,20 @@ class AudFile implements SoundFile, Streaming {
 
 		def samples = []
 		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			def worker = streamingDataWorker
+			worker.on(StreamingSampleEvent) { event ->
+				samples << event.sample
+			}
 			executorService
-				.submit(streamingDataWorker.addDataHandler { type, data ->
-					samples << data
-				})
+				.submit(worker)
 				.get()
 		}
 		return ByteBuffer.fromBuffers(*samples)
 	}
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data.  The data
-	 * will be passed to configured handlers under the {@code sample} key.
+	 * Returns a worker that can be run to start streaming sound data.  The worker
+	 * will emit {@link StreamingSampleEvent}s for new samples available.
 	 * 
 	 * @return Worker for streaming sound data.
 	 */

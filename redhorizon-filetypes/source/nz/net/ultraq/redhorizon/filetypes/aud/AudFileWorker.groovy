@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.filetypes.aud
 
 import nz.net.ultraq.redhorizon.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.codecs.WSADPCM8bit
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
@@ -66,7 +67,7 @@ class AudFileWorker extends Worker {
 			// Decode
 			decoder.decode(compressedSample, sample)
 
-			notifyHandlers('sample', sample)
+			trigger(new StreamingSampleEvent(sample))
 			bytesRead += 8 + compressedSize
 		}
 

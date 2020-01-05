@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.scenegraph.Movable
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
 
 /**
  * A simple piece of short audio that can be loaded entirely into memory for
@@ -48,14 +47,13 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 	 * effect.
 	 * 
 	 * @param soundFile
-	 * @param executorService
 	 */
-	SoundEffect(SoundFile soundFile, ExecutorService executorService) {
+	SoundEffect(SoundFile soundFile) {
 
 		bits      = soundFile.bits
 		channels  = soundFile.channels
 		frequency = soundFile.frequency
-		buffer    = ByteBuffer.fromBuffersDirect(soundFile.getSoundData(executorService))
+		buffer    = ByteBuffer.fromBuffersDirect(soundFile.getSoundData())
 	}
 
 	@Override
