@@ -23,6 +23,7 @@ description = 'Media player for the Red Horizon project'
 dependencies {
 	implementation(
 		project(':redhorizon-engine'),
+		project(':redhorizon-events'),
 		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.3',
 		'info.picocli:picocli:4.1.1',
