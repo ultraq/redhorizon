@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
+import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
