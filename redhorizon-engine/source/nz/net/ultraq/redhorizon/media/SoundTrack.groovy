@@ -28,6 +28,7 @@ import groovy.transform.PackageScope
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 
 /**
@@ -45,6 +46,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	private final Worker soundDataWorker
 	private final BlockingQueue<ByteBuffer> samples
 	private final int bufferSize
+	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private int buffersQueued
 
 	// Renderer information
@@ -90,6 +92,9 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		this.soundDataWorker = soundDataWorker
 		this.soundDataWorker.on(StreamingSampleEvent) { event ->
 			samples << ByteBuffer.fromBuffersDirect(event.sample)
+			if (bufferReady.count && !samples.remainingCapacity()) {
+				bufferReady.countDown()
+			}
 		}
 	}
 
@@ -110,6 +115,14 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		}
 		bufferIds = []
 		buffersQueued = 0
+	}
+
+	@Override
+	void play() {
+
+		// Wait until the sample buffer is filled before starting play
+		bufferReady.await()
+		Playable.super.play()
 	}
 
 	@Override
