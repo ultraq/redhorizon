@@ -91,6 +91,18 @@ class XORDelta implements Encoder, Decoder {
 		xorSource = ByteBuffer.allocateNative(frameSize)
 	}
 
+	/**
+	 * Change the base frame being used for the next {@link #decode} operation.
+	 * 
+	 * @param deltaSource
+	 * @return This codec for chaining.
+	 */
+	XORDelta deltaSource(ByteBuffer deltaSource) {
+
+		xorSource = deltaSource
+		return this
+	}
+
 	@Override
 	void decode(ByteBuffer source, ByteBuffer dest) {
 

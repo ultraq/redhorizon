@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,21 +16,12 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.ByteBuffer
-
 /**
- * Interface which identifies the file format as using indexed data to represent
+ * Marker interface to identify an image file as using indexed data to represent
  * the image information returned by the implementing class.  Thus requiring a
  * matching palette to obtain the 'whole' image.
  * 
  * @author Emanuel Rabina
  */
 interface Paletted {
-
-	/**
-	 * Returns the raw indexed data which constructs this file's image.
-	 * 
-	 * @return The indexed image data.
-	 */
-	ByteBuffer getRawImageData()
 }
