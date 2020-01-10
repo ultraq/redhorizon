@@ -23,19 +23,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface AnimationFile {
-
-	/**
-	 * Returns the number of bytes used to represent the colour data of a single
-	 * pixel.
-	 * <p>
-	 * If the object implements the {@link Paletted} interface, then the return
-	 * value of this method is more of an expectation of the colour-depth,
-	 * rather than a given.
-	 * 
-	 * @return The image colour format.
-	 */
-	ColourFormat getFormat()
+interface AnimationFile extends ImageBase {
 
 	/**
 	 * Get the uncompressed data for each frame of the animation that can be used
@@ -54,23 +42,9 @@ interface AnimationFile {
 	float getFrameRate()
 
 	/**
-	 * Returns the height of the image.
-	 * 
-	 * @return Height of the image.
-	 */
-	int getHeight()
-
-	/**
 	 * Return the number of frames that make up this animation.
 	 * 
 	 * @return
 	 */
 	int getNumFrames()
-
-	/**
-	 * Returns the width of the image.
-	 * 
-	 * @return Width of the image.
-	 */
-	int getWidth()
 }

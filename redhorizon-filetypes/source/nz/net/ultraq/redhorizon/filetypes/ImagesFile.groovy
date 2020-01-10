@@ -25,26 +25,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface ImagesFile {
-
-	/**
-	 * Returns the number of bytes used to represent the colour data of a single
-	 * pixel.
-	 * <p>
-	 * If the object implements the {@link Paletted} interface, then the return
-	 * value of this method is more of an expectation of the colour-depth,
-	 * rather than a given.
-	 * 
-	 * @return The image colour format.
-	 */
-	ColourFormat getFormat()
-
-	/**
-	 * Returns the height of each image.
-	 * 
-	 * @return Height of each image.
-	 */
-	int getHeight()
+interface ImagesFile extends ImageBase {
 
 	/**
 	 * Returns the image data for all of the images in this file.
@@ -59,11 +40,4 @@ interface ImagesFile {
 	 * @return Number of images.
 	 */
 	int getNumImages()
-
-	/**
-	 * Returns the width of each image.
-	 * 
-	 * @return Width of each image.
-	 */
-	int getWidth()
 }
