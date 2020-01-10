@@ -112,13 +112,13 @@ class OpenGLContext extends AbstractContext {
 		}
 
 		def multiplier = 1
-		def widthGap = minWidth / 4
-		def heightGap = minHeight / 4
+		def widthGap = minWidth / 3
+		def heightGap = minHeight / 3
 		while (true) {
 			def testWidth = BASE_WIDTH * multiplier
-			def testHeight = Math.ceil(testWidth / aspectRatio)
-			if (minWidth - testWidth < widthGap || minHeight - testHeight < heightGap) {
-				return new Dimension(testWidth, testHeight as int)
+			def testHeight = Math.ceil(testWidth / aspectRatio) as int
+			if (minWidth - testWidth <= widthGap || minHeight - testHeight <= heightGap) {
+				return new Dimension(testWidth, testHeight)
 			}
 			multiplier++
 		}
