@@ -52,48 +52,28 @@ class Image implements GraphicsElement, SelfVisitable {
 	 */
 	Image(ImageFile imageFile, Rectanglef dimensions, boolean filter) {
 
-		width     = imageFile.width
-		height    = imageFile.height
-		format    = imageFile.format.value
-		imageData = ByteBuffer.fromBuffersDirect(imageFile.imageData)
-		this.dimensions = dimensions
-		this.filter = filter
+		this(imageFile.width, imageFile.height, imageFile.format.value, imageFile.imageData, dimensions, filter)
 	}
 
-//	/**
-//	 * Constructor, creates an image from a file containing several images.
-//	 * 
-//	 * @param imagesfile The file containing several images, including the one
-//	 * 					 to make.
-//	 * @param imagenum	 The 0-index image number to use for this object.
-//	 */
-//	Image(ImagesFile imagesfile, int imagenum) {
-//
-//		this(imagesfile.filename() + "_" + imagenum, imagesfile.format(), imagesfile.width(), imagesfile.height(),
-//			(imagesfile instanceof Paletted) ? ((Paletted)imagesfile).applyPalette(ResourceManager.getPalette())[imagenum]:
-//			imagesfile.getImages()[imagenum], (imagesfile instanceof Paletted))
-//	}
+	/**
+	 * Constructor, creates an image from the given data.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param format
+	 * @param imageData
+	 * @param dimensions
+	 * @param filter
+	 */
+	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, boolean filter) {
 
-//	/**
-//	 * Constructor, creates an image using the given image parts.
-//	 * 
-//	 * @param name	   The name of the image.
-//	 * @param format   RGB/A format of the image.
-//	 * @param width	   The width of the image.
-//	 * @param height   The height of the image.
-//	 * @param image	   The bytes consisting of the image.
-//	 * @param paletted Whether the file is paletted or not.
-//	 */
-//	Image(String name, int format, int width, int height, ByteBuffer image, boolean paletted) {
-//
-//		super(name + (paletted ? "_" + ResourceManager.getPalette() : ""))
-//		this.format = format
-//		this.coords = new Rectangle2D(-width >> 1, -height >> 1, width >> 1, height >> 1)
-//		this.image  = image
-//
-//		texturewidth  = width
-//		textureheight = height
-//	}
+		this.width      = width
+		this.height     = height
+		this.format     = format
+		this.imageData  = ByteBuffer.fromBuffersDirect(imageData)
+		this.dimensions = dimensions
+		this.filter     = filter
+	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {

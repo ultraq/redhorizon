@@ -19,12 +19,14 @@ package nz.net.ultraq.redhorizon
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.media.AnimationPlayer
 import nz.net.ultraq.redhorizon.media.AudioPlayer
 import nz.net.ultraq.redhorizon.media.ImageViewer
+import nz.net.ultraq.redhorizon.media.ImagesViewer
 import nz.net.ultraq.redhorizon.media.VideoPlayer
 
 import org.reflections.Reflections
@@ -161,6 +163,10 @@ class MediaPlayer implements Callable<Integer> {
 			case ImageFile:
 				def imageViewer = new ImageViewer(file, filtering, fixAspectRatio)
 				imageViewer.view()
+				break
+			case ImagesFile:
+				def imagesViewer = new ImagesViewer(file, filtering, fixAspectRatio)
+				imagesViewer.view()
 				break
 			default:
 				logger.error('No media player for the associated file class of {}', file)

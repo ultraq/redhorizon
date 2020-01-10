@@ -178,6 +178,7 @@ class XORDelta implements Encoder, Decoder {
 		}
 		source.rewind()
 		dest.flip()
+		xorSource.rewind()
 		xorSource = dest
 	}
 

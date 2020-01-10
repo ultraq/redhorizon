@@ -27,9 +27,9 @@ import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 class ShpImageInfoDune2 {
 
 	// The various known flags
-	static final short FLAG_LOOKUP_TABLE                 = 0b00000001
-	static final short FLAG_NO_COMPRESSION               = 0b00000010
-	static final short FLAG_VARIABLE_LENGTH_LOOKUP_TABLE = 0b00000100
+	static final short FLAG_LOOKUP_TABLE                 = 0x01
+	static final short FLAG_NO_COMPRESSION               = 0x02
+	static final short FLAG_VARIABLE_LENGTH_LOOKUP_TABLE = 0x04
 
 	// File header
 	final short flags

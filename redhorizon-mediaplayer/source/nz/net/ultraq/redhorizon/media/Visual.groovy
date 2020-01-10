@@ -42,6 +42,17 @@ trait Visual {
 		if (fixAspectRatio) {
 			height *= 1.2
 		}
-		return new Rectanglef(0, 0, width, height).translate(-width / 2, -height / 2)
+		return centerDimensions(new Rectanglef(0, 0, width, height))
+	}
+
+	/**
+	 * Center a set of dimensions.
+	 * 
+	 * @param dimensions
+	 * @return The same dimensions, but modified to be centered around the origin.
+	 */
+	Rectanglef centerDimensions(Rectanglef dimensions) {
+
+		return dimensions.translate(-dimensions.maxX / 2 as int, -dimensions.maxY / 2 as int)
 	}
 }

@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.codecs.XORDelta
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Paletted
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
@@ -37,7 +36,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @FileExtensions('shp')
-class ShpFile implements ImagesFile, Paletted {
+class ShpFile implements ImagesFile {
 
 	private static final byte FORMAT_LCW       = (byte)0x80
 	private static final byte FORMAT_XOR_BASE  = (byte)0x40
@@ -85,7 +84,7 @@ class ShpFile implements ImagesFile, Paletted {
 
 		// Decompresses the raw SHP data into palette-index data
 		def lcw = new LCW()
-		def xorDelta = new XORDelta(width * height)
+		def xorDelta = new XORDelta(delta)
 
 		imagesData = new ByteBuffer[numImages]
 		imagesData.length.times { i ->
@@ -93,7 +92,7 @@ class ShpFile implements ImagesFile, Paletted {
 
 			// Format conversion buffers
 			def compressedImageSize = imageOffsets[i + 1].offset - imageOffset.offset
-			def compressedImage = ByteBuffer.allocateNative(compressedImageSize)
+			def compressedImage = ByteBuffer.wrapNative(input.readNBytes(compressedImageSize))
 
 			def dest = ByteBuffer.allocateNative(width * height)
 
@@ -102,15 +101,10 @@ class ShpFile implements ImagesFile, Paletted {
 					lcw.decode(compressedImage, dest)
 					break
 				case FORMAT_XOR_BASE:
-					def refOffset = imageOffset.refOff
-					for (def j = 0; j < numImages; j++) {
-						if (refOffset == imageOffsets[j].offset) {
-							xorDelta
-								.deltaSource(imagesData[i])
-								.decode(compressedImage, dest)
-							break
-						}
-					}
+					xorDelta
+						.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
+						.decode(compressedImage, dest)
+					break
 					break
 				case FORMAT_XOR_CHAIN:
 					xorDelta

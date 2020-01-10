@@ -37,11 +37,58 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer applyPalette(ByteBuffer self, Palette palette) {
 
-		ByteBuffer dest = ByteBuffer.allocateNative(self.limit() * palette.format.value)
+		def dest = ByteBuffer.allocateNative(self.limit() * palette.format.value)
 		while (self.hasRemaining()) {
 			dest.put(palette[self.get() & 0xff])
 		}
 		self.rewind()
 		return dest.rewind()
+	}
+
+	/**
+	 * Creates a single overall image buffer from a series of smaller image
+	 * buffers.
+	 * 
+	 * @param self
+	 * @param width   Width of each image.
+	 * @param height  Height of each image
+	 * @param imagesX Number of images to fit on the X axis.
+	 * @return Single combined image buffer.
+	 */
+	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, int imagesX) {
+
+		def imagesY = Math.ceil(self.length / imagesX) as int
+		def compileWidth = width * imagesX
+		def compileHeight = height * imagesY
+		def compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
+
+		// For each image
+		for (def image = 0; image < self.length; image++) {
+			def compilationPointer = (image / imagesX as int) * (compileWidth * height) + ((image % imagesX) * width)
+
+			// For each vertical line of pixels in the current image
+			for (def y = 0; y < height; y++) {
+				compilation
+					.position(compilationPointer)
+					.put(self[image], width)
+				compilationPointer += compileWidth
+			}
+		}
+		return compilation.rewind()
+	}
+
+	/**
+	 * Given several image buffers, find out how many images will fit across so
+	 * that the resulting combined width is less-than or equal-to {@code limitX}
+	 * pixels.
+	 * 
+	 * @param self
+	 * @param width  Width of each image.
+	 * @param limitX Desired combined image width to stay below.
+	 * @return Number of images that will fit within {@code limitX} pixels.
+	 */
+	static int imagesAcross(ByteBuffer[] self, int width, int limitX) {
+
+		return width < limitX ? Math.min(Math.floor(limitX / width), self.length) : 1
 	}
 }
