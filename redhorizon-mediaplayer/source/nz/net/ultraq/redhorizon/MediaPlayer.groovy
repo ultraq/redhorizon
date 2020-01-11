@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.media.AnimationPlayer
-import nz.net.ultraq.redhorizon.media.AudioPlayer
+import nz.net.ultraq.redhorizon.media.SoundPlayer
 import nz.net.ultraq.redhorizon.media.ImageViewer
 import nz.net.ultraq.redhorizon.media.ImagesViewer
 import nz.net.ultraq.redhorizon.media.VideoPlayer
@@ -157,7 +157,7 @@ class MediaPlayer implements Callable<Integer> {
 				animationPlayer.play()
 				break
 			case SoundFile:
-				def audioPlayer = new AudioPlayer(file)
+				def audioPlayer = new SoundPlayer(file)
 				audioPlayer.play()
 				break
 			case ImageFile:

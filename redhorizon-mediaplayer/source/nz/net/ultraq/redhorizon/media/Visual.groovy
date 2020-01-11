@@ -16,9 +16,18 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Rectanglef
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.FutureTask
 
 /**
  * Trait for media players displaying visual content.
@@ -56,5 +65,53 @@ trait Visual {
 	Rectanglef centerDimensions(Rectanglef dimensions) {
 
 		return dimensions.translate(-dimensions.maxX / 2 as int, -dimensions.maxY / 2 as int)
+	}
+
+	/**
+	 * Execute the given context within the context of having a graphics engine,
+	 * setting it up, passing it along to the closure, and finally shutting it
+	 * down.
+	 * 
+	 * @param executorService
+	 * @param fixAspectRatio
+	 * @param closure
+	 */
+	void withGraphicsEngine(ExecutorService executorService, boolean fixAspectRatio,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine')
+		Closure closure) {
+
+		def executionBarrier = new CyclicBarrier(2)
+		def finishBarrier = new CountDownLatch(1)
+
+		// To allow the graphics engine to submit items to execute in this thread
+		FutureTask executable = null
+		def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
+			executable = toExecute
+			executionBarrier.await()
+		})
+		graphicsEngine.on(RenderLoopStopEvent) { event ->
+			finishBarrier.countDown()
+		}
+		def engine = executorService.submit(graphicsEngine)
+
+		closure(graphicsEngine)
+
+		// Execute things from this thread when needed
+		while (!engine.done) {
+			executionBarrier.await()
+			if (executable) {
+				executable.run()
+				executable = null
+				executionBarrier.reset()
+			}
+
+			// Shutdown phase
+			if (graphicsEngine.started && graphicsEngine.stopped) {
+				finishBarrier.await()
+				break
+			}
+		}
+
+		engine.get()
 	}
 }

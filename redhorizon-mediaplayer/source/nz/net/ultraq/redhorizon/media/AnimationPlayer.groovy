@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
-import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -27,10 +24,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 /**
  * A basic animation player, used primarily for testing purposes.
@@ -56,67 +50,34 @@ class AnimationPlayer implements Visual {
 		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def executionBarrier = new CyclicBarrier(2)
-			def finishBarrier = new CountDownLatch(1)
+			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
-			// To allow the graphics engine to submit items to execute in this thread
-			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
-				executable = toExecute
-				executionBarrier.await()
-			})
+				// Add the animation to the engine once we have the window dimensions
+				def animation
+				graphicsEngine.on(WindowCreatedEvent) { event ->
+					def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
+						fixAspectRatio, event.windowSize)
 
-			// Add the animation to the engine once we have the window dimensions
-			def animation
-			graphicsEngine.on(WindowCreatedEvent) { event ->
-				def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
-					fixAspectRatio, event.windowSize)
+					animation = new Animation(animationFile, animationCoordinates, filtering, executorService)
+					animation.on(StopEvent) { stopEvent ->
+						logger.debug('Animation stopped')
+						graphicsEngine.stop()
+					}
+					graphicsEngine.addSceneElement(animation)
 
-				animation = new Animation(animationFile, animationCoordinates, filtering, executorService)
-				animation.on(StopEvent) { stopEvent ->
-					logger.debug('Animation stopped')
-					graphicsEngine.stop()
-				}
-				graphicsEngine.addSceneElement(animation)
+					if (scanlines) {
+						graphicsEngine.addSceneElement(new Scanlines(
+							new Dimension(animationFile.width, animationFile.height),
+							animationCoordinates
+						))
+					}
 
-				if (scanlines) {
-					graphicsEngine.addSceneElement(new Scanlines(
-						new Dimension(animationFile.width, animationFile.height),
-						animationCoordinates
-					))
-				}
-			}
-
-			graphicsEngine.on(RenderLoopStartEvent) { event ->
-				executorService.submit { ->
 					animation.play()
 					logger.debug('Animation started')
+
+					logger.info('Waiting for animation to finish.  Close the window to exit.')
 				}
 			}
-			graphicsEngine.on(RenderLoopStopEvent) { event ->
-				finishBarrier.countDown()
-			}
-			def engine = executorService.submit(graphicsEngine)
-
-			logger.info('Waiting for animation to finish.  Close the window to exit.')
-
-			// Execute things from this thread when needed
-			while (!engine.done) {
-				executionBarrier.await()
-				if (executable) {
-					executable.run()
-					executable = null
-					executionBarrier.reset()
-				}
-
-				// Shutdown phase
-				if (graphicsEngine.started && graphicsEngine.stopped) {
-					finishBarrier.await()
-					break
-				}
-			}
-
-			engine.get()
 		}
 	}
 }

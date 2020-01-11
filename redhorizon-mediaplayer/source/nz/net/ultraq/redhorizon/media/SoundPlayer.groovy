@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.aud.AudFile
 
@@ -32,9 +31,9 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AudioPlayer {
+class SoundPlayer implements Audio {
 
-	private static final Logger logger = LoggerFactory.getLogger(AudioPlayer)
+	private static final Logger logger = LoggerFactory.getLogger(SoundPlayer)
 
 	final SoundFile soundFile
 
@@ -46,35 +45,32 @@ class AudioPlayer {
 		logger.info('File details: {}', soundFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
+			withAudioEngine(executorService) { audioEngine ->
 
-			// Try determine the appropriate media for the sound file
-			def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
-				new SoundTrack(soundFile, executorService) :
-				new SoundEffect(soundFile)
+				// Try determine the appropriate media for the sound file
+				def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
+					new SoundTrack(soundFile, executorService) :
+					new SoundEffect(soundFile)
 
-			def audioEngine = new AudioEngine()
-			audioEngine.addSceneElement(sound)
+				audioEngine.addSceneElement(sound)
 
-			def engine = executorService.submit(audioEngine)
-
-			sound.on(StopEvent) { event ->
-				logger.debug('Sound stopped')
-				audioEngine.stop()
-			}
-			sound.play()
-
-			logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
-
-			// TODO: I think this is what's holding up execution - see if I can't kill it on program end
-			executorService.submit({ ->
-				def reader = new InputStreamReader(System.in)
-				if (reader.read()) {
-					logger.debug('Keyboard input received')
+				sound.on(StopEvent) { event ->
+					logger.debug('Sound stopped')
 					audioEngine.stop()
 				}
-			})
+				sound.play()
 
-			engine.get()
+				logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
+
+				// TODO: I think this is what's holding up execution - see if I can't kill it on program end
+				executorService.submit({ ->
+					def reader = new InputStreamReader(System.in)
+					if (reader.read()) {
+						logger.debug('Keyboard input received')
+						audioEngine.stop()
+					}
+				})
+			}
 		}
 	}
 }

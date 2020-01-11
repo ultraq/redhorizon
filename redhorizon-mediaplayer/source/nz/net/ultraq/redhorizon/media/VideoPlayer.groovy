@@ -17,9 +17,6 @@
 package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
-import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
-import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -28,10 +25,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 /**
  * A basic video player, used primarily for testing purposes.
@@ -39,7 +33,7 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer implements Visual {
+class VideoPlayer implements Audio, Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
@@ -57,83 +51,42 @@ class VideoPlayer implements Visual {
 		logger.info('File details: {}', videoFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def executionBarrier = new CyclicBarrier(2)
-			def finishBarrier = new CountDownLatch(2)
+			withAudioEngine(executorService) { audioEngine ->
+				withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
-			def audioEngine = new AudioEngine()
+					// Add the video to the engines once we have the window dimensions
+					def video
+					graphicsEngine.on(WindowCreatedEvent) { event ->
+						def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
+							fixAspectRatio, event.windowSize)
 
-			// To allow the graphics engine to submit items to execute in this thread
-			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
-				executable = toExecute
-				executionBarrier.await()
-			})
+						video = new Video(videoFile, videoCoordinates, filtering, executorService)
+						video.on(StopEvent) { stopEvent ->
+							logger.debug('Video stopped')
+							audioEngine.stop()
+							graphicsEngine.stop()
+						}
+						audioEngine.addSceneElement(video)
+						graphicsEngine.addSceneElement(video)
 
-			// Add the video to the engines once we have the window dimensions
-			def video
-			graphicsEngine.on(WindowCreatedEvent) { event ->
-				def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
-					fixAspectRatio, event.windowSize)
+						if (scanlines) {
+							graphicsEngine.addSceneElement(new Scanlines(
+								new Dimension(videoFile.width, videoFile.height),
+								videoCoordinates
+							))
+						}
+					}
 
-				video = new Video(videoFile, videoCoordinates, filtering, executorService)
-				video.on(StopEvent) { stopEvent ->
-					logger.debug('Video stopped')
-					audioEngine.stop()
-					graphicsEngine.stop()
-				}
-				audioEngine.addSceneElement(video)
-				graphicsEngine.addSceneElement(video)
+					graphicsEngine.on(RenderLoopStartEvent) { event ->
+						executorService.submit { ->
+							video.play()
+							logger.debug('Video started')
+						}
+					}
 
-				if (scanlines) {
-					graphicsEngine.addSceneElement(new Scanlines(
-						new Dimension(videoFile.width, videoFile.height),
-						videoCoordinates
-					))
-				}
-			}
-
-			graphicsEngine.on(RenderLoopStartEvent) { event ->
-				executorService.submit { ->
-					video.play()
-					logger.debug('Video started')
+					logger.info('Waiting for video to finish.  Close the window to exit.')
 				}
 			}
-
-			// Stop both engines if one goes down
-			audioEngine.on(RenderLoopStopEvent) { event ->
-				video.stop()
-				graphicsEngine.stop()
-				finishBarrier.countDown()
-			}
-			graphicsEngine.on(RenderLoopStopEvent) { event ->
-				video.stop()
-				audioEngine.stop()
-				finishBarrier.countDown()
-			}
-
-			def audioEngineTask = executorService.submit(audioEngine)
-			def graphicsEngineTask = executorService.submit(graphicsEngine)
-
-			logger.info('Waiting for video to finish.  Close the window to exit.')
-
-			// Execute things from this thread when needed
-			while (!graphicsEngineTask.done) {
-				executionBarrier.await()
-				if (executable) {
-					executable.run()
-					executable = null
-					executionBarrier.reset()
-				}
-
-				// Shutdown phase
-				if (graphicsEngine.started && graphicsEngine.stopped) {
-					finishBarrier.await()
-					break
-				}
-			}
-
-			graphicsEngineTask.get()
-			audioEngineTask.get()
 		}
 	}
 }

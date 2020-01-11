@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.media
 
-import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
@@ -25,10 +23,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 /**
  * A basic image viewer, used primarily for testing purposes.
@@ -53,48 +48,17 @@ class ImageViewer implements Visual {
 		logger.info('File details: {}', imageFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def executionBarrier = new CyclicBarrier(2)
-			def finishBarrier = new CountDownLatch(1)
+			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
-			// To allow the graphics engine to submit items to execute in this thread
-			FutureTask executable = null
-			def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
-				executable = toExecute
-				executionBarrier.await()
-			})
-
-			// Add the image to the engine once we have the window dimensions
-			graphicsEngine.on(WindowCreatedEvent) { event ->
-				graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
-					imageFile.width, imageFile.height, fixAspectRatio, event.windowSize), filtering
-				))
-			}
-
-			graphicsEngine.on(RenderLoopStopEvent) { event ->
-				finishBarrier.countDown()
-			}
-
-			def engine = executorService.submit(graphicsEngine)
-
-			logger.info('Displaying the image in another window.  Close the window to exit.')
-
-			// Execute things from this thread when needed
-			while (!engine.done) {
-				executionBarrier.await()
-				if (executable) {
-					executable.run()
-					executable = null
-					executionBarrier.reset()
+				// Add the image to the engine once we have the window dimensions
+				graphicsEngine.on(WindowCreatedEvent) { event ->
+					graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
+						imageFile.width, imageFile.height, fixAspectRatio, event.windowSize), filtering
+					))
 				}
 
-				// Shutdown phase
-				if (graphicsEngine.started && graphicsEngine.stopped) {
-					finishBarrier.await()
-					break
-				}
+				logger.info('Displaying the image in another window.  Close the window to exit.')
 			}
-
-			engine.get()
 		}
 	}
 }
