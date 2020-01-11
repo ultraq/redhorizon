@@ -53,16 +53,16 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final Rectanglef dimensions
 	final boolean filter
 
-	private final Worker frameDataWorker
-	private final BlockingQueue<ByteBuffer> frameBuffer
+	private final Worker animationDataWorker
+	private final BlockingQueue<ByteBuffer> frames
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
+	private int framesQueued
 	private long animationTimeStart
 
 	// Rendering information
-	private List<ByteBuffer> frames // TODO: Can we do without this?  ie: turn every frame into a texture
 	private int lastFrame
-	private int[] textureIds
+	private List<Integer> textureIds
 
 	/**
 	 * Constructor, create an animation out of animation file data.
@@ -78,7 +78,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			dimensions, filter, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
 
-		executorService.execute(frameDataWorker)
+		executorService.execute(animationDataWorker)
 	}
 
 	/**
@@ -92,13 +92,13 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param dimensions
 	 * @param filter
 	 * @param bufferSize
-	 * @param frameDataWorker
+	 * @param animationDataWorker
 	 */
 	@PackageScope
 	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions, boolean filter,
-		int bufferSize = 10, Worker frameDataWorker) {
+		int bufferSize = 10, Worker animationDataWorker) {
 
-		if (!frameDataWorker) {
+		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
@@ -110,12 +110,12 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.dimensions = dimensions
 		this.filter     = filter
 
-		frameBuffer = new ArrayBlockingQueue<>(bufferSize)
+		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
-		this.frameDataWorker = frameDataWorker
-		this.frameDataWorker.on(StreamingFrameEvent) { event ->
-			frameBuffer << ByteBuffer.fromBuffersDirect(event.frame)
-			if (!frameBuffer.remainingCapacity() && bufferReady.count) {
+		this.animationDataWorker = animationDataWorker
+		this.animationDataWorker.on(StreamingFrameEvent) { event ->
+			frames << ByteBuffer.fromBuffersDirect(event.frame)
+			if (bufferReady.count && !frames.remainingCapacity()) {
 				bufferReady.countDown()
 			}
 		}
@@ -124,18 +124,17 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		frameDataWorker.stop()
-		frameBuffer.drain()
+		animationDataWorker.stop()
+		frames.drain()
 		renderer.deleteTextures(textureIds.findAll { it } as int[])
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		frames = []
 		lastFrame = -1
-		textureIds = new int[numFrames]
-		Arrays.fill(textureIds, 0)
+		textureIds = []
+		framesQueued = 0
 	}
 
 	@Override
@@ -153,14 +152,18 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		if (playing) {
 			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
-			// Try to load up to frameBufferTarget frames ahead
-			if (frameBuffer.size()) {
+			// Try to load up to bufferSize frames ahead
+			if (frames.size()) {
 				def framesAhead = Math.min(currentFrame + bufferSize, numFrames)
-				if (!frames[framesAhead]) {
-					def numFramesToRead = framesAhead - frames.size()
+				if (!textureIds[framesAhead]) {
+					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
-						def newFrames = frameBuffer.drain(numFramesToRead)
-						frames.addAll(newFrames)
+						def newTextureIds = frames.drain(numFramesToRead).collect { frame ->
+							def newTextureId = renderer.createTexture(frame, format, width, height, filter)
+							textureIds << newTextureId
+							return newTextureId
+						}
+						framesQueued += newTextureIds.size()
 					}
 				}
 			}
@@ -168,19 +171,11 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			// Draw the current frame if available
 			if (currentFrame < numFrames) {
 				def textureId = textureIds[currentFrame]
-				if (!textureId) {
-					def frame = frames[currentFrame]
-					if (frame) {
-						textureId = renderer.createTexture(frame, format, width, height, filter)
-						renderer.drawTexture(textureId, dimensions)
-						textureIds[currentFrame] = textureId
-					}
-					else {
-						logger.debug('Frame {} not available, skipping', currentFrame)
-					}
+				if (textureId) {
+					renderer.drawTexture(textureId, dimensions)
 				}
 				else {
-					renderer.drawTexture(textureId, dimensions)
+					logger.debug('Frame {} not available, skipping', currentFrame)
 				}
 			}
 
@@ -191,13 +186,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 			// Delete used frames as the animation progresses to free up memory
 			if (lastFrame != -1 && lastFrame != currentFrame) {
-				def lastTextureId = textureIds[lastFrame]
-				if (lastTextureId) {
-					renderer.deleteTextures(lastTextureId)
-				}
-				lastFrame..<currentFrame.each { i ->
-					frames[i] = null
-				}
+				def usedTextureIds = textureIds[lastFrame..<currentFrame]
+				renderer.deleteTextures(usedTextureIds as int[])
+				usedTextureIds.clear()
+				framesQueued -= usedTextureIds.size()
 			}
 			lastFrame = currentFrame
 		}

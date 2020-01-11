@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import org.joml.Rectanglef
 
 /**

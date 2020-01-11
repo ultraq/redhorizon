@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
-import nz.net.ultraq.redhorizon.media.Dimension
+import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.slf4j.Logger
