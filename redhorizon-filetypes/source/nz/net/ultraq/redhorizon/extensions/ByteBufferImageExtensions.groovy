@@ -63,16 +63,17 @@ class ByteBufferImageExtensions {
 		def compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
 
 		// For each image
-		for (def image = 0; image < self.length; image++) {
-			def compilationPointer = (image / imagesX as int) * (compileWidth * height) + ((image % imagesX) * width)
+		self.eachWithIndex { image, i ->
+			def compilationPointer = (i / imagesX as int) * (compileWidth * height) + ((i % imagesX) * width)
 
 			// For each vertical line of pixels in the current image
-			for (def y = 0; y < height; y++) {
+			height.times { y ->
 				compilation
 					.position(compilationPointer)
-					.put(self[image], width)
+					.put(image, width)
 				compilationPointer += compileWidth
 			}
+			image.rewind()
 		}
 		return compilation.rewind()
 	}

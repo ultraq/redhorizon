@@ -53,8 +53,10 @@ class ImagesViewer implements Visual {
 
 		// TODO: Load a palette based on CLI options
 		Palette palette
-		new BufferedInputStream(this.class.classLoader.getResourceAsStream('ra-temperat.pal')).withCloseable { inputStream ->
-			palette = new PalFile(inputStream)
+		if (imagesFile.format == FORMAT_INDEXED) {
+			new BufferedInputStream(this.class.classLoader.getResourceAsStream('td-temperat.pal')).withCloseable { inputStream ->
+				palette = new PalFile(inputStream)
+			}
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
@@ -69,7 +71,8 @@ class ImagesViewer implements Visual {
 					if (imagesFile.format == FORMAT_INDEXED) {
 						combinedImage = combinedImage.applyPalette(palette)
 					}
-					graphicsEngine.addSceneElement(new Image(combinedWidth, combinedHeight, palette.format.value, combinedImage,
+					graphicsEngine.addSceneElement(new Image(combinedWidth, combinedHeight,
+						(palette?.format ?: imagesFile.format).value, combinedImage,
 						centerDimensions(new Rectanglef(0, 0, combinedWidth, combinedHeight)),
 						filtering
 					))
