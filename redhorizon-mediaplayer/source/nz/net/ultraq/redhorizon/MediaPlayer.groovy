@@ -77,6 +77,9 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays (images/animations/videos only)')
 	boolean fixAspectRatio
 
+	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
+	String paletteType
+
 	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
 	boolean scanlines
 
@@ -157,15 +160,15 @@ class MediaPlayer implements Callable<Integer> {
 				animationPlayer.play()
 				break
 			case SoundFile:
-				def audioPlayer = new SoundPlayer(file)
-				audioPlayer.play()
+				def soundPlayer = new SoundPlayer(file)
+				soundPlayer.play()
 				break
 			case ImageFile:
 				def imageViewer = new ImageViewer(file, filtering, fixAspectRatio)
 				imageViewer.view()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(file, filtering, fixAspectRatio)
+				def imagesViewer = new ImagesViewer(file, filtering, fixAspectRatio, paletteType)
 				imagesViewer.view()
 				break
 			default:

@@ -43,6 +43,7 @@ class ImagesViewer implements Visual {
 	final ImagesFile imagesFile
 	final boolean filtering
 	final boolean fixAspectRatio
+	final String paletteType
 
 	/**
 	 * View the configured file.
@@ -51,10 +52,10 @@ class ImagesViewer implements Visual {
 
 		logger.info('File details: {}', imagesFile)
 
-		// TODO: Load a palette based on CLI options
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
-			new BufferedInputStream(this.class.classLoader.getResourceAsStream('td-temperat.pal')).withCloseable { inputStream ->
+			def paletteName = "${paletteType.toLowerCase()}-temperat.pal"
+			new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteName)).withCloseable { inputStream ->
 				palette = new PalFile(inputStream)
 			}
 		}
