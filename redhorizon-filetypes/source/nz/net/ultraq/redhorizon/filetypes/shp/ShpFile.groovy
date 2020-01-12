@@ -105,7 +105,6 @@ class ShpFile implements ImagesFile {
 						.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
 						.decode(compressedImage, dest)
 					break
-					break
 				case FORMAT_XOR_CHAIN:
 					xorDelta
 //						.deltaSource(imagesData[i - 1])
