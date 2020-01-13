@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.filetypes.vqa
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
 import groovy.transform.PackageScope
-import groovy.transform.TupleConstructor
 
 /**
  * Header for a "chunk" in a VQA file.  Each chunk header consists of a 4-letter

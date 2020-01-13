@@ -26,6 +26,9 @@ import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -49,6 +52,8 @@ import java.util.concurrent.Executors
  */
 @FileExtensions('vqa')
 class VqaFile implements Streaming, VideoFile {
+
+	private static final Logger logger = LoggerFactory.getLogger(VqaFile)
 
 	private final NativeDataInputStream input
 
@@ -130,9 +135,21 @@ class VqaFile implements Streaming, VideoFile {
 		maxCbfzSize  = input.readInt()
 		unknown5     = input.readInt()
 
+		// Several unknown chunks can occur here, which we can skip for now
+		while (true) {
+			input.mark(4)
+			def chunkName = new String(input.readNBytes(4))
+			if (chunkName == 'FINF') {
+				input.reset()
+				break
+			}
+			logger.debug('Unknown chunk "{}" found in header, skipping', chunkName)
+			input.skip(Integer.reverseBytes(input.readInt()))
+		}
+
 		// Chunk (frame and sound) offsets
 		finf = new String(input.readNBytes(4))
-		assert finf == 'FINF'
+		assert finf ==~ /FINF/
 		finfLength = Integer.reverseBytes(input.readInt())
 
 		offsets = new int[numFrames]
