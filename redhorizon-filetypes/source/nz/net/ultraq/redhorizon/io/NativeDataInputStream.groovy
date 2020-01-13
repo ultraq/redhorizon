@@ -29,6 +29,8 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Delegate
 	private final DataInputStream dis
 	private final boolean isLittleEndian
+	private int bytesRead
+	private int markAt
 
 	/**
 	 * Constructor, wraps the given input stream so that values read from it are
@@ -42,9 +44,20 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 		isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
 	}
 
+	/**
+	 * Returns the number of bytes read in the stream so far.
+	 * 
+	 * @return
+	 */
+	int getBytesRead() {
+
+		return bytesRead
+	}
+
 	@Override
 	synchronized void mark(int readLimit) {
 
+		markAt = bytesRead
 		dis.mark(readLimit)
 	}
 
@@ -52,6 +65,13 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	boolean markSupported() {
 
 		return dis.markSupported()
+	}
+
+	@Override
+	int read() {
+
+		bytesRead++
+		return dis.read()
 	}
 
 	/**
@@ -83,6 +103,7 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Override
 	synchronized void reset() {
 
+		bytesRead = markAt
 		dis.reset()
 	}
 }

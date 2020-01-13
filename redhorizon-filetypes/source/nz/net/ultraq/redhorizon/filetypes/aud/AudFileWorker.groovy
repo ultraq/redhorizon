@@ -53,7 +53,8 @@ class AudFileWorker extends Worker {
 		def decoder = type == AudFile.TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 		// Decompress the aud file data by chunks
-		for (def bytesRead = 0; bytesRead < compressedSize && canContinue; ) {
+		def headerSize = input.bytesRead
+		while (canContinue && input.bytesRead < headerSize + compressedSize) {
 
 			// Chunk header
 			def compressedSize = input.readShort()
@@ -68,7 +69,6 @@ class AudFileWorker extends Worker {
 			decoder.decode(compressedSample, sample)
 
 			trigger(new StreamingSampleEvent(sample))
-			bytesRead += 8 + compressedSize
 		}
 
 		if (!stopped) {

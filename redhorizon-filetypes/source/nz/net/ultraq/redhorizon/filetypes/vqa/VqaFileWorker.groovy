@@ -164,6 +164,7 @@ class VqaFileWorker extends Worker {
 			input.mark(1)
 			def nextByte = input.read()
 			if (nextByte == -1) {
+				input.reset()
 				return -1
 			}
 			if (nextByte) {
@@ -187,9 +188,8 @@ class VqaFileWorker extends Worker {
 		}
 
 		// Header + Offsets
-		for (def bytesRead = 62 + finfLength; bytesRead < formLength && canContinue; ) {
+		while (canContinue && input.bytesRead < formLength) {
 			def chunkHeader = new VqaChunkHeader(input)
-			bytesRead += 8
 
 			switch (chunkHeader.name) {
 
@@ -197,7 +197,6 @@ class VqaFileWorker extends Worker {
 			case ~/SND./:
 				def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
 				trigger(new StreamingSampleEvent(sample))
-				bytesRead += chunkHeader.length
 				break
 
 			// Decode image and image-related data
@@ -250,17 +249,14 @@ class VqaFileWorker extends Worker {
 					partialCodebooks.clear()
 				}
 
-				bytesRead += chunkHeader.length
 				break
 
 			default:
 				logger.debug('Unknown chunk "{}", skipping', chunkHeader.name)
-				bytesRead += input.skip(chunkHeader.length)
+				input.skip(chunkHeader.length)
 			}
 
-			if (discardNullByte()) {
-				bytesRead++
-			}
+			discardNullByte()
 		}
 
 		if (!stopped) {
