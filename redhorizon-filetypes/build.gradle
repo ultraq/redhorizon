@@ -18,6 +18,12 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 description = 'Filetypes module for the Red Horizon project'
 
+repositories {
+	flatDir {
+		dirs 'libraries'
+	}
+}
+
 dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
