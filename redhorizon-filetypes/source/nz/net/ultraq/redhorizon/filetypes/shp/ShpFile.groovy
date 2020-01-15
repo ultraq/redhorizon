@@ -124,6 +124,6 @@ class ShpFile implements ImagesFile {
 	@Override
 	String toString() {
 
-		return "SHP file (C&C), ${numImages} ${width}x${height} images (no palette)"
+		return "SHP file (C&C), contains ${numImages} ${width}x${height} images (no palette)"
 	}
 }

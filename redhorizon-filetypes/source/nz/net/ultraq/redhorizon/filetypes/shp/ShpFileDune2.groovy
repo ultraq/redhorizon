@@ -152,6 +152,6 @@ class ShpFileDune2 {
 	@Override
 	String toString() {
 
-		return "SHP file (Dune 2), ${numImages} ${width}x${height} images (no palette)"
+		return "SHP file (Dune 2), contains ${numImages} images of various sizes (no palette)"
 	}
 }
