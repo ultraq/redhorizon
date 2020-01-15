@@ -100,9 +100,9 @@ trait Visual {
 		while (!engine.done) {
 			executionBarrier.await()
 			if (executable) {
+				executionBarrier.reset()
 				executable.run()
 				executable = null
-				executionBarrier.reset()
 			}
 
 			// Shutdown phase

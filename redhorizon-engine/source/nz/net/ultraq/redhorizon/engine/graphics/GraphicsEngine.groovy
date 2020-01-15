@@ -100,11 +100,11 @@ class GraphicsEngine extends EngineSubsystem {
 		Thread.currentThread().name = 'Graphics Engine'
 
 		// Initialization
-		context = waitForMainThread({ ->
+		context = waitForMainThread { ->
 			def openGlContext = new OpenGLContext(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
 			trigger(new WindowCreatedEvent(openGlContext.windowSize))
 			return openGlContext
-		})
+		}
 		context.withCloseable {
 			OpenGLRenderer renderer
 			context.withCurrent { ->
@@ -144,11 +144,11 @@ class GraphicsEngine extends EngineSubsystem {
 					}
 					context.swapBuffers()
 				}
-				waitForMainThread({ ->
+				waitForMainThread { ->
 					context.withCurrent { ->
 						context.pollEvents()
 					}
-				})
+				}
 			}
 
 			// Shutdown
@@ -181,12 +181,12 @@ class GraphicsEngine extends EngineSubsystem {
 	 * executed by the main thread, returning the result of execution in that
 	 * thread.
 	 * 
-	 * @param callable
+	 * @param closure
 	 * @return
 	 */
-	private <T> T waitForMainThread(Callable<T> callable) {
+	private <T> T waitForMainThread(Closure<T> closure) {
 
-		def future = new FutureTask<T>(callable)
+		def future = new FutureTask<T>(closure)
 		needsMainThreadCallback(future)
 		return future.get()
 	}
