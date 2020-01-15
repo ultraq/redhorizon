@@ -152,13 +152,13 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		if (playing) {
 			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
 
-			// Try to load up to bufferSize frames ahead
+			// Try to load up to bufferSize frames ahead, maxing at 5 so we don't spent too much time in here
 			if (frames.size()) {
 				def framesAhead = Math.min(currentFrame + bufferSize, numFrames)
 				if (!textureIds[framesAhead]) {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
-						def newTextureIds = frames.drain(numFramesToRead).collect { frame ->
+						def newTextureIds = frames.drain(Math.max(numFramesToRead, 5)).collect { frame ->
 							def newTextureId = renderer.createTexture(frame, format, width, height, filter)
 							textureIds << newTextureId
 							return newTextureId

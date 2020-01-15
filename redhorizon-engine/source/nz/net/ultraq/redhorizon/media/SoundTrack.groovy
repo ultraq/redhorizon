@@ -130,11 +130,11 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 
 		if (playing) {
 
-			// Buffers to read and queue
+			// Buffers to read and queue, maxing at 5 so we don't spend too much time in here
 			if (samples.size()) {
 				def numBuffersToRead = bufferSize - buffersQueued
 				if (numBuffersToRead) {
-					def newBufferIds = samples.drain(numBuffersToRead).collect { buffer ->
+					def newBufferIds = samples.drain(Math.max(numBuffersToRead, 5)).collect { buffer ->
 						def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
 						bufferIds << newBufferId
 						return newBufferId
