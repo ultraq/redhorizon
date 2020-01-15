@@ -38,10 +38,10 @@ interface ArchiveFile<E extends ArchiveEntry> extends Closeable {
 	E getEntry(String name)
 
 	/**
-	 * Returns an input stream to the entry in the archive.
+	 * Returns a buffered input stream to the entry in the archive.
 	 * 
 	 * @param entry Descriptor of the entry in the archive file.
 	 * @return An input stream for reading the entry within the archive.
 	 */
-	InputStream getEntryData(E entry)
+	BufferedInputStream getEntryData(E entry)
 }

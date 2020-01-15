@@ -66,7 +66,7 @@ class MediaPlayer implements Callable<Integer> {
 	CommandSpec commandSpec
 
 	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
-	String file
+	File file
 
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the entry in the mix file to play')
 	String entryName
@@ -96,13 +96,13 @@ class MediaPlayer implements Callable<Integer> {
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
 		logger.info('Loading {}...', file)
-		if (file.endsWith('.mix')) {
-			new MixFile(new File(file)).withCloseable { mix ->
+		if (file.name.endsWith('.mix')) {
+			new MixFile(file).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
-					new BufferedInputStream(mix.getEntryData(entry)).withCloseable { entryInput ->
-						play(getFileClass(entryName).newInstance(entryInput))
+					mix.getEntryData(entry).withStream { inputStream ->
+						play(getFileClass(entryName).newInstance(inputStream))
 					}
 				}
 				else {
@@ -112,8 +112,8 @@ class MediaPlayer implements Callable<Integer> {
 			}
 		}
 		else {
-			new BufferedInputStream(new FileInputStream(file)).withCloseable { input ->
-				play(getFileClass(file).newInstance(input))
+			file.withInputStream { inputStream ->
+				play(getFileClass(file.name).newInstance(inputStream))
 			}
 		}
 		return 0
