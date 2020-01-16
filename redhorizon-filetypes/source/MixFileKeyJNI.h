@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey
  * Method:    getBlowfishKeyNative
- * Signature: ([B[B)V
+ * Signature: ([B[B[B[BI)V
  */
 JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_getBlowfishKeyNative
-  (JNIEnv *, jclass, jbyteArray, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jbyteArray, jbyteArray, jint);
 
 #ifdef __cplusplus
 }

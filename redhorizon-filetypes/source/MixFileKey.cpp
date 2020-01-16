@@ -33,27 +33,6 @@
 #include "MixFileKey.h"
 #include "MixFileKeyJNI.h"
 
-// Public key string and character map?
-const static char* keystring = "AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V";
-const static char char2num[] = {
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
-	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-	-1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
-	-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-};
-
 // Public key
 static struct {
 	BigNumber key1;
@@ -84,14 +63,36 @@ static BigNumber130 global2;
  * @param source Byte array containing the 80-byte key source.
  * @param dest   Byte array store for the 56-byte Blowfish key.
  */
-JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_getBlowfishKeyNative
-	(JNIEnv *env, jclass cnckey, jbyteArray source, jbyteArray dest) {
+JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_getBlowfishKeyNative(
+	JNIEnv *env, jclass cnckey, jbyteArray source, jbyteArray dest,
+	jbyteArray publicKey1, jbyteArray publicKey2, jint publicKeyLength) {
 
-	static bool publickeyinit = false;
-	if (!publickeyinit) {
-		initPublicKey();
-		publickeyinit = true;
+	initBigNumber(PublicKey.key2, 0, 64);
+	jsize publicKey2Length = env->GetArrayLength(publicKey2);
+	jbyte *publicKey2Bytes = env->GetByteArrayElements(publicKey2, 0);
+	for (int i = 0; i < publicKey2Length; i++) {
+		((unsigned char*)PublicKey.key2)[i] = publicKey2Bytes[i];
 	}
+	printf("Public key 2: ");
+	for (int i = 0; i < sizeof(PublicKey.key2); i++) {
+		printf("0x%x, ", PublicKey.key2[i]);
+	}
+	printf("\n");
+
+	initBigNumber(PublicKey.key1, 0, 64);
+	jsize publicKey1Length = env->GetArrayLength(publicKey1);
+	jbyte *publicKey1Bytes = env->GetByteArrayElements(publicKey1, 0);
+	for (int i = 0; i < publicKey1Length; i++) {
+		((unsigned char*)PublicKey.key1)[i] = publicKey1Bytes[i];
+	}
+	printf("Public key 1: ");
+	for (int i = 0; i < sizeof(PublicKey.key1); i++) {
+		printf("0x%x, ", PublicKey.key1[i]);
+	}
+	printf("\n");
+
+	PublicKey.length = publicKeyLength;
+
 
 	jbyte sourcebytes[80]; env->GetByteArrayRegion(source, 0, 80, sourcebytes);
 	jbyte destbytes[56];   env->GetByteArrayRegion(dest, 0, 56, destbytes);
@@ -102,33 +103,8 @@ JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_ge
 
 	env->SetByteArrayRegion(source, 0, 80, sourcebytes);
 	env->SetByteArrayRegion(dest, 0, 56, destbytes);
-}
 
-/**
- * Initializes the variables in the PublicKey struct.  Namely, fills the
- * PublicKey.Key1 BigNumber with what appears to be a list of characters based
- * from the keystring variable, and the character map.
- */
-static void initPublicKey() {
-
-	char tempkey[256];
-	initBigNumber(PublicKey.key2, 0x00010001, 64);
-
-	for (int i1 = 0, i2 = 0; i1 < strlen(keystring); ) {
-
-		int temp = 0;
-		temp |= char2num[keystring[i1++]]; temp <<= 6;
-		temp |= char2num[keystring[i1++]]; temp <<= 6;
-		temp |= char2num[keystring[i1++]]; temp <<= 6;
-		temp |= char2num[keystring[i1++]];
-
-		tempkey[i2++] = (temp >> 16) & 0xff;
-		tempkey[i2++] = (temp >> 8)  & 0xff;
-		tempkey[i2++] =  temp        & 0xff;
-	}
-
-	dataLength(PublicKey.key1, tempkey, 64);
-	PublicKey.length = bignumberBitLength(PublicKey.key1, 64) - 1;
+	fflush(stdout);
 }
 
 /**
@@ -254,44 +230,6 @@ static void calculateKey(BigNumber n1, BigNumber n2, BigNumber n3, BigNumber n4,
 	}
 	initBigNumber(temp, 0, n4length);
 	clearTempVars(limit);
-}
-
-/**
- * Attempts to discover the length of the key (in bytes) from the key string.
- * This is normally found in the 1st index position (data[1]) of the string.
- * But if the value at that position has it's sign bit set to 1, then discover
- * the length using a loop.
- * 
- * Once the length has been determined, a call moveDataToKey() is made to
- * begin moving bytes over.
- * 
- * @param key   The key which will take the bytes from the key string.
- * @param *data char* to the key string.
- * @param limit Max array length variable.
- */
-static void dataLength(BigNumber key, char *data, int limit) {
-
-	if (data[0] != 2) {
-		return;
-	}
-	data++;
-
-	int keylength;
-	if (data[0] & 0x80) {
-		keylength = 0;
-		for (int i = 0; i < (data[0] & 0x7f); i++) {
-			keylength = (keylength << 8) | data[i + 1];
-		}
-		data += (data[0] & 0x7f) + 1;
-	}
-	else {
-		keylength = data[0];
-		data++;
-	}
-
-	if (keylength <= limit * 4) {
-		moveDataToKey(key, data, keylength, limit);
-	}
 }
 
 /**

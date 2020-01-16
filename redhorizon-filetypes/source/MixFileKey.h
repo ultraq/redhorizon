@@ -26,7 +26,6 @@ typedef unsigned int BigNumber4[4];
 typedef unsigned int BigNumber130[130];
 
 // Pre-calculation stuff
-static void initPublicKey();
 static void initTwoInts(BigNumber, int);
 
 // Key calculations and methods
@@ -34,7 +33,6 @@ static void calculateBigNumber(BigNumber, BigNumber, BigNumber, int);
 static void calculateKey(BigNumber, BigNumber, BigNumber, BigNumber, int);
 static void dataLength(BigNumber, char *, int);
 static unsigned int getMulShort(BigNumber);
-static void moveDataToKey(BigNumber, char *, int, int);
 static int  predataLength();
 static void predataProcessing(const void *, int, unsigned char *);
 static void clearTempVars(int);
