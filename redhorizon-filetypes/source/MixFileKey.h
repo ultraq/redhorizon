@@ -25,6 +25,10 @@ typedef unsigned int BigNumber[64];
 typedef unsigned int BigNumber4[4];
 typedef unsigned int BigNumber130[130];
 
+static void printBigNumber(char*, BigNumber);
+static void printBigNumber4(char*, BigNumber4);
+static void printBigNumber130(char*, BigNumber130);
+
 // Pre-calculation stuff
 static void initTwoInts(BigNumber, int);
 

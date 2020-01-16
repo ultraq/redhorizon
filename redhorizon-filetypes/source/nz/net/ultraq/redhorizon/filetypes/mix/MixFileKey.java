@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.filetypes.mix;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -43,11 +46,55 @@ public class MixFileKey {
 	}
 	private static PublicKey publicKey;
 
+	private static BigInteger global1;
+	static int g1bitlength;
+	static int g1lengthx2;
+
+	static BigInteger g1hi;
+	static BigInteger g1hiinv;
+	static int g1hibitlength;
+	static int g1hiinvlo;
+	static int g1hiinvhi;
+
+	static BigInteger global2;
+
 	/**
 	 * Hidden default constructor, as this class is only ever meant to be used
 	 * statically.
 	 */
 	private MixFileKey() {
+	}
+
+	/**
+	 * Convert a little endian byte array to a {@code BigInteger}.
+	 * 
+	 * @param bytes
+	 * @return
+	 */
+	private static BigInteger fromLittleEndianByteArray(byte[] bytes) {
+
+		byte[] flipped = new byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			flipped[i] = bytes[bytes.length - 1 - i];
+		}
+		return new BigInteger(flipped);
+	}
+
+	/**
+	 * Convert a {@code BigInteger}'s big endian byte representation to a little
+	 * endian byte array.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private static byte[] toLittleEndianByteArray(BigInteger value) {
+
+		byte[] bytes = value.toByteArray();
+		byte[] flipped = new byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			flipped[i] = bytes[bytes.length - 1 - i];
+		}
+		return flipped;
 	}
 
 	/**
@@ -65,14 +112,16 @@ public class MixFileKey {
 
 		// The C++ code expects key1 to be in little endian format, but Java's
 		// BitIntegers are in big endian, so flip that one around here for now.
-		byte[] key1Bytes = publicKey.key1.toByteArray();
-		byte[] key1BytesFlipped = new byte[key1Bytes.length];
-		for (int i = 0; i < key1Bytes.length; i++) {
-			key1BytesFlipped[i] = key1Bytes[key1Bytes.length - 1 - i];
-		}
+		byte[] key1BytesFlipped = toLittleEndianByteArray(publicKey.key1);
 
+		ByteBuffer key = ByteBuffer.allocate(256);
+		predataProcessing(source, predataLength(), key);
+		source.rewind();
+
+		System.out.println();
 		getBlowfishKeyNative(source.array(), dest.array(),
 			key1BytesFlipped, publicKey.key2.toByteArray(), publicKey.length);
+		System.out.println();
 	}
 
 	/**
@@ -95,14 +144,14 @@ public class MixFileKey {
 
 		publicKey = new PublicKey();
 		publicKey.key2 = new BigInteger(new byte[]{ 0x00, 0x01, 0x00, 0x01 });
+		printBigInteger("Public key 2", publicKey.key2);
 
 		ByteBuffer decodedKeyString = ByteBuffer.wrap(Base64.getDecoder().decode(keyString));
 		int keyLength = dataLength(decodedKeyString);
 
 		publicKey.key1 = moveDataToKey(decodedKeyString, keyLength);
+		printBigInteger("Public key 1", publicKey.key1);
 		publicKey.length = publicKey.key1.bitLength() - 1; // Should be 318 from C++
-
-		System.out.println("Compare tempKey to C++");
 
 // From Java -> C
 // Public key 2: 0x10001, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
@@ -149,7 +198,6 @@ public class MixFileKey {
 		}
 		data.rewind();
 
-		System.out.println("Compare keyLength to C++");
 		return keyLength; // Should be 40 from C++
 	}
 
@@ -164,5 +212,265 @@ public class MixFileKey {
 		byte[] keyVal = new byte[keyLength];
 		System.arraycopy(data.array(), 2, keyVal, 0, keyLength);
 		return new BigInteger(keyVal);
+	}
+
+	static void printBigInteger(String name, BigInteger integer) {
+		System.out.print(name + " (Java): ");
+		for (byte b: integer.toByteArray()) {
+			System.out.print(String.format("0x%x, ", b & 0xff));
+		}
+		System.out.println();
+	}
+
+	/**
+	 * The length of the byte values going into the predataProcessing() method?
+	 * Not too sure, although it does return some factor of 80 (40 on most
+	 * occassions, so maybe the number of times to perform key calculations in
+	 * the predataProcessing() method?)
+	 *
+	 * @return The some value related to the length of the public key.
+	 */
+	static int predataLength() {
+
+//		int a = (publicKey.length - 1) / 8;
+//		int result = (55 / a + 1) * (a + 1);
+//		System.out.println("Result: " + result);
+//		return result;
+		return 80; // Can be constant since it's based off public key which is also constant?
+		           // Does this have anything to do with the source being 80 bytes in length?
+	}
+
+	/**
+	 * Initializes some temporary BigNumber variables to be put through the various
+	 * private key functions/calculations, which then get copied to the destination
+	 * byte buffer for the Blowfish key.
+	 * 
+	 * @param source The 80-byte key source.
+	 * @param dest   Byte buffer for the 56-byte Blowfish key.
+	 */
+	static void predataProcessing(ByteBuffer source, int predatalength, ByteBuffer dest) {
+
+//		BigInteger n2, n3;
+
+		int a = (publicKey.length - 1) / 8;
+		while (a + 1 <= predatalength) {
+
+//			initBigNumber(n2, 0, 64);
+//			memmove(n2, source, a + 1);
+			byte[] fromSource = new byte[a + 1];
+			source.get(fromSource);
+			BigInteger n2 = new BigInteger(fromSource);
+			BigInteger keyPart = calculateKey(n2, publicKey.key2, publicKey.key1);
+
+//			memmove(dest, n3, a);
+//			byte[] toDest = new byte[a];
+//			System.arraycopy(keyPart.toByteArray(), 0, toDest, 0, toDest.length);
+//			dest.put(toDest);
+
+			predatalength -= a + 1;
+//			source += a + 1;
+//			dest += a;
+		}
+	}
+
+	/**
+	 * Performs calculations on the public key to generate the Blowfish key.  Most
+	 * of it seems to get off-loaded to the calculateBigNumber() method though.
+	 * 
+	 * @param n2 -
+	 * @param n3 -
+	 * @param n4 -
+	 */
+	static BigInteger calculateKey(BigInteger n2, BigInteger n3, BigInteger n4) {
+
+		BigInteger temp;
+
+//		initBigNumber(n1, 1, limit);
+
+//		int n4length = bignumberIntLength(n4, limit);
+		int n4Length = (n4.bitLength() + 31) >> 5; // The int length of the big number
+		System.out.println("n4IntLength (Java): " + n4Length);
+		initTwoInts(n4);
+
+		int n3bitlength = n3.bitLength();
+		int n3length = (n3bitlength + 31) >> 5;
+
+//		unsigned int bitmask = (((unsigned int )1) << ((n3bitlength - 1) % 32)) >> 1;
+//
+//		n3 += n3length - 1;
+//		n3bitlength--;
+//
+//		BigInteger n1 = bignumberMove(n2);
+//
+//		while (--n3bitlength != -1) {
+//
+//			if (bitmask == 0) {
+//				bitmask = 0x80000000;
+//				n3--;
+//			}
+//			calculateBigNumber(temp, n1, n1, n4Length);
+//
+//			if (*n3 & bitmask) {
+//				calculateBigNumber(n1, temp, n2, n4Length);
+//			}
+//		else {
+//				bignumberMove(n1, temp, n4Length);
+//			}
+//			bitmask >>= 1;
+//		}
+//		initBigNumber(temp, 0, n4Length);
+//		clearTempVars(limit);
+
+		return null;
+	}
+
+	/**
+	 * Not too sure on this method, but it looks as if it just initializes the
+	 * several temporary variables with some meaningful values.
+	 * 
+	 * @param bignum A BigNumber to source all the values from.
+	 */
+	static void initTwoInts(BigInteger bignum) {
+
+//		bignumberMove(global1, bignum, limit);
+//		g1bitlength = bignumberBitLength(global1, limit);
+//		g1lengthx2 = (g1bitlength + 15) / 16;
+		global1 = bignumberMove(bignum);
+		g1bitlength = global1.bitLength();
+		g1lengthx2 = (g1bitlength + 15) / 16; // Length as a short???
+
+//		bignumberMove(g1hi, global1 + bignumberIntLength(global1, limit) - 2, 2);
+//		g1hibitlength = bignumberBitLength(g1hi, 2) - 32;
+		// Uses the move as a small copy
+		byte[] g1hiBytes = new byte[16];
+		System.arraycopy(global1.toByteArray(), 0, g1hiBytes, 0, 8);
+		g1hi = new BigInteger(g1hiBytes);
+//		g1hi = new BigInteger(global1.toByteArray(), 0, 8);
+		g1hibitlength = g1hi.bitLength() - 32;
+
+		printBigInteger("g1hi", g1hi);
+		System.out.println("g1hibitlength: " + g1hibitlength); // C++ reports this as 31, Java 63 o_o
+		System.out.println("Comparison point");
+
+//		bignumberShiftRight(g1hi, g1hibitlength, 2);
+//		bignumberInverse(g1hiinv, g1hi, 2);
+//		bignumberShiftRight(g1hiinv, 1, 2);
+
+		// Should right shift as many bits as it contains so that it ends up in the lower half
+		g1hi = g1hi.shiftRight(g1hibitlength);
+		printBigInteger("g1hi after right shift", g1hi);
+		g1hiinv = bigNumberInverse(g1hi);
+		printBigInteger("g1hi after inverse", g1hiinv);
+
+//		g1hibitlength = (g1hibitlength + 15) % 16 + 1;
+//		bignumberIncrement(g1hiinv, 2);
+//
+//		if (bignumberBitLength(g1hiinv, 2) > 32) {
+//			bignumberShiftRight(g1hiinv, 1, 2);
+//			g1hibitlength--;
+//		}
+//		g1hiinvlo = *(unsigned short *)g1hiinv;
+//		g1hiinvhi = *(((unsigned short *)g1hiinv) + 1);
+	}
+
+	/**
+	 * Inverse function?
+	 * <p>
+	 * I'm not really sure what the original C++ function was supposed to be doing
+	 * because it wasn't following any definition of "inverse" I knew or could
+	 * find.  As such, I'm keeping it mostly intact and translating it to
+	 * Java/Groovy so it can continue working.
+	 * 
+	 * @param value The original value to be inverted.
+	 * @return The "inverse" of {@code value}.
+	 */
+	static BigInteger bigNumberInverse(BigInteger value) {
+
+		// The original C++ code worked on byte arrays, so convert Java's BigInteger
+		// to little endian byte arrays.
+
+		ByteBuffer tempBytes = ByteBuffer.allocate(256).order(ByteOrder.nativeOrder());
+		IntBuffer tempInts = tempBytes.asIntBuffer();
+		int[] dest = new int[64];
+		int destPos = 0;
+
+		int bitLength = value.bitLength();
+		int bit = 1 << (bitLength % 32);
+		destPos += ((bitLength + 32) / 32) - 1;
+		int byteLength = ((bitLength - 1) / 32) * 4;
+		tempInts.put(byteLength / 4, tempInts.get(tempInts.position()) | (1 << ((bitLength - 1) & 0x1f)));
+
+		BigInteger temp = fromLittleEndianByteArray(tempBytes.array());
+		printBigInteger("Temp", temp);
+
+		while (bitLength-- > 0) {
+			temp = temp.shiftLeft(1);
+			if (temp.compareTo(value) != -1) {
+				temp = temp.subtract(value);
+				dest[destPos] |= bit;
+			}
+			bit >>= 1;
+			if (bit == 0) {
+				destPos--;
+				bit = 0x80000000;
+			}
+			System.out.print("Dest: ");
+			for (int i: dest) {
+				System.out.print(String.format("0x%x, ", i));
+			}
+			System.out.println();
+		}
+
+//		Dest: 0x0, 0x1, 0x0, 0x0,
+//		Dest: 0x80000000, 0x1, 0x0, 0x0,
+//		Dest: 0x80000000, 0x1, 0x0, 0x0,
+//		Dest: 0x80000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90000000, 0x1, 0x0, 0x0,
+//		Dest: 0x90800000, 0x1, 0x0, 0x0,
+//		Dest: 0x90c00000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e00000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e00000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e00000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e40000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e40000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e40000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e40000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e44000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46000, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46100, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46100, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46140, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46160, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46170, 0x1, 0x0, 0x0,
+//		Dest: 0x90e46178, 0x1, 0x0, 0x0,
+//		Dest: 0x90e4617c, 0x1, 0x0, 0x0,
+//		Dest: 0x90e4617e, 0x1, 0x0, 0x0,
+
+		byte[] destBytes = new byte[256];
+		for (int i = 0; i < 256; i++) {
+			destBytes[i] = (byte)(dest[i / 4] >>> (24 - (i % 4)));
+		}
+
+		return fromLittleEndianByteArray(destBytes);
+	}
+
+	/**
+	 * Copies the values from 1 big number to another.  This is effectively
+	 * cloning.
+	 * 
+	 * @param source BigNumber to source the values from.
+	 */
+	static BigInteger bignumberMove(BigInteger source) {
+
+//		memmove(dest, source, limit * 4);
+		return new BigInteger(source.toString());
 	}
 }
