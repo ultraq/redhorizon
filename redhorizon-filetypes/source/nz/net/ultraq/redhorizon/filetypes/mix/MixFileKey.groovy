@@ -192,17 +192,6 @@ public class MixFileKey {
 	}
 
 	/**
-	 * This is the entry method for the public key -> private key function. A
-	 * byte array of the 80-byte key source from the MIX file is given, and the
-	 * 56-byte Blowfish key is calculated.
-	 * 
-	 * @param source A byte[] containing the 80-byte key source.
-	 * @param dest   A byte[] store for the 56-byte Blowfish key.
-	 */
-	private native static void getBlowfishKeyNative(byte[] source, byte[] dest,
-		byte[] publicKey1, byte[] publicKey2, int publicKeyLength);
-
-	/**
 	 * Initializes the variables in the PublicKey struct.  Namely, fills the
 	 * PublicKey.Key1 BigNumber with what appears to be a list of characters based
 	 * from the keystring variable, and the character map.
@@ -210,7 +199,7 @@ public class MixFileKey {
 	private static void initPublicKey() {
 
 		publicKey = new PublicKey();
-		publicKey.key2 = new BigInteger(new byte[]{ 0x00, 0x01, 0x00, 0x01 });
+		publicKey.key2 = new BigInteger([0x00, 0x01, 0x00, 0x01] as byte[]);
 
 		ByteBuffer decodedKeyString = ByteBuffer.wrap(Base64.getDecoder().decode(keyString));
 		int keyLength = dataLength(decodedKeyString);
@@ -484,8 +473,8 @@ public class MixFileKey {
 		int bitLength = value.bitLength();
 		int bit = 1 << (bitLength % 32);
 		destPos += ((bitLength + 32) / 32) - 1;
-		int byteLength = ((bitLength - 1) / 32) * 4;
-		tempInts.put(byteLength / 4, tempInts.get(tempInts.position()) | (1 << ((bitLength - 1) & 0x1f)));
+		int byteLength = ((bitLength - 1) / 32 as int) * 4;
+		tempInts.put(byteLength / 4 as int, tempInts.get(tempInts.position()) | (1 << ((bitLength - 1) & 0x1f)));
 
 		BigInteger temp = fromLittleEndianByteArray(tempBytes.array());
 
@@ -504,7 +493,7 @@ public class MixFileKey {
 
 		byte[] destBytes = new byte[dest.length * 4];
 		for (int i = 0; i < destBytes.length; i++) {
-			destBytes[i] = (byte)(dest[i / 4] >>> (8 * (i % 4)));
+			destBytes[i] = (byte)(dest[i / 4 as int] >>> (8 * (i % 4)));
 		}
 
 		return fromLittleEndianByteArray(destBytes);
@@ -524,7 +513,7 @@ public class MixFileKey {
 		global2 = n2.multiply(n3);
 
 //		int g2lengthx2 = bignumberIntLength(global2, limit * 2 + 1) * 2;
-		int g2lengthx2 = ((global2.bitLength() + 31) / 32) * 2; // the integer length * 2
+		int g2lengthx2 = ((global2.bitLength() + 31) / 32 as int) * 2; // the integer length * 2
 		if (g2lengthx2 >= g1lengthx2) {
 //			bignumberIncrement(global2, limit * 2 + 1);
 //			bignumberNegate(global2, limit * 2 + 1);
@@ -541,7 +530,7 @@ public class MixFileKey {
 				global2Bytes = ByteBuffer.allocate(global2RawBytes.length + 4)
 					.order(ByteOrder.nativeOrder())
 					.put(global2RawBytes)
-					.putInt(0xffffffff) // Mock sign int
+					.putInt(-1) // Mock sign int
 					.rewind();
 			}
 			else {
