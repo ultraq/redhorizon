@@ -97,7 +97,6 @@ JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_ge
 	for (int i = 0; i < publicKey2Length; i++) {
 		((unsigned char*)PublicKey.key2)[i] = publicKey2Bytes[i];
 	}
-//	printBigNumber("Public key 2", PublicKey.key2);
 
 	initBigNumber(PublicKey.key1, 0, 64);
 	jsize publicKey1Length = env->GetArrayLength(publicKey1);
@@ -105,10 +104,8 @@ JNIEXPORT void JNICALL Java_nz_net_ultraq_redhorizon_filetypes_mix_MixFileKey_ge
 	for (int i = 0; i < publicKey1Length; i++) {
 		((unsigned char*)PublicKey.key1)[i] = publicKey1Bytes[i];
 	}
-//	printBigNumber("Public key 1", PublicKey.key1);
 
 	PublicKey.length = publicKeyLength;
-
 
 	jbyte sourcebytes[80]; env->GetByteArrayRegion(source, 0, 80, sourcebytes);
 	jbyte destbytes[56];   env->GetByteArrayRegion(dest, 0, 56, destbytes);
@@ -139,15 +136,9 @@ static void initTwoInts(BigNumber bignum, int limit) {
 	bignumberMove(g1hi, global1 + bignumberIntLength(global1, limit) - 2, 2);
 	g1hibitlength = bignumberBitLength(g1hi, 2) - 32;
 
-	printBigNumber4("g1hi", g1hi);
-	printf("g1hibitlength: %d\n", g1hibitlength);
-
 	bignumberShiftRight(g1hi, g1hibitlength, 2);
-	printBigNumber4("g1hi after right shift", g1hi);
 	bignumberInverse(g1hiinv, g1hi, 2);
-	printBigNumber4("g1hiinv", g1hiinv);
 	bignumberShiftRight(g1hiinv, 1, 2);
-	printBigNumber4("g1hiinv after right shift", g1hiinv);
 
 	g1hibitlength = (g1hibitlength + 15) % 16 + 1;
 	bignumberIncrement(g1hiinv, 2);
@@ -190,10 +181,15 @@ static void calculateBigNumber(BigNumber n1, BigNumber n2, BigNumber n3, int lim
 			unsigned short temp = getMulShort((unsigned int *)edi);
 
 			if (temp > 0) {
+//				printf("esi pointer at 0x%x\n", *esi);
+//				printBigNumber130("global2 before", global2);
 				bignumberMultiplyWord((unsigned int *)esi, global1, temp, limit * 2);
+//				printBigNumber130("global2 after", global2);
 
 				if ((*edi & 0x8000) == 0) {
 					if (bignumberSubtract((unsigned int *)esi, (unsigned int *)esi, global1, 0, limit)) {
+					printf("Positive?\n");
+					printBigNumber130("global2", global2);
 						(*edi)--;
 					}
 				}
@@ -201,6 +197,7 @@ static void calculateBigNumber(BigNumber n1, BigNumber n2, BigNumber n3, int lim
 		}
 		bignumberNegate(global2, limit);
 		bignumberDecrement(global2, limit);
+//		printBigNumber130("global2", global2);
 	}
 	bignumberMove(n1, global2, limit);
 }
@@ -222,7 +219,6 @@ static void calculateKey(BigNumber n1, BigNumber n2, BigNumber n3, BigNumber n4,
 	initBigNumber(n1, 1, limit);
 
 	int n4length = bignumberIntLength(n4, limit);
-	printf("n4IntLength: %d\n", n4length);
 	initTwoInts(n4, n4length);
 
 	int n3bitlength = bignumberBitLength(n3, n4length);
@@ -253,6 +249,7 @@ static void calculateKey(BigNumber n1, BigNumber n2, BigNumber n3, BigNumber n4,
 	}
 	initBigNumber(temp, 0, n4length);
 	clearTempVars(limit);
+	printBigNumber130("n1", n1);
 }
 
 /**
@@ -499,21 +496,18 @@ static void bignumberInverse(BigNumber dest, BigNumber source, int limit) {
 	dest += ((bitlength + 32) / 32) - 1;
 	bytelength = ((bitlength - 1) / 32) * 4;
 	temp[bytelength / 4] |= ((unsigned int)1) << ((bitlength - 1) & 0x1f);
-	printBigNumber("Temp", temp);
 
 	while (bitlength-- > 0) {
 		bignumberShiftLeft(temp, 1, limit);
 		if (bignumberCompare(temp, source, limit) != -1) {
 			bignumberSubtract(temp, temp, source, 0, limit);
 			*dest |= bit;
-			printf("Bit: %f", bit);
 		}
 		bit >>= 1;
 		if (bit == 0) {
 			dest--;
 			bit = 0x80000000;
 		}
-		printBigNumber4("Dest", dest);
 	}
 	initBigNumber(temp, 0, limit);
 }
