@@ -16,4 +16,5 @@
 
 moduleName = redhorizon-filetypes
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferImageExtensions
+extensionClasses = nz.net.ultraq.redhorizon.extensions.BigIntegerExtensions,\
+                   nz.net.ultraq.redhorizon.extensions.ByteBufferImageExtensions

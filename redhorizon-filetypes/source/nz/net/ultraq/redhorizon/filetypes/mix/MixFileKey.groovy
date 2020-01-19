@@ -276,14 +276,14 @@ class MixFileKey {
 
 		// Should right shift as many bits as it contains so that it ends up in the lower half
 		// TODO: Looks like g1hi is only used to split it into the other values.
-		g1hi = g1hi.shiftRight(g1hibitlength)
-		g1hiinv = bigNumberInverse(g1hi).shiftRight(1)
+		g1hi >>= g1hibitlength
+		g1hiinv = bigNumberInverse(g1hi) >> 1
 
 		g1hibitlength = (g1hibitlength + 15) % 16 + 1
-		g1hiinv = g1hiinv.add(BigInteger.ONE)
+		g1hiinv += 1
 
 		if (g1hiinv.bitLength() > 32) {
-			g1hiinv = g1hiinv.shiftRight(1)
+			g1hiinv >>= 1
 			g1hibitlength--
 		}
 		// By this point, g1hiinv is reduced to a 32 bit value, but there may be 5
@@ -325,9 +325,9 @@ class MixFileKey {
 		def temp = fromLittleEndianByteArray(tempBytes.array())
 
 		while (bitLength--) {
-			temp = temp.shiftLeft(1)
+			temp <<= 1
 			if (temp <=> value != -1) {
-				temp = temp.subtract(value)
+				temp -= value
 				dest[destPos] |= bit
 			}
 			bit >>>= 1
@@ -360,12 +360,12 @@ class MixFileKey {
 
 		def g2lengthx2 = fitInts(global2.bitLength()) * 2
 		if (g2lengthx2 >= g1lengthx2) {
-			global2 = global2.add(BigInteger.ONE).negate()
+			global2 = (global2 + 1).negate()
 
 			def lengthdiff = g2lengthx2 + 1 - g1lengthx2
 
 			def global2RawBytes = toLittleEndianByteArray(global2)
-			def global2Bytes = global2 <=> BigInteger.ZERO == -1 ?
+			def global2Bytes = global2 <=> 0 == -1 ?
 				ByteBuffer.allocateNative(global2RawBytes.length + 4)
 					.put(global2RawBytes)
 					.putInt(-1) // Mock sign int
@@ -386,7 +386,7 @@ class MixFileKey {
 					//       part of the number.  Could be a good extension method?
 					def global2BytesArray = global2Bytes.array()
 					def partial = fromLittleEndianByteArray(global2BytesArray, esi * 2, global2BytesArray.length - (esi * 2))
-					partial = (global1 * new BigInteger(Integer.toString(temp))).add(partial)
+					partial = global1 * new BigInteger(Integer.toString(temp)) + partial
 
 					// Reconstruct the value
 					ByteBuffer allBytes = global2Bytes.duplicate()
@@ -400,7 +400,7 @@ class MixFileKey {
 					if ((global2Shorts.get(edi) & 0x8000) == 0) {
 						// TODO: Another split calculation
 						def partial2 = fromLittleEndianByteArray(global2BytesArray, esi * 2, global2BytesArray.length - (esi * 2))
-						partial2 = partial2.subtract(global1)
+						partial2 -= global1
 
 						// Reconstruct the value
 						allBytes = global2Bytes.duplicate()
@@ -411,14 +411,14 @@ class MixFileKey {
 						}
 						global2 = fromLittleEndianByteArray(allBytes.array())
 
-						if (global2 <=> BigInteger.ZERO == 1) {
+						if (global2 <=> 0 == 1) {
 							logger.warn('Untested code branch in MixFileKey')
 							edi--
 						}
 					}
 				}
 			}
-			global2 = global2.negate().subtract(BigInteger.ONE)
+			global2 = global2.negate() - 1
 		}
 		return new BigInteger(global2.toString())
 	}
