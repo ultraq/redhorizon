@@ -51,12 +51,9 @@ class MixFileKey {
 	// A base64 encoded string of the public key used for the transformation function
 	static final String PUBLIC_KEY_STRING = 'AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V'
 
-	private static final BigInteger bitMask
 	private static final BigInteger publicKey
 
 	static {
-		bitMask = new BigInteger([0x00, 0x01, 0x00, 0x01] as byte[])
-
 		def publicKeyBytes = ByteBuffer.wrap(Base64.getDecoder().decode(PUBLIC_KEY_STRING))
 		assert publicKeyBytes.get() == 2
 
@@ -221,40 +218,12 @@ class MixFileKey {
 
 		initTwoInts()
 
-		def bitMaskBitLength = bitMask.bitLength()
-
-		// TODO: This is a mask using the bitMask value, but shifted right to begin
-		//       with, then cycled as a 32-bit/int value for only 16 bits in the
-		//       following loop.  Do we really need the global bitMask then?
-		def bitmask = (1 << ((bitMaskBitLength - 1) % 32)) >> 1
-
-		// TODO: This bytebuffer cycles through bytes from the end to the beginning.
-		//       That seems like going from the most-significant byte to the least,
-		//       so should I just order it in big endian order to begin with and
-		//       iterate "upwards" instead?
-		def n3Bytes = ByteBuffer.wrapNative(toLittleEndianByteArray(bitMask))
-		n3Bytes.position(n3Bytes.limit() - 1)
-		bitMaskBitLength--
-
-		// TODO: A copy of the source that gets mutated by the key calculation
 		def key = new BigInteger(source.toString())
-
-		while (--bitMaskBitLength >= 0) {
-
-			// TODO: A wrapping of the bit mask.  This wrapping bit pattern is done a
-			//       few times in this file, so maybe warrants an extension or at
-			//       least some function to call.
-			if (bitmask == 0) {
-				bitmask = 0x80000000
-				n3Bytes.position(n3Bytes.position() - 1)
-			}
+		16.times {
 			key = calculateKeyBigNumber(key, key)
-
-			if (n3Bytes.get(n3Bytes.position()) & bitmask) {
-				key = calculateKeyBigNumber(key, source)
-			}
-			bitmask >>>= 1
 		}
+		key = calculateKeyBigNumber(key, source)
+
 		clearTempVars()
 		return key
 	}

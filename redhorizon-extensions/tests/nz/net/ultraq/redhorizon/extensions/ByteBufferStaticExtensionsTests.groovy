@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.extensions.tests
-
-import nz.net.ultraq.redhorizon.extensions.ByteBufferStaticExtensions
+package nz.net.ultraq.redhorizon.extensions
 
 import spock.lang.Specification
 

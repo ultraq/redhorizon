@@ -38,7 +38,7 @@ class ByteBufferExtensions {
 	static ByteBuffer put(ByteBuffer self, ByteBuffer src, int length) {
 
 		self.put(src.array(), src.position(), length)
-		src.advance(length)
+		src + length
 		return self
 	}
 }

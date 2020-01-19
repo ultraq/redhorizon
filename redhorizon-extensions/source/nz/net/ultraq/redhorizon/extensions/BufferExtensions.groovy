@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
-import java.nio.Buffer
+import java.nio.ByteBuffer
 
 /**
  * Instance method extensions to the {@code Buffer} class.
@@ -26,15 +26,40 @@ import java.nio.Buffer
 class BufferExtensions {
 
 	/**
-	 * Advance the internal position of a buffer by the given amount.  Negative
-	 * values may be given to move the position backwards.
+	 * Much like with pointers to arrays in C/C++, using {@code minus} will
+	 * reverse the internal position of the buffer by the specified amount.
 	 * 
 	 * @param self
-	 * @param advanceBy
-	 * @return
+	 * @param n
+	 * @return The buffer.
 	 */
-	static Buffer advance(Buffer self, int advanceBy) {
+	static ByteBuffer minus(ByteBuffer self, int n) {
 
-		return self.position(self.position() + advanceBy)
+		return self.position(self.position() - n)
+	}
+
+	/**
+	 * Advance the internal position of the buffer by 1.
+	 * 
+	 * @param self
+	 * @param n
+	 * @return The buffer.
+	 */
+	static ByteBuffer next(ByteBuffer self) {
+
+		return self + 1
+	}
+
+	/**
+	 * Much like with pointers to arrays in C/C++, using {@code plus} will advance
+	 * the internal position of the buffer by the specified amount.
+	 * 
+	 * @param self
+	 * @param n
+	 * @return The buffer.
+	 */
+	static ByteBuffer plus(ByteBuffer self, int n) {
+
+		return self.position(self.position() + n)
 	}
 }
