@@ -188,8 +188,8 @@ static void calculateBigNumber(BigNumber n1, BigNumber n2, BigNumber n3, int lim
 
 				if ((*edi & 0x8000) == 0) {
 					if (bignumberSubtract((unsigned int *)esi, (unsigned int *)esi, global1, 0, limit)) {
-					printf("Positive?\n");
-					printBigNumber130("global2", global2);
+						printf("Positive?\n");
+						printBigNumber130("global2", global2);
 						(*edi)--;
 					}
 				}

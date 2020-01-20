@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.IntBuffer
 import java.nio.ShortBuffer
 
 /**
@@ -134,6 +135,15 @@ class MixFileKey {
 		return fromLittleEndianByteArray(bytes, 0, bytes.length)
 	}
 
+	private static byte[] reverse(byte[] bytes) {
+
+		byte[] reversed = new byte[bytes.length]
+		for (int i = 0; i < bytes.length; i++) {
+			reversed[i] = bytes[bytes.length - 1 - i]
+		}
+		return reversed
+	}
+
 	/**
 	 * Convert a little endian byte array to a {@code BigInteger}.
 	 *
@@ -144,11 +154,7 @@ class MixFileKey {
 	 */
 	private static BigInteger fromLittleEndianByteArray(byte[] bytes, int offset, int length) {
 
-		// TODO: This should be a "reverse" extension
-		byte[] flipped = new byte[bytes.length]
-		for (int i = 0; i < bytes.length; i++) {
-			flipped[i] = bytes[bytes.length - 1 - i]
-		}
+		byte[] flipped = reverse(bytes)
 		return new BigInteger(flipped, flipped.length - length - offset, length)
 	}
 
@@ -161,21 +167,41 @@ class MixFileKey {
 	 */
 	private static byte[] toLittleEndianByteArray(BigInteger value) {
 
-		byte[] bytes = value.toByteArray()
+		return reverse(toByteArrayNoSignByte(value))
+	}
 
-		// Strip out any bytes representing a sign bit
-		if (bytes[0] == 0) {
-			byte[] newBytes = new byte[bytes.length - 1]
-			System.arraycopy(bytes, 1, newBytes, 0, newBytes.length)
-			bytes = newBytes
-		}
+	/**
+	 * Prints the values of the {@code BigInteger} in a similar format to how the
+	 * C++ code does (as little-endian int-sized chunks).
+	 * 
+	 * @param name
+	 * @param integer
+	 */
+	private static void printBigInteger(String name, BigInteger integer) {
 
-		// TODO: This should be a "reverse" extension
-		byte[] flipped = new byte[bytes.length]
-		for (int i = 0; i < bytes.length; i++) {
-			flipped[i] = bytes[bytes.length - 1 - i]
+		printByteBuffer(name, ByteBuffer.wrap(toLittleEndianByteArray(integer)).order(ByteOrder.nativeOrder()))
+	}
+
+	private static void printByteBuffer(String name, ByteBuffer buffer) {
+
+		System.out.print(name + " (Groovy): ")
+		if (buffer.order() != ByteOrder.nativeOrder()) {
+			buffer = ByteBuffer.wrap(reverse(buffer.array())).order((ByteOrder.nativeOrder()))
 		}
-		return flipped
+		IntBuffer integerInts = buffer.asIntBuffer()
+		for (int i = 0; i < integerInts.limit(); i++) {
+			System.out.print(String.format("0x%x, ", integerInts.get(i)))
+		}
+		int remainder = buffer.limit() % 4;
+		if (remainder != 0) {
+			int remaining = 0
+			for (int i = 0; i < remainder; i++) {
+				remaining <<= 8
+				remaining |= buffer.get(buffer.limit() - 1 - i) & 0xff
+			}
+			System.out.print(String.format("0x%x, ", remaining))
+		}
+		System.out.println()
 	}
 
 	/**
@@ -333,14 +359,8 @@ class MixFileKey {
 
 			def lengthdiff = g2lengthx2 + 1 - g1lengthx2
 
-			def global2RawBytes = toLittleEndianByteArray(global2)
-			def global2Bytes = global2 <=> 0 == -1 ?
-				ByteBuffer.allocateNative(global2RawBytes.length + 4)
-					.put(global2RawBytes)
-					.putInt(-1) // Mock sign int
-					.rewind() :
-				ByteBuffer.wrapNative(global2RawBytes)
-			ShortBuffer global2Shorts = global2Bytes.asShortBuffer()
+			def global2Bytes = asNativeBigInteger(global2)
+			def global2Shorts = global2Bytes.asShortBuffer()
 			def esi = lengthdiff
 			def edi = g2lengthx2 + 1
 
@@ -353,35 +373,27 @@ class MixFileKey {
 					// TODO: This deconstruct/reconstruct is the splitting of a BigInteger
 					//       from a specific point to localize a calculation to just that
 					//       part of the number.  Could be a good extension method?
-					def global2BytesArray = global2Bytes.array()
-					def partial = fromLittleEndianByteArray(global2BytesArray, esi * 2, global2BytesArray.length - (esi * 2))
+					def partial = copy(global2, esi * 2, fitBytes(global2.bitLength()) - (esi * 2))
 					partial = global1 * new BigInteger(Integer.toString(temp)) + partial
 
-					// Reconstruct the value
-					ByteBuffer allBytes = global2Bytes.duplicate()
-					byte[] partialArray = toLittleEndianByteArray(partial)
-					allBytes.position(esi * 2).put(partialArray)
-					while (allBytes.hasRemaining()) {
-						allBytes.put((byte)0xff) // Fill remaining with the sign bit
-					}
-					global2 = fromLittleEndianByteArray(allBytes.array())
+					global2 = replace(global2, partial, esi * 2)
+					global2Bytes = asNativeBigInteger(global2)
+					global2Shorts = global2Bytes.asShortBuffer()
 
-					if ((global2Shorts.get(edi) & 0x8000) == 0) {
+					printBigInteger("global2 after", global2)
+					if (edi < global2Shorts.limit() && (global2Shorts.get(edi) & 0x8000) == 0) {
+
 						// TODO: Another split calculation
-						def partial2 = fromLittleEndianByteArray(global2BytesArray, esi * 2, global2BytesArray.length - (esi * 2))
+						def partial2 = copy(global2, esi * 2, fitBytes(global2.bitLength()) - (esi * 2))
 						partial2 -= global1
 
-						// Reconstruct the value
-						allBytes = global2Bytes.duplicate()
-						def partial2Array = toLittleEndianByteArray(partial2)
-						allBytes.position(esi * 2).put(partial2Array)
-						while (allBytes.hasRemaining()) {
-							allBytes.put((byte)0xff) // Fill remaining with the sign bit
-						}
-						global2 = fromLittleEndianByteArray(allBytes.array())
+						global2 = replace(global2, partial2, esi * 2)
+						global2Bytes = asNativeBigInteger(global2)
+						global2Shorts = global2Bytes.asShortBuffer()
 
-						if (global2 <=> 0 == 1) {
-							logger.warn('Untested code branch in MixFileKey')
+						printBigInteger('global2 after subtract', global2)
+						if (global2 <=> 0) {
+							System.out.println('Positive?')
 							edi--
 						}
 					}
@@ -390,6 +402,87 @@ class MixFileKey {
 			global2 = global2.negate() - 1
 		}
 		return new BigInteger(global2.toString())
+	}
+
+	/**
+	 * Convert a {@code BigInteger} to its byte representation equivalent as in
+	 * the original C++ code, which is a little endian byte array with sign bytes.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	private static ByteBuffer asNativeBigInteger(BigInteger source) {
+
+		def sourceBytes = toLittleEndianByteArray(source)
+		return ByteBuffer.allocateNative(sourceBytes.length + 4)
+			.put(sourceBytes)
+			.putInt(source.signum() == -1 ? -1 : 0) // Mock sign int
+			.rewind()
+	}
+
+	/**
+	 * Use {@code num} bytes from the byte value of the {@code BigInteger} to
+	 * create a new {@code BigInteger}.
+	 * 
+	 * @param source
+	 * @param offset
+	 * @param length
+	 * @return
+	 */
+	private static BigInteger copy(BigInteger source, int offset, int length) {
+
+		def sourceBytes = toByteArrayNoSignByte(source)
+		def sourceBuffer = ByteBuffer.allocate(sourceBytes.length + 4)
+			.putInt(source.signum() == -1 ? -1 : 0) // Mock sign int
+			.put(sourceBytes)
+		return new BigInteger(sourceBuffer.array(), sourceBuffer.limit() - length - offset - 4, length + 4)
+	}
+
+	private static byte[] toByteArrayNoSignByte(BigInteger value) {
+
+		byte[] bytes = value.toByteArray()
+		if (bytes[0] == 0 || (bytes[0] == (byte)0xff && bytes[1] == (byte)0xff && value.signum() == -1)) {
+			byte[] newBytes = new byte[bytes.length - 1]
+			System.arraycopy(bytes, 1, newBytes, 0, newBytes.length)
+			bytes = newBytes
+		}
+
+		return bytes
+	}
+
+	private static ByteBuffer fill(ByteBuffer buffer, byte val) {
+
+		buffer.rewind()
+		while (buffer.hasRemaining()) {
+			buffer.put(val)
+		}
+		return buffer.rewind()
+	}
+
+	/**
+	 * Replace {@code num} bytes of the bytes in {@code source} with those from
+	 * {@code replaceWith}.
+	 * 
+	 * @param source
+	 * @param replaceWith
+	 * @param retain
+	 * @return
+	 */
+	private static BigInteger replace(BigInteger source, BigInteger replaceWith, int retain) {
+
+		// TODO: Since this operation works with the method above, it can probably
+		//       be contained within a closure.
+		def sourceBytes = toByteArrayNoSignByte(source)
+		def replaceBytes = toByteArrayNoSignByte(replaceWith)
+
+		def sourceBuffer = fill(ByteBuffer.allocate(sourceBytes.length + 4), (byte)(source.signum() == -1 ? -1 : 0))
+		sourceBuffer.position(sourceBuffer.limit() - retain - replaceBytes.length - 4)
+		sourceBuffer.putInt(replaceWith.signum() == -1 ? -1 : 0)
+
+		sourceBuffer.put(replaceBytes)
+		sourceBuffer.put(sourceBytes, sourceBuffer.position() - 4, sourceBuffer.remaining())
+
+		return new BigInteger(sourceBuffer.array())
 	}
 
 	/**
