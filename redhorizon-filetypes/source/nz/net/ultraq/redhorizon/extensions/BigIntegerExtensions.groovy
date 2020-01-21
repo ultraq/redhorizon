@@ -86,4 +86,22 @@ class BigIntegerExtensions {
 
 		return (self.bitLength() + 15) >>> 4
 	}
+
+	/**
+	 * The same as {@link BigInteger#toByteArray}, but with the removal of the
+	 * first byte if it acted as a sign byte.
+	 * 
+	 * @param self
+	 * @return
+	 */
+	static byte[] toByteArrayNoSignByte(BigInteger self) {
+
+		byte[] bytes = self.toByteArray()
+		if ((bytes[0] == (byte)0 && self.signum() != -1) || (bytes[0] == (byte)0xff && self.signum() == -1)) {
+			byte[] newBytes = new byte[bytes.length - 1]
+			System.arraycopy(bytes, 1, newBytes, 0, newBytes.length)
+			bytes = newBytes
+		}
+		return bytes
+	}
 }

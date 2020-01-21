@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes.mix
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
@@ -42,8 +39,6 @@ import java.nio.ShortBuffer
  */
 class MixFileKey {
 
-	private static final Logger logger = LoggerFactory.getLogger(MixFileKey)
-
 	static final int SIZE_KEY_SOURCE = 80
 	static final int SIZE_KEY = 56
 
@@ -52,9 +47,16 @@ class MixFileKey {
 	// A base64 encoded string of the public key used for the transformation function
 	static final String PUBLIC_KEY_STRING = 'AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V'
 
-	private static final BigInteger publicKey
+	private static BigInteger publicKey
+	private static int pkHiBitLength
+	private static int pkHiInvLo
+	private static int pkHiInvHi
 
 	static {
+
+		// Construct the public key bigint from the public key string
+		// -------------------------------------------------------------------------
+
 		def publicKeyBytes = ByteBuffer.wrap(Base64.getDecoder().decode(PUBLIC_KEY_STRING))
 		assert publicKeyBytes.get() == 2
 
@@ -75,18 +77,22 @@ class MixFileKey {
 		}
 
 		publicKey = new BigInteger(publicKeyBytes.array(), publicKeyBytes.position(), keyLength)
+
+
+		// Initializes several temporary variables derived from the public key
+		// -------------------------------------------------------------------------
+
+		def pkHiInt = new BigInteger(publicKey.toByteArray(), 0, 4)
+		pkHiBitLength = pkHiInt.bitLength() % 16
+		def pkHiIntInv = (bigNumberInverse(pkHiInt << (32 - pkHiInt.bitLength())) >> 1) + 1
+		if (pkHiIntInv.bitLength() > 32) {
+			pkHiIntInv >>= 1
+			pkHiBitLength--
+		}
+		def g1hiinvAsShortBuffer = ByteBuffer.wrap(pkHiIntInv.toByteArrayNoSignByte()).asShortBuffer()
+		pkHiInvHi = g1hiinvAsShortBuffer.get() & 0xffff
+		pkHiInvLo = g1hiinvAsShortBuffer.get() & 0xffff
 	}
-
-	private BigInteger global1
-	private int g1lengthx2
-
-	private BigInteger g1hi
-	private BigInteger g1hiinv
-	private int g1hibitlength
-	private int g1hiinvlo
-	private int g1hiinvhi
-
-	private BigInteger global2
 
 	/**
 	 * Convert a little endian byte array to a {@code BigInteger}.
@@ -96,30 +102,7 @@ class MixFileKey {
 	 */
 	private static BigInteger fromLittleEndianByteArray(byte[] bytes) {
 
-		return fromLittleEndianByteArray(bytes, 0, bytes.length)
-	}
-
-	private static byte[] reverse(byte[] bytes) {
-
-		byte[] reversed = new byte[bytes.length]
-		for (int i = 0; i < bytes.length; i++) {
-			reversed[i] = bytes[bytes.length - 1 - i]
-		}
-		return reversed
-	}
-
-	/**
-	 * Convert a little endian byte array to a {@code BigInteger}.
-	 *
-	 * @param bytes
-	 * @param offset
-	 * @param length
-	 * @return
-	 */
-	private static BigInteger fromLittleEndianByteArray(byte[] bytes, int offset, int length) {
-
-		byte[] flipped = reverse(bytes)
-		return new BigInteger(flipped, flipped.length - length - offset, length)
+		return new BigInteger(bytes.reverse())
 	}
 
 	/**
@@ -131,7 +114,7 @@ class MixFileKey {
 	 */
 	private static byte[] toLittleEndianByteArray(BigInteger value) {
 
-		return reverse(toByteArrayNoSignByte(value))
+		return value.toByteArrayNoSignByte().reverse()
 	}
 
 	/**
@@ -150,7 +133,7 @@ class MixFileKey {
 
 		printf("${name} (Groovy): ")
 		if (buffer.order() != ByteOrder.nativeOrder()) {
-			buffer = ByteBuffer.wrap(reverse(buffer.array())).order((ByteOrder.nativeOrder()))
+			buffer = ByteBuffer.wrap(buffer.array().reverse()).order((ByteOrder.nativeOrder()))
 		}
 		IntBuffer integerInts = buffer.asIntBuffer()
 		for (int i = 0; i < integerInts.limit(); i++) {
@@ -206,52 +189,13 @@ class MixFileKey {
 	 */
 	private BigInteger calculateKeyBigNumber(BigInteger source) {
 
-		initTwoInts()
-
 		def key = new BigInteger(source.toString())
 		16.times {
 			key = calculateKeyBigNumber(key, key)
 		}
 		key = calculateKeyBigNumber(key, source)
 
-		clearTempVars()
 		return key
-	}
-
-	/**
-	 * Initializes several temporary variables from the public key.
-	 */
-	private void initTwoInts() {
-
-		// TODO: If I can figure out the scope for these values, then these globals
-		//       should be removable.
-		global1 = new BigInteger(publicKey.toString())
-		g1lengthx2 = global1.shortLength()
-
-		// Uses the move as a small copy
-		// TODO: Why -32?  Is that just to cut it in half?
-		g1hi = new BigInteger(global1.toByteArray(), 0, 8)
-		g1hibitlength = g1hi.bitLength() - 32
-
-		// Should right shift as many bits as it contains so that it ends up in the lower half
-		// TODO: Looks like g1hi is only used to split it into the other values.
-		g1hi >>= g1hibitlength
-		g1hiinv = bigNumberInverse(g1hi) >> 1
-
-		g1hibitlength = (g1hibitlength + 15) % 16 + 1
-		g1hiinv += 1
-
-		if (g1hiinv.bitLength() > 32) {
-			g1hiinv >>= 1
-			g1hibitlength--
-		}
-		// By this point, g1hiinv is reduced to a 32 bit value, but there may be 5
-		// bytes in the array to represent leading 0s (sign bits)
-		def g1hiinvBytes = g1hiinv.toByteArray()
-		def length = g1hiinvBytes.length
-
-		g1hiinvlo = (g1hiinvBytes[length - 2] & 0xff) << 8 | (g1hiinvBytes[length - 1] & 0xff)
-		g1hiinvhi = (g1hiinvBytes[length - 4] & 0xff) << 8 | (g1hiinvBytes[length - 3] & 0xff)
 	}
 
 	/**
@@ -265,7 +209,7 @@ class MixFileKey {
 	 * @param value The original value to be inverted.
 	 * @return The "inverse" of {@code value}.
 	 */
-	private BigInteger bigNumberInverse(BigInteger value) {
+	private static BigInteger bigNumberInverse(BigInteger value) {
 
 		// The original C++ code worked on byte arrays, working on them as ints and
 		// doing BigNumber arithmetic, so what follows is pretty nuts.
@@ -315,15 +259,16 @@ class MixFileKey {
 	 */
 	private BigInteger calculateKeyBigNumber(BigInteger source1, BigInteger source2) {
 
-		global2 = source1 * source2
+		def g1lengthx2 = publicKey.shortLength()
+		def key = source1 * source2
 
-		def g2lengthx2 = global2.shortLength()
+		def g2lengthx2 = key.shortLength()
 		if (g2lengthx2 >= g1lengthx2) {
-			global2 = (global2 + 1).negate()
+			key = (key + 1).negate()
 
 			def lengthdiff = g2lengthx2 + 1 - g1lengthx2
 
-			def global2Bytes = asNativeBigInteger(global2)
+			def global2Bytes = asNativeBigInteger(key)
 			def global2Shorts = global2Bytes.asShortBuffer()
 			def esi = lengthdiff
 			def edi = g2lengthx2 + 1
@@ -337,35 +282,35 @@ class MixFileKey {
 					// TODO: This deconstruct/reconstruct is the splitting of a BigInteger
 					//       from a specific point to localize a calculation to just that
 					//       part of the number.  Could be a good extension method?
-					def partial = copy(global2, esi * 2, global2.byteLength() - (esi * 2))
-					partial = global1 * new BigInteger(Integer.toString(temp)) + partial
+					def partial = copy(key, esi * 2, key.byteLength() - (esi * 2))
+					partial = publicKey * new BigInteger(Integer.toString(temp)) + partial
 
-					global2 = replace(global2, partial, esi * 2)
-					global2Bytes = asNativeBigInteger(global2)
+					key = replace(key, partial, esi * 2)
+					global2Bytes = asNativeBigInteger(key)
 					global2Shorts = global2Bytes.asShortBuffer()
 
-					printBigInteger("global2 after", global2)
+					printBigInteger("global2 after", key)
 					if (edi < global2Shorts.limit() && (global2Shorts.get(edi) & 0x8000) == 0) {
 
 						// TODO: Another split calculation
-						def partial2 = copy(global2, esi * 2, global2.byteLength() - (esi * 2))
-						partial2 -= global1
+						def partial2 = copy(key, esi * 2, key.byteLength() - (esi * 2))
+						partial2 -= publicKey
 
-						global2 = replace(global2, partial2, esi * 2)
-						global2Bytes = asNativeBigInteger(global2)
+						key = replace(key, partial2, esi * 2)
+						global2Bytes = asNativeBigInteger(key)
 						global2Shorts = global2Bytes.asShortBuffer()
 
-						printBigInteger('global2 after subtract', global2)
-						if (global2 <=> 0) {
+						printBigInteger('global2 after subtract', key)
+						if (key <=> 0) {
 							println('Positive?')
 							edi--
 						}
 					}
 				}
 			}
-			global2 = global2.negate() - 1
+			key = key.negate() - 1
 		}
-		return new BigInteger(global2.toString())
+		return new BigInteger(key.toString())
 	}
 
 	/**
@@ -395,23 +340,11 @@ class MixFileKey {
 	 */
 	private static BigInteger copy(BigInteger source, int offset, int length) {
 
-		def sourceBytes = toByteArrayNoSignByte(source)
+		def sourceBytes = source.toByteArrayNoSignByte()
 		def sourceBuffer = ByteBuffer.allocate(sourceBytes.length + 4)
 			.putInt(source.signum() == -1 ? -1 : 0) // Mock sign int
 			.put(sourceBytes)
 		return new BigInteger(sourceBuffer.array(), sourceBuffer.limit() - length - offset - 4, length + 4)
-	}
-
-	private static byte[] toByteArrayNoSignByte(BigInteger value) {
-
-		byte[] bytes = value.toByteArray()
-		if (bytes[0] == 0 || (bytes[0] == (byte)0xff && bytes[1] == (byte)0xff && value.signum() == -1)) {
-			byte[] newBytes = new byte[bytes.length - 1]
-			System.arraycopy(bytes, 1, newBytes, 0, newBytes.length)
-			bytes = newBytes
-		}
-
-		return bytes
 	}
 
 	private static ByteBuffer fill(ByteBuffer buffer, byte val) {
@@ -436,8 +369,8 @@ class MixFileKey {
 
 		// TODO: Since this operation works with the method above, it can probably
 		//       be contained within a closure.
-		def sourceBytes = toByteArrayNoSignByte(source)
-		def replaceBytes = toByteArrayNoSignByte(replaceWith)
+		def sourceBytes = source.toByteArrayNoSignByte()
+		def replaceBytes = replaceWith.toByteArrayNoSignByte()
 
 		def sourceBuffer = fill(ByteBuffer.allocate(sourceBytes.length + 4), (byte)(source.signum() == -1 ? -1 : 0))
 		sourceBuffer.position(sourceBuffer.limit() - retain - replaceBytes.length - 4)
@@ -459,32 +392,15 @@ class MixFileKey {
 	 */
 	private int getMulShort(ShortBuffer values) {
 
-		def i = (((((((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * g1hiinvlo + 0x10000) >>> 1) +
-			((((values.get(values.position() - 2) ^ 0xffff) & 0xffff) * g1hiinvhi + g1hiinvhi) >>> 1) + 1) >>> 16) +
-			((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * g1hiinvhi) >>> 1) +
-			((((values.get(values.position()) ^ 0xffff) & 0xffff) * g1hiinvlo) >>> 1) + 1) >>> 14) + g1hiinvhi *
-			((values.get(values.position()) ^ 0xffff) & 0xffff) * 2) >>> g1hibitlength
+		def i = (((((((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvLo + 0x10000) >>> 1) +
+			((((values.get(values.position() - 2) ^ 0xffff) & 0xffff) * pkHiInvHi + pkHiInvHi) >>> 1) + 1) >>> 16) +
+			((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvHi) >>> 1) +
+			((((values.get(values.position()) ^ 0xffff) & 0xffff) * pkHiInvLo) >>> 1) + 1) >>> 14) + pkHiInvHi *
+			((values.get(values.position()) ^ 0xffff) & 0xffff) * 2) >>> pkHiBitLength
 
 		if (i > 0xffff) {
 			i = 0xffff
 		}
 		return i
-	}
-
-	/**
-	 * Sets all of the temporary variables back to 0.
-	 */
-	void clearTempVars() {
-
-		global1 = BigInteger.ZERO
-		g1lengthx2 = 0
-
-		g1hi = BigInteger.ZERO
-		g1hiinv = BigInteger.ZERO
-		g1hibitlength = 0
-		g1hiinvlo = 0
-		g1hiinvhi = 0
-
-		global2 = BigInteger.ZERO
 	}
 }
