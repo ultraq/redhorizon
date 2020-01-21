@@ -89,42 +89,6 @@ class MixFileKey {
 	private BigInteger global2
 
 	/**
-	 * Calculate the number of bytes needed to be able to represent the given
-	 * number of bits.
-	 * 
-	 * @param bits
-	 * @return
-	 */
-	private static int fitBytes(int bits) {
-
-		return (bits + 7) >>> 3
-	}
-
-	/**
-	 * Calculate the number of ints needed to be able to represent the given
-	 * number of bits.
-	 * 
-	 * @param bits
-	 * @return
-	 */
-	private static int fitInts(int bits) {
-
-		return (bits + 31) >>> 5
-	}
-
-	/**
-	 * Calculate the number of shorts needed to be able to represent the given
-	 * number of bits.
-	 * 
-	 * @param bits
-	 * @return
-	 */
-	private static int fitShorts(int bits) {
-
-		return (bits + 15) >>> 4
-	}
-
-	/**
 	 * Convert a little endian byte array to a {@code BigInteger}.
 	 * 
 	 * @param bytes
@@ -184,13 +148,13 @@ class MixFileKey {
 
 	private static void printByteBuffer(String name, ByteBuffer buffer) {
 
-		System.out.print(name + " (Groovy): ")
+		printf("${name} (Groovy): ")
 		if (buffer.order() != ByteOrder.nativeOrder()) {
 			buffer = ByteBuffer.wrap(reverse(buffer.array())).order((ByteOrder.nativeOrder()))
 		}
 		IntBuffer integerInts = buffer.asIntBuffer()
 		for (int i = 0; i < integerInts.limit(); i++) {
-			System.out.print(String.format("0x%x, ", integerInts.get(i)))
+			printf('0x%x, ', integerInts.get(i))
 		}
 		int remainder = buffer.limit() % 4;
 		if (remainder != 0) {
@@ -199,9 +163,9 @@ class MixFileKey {
 				remaining <<= 8
 				remaining |= buffer.get(buffer.limit() - 1 - i) & 0xff
 			}
-			System.out.print(String.format("0x%x, ", remaining))
+			printf('0x%x, ', remaining)
 		}
-		System.out.println()
+		println()
 	}
 
 	/**
@@ -218,7 +182,7 @@ class MixFileKey {
 		// Process the key in parts that can fit the public key
 		// TODO: Can maybe write some split function for a ByteBuffer so this can be
 		//       iterated over?
-		def processingSize = fitBytes(publicKey.bitLength())
+		def processingSize = publicKey.byteLength()
 		while (source.hasRemaining()) {
 			def partialSource = new byte[processingSize]
 			source.get(partialSource)
@@ -262,7 +226,7 @@ class MixFileKey {
 		// TODO: If I can figure out the scope for these values, then these globals
 		//       should be removable.
 		global1 = new BigInteger(publicKey.toString())
-		g1lengthx2 = fitShorts(global1.bitLength())
+		g1lengthx2 = global1.shortLength()
 
 		// Uses the move as a small copy
 		// TODO: Why -32?  Is that just to cut it in half?
@@ -313,8 +277,8 @@ class MixFileKey {
 
 		def bitLength = value.bitLength()
 		def bit = 1 << (bitLength % 32)
-		destPos += fitInts(bitLength)
-		def intLength = fitInts(bitLength)
+		destPos += value.intLengthNoSign()
+		def intLength = value.intLengthNoSign()
 		tempInts.put(intLength / 4 as int, tempInts.get(tempInts.position()) | (1 << ((bitLength - 1) & 0x1f)))
 
 		def temp = fromLittleEndianByteArray(tempBytes.array())
@@ -353,7 +317,7 @@ class MixFileKey {
 
 		global2 = source1 * source2
 
-		def g2lengthx2 = fitInts(global2.bitLength()) * 2
+		def g2lengthx2 = global2.shortLength()
 		if (g2lengthx2 >= g1lengthx2) {
 			global2 = (global2 + 1).negate()
 
@@ -373,7 +337,7 @@ class MixFileKey {
 					// TODO: This deconstruct/reconstruct is the splitting of a BigInteger
 					//       from a specific point to localize a calculation to just that
 					//       part of the number.  Could be a good extension method?
-					def partial = copy(global2, esi * 2, fitBytes(global2.bitLength()) - (esi * 2))
+					def partial = copy(global2, esi * 2, global2.byteLength() - (esi * 2))
 					partial = global1 * new BigInteger(Integer.toString(temp)) + partial
 
 					global2 = replace(global2, partial, esi * 2)
@@ -384,7 +348,7 @@ class MixFileKey {
 					if (edi < global2Shorts.limit() && (global2Shorts.get(edi) & 0x8000) == 0) {
 
 						// TODO: Another split calculation
-						def partial2 = copy(global2, esi * 2, fitBytes(global2.bitLength()) - (esi * 2))
+						def partial2 = copy(global2, esi * 2, global2.byteLength() - (esi * 2))
 						partial2 -= global1
 
 						global2 = replace(global2, partial2, esi * 2)
@@ -393,7 +357,7 @@ class MixFileKey {
 
 						printBigInteger('global2 after subtract', global2)
 						if (global2 <=> 0) {
-							System.out.println('Positive?')
+							println('Positive?')
 							edi--
 						}
 					}
