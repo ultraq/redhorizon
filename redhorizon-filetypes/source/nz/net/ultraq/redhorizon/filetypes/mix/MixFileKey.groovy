@@ -211,21 +211,19 @@ class MixFileKey {
 	 */
 	private static BigInteger bigNumberInverse(BigInteger value) {
 
-		// The original C++ code worked on byte arrays, working on them as ints and
-		// doing BigNumber arithmetic, so what follows is pretty nuts.
+		// For the resulting binary value
+		def dest = new byte[16]
+		def destPos = value.byteLength()
 
-		def tempBytes = ByteBuffer.allocate(256).order(ByteOrder.nativeOrder())
-		def tempInts = tempBytes.asIntBuffer()
-		def dest = new int[4]
-		def destPos = 0
-
+		// A rotating bit mask
 		def bitLength = value.bitLength()
-		def bit = 1 << (bitLength % 32)
-		destPos += value.intLengthNoSign()
-		def intLength = value.intLengthNoSign()
-		tempInts.put(intLength / 4 as int, tempInts.get(tempInts.position()) | (1 << ((bitLength - 1) & 0x1f)))
+		def bit = 1 << (bitLength % 8)
 
-		def temp = fromLittleEndianByteArray(tempBytes.array())
+		def temp = fromLittleEndianByteArray(ByteBuffer.allocate(16)
+			.order(ByteOrder.nativeOrder())
+			.put(value.byteLength() - 1, 1 << (((bitLength - 1) % 8) & 0x1f) as byte)
+			.array()
+		)
 
 		while (bitLength--) {
 			temp <<= 1
@@ -234,20 +232,13 @@ class MixFileKey {
 				dest[destPos] |= bit
 			}
 			bit >>>= 1
-			// TODO: Another instance of bit shifting with wrapping
 			if (bit == 0) {
 				destPos--
-				bit = 0x80000000
+				bit = 0x80
 			}
 		}
 
-		// TODO: A byte view over an int-sized array?
-		def destBytes = new byte[16]
-		for (int i = 0; i < destBytes.length; i++) {
-			destBytes[i] = (byte)(dest[i / 4 as int] >>> (8 * (i % 4)))
-		}
-
-		return fromLittleEndianByteArray(destBytes)
+		return fromLittleEndianByteArray(dest)
 	}
 
 	/**
