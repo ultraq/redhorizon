@@ -26,6 +26,19 @@ import java.nio.ByteBuffer
 class ByteBufferExtensions {
 
 	/**
+	 * Advance the internal position of a buffer by the given amount.  Negative
+	 * values may be given to move the position backwards.
+	 * 
+	 * @param self
+	 * @param n
+	 * @return The buffer.
+	 */
+	static ByteBuffer advance(ByteBuffer self, int n) {
+
+		return self.position(self.position() + n)
+	}
+
+	/**
 	 * A relative bulk <i>put</i> method using another {@code ByteBuffer} but only
 	 * reading up to {@code length} bytes from that buffer.  The position of both
 	 * buffers will be increased by {@code length}.
@@ -38,7 +51,7 @@ class ByteBufferExtensions {
 	static ByteBuffer put(ByteBuffer self, ByteBuffer src, int length) {
 
 		self.put(src.array(), src.position(), length)
-		src + length
+		src.advance(length)
 		return self
 	}
 }
