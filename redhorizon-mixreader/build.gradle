@@ -33,7 +33,6 @@ application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
 	applicationName = 'mix'
 	applicationDefaultJvmArgs = [
-		'-Djava.library.path=./lib',
 		"-Dredhorizon.version=${version}"
 	] + [
 		'java.io',
@@ -47,16 +46,5 @@ application {
 		'sun.nio.ch'
 	].inject([]) { acc, javaPackage ->
 		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
-	}
-}
-
-distributions {
-	main {
-		contents {
-			from('../redhorizon-filetypes') {
-				include '*MixFileKey*'
-				into 'lib'
-			}
-		}
 	}
 }
