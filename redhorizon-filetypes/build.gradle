@@ -18,12 +18,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 description = 'Filetypes module for the Red Horizon project'
 
-repositories {
-	flatDir {
-		dirs 'libraries'
-	}
-}
-
 dependencies {
 	implementation(
 		project(':redhorizon-codecs'),
@@ -43,35 +37,4 @@ processResources {
 	expand([
 		moduleVersion: version
 	])
-}
-
-def isMac = Os.isFamily(Os.FAMILY_MAC)
-def isUnix = Os.isFamily(Os.FAMILY_UNIX)
-def isWindows = Os.isFamily(Os.FAMILY_WINDOWS)
-
-task compileMixFileKey(type: Exec) {
-	onlyIf {
-		return !(
-			isMac ? file('libMixFileKey.dylib') :
-			isUnix ? file('libMixFileKey.so') :
-			isWindows ? file('MixFileKey.dll') :
-			true
-		)
-	}
-
-	if (isUnix) {
-		commandLine 'make', isMac ? 'macos' : 'linux'
-	}
-	else if (isWindows) {
-		commandLine 'nmake', 'windows'
-	}
-	else {
-		doLast {
-			println 'No C++ build configuration for this platform'
-		}
-	}
-}
-
-build {
-	dependsOn 'compileMixFileKey'
 }

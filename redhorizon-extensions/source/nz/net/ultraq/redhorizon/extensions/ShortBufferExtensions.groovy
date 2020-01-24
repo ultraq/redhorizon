@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,25 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
-import java.nio.Buffer
+import java.nio.ShortBuffer
 
 /**
- * Instance method extensions to the {@code Buffer} class.
+ * Instance method extensions to the {@code ShortBuffer} class.
  * 
  * @author Emanuel Rabina
  */
-class BufferExtensions {
+class ShortBufferExtensions {
 
 	/**
 	 * Advance the internal position of a buffer by the given amount.  Negative
 	 * values may be given to move the position backwards.
 	 * 
 	 * @param self
-	 * @param advanceBy
-	 * @return
+	 * @param n
+	 * @return The buffer.
 	 */
-	static Buffer advance(Buffer self, int advanceBy) {
+	static ShortBuffer advance(ShortBuffer self, int n) {
 
-		return self.position(self.position() + advanceBy)
+		return self.position(self.position() + n)
 	}
 }

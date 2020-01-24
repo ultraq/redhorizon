@@ -32,8 +32,6 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 
 	private static final int SIZE_ENCRYPTED_BLOCK = 8
 	private static final int SIZE_FLAG = 4
-	private static final int SIZE_BLOWFISH_SOURCE_KEY = 80
-	private static final int SIZE_BLOWFISH_KEY = 56
 
 	final short numEntries
 	final int dataSize
@@ -49,10 +47,9 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 	MixFileDelegateEncrypted(DataInput input) {
 
 		// Retrieve the Blowfish key used for decrypting the header and file entry index
-		def keySource = ByteBuffer.allocateNative(SIZE_BLOWFISH_SOURCE_KEY)
+		def keySource = ByteBuffer.allocateNative(MixFileKey.SIZE_KEY_SOURCE)
 		input.readFully(keySource.array())
-		def key = ByteBuffer.allocateNative(SIZE_BLOWFISH_KEY)
-		MixFileKey.getBlowfishKey(keySource, key)
+		def key = new MixFileKey().calculateKey(keySource)
 		def blowfish = new BlowfishECB(key.array(), 0, key.capacity())
 
 		// Decrypt the first block to obtain the header
@@ -81,6 +78,6 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 			entries[index] = new MixEntry(decryptedIndexBuffer)
 		}
 
-		baseEntryOffset = SIZE_FLAG + SIZE_BLOWFISH_SOURCE_KEY + SIZE_ENCRYPTED_BLOCK + numBytesForIndex
+		baseEntryOffset = SIZE_FLAG + MixFileKey.SIZE_KEY_SOURCE + SIZE_ENCRYPTED_BLOCK + numBytesForIndex
 	}
 }
