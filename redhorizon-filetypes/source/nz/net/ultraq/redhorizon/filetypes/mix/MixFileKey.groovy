@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.filetypes.mix
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
@@ -102,7 +104,21 @@ class MixFileKey {
 	 */
 	private static BigInteger fromLittleEndianByteArray(byte[] bytes) {
 
-		return new BigInteger(bytes.reverse())
+		return fromLittleEndianByteArray(bytes, 0, bytes.length)
+	}
+
+	/**
+	 * Convert a little endian byte array to a {@code BigInteger}, using only the
+	 * subset of bytes in the little endian order.
+	 * 
+	 * @param bytes
+	 * @param offset
+	 * @param length
+	 * @return
+	 */
+	private static BigInteger fromLittleEndianByteArray(byte[] bytes, int offset, int length) {
+
+		return new BigInteger(bytes.reverse(), bytes.length - length - offset, length)
 	}
 
 	/**
@@ -171,9 +187,9 @@ class MixFileKey {
 			source.get(partialSource)
 			def bigIntegerPartialSource = fromLittleEndianByteArray(partialSource)
 
-			def bigIntegerPartialKey = calculateKeyBigNumber(bigIntegerPartialSource)
+			def partialKey = calculateKeyBigNumber(bigIntegerPartialSource)
 
-			def keyArray = toLittleEndianByteArray(bigIntegerPartialKey)
+			def keyArray = toLittleEndianByteArray(partialKey)
 			key.put(keyArray, 0, keyArray.length)
 		}
 		source.rewind()
@@ -189,13 +205,13 @@ class MixFileKey {
 	 */
 	private BigInteger calculateKeyBigNumber(BigInteger source) {
 
-		def key = new BigInteger(source.toString())
+		def partialKey = new BigInteger(source.toString())
 		16.times {
-			key = calculateKeyBigNumber(key, key)
+			partialKey = calculateKeyBigNumber(partialKey, partialKey)
 		}
-		key = calculateKeyBigNumber(key, source)
+		partialKey = calculateKeyBigNumber(partialKey, source)
 
-		return key
+		return partialKey
 	}
 
 	/**
@@ -243,6 +259,9 @@ class MixFileKey {
 
 	/**
 	 * Further calculation of the key based on the given 2 sources values.
+	 * <p>
+	 * This method had some rather complicated C++ code, so I've mostly kept it
+	 * intact and translated it to Java/Groovy to keep it working.
 	 * 
 	 * @param source1
 	 * @param source2
@@ -250,63 +269,114 @@ class MixFileKey {
 	 */
 	private BigInteger calculateKeyBigNumber(BigInteger source1, BigInteger source2) {
 
-		def g1lengthx2 = publicKey.shortLength()
-		def key = source1 * source2
+		def partialKey = source1 * source2
 
-		def g2lengthx2 = key.shortLength()
-		if (g2lengthx2 >= g1lengthx2) {
-			key = (key + 1).negate()
+		if (partialKey.shortLength() >= publicKey.shortLength()) {
+			partialKey = -(partialKey + 1)
 
-			def lengthdiff = g2lengthx2 + 1 - g1lengthx2
+			// The following loop operates on as section of the partial key's bytes,
+			// delimited by the "esi" value, as if it were a byte, short, and
+			// sometimes int array.  It slowly reduces the partial key value to the
+			// size of the public key.
 
-			def global2Bytes = asNativeBigInteger(key)
-			def global2Shorts = global2Bytes.asShortBuffer()
-			def esi = lengthdiff
-			def edi = g2lengthx2 + 1
+			def lengthDiff = partialKey.shortLength() + 1 - publicKey.shortLength()
+			def partialKeyBytes = asNativeBigInteger(partialKey)
+			printByteBuffer('global2 before loop', partialKeyBytes)
+			def partialKeyShorts = partialKeyBytes.asShortBuffer()
+			partialKeyShorts.position(partialKeyShorts.limit() - 2) // Initial sign value is int sized 
+			def esi = lengthDiff
+			def edi = partialKey.shortLength() + 1
 
-			for (; lengthdiff > 0; lengthdiff--) {
-				esi--
-				edi--
-				int temp = getMulShort(global2Shorts.position(edi))
+			while (lengthDiff--) {
+				def leOffset = lengthDiff * 2
+				def leRange = partialKeyBytes.limit() - leOffset
 
+				def temp = getMulShort(partialKeyShorts)
 				if (temp > 0) {
-					// TODO: This deconstruct/reconstruct is the splitting of a BigInteger
-					//       from a specific point to localize a calculation to just that
-					//       part of the number.  Could be a good extension method?
-					def partial = copy(key, esi * 2, key.byteLength() - (esi * 2))
-					partial = publicKey * new BigInteger(Integer.toString(temp)) + partial
+					def partial = forRange(partialKeyBytes, leOffset, leRange) { rangeValue ->
+						return publicKey * new BigInteger(Integer.toString(temp)) + rangeValue
+					}
 
-					key = replace(key, partial, esi * 2)
-					global2Bytes = asNativeBigInteger(key)
-					global2Shorts = global2Bytes.asShortBuffer()
+					printByteBuffer("global2 after", partialKeyBytes)
 
-					printBigInteger("global2 after", key)
-					if (edi < global2Shorts.limit() && (global2Shorts.get(edi) & 0x8000) == 0) {
+					if (partial.signum() != -1) {
+						def partial2 = forRange(partialKeyBytes, leOffset, leRange) { rangeValue ->
+							return rangeValue - publicKey
+						}
 
-						// TODO: Another split calculation
-						def partial2 = copy(key, esi * 2, key.byteLength() - (esi * 2))
-						partial2 -= publicKey
-
-						key = replace(key, partial2, esi * 2)
-						global2Bytes = asNativeBigInteger(key)
-						global2Shorts = global2Bytes.asShortBuffer()
-
-						printBigInteger('global2 after subtract', key)
-						if (key <=> 0) {
+						printByteBuffer('global2 after subtract', partialKeyBytes)
+						if (partial2 <=> 0 != -1) {
 							println('Positive?')
-							edi--
+							partialKeyShorts.advance(-1)
 						}
 					}
 				}
+				partialKeyShorts.advance(-1)
+
+//				esi--
+//				edi--
+//				def temp = getMulShort(partialKeyShorts.position(edi))
+//
+//				if (temp > 0) {
+//					def partial = copy(partialKey, esi * 2, partialKey.byteLength() - (esi * 2))
+//					partial = publicKey * new BigInteger(Integer.toString(temp)) + partial
+//
+//					partialKey = replace(partialKey, partial, esi * 2)
+//					partialKeyBytes = asNativeBigInteger(partialKey)
+//					partialKeyShorts = partialKeyBytes.asShortBuffer()
+//
+//					printBigInteger("global2 after", partialKey)
+//					if (edi < partialKeyShorts.limit() && (partialKeyShorts.get(edi) & 0x8000) == 0) {
+//
+//						// TODO: Another split calculation
+//						def partial2 = copy(partialKey, esi * 2, partialKey.byteLength() - (esi * 2))
+//						partial2 -= publicKey
+//
+//						partialKey = replace(partialKey, partial2, esi * 2)
+//						partialKeyBytes = asNativeBigInteger(partialKey)
+//						partialKeyShorts = partialKeyBytes.asShortBuffer()
+//
+//						printBigInteger('global2 after subtract', partialKey)
+//						if (partialKey <=> 0) {
+//							println('Positive?')
+//							edi--
+//						}
+//					}
+//				}
 			}
-			key = key.negate() - 1
+			partialKey = fromLittleEndianByteArray(partialKeyBytes.array())
+			println("partialKey: ${partialKey}")
+			partialKey = -partialKey - 1
 		}
-		return new BigInteger(key.toString())
+		return new BigInteger(partialKey.toString())
+	}
+
+	/**
+	 * No damn idea as to what this does except to look confusing as hell.  Looks
+	 * to be some modification of the current position of the buffer against the
+	 * public key inverse lo/hi values.
+	 * 
+	 * @param values
+	 * @return
+	 */
+	private int getMulShort(ShortBuffer values) {
+
+		def i = (((((((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvLo + 0x10000) >>> 1) +
+			((((values.get(values.position() - 2) ^ 0xffff) & 0xffff) * pkHiInvHi + pkHiInvHi) >>> 1) + 1) >>> 16) +
+			((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvHi) >>> 1) +
+			((((values.get(values.position()) ^ 0xffff) & 0xffff) * pkHiInvLo) >>> 1) + 1) >>> 14) + pkHiInvHi *
+			((values.get(values.position()) ^ 0xffff) & 0xffff) * 2) >>> pkHiBitLength
+
+		if (i > 0xffff) {
+			i = 0xffff
+		}
+		return i
 	}
 
 	/**
 	 * Convert a {@code BigInteger} to its byte representation equivalent as in
-	 * the original C++ code, which is a little endian byte array with sign bytes.
+	 * the original C++ code, which is a little endian byte array filled to the
+	 * nearest int size, padding with sign bytes if necessary.
 	 * 
 	 * @param source
 	 * @return
@@ -314,10 +384,35 @@ class MixFileKey {
 	private static ByteBuffer asNativeBigInteger(BigInteger source) {
 
 		def sourceBytes = toLittleEndianByteArray(source)
-		return ByteBuffer.allocateNative(sourceBytes.length + 4)
+		def sourceLength = sourceBytes.length
+		if (sourceLength % 4) {
+			sourceLength += 4 - sourceLength % 4
+		}
+		def sourceBuffer = ByteBuffer.allocateNative(sourceLength + 4)
 			.put(sourceBytes)
-			.putInt(source.signum() == -1 ? -1 : 0) // Mock sign int
-			.rewind()
+		while (sourceBuffer.hasRemaining()) {
+			sourceBuffer.put((byte)(source.signum() == -1 ? -1 : 0))
+		}
+		return sourceBuffer.rewind()
+	}
+
+	private static BigInteger forRange(ByteBuffer buffer, int offset, int length,
+		@ClosureParams(value = SimpleType, options = 'java.math.BigInteger') Closure<BigInteger> closure) {
+
+		def rangeBytes = new byte[length]
+		System.arraycopy(buffer.array(), offset, rangeBytes, 0, length)
+		def result = closure(fromLittleEndianByteArray(rangeBytes))
+		buffer
+			.position(offset)
+//			.put(toLittleEndianByteArray(result))
+//			.put(result.toByteArray().reverse())
+//			.reset()
+			.put(result.toByteArray().reverse())
+		while (buffer.hasRemaining()) {
+			buffer.put((byte)(result.signum() == -1 ? -1 : 0))
+		}
+		buffer.rewind()
+		return result
 	}
 
 	/**
@@ -371,27 +466,5 @@ class MixFileKey {
 		sourceBuffer.put(sourceBytes, sourceBuffer.position() - 4, sourceBuffer.remaining())
 
 		return new BigInteger(sourceBuffer.array())
-	}
-
-	/**
-	 * No damn idea as to what this does except to look confusing as hell.  Looks
-	 * to be some modification of the current position of the buffer against the
-	 * global inverse lo/hi values.
-	 * 
-	 * @param values
-	 * @return
-	 */
-	private int getMulShort(ShortBuffer values) {
-
-		def i = (((((((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvLo + 0x10000) >>> 1) +
-			((((values.get(values.position() - 2) ^ 0xffff) & 0xffff) * pkHiInvHi + pkHiInvHi) >>> 1) + 1) >>> 16) +
-			((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvHi) >>> 1) +
-			((((values.get(values.position()) ^ 0xffff) & 0xffff) * pkHiInvLo) >>> 1) + 1) >>> 14) + pkHiInvHi *
-			((values.get(values.position()) ^ 0xffff) & 0xffff) * 2) >>> pkHiBitLength
-
-		if (i > 0xffff) {
-			i = 0xffff
-		}
-		return i
 	}
 }
