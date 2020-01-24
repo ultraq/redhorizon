@@ -36,20 +36,6 @@ class BigIntegerExtensions {
 	}
 
 	/**
-	 * Calculate the number of int-sized values needed to be able to represent
-	 * this {@code BigInteger}, excluding space for a sign bit.  (The name differs
-	 * slightly as there is already a private method in {@code BigInteger} with
-	 * the intended name!)
-	 * 
-	 * @param self
-	 * @return
-	 */
-	static int intLengthNoSign(BigInteger self) {
-
-		return (self.bitLength() + 31) >>> 5
-	}
-
-	/**
 	 * An alias for {@link BigInteger#shiftLeft} that allows the use of the
 	 * {@code <<} symbol}.
 	 * 

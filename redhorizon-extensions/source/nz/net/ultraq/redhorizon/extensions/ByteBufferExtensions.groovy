@@ -54,4 +54,26 @@ class ByteBufferExtensions {
 		src.advance(length)
 		return self
 	}
+
+	/**
+	 * Split a buffer into several smaller buffers of the specified size.  If the
+	 * size doesn't cleanly divide into the current buffer, then the final buffer
+	 * will be smaller and contain the remaining bytes.
+	 * 
+	 * @param self
+	 * @param length
+	 * @return
+	 */
+	static ByteBuffer[] split(ByteBuffer self, int length) {
+
+		self.rewind()
+		def buffers = new ByteBuffer[Math.ceil(self.limit() / length)].collect {
+			def bufferSize = Math.min(length, self.remaining())
+			return ByteBuffer.allocate(bufferSize).order(self.order())
+				.put(self, bufferSize)
+				.rewind()
+		}
+		self.rewind()
+		return buffers
+	}
 }

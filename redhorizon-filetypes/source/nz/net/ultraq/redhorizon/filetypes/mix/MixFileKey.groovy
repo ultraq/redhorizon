@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.filetypes.mix
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.IntBuffer
 import java.nio.ShortBuffer
 
 /**
@@ -97,124 +95,6 @@ class MixFileKey {
 	}
 
 	/**
-	 * Convert a little endian byte array to a {@code BigInteger}.
-	 * 
-	 * @param bytes
-	 * @return
-	 */
-	private static BigInteger fromLittleEndianByteArray(byte[] bytes) {
-
-		return fromLittleEndianByteArray(bytes, 0, bytes.length)
-	}
-
-	/**
-	 * Convert a little endian byte array to a {@code BigInteger}, using only the
-	 * subset of bytes in the little endian order.
-	 * 
-	 * @param bytes
-	 * @param offset
-	 * @param length
-	 * @return
-	 */
-	private static BigInteger fromLittleEndianByteArray(byte[] bytes, int offset, int length) {
-
-		return new BigInteger(bytes.reverse(), bytes.length - length - offset, length)
-	}
-
-	/**
-	 * Convert a {@code BigInteger}'s big endian byte representation to a little
-	 * endian byte array.
-	 * 
-	 * @param value
-	 * @return
-	 */
-	private static byte[] toLittleEndianByteArray(BigInteger value) {
-
-		return value.toByteArrayNoSignByte().reverse()
-	}
-
-	/**
-	 * Prints the values of the {@code BigInteger} in a similar format to how the
-	 * C++ code does (as little-endian int-sized chunks).
-	 * 
-	 * @param name
-	 * @param integer
-	 */
-	private static void printBigInteger(String name, BigInteger integer) {
-
-		printByteBuffer(name, ByteBuffer.wrap(toLittleEndianByteArray(integer)).order(ByteOrder.nativeOrder()))
-	}
-
-	private static void printByteBuffer(String name, ByteBuffer buffer) {
-
-		printf("${name} (Groovy): ")
-		if (buffer.order() != ByteOrder.nativeOrder()) {
-			buffer = ByteBuffer.wrap(buffer.array().reverse()).order((ByteOrder.nativeOrder()))
-		}
-		IntBuffer integerInts = buffer.asIntBuffer()
-		for (int i = 0; i < integerInts.limit(); i++) {
-			printf('0x%x, ', integerInts.get(i))
-		}
-		int remainder = buffer.limit() % 4;
-		if (remainder != 0) {
-			int remaining = 0
-			for (int i = 0; i < remainder; i++) {
-				remaining <<= 8
-				remaining |= buffer.get(buffer.limit() - 1 - i) & 0xff
-			}
-			printf('0x%x, ', remaining)
-		}
-		println()
-	}
-
-	/**
-	 * Calculates the 56-byte Blowfish key from the 80-byte key source found in
-	 * Red Alert's MIX files.
-	 * 
-	 * @param source A buffer containing the 80-byte key source.
-	 * @return A buffer containing the 56-byte Blowfish key.
-	 */
-	ByteBuffer calculateKey(ByteBuffer source) {
-
-		def key = ByteBuffer.allocateNative(SIZE_KEY)
-
-		// Process the key in parts that can fit the public key
-		// TODO: Can maybe write some split function for a ByteBuffer so this can be
-		//       iterated over?
-		def processingSize = publicKey.byteLength()
-		while (source.hasRemaining()) {
-			def partialSource = new byte[processingSize]
-			source.get(partialSource)
-			def bigIntegerPartialSource = fromLittleEndianByteArray(partialSource)
-
-			def partialKey = calculateKeyBigNumber(bigIntegerPartialSource)
-
-			def keyArray = toLittleEndianByteArray(partialKey)
-			key.put(keyArray, 0, keyArray.length)
-		}
-		source.rewind()
-		return key.rewind()
-	}
-
-	/**
-	 * Calculate the key now that all sources have been transformed into
-	 * {@code BigInteger}s.
-	 * 
-	 * @param source
-	 * @return The key, as a {@code BigInteger}.
-	 */
-	private BigInteger calculateKeyBigNumber(BigInteger source) {
-
-		def partialKey = new BigInteger(source.toString())
-		16.times {
-			partialKey = calculateKeyBigNumber(partialKey, partialKey)
-		}
-		partialKey = calculateKeyBigNumber(partialKey, source)
-
-		return partialKey
-	}
-
-	/**
 	 * Inverse function?
 	 * <p>
 	 * I'm not really sure what the original C++ function was supposed to be doing
@@ -235,11 +115,11 @@ class MixFileKey {
 		def bitLength = value.bitLength()
 		def bit = 1 << (bitLength % 8)
 
-		def temp = fromLittleEndianByteArray(ByteBuffer.allocate(16)
-			.order(ByteOrder.nativeOrder())
+		// ???
+		def temp = new BigInteger(ByteBuffer.allocateNative(16)
 			.put(value.byteLength() - 1, 1 << (((bitLength - 1) % 8) & 0x1f) as byte)
 			.array()
-		)
+			.reverse())
 
 		while (bitLength--) {
 			temp <<= 1
@@ -248,13 +128,47 @@ class MixFileKey {
 				dest[destPos] |= bit
 			}
 			bit >>>= 1
-			if (bit == 0) {
+			if (!bit) {
 				destPos--
 				bit = 0x80
 			}
 		}
 
-		return fromLittleEndianByteArray(dest)
+		return new BigInteger(dest.reverse())
+	}
+
+	/**
+	 * Calculates the 56-byte Blowfish key from the 80-byte key source found in
+	 * Red Alert's MIX files.
+	 * 
+	 * @param source A buffer containing the 80-byte key source.
+	 * @return A buffer containing the 56-byte Blowfish key.
+	 */
+	ByteBuffer calculateKey(ByteBuffer source) {
+
+		def key = ByteBuffer.allocateNative(SIZE_KEY)
+
+		// Process the key in parts of equal size to the public key
+		source.split(publicKey.byteLength()).each { sourcePart ->
+			def sourceValue = new BigInteger(sourcePart.array().reverse())
+
+			// Recursive function to reduce the partial source value through multiple
+			// rounds of the {@link #calculateKeyBigNumber(BigInteger, BigInteger)}
+			// method, returning the partial key.
+			def calculateKeyBigNumberRecursive = null
+			calculateKeyBigNumberRecursive = { BigInteger value, int rounds ->
+				return rounds ?
+					calculateKeyBigNumberRecursive(calculateKeyBigNumber(value, value), rounds - 1) :
+					value
+			}
+			def partialKey = calculateKeyBigNumber(
+				calculateKeyBigNumberRecursive(new BigInteger(sourceValue.toString()), 16),
+				sourceValue)
+
+			key.put(partialKey.toByteArrayNoSignByte().reverse())
+		}
+
+		return key.rewind()
 	}
 
 	/**
@@ -275,79 +189,35 @@ class MixFileKey {
 			partialKey = -(partialKey + 1)
 
 			// The following loop operates on as section of the partial key's bytes,
-			// delimited by the "esi" value, as if it were a byte, short, and
-			// sometimes int array.  It slowly reduces the partial key value to the
-			// size of the public key.
+			// delimited by the "lengthDiff" value, as if it were a short value array.
+			// It slowly reduces the partial key value to the size of the public key.
 
 			def lengthDiff = partialKey.shortLength() + 1 - publicKey.shortLength()
 			def partialKeyBytes = asNativeBigInteger(partialKey)
-			printByteBuffer('global2 before loop', partialKeyBytes)
 			def partialKeyShorts = partialKeyBytes.asShortBuffer()
-			partialKeyShorts.position(partialKeyShorts.limit() - 2) // Initial sign value is int sized 
-			def esi = lengthDiff
-			def edi = partialKey.shortLength() + 1
+			partialKeyShorts.position(partialKeyShorts.limit() - 2) // To position it at the int-sized sign value 
 
 			while (lengthDiff--) {
-				def leOffset = lengthDiff * 2
-				def leRange = partialKeyBytes.limit() - leOffset
+				def offset = lengthDiff * 2
+				def leRange = partialKeyBytes.limit() - offset
 
-				def temp = getMulShort(partialKeyShorts)
+				def temp = calculateKeyShort(partialKeyShorts)
 				if (temp > 0) {
-					def partial = forRange(partialKeyBytes, leOffset, leRange) { rangeValue ->
+					def partial = forRange(partialKeyBytes, offset, leRange) { rangeValue ->
 						return publicKey * new BigInteger(Integer.toString(temp)) + rangeValue
 					}
 
-					printByteBuffer("global2 after", partialKeyBytes)
-
 					if (partial.signum() != -1) {
-						def partial2 = forRange(partialKeyBytes, leOffset, leRange) { rangeValue ->
+						forRange(partialKeyBytes, offset, leRange) { rangeValue ->
 							return rangeValue - publicKey
-						}
-
-						printByteBuffer('global2 after subtract', partialKeyBytes)
-						if (partial2 <=> 0 != -1) {
-							println('Positive?')
-							partialKeyShorts.advance(-1)
 						}
 					}
 				}
 				partialKeyShorts.advance(-1)
-
-//				esi--
-//				edi--
-//				def temp = getMulShort(partialKeyShorts.position(edi))
-//
-//				if (temp > 0) {
-//					def partial = copy(partialKey, esi * 2, partialKey.byteLength() - (esi * 2))
-//					partial = publicKey * new BigInteger(Integer.toString(temp)) + partial
-//
-//					partialKey = replace(partialKey, partial, esi * 2)
-//					partialKeyBytes = asNativeBigInteger(partialKey)
-//					partialKeyShorts = partialKeyBytes.asShortBuffer()
-//
-//					printBigInteger("global2 after", partialKey)
-//					if (edi < partialKeyShorts.limit() && (partialKeyShorts.get(edi) & 0x8000) == 0) {
-//
-//						// TODO: Another split calculation
-//						def partial2 = copy(partialKey, esi * 2, partialKey.byteLength() - (esi * 2))
-//						partial2 -= publicKey
-//
-//						partialKey = replace(partialKey, partial2, esi * 2)
-//						partialKeyBytes = asNativeBigInteger(partialKey)
-//						partialKeyShorts = partialKeyBytes.asShortBuffer()
-//
-//						printBigInteger('global2 after subtract', partialKey)
-//						if (partialKey <=> 0) {
-//							println('Positive?')
-//							edi--
-//						}
-//					}
-//				}
 			}
-			partialKey = fromLittleEndianByteArray(partialKeyBytes.array())
-			println("partialKey: ${partialKey}")
-			partialKey = -partialKey - 1
+			partialKey = -new BigInteger(partialKeyBytes.array().reverse()) - 1
 		}
+
 		return new BigInteger(partialKey.toString())
 	}
 
@@ -359,7 +229,7 @@ class MixFileKey {
 	 * @param values
 	 * @return
 	 */
-	private int getMulShort(ShortBuffer values) {
+	private int calculateKeyShort(ShortBuffer values) {
 
 		def i = (((((((((values.get(values.position() - 1) ^ 0xffff) & 0xffff) * pkHiInvLo + 0x10000) >>> 1) +
 			((((values.get(values.position() - 2) ^ 0xffff) & 0xffff) * pkHiInvHi + pkHiInvHi) >>> 1) + 1) >>> 16) +
@@ -383,7 +253,7 @@ class MixFileKey {
 	 */
 	private static ByteBuffer asNativeBigInteger(BigInteger source) {
 
-		def sourceBytes = toLittleEndianByteArray(source)
+		def sourceBytes = source.toByteArray().reverse()
 		def sourceLength = sourceBytes.length
 		if (sourceLength % 4) {
 			sourceLength += 4 - sourceLength % 4
@@ -396,75 +266,31 @@ class MixFileKey {
 		return sourceBuffer.rewind()
 	}
 
+	/**
+	 * Perform {@code BigInteger} calculations using byte data from a section of a
+	 * buffer.  The bytes comprising the section will be passed to the given
+	 * closure as a {@code BigInteger}, and the returned result will then be used
+	 * to replace those bytes, padding out any remaining space with the sign byte.
+	 * 
+	 * @param buffer
+	 * @param offset
+	 * @param length
+	 * @param closure
+	 * @return
+	 */
 	private static BigInteger forRange(ByteBuffer buffer, int offset, int length,
 		@ClosureParams(value = SimpleType, options = 'java.math.BigInteger') Closure<BigInteger> closure) {
 
 		def rangeBytes = new byte[length]
 		System.arraycopy(buffer.array(), offset, rangeBytes, 0, length)
-		def result = closure(fromLittleEndianByteArray(rangeBytes))
+		def result = closure(new BigInteger(rangeBytes.reverse()))
 		buffer
 			.position(offset)
-//			.put(toLittleEndianByteArray(result))
-//			.put(result.toByteArray().reverse())
-//			.reset()
 			.put(result.toByteArray().reverse())
 		while (buffer.hasRemaining()) {
 			buffer.put((byte)(result.signum() == -1 ? -1 : 0))
 		}
 		buffer.rewind()
 		return result
-	}
-
-	/**
-	 * Use {@code num} bytes from the byte value of the {@code BigInteger} to
-	 * create a new {@code BigInteger}.
-	 * 
-	 * @param source
-	 * @param offset
-	 * @param length
-	 * @return
-	 */
-	private static BigInteger copy(BigInteger source, int offset, int length) {
-
-		def sourceBytes = source.toByteArrayNoSignByte()
-		def sourceBuffer = ByteBuffer.allocate(sourceBytes.length + 4)
-			.putInt(source.signum() == -1 ? -1 : 0) // Mock sign int
-			.put(sourceBytes)
-		return new BigInteger(sourceBuffer.array(), sourceBuffer.limit() - length - offset - 4, length + 4)
-	}
-
-	private static ByteBuffer fill(ByteBuffer buffer, byte val) {
-
-		buffer.rewind()
-		while (buffer.hasRemaining()) {
-			buffer.put(val)
-		}
-		return buffer.rewind()
-	}
-
-	/**
-	 * Replace {@code num} bytes of the bytes in {@code source} with those from
-	 * {@code replaceWith}.
-	 * 
-	 * @param source
-	 * @param replaceWith
-	 * @param retain
-	 * @return
-	 */
-	private static BigInteger replace(BigInteger source, BigInteger replaceWith, int retain) {
-
-		// TODO: Since this operation works with the method above, it can probably
-		//       be contained within a closure.
-		def sourceBytes = source.toByteArrayNoSignByte()
-		def replaceBytes = replaceWith.toByteArrayNoSignByte()
-
-		def sourceBuffer = fill(ByteBuffer.allocate(sourceBytes.length + 4), (byte)(source.signum() == -1 ? -1 : 0))
-		sourceBuffer.position(sourceBuffer.limit() - retain - replaceBytes.length - 4)
-		sourceBuffer.putInt(replaceWith.signum() == -1 ? -1 : 0)
-
-		sourceBuffer.put(replaceBytes)
-		sourceBuffer.put(sourceBytes, sourceBuffer.position() - 4, sourceBuffer.remaining())
-
-		return new BigInteger(sourceBuffer.array())
 	}
 }
