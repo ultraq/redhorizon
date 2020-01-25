@@ -101,8 +101,9 @@ trait Visual {
 			executionBarrier.await()
 			if (executable) {
 				executionBarrier.reset()
-				executable.run()
+				def executableRef = executable
 				executable = null
+				executableRef.run()
 			}
 
 			// Shutdown phase

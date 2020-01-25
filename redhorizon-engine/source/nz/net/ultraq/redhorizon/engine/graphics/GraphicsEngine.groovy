@@ -24,7 +24,6 @@ import static nz.net.ultraq.redhorizon.engine.graphics.OpenGLContext.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.Callable
 import java.util.concurrent.FutureTask
 
 /**
