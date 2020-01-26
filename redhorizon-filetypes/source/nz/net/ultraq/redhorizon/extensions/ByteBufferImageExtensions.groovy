@@ -92,4 +92,33 @@ class ByteBufferImageExtensions {
 
 		return width < limitX ? Math.min(Math.floor(limitX / width), self.length) : 1
 	}
+
+	/**
+	 * Return a new image buffer where the width and height dimensions have been
+	 * right-shifted by the given amount.  (The reason for only scaling by binary
+	 * shifting is that the scaling algorithm is really slow if it has to use
+	 * division!)
+	 * 
+	 * @param self
+	 * @param width
+	 * @param height
+	 * @param format
+	 * @param scaleShift
+	 * @return
+	 */
+	static ByteBuffer scale(ByteBuffer self, int width, int height, int format, int scaleShift) {
+
+		def scaledWidth = width << scaleShift
+		def scaledHeight = height << scaleShift
+		def scaledBuffer = ByteBuffer.allocateNative(scaledWidth * scaledHeight * format)
+
+		for (def y = 0; y < scaledHeight; y++) {
+			for (def x = 0; x < scaledWidth; x++) {
+				def selfPointer = ((y >> scaleShift) * width + (x >> scaleShift)) * format
+				def scalePointer = (y * scaledWidth + x) * format
+				scaledBuffer.position(scalePointer).put(self.array(), selfPointer, format)
+			}
+		}
+		return scaledBuffer.rewind()
+	}
 }

@@ -102,8 +102,15 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		this.width      = width
-		this.height     = height
+		// If applying filtering on a very low resolution item, apply a basic 2x
+		// scaling to it so that the filtering doesn't become too blurry
+		def scale = 0
+		if (filter && width <= 320) {
+			scale = 1
+		}
+
+		this.width      = width << scale
+		this.height     = height << scale
 		this.format     = format
 		this.numFrames  = numFrames
 		this.frameRate  = frameRate
@@ -114,7 +121,11 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.bufferSize = bufferSize
 		this.animationDataWorker = animationDataWorker
 		this.animationDataWorker.on(StreamingFrameEvent) { event ->
-			frames << ByteBuffer.fromBuffersDirect(event.frame)
+			def frame = event.frame
+			if (scale) {
+				frame = event.frame.scale(width, height, format, scale)
+			}
+			frames << ByteBuffer.fromBuffersDirect(frame)
 			if (bufferReady.count && !frames.remainingCapacity()) {
 				bufferReady.countDown()
 			}
