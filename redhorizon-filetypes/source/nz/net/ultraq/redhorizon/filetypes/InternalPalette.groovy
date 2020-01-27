@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.filetypes
  * 
  * @author Emanuel Rabina
  */
-interface PalettedInternal {
+interface InternalPalette {
 
 	/**
 	 * Retrieves the internal palette.

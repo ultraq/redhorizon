@@ -23,5 +23,6 @@ include(
 	'redhorizon-extensions',
 	'redhorizon-filetypes',
 	'redhorizon-mediaplayer',
-	'redhorizon-mixreader'
+	'redhorizon-mixreader',
+	'redhorizon-utilities:converter-pcx2cps'
 )

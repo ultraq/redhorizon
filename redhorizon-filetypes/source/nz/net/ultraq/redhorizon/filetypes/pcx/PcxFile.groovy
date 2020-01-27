@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
@@ -38,7 +39,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina.
  */
 @FileExtensions('pcx')
-class PcxFile implements ImageFile {
+class PcxFile implements ImageFile, InternalPalette {
 
 	// Header constants
 	private static final int  HEADER_PALETTE_SIZE  = 48
@@ -79,6 +80,7 @@ class PcxFile implements ImageFile {
 	final int height
 	final ColourFormat format = FORMAT_RGB
 	final ByteBuffer imageData
+	final Palette palette
 
 	/**
 	 * Constructor, creates a new PCX file from data in the given input stream.
@@ -131,7 +133,6 @@ class PcxFile implements ImageFile {
 		// Read the rest of the stream
 		def imageAndPalette = input.readAllBytes()
 		def encodedImage = ByteBuffer.wrapNative(imageAndPalette, 0, imageAndPalette.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
-		def palette = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 
 		// Build up the raw image data for use with a palette later
 		// NOTE: The below is for the case when the scanline data exceeds the
@@ -153,8 +154,11 @@ class PcxFile implements ImageFile {
 		}
 		rawImageData.rewind()
 
+		def paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
+		palette = new Palette(PALETTE_COLOURS, FORMAT_RGB, paletteData)
+
 		// Apply palette to raw image data to create the final image
-		imageData = rawImageData.applyPalette(new Palette(PALETTE_COLOURS, FORMAT_RGB, palette))
+		imageData = rawImageData.applyPalette(palette)
 	}
 
 	/**

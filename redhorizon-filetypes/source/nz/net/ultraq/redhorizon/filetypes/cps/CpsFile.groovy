@@ -20,9 +20,10 @@ import nz.net.ultraq.redhorizon.codecs.LCW
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.filetypes.PalettedInternal
+import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import java.nio.ByteBuffer
@@ -37,13 +38,13 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class CpsFile implements ImageFile, PalettedInternal {
+class CpsFile implements ImageFile, InternalPalette {
 
 	// Header constants
-	private static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
-	private static final int COMPRESSION_LCW = 0x0004
-	private static final int IMAGE_SIZE      = 64000  // 320x200
-	private static final int PALETTE_SIZE    = 768
+	static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
+	static final int COMPRESSION_LCW = 0x0004
+	static final int IMAGE_SIZE      = 64000  // 320x200
+	static final int PALETTE_SIZE    = 768
 
 	// File header
 	final short fileSize
@@ -57,12 +58,6 @@ class CpsFile implements ImageFile, PalettedInternal {
 	final ColourFormat format = FORMAT_RGB
 	final Palette palette
 	final ByteBuffer imageData
-
-	// CPS constants
-	private static final int IMAGE_WIDTH  = 320
-	private static final int IMAGE_HEIGHT = 200
-
-	private static final String PARAM_NOPALETTE = "-nopal"
 
 	/**
 	 * Constructor, creates a new CPS file from data in the given input stream.
@@ -101,53 +96,20 @@ class CpsFile implements ImageFile, PalettedInternal {
 	/**
 	 * Constructor, creates a new cps file from another image.
 	 * 
-	 * @param name		Name of the CPS file.
-	 * @param imagefile {@link ImageFile} instance.
-	 * @param params	Additional parameters: unpaletted (opt).
+	 * @param imageFile
 	 */
-//	private CpsFile(String name, ImageFile imagefile, String... params) {
-//
-//		super(name)
-//
-//		boolean usepalette = true
-//
-//		// Grab the parameters
-//		for (String param: params) {
-//			if (param.equals(PARAM_NOPALETTE)) {
-//				usepalette = false
-//			}
-//		}
-//
-//		// Ensure the image meets CPS file requirements
-//		if (imagefile.width() != IMAGE_WIDTH) {
-//			throw new IllegalArgumentException("CPS file image size isn't 0xFA00 (320x200)")
-//		}
-//		if (imagefile.height() != IMAGE_HEIGHT) {
-//			throw new IllegalArgumentException("CPS file image size isn't 0xFA00 (320x200)")
-//		}
-//
-//		// Check for a palette if creating a paletted CPS
-//		if (usepalette && !(imagefile instanceof PalettedInternal)) {
-//			throw new IllegalArgumentException(
-//					"No palette found in source image for use in paletted CPS file")
-//		}
-//
-//		// Copy palette, image
-//		cpspalette = usepalette ? new CpsPalette(((PalettedInternal)imagefile).getPalette()) : null
-//		cpsimage   = BufferUtility.readRemaining(((PalettedInternal)imagefile).getRawImageData())
-//	}
+	CpsFile(ImageFile imageFile) {
 
-	/**
-	 * Constructor, creates a new cps file from a pcx file.
-	 * 
-	 * @param name	  The name of this file.
-	 * @param pcxfile PCX file to draw data from.
-	 * @param params  Additional parameters: unpaletted (opt).
-	 */
-//	CpsFile(String name, PcxFile pcxfile, String... params) {
-//
-//		this(name, (ImageFile)pcxfile, params)
-//	}
+		assert imageFile.width == 320 : 'Source file image width must be 320 pixels'
+		assert imageFile.height == 200 : 'Source file image height must be 200 pixels'
+
+		width = imageFile.width
+		height = imageFile.height
+		if (imageFile instanceof InternalPalette) {
+			palette = imageFile.palette
+		}
+		imageData = imageFile.imageData
+	}
 
 	/**
 	 * Returns some information on this CPS file.
@@ -161,33 +123,32 @@ class CpsFile implements ImageFile, PalettedInternal {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Write this CPS file to the given stream.
+	 * 
+	 * @param outputStream
 	 */
-//	@Override
-//	void write(GatheringByteChannel outputchannel) {
-//
-//		try {
-//			// Encode image
-//			ByteBuffer image = ByteBuffer.allocate(cpsimage.capacity())
-//			CodecUtility.encodeFormat80(cpsimage, image)
-//
-//			// Build palette (if exists)
-//			ByteBuffer palette = cpspalette != null ? cpspalette.toByteBuffer() : null
-//
-//			// Construct header, store to ByteBuffer
-//			cpsheader = cpspalette != null ?
-//					new CpsFileHeader((short)(CpsFileHeader.HEADER_SIZE + CpsFileHeader.PALETTE_SIZE + image.limit() - 2),
-//							CpsFileHeader.PALETTE_SIZE) :
-//					new CpsFileHeader((short)(CpsFileHeader.HEADER_SIZE + image.limit() - 2), (short)0)
-//			ByteBuffer header = cpsheader.toByteBuffer()
-//
-//			// Write file
-//			outputchannel.write(cpspalette != null ?
-//					new ByteBuffer[]{ header, palette, image } :
-//					new ByteBuffer[]{ header, image })
-//		}
-//		finally {
-//			outputchannel.close()
-//		}
-//	}
+	void writeTo(OutputStream outputStream) {
+
+		def output = new NativeDataOutputStream(outputStream)
+		def lcw = new LCW()
+
+		// Encode image
+		def encodedImage = ByteBuffer.allocateNative(imageData.capacity())
+		lcw.encode(imageData, encodedImage)
+
+		// Write header
+		output.writeShort(8 + encodedImage.limit()) // Header + image - this value itself
+		output.writeShort(COMPRESSION_LCW)
+		output.writeShort(encodedImage.limit())
+		output.writeShort(0)
+		output.writeShort(palette ? PALETTE_SIZE : 0)
+
+		// Write optional palette and image data
+		if (palette) {
+			palette.size.times { i ->
+				output.write(palette[i])
+			}
+		}
+		output.write(encodedImage.array(), 0, encodedImage.limit())
+	}
 }
