@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.media
+package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 

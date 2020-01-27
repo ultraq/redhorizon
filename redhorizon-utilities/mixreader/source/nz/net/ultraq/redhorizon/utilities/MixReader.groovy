@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 

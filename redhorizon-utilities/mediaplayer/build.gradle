@@ -20,6 +20,7 @@ dependencies {
 	implementation(
 		project(':redhorizon-engine'),
 		project(':redhorizon-events'),
+		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11'

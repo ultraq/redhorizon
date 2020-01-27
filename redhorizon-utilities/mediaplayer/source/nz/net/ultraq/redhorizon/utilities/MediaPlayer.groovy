@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -23,11 +23,11 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.media.AnimationPlayer
-import nz.net.ultraq.redhorizon.media.SoundPlayer
-import nz.net.ultraq.redhorizon.media.ImageViewer
-import nz.net.ultraq.redhorizon.media.ImagesViewer
-import nz.net.ultraq.redhorizon.media.VideoPlayer
+import nz.net.ultraq.redhorizon.utilities.mediaplayer.AnimationPlayer
+import nz.net.ultraq.redhorizon.utilities.mediaplayer.SoundPlayer
+import nz.net.ultraq.redhorizon.utilities.mediaplayer.ImageViewer
+import nz.net.ultraq.redhorizon.utilities.mediaplayer.ImagesViewer
+import nz.net.ultraq.redhorizon.utilities.mediaplayer.VideoPlayer
 
 import org.reflections.Reflections
 import org.slf4j.Logger

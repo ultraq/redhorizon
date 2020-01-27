@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.media
+package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.media.Animation
+import nz.net.ultraq.redhorizon.media.StopEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
