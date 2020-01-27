@@ -22,7 +22,7 @@ include(
 	'redhorizon-events',
 	'redhorizon-extensions',
 	'redhorizon-filetypes',
-	'redhorizon-mediaplayer',
-	'redhorizon-mixreader',
-	'redhorizon-utilities:converter'
+	'redhorizon-utilities:converter',
+	'redhorizon-utilities:mediaplayer',
+	'redhorizon-utilities:mixreader'
 )

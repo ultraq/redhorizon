@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-plugins {
-	id 'application'
-}
-
 description = 'Media player for the Red Horizon project'
 
 dependencies {
@@ -25,8 +21,6 @@ dependencies {
 		project(':redhorizon-engine'),
 		project(':redhorizon-events'),
 		project(':redhorizon-filetypes'),
-		'ch.qos.logback:logback-classic:1.2.3',
-		'info.picocli:picocli:4.1.1',
 		'org.joml:joml:1.9.19',
 		'org.reflections:reflections:0.9.11'
 	)
@@ -38,23 +32,6 @@ dependencies {
 application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
 	applicationName = 'play'
-	applicationDefaultJvmArgs = [
-		"-Dredhorizon.version=${version}"
-	] + [
-		'java.io',
-		'java.math',
-		'java.lang',
-		'java.lang.annotation',
-		'java.lang.invoke',
-		'java.lang.reflect',
-		'java.nio',
-		'java.util',
-		'java.util.concurrent',
-		'java.util.regex',
-		'sun.nio.ch'
-	].inject([]) { acc, javaPackage ->
-		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
-	}
 }
 
 startScripts {

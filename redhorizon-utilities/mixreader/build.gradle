@@ -14,37 +14,16 @@
  * limitations under the License.
  */
 
-plugins {
-	id 'application'
-}
-
 description = 'Mix file reader and extractor for the Red Horizon project'
 
 dependencies {
 	implementation(
 		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes'),
-		'ch.qos.logback:logback-classic:1.2.3',
-		'info.picocli:picocli:4.1.1'
+		project(':redhorizon-filetypes')
 	)
 }
 
 application {
 	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
 	applicationName = 'mix'
-	applicationDefaultJvmArgs = [
-		"-Dredhorizon.version=${version}"
-	] + [
-		'java.io',
-		'java.lang',
-		'java.lang.annotation',
-		'java.lang.invoke',
-		'java.lang.reflect',
-		'java.nio',
-		'java.util',
-		'java.util.concurrent',
-		'sun.nio.ch'
-	].inject([]) { acc, javaPackage ->
-		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
-	}
 }
