@@ -18,7 +18,7 @@ plugins {
 	id 'application'
 }
 
-description = 'Convert PCX files to CPS files'
+description = 'CLI tool for converting from one file format to another'
 
 dependencies {
 	implementation(
@@ -30,21 +30,14 @@ dependencies {
 }
 
 application {
-	mainClassName = 'nz.net.ultraq.redhorizon.utilities.converter.Pcx2CpsConverter'
-	applicationName = 'pcx2cps'
+	mainClassName = 'nz.net.ultraq.redhorizon.utilities.Converter'
+	applicationName = 'convert'
 	applicationDefaultJvmArgs = [
 		"-Dredhorizon.version=${version}"
-	]/* + [
-		'java.io',
+	] + [
 		'java.lang',
-		'java.lang.annotation',
-		'java.lang.invoke',
-		'java.lang.reflect',
-		'java.nio',
-		'java.util',
-		'java.util.concurrent',
-		'sun.nio.ch'
+		'java.lang.invoke'
 	].inject([]) { acc, javaPackage ->
 		acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
-	}*/
+	}
 }
