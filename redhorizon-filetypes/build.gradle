@@ -21,12 +21,8 @@ description = 'Filetypes module for the Red Horizon project'
 dependencies {
 	implementation(
 		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		':blowfishj:2.41'
+		project(':redhorizon-extensions')
 	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:0.3.0') {
-		exclude module: 'groovy'
-	}
 }
 
 processResources {
