@@ -14,7 +14,6 @@
 # limitations under the License.
 # 
 
-moduleName = redhorizon-classic
+moduleName = redhorizon-filetypes
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.classic.extensions.BigIntegerExtensions,\
-                   nz.net.ultraq.redhorizon.classic.extensions.ByteArrayExtensions
+extensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferImageExtensions

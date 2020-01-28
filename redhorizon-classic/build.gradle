@@ -30,3 +30,9 @@ dependencies {
 		exclude module: 'groovy'
 	}
 }
+
+processResources {
+	expand([
+		moduleVersion: version
+	])
+}

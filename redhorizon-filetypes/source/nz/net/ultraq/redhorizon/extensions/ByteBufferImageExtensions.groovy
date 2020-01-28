@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.extensions
+package nz.net.ultraq.redhorizon.extensions
 
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
