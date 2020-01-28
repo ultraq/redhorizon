@@ -4,7 +4,7 @@ Red Horizon - Classic
 
 A module that bridges the classic C&C file formats for use with the Red Horizon
 engine.  All of the reverse engineering of the old codecs and files takes place
-here, and serve as working examples of code for other programmers.
+here, and serve as working examples for other programmers.
 
 
 Codecs

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.codecs
+package nz.net.ultraq.redhorizon.codecs
 
 import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor

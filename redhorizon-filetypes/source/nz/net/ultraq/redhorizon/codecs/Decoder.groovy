@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.codecs
+package nz.net.ultraq.redhorizon.codecs
 
 import java.nio.ByteBuffer
 
 /**
- * Interface for classes that can encode information.
+ * Interface for classes that can decode information.
  * 
  * @author Emanuel Rabina
  */
-interface Encoder {
+interface Decoder {
 
 	/**
-	 * Encodes the information in the {@code source} buffer, putting it into the
+	 * Decodes the information in the {@code source} buffer, putting it into the
 	 * {@code dest} buffer.
 	 * 
 	 * @param source
 	 * @param dest
 	 */
-	void encode(ByteBuffer source, ByteBuffer dest)
+	void decode(ByteBuffer source, ByteBuffer dest)
 }

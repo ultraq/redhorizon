@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.vqa
 
-import nz.net.ultraq.redhorizon.classic.codecs.Decoder
+import nz.net.ultraq.redhorizon.codecs.Decoder
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit

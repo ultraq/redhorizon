@@ -16,7 +16,7 @@
 
 /**
  * A collection of encoders/decoders for C&amp;C file data.  The codecs here are
- * used mostly by the {@code redhorizon-filetypes} packages and serve as working
- * examples for JVM programmers.
+ * used by the {@link nz.net.ultraq.redhorizon.filetypes} package and serve as
+ * working examples for other programmers.
  */
 package nz.net.ultraq.redhorizon.classic.codecs;
