@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.utilities.converter
 
-import nz.net.ultraq.redhorizon.filetypes.cps.CpsFile
+import nz.net.ultraq.redhorizon.classic.filetypes.cps.CpsFile
 import nz.net.ultraq.redhorizon.filetypes.pcx.PcxFile
 
 import org.slf4j.Logger

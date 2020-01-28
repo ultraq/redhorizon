@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.utilities
 
+import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.utilities.mediaplayer.AnimationPlayer
 import nz.net.ultraq.redhorizon.utilities.mediaplayer.SoundPlayer
 import nz.net.ultraq.redhorizon.utilities.mediaplayer.ImageViewer

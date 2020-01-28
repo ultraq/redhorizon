@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-description = 'Mix file reader and extractor for the Red Horizon project'
-
-dependencies {
-	implementation(
-		project(':redhorizon-classic'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
-	)
-}
-
-application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
-	applicationName = 'mix'
-}
+/**
+ * A collection of encoders/decoders for C&amp;C file data.  The codecs here are
+ * used mostly by the {@code redhorizon-filetypes} packages and serve as working
+ * examples for JVM programmers.
+ */
+package nz.net.ultraq.redhorizon.classic.codecs;

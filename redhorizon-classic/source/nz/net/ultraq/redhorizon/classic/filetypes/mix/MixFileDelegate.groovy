@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-description = 'Mix file reader and extractor for the Red Horizon project'
+package nz.net.ultraq.redhorizon.classic.filetypes.mix
 
-dependencies {
-	implementation(
-		project(':redhorizon-classic'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
-	)
-}
+import groovy.transform.PackageScope
 
-application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
-	applicationName = 'mix'
+/**
+ * Common class for MIX file delegates.
+ * 
+ * @author Emanuel Rabina
+ */
+@PackageScope
+abstract class MixFileDelegate {
+
+	/**
+	 * The number of bytes to adjust an entry offset value by, which is the number
+	 * of bytes in the MIX file before the first entry.
+	 * 
+	 * @return
+	 */
+	abstract int getBaseEntryOffset()
+
+	/**
+	 * The index of entries packaged within the MIX file.
+	 * 
+	 * @return
+	 */
+	abstract MixEntry[] getEntries()
 }

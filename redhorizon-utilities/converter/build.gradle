@@ -18,6 +18,7 @@ description = 'CLI tool for converting from one file format to another'
 
 dependencies {
 	implementation(
+		project(':redhorizon-classic'),
 		project(':redhorizon-filetypes')
 	)
 }

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.utilities
 
-import nz.net.ultraq.redhorizon.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

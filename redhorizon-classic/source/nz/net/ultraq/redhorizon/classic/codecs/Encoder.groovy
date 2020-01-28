@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-description = 'Mix file reader and extractor for the Red Horizon project'
+package nz.net.ultraq.redhorizon.classic.codecs
 
-dependencies {
-	implementation(
-		project(':redhorizon-classic'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
-	)
-}
+import java.nio.ByteBuffer
 
-application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
-	applicationName = 'mix'
+/**
+ * Interface for classes that can encode information.
+ * 
+ * @author Emanuel Rabina
+ */
+interface Encoder {
+
+	/**
+	 * Encodes the information in the {@code source} buffer, putting it into the
+	 * {@code dest} buffer.
+	 * 
+	 * @param source
+	 * @param dest
+	 */
+	void encode(ByteBuffer source, ByteBuffer dest)
 }

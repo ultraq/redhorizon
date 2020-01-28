@@ -18,6 +18,7 @@ description = 'Media player for the Red Horizon project'
 
 dependencies {
 	implementation(
+		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
 		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),

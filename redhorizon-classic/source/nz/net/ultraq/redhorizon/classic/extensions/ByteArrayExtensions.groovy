@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-description = 'Mix file reader and extractor for the Red Horizon project'
+package nz.net.ultraq.redhorizon.classic.extensions
 
-dependencies {
-	implementation(
-		project(':redhorizon-classic'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
-	)
-}
+/**
+ * Extensions for {@code byte} arrays.
+ * 
+ * @author Emanuel Rabina
+ */
+class ByteArrayExtensions {
 
-application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
-	applicationName = 'mix'
+	/**
+	 * Return a new array of the items in this array but in reverse order.
+	 * 
+	 * @param self
+	 * @return
+	 */
+	static byte[] reverse(byte[] self) {
+
+		byte[] reversed = new byte[self.length]
+		for (int i = 0; i < self.length; i++) {
+			reversed[i] = self[self.length - 1 - i]
+		}
+		return reversed
+	}
 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-description = 'Mix file reader and extractor for the Red Horizon project'
+description = 'A collection of encoders/decoders for C&C file data'
 
 dependencies {
 	implementation(
-		project(':redhorizon-classic'),
+		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
+		project(':redhorizon-filetypes'),
+		':blowfishj:2.41'
 	)
-}
-
-application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
-	applicationName = 'mix'
+	implementation('nz.net.ultraq.extensions:groovy-extensions:0.3.0') {
+		exclude module: 'groovy'
+	}
+	implementation('nz.net.ultraq.extensions:profiling-extensions:0.4.0') {
+		exclude module: 'groovy'
+	}
 }
