@@ -128,7 +128,10 @@ class MediaPlayer implements Callable<Integer> {
 	private Class<?> getFileClass(String filename) {
 
 		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
-		def fileClass = new Reflections('nz.net.ultraq.redhorizon.filetypes')
+		def fileClass = new Reflections(
+			'nz.net.ultraq.redhorizon.filetypes',
+			'nz.net.ultraq.redhorizon.classic.filetypes'
+		)
 			.getTypesAnnotatedWith(FileExtensions)
 			.find { type ->
 				def annotation = type.getAnnotation(FileExtensions)

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import AudFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
 import nz.net.ultraq.redhorizon.media.StopEvent
