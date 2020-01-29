@@ -31,8 +31,9 @@ description = 'Recreating the original 2D Command & Conquer games'
 distributions {
 	main {
 		contents {
-			from 'redhorizon-mediaplayer/build/install/play'
-			from 'redhorizon-mixreader/build/install/mix'
+			from 'redhorizon-utilities/converter/build/install/convert'
+			from 'redhorizon-utilities/mediaplayer/build/install/play'
+			from 'redhorizon-utilities/mixreader/build/install/mix'
 			from('.') {
 				include 'CHANGELOG.md'
 				include 'LICENSE.txt'
@@ -44,8 +45,9 @@ distributions {
 
 [distTar, distZip].each {
 	it.dependsOn = [
-		':redhorizon-mediaplayer:installDist',
-		':redhorizon-mixreader:installDist'
+		':redhorizon-utilities:converter:installDist',
+		':redhorizon-utilities:mediaplayer:installDist',
+		':redhorizon-utilities:mixreader:installDist'
 	]
 	it.duplicatesStrategy = 'exclude'
 }

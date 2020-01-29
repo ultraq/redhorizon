@@ -15,6 +15,7 @@
  */
 
 description = 'Media player for the Red Horizon project'
+archivesBaseName = 'redhorizon-utilities-mediaplayer'
 
 dependencies {
 	implementation(

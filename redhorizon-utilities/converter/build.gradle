@@ -15,6 +15,7 @@
  */
 
 description = 'CLI tool for converting from one file format to another'
+archivesBaseName = 'redhorizon-utilities-converter'
 
 dependencies {
 	implementation(

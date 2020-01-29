@@ -15,6 +15,7 @@
  */
 
 description = 'Mix file reader and extractor for the Red Horizon project'
+archivesBaseName = 'redhorizon-utilties-mixreader'
 
 dependencies {
 	implementation(
