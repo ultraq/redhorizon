@@ -26,6 +26,6 @@ dependencies {
 }
 
 application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MixReader'
+	mainClassName = 'nz.net.ultraq.redhorizon.utilities.MixReader'
 	applicationName = 'mix'
 }

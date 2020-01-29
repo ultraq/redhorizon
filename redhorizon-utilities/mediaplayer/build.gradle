@@ -33,7 +33,7 @@ dependencies {
 }
 
 application {
-	mainClassName = 'nz.net.ultraq.redhorizon.MediaPlayer'
+	mainClassName = 'nz.net.ultraq.redhorizon.utilities.MediaPlayer'
 	applicationName = 'play'
 }
 
