@@ -70,12 +70,14 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param animationFile   Animation source.
 	 * @param dimensions      Dimensions over which to display the animation over.
 	 * @param filter          Filter the frames of the animation.
+	 * @param scale           Double the output resolution of low-resolution
+	 *                        animations.
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, boolean scale, ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format.value, animationFile.numFrames, animationFile.frameRate,
-			dimensions, filter, animationFile.frameRate as int,
+			dimensions, filter, scale, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
 
 		executorService.execute(animationDataWorker)
@@ -91,26 +93,20 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param frameRate
 	 * @param dimensions
 	 * @param filter
+	 * @param scale
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 */
 	@PackageScope
 	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions, boolean filter,
-		int bufferSize = 10, Worker animationDataWorker) {
+		boolean scale, int bufferSize = 10, Worker animationDataWorker) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		// If applying filtering on a very low resolution item, apply a basic 2x
-		// scaling to it so that the filtering doesn't become too blurry
-		def scale = 0
-		if (filter && width <= 320) {
-			scale = 1
-		}
-
-		this.width      = width << scale
-		this.height     = height << scale
+		this.width      = width << (scale ? 1 : 0)
+		this.height     = height << (scale ? 1 : 0)
 		this.format     = format
 		this.numFrames  = numFrames
 		this.frameRate  = frameRate
@@ -123,7 +119,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.animationDataWorker.on(StreamingFrameEvent) { event ->
 			def frame = event.frame
 			if (scale) {
-				frame = event.frame.scale(width, height, format, scale)
+				frame = event.frame.scale(width, height, format, 1)
 			}
 			frames << ByteBuffer.fromBuffersDirect(frame)
 			if (bufferReady.count && !frames.remainingCapacity()) {

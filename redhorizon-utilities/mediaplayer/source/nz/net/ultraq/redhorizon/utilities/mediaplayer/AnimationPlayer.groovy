@@ -42,6 +42,7 @@ class AnimationPlayer implements Visual {
 
 	final boolean filtering
 	final boolean fixAspectRatio
+	final boolean scaleLowRes
 	final boolean scanlines
 
 	/**
@@ -60,7 +61,7 @@ class AnimationPlayer implements Visual {
 					def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
 						fixAspectRatio, event.windowSize)
 
-					animation = new Animation(animationFile, animationCoordinates, filtering, executorService)
+					animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, executorService)
 					animation.on(StopEvent) { stopEvent ->
 						logger.debug('Animation stopped')
 						graphicsEngine.stop()

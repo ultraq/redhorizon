@@ -43,6 +43,7 @@ class VideoPlayer implements Audio, Visual {
 
 	final boolean filtering
 	final boolean fixAspectRatio
+	final boolean scaleLowRes
 	final boolean scanlines
 
 	/**
@@ -62,7 +63,7 @@ class VideoPlayer implements Audio, Visual {
 						def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
 							fixAspectRatio, event.windowSize)
 
-						video = new Video(videoFile, videoCoordinates, filtering, executorService)
+						video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, executorService)
 						video.on(StopEvent) { stopEvent ->
 							logger.debug('Video stopped')
 							audioEngine.stop()
