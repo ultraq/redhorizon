@@ -13,7 +13,7 @@ Codecs
 The codecs (encoders/decoders) implemented in this module:
 
  - **[IMAADPCM_16bit](source/nz/net/ultraq/redhorizon/classic/codecs/IMAADPCM16bit.groovy)**:
-   An IMA-APPCM compression scheme for 16-bit audio.
+   An IMA-ADPCM compression scheme for 16-bit audio.
  - **[LCW](source/nz/net/ultraq/redhorizon/classic/codecs/LCW.groovy)**:
    "Lempel–Castle–Welch" compression, Westwood's response to Unisys enforcing
    their patent on "Lempel–Ziv–Welch" compression (though it doesn't resemble
