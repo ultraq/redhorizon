@@ -1,0 +1,82 @@
+/* 
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.engine
+
+import java.util.concurrent.ExecutorService
+
+/**
+ * An implementation of the separate time source of game time that can be
+ * controlled to affect it.
+ * 
+ * @author Emanuel Rabina
+ */
+class GameClock implements GameTime {
+
+	private float speed = 1.0f
+	private boolean running = true
+	long currentTimeMillis
+
+	/**
+	 * Create a new game clock which will automatically update itself taking into
+	 * account elapsed system time and the speed at which game time is flowing.
+	 * 
+	 * @param executorService
+	 */
+	GameClock(ExecutorService executorService) {
+
+		def lastSystemTimeMillis = System.currentTimeMillis()
+		currentTimeMillis = lastSystemTimeMillis
+
+		executorService.execute { ->
+			Thread.currentThread().name = 'Game clock'
+			while (running) {
+				Thread.sleep(1) { ex ->
+					running = false
+					return true
+				}
+				def currentSystemTimeMillis = System.currentTimeMillis()
+				def diff = currentSystemTimeMillis - lastSystemTimeMillis
+
+				// Normal flow of time, accumulate ticks at the same rate as system time
+				if (speed == 1.0f) {
+					currentTimeMillis += diff
+				}
+				// Modified flow, accumulate ticks at system time * flow speed
+				else {
+					currentTimeMillis += (diff * speed)
+				}
+				lastSystemTimeMillis = currentSystemTimeMillis
+			}
+		}
+	}
+
+	/**
+	 * Pauses the flow of time.
+	 */
+	void pause() {
+
+		speed = 0.0f
+	}
+
+	/**
+	 * Resumes the flow of time.
+	 */
+	void resume() {
+
+		speed = 1.0f
+	}
+}

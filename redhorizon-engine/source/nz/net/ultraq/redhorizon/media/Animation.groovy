@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
@@ -59,6 +60,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private int framesQueued
 	private long animationTimeStart
+	private final GameTime gameTime
 
 	// Rendering information
 	private int lastFrame
@@ -72,13 +74,16 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param filter          Filter the frames of the animation.
 	 * @param scale           Double the output resolution of low-resolution
 	 *                        animations.
+	 * @param gameTime
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, boolean scale, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, boolean scale,
+		GameTime gameTime, ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format.value, animationFile.numFrames, animationFile.frameRate,
 			dimensions, filter, scale, animationFile.frameRate as int,
-			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
+			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
+			gameTime)
 
 		executorService.execute(animationDataWorker)
 	}
@@ -96,10 +101,11 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param scale
 	 * @param bufferSize
 	 * @param animationDataWorker
+	 * @param gameTime
 	 */
 	@PackageScope
 	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions, boolean filter,
-		boolean scale, int bufferSize = 10, Worker animationDataWorker) {
+		boolean scale, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
@@ -126,6 +132,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 				bufferReady.countDown()
 			}
 		}
+
+		this.gameTime = gameTime
 	}
 
 	@Override
@@ -149,7 +157,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		// Wait until the frame buffer is filled before starting play
 		bufferReady.await()
-		animationTimeStart = System.currentTimeMillis()
+		animationTimeStart = gameTime.currentTimeMillis
 		Playable.super.play()
 	}
 
@@ -157,7 +165,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
-			def currentFrame = Math.floor((System.currentTimeMillis() - animationTimeStart) / 1000 * frameRate) as int
+			def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * frameRate) as int
 
 			// Try to load up to bufferSize frames ahead, maxing at 5 so we don't spent too much time in here
 			if (frames.size()) {

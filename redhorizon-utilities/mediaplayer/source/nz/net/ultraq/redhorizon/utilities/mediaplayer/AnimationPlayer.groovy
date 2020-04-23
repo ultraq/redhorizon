@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -53,6 +54,8 @@ class AnimationPlayer implements Visual {
 		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
+			def gameClock = new GameClock(executorService)
+
 			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
 				// Add the animation to the engine once we have the window dimensions
@@ -61,7 +64,7 @@ class AnimationPlayer implements Visual {
 					def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
 						fixAspectRatio, event.windowSize)
 
-					animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, executorService)
+					animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, gameClock, executorService)
 					animation.on(StopEvent) { stopEvent ->
 						logger.debug('Animation stopped')
 						graphicsEngine.stop()

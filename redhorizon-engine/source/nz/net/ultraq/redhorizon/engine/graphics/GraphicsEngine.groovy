@@ -24,6 +24,8 @@ import static nz.net.ultraq.redhorizon.engine.graphics.OpenGLContext.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 import java.util.concurrent.FutureTask
 
 /**
@@ -53,7 +55,8 @@ class GraphicsEngine extends EngineSubsystem {
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(boolean fixAspectRatio, Closure needsMainThreadCallback) {
+	GraphicsEngine(boolean fixAspectRatio,
+		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
 		this.fixAspectRatio = fixAspectRatio
 		this.needsMainThreadCallback = needsMainThreadCallback
