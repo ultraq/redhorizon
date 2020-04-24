@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.GameClock
+import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -25,6 +26,7 @@ import nz.net.ultraq.redhorizon.media.StopEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -68,6 +70,7 @@ class AnimationPlayer implements Visual {
 					animation.on(StopEvent) { stopEvent ->
 						logger.debug('Animation stopped')
 						graphicsEngine.stop()
+						gameClock.stop()
 					}
 					graphicsEngine.addSceneElement(animation)
 
@@ -82,6 +85,13 @@ class AnimationPlayer implements Visual {
 					logger.debug('Animation started')
 
 					logger.info('Waiting for animation to finish.  Close the window to exit.')
+				}
+
+				// Key event handler
+				graphicsEngine.on(KeyEvent) { event ->
+					if (event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
+						gameClock.togglePause()
+					}
 				}
 			}
 		}

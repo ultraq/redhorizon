@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.ExecutorService
 
 /**
@@ -26,7 +29,10 @@ import java.util.concurrent.ExecutorService
  */
 class GameClock implements GameTime {
 
+	private static Logger logger = LoggerFactory.getLogger(GameClock)
+
 	private float speed = 1.0f
+	private float lastSpeed
 	private boolean running = true
 	long currentTimeMillis
 
@@ -69,6 +75,8 @@ class GameClock implements GameTime {
 	 */
 	void pause() {
 
+		logger.debug('Pause')
+		lastSpeed = speed
 		speed = 0.0f
 	}
 
@@ -77,6 +85,28 @@ class GameClock implements GameTime {
 	 */
 	void resume() {
 
-		speed = 1.0f
+		logger.debug('Resume')
+		speed = lastSpeed
+	}
+
+	/**
+	 * Stop the ticking of the game clock.
+	 */
+	void stop() {
+
+		running = false
+	}
+
+	/**
+	 * Toggles between a paused and flowing state.
+	 */
+	void togglePause() {
+
+		if (speed) {
+			pause()
+		}
+		else {
+			resume()
+		}
 	}
 }

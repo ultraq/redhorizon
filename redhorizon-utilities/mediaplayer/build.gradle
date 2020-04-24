@@ -24,7 +24,9 @@ dependencies {
 		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
+		platform('org.lwjgl:lwjgl-bom:3.2.3'),
 		'org.joml:joml:1.9.19',
+		'org.lwjgl:lwjgl-glfw',
 		'org.reflections:reflections:0.9.11'
 	)
 	implementation('nz.net.ultraq.extensions:groovy-extensions:0.3.0') {

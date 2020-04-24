@@ -20,10 +20,14 @@ import nz.net.ultraq.redhorizon.engine.AbstractContext
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.glfw.GLFWKeyCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.system.MemoryUtil.NULL
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * The OpenGL context, a concept used by OpenGL to control rendering threads.
@@ -59,8 +63,10 @@ class OpenGLContext extends AbstractContext {
 	 * object, through which input events are received.
 	 * 
 	 * @param aspectRatio
+	 * @param keyCallback
 	 */
-	OpenGLContext(float aspectRatio) {
+	OpenGLContext(float aspectRatio,
+		@ClosureParams(value = SimpleType, options = ['int', 'int', 'int', 'int']) Closure keyCallback) {
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -85,6 +91,13 @@ class OpenGLContext extends AbstractContext {
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
+
+		glfwSetKeyCallback(window, new GLFWKeyCallback() {
+			@Override
+			void invoke(long window, int key, int scancode, int action, int mods) {
+				keyCallback(key, scancode, action, mods)
+			}
+		})
 
 		withCurrent { ->
 			glfwSwapInterval(1)
