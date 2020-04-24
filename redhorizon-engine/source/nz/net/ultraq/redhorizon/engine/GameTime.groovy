@@ -30,4 +30,11 @@ interface GameTime {
 	 * @return
 	 */
 	long getCurrentTimeMillis()
+
+	/**
+	 * Return whether or not time has been paused.
+	 * 
+	 * @return
+	 */
+	boolean isPaused()
 }

@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.engine.GameClock
+import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
@@ -25,6 +27,8 @@ import nz.net.ultraq.redhorizon.media.Video
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -54,6 +58,8 @@ class VideoPlayer implements Audio, Visual {
 		logger.info('File details: {}', videoFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
+			def gameClock = new GameClock(executorService)
+
 			withAudioEngine(executorService) { audioEngine ->
 				withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
@@ -63,7 +69,7 @@ class VideoPlayer implements Audio, Visual {
 						def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
 							fixAspectRatio, event.windowSize)
 
-						video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, executorService)
+						video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, gameClock, executorService)
 						video.on(StopEvent) { stopEvent ->
 							logger.debug('Video stopped')
 							audioEngine.stop()
@@ -84,6 +90,13 @@ class VideoPlayer implements Audio, Visual {
 						executorService.submit { ->
 							video.play()
 							logger.debug('Video started')
+						}
+					}
+
+					// Key event handler
+					graphicsEngine.on(KeyEvent) { event ->
+						if (event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
+							gameClock.togglePause()
 						}
 					}
 

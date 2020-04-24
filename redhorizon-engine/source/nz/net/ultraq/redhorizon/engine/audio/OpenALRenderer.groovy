@@ -112,11 +112,16 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void playSource(int sourceId) {
+	void pauseSource(int sourceId) {
 
 		checkForError { ->
-			alSourcef(sourceId, AL_GAIN, 1f)
+			alSourcePause(sourceId)
 		}
+	}
+
+	@Override
+	void playSource(int sourceId) {
+
 		checkForError { ->
 			alSourcePlay(sourceId)
 		}
@@ -135,6 +140,14 @@ class OpenALRenderer implements AudioRenderer {
 
 		return checkForError { ->
 			return alIsSource(sourceId)
+		}
+	}
+
+	@Override
+	boolean sourcePaused(int sourceId) {
+
+		return checkForError { ->
+			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PAUSED
 		}
 	}
 

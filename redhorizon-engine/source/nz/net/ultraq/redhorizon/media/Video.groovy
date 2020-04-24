@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.filetypes.Streaming
@@ -48,21 +49,23 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	 * @param filter          Filter the frames of the video.
 	 * @param scale           Double the output resolution of low-resolution
 	 *                        videos.
+	 * @param gameTime
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, Rectanglef dimensions, boolean filter, boolean scale, ExecutorService executorService) {
+	Video(VideoFile videoFile, Rectanglef dimensions, boolean filter, boolean scale,
+		GameTime gameTime, ExecutorService executorService) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format.value, videoFile.numFrames, videoFile.frameRate,
-				dimensions, filter, scale, videoFile.frameRate as int, videoWorker)
+				dimensions, filter, scale, videoFile.frameRate as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}
 
 			soundTrack = new SoundTrack(videoFile.bits, videoFile.channels, videoFile.frequency,
-				videoFile.frameRate + 1 as int, videoWorker)
+				videoFile.frameRate + 1 as int, videoWorker, gameTime)
 			soundTrack.on(StopEvent) { event ->
 				stop()
 			}

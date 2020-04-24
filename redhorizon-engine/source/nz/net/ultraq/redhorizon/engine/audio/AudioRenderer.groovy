@@ -80,6 +80,13 @@ interface AudioRenderer {
 	void deleteSource(int sourceId)
 
 	/**
+	 * Pause playing a source.
+	 * 
+	 * @param sourceId
+	 */
+	void pauseSource(int sourceId)
+
+	/**
 	 * Start a source playing.
 	 * 
 	 * @param sourceId
@@ -101,6 +108,14 @@ interface AudioRenderer {
 	 * @return
 	 */
 	boolean sourceExists(int sourceId)
+
+	/**
+	 * Return whether a source is currently paused.
+	 * 
+	 * @param sourceId
+	 * @return
+	 */
+	boolean sourcePaused(int sourceId)
 
 	/**
 	 * Return whether a source is currently playing.

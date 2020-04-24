@@ -70,6 +70,12 @@ class GameClock implements GameTime {
 		}
 	}
 
+	@Override
+	boolean isPaused() {
+
+		return !speed
+	}
+
 	/**
 	 * Pauses the flow of time.
 	 */

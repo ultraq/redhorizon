@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.media
 
+import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
@@ -23,6 +24,9 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
@@ -38,6 +42,8 @@ import java.util.concurrent.ExecutorService
  */
 class SoundTrack implements AudioElement, Playable, SelfVisitable {
 
+	private static final Logger logger = LoggerFactory.getLogger(SoundTrack)
+
 	// Sound information
 	final int bits
 	final int channels
@@ -48,6 +54,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private int buffersQueued
+	private GameTime gameTime
 
 	// Renderer information
 	private int sourceId
@@ -57,12 +64,13 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	 * Constructor, use the data in {@code soundFile} for playing the sound track.
 	 * 
 	 * @param soundFile
+	 * @param gameTime
 	 * @param executorService
 	 */
-	SoundTrack(SoundFile soundFile, ExecutorService executorService) {
+	SoundTrack(SoundFile soundFile, GameTime gameTime, ExecutorService executorService) {
 
 		this(soundFile.bits, soundFile.channels, soundFile.frequency,
-			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null)
+			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null, gameTime)
 
 		executorService.execute(soundDataWorker)
 	}
@@ -75,9 +83,10 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 	 * @param frequency
 	 * @param bufferSize
 	 * @param soundDataWorker
+	 * @param gameTime
 	 */
 	@PackageScope
-	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker) {
+	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker, GameTime gameTime) {
 
 		if (!soundDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
@@ -96,6 +105,8 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 				bufferReady.countDown()
 			}
 		}
+
+		this.gameTime = gameTime
 	}
 
 	@Override
@@ -139,9 +150,20 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 						bufferIds << newBufferId
 						return newBufferId
 					}
-					renderer.queueBuffers(sourceId, *newBufferIds)
+//					renderer.queueBuffers(sourceId, *newBufferIds)
+					renderer.queueBuffers(sourceId, newBufferIds as int[])
 					buffersQueued += newBufferIds.size()
 				}
+			}
+
+			// Pause/play with game time
+			if (gameTime.paused && renderer.sourcePlaying(sourceId)) {
+				logger.debug('Soundtrack paused')
+				renderer.pauseSource(sourceId)
+			}
+			else if (!gameTime.paused && renderer.sourcePaused(sourceId)) {
+				logger.debug('Soundtrack resumed')
+				renderer.playSource(sourceId)
 			}
 
 			// Buffers exhausted
@@ -168,8 +190,10 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 				buffersProcessed.times {
 					processedBufferIds << bufferIds.removeAt(0)
 				}
-				renderer.unqueueBuffers(sourceId, *processedBufferIds)
-				renderer.deleteBuffers(*processedBufferIds)
+//				renderer.unqueueBuffers(sourceId, *processedBufferIds)
+				renderer.unqueueBuffers(sourceId, processedBufferIds as int[])
+//				renderer.deleteBuffers(*processedBufferIds)
+				renderer.deleteBuffers(processedBufferIds as int[])
 				buffersQueued -= buffersProcessed
 			}
 		}
