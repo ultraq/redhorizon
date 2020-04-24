@@ -79,4 +79,8 @@ subprojects {
 	compileGroovy {
 		groovyOptions.optimizationOptions.indy = true
 	}
+
+	test {
+		useJUnitPlatform()
+	}
 }
