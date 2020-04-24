@@ -27,20 +27,6 @@ subprojects {
 	application {
 		applicationDefaultJvmArgs = [
 			"-Dredhorizon.version=${version}"
-		] + [
-			'java.io',
-			'java.math',
-			'java.lang',
-			'java.lang.annotation',
-			'java.lang.invoke',
-			'java.lang.reflect',
-			'java.nio',
-			'java.util',
-			'java.util.concurrent',
-			'java.util.regex',
-			'sun.nio.ch'
-		].inject([]) { acc, javaPackage ->
-			acc << '--add-opens' << "java.base/$javaPackage=ALL-UNNAMED"
-		}
+		]
 	}
 }

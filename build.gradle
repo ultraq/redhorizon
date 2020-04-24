@@ -68,15 +68,19 @@ subprojects {
 
 	dependencies {
 		implementation(
-			'org.codehaus.groovy:groovy:2.5.11:indy',
+			'org.codehaus.groovy:groovy:3.0.3:indy',
 			'org.slf4j:slf4j-api:1.7.29'
 		)
-		testImplementation('org.spockframework:spock-core:1.3-groovy-2.5') {
+		testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
 			exclude group: 'org.codehaus.groovy'
 		}
 	}
 
 	compileGroovy {
 		groovyOptions.optimizationOptions.indy = true
+	}
+
+	test {
+		useJUnitPlatform()
 	}
 }
