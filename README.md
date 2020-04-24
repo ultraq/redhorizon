@@ -4,7 +4,6 @@ Red Horizon
 
 [![Build Status](https://travis-ci.org/ultraq/redhorizon.svg)](https://travis-ci.org/ultraq/redhorizon)
 [![GitHub Release](https://img.shields.io/github/release/ultraq/redhorizon.svg?maxAge=3600)](https://github.com/ultraq/redhorizon/releases/latest)
-[![License](https://img.shields.io/github/license/ultraq/redhorizon.svg?maxAge=2592000)](https://github.com/ultraq/redhorizon/blob/master/LICENSE.txt)
 
 This repository is an archive of work I did several years ago to attempt to
 recreate the orignal 2D Command & Conquer (C&C) games.  The most useful outcome
