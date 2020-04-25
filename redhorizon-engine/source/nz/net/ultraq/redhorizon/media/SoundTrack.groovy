@@ -156,22 +156,22 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 			}
 
 			// Pause/play with game time
-			if (gameTime.paused && renderer.sourcePlaying(sourceId)) {
-				logger.debug('Soundtrack paused')
-				renderer.pauseSource(sourceId)
+			if (gameTime.paused) {
+				if (!renderer.sourcePaused(sourceId)) {
+					logger.debug('Soundtrack paused')
+					renderer.pauseSource(sourceId)
+				}
 			}
-			else if (!gameTime.paused && renderer.sourcePaused(sourceId)) {
-				logger.debug('Soundtrack resumed')
-				renderer.playSource(sourceId)
-			}
-
-			// Buffers exhausted
-			if (renderer.sourceStopped(sourceId)) {
-				stop()
-			}
-			// Start playing the source
-			else if (!renderer.sourcePlaying(sourceId)) {
-				renderer.playSource(sourceId)
+			else {
+				// Buffers exhausted
+				if (renderer.sourceStopped(sourceId)) {
+					stop()
+				}
+				// Start playing the source
+				else if (!renderer.sourcePlaying(sourceId)) {
+					logger.debug('Soundtrack resumed')
+					renderer.playSource(sourceId)
+				}
 			}
 		}
 		else {
