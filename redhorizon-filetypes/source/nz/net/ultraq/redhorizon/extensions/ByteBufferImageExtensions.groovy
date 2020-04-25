@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.extensions
 
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
+import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
@@ -25,6 +26,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 class ByteBufferImageExtensions {
 
 	/**
@@ -57,7 +59,7 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, int imagesX) {
 
-		def imagesY = Math.ceil(self.length / imagesX) as int
+		def imagesY = (self.length / imagesX) + 1 as int
 		def compileWidth = width * imagesX
 		def compileHeight = height * imagesY
 		def compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
@@ -90,7 +92,7 @@ class ByteBufferImageExtensions {
 	 */
 	static int imagesAcross(ByteBuffer[] self, int width, int limitX) {
 
-		return width < limitX ? Math.min(Math.floor(limitX / width), self.length) : 1
+		return width < limitX ? Math.min(limitX / width as int, self.length) : 1
 	}
 
 	/**

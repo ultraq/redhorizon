@@ -26,9 +26,6 @@ dependencies {
 	implementation('nz.net.ultraq.extensions:groovy-extensions:0.4.0-SNAPSHOT') {
 		exclude module: 'groovy'
 	}
-	implementation('nz.net.ultraq.extensions:profiling-extensions:0.5.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
 }
 
 processResources {

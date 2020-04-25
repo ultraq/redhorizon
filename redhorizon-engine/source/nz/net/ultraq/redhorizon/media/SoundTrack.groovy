@@ -115,7 +115,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		soundDataWorker.stop()
 		samples.drain()
 		renderer.deleteSource(sourceId)
-		renderer.deleteBuffers(*bufferIds)
+		renderer.deleteBuffers(bufferIds as int[])
 	}
 
 	@Override
@@ -150,7 +150,6 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 						bufferIds << newBufferId
 						return newBufferId
 					}
-//					renderer.queueBuffers(sourceId, *newBufferIds)
 					renderer.queueBuffers(sourceId, newBufferIds as int[])
 					buffersQueued += newBufferIds.size()
 				}
@@ -190,9 +189,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 				buffersProcessed.times {
 					processedBufferIds << bufferIds.removeAt(0)
 				}
-//				renderer.unqueueBuffers(sourceId, *processedBufferIds)
 				renderer.unqueueBuffers(sourceId, processedBufferIds as int[])
-//				renderer.deleteBuffers(*processedBufferIds)
 				renderer.deleteBuffers(processedBufferIds as int[])
 				buffersQueued -= buffersProcessed
 			}

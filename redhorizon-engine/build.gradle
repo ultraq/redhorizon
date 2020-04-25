@@ -28,9 +28,6 @@ dependencies {
 		'org.lwjgl:lwjgl-openal',
 		'org.lwjgl:lwjgl-opengl'
 	)
-	implementation('nz.net.ultraq.extensions:profiling-extensions:0.5.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
 	runtimeOnly(
 		'org.lwjgl:lwjgl::natives-macos',
 		'org.lwjgl:lwjgl::natives-windows',
