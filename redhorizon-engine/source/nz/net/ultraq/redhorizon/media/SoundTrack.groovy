@@ -25,9 +25,6 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -41,8 +38,6 @@ import java.util.concurrent.ExecutorService
  * @author Emanuel Rabina
  */
 class SoundTrack implements AudioElement, Playable, SelfVisitable {
-
-	private static final Logger logger = LoggerFactory.getLogger(SoundTrack)
 
 	// Sound information
 	final int bits
@@ -158,7 +153,6 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 			// Pause/play with game time
 			if (gameTime.paused) {
 				if (!renderer.sourcePaused(sourceId)) {
-					logger.debug('Soundtrack paused')
 					renderer.pauseSource(sourceId)
 				}
 			}
@@ -169,7 +163,6 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 				}
 				// Start playing the source
 				else if (!renderer.sourcePlaying(sourceId)) {
-					logger.debug('Soundtrack resumed')
 					renderer.playSource(sourceId)
 				}
 			}

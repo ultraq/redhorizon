@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -80,17 +81,28 @@ class AnimationPlayer implements Visual {
 							animationCoordinates
 						))
 					}
-
-					animation.play()
-					logger.debug('Animation started')
-
-					logger.info('Waiting for animation to finish.  Close the window to exit.')
 				}
+
+				graphicsEngine.on(RenderLoopStartEvent) { event ->
+					executorService.submit { ->
+						animation.play()
+						logger.debug('Animation started')
+					}
+				}
+
+				logger.info('Waiting for animation to finish.  Close the window to exit.')
 
 				// Key event handler
 				graphicsEngine.on(KeyEvent) { event ->
-					if (event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
-						gameClock.togglePause()
+					if (event.action == GLFW_PRESS) {
+						switch (event.key) {
+						case GLFW_KEY_SPACE:
+							gameClock.togglePause()
+							break
+						case GLFW_KEY_ESCAPE:
+							animation.stop()
+							break
+						}
 					}
 				}
 			}

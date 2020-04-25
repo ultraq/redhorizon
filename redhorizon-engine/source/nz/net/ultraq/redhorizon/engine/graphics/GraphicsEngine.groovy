@@ -105,7 +105,6 @@ class GraphicsEngine extends EngineSubsystem {
 		// Initialization
 		context = waitForMainThread { ->
 			def openGlContext = new OpenGLContext(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN, { key, scancode, action, mods ->
-				logger.debug('Keyboard event, key: {}, scancode: {}, action: {}, mods: ', key, scancode, action, mods)
 				trigger(new KeyEvent(key, scancode, action, mods))
 			})
 			trigger(new WindowCreatedEvent(openGlContext.windowSize))

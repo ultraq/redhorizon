@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.media.Video
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
@@ -93,14 +94,21 @@ class VideoPlayer implements Audio, Visual {
 						}
 					}
 
+					logger.info('Waiting for video to finish.  Close the window to exit.')
+
 					// Key event handler
 					graphicsEngine.on(KeyEvent) { event ->
-						if (event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
-							gameClock.togglePause()
+						if (event.action == GLFW_PRESS) {
+							switch (event.key) {
+							case GLFW_KEY_SPACE:
+								gameClock.togglePause()
+								break
+							case GLFW_KEY_ESCAPE:
+								video.stop()
+								break
+							}
 						}
 					}
-
-					logger.info('Waiting for video to finish.  Close the window to exit.')
 				}
 			}
 		}

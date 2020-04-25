@@ -81,7 +81,7 @@ class GameClock implements GameTime {
 	 */
 	void pause() {
 
-		logger.debug('Pause')
+		logger.debug('Pausing game clock')
 		lastSpeed = speed
 		speed = 0.0f
 	}
@@ -91,7 +91,7 @@ class GameClock implements GameTime {
 	 */
 	void resume() {
 
-		logger.debug('Resume')
+		logger.debug('Resuming game clock')
 		speed = lastSpeed
 	}
 
