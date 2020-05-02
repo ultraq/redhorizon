@@ -2,7 +2,7 @@
 Red Horizon
 ===========
 
-[![Build Status](https://travis-ci.org/ultraq/redhorizon.svg)](https://travis-ci.org/ultraq/redhorizon)
+[![Build Status](https://travis-ci.com/ultraq/redhorizon.svg)](https://travis-ci.com/ultraq/redhorizon)
 [![GitHub Release](https://img.shields.io/github/release/ultraq/redhorizon.svg?maxAge=3600)](https://github.com/ultraq/redhorizon/releases/latest)
 
 This repository is an archive of work I did several years ago to attempt to
