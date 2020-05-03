@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
-import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -40,7 +39,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer implements Audio, Visual {
+class VideoPlayer implements Audio, Timed, Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
@@ -59,53 +58,54 @@ class VideoPlayer implements Audio, Visual {
 		logger.info('File details: {}', videoFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def gameClock = new GameClock(executorService)
+			withGameClock(executorService) { gameClock ->
+				withAudioEngine(executorService) { audioEngine ->
+					withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
-			withAudioEngine(executorService) { audioEngine ->
-				withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+						// Add the video to the engines once we have the window dimensions
+						def video
+						graphicsEngine.on(WindowCreatedEvent) { event ->
+							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
+								fixAspectRatio, event.windowSize)
 
-					// Add the video to the engines once we have the window dimensions
-					def video
-					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
-							fixAspectRatio, event.windowSize)
+							video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, gameClock, executorService)
+							video.on(StopEvent) { stopEvent ->
+								logger.debug('Video stopped')
+								audioEngine.stop()
+								graphicsEngine.stop()
+							}
+							audioEngine.addSceneElement(video)
+							graphicsEngine.addSceneElement(video)
 
-						video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, gameClock, executorService)
-						video.on(StopEvent) { stopEvent ->
-							logger.debug('Video stopped')
-							audioEngine.stop()
-							graphicsEngine.stop()
+							if (scanlines) {
+								graphicsEngine.addSceneElement(new Scanlines(
+									new Dimension(videoFile.width, videoFile.height),
+									videoCoordinates
+								))
+							}
 						}
-						audioEngine.addSceneElement(video)
-						graphicsEngine.addSceneElement(video)
 
-						if (scanlines) {
-							graphicsEngine.addSceneElement(new Scanlines(
-								new Dimension(videoFile.width, videoFile.height),
-								videoCoordinates
-							))
+						graphicsEngine.on(RenderLoopStartEvent) { event ->
+							executorService.submit { ->
+								Thread.currentThread().name = 'Video starter'
+								video.play()
+								logger.debug('Video started')
+							}
 						}
-					}
 
-					graphicsEngine.on(RenderLoopStartEvent) { event ->
-						executorService.submit { ->
-							video.play()
-							logger.debug('Video started')
-						}
-					}
+						logger.info('Waiting for video to finish.  Close the window to exit.')
 
-					logger.info('Waiting for video to finish.  Close the window to exit.')
-
-					// Key event handler
-					graphicsEngine.on(KeyEvent) { event ->
-						if (event.action == GLFW_PRESS) {
-							switch (event.key) {
-							case GLFW_KEY_SPACE:
-								gameClock.togglePause()
-								break
-							case GLFW_KEY_ESCAPE:
-								video.stop()
-								break
+						// Key event handler
+						graphicsEngine.on(KeyEvent) { event ->
+							if (event.action == GLFW_PRESS) {
+								switch (event.key) {
+								case GLFW_KEY_SPACE:
+									gameClock.togglePause()
+									break
+								case GLFW_KEY_ESCAPE:
+									video.stop()
+									break
+								}
 							}
 						}
 					}

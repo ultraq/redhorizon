@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
-import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -38,7 +37,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationPlayer implements Visual {
+class AnimationPlayer implements Timed, Visual {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
@@ -57,51 +56,52 @@ class AnimationPlayer implements Visual {
 		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			def gameClock = new GameClock(executorService)
+			withGameClock(executorService) { gameClock ->
+				withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
 
-			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+					// Add the animation to the engine once we have the window dimensions
+					def animation
+					graphicsEngine.on(WindowCreatedEvent) { event ->
+						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
+							fixAspectRatio, event.windowSize)
 
-				// Add the animation to the engine once we have the window dimensions
-				def animation
-				graphicsEngine.on(WindowCreatedEvent) { event ->
-					def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
-						fixAspectRatio, event.windowSize)
+						animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, gameClock, executorService)
+						animation.on(StopEvent) { stopEvent ->
+							logger.debug('Animation stopped')
+							graphicsEngine.stop()
+							gameClock.stop()
+						}
+						graphicsEngine.addSceneElement(animation)
 
-					animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, gameClock, executorService)
-					animation.on(StopEvent) { stopEvent ->
-						logger.debug('Animation stopped')
-						graphicsEngine.stop()
-						gameClock.stop()
+						if (scanlines) {
+							graphicsEngine.addSceneElement(new Scanlines(
+								new Dimension(animationFile.width, animationFile.height),
+								animationCoordinates
+							))
+						}
 					}
-					graphicsEngine.addSceneElement(animation)
 
-					if (scanlines) {
-						graphicsEngine.addSceneElement(new Scanlines(
-							new Dimension(animationFile.width, animationFile.height),
-							animationCoordinates
-						))
+					graphicsEngine.on(RenderLoopStartEvent) { event ->
+						executorService.execute { ->
+							Thread.currentThread().name = 'Animation starter'
+							animation.play()
+							logger.debug('Animation started')
+						}
 					}
-				}
 
-				graphicsEngine.on(RenderLoopStartEvent) { event ->
-					executorService.submit { ->
-						animation.play()
-						logger.debug('Animation started')
-					}
-				}
+					logger.info('Waiting for animation to finish.  Close the window to exit.')
 
-				logger.info('Waiting for animation to finish.  Close the window to exit.')
-
-				// Key event handler
-				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS) {
-						switch (event.key) {
-						case GLFW_KEY_SPACE:
-							gameClock.togglePause()
-							break
-						case GLFW_KEY_ESCAPE:
-							animation.stop()
-							break
+					// Key event handler
+					graphicsEngine.on(KeyEvent) { event ->
+						if (event.action == GLFW_PRESS) {
+							switch (event.key) {
+							case GLFW_KEY_SPACE:
+								gameClock.togglePause()
+								break
+							case GLFW_KEY_ESCAPE:
+								animation.stop()
+								break
+							}
 						}
 					}
 				}
