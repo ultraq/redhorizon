@@ -70,7 +70,7 @@ subprojects {
 			'org.codehaus.groovy:groovy:3.0.3:indy',
 			'org.slf4j:slf4j-api:1.7.29'
 		)
-		implementation('nz.net.ultraq.extensions:profiling-extensions:0.5.0-SNAPSHOT') {
+		implementation('nz.net.ultraq.extensions:profiling-extensions:0.5.0') {
 			exclude module: 'groovy'
 		}
 		testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {

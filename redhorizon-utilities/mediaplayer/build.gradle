@@ -29,7 +29,7 @@ dependencies {
 		'org.lwjgl:lwjgl-glfw',
 		'org.reflections:reflections:0.9.11'
 	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:0.4.0-SNAPSHOT') {
+	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 		exclude module: 'groovy'
 	}
 }
