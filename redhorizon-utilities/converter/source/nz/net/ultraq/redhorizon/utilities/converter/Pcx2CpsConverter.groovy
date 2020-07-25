@@ -62,15 +62,15 @@ class Pcx2CpsConverter implements Callable<Integer> {
 				destFile.withOutputStream { outputStream ->
 					new CpsFile(pcxFile).writeTo(outputStream)
 				}
+				return 0
 			}
 			else {
 				logger.error('Output file, {}, already exists', destFile)
 			}
 		}
 		else {
-			logger.error('{} not found')
-			return 1
+			logger.error('{} not found', sourceFile)
 		}
-		return 0
+		return 1
 	}
 }
