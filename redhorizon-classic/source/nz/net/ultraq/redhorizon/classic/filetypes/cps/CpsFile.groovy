@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes.cps
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.filetypes.VgaPalette
+import nz.net.ultraq.redhorizon.classic.filetypes.Writable
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
@@ -38,7 +39,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class CpsFile implements ImageFile, InternalPalette {
+class CpsFile implements ImageFile, InternalPalette, Writable {
 
 	// Header constants
 	static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
@@ -94,7 +95,7 @@ class CpsFile implements ImageFile, InternalPalette {
 	}
 
 	/**
-	 * Constructor, creates a new cps file from another image.
+	 * Constructor, creates a new CPS file from another image.
 	 * 
 	 * @param imageFile
 	 */
@@ -122,11 +123,7 @@ class CpsFile implements ImageFile, InternalPalette {
 		return "CPS file, ${width}x${height}, 8-bit ${palette ? 'w/ internal palette' : '(no palette)'}"
 	}
 
-	/**
-	 * Write this CPS file to the given stream.
-	 * 
-	 * @param outputStream
-	 */
+	@Override
 	void writeTo(OutputStream outputStream) {
 
 		def output = new NativeDataOutputStream(outputStream)

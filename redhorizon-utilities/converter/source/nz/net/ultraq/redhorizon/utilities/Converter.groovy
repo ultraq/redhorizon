@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.utilities.converter.Pcx2CpsConverter
+import nz.net.ultraq.redhorizon.utilities.converter.Png2ShpConverter
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -41,7 +42,8 @@ import java.util.concurrent.Callable
 	],
 	mixinStandardHelpOptions = true,
 	subcommands = [
-	  Pcx2CpsConverter
+	  Pcx2CpsConverter,
+		Png2ShpConverter
 	],
 	synopsisSubcommandLabel = 'COMMAND',
 	version = '${sys:redhorizon.version}'

@@ -75,10 +75,10 @@ class PngFile implements ImageFile {
 	 * @param animationfile File to source data from.
 	 * @param params		Additional parameters: external palette (opt).
 	 */
-	PngFile(String name, AnimationFile animationfile, String... params) {
-
-		this(name, (ImagesFile)animationfile, params)
-	}
+//	PngFile(String name, AnimationFile animationfile, String... params) {
+//
+//		this(name, (ImagesFile)animationfile, params)
+//	}
 
 	/**
 	 * Constructor, allows the construction of a new PNG file from the given
