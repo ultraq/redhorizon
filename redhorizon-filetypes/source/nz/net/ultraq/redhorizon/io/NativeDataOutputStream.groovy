@@ -42,6 +42,32 @@ class NativeDataOutputStream extends OutputStream implements DataOutput {
 		isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN
 	}
 
+	/**
+	 * Writes a {@code int} value, respecting the byte order of the underlying
+	 * platform.
+	 * 
+	 * @param v
+	 */
+	@Override
+	void writeInt(int v) {
+
+		if (isLittleEndian) {
+			write(v)
+			write(v >>> 8)
+			write(v >>> 16)
+			write(v >>> 24)
+		}
+		else {
+			dos.writeInt(v)
+		}
+	}
+
+	/**
+	 * Writes a {@code short} value, respecting the byte order of the underlying
+	 * platform.
+	 * 
+	 * @param v
+	 */
 	@Override
 	void writeShort(int v) {
 
