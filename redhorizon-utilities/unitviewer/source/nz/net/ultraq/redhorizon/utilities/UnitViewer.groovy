@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
@@ -31,6 +32,9 @@ import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.json.JsonSlurper
 import java.util.concurrent.Callable
@@ -111,6 +115,20 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
+
+				// Key event handler
+				graphicsEngine.on(KeyEvent) { event ->
+					if (event.action == GLFW_PRESS) {
+						switch (event.key) {
+						case GLFW_KEY_LEFT:
+							unit.rotateLeft()
+							break
+						case GLFW_KEY_RIGHT:
+							unit.rotateRight()
+							break
+						}
+					}
+				}
 			}
 		}
 	}

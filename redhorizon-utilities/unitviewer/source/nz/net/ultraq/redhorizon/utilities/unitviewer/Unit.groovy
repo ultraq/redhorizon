@@ -33,8 +33,12 @@ import org.joml.Rectanglef
  */
 class Unit implements GraphicsElement, SelfVisitable {
 
+	private final int rotationSteps
+	private final float degreesPerStep
 	private final Image[] bodyFrames
 	private final Image[] turretFrames
+
+	float heading
 
 	/**
 	 * Constructor, build a unit from the given data.
@@ -61,6 +65,8 @@ class Unit implements GraphicsElement, SelfVisitable {
 		}
 
 		def bodyPart = data.shpFile.parts.body
+		rotationSteps = bodyPart.frames
+		degreesPerStep = (360f / rotationSteps) as float
 		bodyFrames = new Image[bodyPart.frames]
 		buildFrames(bodyFrames, bodyPart)
 
@@ -94,7 +100,26 @@ class Unit implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		bodyFrames[0].render(renderer)
+		def rotationFrame = -(heading / degreesPerStep) as int
+		bodyFrames[rotationFrame].render(renderer)
 		// TODO: Render the turret
+	}
+
+	/**
+	 * Adjust the heading of the unit such that it's rotated left enough to
+	 * utilize its next frame in that direction.
+	 */
+	void rotateLeft() {
+
+		heading = Math.wrap(heading - degreesPerStep as float, 0f, 360f)
+	}
+
+	/**
+	 * Adjust the heading of the unit such that it's rotated right enough to
+	 * utilize its next frame in that direction.
+	 */
+	void rotateRight() {
+
+		heading = Math.wrap(heading + degreesPerStep as float, 0f, 360f)
 	}
 }
