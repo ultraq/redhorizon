@@ -28,6 +28,7 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
+		'org.joml:joml:1.9.19',
 		'org.lwjgl:lwjgl-glfw',
 	)
 	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {

@@ -1,0 +1,13 @@
+{
+	"shpFile": {
+		"filename": "jeep.shp",
+		"parts": {
+			"body": {
+				"frames": 32
+			},
+			"turret": {
+				"frames": 32
+			}
+		}
+	}
+}
