@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.utilities.PaletteTypes
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
@@ -45,7 +46,7 @@ class ImagesViewer implements WithGraphicsEngine {
 	final ImagesFile imagesFile
 	final boolean filtering
 	final boolean fixAspectRatio
-	final String paletteType
+	final PaletteTypes paletteType
 
 	/**
 	 * View the configured file.
@@ -56,7 +57,7 @@ class ImagesViewer implements WithGraphicsEngine {
 
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
-			def paletteName = "${paletteType.toLowerCase()}-temperat.pal"
+			def paletteName = "${paletteType.name().toLowerCase()}-temperat.pal"
 			new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteName)).withCloseable { inputStream ->
 				palette = new PalFile(inputStream)
 			}
