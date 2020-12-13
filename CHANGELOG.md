@@ -2,6 +2,14 @@
 Changelog
 =========
 
+### 0.30.3
+ - Improve performance of VQA file playback
+ - Allow playback of some VQA files in Red Alert that contain unknown data
+ - Support for viewing SHP files (puts all the frames up on the screen at once)
+   with either the RA/TD "temperate" palette
+ - When viewing images/animations/videos, don't let the window get bigger than
+   the smallest screen in a multi-monitor setup ([#31](https://github.com/ultraq/redhorizon/issues/31))
+
 ### 0.30.2
  - Support for playing VQA files through the media player
  - Performance improvements when streaming files, reducing memory usage by
