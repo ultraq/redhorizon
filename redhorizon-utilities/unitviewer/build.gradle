@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-description = 'Media player for the Red Horizon project'
-archivesBaseName = 'redhorizon-utilities-mediaplayer'
+description = 'Unit/Structure viewer for the Red Horizon project'
+archivesBaseName = 'redhorizon-utilities-unitviewer'
 
 dependencies {
+	implementation('org.codehaus.groovy:groovy-json:3.0.3:indy') {
+		exclude module: 'groovy'
+	}
 	implementation(
 		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
@@ -25,9 +28,7 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
-		'org.joml:joml:1.9.19',
 		'org.lwjgl:lwjgl-glfw',
-		'org.reflections:reflections:0.9.11'
 	)
 	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 		exclude module: 'groovy'
@@ -35,6 +36,6 @@ dependencies {
 }
 
 application {
-	mainClassName = 'nz.net.ultraq.redhorizon.utilities.MediaPlayer'
-	applicationName = 'play'
+	mainClassName = 'nz.net.ultraq.redhorizon.utilities.UnitViewer'
+	applicationName = 'view'
 }

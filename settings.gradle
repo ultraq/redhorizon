@@ -24,5 +24,6 @@ include(
 	'redhorizon-filetypes',
 	'redhorizon-utilities:converter',
 	'redhorizon-utilities:mediaplayer',
-	'redhorizon-utilities:mixreader'
+	'redhorizon-utilities:mixreader',
+	'redhorizon-utilities:unitviewer'
 )
