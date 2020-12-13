@@ -35,6 +35,7 @@ import picocli.CommandLine.Spec
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
 import groovy.json.JsonSlurper
 import java.util.concurrent.Callable
@@ -118,7 +119,7 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 
 				// Key event handler
 				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS) {
+					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 						switch (event.key) {
 						case GLFW_KEY_LEFT:
 							unit.rotateLeft()
