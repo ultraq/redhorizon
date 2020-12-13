@@ -26,6 +26,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 enum UnitConfigs {
 
+	HARV('harv.json'),
 	JEEP('jeep.json')
 
 	final String file

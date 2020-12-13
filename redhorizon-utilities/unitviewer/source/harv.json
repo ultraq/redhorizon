@@ -1,0 +1,17 @@
+{
+	"shpFile": {
+		"filename": "harv.shp",
+		"parts": {
+			"body": {
+				"frames": 32
+			}
+		},
+		"animations": [
+			{
+				"type": "harvesting",
+				"frames": 4,
+				"headings": 8
+			}
+		]
+	}
+}

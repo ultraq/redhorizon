@@ -16,7 +16,9 @@
 
 package nz.net.ultraq.redhorizon.utilities
 
+import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
@@ -24,6 +26,7 @@ import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitConfigs
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitData
 
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
@@ -32,6 +35,7 @@ import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
@@ -88,8 +92,11 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 			logger.error('No configuration available for {}', unitName)
 			throw new IllegalArgumentException()
 		}
-		
-		def unitData = new JsonSlurper().parse(this.class.classLoader.getResourceAsStream(unitConfig.file)) as UnitData
+
+		def configData = this.class.classLoader.getResourceAsStream(unitConfig.file).text
+		logger.info('Configuration data:\n{}', configData)
+
+		def unitData = new JsonSlurper().parseText(configData) as UnitData
 		view(unitData)
 
 		return 0
@@ -102,16 +109,26 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 	 */
 	private void view(UnitData unitData) {
 
+		// TODO: Configure the path to the mix file, or do some kind of item lookup
+		def mixFile = new MixFile(new File('mix/red-alert/Conquer.mix'))
+		def mixFileEntry = mixFile.getEntry(unitData.shpFile.filename)
+		def shpFile = mixFile.getEntryData(mixFileEntry).withStream { inputStream ->
+			return new ShpFile(inputStream)
+		}
+		logger.info('{} details: {}', unitData.shpFile.filename, shpFile)
+
 		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
 			return new PalFile(inputStream)
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGraphicsEngine(executorService, false) { graphicsEngine ->
-				def unit = new Unit(unitData, palette)
 
 				// Add the unit to the engine once we have the window dimensions
+				Unit unit
 				graphicsEngine.on(WindowCreatedEvent) { event ->
+					def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
+					unit = new Unit(unitData, shpFile, palette, unitCoordinates)
 					graphicsEngine.addSceneElement(unit)
 				}
 
@@ -126,6 +143,9 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 							break
 						case GLFW_KEY_RIGHT:
 							unit.rotateRight()
+							break
+						case GLFW_KEY_ESCAPE:
+							graphicsEngine.stop()
 							break
 						}
 					}

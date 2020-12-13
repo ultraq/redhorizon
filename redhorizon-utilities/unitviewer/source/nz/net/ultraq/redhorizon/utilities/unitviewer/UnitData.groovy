@@ -28,6 +28,7 @@ class UnitData {
 	static class ShpFile {
 		String filename
 		ShpFileParts parts
+		ShpFileAnimations[] animations
 	}
 
 	static class ShpFileParts {
@@ -37,5 +38,11 @@ class UnitData {
 
 	static class ShpFilePart {
 		int frames
+	}
+
+	static class ShpFileAnimations {
+		String type
+		int frames
+		int headings
 	}
 }

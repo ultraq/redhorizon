@@ -16,10 +16,9 @@
 
 package nz.net.ultraq.redhorizon.utilities.unitviewer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
@@ -44,23 +43,17 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 * Constructor, build a unit from the given data.
 	 * 
 	 * @param data
+	 * @param imageData
 	 * @param palette
+	 * @param coordinates
 	 */
-	Unit(UnitData data, Palette palette) {
-
-		// TODO: Configure the path to the mix file, or do some kind of item lookup
-		def mixFile = new MixFile(new File('mix/red-alert/Conquer.mix'))
-		def mixFileEntry = mixFile.getEntry(data.shpFile.filename)
-		def shpFile = mixFile.getEntryData(mixFileEntry).withStream { inputStream ->
-			return new ShpFile(inputStream)
-		}
+	Unit(UnitData data, ImagesFile imageData, Palette palette, Rectanglef coordinates) {
 
 		def frameIndex = 0
 		def buildFrames = { frames, part ->
 			part.frames.times { time ->
-				frames[time] = new Image(shpFile.width, shpFile.height, palette.format.value,
-					shpFile.imagesData[frameIndex++].applyPalette(palette),
-					new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2), false)
+				frames[time] = new Image(imageData.width, imageData.height, palette.format.value,
+					imageData.imagesData[frameIndex++].applyPalette(palette), coordinates, false)
 			}
 		}
 
@@ -71,8 +64,10 @@ class Unit implements GraphicsElement, SelfVisitable {
 		buildFrames(bodyFrames, bodyPart)
 
 		def turretPart = data.shpFile.parts.turret
-		turretFrames = new Image[turretPart.frames]
-		buildFrames(turretFrames, turretPart)
+		if (turretPart) {
+			turretFrames = new Image[turretPart.frames]
+			buildFrames(turretFrames, turretPart)
+		}
 	}
 
 	@Override
