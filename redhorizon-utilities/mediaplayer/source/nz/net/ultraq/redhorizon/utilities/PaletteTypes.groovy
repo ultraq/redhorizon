@@ -29,5 +29,5 @@ enum PaletteTypes {
 	RA('ra-temperat.pal'),
 	TD('td-temperat.pal')
 
-	final String paletteFile
+	final String file
 }

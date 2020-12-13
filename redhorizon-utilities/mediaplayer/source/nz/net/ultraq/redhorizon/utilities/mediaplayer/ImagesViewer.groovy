@@ -57,9 +57,8 @@ class ImagesViewer implements WithGraphicsEngine {
 
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
-			def paletteName = "${paletteType.name().toLowerCase()}-temperat.pal"
-			new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteName)).withCloseable { inputStream ->
-				palette = new PalFile(inputStream)
+			palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
+				return new PalFile(inputStream)
 			}
 		}
 
