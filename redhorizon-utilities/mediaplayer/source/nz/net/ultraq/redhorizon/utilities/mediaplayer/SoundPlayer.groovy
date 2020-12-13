@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
+import nz.net.ultraq.redhorizon.engine.WithGameClock
+import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
@@ -34,7 +36,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class SoundPlayer implements Audio, Timed {
+class SoundPlayer implements WithAudioEngine, WithGameClock {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundPlayer)
 

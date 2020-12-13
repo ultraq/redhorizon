@@ -18,7 +18,9 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
@@ -37,7 +39,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationPlayer implements Timed, Visual {
+class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 

@@ -14,38 +14,36 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities.mediaplayer
+package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
+import nz.net.ultraq.redhorizon.engine.GameClock
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.ExecutorService
 
 /**
- * Common behaviour for media players that need an audio engine for playback.
+ * Trait for simplifying the use of a game clock by keeping it to within a
+ * closure.
  * 
  * @author Emanuel Rabina
  */
-trait Audio {
+trait WithGameClock {
 
 	/**
-	 * Execute the given closure within the context of having an audio engine:
-	 * setting it up, passing it along to the closure, and finally shutting it
-	 * down.
+	 * Execute the given closure within the context of having a game clock:
+	 * setting it up, passing it to the closure, and shutting it down when the
+	 * closure is complete.
 	 * 
 	 * @param executorService
 	 * @param closure
 	 */
-	void withAudioEngine(ExecutorService executorService,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.audio.AudioEngine')
+	void withGameClock(ExecutorService executorService,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.GameClock')
 		Closure closure) {
 
-		def audioEngine = new AudioEngine()
-		def engine = executorService.submit(audioEngine)
-
-		closure(audioEngine)
-
-		engine.get()
+		def gameClock = new GameClock(executorService)
+		closure(gameClock)
+		gameClock.stop()
 	}
 }

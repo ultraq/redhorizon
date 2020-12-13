@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
@@ -37,7 +38,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImagesViewer implements Visual {
+class ImagesViewer implements WithGraphicsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 

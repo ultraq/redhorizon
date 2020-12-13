@@ -78,7 +78,7 @@ class MediaPlayer implements Callable<Integer> {
 	boolean fixAspectRatio
 
 	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
-	String paletteType
+	PaletteTypes paletteType
 
 	@Option(names = ['--scale-low-res'], description = 'Double the output resolution of low-res animations and videos (320x200 or lower).  Useful in conjunction with filtering so that the result is still filtered but less blurry.')
 	boolean scaleLowRes
@@ -189,6 +189,10 @@ class MediaPlayer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new MediaPlayer()).execute(args))
+		System.exit(
+			new CommandLine(new MediaPlayer())
+				.setCaseInsensitiveEnumValuesAllowed(true)
+				.execute(args)
+		)
 	}
 }

@@ -18,7 +18,10 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.WithGameClock
+import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.StopEvent
@@ -39,7 +42,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer implements Audio, Timed, Visual {
+class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 

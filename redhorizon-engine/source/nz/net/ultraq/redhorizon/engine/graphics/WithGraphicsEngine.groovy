@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities.mediaplayer
+package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Rectanglef
@@ -30,11 +29,12 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.FutureTask
 
 /**
- * Trait for media players displaying visual content.
+ * Trait for simplifying the use of a graphics engine by keeping it to within a
+ * closure.
  * 
  * @author Emanuel Rabina
  */
-trait Visual {
+trait WithGraphicsEngine {
 
 	/**
 	 * Calculate the ideal centered dimensions for the image that stretches to fit
