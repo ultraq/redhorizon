@@ -9,8 +9,13 @@
 		"animations": [
 			{
 				"type": "harvesting",
-				"frames": 4,
+				"frames": 8,
 				"headings": 8
+			},
+			{
+				"type": "drop-off",
+				"frames": 15,
+				"headings": 1
 			}
 		]
 	}

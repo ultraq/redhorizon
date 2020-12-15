@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
@@ -35,9 +36,12 @@ import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
@@ -62,7 +66,7 @@ import java.util.concurrent.Executors
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
+class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
 
@@ -122,31 +126,42 @@ class UnitViewer implements Callable<Integer>, WithGraphicsEngine {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, false) { graphicsEngine ->
+			withGameClock(executorService) { gameClock ->
+				withGraphicsEngine(executorService, false) { graphicsEngine ->
 
-				// Add the unit to the engine once we have the window dimensions
-				Unit unit
-				graphicsEngine.on(WindowCreatedEvent) { event ->
-					def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
-					unit = new Unit(unitData, shpFile, palette, unitCoordinates)
-					graphicsEngine.addSceneElement(unit)
-				}
+					// Add the unit to the engine once we have the window dimensions
+					Unit unit
+					graphicsEngine.on(WindowCreatedEvent) { event ->
+						def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
+						unit = new Unit(unitData, shpFile, palette, unitCoordinates, gameClock)
+						graphicsEngine.addSceneElement(unit)
+					}
 
-				logger.info('Displaying the image in another window.  Close the window to exit.')
+					logger.info('Displaying the image in another window.  Close the window to exit.')
 
-				// Key event handler
-				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-						switch (event.key) {
-						case GLFW_KEY_LEFT:
-							unit.rotateLeft()
-							break
-						case GLFW_KEY_RIGHT:
-							unit.rotateRight()
-							break
-						case GLFW_KEY_ESCAPE:
-							graphicsEngine.stop()
-							break
+					// Key event handler
+					graphicsEngine.on(KeyEvent) { event ->
+						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+							switch (event.key) {
+							case GLFW_KEY_LEFT:
+								unit.rotateLeft()
+								break
+							case GLFW_KEY_RIGHT:
+								unit.rotateRight()
+								break
+							case GLFW_KEY_UP:
+								unit.previousAnimation()
+								break
+							case GLFW_KEY_DOWN:
+								unit.nextAnimation()
+								break
+							case GLFW_KEY_SPACE:
+								gameClock.togglePause()
+								break
+							case GLFW_KEY_ESCAPE:
+								graphicsEngine.stop()
+								break
+							}
 						}
 					}
 				}
