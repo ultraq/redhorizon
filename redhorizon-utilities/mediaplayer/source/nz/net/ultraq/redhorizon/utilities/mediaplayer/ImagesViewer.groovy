@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -28,6 +29,8 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -82,6 +85,17 @@ class ImagesViewer implements WithGraphicsEngine {
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
+
+				// Key event handler
+				graphicsEngine.on(KeyEvent) { event ->
+					if (event.action == GLFW_PRESS) {
+						switch (event.key) {
+						case GLFW_KEY_ESCAPE:
+							graphicsEngine.stop()
+							break
+						}
+					}
+				}
 			}
 		}
 	}
