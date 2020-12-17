@@ -37,16 +37,9 @@ class Unit implements GraphicsElement, SelfVisitable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Unit)
 
-	private final Image[] bodyFrames
-	private final Image[] turretFrames
-	private final UnitAnimation[] unitAnimations
-
-	private long animationTimeStart
-	private final int frameRate = 15 // C&C ran at 15fps?
-	private final GameTime gameTime
-
-	float heading
-	UnitAnimation animation
+	private final List<UnitRenderer> unitRenderers = []
+	private UnitRenderer currentRenderer
+	private float heading
 
 	/**
 	 * Constructor, build a unit from the given data.
@@ -60,75 +53,52 @@ class Unit implements GraphicsElement, SelfVisitable {
 	Unit(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
 
 		def frameIndex = 0
-		def buildFrames = { frames, part ->
-			part.frames.times { time ->
-				frames[time] = new Image(imagesFile.width, imagesFile.height, palette.format.value,
+		def buildFrames = { take ->
+			def frames = []
+			take.times {
+				frames << new Image(imagesFile.width, imagesFile.height, palette.format.value,
 					imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates, false)
 			}
+			return frames
 		}
 
 		def bodyPart = data.shpFile.parts.body
-		bodyFrames = new Image[bodyPart.frames]
-		buildFrames(bodyFrames, bodyPart)
-
 		def turretPart = data.shpFile.parts.turret
-		if (turretPart) {
-			turretFrames = new Image[turretPart.frames]
-			buildFrames(turretFrames, turretPart)
-		}
+		currentRenderer = new UnitRenderer(
+			unit: this,
+			headings: bodyPart.frames,
+			frames: buildFrames(bodyPart.frames) + (turretPart ? buildFrames(turretPart.frames) : [] as List<Image>)
+		)
+		unitRenderers << currentRenderer
 
 		def animations = data.shpFile.animations
 		if (animations) {
-			unitAnimations = new UnitAnimation[animations.length]
-
-			animations.eachWithIndex { animation, index ->
-				def numAnimationFrames = animation.frames * animation.headings
-				def animationFrames = new Image[numAnimationFrames]
-				numAnimationFrames.times { time ->
-					animationFrames[time] = new Image(imagesFile.width, imagesFile.height, palette.format.value,
-						imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates, false)
-				}
-				unitAnimations[index] = new UnitAnimation(
+			animations.each { animation ->
+				unitRenderers << new UnitAnimationRenderer(
+					unit: this,
 					type: animation.type,
-					framesPerHeading: animation.frames,
 					headings: animation.headings,
-					frames: animationFrames
+					framesPerHeading: animation.frames,
+					frames: buildFrames(animation.frames * animation.headings),
+					gameTime: gameTime
 				)
 			}
 		}
-
-		this.gameTime = gameTime
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		bodyFrames.each { frame ->
-			frame.delete(renderer)
-		}
-		turretFrames.each { frame ->
-			frame.delete(renderer)
-		}
-		unitAnimations.each { unitAnimation ->
-			unitAnimation.frames.each { frame ->
-				frame.delete(renderer)
-			}
+		unitRenderers.each { unitRenderer ->
+			unitRenderer.delete(renderer)
 		}
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		bodyFrames.each { frame ->
-			frame.init(renderer)
-		}
-		turretFrames.each { frame ->
-			frame.init(renderer)
-		}
-		unitAnimations.each { unitAnimation ->
-			unitAnimation.frames.each { frame ->
-				frame.init(renderer)
-			}
+		unitRenderers.each { unitRenderer ->
+			unitRenderer.init(renderer)
 		}
 	}
 
@@ -137,23 +107,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void nextAnimation() {
 
-		if (animation) {
-			def currentAnimationIndex = unitAnimations.findIndexOf { unitAnimation ->
-				unitAnimation.type == animation.type
-			}
-			def nextAnimationIndex = currentAnimationIndex + 1
-			if (nextAnimationIndex == unitAnimations.length) {
-				animation = null
-			}
-			else {
-				animation = unitAnimations[nextAnimationIndex]
-			}
-		}
-		else if (unitAnimations) {
-			animation = unitAnimations.first()
-		}
-
-		logger.debug("${animation?.type ?: "No"} animation selected")
+		selectAnimation(+1)
 	}
 
 	/**
@@ -161,38 +115,13 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void previousAnimation() {
 
-		if (animation) {
-			def currentAnimationIndex = unitAnimations.findIndexOf { unitAnimation ->
-				unitAnimation.type == animation.type
-			}
-			def previousAnimationIndex = currentAnimationIndex - 1
-			if (previousAnimationIndex == -1) {
-				animation = null
-			}
-			else {
-				animation = unitAnimations[previousAnimationIndex]
-			}
-		}
-		else if (unitAnimations) {
-			animation = unitAnimations.last()
-		}
-
-		logger.debug("${animation?.type ?: "No"} animation selected")
+		selectAnimation(-1)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (animation) {
-			def rotationFrames = -(heading / (360f / animation.headings)) as int
-			def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * frameRate) % animation.framesPerHeading as int
-			animation.frames[rotationFrames * animation.framesPerHeading + currentFrame].render(renderer)
-		}
-		else {
-			def rotationFrame = -(heading / (360f / bodyFrames.length)) as int
-			bodyFrames[rotationFrame].render(renderer)
-			// TODO: Render the turret
-		}
+		currentRenderer.render(renderer)
 	}
 
 	/**
@@ -201,7 +130,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void rotateLeft() {
 
-		def degreesPerStep = (360f / (animation?.headings ?: bodyFrames.length)) as float
+		def degreesPerStep = (360f / currentRenderer.headings) as float
 		heading = Math.wrap(heading - degreesPerStep as float, 0f, 360f)
 	}
 
@@ -211,14 +140,86 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void rotateRight() {
 
-		def degreesPerStep = (360f / (animation?.headings ?: bodyFrames.length)) as float
+		def degreesPerStep = (360f / currentRenderer.headings) as float
 		heading = Math.wrap(heading + degreesPerStep as float, 0f, 360f)
 	}
 
-	private static class UnitAnimation {
-		private String type
-		private int framesPerHeading
-		private int headings
-		private Image[] frames
+	/**
+	 * Select the next animation either next or previously in the sequence.
+	 * 
+	 * @param next
+	 */
+	private void selectAnimation(int next) {
+
+		currentRenderer = unitRenderers[(unitRenderers.indexOf(currentRenderer) + next) % unitRenderers.size()]
+		if (currentRenderer instanceof UnitAnimationRenderer) {
+			currentRenderer.start()
+		}
+		logger.debug("${currentRenderer.type ?: "No"} animation selected")
+	}
+
+	/**
+	 * Renderer for knowing what kind of body to draw.
+	 */
+	private static class UnitRenderer implements GraphicsElement {
+
+		protected String type
+		protected Unit unit
+		protected int headings
+		protected List<Image> frames
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			frames.each { frame ->
+				frame.delete(renderer)
+			}
+		}
+
+		@Override
+		void init(GraphicsRenderer renderer) {
+
+			frames.each { frame ->
+				frame.init(renderer)
+			}
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			frames[rotationFrames()].render(renderer)
+
+			// TODO: Render the turret
+		}
+
+		protected int rotationFrames() {
+
+			return -(unit.heading / (360f / headings))
+		}
+	}
+
+	/**
+	 * Renderer for drawing animations.
+	 */
+	private static class UnitAnimationRenderer extends UnitRenderer {
+
+		private static final int FRAMERATE = 15 // C&C ran at 15fps?
+
+		protected int framesPerHeading
+		protected GameTime gameTime
+
+		private long animationTimeStart
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
+			frames[rotationFrames() * framesPerHeading + currentFrame].render(renderer)
+		}
+
+		private void start() {
+
+			animationTimeStart = gameTime.currentTimeMillis
+		}
 	}
 }

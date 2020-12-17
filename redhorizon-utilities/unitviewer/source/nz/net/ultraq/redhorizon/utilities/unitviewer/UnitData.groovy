@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities.unitviewer
 
 /**
- * The data of a C&C unit type.
+ * Model of the data of a C&C unit type.
  * 
  * @author Emanuel Rabina
  */

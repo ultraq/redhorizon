@@ -35,7 +35,7 @@ class MathStaticExtensions {
 	static float wrap(Math self, float value, float lower, float upper) {
 
 		return value < lower ? Math.wrap(upper - (lower - value) as float, lower, upper) :
-			     value > upper ? Math.wrap(lower + (value - upper) as float, lower, upper) :
-			     value
+		       value > upper ? Math.wrap(lower + (value - upper) as float, lower, upper) :
+		       value
 	}
 }
