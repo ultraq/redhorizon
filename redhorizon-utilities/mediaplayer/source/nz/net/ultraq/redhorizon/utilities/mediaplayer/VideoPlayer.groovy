@@ -49,7 +49,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 
 	final VideoFile videoFile
 
-	final boolean filtering
+	final boolean filter
 	final boolean fixAspectRatio
 	final boolean scaleLowRes
 	final boolean scanlines
@@ -62,7 +62,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 		logger.info('File details: {}', videoFile)
 
 		def config = new GraphicsConfiguration(
-			filter: filtering,
+			filter: filter,
 			fixAspectRatio: fixAspectRatio
 		)
 

@@ -43,7 +43,7 @@ class ImageViewer implements WithGraphicsEngine {
 
 	final ImageFile imageFile
 
-	final boolean filtering
+	final boolean filter
 	final boolean fixAspectRatio
 
 	/**
@@ -54,7 +54,7 @@ class ImageViewer implements WithGraphicsEngine {
 		logger.info('File details: {}', imageFile)
 
 		def config = new GraphicsConfiguration(
-			filter: filtering,
+			filter: filter,
 			fixAspectRatio: fixAspectRatio
 		)
 

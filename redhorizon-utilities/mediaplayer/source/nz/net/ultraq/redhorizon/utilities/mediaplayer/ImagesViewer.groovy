@@ -48,7 +48,7 @@ class ImagesViewer implements WithGraphicsEngine {
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 
 	final ImagesFile imagesFile
-	final boolean filtering
+	final boolean filter
 	final boolean fixAspectRatio
 	final PaletteTypes paletteType
 
@@ -60,7 +60,7 @@ class ImagesViewer implements WithGraphicsEngine {
 		logger.info('File details: {}', imagesFile)
 
 		def config = new GraphicsConfiguration(
-			filter: filtering,
+			filter: filter,
 			fixAspectRatio: fixAspectRatio
 		)
 

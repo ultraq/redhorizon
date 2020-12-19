@@ -46,7 +46,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 	final AnimationFile animationFile
 
-	final boolean filtering
+	final boolean filter
 	final boolean fixAspectRatio
 	final boolean scaleLowRes
 	final boolean scanlines
@@ -59,7 +59,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 		logger.info('File details: {}', animationFile)
 
 		def config = new GraphicsConfiguration(
-			filter: filtering,
+			filter: filter,
 			fixAspectRatio: fixAspectRatio
 		)
 
