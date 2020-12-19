@@ -155,6 +155,12 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	int createTexture(ByteBuffer data, int format, int width, int height) {
 
+		return createTexture(data, format, width, height, filter)
+	}
+
+	@Override
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
+
 		int textureId = checkForError { ->
 			return glGenTextures()
 		}
