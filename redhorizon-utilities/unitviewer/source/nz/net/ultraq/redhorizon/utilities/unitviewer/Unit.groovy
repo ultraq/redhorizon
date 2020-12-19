@@ -57,7 +57,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 			def frames = []
 			take.times {
 				frames << new Image(imagesFile.width, imagesFile.height, palette.format.value,
-					imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates, false)
+					imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates)
 			}
 			return frames
 		}

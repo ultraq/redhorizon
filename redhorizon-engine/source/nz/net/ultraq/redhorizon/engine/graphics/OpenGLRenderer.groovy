@@ -29,17 +29,24 @@ import java.nio.ByteBuffer
  */
 class OpenGLRenderer implements GraphicsRenderer {
 
+	private final Colours clearColour
+	private final boolean filter
+
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
 	 * 
 	 * @param context
+	 * @param config
 	 */
-	OpenGLRenderer(OpenGLContext context) {
+	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
 		GL.createCapabilities()
 
-		glClearColor(0, 0, 0, 1)
+		clearColour = config.clearColour
+		glClearColor(clearColour.r, clearColour.g, clearColour.b, 1)
+
+		filter = config.filter
 
 		// Edge smoothing
 		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST)
@@ -141,7 +148,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
+	int createTexture(ByteBuffer data, int format, int width, int height) {
 
 		int textureId = checkForError { ->
 			return glGenTextures()

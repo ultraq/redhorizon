@@ -46,20 +46,19 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	 * 
 	 * @param videoFile       Video source.
 	 * @param dimensions      Dimensions over which to display the video over.
-	 * @param filter          Filter the frames of the video.
 	 * @param scale           Double the output resolution of low-resolution
 	 *                        videos.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, Rectanglef dimensions, boolean filter, boolean scale,
-		GameTime gameTime, ExecutorService executorService) {
+	Video(VideoFile videoFile, Rectanglef dimensions, boolean scale, GameTime gameTime,
+		ExecutorService executorService) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format.value, videoFile.numFrames, videoFile.frameRate,
-				dimensions, filter, scale, videoFile.frameRate as int, videoWorker, gameTime)
+				dimensions, scale, videoFile.frameRate as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}

@@ -52,7 +52,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final int numFrames
 	final float frameRate
 	final Rectanglef dimensions
-	final boolean filter
 
 	private final Worker animationDataWorker
 	private final BlockingQueue<ByteBuffer> frames
@@ -71,17 +70,16 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * 
 	 * @param animationFile   Animation source.
 	 * @param dimensions      Dimensions over which to display the animation over.
-	 * @param filter          Filter the frames of the animation.
 	 * @param scale           Double the output resolution of low-resolution
 	 *                        animations.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean filter, boolean scale,
-		GameTime gameTime, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean scale, GameTime gameTime,
+		ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format.value, animationFile.numFrames, animationFile.frameRate,
-			dimensions, filter, scale, animationFile.frameRate as int,
+			dimensions, scale, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
@@ -97,14 +95,13 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param numFrames
 	 * @param frameRate
 	 * @param dimensions
-	 * @param filter
 	 * @param scale
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 * @param gameTime
 	 */
 	@PackageScope
-	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions, boolean filter,
+	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions,
 		boolean scale, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
@@ -117,7 +114,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.numFrames  = numFrames
 		this.frameRate  = frameRate
 		this.dimensions = dimensions
-		this.filter     = filter
 
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
@@ -174,7 +170,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
 						def newTextureIds = frames.drain(Math.max(numFramesToRead, 5)).collect { frame ->
-							def newTextureId = renderer.createTexture(frame, format, width, height, filter)
+							def newTextureId = renderer.createTexture(frame, format, width, height)
 							textureIds << newTextureId
 							return newTextureId
 						}

@@ -71,8 +71,8 @@ class MediaPlayer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the entry in the mix file to play')
 	String entryName
 
-	@Option(names = ['--filtering'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
-	boolean filtering
+	@Option(names = ['--filter'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
+	boolean filter
 
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays (images/animations/videos only)')
 	boolean fixAspectRatio
@@ -158,11 +158,11 @@ class MediaPlayer implements Callable<Integer> {
 
 		switch (file) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(file, filtering, fixAspectRatio, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, scaleLowRes, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(file, filtering, fixAspectRatio, scaleLowRes, scanlines)
+				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, scaleLowRes, scanlines)
 				animationPlayer.play()
 				break
 			case SoundFile:
@@ -170,11 +170,11 @@ class MediaPlayer implements Callable<Integer> {
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(file, filtering, fixAspectRatio)
+				def imageViewer = new ImageViewer(file, filter, fixAspectRatio)
 				imageViewer.view()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(file, filtering, fixAspectRatio, paletteType)
+				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, paletteType)
 				imagesViewer.view()
 				break
 			default:

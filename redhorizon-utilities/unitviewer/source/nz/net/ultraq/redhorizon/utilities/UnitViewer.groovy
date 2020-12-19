@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
+import nz.net.ultraq.redhorizon.engine.graphics.Colours
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
@@ -125,9 +127,13 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 			return new PalFile(inputStream).withAlphaMask()
 		}
 
+		def config = new GraphicsConfiguration(
+			clearColour: Colours.WHITE
+		)
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, false) { graphicsEngine ->
+				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 					// Add the unit to the engine once we have the window dimensions
 					Unit unit

@@ -38,7 +38,6 @@ class Image implements GraphicsElement, SelfVisitable {
 	final int format
 	final ByteBuffer imageData
 	final Rectanglef dimensions
-	final boolean filter
 
 	// Rendering information
 	private int textureId
@@ -48,11 +47,10 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * 
 	 * @param imageFile  Image source.
 	 * @param dimensions Dimensions over which to display the image over.
-	 * @param filter     Filter the image.
 	 */
-	Image(ImageFile imageFile, Rectanglef dimensions, boolean filter) {
+	Image(ImageFile imageFile, Rectanglef dimensions) {
 
-		this(imageFile.width, imageFile.height, imageFile.format.value, imageFile.imageData, dimensions, filter)
+		this(imageFile.width, imageFile.height, imageFile.format.value, imageFile.imageData, dimensions)
 	}
 
 	/**
@@ -63,16 +61,14 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param format
 	 * @param imageData
 	 * @param dimensions
-	 * @param filter
 	 */
-	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, boolean filter) {
+	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions) {
 
 		this.width      = width
 		this.height     = height
 		this.format     = format
 		this.imageData  = ByteBuffer.fromBuffersDirect(imageData)
 		this.dimensions = dimensions
-		this.filter     = filter
 	}
 
 	@Override
@@ -84,7 +80,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		textureId = renderer.createTexture(imageData, format, width, height, filter)
+		textureId = renderer.createTexture(imageData, format, width, height)
 	}
 
 	@Override

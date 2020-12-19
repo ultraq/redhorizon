@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
@@ -60,18 +61,23 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 
 		logger.info('File details: {}', videoFile)
 
+		def config = new GraphicsConfiguration(
+			filter: filtering,
+			fixAspectRatio: fixAspectRatio
+		)
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGameClock(executorService) { gameClock ->
 				withAudioEngine(executorService) { audioEngine ->
-					withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+					withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 						// Add the video to the engines once we have the window dimensions
-						def video
+						Video video
 						graphicsEngine.on(WindowCreatedEvent) { event ->
 							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height,
 								fixAspectRatio, event.windowSize)
 
-							video = new Video(videoFile, videoCoordinates, filtering, scaleLowRes, gameClock, executorService)
+							video = new Video(videoFile, videoCoordinates, scaleLowRes, gameClock, executorService)
 							video.on(StopEvent) { stopEvent ->
 								logger.debug('Video stopped')
 								audioEngine.stop()

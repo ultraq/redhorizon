@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -52,13 +53,18 @@ class ImageViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', imageFile)
 
+		def config = new GraphicsConfiguration(
+			filter: filtering,
+			fixAspectRatio: fixAspectRatio
+		)
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+			withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
 					graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
-						imageFile.width, imageFile.height, fixAspectRatio, event.windowSize), filtering
+						imageFile.width, imageFile.height, fixAspectRatio, event.windowSize)
 					))
 				}
 

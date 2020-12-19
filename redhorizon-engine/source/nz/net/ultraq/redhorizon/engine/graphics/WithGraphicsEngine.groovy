@@ -73,10 +73,10 @@ trait WithGraphicsEngine {
 	 * down.
 	 * 
 	 * @param executorService
-	 * @param fixAspectRatio
+	 * @param config
 	 * @param closure
 	 */
-	void withGraphicsEngine(ExecutorService executorService, boolean fixAspectRatio,
+	void withGraphicsEngine(ExecutorService executorService, GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine')
 		Closure closure) {
 
@@ -85,7 +85,7 @@ trait WithGraphicsEngine {
 
 		// To allow the graphics engine to submit items to execute in this thread
 		FutureTask executable = null
-		def graphicsEngine = new GraphicsEngine(fixAspectRatio, { toExecute ->
+		def graphicsEngine = new GraphicsEngine(config, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})

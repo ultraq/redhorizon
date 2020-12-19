@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
@@ -57,9 +58,14 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 		logger.info('File details: {}', animationFile)
 
+		def config = new GraphicsConfiguration(
+			filter: filtering,
+			fixAspectRatio: fixAspectRatio
+		)
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 					// Add the animation to the engine once we have the window dimensions
 					def animation
@@ -67,7 +73,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
 							fixAspectRatio, event.windowSize)
 
-						animation = new Animation(animationFile, animationCoordinates, filtering, scaleLowRes, gameClock, executorService)
+						animation = new Animation(animationFile, animationCoordinates, scaleLowRes, gameClock, executorService)
 						animation.on(StopEvent) { stopEvent ->
 							logger.debug('Animation stopped')
 							graphicsEngine.stop()

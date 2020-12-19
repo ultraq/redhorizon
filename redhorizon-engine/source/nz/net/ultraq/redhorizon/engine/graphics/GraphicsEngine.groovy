@@ -39,7 +39,7 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
-	private final boolean fixAspectRatio
+	private final GraphicsConfiguration config
 	private final Closure needsMainThreadCallback
 	private final List<SceneElement> sceneElements = []
 
@@ -49,17 +49,17 @@ class GraphicsEngine extends EngineSubsystem {
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
-	 * @param fixAspectRatio
+	 * @param config
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(boolean fixAspectRatio,
+	GraphicsEngine(GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
-		this.fixAspectRatio = fixAspectRatio
+		this.config = config
 		this.needsMainThreadCallback = needsMainThreadCallback
 	}
 
@@ -104,7 +104,7 @@ class GraphicsEngine extends EngineSubsystem {
 
 		// Initialization
 		context = waitForMainThread { ->
-			def openGlContext = new OpenGLContext(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN, { key, scancode, action, mods ->
+			def openGlContext = new OpenGLContext(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN, { key, scancode, action, mods ->
 				trigger(new KeyEvent(key, scancode, action, mods))
 			})
 			trigger(new WindowCreatedEvent(openGlContext.windowSize))
@@ -113,7 +113,7 @@ class GraphicsEngine extends EngineSubsystem {
 		context.withCloseable {
 			OpenGLRenderer renderer
 			context.withCurrent { ->
-				renderer = new OpenGLRenderer(context)
+				renderer = new OpenGLRenderer(context, config)
 			}
 			def graphicsElementStates = [:]
 

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Rectanglef
 
@@ -72,7 +73,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 			}
 		}
 		scanlineTexture.rewind()
-		textureId = renderer.createTexture(scanlineTexture, 4, overlay.width, overlay.height, true)
+		textureId = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height)
 	}
 
 	@Override

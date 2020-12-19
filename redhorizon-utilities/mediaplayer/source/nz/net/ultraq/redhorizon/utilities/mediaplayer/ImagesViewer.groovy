@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -58,6 +59,11 @@ class ImagesViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', imagesFile)
 
+		def config = new GraphicsConfiguration(
+			filter: filtering,
+			fixAspectRatio: fixAspectRatio
+		)
+
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
 			palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
@@ -66,7 +72,7 @@ class ImagesViewer implements WithGraphicsEngine {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, fixAspectRatio) { graphicsEngine ->
+			withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 				// Build a combined image of all the images once we have the window size
 				graphicsEngine.on(WindowCreatedEvent) { event ->
@@ -79,8 +85,7 @@ class ImagesViewer implements WithGraphicsEngine {
 					}
 					graphicsEngine.addSceneElement(new Image(combinedWidth, combinedHeight,
 						(palette?.format ?: imagesFile.format).value, combinedImage,
-						centerDimensions(new Rectanglef(0, 0, combinedWidth, combinedHeight)),
-						filtering
+						centerDimensions(new Rectanglef(0, 0, combinedWidth, combinedHeight))
 					))
 				}
 
