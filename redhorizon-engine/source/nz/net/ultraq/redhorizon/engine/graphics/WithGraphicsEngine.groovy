@@ -42,17 +42,13 @@ trait WithGraphicsEngine {
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
-	 * @param fixAspectRatio
 	 * @param window
 	 * @return
 	 */
-	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, boolean fixAspectRatio, Dimension window) {
+	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, Dimension window) {
 
 		def width = window.width
 		def height = imageHeight * (width / imageWidth)
-		if (fixAspectRatio) {
-			height *= 1.2
-		}
 		return centerDimensions(new Rectanglef(0, 0, width, height))
 	}
 

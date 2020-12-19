@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
-import static nz.net.ultraq.redhorizon.engine.graphics.OpenGLContext.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -104,10 +103,10 @@ class GraphicsEngine extends EngineSubsystem {
 
 		// Initialization
 		context = waitForMainThread { ->
-			def openGlContext = new OpenGLContext(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN, { key, scancode, action, mods ->
+			def openGlContext = new OpenGLContext(config, { key, scancode, action, mods ->
 				trigger(new KeyEvent(key, scancode, action, mods))
 			})
-			trigger(new WindowCreatedEvent(openGlContext.windowSize))
+			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize))
 			return openGlContext
 		}
 		context.withCloseable {

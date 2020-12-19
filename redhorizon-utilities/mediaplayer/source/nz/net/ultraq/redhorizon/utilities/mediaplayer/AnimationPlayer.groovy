@@ -68,10 +68,9 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 					// Add the animation to the engine once we have the window dimensions
-					def animation
+					Animation animation
 					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height,
-							fixAspectRatio, event.windowSize)
+						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height, event.viewportSize)
 
 						animation = new Animation(animationFile, animationCoordinates, scaleLowRes, gameClock, executorService)
 						animation.on(StopEvent) { stopEvent ->

@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.Colours
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitConfigs
@@ -135,13 +134,10 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 			withGameClock(executorService) { gameClock ->
 				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
-					// Add the unit to the engine once we have the window dimensions
-					Unit unit
-					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
-						unit = new Unit(unitData, shpFile, palette, unitCoordinates, gameClock)
-						graphicsEngine.addSceneElement(unit)
-					}
+					// Add the unit to the engine
+					def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
+					def unit = new Unit(unitData, shpFile, palette, unitCoordinates, gameClock)
+					graphicsEngine.addSceneElement(unit)
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
 

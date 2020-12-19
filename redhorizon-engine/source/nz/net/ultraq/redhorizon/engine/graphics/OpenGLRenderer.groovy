@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Rectanglef
 import org.lwjgl.opengl.GL
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11.*
 
 import java.nio.ByteBuffer
@@ -29,6 +31,9 @@ import java.nio.ByteBuffer
  */
 class OpenGLRenderer implements GraphicsRenderer {
 
+	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
+
+	// Configuration values
 	private final Colours clearColour
 	private final boolean filter
 
@@ -46,9 +51,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		clearColour = config.clearColour
 		glClearColor(clearColour.r, clearColour.g, clearColour.b, 1)
 
-		filter = config.filter
-
 		// Edge smoothing
+		filter = config.filter
 		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
@@ -88,13 +92,14 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport based on the camera settings
-		def windowSize = context.windowSize
-		glViewport(0, 0, windowSize.width, windowSize.height)
+		def viewportSize = context.viewportSize
+		logger.info('Establishing a framebuffer of size {}x{}', viewportSize.width, viewportSize.height)
+		glViewport(0, 0, viewportSize.width, viewportSize.height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(
-			-windowSize.width / 2, windowSize.width / 2,
-			-windowSize.height / 2, windowSize.height / 2,
+			-viewportSize.width / 2, viewportSize.width / 2,
+			-viewportSize.height / 2, viewportSize.height / 2,
 			0, 100
 		)
 		glMatrixMode(GL_MODELVIEW)

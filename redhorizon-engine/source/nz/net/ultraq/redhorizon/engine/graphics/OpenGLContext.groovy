@@ -42,19 +42,19 @@ class OpenGLContext extends AbstractContext {
 	// The width of most full-screen graphics in C&C
 	private static final int BASE_WIDTH = 320
 
-	/**
-	 * The aspect ratio of a 320x200 image on VGA screens with non-square pixels
-	 */
-	static final float ASPECT_RATIO_VGA = 4 / 3
+	// The aspect ratio of a 320x200 image on VGA screens with non-square pixels
+	private static final float ASPECT_RATIO_VGA = 4 / 3
 
-	/**
-	 * The aspect ratio of a 320x200 image on modern displays
-	 */
-	static final float ASPECT_RATIO_MODERN = 16 / 10
+	// The aspect ratio of a 320x200 image on modern displays
+	private static final float ASPECT_RATIO_MODERN = 16 / 10
 
-	final Dimension windowSize
+	// Configuration values
+	private final boolean fixAspectRatio
 
 	private final long window
+
+	final Dimension windowSize
+	final Dimension viewportSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context.
@@ -62,10 +62,10 @@ class OpenGLContext extends AbstractContext {
 	 * A limitation of using GLFW is that this also creates the underlying window
 	 * object, through which input events are received.
 	 * 
-	 * @param aspectRatio
+	 * @param config
 	 * @param keyCallback
 	 */
-	OpenGLContext(float aspectRatio,
+	OpenGLContext(GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = ['int', 'int', 'int', 'int']) Closure keyCallback) {
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
@@ -80,17 +80,21 @@ class OpenGLContext extends AbstractContext {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
-		windowSize = calculateWindowSize(aspectRatio)
+		fixAspectRatio = config.fixAspectRatio
+		windowSize = calculateWindowSize(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 
+		logger.info('Creating a window of size {}x{}', windowSize.width, windowSize.height)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
+
+		viewportSize = fixAspectRatio ? new Dimension(windowSize.width, windowSize.height / 1.2 as int) : windowSize
 
 		glfwSetKeyCallback(window, new GLFWKeyCallback() {
 			@Override

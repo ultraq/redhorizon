@@ -76,7 +76,7 @@ class ImagesViewer implements WithGraphicsEngine {
 
 				// Build a combined image of all the images once we have the window size
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					def imagesAcross = imagesFile.imagesData.imagesAcross(imagesFile.width, event.windowSize.width)
+					def imagesAcross = imagesFile.imagesData.imagesAcross(imagesFile.width, event.viewportSize.width)
 					def combinedWidth = imagesFile.width * imagesAcross
 					def combinedHeight = imagesFile.height * Math.ceil(imagesFile.numImages / imagesAcross) as int
 					def combinedImage = imagesFile.imagesData.combineImages(imagesFile.width, imagesFile.height, imagesAcross)

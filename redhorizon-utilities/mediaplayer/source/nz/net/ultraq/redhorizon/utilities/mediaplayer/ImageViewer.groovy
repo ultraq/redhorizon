@@ -64,7 +64,7 @@ class ImageViewer implements WithGraphicsEngine {
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
 					graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
-						imageFile.width, imageFile.height, fixAspectRatio, event.windowSize)
+						imageFile.width, imageFile.height, event.viewportSize)
 					))
 				}
 
