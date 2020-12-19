@@ -178,7 +178,7 @@ class ShpFile implements ImagesFile, Writable {
 	}
 
 	@Override
-	void writeTo(OutputStream outputStream) {
+	void write(OutputStream outputStream) {
 
 		def output = new NativeDataOutputStream(outputStream)
 		def lcw = new LCW()

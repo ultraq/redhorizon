@@ -28,5 +28,5 @@ interface Writable {
 	 * 
 	 * @param outputStream
 	 */
-	void writeTo(OutputStream outputStream)
+	void write(OutputStream outputStream)
 }

@@ -60,7 +60,7 @@ class Pcx2CpsConverter implements Callable<Integer> {
 			}
 			if (!destFile.exists()) {
 				destFile.withOutputStream { outputStream ->
-					new CpsFile(pcxFile).writeTo(outputStream)
+					new CpsFile(pcxFile).write(outputStream)
 				}
 				return 0
 			}

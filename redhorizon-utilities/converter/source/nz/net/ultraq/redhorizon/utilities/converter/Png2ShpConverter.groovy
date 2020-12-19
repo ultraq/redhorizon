@@ -70,7 +70,7 @@ class Png2ShpConverter implements Callable<Integer> {
 			}
 			if (!destFile.exists()) {
 				destFile.withOutputStream { outputStream ->
-					new ShpFile(pngFile, width, height, numImages).writeTo(outputStream)
+					new ShpFile(pngFile, width, height, numImages).write(outputStream)
 				}
 				return 0
 			}
