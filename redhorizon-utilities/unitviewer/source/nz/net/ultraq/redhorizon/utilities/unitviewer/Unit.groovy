@@ -53,10 +53,10 @@ class Unit implements GraphicsElement, SelfVisitable {
 	Unit(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
 
 		def frameIndex = 0
-		def buildFrames = { take ->
-			def frames = []
-			take.times {
-				frames << new Image(imagesFile.width, imagesFile.height, palette.format.value,
+		def buildFrames = { int take ->
+			def frames = new Image[take]
+			take.times { i ->
+				frames[i] = new Image(imagesFile.width, imagesFile.height, palette.format.value,
 					imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates)
 			}
 			return frames
@@ -64,24 +64,15 @@ class Unit implements GraphicsElement, SelfVisitable {
 
 		def bodyPart = data.shpFile.parts.body
 		def turretPart = data.shpFile.parts.turret
-		currentRenderer = new UnitRenderer(
-			unit: this,
-			headings: bodyPart.frames,
-			frames: buildFrames(bodyPart.frames) + (turretPart ? buildFrames(turretPart.frames) : [] as List<Image>)
-		)
+		currentRenderer = new UnitRenderer("body", this, bodyPart.headings, turretPart?.headings ?: 0,
+			buildFrames(bodyPart.headings) + (turretPart ? buildFrames(turretPart.headings) : []) as Image[])
 		unitRenderers << currentRenderer
 
 		def animations = data.shpFile.animations
 		if (animations) {
 			animations.each { animation ->
-				unitRenderers << new UnitAnimationRenderer(
-					unit: this,
-					type: animation.type,
-					headings: animation.headings,
-					framesPerHeading: animation.frames,
-					frames: buildFrames(animation.frames * animation.headings),
-					gameTime: gameTime
-				)
+				unitRenderers << new UnitAnimationRenderer(animation.type, this, animation.headings, animation.frames,
+					buildFrames(animation.frames * animation.headings), gameTime)
 			}
 		}
 	}
@@ -130,8 +121,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void rotateLeft() {
 
-		def degreesPerStep = (360f / currentRenderer.headings) as float
-		heading = Math.wrap(heading - degreesPerStep as float, 0f, 360f)
+		heading = Math.wrap(heading - currentRenderer.degreesPerHeading as float, 0f, 360f)
 	}
 
 	/**
@@ -140,8 +130,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	void rotateRight() {
 
-		def degreesPerStep = (360f / currentRenderer.headings) as float
-		heading = Math.wrap(heading + degreesPerStep as float, 0f, 360f)
+		heading = Math.wrap(heading + currentRenderer.degreesPerHeading as float, 0f, 360f)
 	}
 
 	/**
@@ -155,7 +144,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 		if (currentRenderer instanceof UnitAnimationRenderer) {
 			currentRenderer.start()
 		}
-		logger.debug("${currentRenderer.type ?: "No"} animation selected")
+		logger.debug("${currentRenderer.type} animation selected")
 	}
 
 	/**
@@ -163,10 +152,23 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	private static class UnitRenderer implements GraphicsElement {
 
-		protected String type
-		protected Unit unit
-		protected int headings
-		protected List<Image> frames
+		protected final String type
+		protected final Unit unit
+		protected final int headings
+		protected final int turretHeadings
+		protected final Image[] frames
+		protected final float degreesPerHeading
+
+		protected UnitRenderer(String type, Unit unit, int headings, int turretHeadings, Image[] frames) {
+
+			this.type = type
+			this.unit = unit
+			this.headings = headings
+			this.turretHeadings = turretHeadings
+			this.frames = frames
+
+			degreesPerHeading = (360f / headings) as float
+		}
 
 		@Override
 		void delete(GraphicsRenderer renderer) {
@@ -187,14 +189,16 @@ class Unit implements GraphicsElement, SelfVisitable {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			frames[rotationFrames()].render(renderer)
-
-			// TODO: Render the turret
+			def rotationFrame = rotationFrames()
+			frames[rotationFrame].render(renderer)
+			if (turretHeadings) {
+				frames[headings + rotationFrame].render(renderer)
+			}
 		}
 
 		protected int rotationFrames() {
 
-			return -(unit.heading / (360f / headings))
+			return unit.heading ? headings - (unit.heading / degreesPerHeading) : 0
 		}
 	}
 
@@ -209,6 +213,14 @@ class Unit implements GraphicsElement, SelfVisitable {
 		protected GameTime gameTime
 
 		private long animationTimeStart
+
+		protected UnitAnimationRenderer(String type, Unit unit, int headings, int framesPerHeading, Image[] frames,
+			GameTime gameTime) {
+
+			super(type, unit, headings, 0, frames)
+			this.framesPerHeading = framesPerHeading
+			this.gameTime = gameTime
+		}
 
 		@Override
 		void render(GraphicsRenderer renderer) {

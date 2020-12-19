@@ -37,7 +37,7 @@ class UnitData {
 	}
 
 	static class ShpFilePart {
-		int frames
+		int headings
 	}
 
 	static class ShpFileAnimations {

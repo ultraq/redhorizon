@@ -16,18 +16,28 @@
 
 package nz.net.ultraq.redhorizon.utilities.unitviewer
 
-import groovy.transform.TupleConstructor
-
 /**
  * The set of units that I currently have configurations for.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum UnitConfigs {
+class UnitConfigs {
 
-	HARV('harv.json'),
-	JEEP('jeep.json')
+	private static final Map<String, String> CONFIGS = [
+	  '2TNK': '2tnk.json',
+		'HARV': 'harv.json',
+		'JEEP': 'jeep.json'
+	]
 
-	final String file
+	/**
+	 * Return the filename containing the configuration for the given unit.
+	 * 
+	 * @param name
+	 * @return The name of the config file for the unit or {@code null} if there
+	 *         is no configuration for that unit.
+	 */
+	static String getConfigFile(String name) {
+
+		return CONFIGS[name.toUpperCase()]
+	}
 }

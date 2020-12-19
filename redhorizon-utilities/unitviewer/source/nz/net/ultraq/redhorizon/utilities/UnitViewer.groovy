@@ -92,13 +92,13 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 		logger.info('Red Horizon Unit Viewer {}', commandSpec.version()[0] ?: '(development)')
 
 		logger.info('Loading {}...', unitName)
-		def unitConfig = UnitConfigs.valueOf(unitName.toUpperCase())
-		if (!unitConfig) {
+		def configFile = UnitConfigs.getConfigFile(unitName)
+		if (!configFile) {
 			logger.error('No configuration available for {}', unitName)
 			throw new IllegalArgumentException()
 		}
 
-		def configData = this.class.classLoader.getResourceAsStream(unitConfig.file).text
+		def configData = this.class.classLoader.getResourceAsStream(configFile).text
 		logger.info('Configuration data:\n{}', configData)
 
 		def unitData = new JsonSlurper().parseText(configData) as UnitData
