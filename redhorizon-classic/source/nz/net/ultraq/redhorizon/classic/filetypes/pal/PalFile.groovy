@@ -18,7 +18,9 @@ package nz.net.ultraq.redhorizon.classic.filetypes.pal
 
 import nz.net.ultraq.redhorizon.classic.filetypes.VgaPalette
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 /**
  * Implementation of the PAL file, which is an array of 256 colours (in VGA
@@ -39,5 +41,25 @@ class PalFile extends VgaPalette {
 	PalFile(InputStream inputStream) {
 
 		super(PALETTE_SIZE, FORMAT_RGB, inputStream)
+	}
+
+	/**
+	 * Return a modification of this palette with the given alpha mask for a new
+	 * 32-bit colour palette.
+	 * 
+	 * @return
+	 */
+	Palette withAlphaMask() {
+
+		def paletteWithAlpha = new byte[size][FORMAT_RGBA.value]
+		size.times { i ->
+			def colour = this[i]
+			def colourWithAlpha =
+				i === 0 ? [0, 0, 0, 0] :
+				i === 4 ? [0, 0, 0, 127] :
+				[colour[0], colour[1], colour[2], 255]
+			paletteWithAlpha[i] = colourWithAlpha
+		}
+		return new Palette(size, FORMAT_RGBA, paletteWithAlpha)
 	}
 }

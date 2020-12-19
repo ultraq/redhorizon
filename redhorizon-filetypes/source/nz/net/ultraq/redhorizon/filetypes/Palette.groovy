@@ -82,6 +82,20 @@ class Palette {
 	}
 
 	/**
+	 * Constructor, create a new palette with the give colour table.
+	 * 
+	 * @param size
+	 * @param format
+	 * @param palette
+	 */
+	Palette(int size, ColourFormat format, byte[][] palette) {
+
+		this.size = size
+		this.format = format
+		this.palette = palette
+	}
+
+	/**
 	 * Return the colour data at the specified index.
 	 * 
 	 * @param index Position in the palette.

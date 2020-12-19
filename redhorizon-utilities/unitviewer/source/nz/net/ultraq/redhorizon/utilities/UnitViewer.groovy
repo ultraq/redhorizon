@@ -122,7 +122,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 		logger.info('{} details: {}', unitData.shpFile.filename, shpFile)
 
 		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
-			return new PalFile(inputStream)
+			return new PalFile(inputStream).withAlphaMask()
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
