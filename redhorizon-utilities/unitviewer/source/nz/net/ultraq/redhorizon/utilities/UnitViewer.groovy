@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colours
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
-import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitConfigs
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitData
 
 import org.joml.Rectanglef
@@ -74,11 +73,11 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', arity = '1', description = 'Path to the mix file containing the unit\'s shp file')
-	File mixFilePath
+	@Parameters(index = '0', arity = '1', description = 'Path to the unit shp file to view, or a mix file that contains the unit')
+	File file
 
-	@Parameters(index = '1', arity = '1', description = 'The internal ID of the unit')
-	String unitName
+	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the shp in the mix file to view')
+	String entryName
 
 	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
 	PaletteTypes paletteType
@@ -94,18 +93,36 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 		Thread.currentThread().name = 'Unit Viewer [main]'
 		logger.info('Red Horizon Unit Viewer {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info('Loading {}...', unitName)
-		def configFile = UnitConfigs.getConfigFile(unitName)
-		if (!configFile) {
-			logger.error('No configuration available for {}', unitName)
+		logger.info('Loading {}...', file)
+		def shpFile
+		def unitId
+		if (file.name.endsWith('.mix')) {
+			new MixFile(file).withCloseable { mix ->
+				def entry = mix.getEntry(entryName)
+				if (entry) {
+					logger.info('Loading {}...', entryName)
+					shpFile = mix.getEntryData(entry).withStream { inputStream -> new ShpFile(inputStream) }
+					unitId = entryName[0..<-4]
+				}
+				else {
+					logger.error('{} not found in {}', entryName, file)
+					throw new IllegalArgumentException()
+				}
+			}
+		}
+		else {
+			shpFile = file.withInputStream { inputStream -> new ShpFile(inputStream) }
+			unitId = file.name[0..<-4]
+		}
+
+		def configFileStream = this.class.classLoader.getResourceAsStream(
+			"nz/net/ultraq/redhorizon/utilities/unitviewer/configurations/${unitId.toLowerCase()}.json")
+		if (!configFileStream) {
+			logger.error('No configuration available for {}', unitId)
 			throw new IllegalArgumentException()
 		}
 
-		def configData = this.class.classLoader.getResourceAsStream(configFile).text
-		logger.info('Configuration data:\n{}', configData)
-
-		def unitData = new JsonSlurper().parseText(configData) as UnitData
-		view(unitData)
+		view(shpFile, configFileStream.text)
 
 		return 0
 	}
@@ -113,21 +130,18 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	/**
 	 * Display the unit.
 	 * 
-	 * @param unitData
+	 * @param shpFile
+	 * @param unitConfig
 	 */
-	private void view(UnitData unitData) {
+	private void view(ShpFile shpFile, String unitConfig) {
 
-		def mixFile = new MixFile(mixFilePath)
-		def mixFileEntry = mixFile.getEntry(unitData.shpFile.filename)
-		def shpFile = mixFile.getEntryData(mixFileEntry).withStream { inputStream ->
-			return new ShpFile(inputStream)
-		}
-		logger.info('{} details: {}', unitData.shpFile.filename, shpFile)
+		logger.info('File details: {}', shpFile)
+		logger.info('Configuration data:\n{}', unitConfig)
 
+		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
 		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
-
 		def config = new GraphicsConfiguration(
 			clearColour: Colours.WHITE
 		)
