@@ -24,7 +24,9 @@ package nz.net.ultraq.redhorizon.utilities.unitviewer
 class UnitConfigs {
 
 	private static final Map<String, String> CONFIGS = [
-	  '2TNK': '2tnk.json',
+		'E1': 'e1.json',
+		'2TNK': '2tnk.json',
+		'4TNK': '4tnk.json',
 		'HARV': 'harv.json',
 		'JEEP': 'jeep.json'
 	]

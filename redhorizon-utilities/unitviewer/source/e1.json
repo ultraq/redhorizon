@@ -1,0 +1,95 @@
+{
+	"shpFile": {
+		"filename": "e1.shp",
+		"parts": {
+			"body": {
+				"headings": 8
+			},
+			"bodyAlt": {
+				"headings": 8
+			}
+		},
+		"animations": [
+			{
+				"type": "running",
+				"frames": 6,
+				"headings": 8
+			},
+			{
+				"type": "firing-standing",
+				"frames": 8,
+				"headings": 8
+			},
+			{
+				"type": "kneeling",
+				"frames": 2,
+				"headings": 8
+			},
+			{
+				"type": "crawling",
+				"frames": 4,
+				"headings": 8
+			},
+			{
+				"type": "standing",
+				"frames": 2,
+				"headings": 8
+			},
+			{
+				"type": "firing-prone",
+				"frames": 8,
+				"headings": 8
+			},
+			{
+				"type": "idle",
+				"frames": 32,
+				"headings": 1
+			},
+			{
+				"type": "dying1",
+				"frames": 8,
+				"headings": 1
+			},
+			{
+				"type": "dying2",
+				"frames": 8,
+				"headings": 1
+			},
+			{
+				"type": "dying3",
+				"frames": 8,
+				"headings": 1
+			},
+			{
+				"type": "dying4",
+				"frames": 12,
+				"headings": 1
+			},
+			{
+				"type": "dying-burning",
+				"frames": 18,
+				"headings": 1
+			},
+			{
+				"type": "wave",
+				"frames": 3,
+				"headings": 8
+			},
+			{
+				"type": "cheer",
+				"frames": 3,
+				"headings": 8
+			},
+			{
+				"type": "shrug",
+				"frames": 3,
+				"headings": 8
+			},
+			{
+				"type": "stomp",
+				"frames": 3,
+				"headings": 8
+			}
+		]
+	}
+}

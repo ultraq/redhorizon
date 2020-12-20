@@ -1,0 +1,13 @@
+{
+	"shpFile": {
+		"filename": "4tnk.shp",
+		"parts": {
+			"body": {
+				"headings": 32
+			},
+			"turret": {
+				"headings": 32
+			}
+		}
+	}
+}

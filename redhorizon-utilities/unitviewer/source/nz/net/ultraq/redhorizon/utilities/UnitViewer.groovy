@@ -74,7 +74,10 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters
+	@Parameters(index = '0', arity = '1', description = 'Path to the mix file containing the unit\'s shp file')
+	File mixFilePath
+
+	@Parameters(index = '1', arity = '1', description = 'The internal ID of the unit')
 	String unitName
 
 	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
@@ -114,8 +117,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	 */
 	private void view(UnitData unitData) {
 
-		// TODO: Configure the path to the mix file, or do some kind of item lookup
-		def mixFile = new MixFile(new File('mix/red-alert/Conquer.mix'))
+		def mixFile = new MixFile(mixFilePath)
 		def mixFileEntry = mixFile.getEntry(unitData.shpFile.filename)
 		def shpFile = mixFile.getEntryData(mixFileEntry).withStream { inputStream ->
 			return new ShpFile(inputStream)

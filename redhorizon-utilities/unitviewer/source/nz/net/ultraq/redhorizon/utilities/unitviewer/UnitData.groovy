@@ -33,6 +33,7 @@ class UnitData {
 
 	static class ShpFileParts {
 		ShpFilePart body
+		ShpFilePart bodyAlt
 		ShpFilePart turret
 	}
 

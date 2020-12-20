@@ -68,6 +68,12 @@ class Unit implements GraphicsElement, SelfVisitable {
 			buildFrames(bodyPart.headings) + (turretPart ? buildFrames(turretPart.headings) : []) as Image[])
 		unitRenderers << currentRenderer
 
+		// TODO: Utilize alternative body frames for something
+		def bodyAltPart = data.shpFile.parts.bodyAlt
+		if (bodyAltPart) {
+			frameIndex += bodyAltPart.headings
+		}
+
 		def animations = data.shpFile.animations
 		if (animations) {
 			animations.each { animation ->
@@ -207,7 +213,7 @@ class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	private static class UnitAnimationRenderer extends UnitRenderer {
 
-		private static final int FRAMERATE = 15 // C&C ran at 15fps?
+		private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
 		protected int framesPerHeading
 		protected GameTime gameTime
