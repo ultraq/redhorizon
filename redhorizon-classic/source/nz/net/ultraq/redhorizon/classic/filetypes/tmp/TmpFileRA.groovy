@@ -80,7 +80,7 @@ class TmpFileRA implements ImagesFile {
 		tileWidth  = input.readShort()
 		tileHeight = input.readShort()
 		fileSize   = input.readInt()
-		imageStart  = input.readInt()
+		imageStart = input.readInt()
 		unknown2   = input.readInt()
 		unknown3   = input.readInt()
 		index2     = input.readInt()
