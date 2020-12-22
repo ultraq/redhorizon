@@ -1,6 +1,6 @@
 {
+	"type": "vehicle",
 	"shpFile": {
-		"filename": "2tnk.shp",
 		"parts": {
 			"body": {
 				"headings": 32

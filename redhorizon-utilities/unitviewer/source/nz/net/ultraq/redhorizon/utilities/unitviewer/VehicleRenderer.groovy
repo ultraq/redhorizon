@@ -16,34 +16,39 @@
 
 package nz.net.ultraq.redhorizon.utilities.unitviewer
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.media.Image
+
 /**
- * Model of the data of a C&C unit type.
+ * Vehicle-specific unit renderer.
  * 
  * @author Emanuel Rabina
  */
-class UnitData {
+class VehicleRenderer extends UnitRenderer {
 
-	String type
-	ShpFile shpFile
+	protected final int turretHeadings
 
-	static class ShpFile {
-		ShpFileParts parts
-		ShpFileAnimations[] animations
+	/**
+	 * Constructor, create a vehicle renderer with the following frames.
+	 *
+	 * @param type
+	 * @param unit
+	 * @param headings
+	 * @param turretHeadings
+	 * @param frames
+	 */
+	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, Image[] frames) {
+
+		super(type, unit, headings, frames)
+		this.turretHeadings = turretHeadings
 	}
 
-	static class ShpFileParts {
-		ShpFilePart body
-		ShpFilePart bodyAlt
-		ShpFilePart turret
-	}
+	@Override
+	void render(GraphicsRenderer renderer) {
 
-	static class ShpFilePart {
-		int headings
-	}
-
-	static class ShpFileAnimations {
-		String type
-		int frames
-		int headings
+		super.render(renderer)
+		if (turretHeadings) {
+			frames[headings + rotationFrames()].render(renderer)
+		}
 	}
 }

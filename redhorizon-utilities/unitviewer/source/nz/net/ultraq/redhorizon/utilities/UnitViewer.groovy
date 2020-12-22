@@ -19,13 +19,17 @@ package nz.net.ultraq.redhorizon.utilities
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
+import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.Colours
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
-import nz.net.ultraq.redhorizon.utilities.unitviewer.Unit
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.utilities.unitviewer.Infantry
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitData
+import nz.net.ultraq.redhorizon.utilities.unitviewer.Vehicle
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -139,6 +143,18 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 		logger.info('Configuration data:\n{}', unitConfig)
 
 		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
+		def targetClass
+		switch (unitData.type) {
+			case 'infantry':
+				targetClass = Infantry
+				break
+			case 'vehicle':
+				targetClass = Vehicle
+				break
+			default:
+				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
+		}
+
 		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
@@ -152,7 +168,9 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 
 					// Add the unit to the engine
 					def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
-					def unit = new Unit(unitData, shpFile, palette, unitCoordinates, gameClock)
+					def unit = targetClass
+						.getDeclaredConstructor(UnitData, ImagesFile, Palette, Rectanglef, GameTime)
+						.newInstance(unitData, shpFile, palette, unitCoordinates, gameClock)
 					graphicsEngine.addSceneElement(unit)
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')

@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.utilities.unitviewer
 
-import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -29,58 +28,34 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * The unit that gets displayed on then screen.
+ * The unit that gets displayed on the screen.
  * 
  * @author Emanuel Rabina
  */
-class Unit implements GraphicsElement, SelfVisitable {
+abstract class Unit implements GraphicsElement, SelfVisitable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Unit)
 
-	private final List<UnitRenderer> unitRenderers = []
-	private UnitRenderer currentRenderer
-	private float heading
+	protected final List<UnitRenderer> unitRenderers = []
+	protected UnitRenderer currentRenderer
+	protected float heading
 
 	/**
-	 * Constructor, build a unit from the given data.
+	 * Build a series of images from the specified range of frame data of the unit
+	 * graphics.
 	 * 
-	 * @param data
 	 * @param imagesFile
 	 * @param palette
 	 * @param coordinates
-	 * @param gameTime
+	 * @param range
+	 * @return
 	 */
-	Unit(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
+	protected static Image[] buildImages(ImagesFile imagesFile, Palette palette, Rectanglef coordinates, IntRange range) {
 
-		def frameIndex = 0
-		def buildFrames = { int take ->
-			def frames = new Image[take]
-			take.times { i ->
-				frames[i] = new Image(imagesFile.width, imagesFile.height, palette.format.value,
-					imagesFile.imagesData[frameIndex++].applyPalette(palette), coordinates)
-			}
-			return frames
-		}
-
-		def bodyPart = data.shpFile.parts.body
-		def turretPart = data.shpFile.parts.turret
-		currentRenderer = new UnitRenderer("body", this, bodyPart.headings, turretPart?.headings ?: 0,
-			buildFrames(bodyPart.headings) + (turretPart ? buildFrames(turretPart.headings) : []) as Image[])
-		unitRenderers << currentRenderer
-
-		// TODO: Utilize alternative body frames for something
-		def bodyAltPart = data.shpFile.parts.bodyAlt
-		if (bodyAltPart) {
-			frameIndex += bodyAltPart.headings
-		}
-
-		def animations = data.shpFile.animations
-		if (animations) {
-			animations.each { animation ->
-				unitRenderers << new UnitAnimationRenderer(animation.type, this, animation.headings, animation.frames,
-					buildFrames(animation.frames * animation.headings), gameTime)
-			}
-		}
+		return range.collect([]) { i ->
+			return new Image(imagesFile.width, imagesFile.height, palette.format.value,
+				imagesFile.imagesData[i].applyPalette(palette), coordinates)
+		} as Image[]
 	}
 
 	@Override
@@ -147,97 +122,9 @@ class Unit implements GraphicsElement, SelfVisitable {
 	private void selectAnimation(int next) {
 
 		currentRenderer = unitRenderers[(unitRenderers.indexOf(currentRenderer) + next) % unitRenderers.size()]
-		if (currentRenderer instanceof UnitAnimationRenderer) {
+		if (currentRenderer instanceof UnitRendererAnimations) {
 			currentRenderer.start()
 		}
 		logger.debug("${currentRenderer.type} animation selected")
-	}
-
-	/**
-	 * Renderer for knowing what kind of body to draw.
-	 */
-	private static class UnitRenderer implements GraphicsElement {
-
-		protected final String type
-		protected final Unit unit
-		protected final int headings
-		protected final int turretHeadings
-		protected final Image[] frames
-		protected final float degreesPerHeading
-
-		protected UnitRenderer(String type, Unit unit, int headings, int turretHeadings, Image[] frames) {
-
-			this.type = type
-			this.unit = unit
-			this.headings = headings
-			this.turretHeadings = turretHeadings
-			this.frames = frames
-
-			degreesPerHeading = (360f / headings) as float
-		}
-
-		@Override
-		void delete(GraphicsRenderer renderer) {
-
-			frames.each { frame ->
-				frame.delete(renderer)
-			}
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-
-			frames.each { frame ->
-				frame.init(renderer)
-			}
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			def rotationFrame = rotationFrames()
-			frames[rotationFrame].render(renderer)
-			if (turretHeadings) {
-				frames[headings + rotationFrame].render(renderer)
-			}
-		}
-
-		protected int rotationFrames() {
-
-			return unit.heading ? headings - (unit.heading / degreesPerHeading) : 0
-		}
-	}
-
-	/**
-	 * Renderer for drawing animations.
-	 */
-	private static class UnitAnimationRenderer extends UnitRenderer {
-
-		private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
-
-		protected int framesPerHeading
-		protected GameTime gameTime
-
-		private long animationTimeStart
-
-		protected UnitAnimationRenderer(String type, Unit unit, int headings, int framesPerHeading, Image[] frames,
-			GameTime gameTime) {
-
-			super(type, unit, headings, 0, frames)
-			this.framesPerHeading = framesPerHeading
-			this.gameTime = gameTime
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
-			frames[rotationFrames() * framesPerHeading + currentFrame].render(renderer)
-		}
-
-		private void start() {
-
-			animationTimeStart = gameTime.currentTimeMillis
-		}
 	}
 }

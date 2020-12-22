@@ -1,0 +1,17 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 1
+			}
+		},
+		"animations": [
+			{
+				"type": "construction-complete",
+				"frames": 25,
+				"headings": 1
+			}
+		]
+	}
+}

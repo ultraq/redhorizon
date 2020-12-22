@@ -1,6 +1,6 @@
 {
+	"type": "infantry",
 	"shpFile": {
-		"filename": "e1.shp",
 		"parts": {
 			"body": {
 				"headings": 8

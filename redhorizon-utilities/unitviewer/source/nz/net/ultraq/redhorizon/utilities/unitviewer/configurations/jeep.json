@@ -1,6 +1,6 @@
 {
+	"type": "vehicle",
 	"shpFile": {
-		"filename": "jeep.shp",
 		"parts": {
 			"body": {
 				"headings": 32
