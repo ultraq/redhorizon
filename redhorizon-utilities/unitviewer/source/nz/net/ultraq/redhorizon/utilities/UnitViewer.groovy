@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Infantry
+import nz.net.ultraq.redhorizon.utilities.unitviewer.Structure
 import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitData
 import nz.net.ultraq.redhorizon.utilities.unitviewer.Vehicle
 
@@ -150,6 +151,9 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 				break
 			case 'vehicle':
 				targetClass = Vehicle
+				break
+			case 'structure':
+				targetClass = Structure
 				break
 			default:
 				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
