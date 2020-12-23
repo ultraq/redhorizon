@@ -22,7 +22,7 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
-		'org.joml:joml:1.9.19',
+		'org.joml:joml:1.9.25',
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw',
 		'org.lwjgl:lwjgl-openal',
