@@ -94,7 +94,7 @@ class OpenGLContext extends AbstractContext {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
-		viewportSize = fixAspectRatio ? new Dimension(windowSize.width, windowSize.height / 1.2 as int) : windowSize
+		viewportSize = new Dimension(windowSize.width, (fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
 
 		glfwSetKeyCallback(window, new GLFWKeyCallback() {
 			@Override
