@@ -45,7 +45,7 @@ class Vehicle extends Unit {
 
 		def bodyPart = data.shpFile.parts.body
 		def turretPart = data.shpFile.parts.turret
-		unitRenderers << new VehicleRenderer("body", this, bodyPart.headings, turretPart?.headings ?: 0,
+		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
 			buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)) +
 			(turretPart ? buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += turretPart.headings)) : [])
 			as Image[])

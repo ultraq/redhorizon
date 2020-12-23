@@ -43,7 +43,7 @@ class Infantry extends Unit {
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
-		unitRenderers << new UnitRenderer("body", this, bodyPart.headings,
+		unitRenderers << new UnitRenderer('body', this, bodyPart.headings,
 			buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)))
 
 		// TODO: Utilize alternative body frames for something

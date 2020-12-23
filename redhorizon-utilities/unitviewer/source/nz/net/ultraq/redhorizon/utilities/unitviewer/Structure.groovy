@@ -43,7 +43,7 @@ class Structure extends Unit {
 		def frameIndex = 0
 		def bodyPart = data.shpFile.parts.body
 
-		["", "-damaged"].forEach { status ->
+		['', '-damaged'].forEach { status ->
 			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
 				buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)))
 
