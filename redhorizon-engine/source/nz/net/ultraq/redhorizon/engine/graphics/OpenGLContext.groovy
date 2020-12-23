@@ -88,7 +88,7 @@ class OpenGLContext extends AbstractContext {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 
-		logger.info('Creating a window of size {}x{}', windowSize.width, windowSize.height)
+		logger.debug('Creating a window of size {}x{}', windowSize.width, windowSize.height)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')

@@ -96,7 +96,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glViewport(0, 0, windowSize.width, windowSize.height)
 
 		def viewportSize = context.viewportSize
-		logger.info('Establishing a viewport of size {}x{}', viewportSize.width, viewportSize.height)
+		logger.debug('Establishing a viewport of size {}x{}', viewportSize.width, viewportSize.height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(

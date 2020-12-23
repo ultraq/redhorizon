@@ -50,6 +50,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -141,7 +142,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	private void view(ShpFile shpFile, String unitConfig) {
 
 		logger.info('File details: {}', shpFile)
-		logger.info('Configuration data:\n{}', unitConfig)
+		logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 
 		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
 		def targetClass
