@@ -85,7 +85,7 @@ class ImagesViewer implements WithGraphicsEngine {
 					}
 					graphicsEngine.addSceneElement(new Image(combinedWidth, combinedHeight,
 						(palette?.format ?: imagesFile.format).value, combinedImage,
-						centerDimensions(new Rectanglef(0, 0, combinedWidth, combinedHeight))
+						new Rectanglef(0, 0, combinedWidth, combinedHeight).center()
 					))
 				}
 

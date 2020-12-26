@@ -49,18 +49,7 @@ trait WithGraphicsEngine {
 
 		def width = window.width
 		def height = imageHeight * (width / imageWidth)
-		return centerDimensions(new Rectanglef(0, 0, width, height))
-	}
-
-	/**
-	 * Center a set of dimensions.
-	 * 
-	 * @param dimensions
-	 * @return The same dimensions, but modified to be centered around the origin.
-	 */
-	Rectanglef centerDimensions(Rectanglef dimensions) {
-
-		return dimensions.translate(-dimensions.maxX / 2 as int, -dimensions.maxY / 2 as int)
+		return new Rectanglef(0, 0, width, height).center()
 	}
 
 	/**

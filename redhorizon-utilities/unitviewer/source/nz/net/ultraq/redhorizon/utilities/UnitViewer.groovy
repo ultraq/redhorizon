@@ -172,7 +172,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 					// Add the unit to the engine
-					def unitCoordinates = centerDimensions(new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2))
+					def unitCoordinates = new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2).center()
 					def unit = targetClass
 						.getDeclaredConstructor(UnitData, ImagesFile, Palette, Rectanglef, GameTime)
 						.newInstance(unitData, shpFile, palette, unitCoordinates, gameClock)

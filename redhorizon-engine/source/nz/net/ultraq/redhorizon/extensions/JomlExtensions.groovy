@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
+import org.joml.Rectanglef
 import org.joml.Vector3f
 
 /**
@@ -37,5 +38,13 @@ class JomlExtensions {
 			return [self.x, self.y, self.z]
 		}
 		throw new IllegalArgumentException("Cannot convert Vector3f to type ${clazz}")
+	}
+
+	/**
+	 * Center the rectangle about the origin.
+	 */
+	static Rectanglef center(Rectanglef self) {
+
+		return self.translate(-self.maxX / 2 as int, -self.maxY / 2 as int)
 	}
 }
