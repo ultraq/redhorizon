@@ -103,9 +103,10 @@ class GraphicsEngine extends EngineSubsystem {
 
 		// Initialization
 		context = waitForMainThread { ->
-			def openGlContext = new OpenGLContext(config, { key, scancode, action, mods ->
-				trigger(new KeyEvent(key, scancode, action, mods))
-			})
+			def openGlContext = new OpenGLContext(config)
+			openGlContext.on(KeyEvent) { event ->
+				trigger(event)
+			}
 			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize))
 			return openGlContext
 		}

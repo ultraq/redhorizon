@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
@@ -27,9 +28,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.system.MemoryUtil.NULL
-
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 
 /**
  * The OpenGL context, a concept used by OpenGL to control rendering threads.
@@ -59,16 +57,11 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 	Dimension viewportSize
 
 	/**
-	 * Constructor, create a new OpenGL window and context.
-	 * <p>
-	 * A limitation of using GLFW is that this also creates the underlying window
-	 * object, through which input events are received.
+	 * Constructor, create a new OpenGL window and context using GLFW.
 	 * 
 	 * @param config
-	 * @param keyCallback
 	 */
-	OpenGLContext(GraphicsConfiguration config,
-		@ClosureParams(value = SimpleType, options = ['int', 'int', 'int', 'int']) Closure keyCallback) {
+	OpenGLContext(GraphicsConfiguration config) {
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -112,7 +105,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		glfwSetKeyCallback(window, new GLFWKeyCallback() {
 			@Override
 			void invoke(long window, int key, int scancode, int action, int mods) {
-				keyCallback(key, scancode, action, mods)
+				trigger(new KeyEvent(key, scancode, action, mods))
 			}
 		})
 
