@@ -74,7 +74,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 						// Add the video to the engines once we have the window dimensions
 						Video video
 						graphicsEngine.on(WindowCreatedEvent) { event ->
-							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height, event.viewportSize)
+							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height, event.windowSize)
 
 							video = new Video(videoFile, videoCoordinates, scaleLowRes, gameClock, executorService)
 							video.on(StopEvent) { stopEvent ->

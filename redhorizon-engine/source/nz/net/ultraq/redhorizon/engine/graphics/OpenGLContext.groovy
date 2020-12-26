@@ -17,9 +17,11 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,7 +37,7 @@ import groovy.transform.stc.SimpleType
  * 
  * @author Emanuel Rabina
  */
-class OpenGLContext extends AbstractContext {
+class OpenGLContext extends AbstractContext implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
 
@@ -54,7 +56,7 @@ class OpenGLContext extends AbstractContext {
 	private final long window
 
 	final Dimension windowSize
-	final Dimension viewportSize
+	Dimension viewportSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context.
@@ -94,7 +96,18 @@ class OpenGLContext extends AbstractContext {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
-		viewportSize = new Dimension(windowSize.width, (fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
+		def widthPointer = new int[1]
+		def heightPointer = new int[2]
+		glfwGetFramebufferSize(window, widthPointer, heightPointer)
+		viewportSize = new Dimension(widthPointer[0], heightPointer[0])
+
+		glfwSetFramebufferSizeCallback(window, new GLFWFramebufferSizeCallback() {
+			@Override
+			void invoke(long window, int width, int height) {
+				viewportSize = new Dimension(width, height)
+				trigger(new FramebufferSizeEvent(width, height))
+			}
+		})
 
 		glfwSetKeyCallback(window, new GLFWKeyCallback() {
 			@Override

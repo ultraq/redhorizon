@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import org.joml.Rectanglef
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
@@ -36,6 +38,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	// Configuration values
 	private final Colours clearColour
 	private final boolean filter
+	private final boolean fixAspectRatio
 
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
@@ -92,16 +95,25 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport and projection
-		def windowSize = context.windowSize
-		glViewport(0, 0, windowSize.width, windowSize.height)
-
 		def viewportSize = context.viewportSize
 		logger.debug('Establishing a viewport of size {}x{}', viewportSize.width, viewportSize.height)
+		glViewport(0, 0, viewportSize.width, viewportSize.height)
+		context.on(FramebufferSizeEvent) { event ->
+			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
+			glViewport(0, 0, event.width, event.height)
+		}
+
+		fixAspectRatio = config.fixAspectRatio
+		def windowSize = context.windowSize
+		def projection = new Dimension(
+			windowSize.width,
+			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
+		logger.debug('Establishing a camera projection of size {}x{}', projection.width, projection.height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(
-			-viewportSize.width / 2, viewportSize.width / 2,
-			-viewportSize.height / 2, viewportSize.height / 2,
+			-projection.width / 2, projection.width / 2,
+			-projection.height / 2, projection.height / 2,
 			0, 100
 		)
 		glMatrixMode(GL_MODELVIEW)
