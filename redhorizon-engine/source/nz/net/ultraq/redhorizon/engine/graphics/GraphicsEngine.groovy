@@ -107,7 +107,7 @@ class GraphicsEngine extends EngineSubsystem {
 			openGlContext.on(KeyEvent) { event ->
 				trigger(event)
 			}
-			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize))
+			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize, openGlContext.cameraSize))
 			return openGlContext
 		}
 		context.withCloseable {

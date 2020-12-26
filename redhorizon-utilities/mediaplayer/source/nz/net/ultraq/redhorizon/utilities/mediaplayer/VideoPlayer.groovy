@@ -51,6 +51,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 
 	final boolean filter
 	final boolean fixAspectRatio
+	final boolean fullScreen
 	final boolean scaleLowRes
 	final boolean scanlines
 
@@ -63,7 +64,8 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 
 		def config = new GraphicsConfiguration(
 			filter: filter,
-			fixAspectRatio: fixAspectRatio
+			fixAspectRatio: fixAspectRatio,
+			fullScreen: fullScreen
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
@@ -74,7 +76,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 						// Add the video to the engines once we have the window dimensions
 						Video video
 						graphicsEngine.on(WindowCreatedEvent) { event ->
-							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height, event.windowSize)
+							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height, event.cameraSize)
 
 							video = new Video(videoFile, videoCoordinates, scaleLowRes, gameClock, executorService)
 							video.on(StopEvent) { stopEvent ->

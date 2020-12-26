@@ -48,6 +48,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 	final boolean filter
 	final boolean fixAspectRatio
+	final boolean fullScreen
 	final boolean scaleLowRes
 	final boolean scanlines
 
@@ -60,7 +61,8 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 		def config = new GraphicsConfiguration(
 			filter: filter,
-			fixAspectRatio: fixAspectRatio
+			fixAspectRatio: fixAspectRatio,
+			fullScreen: fullScreen
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
@@ -70,7 +72,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation
 					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height, event.windowSize)
+						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height, event.cameraSize)
 
 						animation = new Animation(animationFile, animationCoordinates, scaleLowRes, gameClock, executorService)
 						animation.on(StopEvent) { stopEvent ->

@@ -58,13 +58,13 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format.value, videoFile.numFrames, videoFile.frameRate,
-				dimensions, scale, videoFile.frameRate as int, videoWorker, gameTime)
+				dimensions, scale, videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}
 
 			soundTrack = new SoundTrack(videoFile.bits, videoFile.channels, videoFile.frequency,
-				videoFile.frameRate + 1 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 + 1 as int, videoWorker, gameTime)
 			soundTrack.on(StopEvent) { event ->
 				stop()
 			}

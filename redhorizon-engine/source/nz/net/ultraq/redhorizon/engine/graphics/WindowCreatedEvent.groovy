@@ -32,4 +32,5 @@ class WindowCreatedEvent extends Event {
 
 	final Dimension windowSize
 	final Dimension viewportSize
+	final Dimension cameraSize
 }

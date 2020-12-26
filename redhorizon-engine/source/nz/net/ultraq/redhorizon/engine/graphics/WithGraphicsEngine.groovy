@@ -38,18 +38,21 @@ trait WithGraphicsEngine {
 
 	/**
 	 * Calculate the ideal centered dimensions for the image that stretches to fit
-	 * the window while maintaining the target aspect ratio.
+	 * the given dimensions while maintaining the target aspect ratio.
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
-	 * @param window
+	 * @param max
 	 * @return
 	 */
-	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, Dimension window) {
+	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, Dimension max) {
 
-		def width = window.width
-		def height = imageHeight * (width / imageWidth)
-		return new Rectanglef(0, 0, width, height).center()
+		def widthScale = max.width / imageWidth
+		def heightScale = max.height / imageHeight
+		return (widthScale < heightScale ?
+			new Rectanglef(0, 0, max.width, imageHeight * widthScale) :
+			new Rectanglef(0, 0, imageWidth * heightScale, max.height)
+		).center()
 	}
 
 	/**

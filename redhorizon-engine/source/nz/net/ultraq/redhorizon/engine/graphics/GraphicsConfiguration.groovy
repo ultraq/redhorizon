@@ -33,4 +33,5 @@ class GraphicsConfiguration {
 	boolean filter
 
 	boolean fixAspectRatio
+	boolean fullScreen
 }

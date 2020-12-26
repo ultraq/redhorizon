@@ -45,6 +45,7 @@ class ImageViewer implements WithGraphicsEngine {
 
 	final boolean filter
 	final boolean fixAspectRatio
+	final boolean fullScreen
 
 	/**
 	 * View the configured file.
@@ -55,7 +56,8 @@ class ImageViewer implements WithGraphicsEngine {
 
 		def config = new GraphicsConfiguration(
 			filter: filter,
-			fixAspectRatio: fixAspectRatio
+			fixAspectRatio: fixAspectRatio,
+			fullScreen: fullScreen
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
@@ -64,7 +66,7 @@ class ImageViewer implements WithGraphicsEngine {
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
 					graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
-						imageFile.width, imageFile.height, event.windowSize)
+						imageFile.width, imageFile.height, event.cameraSize)
 					))
 				}
 

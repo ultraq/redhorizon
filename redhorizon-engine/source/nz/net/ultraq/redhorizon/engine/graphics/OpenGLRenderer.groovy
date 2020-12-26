@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.geometry.Dimension
-
 import org.joml.Rectanglef
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
@@ -38,7 +36,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 	// Configuration values
 	private final Colours clearColour
 	private final boolean filter
-	private final boolean fixAspectRatio
 
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
@@ -103,17 +100,13 @@ class OpenGLRenderer implements GraphicsRenderer {
 			glViewport(0, 0, event.width, event.height)
 		}
 
-		fixAspectRatio = config.fixAspectRatio
-		def windowSize = context.windowSize
-		def projection = new Dimension(
-			windowSize.width,
-			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
-		logger.debug('Establishing a camera projection of size {}x{}', projection.width, projection.height)
+		def cameraSize = context.cameraSize
+		logger.debug('Establishing a camera projection of size {}x{}', cameraSize.width, cameraSize.height)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(
-			-projection.width / 2, projection.width / 2,
-			-projection.height / 2, projection.height / 2,
+			-cameraSize.width / 2, cameraSize.width / 2,
+			-cameraSize.height / 2, cameraSize.height / 2,
 			0, 100
 		)
 		glMatrixMode(GL_MODELVIEW)

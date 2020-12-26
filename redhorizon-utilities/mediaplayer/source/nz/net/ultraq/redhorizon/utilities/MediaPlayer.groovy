@@ -74,8 +74,11 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--filter'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
 	boolean filter
 
-	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays (images/animations/videos only)')
+	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays')
 	boolean fixAspectRatio
+
+	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
+	boolean fullScreen
 
 	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
 	PaletteTypes paletteType
@@ -158,11 +161,11 @@ class MediaPlayer implements Callable<Integer> {
 
 		switch (file) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, fullScreen, scaleLowRes, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, scaleLowRes, scanlines)
+				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, fullScreen, scaleLowRes, scanlines)
 				animationPlayer.play()
 				break
 			case SoundFile:
@@ -170,11 +173,11 @@ class MediaPlayer implements Callable<Integer> {
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(file, filter, fixAspectRatio)
+				def imageViewer = new ImageViewer(file, filter, fixAspectRatio, fullScreen)
 				imageViewer.view()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, paletteType)
+				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, fullScreen, paletteType)
 				imagesViewer.view()
 				break
 			default:

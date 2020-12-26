@@ -50,11 +50,13 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 
 	// Configuration values
 	private final boolean fixAspectRatio
+	private final boolean fullScreen
 
 	private final long window
 
 	final Dimension windowSize
 	Dimension viewportSize
+	Dimension cameraSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -76,7 +78,12 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		}
 
 		fixAspectRatio = config.fixAspectRatio
-		windowSize = calculateWindowSize(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
+		fullScreen = config.fullScreen
+		def monitor = glfwGetPrimaryMonitor()
+		def videoMode = glfwGetVideoMode(monitor)
+		windowSize = fullScreen ?
+			new Dimension(videoMode.width(), videoMode.height()) :
+			calculateWindowSize(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
@@ -84,13 +91,13 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 
 		logger.debug('Creating a window of size {}x{}', windowSize.width, windowSize.height)
-		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', NULL, NULL)
+		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', fullScreen ? monitor : NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
 		def widthPointer = new int[1]
-		def heightPointer = new int[2]
+		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
 		viewportSize = new Dimension(widthPointer[0], heightPointer[0])
 
@@ -101,6 +108,10 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 				trigger(new FramebufferSizeEvent(width, height))
 			}
 		})
+
+		cameraSize = new Dimension(
+			windowSize.width,
+			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
 
 		glfwSetKeyCallback(window, new GLFWKeyCallback() {
 			@Override
