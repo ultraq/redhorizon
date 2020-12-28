@@ -115,17 +115,14 @@ class PcxFile implements ImageFile, InternalPalette {
 		hdpi = input.readShort()
 		vdpi = input.readShort()
 
-		egaPalette = new byte[HEADER_PALETTE_SIZE]
-		input.readFully(egaPalette)
-
+		egaPalette   = input.readNBytes(HEADER_PALETTE_SIZE)
 		reserved     = input.readByte()
 		planes       = input.readByte()
 		bytesPerLine = input.readShort()
 		paletteInfo  = input.readShort()
 		hScreenSize  = input.readShort()
 		vScreenSize  = input.readShort()
-		filler = new byte[54]
-		input.readFully(filler)
+		filler       = input.readNBytes(54)
 
 		width = xMax - xMin + 1
 		height = yMax - yMin + 1

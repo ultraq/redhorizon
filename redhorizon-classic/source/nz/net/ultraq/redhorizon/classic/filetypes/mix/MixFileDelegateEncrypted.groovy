@@ -47,33 +47,30 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 	MixFileDelegateEncrypted(DataInput input) {
 
 		// Retrieve the Blowfish key used for decrypting the header and file entry index
-		def keySource = ByteBuffer.allocateNative(MixFileKey.SIZE_KEY_SOURCE)
-		input.readFully(keySource.array())
+		def keySource = ByteBuffer.wrapNative(input.readNBytes(MixFileKey.SIZE_KEY_SOURCE))
 		def key = new MixFileKey().calculateKey(keySource)
 		def blowfishSecretKey = new SecretKeySpec(key.array(), 'Blowfish')
 		def blowfishCipher = Cipher.getInstance('Blowfish/ECB/NoPadding')
 		blowfishCipher.init(Cipher.DECRYPT_MODE, blowfishSecretKey)
 
 		// Decrypt the first block to obtain the header
-		def headerEncrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
-		def headerDecrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
-		input.readFully(headerEncrypted.array())
-		blowfishCipher.doFinal(headerEncrypted.array(), 0, headerEncrypted.capacity(), headerDecrypted.array(), 0)
+		def headerEncryptedBytes = input.readNBytes(SIZE_ENCRYPTED_BLOCK)
+		def headerDecryptedBuffer = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
+		blowfishCipher.doFinal(headerEncryptedBytes, 0, headerEncryptedBytes.length, headerDecryptedBuffer.array(), 0)
 
-		numEntries = headerDecrypted.getShort()
-		dataSize = headerDecrypted.getInt()
+		numEntries = headerDecryptedBuffer.getShort()
+		dataSize = headerDecryptedBuffer.getInt()
 
 		// Knowing the number of entries ahead, decrypt as many 8 byte blocks that
 		// fit the index, reading it and the 2 unread bytes from the first block
 		def numBytesForIndex = (int)Math.ceil((MixEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
-		def encryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
-		def decryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
-		input.readFully(encryptedBuffer.array())
-		blowfishCipher.doFinal(encryptedBuffer.array(), 0, encryptedBuffer.capacity(), decryptedBuffer.array(), 0)
+		def indexEncryptedBytes = input.readNBytes(numBytesForIndex)
+		def indexDecryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
+		blowfishCipher.doFinal(indexEncryptedBytes, 0, indexEncryptedBytes.length, indexDecryptedBuffer.array(), 0)
 
 		def decryptedIndexBuffer = ByteBuffer.allocateNative(numBytesForIndex + 2)
-			.put(headerDecrypted)
-			.put(decryptedBuffer)
+			.put(headerDecryptedBuffer)
+			.put(indexDecryptedBuffer)
 			.rewind()
 		entries = new MixEntry[numEntries]
 		numEntries.times { index ->
