@@ -20,8 +20,7 @@ dependencies {
 	implementation(
 		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes'),
-		':blowfishj:2.41'
+		project(':redhorizon-filetypes')
 	)
 	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 		exclude module: 'groovy'

@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.mix
 
-import blowfishj.BlowfishECB
-
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * A MIX file specific to the encrypted format found in the Red Alert game.
@@ -50,13 +50,15 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 		def keySource = ByteBuffer.allocateNative(MixFileKey.SIZE_KEY_SOURCE)
 		input.readFully(keySource.array())
 		def key = new MixFileKey().calculateKey(keySource)
-		def blowfish = new BlowfishECB(key.array(), 0, key.capacity())
+		def blowfishSecretKey = new SecretKeySpec(key.array(), 'Blowfish')
+		def blowfishCipher = Cipher.getInstance('Blowfish/ECB/NoPadding')
+		blowfishCipher.init(Cipher.DECRYPT_MODE, blowfishSecretKey)
 
 		// Decrypt the first block to obtain the header
 		def headerEncrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
 		def headerDecrypted = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
 		input.readFully(headerEncrypted.array())
-		blowfish.decrypt(headerEncrypted.array(), 0, headerDecrypted.array(), 0, headerDecrypted.capacity())
+		blowfishCipher.doFinal(headerEncrypted.array(), 0, headerEncrypted.capacity(), headerDecrypted.array(), 0)
 
 		numEntries = headerDecrypted.getShort()
 		dataSize = headerDecrypted.getInt()
@@ -67,7 +69,7 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 		def encryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		def decryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		input.readFully(encryptedBuffer.array())
-		blowfish.decrypt(encryptedBuffer.array(), 0, decryptedBuffer.array(), 0, decryptedBuffer.capacity())
+		blowfishCipher.doFinal(encryptedBuffer.array(), 0, encryptedBuffer.capacity(), decryptedBuffer.array(), 0)
 
 		def decryptedIndexBuffer = ByteBuffer.allocateNative(numBytesForIndex + 2)
 			.put(headerDecrypted)

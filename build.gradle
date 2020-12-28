@@ -61,12 +61,6 @@ subprojects {
 
 	sourceCompatibility = 11
 
-	repositories {
-		flatDir {
-			dirs "$rootDir/libraries"
-		}
-	}
-
 	dependencies {
 		implementation(
 			'org.codehaus.groovy:groovy:3.0.7:indy',
