@@ -2,6 +2,18 @@
 Changelog
 =========
 
+### 0.31.0
+ - Converted the C/C++ code for reading encrypted MIX files to Groovy - no more
+   native platform compilers needed for supporting other platforms
+ - Rebuilt the file conversion utility (the [`convert` CLI tool](README.md#convert)),
+   which currently supports the following file conversions:
+    - PCX -> CPS
+    - paletted PNG -> C&C SHP
+ - Added more options to the media player, including less blurry filtering, a
+   full screen mode, play/pause, and more
+ - Created a unit/structure viewer which supports a handful of units that I have
+   added configuration files for (see: the [`view` CLI tool](README.md#view))
+
 ### 0.30.3
  - Improve performance of VQA file playback
  - Allow playback of some VQA files in Red Alert that contain unknown data
