@@ -53,10 +53,10 @@ class MixReader implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', arity = '1', description = 'Path to the mix file to read')
+	@Parameters(index = '0', description = 'Path to the mix file to read')
 	String mixFile
 
-	@Parameters(index = '1', arity = '1', description = 'Name of the entry in the mix file')
+	@Parameters(index = '1', description = 'Name of the entry in the mix file')
 	String entryName
 
 	/**

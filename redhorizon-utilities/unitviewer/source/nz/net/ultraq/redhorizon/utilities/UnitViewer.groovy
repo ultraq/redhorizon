@@ -79,7 +79,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', arity = '1', description = 'Path to the unit shp file to view, or a mix file that contains the unit')
+	@Parameters(index = '0', description = 'Path to the unit shp file to view, or a mix file that contains the unit')
 	File file
 
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the shp in the mix file to view')

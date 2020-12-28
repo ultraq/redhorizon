@@ -65,7 +65,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', arity = '1', description = 'Path to the input file to play/view')
+	@Parameters(index = '0', description = 'Path to the input file to play/view')
 	File file
 
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the entry in the mix file to play')

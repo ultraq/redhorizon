@@ -39,10 +39,10 @@ class Pcx2CpsConverter implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Pcx2CpsConverter)
 
-	@Parameters(index = '0', arity = '1', description = 'A 320x200 PCX image.  If creating a paletted CPS, then the PCX file must have an internal palette.')
+	@Parameters(index = '0', description = 'A 320x200 PCX image.  If creating a paletted CPS, then the PCX file must have an internal palette.')
 	File sourceFile
 
-	@Parameters(index = '1', arity = '2', description = 'Path for the CPS file to be written to.')
+	@Parameters(index = '1', description = 'Path for the CPS file to be written to.')
 	File destFile
 
 	/**

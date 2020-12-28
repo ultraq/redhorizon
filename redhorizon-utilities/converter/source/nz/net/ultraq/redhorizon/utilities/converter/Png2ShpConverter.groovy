@@ -40,10 +40,10 @@ class Png2ShpConverter implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Png2ShpConverter)
 
-	@Parameters(index = '0', arity = '1', description = 'The sounce PNG image.')
+	@Parameters(index = '0', description = 'The sounce PNG image.')
 	File sourceFile
 
-	@Parameters(index = '1', arity = '2', description = 'Path for the SHP file to be written to.')
+	@Parameters(index = '1', description = 'Path for the SHP file to be written to.')
 	File destFile
 
 	@Option(names = ['--width', '-w'], required = true, description = 'Width of each SHP image')
