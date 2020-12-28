@@ -74,7 +74,7 @@ Convert a paletted PNG file to a Command & Conquer SHP file
 
 ### mix
 
-A MIX file reader for extracting files from it.
+A MIX file reader for extracting files from them.
 
 ```
 Usage: mix [-hV] <mixFile> <entryName>
