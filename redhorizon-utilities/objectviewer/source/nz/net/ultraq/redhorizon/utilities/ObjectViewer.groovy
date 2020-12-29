@@ -17,22 +17,11 @@
 package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
-import nz.net.ultraq.redhorizon.engine.GameTime
-import nz.net.ultraq.redhorizon.engine.KeyEvent
-import nz.net.ultraq.redhorizon.engine.WithGameClock
-import nz.net.ultraq.redhorizon.engine.graphics.Colours
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.utilities.objectviewer.Infantry
-import nz.net.ultraq.redhorizon.utilities.objectviewer.Structure
-import nz.net.ultraq.redhorizon.utilities.objectviewer.UnitData
-import nz.net.ultraq.redhorizon.utilities.objectviewer.Vehicle
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.utilities.objectviewer.UnitViewer
 
-import org.joml.Rectanglef
+import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
@@ -41,19 +30,8 @@ import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import java.util.concurrent.Callable
-import java.util.concurrent.Executors
 
 /**
  * A game object viewer for testing their rendering and configuration.
@@ -71,7 +49,7 @@ import java.util.concurrent.Executors
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class ObjectViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine {
+class ObjectViewer implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ObjectViewer)
 
@@ -98,16 +76,18 @@ class ObjectViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngi
 		Thread.currentThread().name = 'Object Viewer [main]'
 		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info('Loading {}...', file)
-		def shpFile
-		def unitId
-		if (file.name.endsWith('.mix')) {
-			new MixFile(file).withCloseable { mix ->
+		logger.info('Loading {}...', this.file)
+		def objectFile
+		def objectId
+		if (this.file.name.endsWith('.mix')) {
+			new MixFile(this.file).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
-					shpFile = mix.getEntryData(entry).withStream { inputStream -> new ShpFile(inputStream) }
-					unitId = entryName[0..<-4]
+					objectFile = mix.getEntryData(entry).withStream { inputStream ->
+						return getFileClass(entryName).newInstance(inputStream)
+					}
+					objectId = entryName[0..<-4]
 				}
 				else {
 					logger.error('{} not found in {}', entryName, file)
@@ -116,96 +96,59 @@ class ObjectViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngi
 			}
 		}
 		else {
-			shpFile = file.withInputStream { inputStream -> new ShpFile(inputStream) }
-			unitId = file.name[0..<-4]
+			objectFile = this.file.withInputStream { inputStream ->
+				return getFileClass(file.name).newInstance(inputStream)
+			}
+			objectId = this.file.name[0..<-4]
 		}
 
-		def configFileStream = this.class.classLoader.getResourceAsStream(
-			"nz/net/ultraq/redhorizon/utilities/object/configurations/${unitId.toLowerCase()}.json")
-		if (!configFileStream) {
-			logger.error('No configuration available for {}', unitId)
-			throw new IllegalArgumentException()
-		}
-
-		view(shpFile, configFileStream.text)
+		view(objectFile, objectId)
 
 		return 0
 	}
 
 	/**
-	 * Display the unit.
+	 * Find the appropriate class for reading a file with the given name.
 	 * 
-	 * @param shpFile
-	 * @param unitConfig
+	 * @param filename
+	 * @return
 	 */
-	private void view(ShpFile shpFile, String unitConfig) {
+	private Class<?> getFileClass(String filename) {
 
-		logger.info('File details: {}', shpFile)
-		logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
-
-		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
-		def targetClass
-		switch (unitData.type) {
-			case 'infantry':
-				targetClass = Infantry
-				break
-			case 'vehicle':
-				targetClass = Vehicle
-				break
-			case 'structure':
-				targetClass = Structure
-				break
-			default:
-				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
-		}
-
-		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
-		}
-		def config = new GraphicsConfiguration(
-			clearColour: Colours.WHITE
+		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
+		def fileClass = new Reflections(
+			'nz.net.ultraq.redhorizon.filetypes',
+			'nz.net.ultraq.redhorizon.classic.filetypes'
 		)
-
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, config) { graphicsEngine ->
-
-					// Add the unit to the engine
-					def unitCoordinates = new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2).center()
-					def unit = targetClass
-						.getDeclaredConstructor(UnitData, ImagesFile, Palette, Rectanglef, GameTime)
-						.newInstance(unitData, shpFile, palette, unitCoordinates, gameClock)
-					graphicsEngine.addSceneElement(unit)
-
-					logger.info('Displaying the image in another window.  Close the window to exit.')
-
-					// Key event handler
-					graphicsEngine.on(KeyEvent) { event ->
-						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-							switch (event.key) {
-							case GLFW_KEY_LEFT:
-								unit.rotateLeft()
-								break
-							case GLFW_KEY_RIGHT:
-								unit.rotateRight()
-								break
-							case GLFW_KEY_UP:
-								unit.previousAnimation()
-								break
-							case GLFW_KEY_DOWN:
-								unit.nextAnimation()
-								break
-							case GLFW_KEY_SPACE:
-								gameClock.togglePause()
-								break
-							case GLFW_KEY_ESCAPE:
-								graphicsEngine.stop()
-								break
-							}
-						}
-					}
+			.getTypesAnnotatedWith(FileExtensions)
+			.find { type ->
+				def annotation = type.getAnnotation(FileExtensions)
+				return annotation.value().any { extension ->
+					return extension.equalsIgnoreCase(suffix)
 				}
 			}
+		if (!fileClass) {
+			logger.error('No implementation for {} filetype', suffix)
+			throw new IllegalArgumentException()
+		}
+		return fileClass
+	}
+
+	/**
+	 * Display the unit.
+	 * 
+	 * @param objectFile
+	 * @param objectId
+	 */
+	private void view(Object objectFile, String objectId) {
+
+		switch (objectFile) {
+			case ShpFile:
+				new UnitViewer(objectFile, objectId, paletteType).view()
+				break
+			default:
+				logger.error('No viewer for the associated file class of {}', objectFile)
+				throw new UnsupportedOperationException()
 		}
 	}
 
