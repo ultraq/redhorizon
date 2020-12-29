@@ -18,7 +18,7 @@ description = 'Object viewer for the Red Horizon project'
 archivesBaseName = 'redhorizon-utilities-objectviewer'
 
 dependencies {
-	implementation('org.codehaus.groovy:groovy-json:3.0.3:indy') {
+	implementation('org.codehaus.groovy:groovy-json:3.0.7:indy') {
 		exclude module: 'groovy'
 	}
 	implementation(
