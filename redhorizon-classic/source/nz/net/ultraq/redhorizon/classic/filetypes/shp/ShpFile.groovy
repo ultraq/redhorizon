@@ -68,7 +68,7 @@ class ShpFile implements ImagesFile, Writable {
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
 	 * 
-	 * @param input
+	 * @param inputStream
 	 */
 	ShpFile(InputStream inputStream) {
 
