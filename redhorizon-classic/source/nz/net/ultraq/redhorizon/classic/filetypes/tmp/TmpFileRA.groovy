@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import java.nio.ByteBuffer
 
@@ -38,25 +38,25 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions(['int', 'sno', 'tmp'])
+@FileExtensions(['int', 'sno', 'tem'])
 class TmpFileRA implements ImagesFile {
 
 	// File header
 	final int width     // Stored in file as short
 	final int height    // Stored in file as short
 	final int numImages // Stored in file as short
-	final short unknown1
+	final short zero1
 	final short tileWidth
 	final short tileHeight
 	final int fileSize
-	final int imageStart
-	final int unknown2
+	final int imageOffset
+	final int zero2
 	final int unknown3
-	final int index2
+	final int imageIndexOffset
 	final int unknown4
-	final int index1
+	final int tileIndexOffset
 
-	final ColourFormat format = FORMAT_RGB
+	final ColourFormat format = FORMAT_INDEXED
 	final ByteBuffer[] imagesData
 
 	/**
@@ -75,30 +75,44 @@ class TmpFileRA implements ImagesFile {
 		height = input.readShort()
 		assert height == 24 : 'Tile height should be 24 pixels'
 
-		numImages  = input.readShort()
-		unknown1   = input.readShort()
-		tileWidth  = input.readShort()
-		tileHeight = input.readShort()
-		fileSize   = input.readInt()
-		imageStart = input.readInt()
-		unknown2   = input.readInt()
-		unknown3   = input.readInt()
-		index2     = input.readInt()
-		unknown4   = input.readInt()
-		index1     = input.readInt()
+		numImages   = input.readShort()
+		zero1       = input.readShort()
+		tileWidth   = input.readShort()
+		tileHeight  = input.readShort()
+		fileSize    = input.readInt()
+		imageOffset = input.readInt()
+		zero2       = input.readInt()
+		unknown3    = input.readInt()
 
-		assert index2 - index1 == numImages
+		imageIndexOffset = input.readInt()
+		unknown4         = input.readInt()
+		tileIndexOffset  = input.readInt()
 
-		// Image offsets and data
-		def imageOffsets = new byte[numImages]
-		imageOffsets.length.times { i ->
-			imageOffsets[i] = input.readByte()
-		}
+		// Image data follows the header and up to the tile index.  Not every tile
+		// has an image (some are empty), so read all the image data for now and
+		// spread them out according to the tile index afterwards.
+		def imageBytes = ByteBuffer.wrapNative(input.readNBytes(tileIndexOffset - imageOffset))
 		imagesData = new ByteBuffer[numImages]
-		imagesData.length.times { i ->
-			def imageOffset = imageOffsets[i]
-			if (imageOffset != 0xff) {
-				imagesData[i] = ByteBuffer.wrapNative(input.readNBytes(width * height))
+
+		// Tile placement
+		def imageSize = width * height
+		numImages.times { i ->
+			def tile = input.readByte()
+			if (tile != 0xff) {
+
+				// This tile references a previously read image
+				if (tile < i) {
+					imagesData[i] = imagesData[tile]
+				}
+				// This tile reads a new image from the bytes
+				else {
+					imagesData[i] = ByteBuffer.allocateNative(imageSize)
+						.put(imageBytes, imageSize)
+						.rewind()
+				}
+			}
+			else {
+				imagesData[i] = ByteBuffer.allocateNative(width * height)
 			}
 		}
 	}
