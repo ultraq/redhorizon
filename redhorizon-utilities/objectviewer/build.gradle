@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-description = 'Unit/Structure viewer for the Red Horizon project'
-archivesBaseName = 'redhorizon-utilities-unitviewer'
+description = 'Object viewer for the Red Horizon project'
+archivesBaseName = 'redhorizon-utilities-objectviewer'
 
 dependencies {
 	implementation('org.codehaus.groovy:groovy-json:3.0.3:indy') {
@@ -37,6 +37,6 @@ dependencies {
 }
 
 application {
-	mainClassName = 'nz.net.ultraq.redhorizon.utilities.UnitViewer'
+	mainClassName = 'nz.net.ultraq.redhorizon.utilities.ObjectViewer'
 	applicationName = 'view'
 }

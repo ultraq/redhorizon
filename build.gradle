@@ -33,7 +33,7 @@ distributions {
 			from 'redhorizon-utilities/converter/build/install/convert'
 			from 'redhorizon-utilities/mediaplayer/build/install/play'
 			from 'redhorizon-utilities/mixreader/build/install/mix'
-			from 'redhorizon-utilities/unitviewer/build/install/view'
+			from 'redhorizon-utilities/objectviewer/build/install/view'
 			from('.') {
 				include 'CHANGELOG.md'
 				include 'LICENSE.txt'
@@ -48,7 +48,7 @@ distributions {
 		':redhorizon-utilities:converter:installDist',
 		':redhorizon-utilities:mediaplayer:installDist',
 		':redhorizon-utilities:mixreader:installDist',
-		':redhorizon-utilities:unitviewer:installDist'
+		':redhorizon-utilities:objectviewer:installDist'
 	]
 	it.duplicatesStrategy = 'exclude'
 }

@@ -25,5 +25,5 @@ include(
 	'redhorizon-utilities:converter',
 	'redhorizon-utilities:mediaplayer',
 	'redhorizon-utilities:mixreader',
-	'redhorizon-utilities:unitviewer'
+	'redhorizon-utilities:objectviewer'
 )

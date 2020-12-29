@@ -27,10 +27,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.utilities.unitviewer.Infantry
-import nz.net.ultraq.redhorizon.utilities.unitviewer.Structure
-import nz.net.ultraq.redhorizon.utilities.unitviewer.UnitData
-import nz.net.ultraq.redhorizon.utilities.unitviewer.Vehicle
+import nz.net.ultraq.redhorizon.utilities.objectviewer.Infantry
+import nz.net.ultraq.redhorizon.utilities.objectviewer.Structure
+import nz.net.ultraq.redhorizon.utilities.objectviewer.UnitData
+import nz.net.ultraq.redhorizon.utilities.objectviewer.Vehicle
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -56,8 +56,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
 /**
- * A unit and structure viewer for testing game object rendering and
- * configuration.
+ * A game object viewer for testing their rendering and configuration.
  * 
  * @author Emanuel Rabina
  */
@@ -65,24 +64,24 @@ import java.util.concurrent.Executors
 	name = "view",
 	header = [
 		'',
-		'Red Horizon Unit Viewer',
-		'=======================',
+		'Red Horizon Object Viewer',
+		'=========================',
 		''
 	],
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine {
+class ObjectViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine {
 
-	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
+	private static final Logger logger = LoggerFactory.getLogger(ObjectViewer)
 
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', description = 'Path to the unit shp file to view, or a mix file that contains the unit')
+	@Parameters(index = '0', description = 'Path to the object file file to view, or a mix file that contains the object')
 	File file
 
-	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the shp in the mix file to view')
+	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
 	String entryName
 
 	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
@@ -96,8 +95,8 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	@Override
 	Integer call() {
 
-		Thread.currentThread().name = 'Unit Viewer [main]'
-		logger.info('Red Horizon Unit Viewer {}', commandSpec.version()[0] ?: '(development)')
+		Thread.currentThread().name = 'Object Viewer [main]'
+		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
 		logger.info('Loading {}...', file)
 		def shpFile
@@ -122,7 +121,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 		}
 
 		def configFileStream = this.class.classLoader.getResourceAsStream(
-			"nz/net/ultraq/redhorizon/utilities/unitviewer/configurations/${unitId.toLowerCase()}.json")
+			"nz/net/ultraq/redhorizon/utilities/object/configurations/${unitId.toLowerCase()}.json")
 		if (!configFileStream) {
 			logger.error('No configuration available for {}', unitId)
 			throw new IllegalArgumentException()
@@ -217,7 +216,7 @@ class UnitViewer implements Callable<Integer>, WithGameClock, WithGraphicsEngine
 	 */
 	static void main(String[] args) {
 		System.exit(
-			new CommandLine(new UnitViewer())
+			new CommandLine(new ObjectViewer())
 			.setCaseInsensitiveEnumValuesAllowed(true)
 			.execute(args)
 		)
