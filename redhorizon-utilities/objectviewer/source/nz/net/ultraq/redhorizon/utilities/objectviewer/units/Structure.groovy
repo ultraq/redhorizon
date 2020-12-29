@@ -14,46 +14,44 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities.objectviewer
+package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.media.Image
 
 import org.joml.Rectanglef
 
 /**
- * An implementation of a rendered unit for vehicle types.
+ * A rendered unit for building/structure types.
  * 
  * @author Emanuel Rabina
  */
-class Vehicle extends Unit {
+class Structure extends Unit {
 
 	/**
-	 * Constructor, build a unit from the given data.
-	 * 
+	 * Constructor, builds a structure out of unit data.
+	 *
 	 * @param data
 	 * @param imagesFile
 	 * @param palette
 	 * @param coordinates
 	 * @param gameTime
 	 */
-	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
+	Structure(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
 
 		def frameIndex = 0
-
 		def bodyPart = data.shpFile.parts.body
-		def turretPart = data.shpFile.parts.turret
-		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
-			buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)) +
-			(turretPart ? buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += turretPart.headings)) : [])
-			as Image[])
 
-		data.shpFile.animations?.each { animation ->
-			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
-				gameTime)
+		['', '-damaged'].forEach { status ->
+			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
+				buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)))
+
+			data.shpFile.animations?.each { animation ->
+				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
+					buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+					gameTime)
+			}
 		}
 
 		currentRenderer = unitRenderers.first()

@@ -27,6 +27,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.utilities.PaletteTypes
+import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Infantry
+import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Structure
+import nz.net.ultraq.redhorizon.utilities.objectviewer.units.UnitData
+import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Vehicle
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
