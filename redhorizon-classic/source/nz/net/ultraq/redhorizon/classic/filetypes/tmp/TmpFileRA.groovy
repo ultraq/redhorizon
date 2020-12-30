@@ -98,7 +98,7 @@ class TmpFileRA implements ImagesFile {
 		def imageSize = width * height
 		numImages.times { i ->
 			def tile = input.readByte()
-			if (tile != 0xff) {
+			if (tile != -1) {
 
 				// This tile references a previously read image
 				if (tile < i) {
