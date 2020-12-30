@@ -45,6 +45,9 @@ class JomlExtensions {
 	 */
 	static Rectanglef center(Rectanglef self) {
 
+		if (self.minX !== 0 || self.minY !== 0) {
+			self.translate(-self.minX, -self.minY)
+		}
 		return self.translate(-self.maxX / 2 as int, -self.maxY / 2 as int)
 	}
 }
