@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities
+package nz.net.ultraq.redhorizon.classic
 
 import groovy.transform.TupleConstructor
 

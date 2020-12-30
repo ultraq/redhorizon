@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.utilities
 
+import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -80,7 +81,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
-	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
+	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
 	@Option(names = ['--scale-low-res'], description = 'Double the output resolution of low-res animations and videos (320x200 or lower).  Useful in conjunction with filtering so that the result is still filtered but less blurry.')
@@ -194,6 +195,11 @@ class MediaPlayer implements Callable<Integer> {
 	static void main(String[] args) {
 		System.exit(
 			new CommandLine(new MediaPlayer())
+				.registerConverter(PaletteTypes, { value ->
+					return PaletteTypes.find { paletteType ->
+						return value == paletteType.name().toLowerCase().replaceAll('_', '-')
+					}
+				})
 				.setCaseInsensitiveEnumValuesAllowed(true)
 				.execute(args)
 		)
