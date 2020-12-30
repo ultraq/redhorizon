@@ -64,7 +64,7 @@ class ObjectViewer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
 	String entryName
 
-	@Option(names = ['--palette'], defaultValue = 'ra', description = 'Which game palette to apply to a paletted image.  One of "RA" or "TD".')
+	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
 	/**
@@ -165,8 +165,13 @@ class ObjectViewer implements Callable<Integer> {
 	static void main(String[] args) {
 		System.exit(
 			new CommandLine(new ObjectViewer())
-			.setCaseInsensitiveEnumValuesAllowed(true)
-			.execute(args)
+				.registerConverter(PaletteTypes, { value ->
+					return PaletteTypes.find { paletteType ->
+						return value == paletteType.name().toLowerCase().replaceAll('_', '-')
+					}
+				})
+				.setCaseInsensitiveEnumValuesAllowed(true)
+				.execute(args)
 		)
 	}
 }
