@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 class IniFile implements MapFile {
 
 	private static final Pattern SECTION_PATTERN = ~/\[(\w+)\](\s*;.*)?/
-	private static final Pattern LINE_PATTERN = ~/([\w\d]+)=([^\s]+)(\s*;.*)?/
+	private static final Pattern LINE_PATTERN = ~/([\w\d ]+)=([\w\d ]+)(;.*)?/
 
 	private final Map<String,Map<String,String>> sections = [:]
 
@@ -57,8 +57,8 @@ class IniFile implements MapFile {
 					else {
 						def lineMatcher = LINE_PATTERN.matcher(line)
 						if (lineMatcher.matches()) {
-							def lineKey = lineMatcher.group(1)
-							def lineValue = lineMatcher.group(2)
+							def lineKey = lineMatcher.group(1).trim()
+							def lineValue = lineMatcher.group(2).trim()
 							currentSection << [(lineKey): lineValue]
 						}
 					}
