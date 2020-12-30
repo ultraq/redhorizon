@@ -57,7 +57,7 @@ distributions {
 subprojects {
 	apply plugin: 'groovy'
 	apply plugin: 'idea'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/3.1.2/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/3.3.0/gradle-support.gradle'
 
 	sourceCompatibility = 11
 
@@ -66,7 +66,7 @@ subprojects {
 			'org.codehaus.groovy:groovy:3.0.7:indy',
 			'org.slf4j:slf4j-api:1.7.30'
 		)
-		implementation('nz.net.ultraq.extensions:profiling-extensions:0.5.0') {
+		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.0-SNAPSHOT') {
 			exclude module: 'groovy'
 		}
 		testImplementation('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
