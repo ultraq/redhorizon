@@ -51,24 +51,11 @@ interface GraphicsRenderer {
 	 * @param format
 	 * @param width
 	 * @param height
-	 * @param repeat Specify repeat wrapping behaviour of the texture.
-	 * @return New texture handle.
-	 */
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat)
-
-	/**
-	 * Create and fill a texture with the given image data.
-	 * 
-	 * @param data
-	 * @param format
-	 * @param width
-	 * @param height
-	 * @param repeat Specify repeat wrapping behaviour of the texture.
 	 * @param filter Specify nearest-neighbouer filtering on the texture,
 	 *               independent of the graphics configuration.
 	 * @return New texture handle.
 	 */
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat, boolean filter)
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
 
 	/**
 	 * Delete texture handles.

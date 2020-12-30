@@ -160,13 +160,13 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat = false) {
+	int createTexture(ByteBuffer data, int format, int width, int height) {
 
-		return createTexture(data, format, width, height, repeat, filter)
+		return createTexture(data, format, width, height, filter)
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat, boolean filter) {
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
 
 		int textureId = checkForError { ->
 			return glGenTextures()
@@ -174,8 +174,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 		checkForError { ->
 			glBindTexture(GL_TEXTURE_2D, textureId)
 		}
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat ? GL_REPEAT : GL_CLAMP) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat ? GL_REPEAT : GL_CLAMP) }
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 
