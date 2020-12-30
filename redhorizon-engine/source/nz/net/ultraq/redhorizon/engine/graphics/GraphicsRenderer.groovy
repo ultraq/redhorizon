@@ -40,8 +40,6 @@ interface GraphicsRenderer {
 	 * @param format
 	 * @param width
 	 * @param height
-	 * @param filter Specify nearest-neighbouer filtering on the texture,
-	 *               independent of the graphics configuration.
 	 * @return New texture handle.
 	 */
 	int createTexture(ByteBuffer data, int format, int width, int height)
@@ -53,11 +51,24 @@ interface GraphicsRenderer {
 	 * @param format
 	 * @param width
 	 * @param height
+	 * @param repeat Specify repeat wrapping behaviour of the texture.
+	 * @return New texture handle.
+	 */
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat)
+
+	/**
+	 * Create and fill a texture with the given image data.
+	 * 
+	 * @param data
+	 * @param format
+	 * @param width
+	 * @param height
+	 * @param repeat Specify repeat wrapping behaviour of the texture.
 	 * @param filter Specify nearest-neighbouer filtering on the texture,
 	 *               independent of the graphics configuration.
 	 * @return New texture handle.
 	 */
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat, boolean filter)
 
 	/**
 	 * Delete texture handles.
@@ -79,10 +90,14 @@ interface GraphicsRenderer {
 	 * 
 	 * @param textureId
 	 * @param rectangle
+	 * @param repeatX
+	 *   Number of times to repeat the texture on the X axis
+	 * @param repeatY
+	 *   Number of times to repeat the texture on the Y axis
 	 * @param flipVertical
 	 *   Whether or not to flip the texture on its vertical axis to compensate for
 	 *   image data often having Y-coords in the opposite way to the rendering
 	 *   coordinates.
 	 */
-	void drawTexture(int textureId, Rectanglef rectangle, boolean flipVertical)
+	void drawTexture(int textureId, Rectanglef rectangle, int repeatX, int repeatY, boolean flipVertical)
 }

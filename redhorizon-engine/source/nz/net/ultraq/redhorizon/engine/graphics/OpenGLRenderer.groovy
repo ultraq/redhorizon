@@ -160,13 +160,13 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height) {
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat = false) {
 
-		return createTexture(data, format, width, height, filter)
+		return createTexture(data, format, width, height, repeat, filter)
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
+	int createTexture(ByteBuffer data, int format, int width, int height, boolean repeat, boolean filter) {
 
 		int textureId = checkForError { ->
 			return glGenTextures()
@@ -174,8 +174,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		checkForError { ->
 			glBindTexture(GL_TEXTURE_2D, textureId)
 		}
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat ? GL_REPEAT : GL_CLAMP) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat ? GL_REPEAT : GL_CLAMP) }
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 
@@ -199,15 +199,15 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void drawTexture(int textureId, Rectanglef rectangle, boolean flipVertical = true) {
+	void drawTexture(int textureId, Rectanglef rectangle, int repeatX = 1, int repeatY = 1, boolean flipVertical = true) {
 
 		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
 		checkForError { -> glColor4f(1, 1, 1, 1) }
 		glBegin(GL_QUADS)
-			glTexCoord2f(0, flipVertical ? 1 : 0); glVertex2f(rectangle.minX, rectangle.minY)
-			glTexCoord2f(0, flipVertical ? 0 : 1); glVertex2f(rectangle.minX, rectangle.maxY)
-			glTexCoord2f(1, flipVertical ? 0 : 1); glVertex2f(rectangle.maxX, rectangle.maxY)
-			glTexCoord2f(1, flipVertical ? 1 : 0); glVertex2f(rectangle.maxX, rectangle.minY)
+			glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)
+			glTexCoord2f(0, flipVertical ? 0 : repeatY); glVertex2f(rectangle.minX, rectangle.maxY)
+			glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(rectangle.maxX, rectangle.maxY)
+			glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(rectangle.maxX, rectangle.minY)
 		checkForError { -> glEnd() }
 	}
 }

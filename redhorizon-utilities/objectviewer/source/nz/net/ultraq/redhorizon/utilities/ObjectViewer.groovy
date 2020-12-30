@@ -16,9 +16,11 @@
 
 package nz.net.ultraq.redhorizon.utilities
 
+import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.utilities.objectviewer.MapViewer
 import nz.net.ultraq.redhorizon.utilities.objectviewer.UnitViewer
 
 import org.reflections.Reflections
@@ -145,6 +147,9 @@ class ObjectViewer implements Callable<Integer> {
 		switch (objectFile) {
 			case ShpFile:
 				new UnitViewer(objectFile, objectId, paletteType).view()
+				break
+			case IniFile:
+				new MapViewer(objectFile).view()
 				break
 			default:
 				logger.error('No viewer for the associated file class of {}', objectFile)

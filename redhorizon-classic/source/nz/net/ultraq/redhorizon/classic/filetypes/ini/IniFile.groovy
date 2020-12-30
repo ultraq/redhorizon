@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.ini
 
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.MapFile
 
 import java.util.regex.Pattern
@@ -27,10 +28,11 @@ import java.util.regex.Pattern
  * 
  * @author Emanuel Rabina
  */
+@FileExtensions('ini')
 class IniFile implements MapFile {
 
 	private static final Pattern SECTION_PATTERN = ~/\[(\w+)\](\s*;.*)?/
-	private static final Pattern LINE_PATTERN = ~/([\w\d]+)=([^\s]+)\s*;.*/
+	private static final Pattern LINE_PATTERN = ~/([\w\d]+)=([^\s]+)(\s*;.*)?/
 
 	private final Map<String,Map<String,String>> sections = [:]
 
@@ -65,7 +67,12 @@ class IniFile implements MapFile {
 		}
 	}
 
-	@Override
+	/**
+	 * Retrieve the key/value map of data for the given section in the file.
+	 * 
+	 * @param section
+	 * @return
+	 */
 	Map<String,String> getAt(String section) {
 
 		return sections[section]

@@ -73,7 +73,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 			}
 		}
 		scanlineTexture.rewind()
-		textureId = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
+		textureId = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, false, true)
 	}
 
 	@Override

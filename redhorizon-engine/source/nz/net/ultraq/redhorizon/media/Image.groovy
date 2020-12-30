@@ -38,6 +38,8 @@ class Image implements GraphicsElement, SelfVisitable {
 	final int format
 	final ByteBuffer imageData
 	final Rectanglef dimensions
+	final int repeatX
+	final int repeatY
 
 	// Rendering information
 	private int textureId
@@ -61,14 +63,18 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param format
 	 * @param imageData
 	 * @param dimensions
+	 * @param repeatX
+	 * @param repeatY
 	 */
-	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions) {
+	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, int repeatX = 1, int repeatY = 1) {
 
 		this.width      = width
 		this.height     = height
 		this.format     = format
 		this.imageData  = ByteBuffer.fromBuffersDirect(imageData)
 		this.dimensions = dimensions
+		this.repeatX    = repeatX
+		this.repeatY    = repeatY
 	}
 
 	@Override
@@ -80,12 +86,12 @@ class Image implements GraphicsElement, SelfVisitable {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		textureId = renderer.createTexture(imageData, format, width, height)
+		textureId = renderer.createTexture(imageData, format, width, height, repeatX > 1 || repeatY > 1)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(textureId, dimensions)
+		renderer.drawTexture(textureId, dimensions, repeatX, repeatY, true)
 	}
 }
