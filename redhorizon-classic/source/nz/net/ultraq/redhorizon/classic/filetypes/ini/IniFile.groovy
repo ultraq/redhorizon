@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 class IniFile implements MapFile {
 
 	private static final Pattern SECTION_PATTERN = ~/\[(\w+)\](\s*;.*)?/
-	private static final Pattern LINE_PATTERN = ~/([\w\d ]+)=([\w\d ]+)(;.*)?/
+	private static final Pattern LINE_PATTERN = ~/([^=]+)=([^;]+)(;.*)?/
 
 	private final Map<String,Map<String,String>> sections = [:]
 
