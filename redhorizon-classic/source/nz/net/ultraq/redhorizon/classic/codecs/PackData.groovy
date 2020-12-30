@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.codecs.Decoder
 import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Decoder for the [*Pack] sections found inside CNC map file data.
@@ -40,13 +41,12 @@ class PackData implements Decoder {
 	void decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Decode base64 data into standard binary
-//		ByteBuffer mapBytes2 = ByteBuffer.allocate(8192 * chunks)
-		ByteBuffer mapBytes2 = base64Decoder.decode(source)
+		ByteBuffer mapBytes2 = base64Decoder.decode(source).order(ByteOrder.nativeOrder())
 
 		// Decode pack data, 'chunks' number of chunks
 		ByteBuffer[] mapChunks = new ByteBuffer[chunks]
 		for (int i = 0; i < chunks; i++) {
-			mapChunks[i] = ByteBuffer.allocate(8192)
+			mapChunks[i] = ByteBuffer.allocateNative(8192)
 		}
 
 		int pos = 0
@@ -56,7 +56,8 @@ class PackData implements Decoder {
 			int a = mapBytes2.get() & 0xff
 			int b = mapBytes2.get() & 0xff
 			int c = mapBytes2.get() & 0xff
-					mapBytes2.advance(1)
+			int d = mapBytes2.get() & 0xff // Is always 0x20, but unused
+			assert d == 0x20
 			int chunksize = (c << 16) | (b << 8) | a
 
 			// Decode that chunk, put it into one of the buffers in the array
