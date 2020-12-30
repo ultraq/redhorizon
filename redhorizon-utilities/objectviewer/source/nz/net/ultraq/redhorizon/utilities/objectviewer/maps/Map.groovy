@@ -59,7 +59,7 @@ class Map implements GraphicsElement, SelfVisitable {
 		def backgroundTileFile = tilesetMixFile.getEntryData(tilesetMixFile.getEntry(clearTileName)).withStream { inputStream ->
 			return new TmpFileRA(inputStream)
 		}
-		def palette = this.class.classLoader.getResourceAsStream("ra-${theater.label}.pal").withStream { inputStream ->
+		def palette = getResourceAsBufferedStream("ra-${theater.label}.pal").withStream { inputStream ->
 			return new PalFile(inputStream)
 		}
 

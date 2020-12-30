@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.utilities
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.extensions
 
 /**
- * Available palette types.
+ * Extensions to classes to be able to read resources more easily.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum PaletteTypes {
+class ResourceExtensions {
 
-	RA('ra-temperat.pal'),
-	TD('td-temperat.pal')
+	/**
+	 * A shortcut to {@code ClassLoader.getResourceAsStream} wrapped in a
+	 * {@code BufferedInputStream}.
+	 * 
+	 * @param self
+	 * @param resourcePath
+	 * @return
+	 */
+	static InputStream getResourceAsBufferedStream(Object self, String resourcePath) {
 
-	final String file
+		def inputStream = self.class.classLoader.getResourceAsStream(resourcePath)
+		if (inputStream) {
+			return new BufferedInputStream(inputStream)
+		}
+		throw new IllegalArgumentException("Resource not found: ${resourcePath}")
+	}
 }

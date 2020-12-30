@@ -18,8 +18,8 @@ moduleName = redhorizon-extensions
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.extensions.BlockingQueueExtensions,\
                    nz.net.ultraq.redhorizon.extensions.ByteBufferExtensions,\
+                   nz.net.ultraq.redhorizon.extensions.ResourceExtensions,\
                    nz.net.ultraq.redhorizon.extensions.SemaphoreExtensions,\
                    nz.net.ultraq.redhorizon.extensions.ShortBufferExtensions
 staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.ByteBufferStaticExtensions,\
                          nz.net.ultraq.redhorizon.extensions.MathStaticExtensions
-

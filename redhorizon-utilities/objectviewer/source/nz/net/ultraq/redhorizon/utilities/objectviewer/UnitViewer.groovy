@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.utilities.PaletteTypes
+import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.UnitData
@@ -70,14 +70,17 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 
 		logger.info('File details: {}', shpFile)
 
-		def configFileStream = this.class.classLoader.getResourceAsStream(
-			"nz/net/ultraq/redhorizon/utilities/objectviewer/configurations/${unitId.toLowerCase()}.json")
-		if (!configFileStream) {
+		def unitConfig
+		try {
+			def configFileStream = getResourceAsBufferedStream(
+				"nz/net/ultraq/redhorizon/utilities/objectviewer/configurations/${unitId.toLowerCase()}.json")
+			unitConfig = configFileStream.text
+			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
+		}
+		catch (IllegalArgumentException ignored) {
 			logger.error('No configuration available for {}', unitId)
 			throw new IllegalArgumentException()
 		}
-		def unitConfig = configFileStream.text
-		logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 
 		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
 		def targetClass
@@ -95,7 +98,7 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
 		}
 
-		def palette = new BufferedInputStream(this.class.classLoader.getResourceAsStream(paletteType.file)).withCloseable { inputStream ->
+		def palette = getResourceAsBufferedStream(paletteType.file).withStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def config = new GraphicsConfiguration(
