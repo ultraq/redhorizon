@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
 import org.joml.Rectanglei
+import org.joml.Vector2f
 
 import groovy.transform.Memoized
 import java.nio.ByteBuffer
@@ -39,12 +40,15 @@ import java.nio.ByteBuffer
  */
 class Map implements GraphicsElement, SelfVisitable {
 
-	private static final int MAX_CELLS_X = 128
-	private static final int MAX_CELLS_Y = 128
+	private static final int TILE_WIDTH = 24
+	private static final int TILE_HEIGHT = 24
+	private static final int TILES_HORIZONTAL = 128
+	private static final int TILES_VERTICAL = 128
 
-	private final String name
-	private final Theaters theater
-	private final Rectanglei boundary
+	final String name
+	final Theaters theater
+	final Rectanglei boundary
+	final Vector2f initialPosition
 	private Image background
 	private final List<Image> tiles = []
 
@@ -74,6 +78,10 @@ class Map implements GraphicsElement, SelfVisitable {
 			mapY + (mapSection['Height'] as int)
 		)
 
+		def waypoints = mapFile['Waypoints']
+		def waypoint98 = waypoints['98'] as int
+		initialPosition = cellNumberAsWorldCoords(waypoint98)
+
 		// TODO: Figure out some way to share knowledge of the path to mix files
 		//       containing the necessary files
 		new MixFile(new File("mix/red-alert/MapTiles_${theater.label}.mix")).withCloseable { tilesetMixFile ->
@@ -89,8 +97,8 @@ class Map implements GraphicsElement, SelfVisitable {
 			def combinedWidth = backgroundTileFile.width * 5
 			def combinedHeight = backgroundTileFile.height * 4
 			background = new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
-				new Rectanglef(0, 0, MAX_CELLS_X * 24, MAX_CELLS_Y * 24),
-				MAX_CELLS_X * 24 / combinedWidth, MAX_CELLS_Y * 24 / combinedHeight
+				new Rectanglef(0, 0, TILES_HORIZONTAL * TILE_WIDTH, TILES_VERTICAL * TILE_HEIGHT),
+				TILES_HORIZONTAL * TILE_WIDTH / combinedWidth, TILES_VERTICAL * TILE_HEIGHT / combinedHeight
 			)
 
 			// Decode the Mappack section to get all the tiles needed to build the map
@@ -100,12 +108,12 @@ class Map implements GraphicsElement, SelfVisitable {
 				(boundary.minX..<boundary.maxX).each { x ->
 
 					// Get the byte representing the tile
-					def tilePos = (y * 128) + x
+					def tilePos = cellCoordsAsNumber(x, y)
 					def tileVal = mapPackBytes.getShort(2 * tilePos)
-					def tilePic = mapPackBytes.get(32768 + tilePos)
+					def tilePic = mapPackBytes.get(TILES_HORIZONTAL * TILES_VERTICAL * 2 + tilePos)
 
 					// Retrieve the appropriate tile, skip empty tiles
-					if (tileVal != (byte)0xff && tileVal != (short)0xffff) {
+					if (tileVal != 0xff && tileVal != -1) {
 						def tile = TilesRA.find { tile ->
 							return tileVal == tile.value
 						}
@@ -113,16 +121,40 @@ class Map implements GraphicsElement, SelfVisitable {
 
 						// TODO: Create a single texture for each tile and re-use it but
 						//       render it to a different place
-						def tilePosPxX = x * tileFile.width
-						def tilePosPxY = y * tileFile.height
+						def tilePosW = cellNumberAsWorldCoords(tilePos)
 						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 							tileFile.imagesData[tilePic].applyPalette(palette),
-							new Rectanglef(tilePosPxX, tilePosPxY, tilePosPxX + tileFile.width, tilePosPxY + tileFile.height))
+							new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
 						tiles << tileImage
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Convert a set of cell coordinates into a single cell value.
+	 * 
+	 * @param cellX
+	 * @param cellY
+	 * @return
+	 */
+	private static int cellCoordsAsNumber(int cellX, int cellY) {
+
+		return cellY * TILES_VERTICAL + cellX
+	}
+
+	/**
+	 * Convert a number representing a cell in a map into world coordinates.
+	 * 
+	 * @param cellNumber
+	 * @return
+	 */
+	private static Vector2f cellNumberAsWorldCoords(int cellNumber) {
+
+		def cellX = cellNumber % TILES_VERTICAL
+		def cellY = TILES_VERTICAL - Math.ceil(cellNumber / TILES_HORIZONTAL)
+		return new Vector2f(cellX * TILE_WIDTH, cellY * TILE_HEIGHT as float)
 	}
 
 	/**

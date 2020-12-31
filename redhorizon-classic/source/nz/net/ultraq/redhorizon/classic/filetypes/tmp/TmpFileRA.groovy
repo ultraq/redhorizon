@@ -98,18 +98,10 @@ class TmpFileRA implements ImagesFile {
 		def imageSize = width * height
 		numImages.times { i ->
 			def tile = input.readByte()
-			if (tile != -1) {
-
-				// This tile references a previously read image
-				if (tile < i) {
-					imagesData[i] = imagesData[tile]
-				}
-				// This tile reads a new image from the bytes
-				else {
-					imagesData[i] = ByteBuffer.allocateNative(imageSize)
-						.put(imageBytes, imageSize)
-						.rewind()
-				}
+			if (tile != (byte)0xff) {
+				imagesData[i] = ByteBuffer.allocateNative(imageSize)
+					.put(imageBytes.array(), tile * imageSize, imageSize)
+					.rewind()
 			}
 			else {
 				imagesData[i] = ByteBuffer.allocateNative(width * height)
