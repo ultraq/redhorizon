@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
-import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -43,9 +42,9 @@ class GraphicsEngine extends EngineSubsystem {
 	private final Closure needsMainThreadCallback
 	private final List<SceneElement> sceneElements = []
 
+	final Camera camera = new Camera()
 	private OpenGLContext context
 	private OpenGLRenderer renderer
-	private final Vector2f cameraPosition = new Vector2f()
 	private boolean started
 
 	/**
@@ -73,23 +72,6 @@ class GraphicsEngine extends EngineSubsystem {
 	void addSceneElement(SceneElement sceneElement) {
 
 		sceneElements << sceneElement
-	}
-
-	// TODO: Move the following camera methods into their own class
-	void cameraDown() {
-		cameraPosition.add(0, -24)
-	}
-
-	void cameraLeft() {
-		cameraPosition.add(-24, 0)
-	}
-
-	void cameraRight() {
-		cameraPosition.add(24, 0)
-	}
-
-	void cameraUp() {
-		cameraPosition.add(0, 24)
 	}
 
 	/**
@@ -143,6 +125,8 @@ class GraphicsEngine extends EngineSubsystem {
 				context.withCurrent { ->
 					renderer.clear()
 
+					camera.render(renderer)
+
 					sceneElements.each { sceneElement ->
 						sceneElement.accept { element ->
 							if (element instanceof GraphicsElement) {
@@ -166,7 +150,6 @@ class GraphicsEngine extends EngineSubsystem {
 							}
 						}
 					}
-					renderer.updateCamera(cameraPosition)
 
 					context.swapBuffers()
 				}
@@ -180,6 +163,7 @@ class GraphicsEngine extends EngineSubsystem {
 			// Shutdown
 			logger.debug('Shutting down graphics engine')
 			context.withCurrent { ->
+				camera.delete(renderer)
 				graphicsElementStates.keySet().each { graphicsElement ->
 					graphicsElement.delete(renderer)
 				}

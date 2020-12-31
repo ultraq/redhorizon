@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Rectanglef
-import org.joml.Vector2f
+import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,6 +37,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 	// Configuration values
 	private final Colours clearColour
 	private final boolean filter
+
+	private final Vector3f currentPosition = new Vector3f()
 
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
@@ -196,14 +198,12 @@ class OpenGLRenderer implements GraphicsRenderer {
 		checkForError { -> glEnd() }
 	}
 
-	// TODO: Move the camera stuff into its own class
-	private final Vector2f position = new Vector2f()
+	@Override
+	void updateCamera(Vector3f position) {
 
-	void updateCamera(Vector2f newPosition) {
-
-		if (position.x != newPosition.x || position.y != newPosition.y) {
-			glTranslatef(position.x - newPosition.x as float, position.y - newPosition.y as float, 0)
-			position.set(newPosition)
+		if (currentPosition.x != position.x || currentPosition.y != position.y) {
+			glTranslatef(currentPosition.x - position.x as float, currentPosition.y - position.y as float, 0)
+			currentPosition.set(position)
 		}
 	}
 }

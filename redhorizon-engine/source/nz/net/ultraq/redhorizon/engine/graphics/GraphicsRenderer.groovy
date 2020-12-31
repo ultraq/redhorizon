@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Rectanglef
+import org.joml.Vector3f
 
 import java.nio.ByteBuffer
 
@@ -87,4 +88,11 @@ interface GraphicsRenderer {
 	 *   coordinates.
 	 */
 	void drawTexture(int textureId, Rectanglef rectangle, float repeatX, float repeatY, boolean flipVertical)
+
+	/**
+	 * Update the camera projection.
+	 * 
+	 * @param position
+	 */
+	void updateCamera(Vector3f position)
 }

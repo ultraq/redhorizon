@@ -63,6 +63,7 @@ class MapViewer implements WithGraphicsEngine {
 				def map = new Map(mapFile)
 				logger.info('Map details: {}', map)
 				graphicsEngine.addSceneElement(map)
+				graphicsEngine.camera.position.set(map.initialPosition, 0)
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
 
@@ -71,16 +72,16 @@ class MapViewer implements WithGraphicsEngine {
 					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 						switch (event.key) {
 							case GLFW_KEY_DOWN:
-								graphicsEngine.cameraDown()
+								graphicsEngine.camera.moveDown()
 								break
 							case GLFW_KEY_LEFT:
-								graphicsEngine.cameraLeft()
+								graphicsEngine.camera.moveLeft()
 								break
 							case GLFW_KEY_RIGHT:
-								graphicsEngine.cameraRight()
+								graphicsEngine.camera.moveRight()
 								break
 							case GLFW_KEY_UP:
-								graphicsEngine.cameraUp()
+								graphicsEngine.camera.moveUp()
 								break
 							case GLFW_KEY_ESCAPE:
 								graphicsEngine.stop()
