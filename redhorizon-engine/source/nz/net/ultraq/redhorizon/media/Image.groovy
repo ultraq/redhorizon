@@ -38,8 +38,8 @@ class Image implements GraphicsElement, SelfVisitable {
 	final int format
 	final ByteBuffer imageData
 	final Rectanglef dimensions
-	final int repeatX
-	final int repeatY
+	final float repeatX
+	final float repeatY
 
 	// Rendering information
 	private int textureId
@@ -66,7 +66,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param repeatX
 	 * @param repeatY
 	 */
-	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, int repeatX = 1, int repeatY = 1) {
+	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, float repeatX = 1, float repeatY = 1) {
 
 		this.width      = width
 		this.height     = height

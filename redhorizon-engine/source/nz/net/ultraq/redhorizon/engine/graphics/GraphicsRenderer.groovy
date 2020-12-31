@@ -86,5 +86,5 @@ interface GraphicsRenderer {
 	 *   image data often having Y-coords in the opposite way to the rendering
 	 *   coordinates.
 	 */
-	void drawTexture(int textureId, Rectanglef rectangle, int repeatX, int repeatY, boolean flipVertical)
+	void drawTexture(int textureId, Rectanglef rectangle, float repeatX, float repeatY, boolean flipVertical)
 }

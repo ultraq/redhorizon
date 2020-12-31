@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Rectanglef
+import org.joml.Vector2f
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -113,20 +114,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glLoadIdentity()
 	}
 
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	void updateCamera(Camera camera) {
-//
-//		// Update the position of the camera
-//		Point3D diff = getPosition().difference(lastpos)
-//		if (!diff.equals(Point3D.DEFAULT)) {
-//			gl.glTranslatef(-diff.getX(), -diff.getY(), -diff.getZ())
-//			lastpos = lastpos.add(diff)
-//		}
-//	}
-
 	/**
 	 * Check for any OpenGL errors created by the OpenGL call in the given
 	 * closure, throwing them if they occur.
@@ -197,7 +184,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void drawTexture(int textureId, Rectanglef rectangle, int repeatX = 1, int repeatY = 1, boolean flipVertical = true) {
+	void drawTexture(int textureId, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
 
 		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
 		checkForError { -> glColor4f(1, 1, 1, 1) }
@@ -207,5 +194,16 @@ class OpenGLRenderer implements GraphicsRenderer {
 			glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(rectangle.maxX, rectangle.maxY)
 			glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(rectangle.maxX, rectangle.minY)
 		checkForError { -> glEnd() }
+	}
+
+	// TODO: Move the camera stuff into its own class
+	private final Vector2f position = new Vector2f()
+
+	void updateCamera(Vector2f newPosition) {
+
+		if (position.x != newPosition.x || position.y != newPosition.y) {
+			glTranslatef(position.x - newPosition.x as float, position.y - newPosition.y as float, 0)
+			position.set(newPosition)
+		}
 	}
 }

@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -43,6 +44,8 @@ class GraphicsEngine extends EngineSubsystem {
 	private final List<SceneElement> sceneElements = []
 
 	private OpenGLContext context
+	private OpenGLRenderer renderer
+	private final Vector2f cameraPosition = new Vector2f()
 	private boolean started
 
 	/**
@@ -70,6 +73,23 @@ class GraphicsEngine extends EngineSubsystem {
 	void addSceneElement(SceneElement sceneElement) {
 
 		sceneElements << sceneElement
+	}
+
+	// TODO: Move the following camera methods into their own class
+	void cameraDown() {
+		cameraPosition.add(0, -24)
+	}
+
+	void cameraLeft() {
+		cameraPosition.add(-24, 0)
+	}
+
+	void cameraRight() {
+		cameraPosition.add(24, 0)
+	}
+
+	void cameraUp() {
+		cameraPosition.add(0, 24)
 	}
 
 	/**
@@ -111,7 +131,6 @@ class GraphicsEngine extends EngineSubsystem {
 			return openGlContext
 		}
 		context.withCloseable {
-			OpenGLRenderer renderer
 			context.withCurrent { ->
 				renderer = new OpenGLRenderer(context, config)
 			}
@@ -147,6 +166,8 @@ class GraphicsEngine extends EngineSubsystem {
 							}
 						}
 					}
+					renderer.updateCamera(cameraPosition)
+
 					context.swapBuffers()
 				}
 				waitForMainThread { ->

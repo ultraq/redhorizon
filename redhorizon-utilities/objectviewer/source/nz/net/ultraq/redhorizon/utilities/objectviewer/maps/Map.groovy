@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.utilities.objectviewer.maps
 
+import nz.net.ultraq.redhorizon.classic.codecs.PackData
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
@@ -24,9 +25,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import org.joml.Rectanglef
+import org.joml.Rectanglei
+
+import groovy.transform.Memoized
+import java.nio.ByteBuffer
 
 /**
  * A map on which a mission or a skirmish can take place.
@@ -35,9 +39,14 @@ import org.joml.Rectanglef
  */
 class Map implements GraphicsElement, SelfVisitable {
 
+	private static final int MAX_CELLS_X = 128
+	private static final int MAX_CELLS_Y = 128
+
 	private final String name
 	private final Theaters theater
-	private final Image background
+	private final Rectanglei boundary
+	private Image background
+	private final List<Image> tiles = []
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -48,49 +57,140 @@ class Map implements GraphicsElement, SelfVisitable {
 
 		name = mapFile['Basic']['Name']
 
-		def theaterString = mapFile['Map']['Theater']
+		def mapSection = mapFile['Map']
+		def theaterString = mapSection['Theater']
 		theater = Theaters.find { theater ->
 			return theater.label.equalsIgnoreCase(theaterString)
 		}
+		def palette = getResourceAsBufferedStream("ra-${theater.label}.pal").withStream { inputStream ->
+			return new PalFile(inputStream).withAlphaMask()
+		}
+		def mapX = mapSection['X'] as int
+		def mapY = mapSection['Y'] as int
+		boundary = new Rectanglei(
+			mapX,
+			mapY,
+			mapX + (mapSection['Width'] as int),
+			mapY + (mapSection['Height'] as int)
+		)
+
 		// TODO: Figure out some way to share knowledge of the path to mix files
 		//       containing the necessary files
-		def tilesetMixFile = new MixFile(new File("mix/red-alert/MapTiles_${theater.label}.mix"))
-		def clearTileName = TilesRA.DEFAULT.name + theater.ext
-		def backgroundTileFile = tilesetMixFile.getEntryData(tilesetMixFile.getEntry(clearTileName)).withStream { inputStream ->
+		new MixFile(new File("mix/red-alert/MapTiles_${theater.label}.mix")).withCloseable { tilesetMixFile ->
+			def clearTileName = TilesRA.DEFAULT.name + theater.ext
+			def backgroundTileFile = tilesetMixFile.getEntryData(tilesetMixFile.getEntry(clearTileName)).withStream { inputStream ->
+				return new TmpFileRA(inputStream)
+			}
+
+			// Use the background tile to create a 5x4 repeating image
+			def combinedBackgroundData = backgroundTileFile.imagesData
+				.combineImages(backgroundTileFile.width, backgroundTileFile.height, 5)
+				.applyPalette(palette)
+			def combinedWidth = backgroundTileFile.width * 5
+			def combinedHeight = backgroundTileFile.height * 4
+			background = new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
+				new Rectanglef(0, 0, MAX_CELLS_X * 24, MAX_CELLS_Y * 24),
+				MAX_CELLS_X * 24 / combinedWidth, MAX_CELLS_Y * 24 / combinedHeight
+			)
+
+			// Decode the Mappack section to get all the tiles needed to build the map
+			def mapPack = mapFile['MapPack']
+			def mapPackBytes = mapDataToBytes(mapPack)
+			(boundary.minY..<boundary.maxY).each { y ->
+				(boundary.minX..<boundary.maxX).each { x ->
+
+					// Get the byte representing the tile
+					def tilePos = (y * 128) + x
+					def tileVal = mapPackBytes.getShort(2 * tilePos)
+					def tilePic = mapPackBytes.get(32768 + tilePos)
+
+					// Retrieve the appropriate tile, skip empty tiles
+					if (tileVal != (byte)0xff && tileVal != (short)0xffff) {
+						def tile = TilesRA.find { tile ->
+							return tileVal == tile.value
+						}
+						def tileFile = getTileByName(tilesetMixFile, tile.name + theater.ext)
+
+						// TODO: Create a single texture for each tile and re-use it but
+						//       render it to a different place
+						def tilePosPxX = x * tileFile.width
+						def tilePosPxY = y * tileFile.height
+						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
+							tileFile.imagesData[tilePic].applyPalette(palette),
+							new Rectanglef(tilePosPxX, tilePosPxY, tilePosPxX + tileFile.width, tilePosPxY + tileFile.height))
+						tiles << tileImage
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieve the tile with the given name from the mix file.
+	 * 
+	 * @param mixFile
+	 * @param tileName
+	 * @return
+	 */
+	@Memoized
+	private static TmpFileRA getTileByName(MixFile mixFile, String tileName) {
+
+		return mixFile.getEntryData(mixFile.getEntry(tileName)).withStream { inputStream ->
 			return new TmpFileRA(inputStream)
 		}
-		def palette = getResourceAsBufferedStream("ra-${theater.label}.pal").withStream { inputStream ->
-			return new PalFile(inputStream)
-		}
+	}
 
-		// Use the background tile to create a 5x4 repeating image
-		def combinedBackgroundData = backgroundTileFile.imagesData
-			.combineImages(backgroundTileFile.width, backgroundTileFile.height, 5)
-			.applyPalette(palette)
-		def combinedWidth = backgroundTileFile.width * 5
-		def combinedHeight = backgroundTileFile.height * 4
-		background = new Image(combinedWidth, combinedHeight, FORMAT_RGB.value, combinedBackgroundData,
-			new Rectanglef(-combinedWidth * 100, -combinedHeight * 100, combinedWidth * 100, combinedHeight * 100),
-			100, 100
-		)
+	/**
+	 * Converts a map's character data into bytes that represent the tiles used
+	 * throughout the map.
+	 * 
+	 * @param data
+	 *   A map section containing the character data to decode.
+	 * @return The converted map data.
+	 */
+	private static ByteBuffer mapDataToBytes(java.util.Map<String, String> data) {
+
+		// Turn the section into 8-bit chars
+		def sourceBytes = ByteBuffer.allocateNative(data.size() * 70) // Lines are only ever 70 characters long
+		(1..data.size()).each { i ->
+			def line = data[i.toString()]
+			line.chars.each { c ->
+				sourceBytes.put(c as byte)
+			}
+		}
+		sourceBytes.flip()
+
+		// Decode section bytes
+		def mapBytes = ByteBuffer.allocateNative(49152) // 128x128x3 bytes max
+		new PackData(6).decode(sourceBytes, mapBytes)
+		return mapBytes
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		background.delete(renderer)
+		tiles.each { tile ->
+			tile.delete(renderer)
+		}
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
 		background.init(renderer)
+		tiles.each { tile ->
+			tile.init(renderer)
+		}
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
 		background.render(renderer)
+		tiles.each { tile ->
+			tile.render(renderer)
+		}
 	}
 
 	/**

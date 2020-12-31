@@ -24,7 +24,13 @@ import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.Map
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -62,10 +68,24 @@ class MapViewer implements WithGraphicsEngine {
 
 				// Key event handler
 				graphicsEngine.on(KeyEvent) { event ->
-					switch (event.key) {
-						case GLFW_KEY_ESCAPE:
-							graphicsEngine.stop()
-							break
+					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+						switch (event.key) {
+							case GLFW_KEY_DOWN:
+								graphicsEngine.cameraDown()
+								break
+							case GLFW_KEY_LEFT:
+								graphicsEngine.cameraLeft()
+								break
+							case GLFW_KEY_RIGHT:
+								graphicsEngine.cameraRight()
+								break
+							case GLFW_KEY_UP:
+								graphicsEngine.cameraUp()
+								break
+							case GLFW_KEY_ESCAPE:
+								graphicsEngine.stop()
+								break
+						}
 					}
 				}
 			}
