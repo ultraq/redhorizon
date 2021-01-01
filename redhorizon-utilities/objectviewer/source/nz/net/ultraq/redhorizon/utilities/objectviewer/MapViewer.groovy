@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
-import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.Map
+import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,7 +60,7 @@ class MapViewer implements WithGraphicsEngine {
 			withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 				// Add the map
-				def map = new Map(mapFile)
+				def map = new MapRA(mapFile)
 				logger.info('Map details: {}', map)
 				graphicsEngine.addSceneElement(map)
 				graphicsEngine.camera.position.set(map.initialPosition, 0)
