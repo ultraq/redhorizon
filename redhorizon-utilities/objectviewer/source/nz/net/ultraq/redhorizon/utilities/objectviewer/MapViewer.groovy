@@ -28,6 +28,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
@@ -82,6 +83,9 @@ class MapViewer implements WithGraphicsEngine {
 								break
 							case GLFW_KEY_UP:
 								graphicsEngine.camera.moveUp()
+								break
+							case GLFW_KEY_SPACE:
+								graphicsEngine.camera.position.set(map.initialPosition, 0)
 								break
 							case GLFW_KEY_ESCAPE:
 								graphicsEngine.stop()
