@@ -28,7 +28,7 @@ class Camera implements GraphicsElement, SelfVisitable {
 	// TODO: Maybe use a projection matrix (Matrix4f) for all of the camera
 	//       properties instead?
 
-	private static final int TICK = 24
+	private static final int TICK = 48
 
 	@Override
 	void delete(GraphicsRenderer renderer) {

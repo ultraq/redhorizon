@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -29,7 +30,6 @@ import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
-import org.joml.Rectanglei
 import org.joml.Vector2f
 
 import groovy.transform.Memoized
@@ -47,9 +47,15 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	private static final int TILE_WIDTH = 24
 	private static final int TILE_HEIGHT = 24
 
+	private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
+	private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)
+	private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
+	private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
+
 	final String name
 	final Theaters theater
-	final Rectanglei boundary
+	final Rectanglef boundary
+	final Vector2f[] boundaryPoints
 	final Vector2f initialPosition
 
 	private Image background
@@ -75,12 +81,14 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		}
 		def mapX = mapSection['X'] as int
 		def mapY = mapSection['Y'] as int
-		boundary = new Rectanglei(
-			mapX,
-			mapY,
-			mapX + (mapSection['Width'] as int),
-			mapY + (mapSection['Height'] as int)
+		boundary = new Rectanglef(
+			cellCoordsAsWorldCoords(mapX, mapY),
+			cellCoordsAsWorldCoords(
+				mapX + (mapSection['Width'] as int),
+				mapY + (mapSection['Height'] as int)
+			)
 		)
+		boundaryPoints = boundary.asPoints()
 
 		def waypoints = mapFile['Waypoints']
 		def waypoint98 = waypoints['98'] as int
@@ -197,7 +205,10 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		background.render(renderer)
 		mapPackLayer.render(renderer)
-		overlayPackLayer.render(renderer)
+//		overlayPackLayer.render(renderer)
+		renderer.drawLine(Colour.RED.withAlpha(0.5f), X_AXIS_MIN, X_AXIS_MAX)
+		renderer.drawLine(Colour.RED.withAlpha(0.5f), Y_AXIS_MIN, Y_AXIS_MAX)
+		renderer.drawLineLoop(Colour.YELLOW.withAlpha(0.5f), boundaryPoints)
 	}
 
 	/**
@@ -208,7 +219,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	@Override
 	String toString() {
 
-		return "Name: ${name}, Theater: ${theater}"
+		return """
+			Name: ${name}
+			Theater: ${theater}
+			Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
+		""".stripIndent()
 	}
 
 	/**
@@ -341,13 +356,13 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 					// Select the proper orientation for wall tiles
 					if (tile.isWall) {
-						if (tileTypes[tilePos.add(0, 1, new Vector2f())]?.isWall) {
+						if (tileTypes[tilePos.add(0, -1, new Vector2f())]?.isWall) {
 							imageVariant |= 0x01
 						}
 						if (tileTypes[tilePos.add(1, 0, new Vector2f())]?.isWall) {
 							imageVariant |= 0x02
 						}
-						if (tileTypes[tilePos.add(0, -1, new Vector2f())]?.isWall) {
+						if (tileTypes[tilePos.add(0, 1, new Vector2f())]?.isWall) {
 							imageVariant |= 0x04
 						}
 						if (tileTypes[tilePos.add(-1, 0, new Vector2f())]?.isWall) {
@@ -377,7 +392,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 					def tilePosW = cellCoordsAsWorldCoords(tilePos.x as int, tilePos.y as int)
 					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 						tileFile.imagesData[imageVariant].applyPalette(palette),
-						new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
+						new Rectanglef(tilePosW, tilePosW.add(tileFile.width, tileFile.height, new Vector2f())))
 					tiles << tileImage
 				}
 			}

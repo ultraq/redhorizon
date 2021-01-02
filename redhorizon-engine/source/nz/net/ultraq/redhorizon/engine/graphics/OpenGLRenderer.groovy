@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Rectanglef
+import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
@@ -35,7 +36,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
 	// Configuration values
-	private final Colours clearColour
+	private final Colour clearColour
 	private final boolean filter
 
 	private final Vector3f currentPosition = new Vector3f()
@@ -60,6 +61,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
+		glLineWidth(2)
 
 		// Disable antialiasing globally
 //		if (gl.isExtensionAvailable("GL_ARB_multisample")) {
@@ -110,10 +112,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glOrtho(
 			-cameraSize.width / 2, cameraSize.width / 2,
 			-cameraSize.height / 2, cameraSize.height / 2,
-			0, 100
+			0, 10
 		)
 		glMatrixMode(GL_MODELVIEW)
 		glLoadIdentity()
+		glTranslatef(0, 0, -5) // Push back the camera to view the z axis at 0
 	}
 
 	/**
@@ -186,10 +189,31 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
+	void drawLine(Colour colour, Vector2f vertexA, Vector2f vertexB) {
+
+		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
+		glBegin(GL_LINES)
+			glVertex2f(vertexA.x, vertexA.y)
+			glVertex2f(vertexB.x, vertexB.y)
+		checkForError { -> glEnd() }
+	}
+
+	@Override
+	void drawLineLoop(Colour colour, Vector2f... vertices) {
+
+		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
+		glBegin(GL_LINE_LOOP)
+			vertices.each { vertex ->
+				glVertex2f(vertex.x, vertex.y)
+			}
+		checkForError { -> glEnd() }
+	}
+
+	@Override
 	void drawTexture(int textureId, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
 
 		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
-		checkForError { -> glColor4f(1, 1, 1, 1) }
+		checkForError { -> glColor3f(1, 1, 1) }
 		glBegin(GL_QUADS)
 			glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)
 			glTexCoord2f(0, flipVertical ? 0 : repeatY); glVertex2f(rectangle.minX, rectangle.maxY)

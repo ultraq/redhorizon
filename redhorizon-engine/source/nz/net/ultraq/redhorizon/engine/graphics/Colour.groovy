@@ -24,12 +24,28 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-enum Colours {
+class Colour {
 
-	BLACK(0, 0, 0),
-	WHITE(255, 255, 255)
+	static final Colour BLACK  = new Colour(0, 0, 0)
+	static final Colour BLUE   = new Colour(0, 0, 1)
+	static final Colour GREEN  = new Colour(0, 1, 0)
+	static final Colour RED    = new Colour(1, 0, 0)
+	static final Colour WHITE  = new Colour(1, 1, 1)
+	static final Colour YELLOW = new Colour(1, 0.5, 0)
 
 	final float r
 	final float g
 	final float b
+	final float a = 1
+
+	/**
+	 * Return a new colour from a base one but with a specific alpha value.
+	 * 
+	 * @param alpha
+	 * @return
+	 */
+	Colour withAlpha(float alpha) {
+
+		return new Colour(this.r, this.g, this.b, alpha)
+	}
 }

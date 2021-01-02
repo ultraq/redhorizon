@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
-import nz.net.ultraq.redhorizon.engine.graphics.Colours
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -102,7 +102,7 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def config = new GraphicsConfiguration(
-			clearColour: Colours.WHITE
+			clearColour: Colour.WHITE
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import static nz.net.ultraq.redhorizon.engine.graphics.Colours.BLACK
+import static Colour.BLACK
 
 /**
  * Graphics configuration object.
@@ -25,7 +25,7 @@ import static nz.net.ultraq.redhorizon.engine.graphics.Colours.BLACK
  */
 class GraphicsConfiguration {
 
-	Colours clearColour = BLACK
+	Colour clearColour = BLACK
 
 	/**
 	 * Whether to use nearest-neighbour filtering on textures.

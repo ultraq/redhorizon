@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.extensions
 
 import org.joml.Rectanglef
+import org.joml.Vector2f
 import org.joml.Vector3f
 
 /**
@@ -25,6 +26,22 @@ import org.joml.Vector3f
  * @author Emanuel Rabina
  */
 class JomlExtensions {
+
+	/**
+	 * Return each point around the rectangle as a series of vectors.
+	 * 
+	 * @param self
+	 * @return An array of 4 vectors, one for each x/y point around the rectangle.
+	 */
+	static Vector2f[] asPoints(Rectanglef self) {
+
+		return [
+			new Vector2f(self.minX, self.minY),
+			new Vector2f(self.minX, self.maxY),
+			new Vector2f(self.maxX, self.maxY),
+			new Vector2f(self.maxX, self.minY)
+		]
+	}
 
 	/**
 	 * Return a vector's values as a {@code float[]}.
@@ -42,6 +59,9 @@ class JomlExtensions {
 
 	/**
 	 * Center the rectangle about the origin.
+	 * 
+	 * @param self
+	 * @return This rectangle.
 	 */
 	static Rectanglef center(Rectanglef self) {
 
