@@ -189,23 +189,24 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void drawLine(Colour colour, Vector2f vertexA, Vector2f vertexB) {
+	void drawLineLoop(Colour colour, Vector2f... vertices) {
 
-		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
-		glBegin(GL_LINES)
-			glVertex2f(vertexA.x, vertexA.y)
-			glVertex2f(vertexB.x, vertexB.y)
-		checkForError { -> glEnd() }
+		drawPrimitive(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
-	void drawLineLoop(Colour colour, Vector2f... vertices) {
+	void drawLines(Colour colour, Vector2f... vertices) {
+
+		drawPrimitive(GL_LINES, colour, vertices)
+	}
+
+	private void drawPrimitive(int primitiveType, Colour colour, Vector2f... vertices) {
 
 		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
-		glBegin(GL_LINE_LOOP)
-			vertices.each { vertex ->
-				glVertex2f(vertex.x, vertex.y)
-			}
+		glBegin(primitiveType)
+		vertices.each { vertex ->
+			glVertex3f(vertex.x, vertex.y, 2)
+		}
 		checkForError { -> glEnd() }
 	}
 

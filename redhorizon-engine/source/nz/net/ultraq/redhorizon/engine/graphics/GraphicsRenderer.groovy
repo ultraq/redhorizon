@@ -67,21 +67,20 @@ interface GraphicsRenderer {
 	void deleteTextures(int... textureIds)
 
 	/**
-	 * Draw a coloured line.
-	 * 
-	 * @param colour
-	 * @param vertexA
-	 * @param vertexB
-	 */
-	void drawLine(Colour colour, Vector2f vertexA, Vector2f vertexB)
-
-	/**
 	 * Draw a coloured line that closes itself.
 	 * 
 	 * @param colour
 	 * @param vertices
 	 */
 	void drawLineLoop(Colour colour, Vector2f... vertices)
+
+	/**
+	 * Draw any number of coloured lines.
+	 * 
+	 * @param colour
+	 * @param vertices
+	 */
+	void drawLines(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Draw the texture over the given rectangle.

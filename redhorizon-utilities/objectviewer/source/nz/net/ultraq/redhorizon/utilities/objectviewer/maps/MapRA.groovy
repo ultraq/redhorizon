@@ -79,20 +79,14 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		def palette = getResourceAsBufferedStream("ra-${theater.label.toLowerCase()}.pal").withStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
-		def mapX = mapSection['X'] as int
-		def mapY = mapSection['Y'] as int
-		boundary = new Rectanglef(
-			cellCoordsAsWorldCoords(mapX, mapY),
-			cellCoordsAsWorldCoords(
-				mapX + (mapSection['Width'] as int),
-				mapY + (mapSection['Height'] as int)
-			)
-		)
+		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
+		def mapWH = new Vector2f(mapXY).add(mapSection['Width'] as int, mapSection['Height'] as int)
+		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).switchY()
 		boundaryPoints = boundary.asPoints()
 
 		def waypoints = mapFile['Waypoints']
 		def waypoint98 = waypoints['98'] as int
-		initialPosition = cellNumberAsWorldCoords(waypoint98)
+		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		// TODO: Figure out some way to share knowledge of the path to mix files
 		//       containing the necessary files
@@ -117,43 +111,6 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			mapPackLayer = new MapRAMapPack(tilesMixFile, palette, mapDataToBytes(mapFile['MapPack'], 6))
 			overlayPackLayer = new MapRAOverlayPack(tilesMixFile, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
 		}
-	}
-
-	/**
-	 * Convert a set of cell coordinates into a single cell value.
-	 * 
-	 * @param cellX
-	 * @param cellY
-	 * @return
-	 */
-	private static int cellCoordsAsNumber(int cellX, int cellY) {
-
-		return cellY * TILES_Y + cellX
-	}
-
-	/**
-	 * Convert a set of cell coordinates into world coordinates.
-	 * 
-	 * @param cellX
-	 * @param cellY
-	 * @return
-	 */
-	private static Vector2f cellCoordsAsWorldCoords(int cellX, int cellY) {
-
-		return new Vector2f(cellX * TILE_WIDTH, (TILES_Y * TILE_HEIGHT) - (cellY * TILE_HEIGHT))
-	}
-
-	/**
-	 * Convert a number representing a cell in a map into world coordinates.
-	 * 
-	 * @param cellNumber
-	 * @return
-	 */
-	private static Vector2f cellNumberAsWorldCoords(int cellNumber) {
-
-		def cellX = cellNumber % TILES_Y
-		def cellY = TILES_Y - Math.ceil(cellNumber / TILES_X)
-		return new Vector2f(cellX * TILE_WIDTH, cellY * TILE_HEIGHT as float)
 	}
 
 	@Override
@@ -205,10 +162,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		background.render(renderer)
 		mapPackLayer.render(renderer)
-//		overlayPackLayer.render(renderer)
-		renderer.drawLine(Colour.RED.withAlpha(0.5f), X_AXIS_MIN, X_AXIS_MAX)
-		renderer.drawLine(Colour.RED.withAlpha(0.5f), Y_AXIS_MIN, Y_AXIS_MAX)
-		renderer.drawLineLoop(Colour.YELLOW.withAlpha(0.5f), boundaryPoints)
+		overlayPackLayer.render(renderer)
+		renderer.drawLines(Colour.RED, X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
+		renderer.drawLineLoop(Colour.YELLOW, boundaryPoints)
 	}
 
 	/**
@@ -243,11 +199,13 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
+					// The +1 shift is to make up for the difference in coordinate systems
+					def tileCoord = new Vector2f(x, y + 1)
 
 					// Get the byte representing the tile
-					def tilePos = cellCoordsAsNumber(x, y)
-					def tileVal = tileData.getShort()
-					def tilePic = tileData.get(TILES_X * TILES_Y * 2 + tilePos)
+					def tileValOffset = y * TILES_Y + x
+					def tileVal = tileData.getShort(tileValOffset * 2)
+					def tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset)
 
 					// Retrieve the appropriate tile, skip empty tiles
 					if (tileVal != 0xff && tileVal != -1) {
@@ -258,10 +216,10 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 						// TODO: Create a single texture for each tile and re-use it but
 						//       render it to a different place
-						def tilePosW = cellNumberAsWorldCoords(tilePos)
+						def tilePos = new Vector2f(tileCoord).asWorldCoords()
 						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 							tileFile.imagesData[tilePic].applyPalette(palette),
-							new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
+							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
 						tiles << tileImage
 					}
 				}
@@ -332,6 +290,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			new MixFile(new File('mix/red-alert/Conquer.mix')).withCloseable { conquerMixFile ->
 				TILES_X.times { y ->
 					TILES_Y.times { x ->
+						// The +1 shift is to make up for the difference in coordinate systems
+						def tileCoord = new Vector2f(x, y + 1)
 
 						// Get the byte representing the tile
 						def tileVal = tileData.get()
@@ -341,7 +301,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							def tile = MapRAOverlayPackTiles.find { tile ->
 								return tile.value == tileVal
 							}
-							tileTypes << [(new Vector2f(x, y)): tile]
+							tileTypes << [(tileCoord): tile]
 						}
 					}
 				}
@@ -389,7 +349,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 					// TODO: Create a single texture for each tile and re-use it but
 					//       render it to a different place
-					def tilePosW = cellCoordsAsWorldCoords(tilePos.x as int, tilePos.y as int)
+					def tilePosW = new Vector2f(tilePos).asWorldCoords()
 					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 						tileFile.imagesData[imageVariant].applyPalette(palette),
 						new Rectanglef(tilePosW, tilePosW.add(tileFile.width, tileFile.height, new Vector2f())))
