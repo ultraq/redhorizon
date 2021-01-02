@@ -22,7 +22,7 @@ import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11.*
+import static org.lwjgl.opengl.GL21.*
 
 import java.nio.ByteBuffer
 
@@ -70,19 +70,19 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		// Texturing controls
 		glEnable(GL_TEXTURE_2D)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
 
 		// Texture blend combo, create a mixture of GL_BLEND on RGB, GL_REPLACE on A
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_TEXTURE)
-//		gl.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_TEXTURE)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_COLOR)
 
 		// Depth testing
 		glEnable(GL_DEPTH_TEST)
@@ -200,12 +200,19 @@ class OpenGLRenderer implements GraphicsRenderer {
 		drawPrimitive(GL_LINES, colour, vertices)
 	}
 
-	private void drawPrimitive(int primitiveType, Colour colour, Vector2f... vertices) {
+	/**
+	 * Draw any kind of coloured primitive.
+	 * 
+	 * @param primitiveType
+	 * @param colour
+	 * @param vertices
+	 */
+	private static void drawPrimitive(int primitiveType, Colour colour, Vector2f... vertices) {
 
 		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
 		glBegin(primitiveType)
 		vertices.each { vertex ->
-			glVertex3f(vertex.x, vertex.y, 2)
+			glVertex2f(vertex.x, vertex.y)
 		}
 		checkForError { -> glEnd() }
 	}

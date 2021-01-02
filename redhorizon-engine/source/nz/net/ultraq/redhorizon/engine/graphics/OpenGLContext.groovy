@@ -88,7 +88,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 			calculateWindowSize(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 
