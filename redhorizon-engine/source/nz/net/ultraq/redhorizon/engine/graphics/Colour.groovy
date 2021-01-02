@@ -31,7 +31,7 @@ class Colour {
 	static final Colour GREEN  = new Colour(0, 1, 0)
 	static final Colour RED    = new Colour(1, 0, 0)
 	static final Colour WHITE  = new Colour(1, 1, 1)
-	static final Colour YELLOW = new Colour(1, 0.5, 0)
+	static final Colour YELLOW = new Colour(1, 1, 0)
 
 	final float r
 	final float g

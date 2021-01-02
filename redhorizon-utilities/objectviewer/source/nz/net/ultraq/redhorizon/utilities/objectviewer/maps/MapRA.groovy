@@ -352,7 +352,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 					def tilePosW = new Vector2f(tilePos).asWorldCoords()
 					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 						tileFile.imagesData[imageVariant].applyPalette(palette),
-						new Rectanglef(tilePosW, tilePosW.add(tileFile.width, tileFile.height, new Vector2f())))
+						new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
 					tiles << tileImage
 				}
 			}

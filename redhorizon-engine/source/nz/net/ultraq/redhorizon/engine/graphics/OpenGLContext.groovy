@@ -18,12 +18,14 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.ScrollEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback
 import org.lwjgl.glfw.GLFWKeyCallback
+import org.lwjgl.glfw.GLFWScrollCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -120,6 +122,13 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 			}
 		})
 
+		glfwSetScrollCallback(window, new GLFWScrollCallback() {
+			@Override
+			void invoke(long window, double xoffset, double yoffset) {
+				trigger(new ScrollEvent(xoffset, yoffset))
+			}
+		})
+
 		withCurrent { ->
 			glfwSwapInterval(1)
 		}
@@ -178,7 +187,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 	/**
 	 * Communicate with the window so we're not locking up.
 	 */
-	void pollEvents() {
+	static void pollEvents() {
 
 		glfwPollEvents()
 	}

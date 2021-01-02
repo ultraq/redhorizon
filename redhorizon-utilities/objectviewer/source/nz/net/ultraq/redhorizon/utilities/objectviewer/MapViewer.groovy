@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
@@ -45,6 +46,7 @@ import java.util.concurrent.Executors
 class MapViewer implements WithGraphicsEngine {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapViewer)
+	private static final int TICK = 48
 
 	final IniFile mapFile
 
@@ -73,16 +75,16 @@ class MapViewer implements WithGraphicsEngine {
 					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 						switch (event.key) {
 							case GLFW_KEY_DOWN:
-								graphicsEngine.camera.moveDown()
+								graphicsEngine.camera.position.add(0, -TICK, 0)
 								break
 							case GLFW_KEY_LEFT:
-								graphicsEngine.camera.moveLeft()
+								graphicsEngine.camera.position.add(-TICK, 0, 0)
 								break
 							case GLFW_KEY_RIGHT:
-								graphicsEngine.camera.moveRight()
+								graphicsEngine.camera.position.add(TICK, 0, 0)
 								break
 							case GLFW_KEY_UP:
-								graphicsEngine.camera.moveUp()
+								graphicsEngine.camera.position.add(0, TICK, 0)
 								break
 							case GLFW_KEY_SPACE:
 								graphicsEngine.camera.position.set(map.initialPosition, 0)
@@ -92,6 +94,10 @@ class MapViewer implements WithGraphicsEngine {
 								break
 						}
 					}
+				}
+				// Use scroll input to move around the map
+				graphicsEngine.on(ScrollEvent) { event ->
+					graphicsEngine.camera.position.add(3 * -event.xOffset as float, 3 * event.yOffset as float, 0)
 				}
 			}
 		}
