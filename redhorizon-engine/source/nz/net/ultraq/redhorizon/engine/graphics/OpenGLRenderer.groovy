@@ -227,6 +227,21 @@ class OpenGLRenderer implements GraphicsRenderer {
 		checkForError { -> glEnd() }
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		return """
+			OpenGL graphics renderer
+			 - Vendor: ${glGetString(GL_VENDOR)}
+			 - Device name: ${glGetString(GL_RENDERER)}
+			 - OpenGL version: ${glGetString(GL_VERSION)}
+		""".stripIndent()
+	}
+
 	@Override
 	void updateCamera(Vector3f position) {
 

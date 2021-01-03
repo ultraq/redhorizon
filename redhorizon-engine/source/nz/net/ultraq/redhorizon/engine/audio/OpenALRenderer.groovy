@@ -167,6 +167,22 @@ class OpenALRenderer implements AudioRenderer {
 		}
 	}
 
+	/**
+	 * Emit some information about the OpenAL rendering device.
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		return """
+			OpenAL audio renderer
+			 - Vendor: ${alGetString(AL_VENDOR)}
+			 - Device name: ${alGetString(AL_RENDERER)}
+			 - OpenAL version: ${alGetString(AL_VERSION)}
+		""".stripIndent()
+	}
+
 	@Override
 	void unqueueBuffers(int sourceId, int... bufferIds) {
 

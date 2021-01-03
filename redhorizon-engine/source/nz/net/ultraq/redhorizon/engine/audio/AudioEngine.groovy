@@ -69,6 +69,7 @@ class AudioEngine extends EngineSubsystem {
 		new OpenALContext().withCloseable { context ->
 			context.withCurrent { ->
 				def renderer = new OpenALRenderer()
+				logger.debug(renderer.toString())
 				def audioElementStates = [:]
 
 				// Rendering loop

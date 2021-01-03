@@ -118,6 +118,7 @@ class GraphicsEngine extends EngineSubsystem {
 		context.withCloseable {
 			context.withCurrent { ->
 				renderer = new OpenGLRenderer(context, config)
+				logger.debug(renderer.toString())
 			}
 			def graphicsElementStates = [:]
 
