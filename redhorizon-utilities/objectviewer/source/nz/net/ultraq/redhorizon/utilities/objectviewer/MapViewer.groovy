@@ -49,6 +49,7 @@ class MapViewer implements WithGraphicsEngine {
 	private static final int TICK = 48
 
 	final IniFile mapFile
+	final boolean fullScreen
 
 	/**
 	 * Display the map.
@@ -57,7 +58,9 @@ class MapViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', mapFile)
 
-		def config = new GraphicsConfiguration()
+		def config = new GraphicsConfiguration(
+			fullScreen: fullScreen
+		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGraphicsEngine(executorService, config) { graphicsEngine ->

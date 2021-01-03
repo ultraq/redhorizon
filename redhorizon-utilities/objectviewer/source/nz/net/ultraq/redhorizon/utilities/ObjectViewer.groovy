@@ -65,6 +65,9 @@ class ObjectViewer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
 	String entryName
 
+	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
+	boolean fullScreen
+
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
@@ -150,7 +153,7 @@ class ObjectViewer implements Callable<Integer> {
 				new UnitViewer(objectFile, objectId, paletteType).view()
 				break
 			case IniFile:
-				new MapViewer(objectFile).view()
+				new MapViewer(objectFile, fullScreen).view()
 				break
 			default:
 				logger.error('No viewer for the associated file class of {}', objectFile)
