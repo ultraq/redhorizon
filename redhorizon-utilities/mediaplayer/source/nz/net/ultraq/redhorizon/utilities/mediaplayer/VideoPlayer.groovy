@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
-import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.StopEvent

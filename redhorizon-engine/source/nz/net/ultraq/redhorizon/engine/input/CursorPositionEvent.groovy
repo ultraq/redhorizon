@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.input
 
 import groovy.transform.TupleConstructor
 
 /**
- * Event for mouse input
+ * Event for cursor movement.
  * 
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MouseButtonEvent extends InputEvent {
+class CursorPositionEvent extends InputEvent {
 
-	final int button
-	final int action
-	final int mods
+	final double xPos
+	final double yPos
 }

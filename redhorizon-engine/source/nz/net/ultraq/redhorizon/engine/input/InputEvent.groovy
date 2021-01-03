@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.input
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Event for cursor movement.
+ * Common type for all input events.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class CursorPositionEvent extends InputEvent {
-
-	final double xPos
-	final double yPos
+abstract class InputEvent extends Event {
 }

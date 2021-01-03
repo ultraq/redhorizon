@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.input
 
 import groovy.transform.TupleConstructor
 
 /**
- * Event for scrolling input
+ * Event for mouse input
  * 
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ScrollEvent extends InputEvent {
+class MouseButtonEvent extends InputEvent {
 
-	final double xOffset
-	final double yOffset
+	final int button
+	final int action
+	final int mods
 }

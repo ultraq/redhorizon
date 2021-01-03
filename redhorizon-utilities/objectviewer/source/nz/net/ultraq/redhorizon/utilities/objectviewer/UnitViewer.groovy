@@ -19,11 +19,11 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.GameTime
-import nz.net.ultraq.redhorizon.engine.KeyEvent
 import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.classic.PaletteTypes

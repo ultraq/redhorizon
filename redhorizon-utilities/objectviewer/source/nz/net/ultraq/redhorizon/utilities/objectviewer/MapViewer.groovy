@@ -17,12 +17,12 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
-import nz.net.ultraq.redhorizon.engine.CursorPositionEvent
-import nz.net.ultraq.redhorizon.engine.KeyEvent
-import nz.net.ultraq.redhorizon.engine.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
 import org.joml.Vector2f

@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
-import nz.net.ultraq.redhorizon.engine.CursorPositionEvent
-import nz.net.ultraq.redhorizon.engine.KeyEvent
-import nz.net.ultraq.redhorizon.engine.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.ScrollEvent
+import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 

@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
-import nz.net.ultraq.redhorizon.engine.InputEvent
+import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
