@@ -223,6 +223,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 						def tileFile = getTileByName(tileMixFile, tile.name + theater.ext)
 
+						// Skip references to invalid tiles
+						if (tilePic >= tileFile.imagesData.length) {
+							return
+						}
+
 						// TODO: Create a single texture for each tile and re-use it but
 						//       render it to a different place
 						def tilePos = new Vector2f(tileCoord).asWorldCoords()
