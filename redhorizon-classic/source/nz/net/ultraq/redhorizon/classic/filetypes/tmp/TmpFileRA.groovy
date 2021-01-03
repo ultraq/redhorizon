@@ -38,7 +38,6 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions(['int', 'sno', 'tem'])
 class TmpFileRA implements ImagesFile {
 
 	// File header
@@ -107,5 +106,16 @@ class TmpFileRA implements ImagesFile {
 				imagesData[i] = ByteBuffer.allocateNative(width * height)
 			}
 		}
+	}
+
+	/**
+	 * Emit some information about this template file.
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		return "TMP file (RA), contains ${numImages} ${width}x${height} images (no palette)"
 	}
 }

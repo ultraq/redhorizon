@@ -29,10 +29,12 @@ enum Theaters {
 	// Available theater types
 	DESERT    ('Desert',    '.des'),
 	INTERIOR  ('Interior',  '.int'),
-	SNOW      ('Snow',      '.sno'),
-	TEMPERATE ('Temperate', '.tem'),
+	SNOW      ('Snow',      '.sno', 5, 4),
+	TEMPERATE ('Temperate', '.tem', 4, 4),
 	WINTER    ('Winter',    '.win')
 
 	final String label
 	final String ext
+	final int clearX
+	final int clearY
 }

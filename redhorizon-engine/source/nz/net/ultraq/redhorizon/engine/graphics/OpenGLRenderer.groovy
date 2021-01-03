@@ -70,7 +70,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		// Texturing controls
 		glEnable(GL_TEXTURE_2D)
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE)
 
 		// Texture blend combo, create a mixture of GL_BLEND on RGB, GL_REPLACE on A
 //		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE)

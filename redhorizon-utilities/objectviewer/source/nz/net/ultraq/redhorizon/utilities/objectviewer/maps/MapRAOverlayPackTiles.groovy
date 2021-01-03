@@ -16,12 +16,15 @@
 
 package nz.net.ultraq.redhorizon.utilities.objectviewer.maps
 
+import groovy.transform.TupleConstructor
+
 /**
  * All of the overlay tiles and their matching name and hex values in the
  * scenario files.
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor
 enum MapRAOverlayPackTiles {
 
 	// Walls
@@ -51,32 +54,17 @@ enum MapRAOverlayPackTiles {
 	FIELD_POTATO    ('V18', 0x13, false, false),
 
 	// Crates
-	CRATE_WOOD   ('WCRATE', 0x15, false, false),
-	CRATE_SILVER ('SCRATE', 0x16, false, false),
-	CRATE_WATER  ('WWCRATE', 0x18, false, false),
+	CRATE_WOOD   ('WCRATE', 0x15, false, false, true),
+	CRATE_SILVER ('SCRATE', 0x16, false, false, true),
+	CRATE_WATER  ('WWCRATE', 0x18, false, false, true),
 
 	// Misc
 	FLAGHOLDER ('FPLS', 0x14, false, false)
 
 	// Tile attributes
 	final String name
-	final byte value
+	final int value
 	final boolean isWall
 	final boolean isResource
-
-	/**
-	 * Constructor, initializes each enumerated type.
-	 * 
-	 * @param name       The name (and filename) for the map tile.
-	 * @param value      OverlayPack value for the tile.
-	 * @param isWall     Whether this overlay represents a wall.
-	 * @param isResource Whether this overlay represents a harvestable resource.
-	 */
-	private MapRAOverlayPackTiles(String name, int value, boolean isWall, boolean isResource) {
-
-		this.name       = name
-		this.value      = (byte)value
-		this.isWall     = isWall
-		this.isResource = isResource
-	}
+	final boolean useShp = false
 }

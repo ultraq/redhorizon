@@ -16,12 +16,15 @@
 
 package nz.net.ultraq.redhorizon.utilities.objectviewer.maps
 
+import groovy.transform.TupleConstructor
+
 /**
  * All of the tiles available across the snow and temperate tilesets for Red
  * Alert maps.
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor
 enum MapRAMapPackTiles {
 
 	// Standard tiles
@@ -36,11 +39,11 @@ enum MapRAMapPackTiles {
 	FJORD_SS   ('SH09', 0x0b),
 	COAST_SS09 ('SH10', 0x0c), COAST_SS10 ('SH11', 0x0d), COAST_SS11 ('SH12', 0x0e),
 
-	// Short tiles, water on western edge
-	COAST_SW01 ('SH13', 0x10), COAST_SW02 ('SH14', 0x11), COAST_SW03 ('SH15', 0x12),
-	COAST_SW04 ('SH16', 0x13), COAST_SW05 ('SH17', 0x14),
-	FJORD_SW   ('SH18', 0x15),
-	COAST_SW06 ('SH19', 0xff), COAST_SW07 ('SH20', 0x16), COAST_SW08 ('SH21', 0x17),
+	// Shore tiles, water on western edge
+	COAST_SW01 ('SH13', 0x0f), COAST_SW02 ('SH14', 0x10), COAST_SW03 ('SH15', 0x11),
+	COAST_SW04 ('SH16', 0x12), COAST_SW05 ('SH17', 0x13), COAST_SW06 ('SH18', 0x14),
+	FJORD_SW   ('SH19', 0x15),
+	COAST_SW07 ('SH20', 0x16), COAST_SW08 ('SH21', 0x17),
 
 	// Shore tiles, water on northern edge
 	COAST_SN01 ('SH22', 0x18), COAST_SN02 ('SH23', 0x19), COAST_SN03 ('SH24', 0x1a),
@@ -113,16 +116,16 @@ enum MapRAMapPackTiles {
 	ROCKS3 ('B3', 0x63),
 
 	// Coastal bridges
-	COAST_BRIDGE_S1    ('BR1A', 0xf9), COAST_BRIDGE_S2    ('BR1B', 0xfa), COAST_BRIDGE_S3    ('BR1C', 0xfb),
-	COAST_BRIDGE_BIT_S ('BR1X', 0x10e),
-	COAST_BRIDGE_N1    ('BR2A', 0xfc), COAST_BRIDGE_N2    ('BR2B', 0xfd), COAST_BRIDGE_N3    ('BR2C', 0xfe),
-	COAST_BRIDGE_BIT_N ('BR2X', 0x10f),
+	COAST_BRIDGE_S1    ('BR1A', 0xeb), COAST_BRIDGE_S2    ('BR1B', 0xec), COAST_BRIDGE_S3    ('BR1C', 0xed),
+	COAST_BRIDGE_BIT_S ('BR1X', 0x17c),
+	COAST_BRIDGE_N1    ('BR2A', 0xee), COAST_BRIDGE_N2    ('BR2B', 0xef), COAST_BRIDGE_N3    ('BR2C', 0xf0),
+	COAST_BRIDGE_BIT_N ('BR2X', 0x17d),
 
-	COAST_BRIDGE_J1 ('BR3A', 0xf1),  COAST_BRIDGE_J2 ('BR3B', 0x101), COAST_BRIDGE_J3 ('BR3C', 0x102),
-	COAST_BRIDGE_J4 ('BR3D', 0x103), COAST_BRIDGE_J5 ('BR3E', 0x104), COAST_BRIDGE_J6 ('BR3F', 0x105),
+	COAST_BRIDGE_J1 ('BR3A', 0xf1), COAST_BRIDGE_J2 ('BR3B', 0xf2), COAST_BRIDGE_J3 ('BR3C', 0xf3),
+	COAST_BRIDGE_J4 ('BR3D', 0xf4), COAST_BRIDGE_J5 ('BR3E', 0xf5), COAST_BRIDGE_J6 ('BR3F', 0xf6),
 
-	COAST_SANDBAR_N  ('F01', 0x106), COAST_SANDBAR_JV ('F02', 0x107), COAST_SANDBAR_S  ('F03', 0x108),
-	COAST_SANDBAR_W  ('F04', 0x109), COAST_SANDBAR_JH ('F05', 0x10a), COAST_SANDBAR_E  ('F06', 0x10b),
+	COAST_SANDBAR_N  ('F01', 0xf7), COAST_SANDBAR_JV ('F02', 0xf8), COAST_SANDBAR_S  ('F03', 0xf9),
+	COAST_SANDBAR_W  ('F04', 0xfa), COAST_SANDBAR_JH ('F05', 0xfb), COAST_SANDBAR_E  ('F06', 0xfc),
 
 	// Various debris
 	DEBRIS01 ('P01', 0x67),
@@ -159,11 +162,11 @@ enum MapRAMapPackTiles {
 	RIVER_CROSS_VER       ('Ford1', 0x81),
 	RIVER_CROSS_HOR       ('Ford2', 0x82),
 	RIVER_BRIDGE_NESW_FIX ('Bridge1', 0x83),
-	RIVER_BRIDGE_NESW_HLF ('Bridge1h', 0xff),
+	RIVER_BRIDGE_NESW_HLF ('Bridge1h', 0x17a),
 	RIVER_BRIDGE_NESW_BRK ('Bridge1d', 0x84),
 	RIVER_BRIDGE_NESW_BIT ('Bridge1x', 0x17e),
 	RIVER_BRIDGE_NWSE_FIX ('Bridge2', 0x85),
-	RIVER_BRIDGE_NWSE_HLF ('Bridge2h', 0xff),
+	RIVER_BRIDGE_NWSE_HLF ('Bridge2h', 0x214),
 	RIVER_BRIDGE_NWSE_BRK ('Bridge2d', 0x86),
 	RIVER_BRIDGE_NWSE_BIT ('Bridge2x', 0x17f),
 
@@ -252,17 +255,5 @@ enum MapRAMapPackTiles {
 
 	// Tile attributes
 	final String name
-	final short value
-
-	/**
-	 * Constructor, initializes each tile
-	 * 
-	 * @param name	 The name (and filename) for the map tile.
-	 * @param value	 MapPack value for the tile.
-	 */
-	private MapRAMapPackTiles(String name, int value) {
-
-		this.name  = name
-		this.value = (short)value
-	}
+	final int value
 }

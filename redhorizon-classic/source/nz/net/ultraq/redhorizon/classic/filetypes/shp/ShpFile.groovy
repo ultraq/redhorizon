@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions(['shp', 'sno', 'tem'])
+@FileExtensions('shp')
 class ShpFile implements ImagesFile, Writable {
 
 	private static final int HEADER_SIZE = 14

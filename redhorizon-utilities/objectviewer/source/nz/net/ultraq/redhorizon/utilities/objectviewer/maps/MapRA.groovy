@@ -31,6 +31,8 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import groovy.transform.Memoized
 import java.nio.ByteBuffer
@@ -41,6 +43,8 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 class MapRA implements GraphicsElement, SelfVisitable {
+
+	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
 	private static final int TILES_X = 128
 	private static final int TILES_Y = 128
@@ -98,10 +102,10 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 			// Use the background tile to create a 5x4 repeating image
 			def combinedBackgroundData = backgroundTileFile.imagesData
-				.combineImages(backgroundTileFile.width, backgroundTileFile.height, 5)
+				.combineImages(backgroundTileFile.width, backgroundTileFile.height, theater.clearX)
 				.applyPalette(palette)
-			def combinedWidth = backgroundTileFile.width * 5
-			def combinedHeight = backgroundTileFile.height * 4
+			def combinedWidth = backgroundTileFile.width * theater.clearX
+			def combinedHeight = backgroundTileFile.height * theater.clearY
 			background = new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
 				new Rectanglef(0, 0, TILES_X * TILE_WIDTH, TILES_Y * TILE_HEIGHT),
 				TILES_X * TILE_WIDTH / combinedWidth, TILES_Y * TILE_HEIGHT / combinedHeight
@@ -212,6 +216,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						def tile = MapRAMapPackTiles.find { tile ->
 							return tile.value == tileVal
 						}
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn("Skipping unknown tile type: ${tileVal}")
+							return
+						}
 						def tileFile = getTileByName(tileMixFile, tile.name + theater.ext)
 
 						// TODO: Create a single texture for each tile and re-use it but
@@ -309,42 +318,39 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				// Now that the tiles are all assembled, build the appropriate image
 				// representation for them
 				tileTypes.each { tilePos, tile ->
-					def tileFile = tile.isWall ?
+					def tileFile = tile.isWall || tile.useShp ?
 						getTileByName(conquerMixFile, "${tile.name}.shp") :
 						getTileByName(tileMixFile, tile.name + theater.ext)
 					def imageVariant = 0
 
 					// Select the proper orientation for wall tiles
 					if (tile.isWall) {
-						if (tileTypes[tilePos.add(0, -1, new Vector2f())]?.isWall) {
+						if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
 							imageVariant |= 0x01
 						}
-						if (tileTypes[tilePos.add(1, 0, new Vector2f())]?.isWall) {
+						if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
 							imageVariant |= 0x02
 						}
-						if (tileTypes[tilePos.add(0, 1, new Vector2f())]?.isWall) {
+						if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
 							imageVariant |= 0x04
 						}
-						if (tileTypes[tilePos.add(-1, 0, new Vector2f())]?.isWall) {
+						if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
 							imageVariant |= 0x08
 						}
 					}
 					// Select the proper density for resources
 					else if (tile.isResource) {
-						def adjacent = 0
-						if (tileTypes[tilePos.add(0, 1, new Vector2f())]?.isResource) {
-							adjacent++
+						def adjacent = (-1..1).inject(0) { accY, y ->
+							return accY + (-1..1).inject(0) { accX, x ->
+								if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
+									return accX + 1
+								}
+								return accX
+							}
 						}
-						if (tileTypes[tilePos.add(1, 0, new Vector2f())]?.isResource) {
-							adjacent++
-						}
-						if (tileTypes[tilePos.add(0, -1, new Vector2f())]?.isResource) {
-							adjacent++
-						}
-						if (tileTypes[tilePos.add(-1, 0, new Vector2f())]?.isResource) {
-							adjacent++
-						}
-						imageVariant = (tile.name().startsWith('GEM') ? adjacent / 2 : adjacent * 3 - 1) as int
+						imageVariant = tile.name().startsWith('GEM') ?
+							adjacent / 3 as int :
+							3 + adjacent
 					}
 
 					// TODO: Create a single texture for each tile and re-use it but
@@ -376,7 +382,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		@Memoized
 		private static ShpFile getTileByName(MixFile mixFile, String tileName) {
 
-			return mixFile.getEntryData(mixFile.getEntry(tileName)).withStream { inputStream ->
+			return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
 				return new ShpFile(inputStream)
 			}
 		}
