@@ -85,7 +85,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		}
 		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
 		def mapWH = new Vector2f(mapXY).add(mapSection['Width'] as int, mapSection['Height'] as int)
-		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).switchY()
+		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
 		boundaryPoints = boundary.asPoints()
 
 		def waypoints = mapFile['Waypoints']
@@ -106,9 +106,14 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				.applyPalette(palette)
 			def combinedWidth = backgroundTileFile.width * theater.clearX
 			def combinedHeight = backgroundTileFile.height * theater.clearY
+			def backgroundDimensions = new Rectanglef(
+				new Vector2f(0, 0).asWorldCoords(),
+				new Vector2f(TILES_X, TILES_Y).asWorldCoords()
+			).makeValid()
 			background = new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
-				new Rectanglef(0, 0, TILES_X * TILE_WIDTH, TILES_Y * TILE_HEIGHT),
-				TILES_X * TILE_WIDTH / combinedWidth, TILES_Y * TILE_HEIGHT / combinedHeight
+				backgroundDimensions,
+				backgroundDimensions.lengthX() / combinedWidth as float,
+				backgroundDimensions.lengthY() / combinedHeight as float
 			)
 
 			// Build the various layers
@@ -167,8 +172,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		background.render(renderer)
 		mapPackLayer.render(renderer)
 		overlayPackLayer.render(renderer)
-		renderer.drawLines(Colour.RED, X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
-		renderer.drawLineLoop(Colour.YELLOW, boundaryPoints)
+		renderer.drawLines(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
+		renderer.drawLineLoop(Colour.YELLOW.withAlpha(0.5), boundaryPoints)
 	}
 
 	/**

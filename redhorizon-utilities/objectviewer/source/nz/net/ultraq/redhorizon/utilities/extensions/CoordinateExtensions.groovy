@@ -51,21 +51,28 @@ class CoordinateExtensions {
 	 */
 	static Vector2f asWorldCoords(Vector2f self) {
 
-		return self.set(self.x, TILES_Y - self.y as float).mul(TILE_WIDTH, TILE_HEIGHT)
+		return self.set(self.x - (TILES_X / 2), (TILES_Y / 2) - self.y as float).mul(TILE_WIDTH, TILE_HEIGHT)
 	}
 
 	/**
-	 * Return a new rectangle whose Y components are a flipped version of the
-	 * current rectangle so that minY <-> maxY.
+	 * Update the rectangle so that min/max values are valid, ie: if minX > maxX
+	 * then minX <-> maxX, and same for the Y axis.
 	 * 
 	 * @param self
 	 * @return
 	 */
-	static Rectanglef switchY(Rectanglef self) {
+	static Rectanglef makeValid(Rectanglef self) {
 
-		def minY = self.minY
-		self.minY = self.maxY
-		self.maxY = minY
+		if (self.minX > self.maxX) {
+			def minX = self.minX
+			self.minX = self.maxX
+			self.maxX = minX
+		}
+		if (self.minY > self.maxY) {
+			def minY = self.minY
+			self.minY = self.maxY
+			self.maxY = minY
+		}
 		return self
 	}
 }
