@@ -51,7 +51,7 @@ class CoordinateExtensions {
 	 */
 	static Vector2f asWorldCoords(Vector2f self) {
 
-		return new Vector2f(self.x, TILES_Y - self.y as float).mul(TILE_WIDTH, TILE_HEIGHT)
+		return self.set(self.x, TILES_Y - self.y as float).mul(TILE_WIDTH, TILE_HEIGHT)
 	}
 
 	/**
@@ -63,6 +63,9 @@ class CoordinateExtensions {
 	 */
 	static Rectanglef switchY(Rectanglef self) {
 
-		return new Rectanglef(self.minX, self.maxY, self.maxX, self.minY)
+		def minY = self.minY
+		self.minY = self.maxY
+		self.maxY = minY
+		return self
 	}
 }
