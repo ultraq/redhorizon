@@ -63,26 +63,21 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
 		glLineWidth(2)
 
-		// Disable antialiasing globally
-//		if (gl.isExtensionAvailable("GL_ARB_multisample")) {
-//			gl.glDisable(GL_MULTISAMPLE)
-//		}
-
 		// Texturing controls
 		glEnable(GL_TEXTURE_2D)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
 
 		// Texture blend combo, create a mixture of GL_BLEND on RGB, GL_REPLACE on A
-//		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_TEXTURE)
-//		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA)
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR)
+		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_TEXTURE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_COLOR)
 
 		// Depth testing
 		glEnable(GL_DEPTH_TEST)
@@ -209,12 +204,14 @@ class OpenGLRenderer implements GraphicsRenderer {
 	 */
 	private static void drawPrimitive(int primitiveType, Colour colour, Vector2f... vertices) {
 
-		checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
-		glBegin(primitiveType)
-		vertices.each { vertex ->
-			glVertex2f(vertex.x, vertex.y)
+		withTextureEnvironmentMode(GL_COMBINE) { ->
+			checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
+			glBegin(primitiveType)
+			vertices.each { vertex ->
+				glVertex2f(vertex.x, vertex.y)
+			}
+			checkForError { -> glEnd() }
 		}
-		checkForError { -> glEnd() }
 	}
 
 	@Override
@@ -237,5 +234,20 @@ class OpenGLRenderer implements GraphicsRenderer {
 			glTranslatef(currentPosition.x - position.x as float, currentPosition.y - position.y as float, 0)
 			currentPosition.set(position)
 		}
+	}
+
+	/**
+	 * Execute the given closure with its own texture environment mode independent
+	 * from the global one.
+	 * 
+	 * @param texEnvMode
+	 * @param closure
+	 */
+	private static void withTextureEnvironmentMode(int texEnvMode, Closure closure) {
+
+		def origTexEnvMode = glGetTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE)
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode)
+		closure()
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, origTexEnvMode)
 	}
 }
