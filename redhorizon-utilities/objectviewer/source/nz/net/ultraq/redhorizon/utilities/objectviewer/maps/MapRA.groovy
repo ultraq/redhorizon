@@ -180,9 +180,10 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	String toString() {
 
 		return """
-			Name: ${name}
-			Theater: ${theater}
-			Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
+			Red Alert map
+			 - Name: ${name}
+			 - Theater: ${theater}
+			 - Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
 		""".stripIndent()
 	}
 
