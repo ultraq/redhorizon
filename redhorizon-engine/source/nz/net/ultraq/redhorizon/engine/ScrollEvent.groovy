@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.events.Event
-
 import groovy.transform.TupleConstructor
 
 /**
@@ -26,7 +24,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ScrollEvent extends Event {
+class ScrollEvent extends InputEvent {
 
 	final double xOffset
 	final double yOffset

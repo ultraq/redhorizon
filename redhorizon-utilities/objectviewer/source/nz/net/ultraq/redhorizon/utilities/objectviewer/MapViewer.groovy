@@ -17,12 +17,15 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
+import nz.net.ultraq.redhorizon.engine.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
@@ -31,7 +34,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
 import groovy.transform.TupleConstructor
@@ -98,9 +103,30 @@ class MapViewer implements WithGraphicsEngine {
 						}
 					}
 				}
-				// Use scroll input to move around the map
+
+				// Use scroll input or click-and-drag to move around the map
 				graphicsEngine.on(ScrollEvent) { event ->
 					graphicsEngine.camera.position.add(3 * -event.xOffset as float, 3 * event.yOffset as float, 0)
+				}
+				def cursorPosition = new Vector2f()
+				def dragging = false
+				graphicsEngine.on(CursorPositionEvent) { event ->
+					if (dragging) {
+						def diffX = cursorPosition.x - event.xPos as float
+						def diffY = cursorPosition.y - event.yPos as float
+						graphicsEngine.camera.position.add(diffX, -diffY, 0)
+					}
+					cursorPosition.set(event.xPos as float, event.yPos as float)
+				}
+				graphicsEngine.on(MouseButtonEvent) { event ->
+					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+						if (event.action == GLFW_PRESS) {
+							dragging = true
+						}
+						else if (event.action == GLFW_RELEASE) {
+							dragging = false
+						}
+					}
 				}
 			}
 		}

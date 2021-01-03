@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Event for keyboard input.
+ * Common type for all input events.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class KeyEvent extends InputEvent {
-
-	final int key
-	final int scancode
-	final int action
-	final int mods
+abstract class InputEvent extends Event {
 }

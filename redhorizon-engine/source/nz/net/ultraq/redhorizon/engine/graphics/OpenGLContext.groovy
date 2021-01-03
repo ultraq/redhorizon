@@ -17,15 +17,14 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.engine.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.KeyEvent
+import nz.net.ultraq.redhorizon.engine.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.ScrollEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
-import org.lwjgl.glfw.GLFWFramebufferSizeCallback
-import org.lwjgl.glfw.GLFWKeyCallback
-import org.lwjgl.glfw.GLFWScrollCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -103,31 +102,28 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
 		viewportSize = new Dimension(widthPointer[0], heightPointer[0])
 
-		glfwSetFramebufferSizeCallback(window, new GLFWFramebufferSizeCallback() {
-			@Override
-			void invoke(long window, int width, int height) {
-				viewportSize = new Dimension(width, height)
-				trigger(new FramebufferSizeEvent(width, height))
-			}
-		})
+		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
+			viewportSize = new Dimension(width, height)
+			trigger(new FramebufferSizeEvent(width, height))
+		}
 
 		cameraSize = new Dimension(
 			windowSize.width,
 			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
 
-		glfwSetKeyCallback(window, new GLFWKeyCallback() {
-			@Override
-			void invoke(long window, int key, int scancode, int action, int mods) {
-				trigger(new KeyEvent(key, scancode, action, mods))
-			}
-		})
-
-		glfwSetScrollCallback(window, new GLFWScrollCallback() {
-			@Override
-			void invoke(long window, double xoffset, double yoffset) {
-				trigger(new ScrollEvent(xoffset, yoffset))
-			}
-		})
+		// Input callbacks
+		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
+			trigger(new KeyEvent(key, scancode, action, mods))
+		}
+		glfwSetScrollCallback(window) { long window, double xoffset, double yoffset ->
+			trigger(new ScrollEvent(xoffset, yoffset))
+		}
+		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
+			trigger(new MouseButtonEvent(button, action, mods))
+		}
+		glfwSetCursorPosCallback(window) { window, double xpos, double ypos ->
+			trigger(new CursorPositionEvent(xpos, ypos))
+		}
 
 		withCurrent { ->
 			glfwSwapInterval(1)

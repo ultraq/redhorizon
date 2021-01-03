@@ -17,8 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
-import nz.net.ultraq.redhorizon.engine.KeyEvent
-import nz.net.ultraq.redhorizon.engine.ScrollEvent
+import nz.net.ultraq.redhorizon.engine.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
@@ -107,12 +106,12 @@ class GraphicsEngine extends EngineSubsystem {
 		// Initialization
 		context = waitForMainThread { ->
 			def openGlContext = new OpenGLContext(config)
-			openGlContext.on(KeyEvent) { event ->
+
+			// Re-fire input events
+			openGlContext.on(InputEvent) { event ->
 				trigger(event)
 			}
-			openGlContext.on(ScrollEvent) { event ->
-				trigger(event)
-			}
+
 			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize, openGlContext.cameraSize))
 			return openGlContext
 		}
