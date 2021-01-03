@@ -73,7 +73,7 @@ class MixReader implements Callable<Integer> {
 			def entry = mix.getEntry(entryName)
 			if (entry) {
 				logger.info('{} found, writing to file...', entryName)
-				mix.getEntryData(entry).withCloseable { entryInputStream ->
+				mix.getEntryData(entry).withBufferedStream { entryInputStream ->
 					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
 						entryInputStream.transferTo(entryOutputStream)
 					}

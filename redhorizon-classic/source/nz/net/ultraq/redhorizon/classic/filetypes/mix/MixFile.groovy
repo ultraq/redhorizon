@@ -127,8 +127,8 @@ class MixFile implements ArchiveFile<MixEntry> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	BufferedInputStream getEntryData(MixEntry entry) {
+	InputStream getEntryData(MixEntry entry) {
 
-		return new BufferedInputStream(new MixEntryInputStream(input, inputSemaphore, baseEntryOffset, entry))
+		return new MixEntryInputStream(input, inputSemaphore, baseEntryOffset, entry)
 	}
 }

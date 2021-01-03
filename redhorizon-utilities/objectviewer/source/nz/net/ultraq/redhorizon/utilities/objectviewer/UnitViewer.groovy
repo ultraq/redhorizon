@@ -72,9 +72,11 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 
 		def unitConfig
 		try {
-			def configFileStream = getResourceAsBufferedStream(
+			unitConfig = getResourceAsStream(
 				"nz/net/ultraq/redhorizon/utilities/objectviewer/configurations/${unitId.toLowerCase()}.json")
-			unitConfig = configFileStream.text
+				.withBufferedStream { inputStream ->
+					return inputStream.text
+				}
 			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
 		catch (IllegalArgumentException ignored) {
@@ -98,7 +100,7 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
 		}
 
-		def palette = getResourceAsBufferedStream(paletteType.file).withStream { inputStream ->
+		def palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def config = new GraphicsConfiguration(

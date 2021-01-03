@@ -76,7 +76,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		theater = Theaters.find { theater ->
 			return theater.label.equalsIgnoreCase(theaterString)
 		}
-		def palette = getResourceAsBufferedStream("ra-${theater.label.toLowerCase()}.pal").withStream { inputStream ->
+		def palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
@@ -92,7 +92,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		//       containing the necessary files
 		new MixFile(new File("mix/red-alert/MapTiles_${theater.label}.mix")).withCloseable { tilesMixFile ->
 			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
-			def backgroundTileFile = tilesMixFile.getEntryData(tilesMixFile.getEntry(clearTileName)).withStream { inputStream ->
+			def backgroundTileFile = tilesMixFile.getEntryData(tilesMixFile.getEntry(clearTileName)).withBufferedStream { inputStream ->
 				return new TmpFileRA(inputStream)
 			}
 
@@ -245,7 +245,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		@Memoized
 		private static TmpFileRA getTileByName(MixFile mixFile, String tileName) {
 
-			return mixFile.getEntryData(mixFile.getEntry(tileName)).withStream { inputStream ->
+			return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
 				return new TmpFileRA(inputStream)
 			}
 		}

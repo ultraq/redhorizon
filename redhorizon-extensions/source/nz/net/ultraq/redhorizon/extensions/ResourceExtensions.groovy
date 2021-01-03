@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * Extensions to classes to be able to read resources more easily.
  * 
@@ -24,19 +27,32 @@ package nz.net.ultraq.redhorizon.extensions
 class ResourceExtensions {
 
 	/**
-	 * A shortcut to {@code ClassLoader.getResourceAsStream} wrapped in a
-	 * {@code BufferedInputStream}.
+	 * A shortcut to {@code ClassLoader.getResourceAsStream}.
 	 * 
 	 * @param self
 	 * @param resourcePath
 	 * @return
 	 */
-	static InputStream getResourceAsBufferedStream(Object self, String resourcePath) {
+	static InputStream getResourceAsStream(Object self, String resourcePath) {
 
 		def inputStream = self.class.classLoader.getResourceAsStream(resourcePath)
 		if (inputStream) {
-			return new BufferedInputStream(inputStream)
+			return inputStream
 		}
 		throw new IllegalArgumentException("Resource not found: ${resourcePath}")
+	}
+
+	/**
+	 * Wrap an input stream with a buffered one and invoke the usual
+	 * {@code withStream} method over it.
+	 * 
+	 * @param stream
+	 * @param closure
+	 * @return
+	 */
+	static <T> T withBufferedStream(InputStream stream,
+		@ClosureParams(value = SimpleType, options = 'java.io.BufferedInputStream') Closure<T> closure) {
+
+		return new BufferedInputStream(stream).withStream(closure)
 	}
 }

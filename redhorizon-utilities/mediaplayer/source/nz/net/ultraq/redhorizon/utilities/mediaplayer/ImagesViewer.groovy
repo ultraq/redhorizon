@@ -68,7 +68,7 @@ class ImagesViewer implements WithGraphicsEngine {
 
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
-			palette = getResourceAsBufferedStream(paletteType.file).withStream { inputStream ->
+			palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
 				return new PalFile(inputStream)
 			}
 		}

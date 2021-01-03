@@ -90,7 +90,7 @@ class ObjectViewer implements Callable<Integer> {
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
-					objectFile = mix.getEntryData(entry).withStream { inputStream ->
+					objectFile = mix.getEntryData(entry).withBufferedStream { inputStream ->
 						return getFileClass(entryName).newInstance(inputStream)
 					}
 					objectId = entryName[0..<-4]
