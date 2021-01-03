@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.events
  */
 trait EventTarget {
 
-	private final Map<Class<? extends Event>, List<EventListener>> eventListeners = [:]
+	private final List<EventAndListenerPair> eventListeners = []
 
 	/**
 	 * Register an event listener on this event target.  When the event is fired
@@ -35,10 +35,7 @@ trait EventTarget {
 	 */
 	public <E extends Event> void on(Class<E> event, EventListener<E> eventListener) {
 
-		def listenersForEvent = eventListeners.getOrCreate(event) { ->
-			return new ArrayList<EventListener>()
-		}
-		listenersForEvent << eventListener
+		eventListeners << new EventAndListenerPair(event, eventListener)
 	}
 
 	/**
@@ -49,8 +46,10 @@ trait EventTarget {
 	 */
 	public <E extends Event> void trigger(E event) {
 
-		eventListeners[(Class<? extends Event>)event.class]?.each { listener ->
-			listener.handleEvent(event)
+		eventListeners.each { pair ->
+			if (pair.event.isInstance(event)) {
+				pair.listener.handleEvent(event)
+			}
 		}
 	}
 }
