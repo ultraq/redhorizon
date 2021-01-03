@@ -30,7 +30,7 @@ class DataInputExtensions {
 	 * @param length
 	 * @return
 	 */
-	static byte[] readNBytes(DataInput self, int length) {
+	static byte[] readBytes(DataInput self, int length) {
 
 		def bytes = new byte[length]
 		self.readFully(bytes)
