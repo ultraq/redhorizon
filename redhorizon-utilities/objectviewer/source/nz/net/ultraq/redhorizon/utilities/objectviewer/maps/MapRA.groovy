@@ -62,9 +62,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	final Vector2f[] boundaryPoints
 	final Vector2f initialPosition
 
-	private Image background
-	private MapRAMapPack mapPackLayer
-	private MapRAOverlayPack overlayPackLayer
+	private final List<MapLayer> layers = []
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -110,32 +108,64 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				new Vector2f(0, 0).asWorldCoords(),
 				new Vector2f(TILES_X, TILES_Y).asWorldCoords()
 			).makeValid()
-			background = new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
+			layers << new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
 				backgroundDimensions,
 				backgroundDimensions.lengthX() / combinedWidth as float,
 				backgroundDimensions.lengthY() / combinedHeight as float
 			)
 
 			// Build the various layers
-			mapPackLayer = new MapRAMapPack(tilesMixFile, palette, mapDataToBytes(mapFile['MapPack'], 6))
-			overlayPackLayer = new MapRAOverlayPack(tilesMixFile, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
+			layers << new MapRAMapPack(tilesMixFile, palette, mapDataToBytes(mapFile['MapPack'], 6))
+			layers << new MapRAOverlayPack(tilesMixFile, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
+			layers << new MapRATerrain(tilesMixFile, palette, mapFile['TERRAIN'])
 		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		background.delete(renderer)
-		mapPackLayer.delete(renderer)
-		overlayPackLayer.delete(renderer)
+		layers.each { layer ->
+			layer.delete(renderer)
+		}
+	}
+
+	/**
+	 * Retrieve the map tile with the given name from the mix file as a SHP file.
+	 * 
+	 * @param mixFile
+	 * @param tileName
+	 * @return
+	 */
+	@Memoized
+	private static ShpFile getShpFileByName(MixFile mixFile, String tileName) {
+
+		return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
+			return new ShpFile(inputStream)
+		}
+	}
+
+	/**
+	 * Retrieve the tile with the given name from the mix file as a Red Alert
+	 * tile file.
+	 * 
+	 * @param mixFile
+	 * @param tileName
+	 * @return
+	 */
+	@Memoized
+	private static TmpFileRA getTmpFileByName(MixFile mixFile, String tileName) {
+
+		return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
+			return new TmpFileRA(inputStream)
+		}
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		background.init(renderer)
-		mapPackLayer.init(renderer)
-		overlayPackLayer.init(renderer)
+		layers.each { layer ->
+			layer.init(renderer)
+		}
 	}
 
 	/**
@@ -169,9 +199,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		background.render(renderer)
-		mapPackLayer.render(renderer)
-		overlayPackLayer.render(renderer)
+		layers.each { layer ->
+			layer.render(renderer)
+		}
 		renderer.drawLines(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
 		renderer.drawLineLoop(Colour.YELLOW.withAlpha(0.5), boundaryPoints)
 	}
@@ -193,11 +223,41 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	}
 
 	/**
+	 * Common code for rendering a map layer.
+	 */
+	private abstract class MapLayer implements GraphicsElement {
+
+		protected final List<Image> elements = []
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			elements.each { element ->
+				element.delete(renderer)
+			}
+		}
+
+		@Override
+		void init(GraphicsRenderer renderer) {
+
+			elements.each { element ->
+				element.init(renderer)
+			}
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			elements.each { element ->
+				element.render(renderer)
+			}
+		}
+	}
+
+	/**
 	 * The "MapPack" layer of a Red Alert map.
 	 */
-	private class MapRAMapPack implements GraphicsElement {
-
-		final List<Image> tiles = []
+	private class MapRAMapPack extends MapLayer {
 
 		/**
 		 * Constructor, build the MapPack layer from the given tile data.
@@ -227,7 +287,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							logger.warn("Skipping unknown tile type: ${tileVal}")
 							return
 						}
-						def tileFile = getTileByName(tileMixFile, tile.name + theater.ext)
+						def tileFile = getTmpFileByName(tileMixFile, tile.name + theater.ext)
 
 						// Skip references to invalid tiles
 						if (tilePic >= tileFile.imagesData.length) {
@@ -240,49 +300,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 							tileFile.imagesData[tilePic].applyPalette(palette),
 							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
-						tiles << tileImage
+						elements << tileImage
 					}
 				}
-			}
-		}
-
-		@Override
-		void delete(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.delete(renderer)
-			}
-		}
-
-		/**
-		 * Retrieve the tile with the given name from the mix file as a Red Alert
-		 * tile file.
-		 * 
-		 * @param mixFile
-		 * @param tileName
-		 * @return
-		 */
-		@Memoized
-		private static TmpFileRA getTileByName(MixFile mixFile, String tileName) {
-
-			return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
-				return new TmpFileRA(inputStream)
-			}
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.init(renderer)
-			}
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.render(renderer)
 			}
 		}
 	}
@@ -290,9 +310,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	/**
 	 * The "OverlayPack" layer of a Red Alert map.
 	 */
-	private class MapRAOverlayPack implements GraphicsElement {
-
-		final List<Image> tiles = []
+	private class MapRAOverlayPack extends MapLayer {
 
 		/**
 		 * Constructor, build the OverlayPack layer from the given tile data.
@@ -330,8 +348,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				// representation for them
 				tileTypes.each { tilePos, tile ->
 					def tileFile = tile.isWall || tile.useShp ?
-						getTileByName(conquerMixFile, "${tile.name}.shp") :
-						getTileByName(tileMixFile, tile.name + theater.ext)
+						getShpFileByName(conquerMixFile, "${tile.name}.shp") :
+						getShpFileByName(tileMixFile, tile.name + theater.ext)
 					def imageVariant = 0
 
 					// Select the proper orientation for wall tiles
@@ -370,47 +388,36 @@ class MapRA implements GraphicsElement, SelfVisitable {
 					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 						tileFile.imagesData[imageVariant].applyPalette(palette),
 						new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
-					tiles << tileImage
+					elements << tileImage
 				}
 			}
 		}
+	}
 
-		@Override
-		void delete(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.delete(renderer)
-			}
-		}
+	/**
+	 * The "Terrain" layer of a Red Alert map.
+	 */
+	private class MapRATerrain extends MapLayer {
 
 		/**
-		 * Retrieve the tile with the given name from the mix file as a SHP file.
-		 * 
-		 * @param mixFile
-		 * @param tileName
-		 * @return
+		 * Constructor, build the terrain layer from the given terrain data.
+		 *
+		 * @param tileMixFile
+		 * @param palette
+		 * @param terrainData
 		 */
-		@Memoized
-		private static ShpFile getTileByName(MixFile mixFile, String tileName) {
+		MapRATerrain(MixFile tileMixFile, Palette palette, Map<String,String> terrainData) {
 
-			return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
-				return new ShpFile(inputStream)
-			}
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.init(renderer)
-			}
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			tiles.each { tile ->
-				tile.render(renderer)
+			terrainData.each { cell, terrainType ->
+				def terrainFile = getShpFileByName(tileMixFile, terrainType + theater.ext)
+				// The +1 shift is to make up for the difference in coordinate systems
+				// TODO: Config file for all these terrain dimensions?  Or somehow
+				//       include object width/height into the cell coord calculation.
+				def cellPosXY = (cell as int).asCellCoords().add(0, terrainFile.height / TILE_HEIGHT - 1).asWorldCoords()
+				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
+				elements << new Image(terrainFile.width, terrainFile.height, palette.format.value,
+					terrainFile.imagesData[0].applyPalette(palette),
+					new Rectanglef(cellPosXY, cellPosWH).makeValid())
 			}
 		}
 	}
