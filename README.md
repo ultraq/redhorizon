@@ -142,3 +142,5 @@ Usage: view [-hV] [--full-screen] [--palette=<paletteType>] <file> [<entryName>]
 ```
 
 [Demo of the unit viewer on YouTube](https://www.youtube.com/watch?v=UihLl4ALbnw)
+
+[Demo of the map viewer on YouTube](https://youtu.be/zPHCF8BfkKU)
