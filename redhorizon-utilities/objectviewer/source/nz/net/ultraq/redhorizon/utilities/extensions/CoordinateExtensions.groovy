@@ -47,11 +47,16 @@ class CoordinateExtensions {
 	 * Convert a set of cell coordinates into world coordinates.
 	 * 
 	 * @param self
+	 * @param objectHeightInCells
+	 *   Optional, height of the object whose coordinates are being translated.
 	 * @return
 	 */
-	static Vector2f asWorldCoords(Vector2f self) {
+	static Vector2f asWorldCoords(Vector2f self, int objectHeightInCells = 0) {
 
-		return self.set(self.x - (TILES_X / 2), (TILES_Y / 2) - self.y as float).mul(TILE_WIDTH, TILE_HEIGHT)
+		return self
+			.add(0, objectHeightInCells)
+			.set(self.x - (TILES_X / 2), (TILES_Y / 2) - self.y as float)
+			.mul(TILE_WIDTH, TILE_HEIGHT)
 	}
 
 	/**

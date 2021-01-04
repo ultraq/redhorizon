@@ -62,7 +62,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	final Vector2f[] boundaryPoints
 	final Vector2f initialPosition
 
-	private final List<MapLayer> layers = []
+	private final List<GraphicsElement> layers = []
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -130,33 +130,19 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	}
 
 	/**
-	 * Retrieve the map tile with the given name from the mix file as a SHP file.
+	 * Retrieve the map tile with the given name from the mix file, returned as
+	 * the specified file type.
 	 * 
 	 * @param mixFile
 	 * @param tileName
+	 * @param fileType
 	 * @return
 	 */
 	@Memoized
-	private static ShpFile getShpFileByName(MixFile mixFile, String tileName) {
+	private static <T> T getTileByName(MixFile mixFile, String tileName, Class<T> fileType) {
 
 		return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
-			return new ShpFile(inputStream)
-		}
-	}
-
-	/**
-	 * Retrieve the tile with the given name from the mix file as a Red Alert
-	 * tile file.
-	 * 
-	 * @param mixFile
-	 * @param tileName
-	 * @return
-	 */
-	@Memoized
-	private static TmpFileRA getTmpFileByName(MixFile mixFile, String tileName) {
-
-		return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
-			return new TmpFileRA(inputStream)
+			return fileType.newInstance(inputStream)
 		}
 	}
 
@@ -269,8 +255,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
-					// The +1 shift is to make up for the difference in coordinate systems
-					def tileCoord = new Vector2f(x, y + 1)
+					def tileCoord = new Vector2f(x, y)
 
 					// Get the byte representing the tile
 					def tileValOffset = y * TILES_Y + x
@@ -287,7 +272,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							logger.warn("Skipping unknown tile type: ${tileVal}")
 							return
 						}
-						def tileFile = getTmpFileByName(tileMixFile, tile.name + theater.ext)
+						def tileFile = getTileByName(tileMixFile, tile.name + theater.ext, TmpFileRA)
 
 						// Skip references to invalid tiles
 						if (tilePic >= tileFile.imagesData.length) {
@@ -296,7 +281,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 						// TODO: Create a single texture for each tile and re-use it but
 						//       render it to a different place
-						def tilePos = new Vector2f(tileCoord).asWorldCoords()
+						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
 						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 							tileFile.imagesData[tilePic].applyPalette(palette),
 							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
@@ -328,8 +313,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			new MixFile(new File('mix/red-alert/Conquer.mix')).withCloseable { conquerMixFile ->
 				TILES_X.times { y ->
 					TILES_Y.times { x ->
-						// The +1 shift is to make up for the difference in coordinate systems
-						def tileCoord = new Vector2f(x, y + 1)
+						def tileCoord = new Vector2f(x, y)
 
 						// Get the byte representing the tile
 						def tileVal = tileData.get()
@@ -348,8 +332,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				// representation for them
 				tileTypes.each { tilePos, tile ->
 					def tileFile = tile.isWall || tile.useShp ?
-						getShpFileByName(conquerMixFile, "${tile.name}.shp") :
-						getShpFileByName(tileMixFile, tile.name + theater.ext)
+						getTileByName(conquerMixFile, "${tile.name}.shp", ShpFile) :
+						getTileByName(tileMixFile, tile.name + theater.ext, ShpFile)
 					def imageVariant = 0
 
 					// Select the proper orientation for wall tiles
@@ -384,7 +368,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 					// TODO: Create a single texture for each tile and re-use it but
 					//       render it to a different place
-					def tilePosW = new Vector2f(tilePos).asWorldCoords()
+					def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
 					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
 						tileFile.imagesData[imageVariant].applyPalette(palette),
 						new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
@@ -409,15 +393,19 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		MapRATerrain(MixFile tileMixFile, Palette palette, Map<String,String> terrainData) {
 
 			terrainData.each { cell, terrainType ->
-				def terrainFile = getShpFileByName(tileMixFile, terrainType + theater.ext)
-				// The +1 shift is to make up for the difference in coordinate systems
-				// TODO: Config file for all these terrain dimensions?  Or somehow
-				//       include object width/height into the cell coord calculation.
-				def cellPosXY = (cell as int).asCellCoords().add(0, terrainFile.height / TILE_HEIGHT - 1).asWorldCoords()
+				def terrainFile = getTileByName(tileMixFile, terrainType + theater.ext, ShpFile)
+				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
 				elements << new Image(terrainFile.width, terrainFile.height, palette.format.value,
 					terrainFile.imagesData[0].applyPalette(palette),
 					new Rectanglef(cellPosXY, cellPosWH).makeValid())
+			}
+
+			// Sort the terrain elements so that ones lower down the map render "over"
+			// those higher up the map
+			elements.sort { imageA, imageB ->
+				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
+				       imageB.dimensions.minX - imageA.dimensions.minX
 			}
 		}
 	}
