@@ -121,19 +121,23 @@ Demo of WSA (animation format) playback on YouTube:
 
 ### view
 
-Unit/structure viewer.  Currently supports only a handful of units; those which
-I have built configuration files for.
+Unit/structure and map viewer.  Currently supports only a handful of units -
+those which I have built configuration files for - and non-interior theater
+maps.
 
 ```
-Usage: view [-hV] [--palette=<paletteType>] <file> [<entryName>]
-      <file>          Path to the unit shp file to view, or a mix file that
-                        contains the unit
-      [<entryName>]   If <file> is a mix file, this is the name of the shp in
-                        the mix file to view
+Usage: view [-hV] [--full-screen] [--palette=<paletteType>] <file> [<entryName>]
+      <file>          Path to the object file file to view, or a mix file that
+                        contains the object
+      [<entryName>]   If <file> is a mix file, this is the name of the object
+                        in the mix file to view
+      --full-screen   Run in fullscreen mode.  Only applies to the mission
+                        viewer.
   -h, --help          Show this help message and exit.
       --palette=<paletteType>
                       Which game palette to apply to a paletted image.  One of
-                        "RA" or "TD".
+                        "ra-snow", "ra-temperate", or "td-temperate".  Defaults
+                        to ra-temperate
   -V, --version       Print version information and exit.
 ```
 

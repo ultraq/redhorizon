@@ -65,7 +65,7 @@ class ObjectViewer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
 	String entryName
 
-	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
+	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode.  Only applies to the mission viewer.')
 	boolean fullScreen
 
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')

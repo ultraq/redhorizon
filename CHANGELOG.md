@@ -2,6 +2,13 @@
 Changelog
 =========
 
+### 0.31.1
+ - Lean on Java's built-in blowfish cipher to replace the BlowfishJ library I'd
+   been using.
+ - Renamed the unit viewer to a general purpose object viewer, and gave it the
+   ability to view Red Alert mission maps.  Currently only works with the
+   directory structure I have for local dev and doesn't work for interior maps.
+
 ### 0.31.0
  - Converted the C/C++ code for reading encrypted MIX files to Groovy - no more
    native platform compilers needed for supporting other platforms

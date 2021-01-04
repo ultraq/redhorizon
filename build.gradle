@@ -21,7 +21,7 @@ plugins {
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
-	version = '0.31.0'
+	version = '0.31.1'
 }
 
 // Root project configuration
