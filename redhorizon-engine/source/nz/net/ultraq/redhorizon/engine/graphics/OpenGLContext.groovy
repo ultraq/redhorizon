@@ -90,6 +90,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
+		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
 		logger.debug('Creating a window of size {}x{}', windowSize.width, windowSize.height)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', fullScreen ? monitor : NULL, NULL)
