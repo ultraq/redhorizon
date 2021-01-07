@@ -30,7 +30,7 @@ dependencies {
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
 		'org.joml:joml:1.9.25',
 		'org.lwjgl:lwjgl-glfw',
-		'org.reflections:reflections:0.9.11'
+		'org.reflections:reflections:0.9.12'
 	)
 	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 		exclude module: 'groovy'
