@@ -45,4 +45,15 @@ class Dimension {
 		}
 		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
 	}
+
+	/**
+	 * Return the width & height dimensions.
+	 * 
+	 * @return "(width)x(height)"
+	 */
+	@Override
+	String toString() {
+
+		return "${width}x${height}"
+	}
 }

@@ -46,6 +46,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	 * Horizon's 2D game engine.
 	 * 
 	 * @param context
+	 * @param camera
 	 * @param config
 	 */
 	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
@@ -92,26 +93,14 @@ class OpenGLRenderer implements GraphicsRenderer {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport and projection
-		def viewportSize = context.viewportSize
-		logger.debug('Establishing a viewport of size {}x{}', viewportSize.width, viewportSize.height)
+		def viewportSize = context.framebufferSize
+		logger.debug('Establishing a viewport of size {}', viewportSize)
 		glViewport(0, 0, viewportSize.width, viewportSize.height)
-		context.on(FramebufferSizeEvent) { event ->
-			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
-			glViewport(0, 0, event.width, event.height)
-		}
+//		context.on(FramebufferSizeEvent) { event ->
+//			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
+//			glViewport(0, 0, event.width, event.height)
+//		}
 
-		def cameraSize = context.cameraSize
-		logger.debug('Establishing a camera projection of size {}x{}', cameraSize.width, cameraSize.height)
-		glMatrixMode(GL_PROJECTION)
-		glLoadIdentity()
-		glOrtho(
-			-cameraSize.width / 2, cameraSize.width / 2,
-			-cameraSize.height / 2, cameraSize.height / 2,
-			0, 10
-		)
-		glMatrixMode(GL_MODELVIEW)
-		glLoadIdentity()
-		glTranslatef(0, 0, -5) // Push back the camera to view the z axis at 0
 	}
 
 	/**
@@ -144,6 +133,21 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		checkForError { -> glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) }
 //		checkForError { -> glClear(GL_STENCIL_BUFFER_BIT) }
+	}
+
+	@Override
+	void createCamera(Rectanglef projection) {
+
+		logger.debug('Establishing a camera projection of size {}x{}', projection.lengthX(), projection.lengthY())
+		glMatrixMode(GL_PROJECTION)
+		glLoadIdentity()
+		glOrtho(
+			projection.minX, projection.maxX,
+			projection.minY, projection.maxY,
+			-1, 1
+		)
+		glMatrixMode(GL_MODELVIEW)
+		glLoadIdentity()
 	}
 
 	@Override

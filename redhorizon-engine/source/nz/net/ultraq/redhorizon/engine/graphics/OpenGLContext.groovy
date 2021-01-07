@@ -56,8 +56,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 	private final long window
 
 	final Dimension windowSize
-	Dimension viewportSize
-	Dimension cameraSize
+	final Dimension framebufferSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -92,7 +91,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
-		logger.debug('Creating a window of size {}x{}', windowSize.width, windowSize.height)
+		logger.debug('Creating a window of size {}', windowSize)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', fullScreen ? monitor : NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
@@ -101,16 +100,12 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		viewportSize = new Dimension(widthPointer[0], heightPointer[0])
+		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
 
-		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
-			viewportSize = new Dimension(width, height)
-			trigger(new FramebufferSizeEvent(width, height))
-		}
-
-		cameraSize = new Dimension(
-			windowSize.width,
-			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int)
+//		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
+//			framebufferSize = new Dimension(width, height)
+//			trigger(new FramebufferSizeEvent(width, height))
+//		}
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
@@ -132,7 +127,7 @@ class OpenGLContext extends AbstractContext implements EventTarget {
 	}
 
 	/**
-	 * Calculate the dimensions for window that will fit any monitor in a user's
+	 * Calculate the dimensions for a window that will fit any monitor in a user's
 	 * setup, while respecting the target aspect ratio.
 	 * 
 	 * @param aspectRatio

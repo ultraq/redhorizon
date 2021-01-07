@@ -16,7 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+
+import org.joml.Rectanglef
 
 /**
  * A representation of the player's view into the world.
@@ -25,8 +28,21 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
  */
 class Camera implements GraphicsElement, SelfVisitable {
 
-	// TODO: Maybe use a projection matrix (Matrix4f) for all of the camera
-	//       properties instead?
+	final Dimension size
+
+	/**
+	 * Constructor, build a camera to work with the given dimensions.
+	 * 
+	 * @param windowSize
+	 * @param fixAspectRatio
+	 */
+	Camera(Dimension windowSize, boolean fixAspectRatio) {
+
+		size = new Dimension(
+			windowSize.width,
+			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int
+		)
+	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
@@ -34,6 +50,8 @@ class Camera implements GraphicsElement, SelfVisitable {
 
 	@Override
 	void init(GraphicsRenderer renderer) {
+
+		renderer.createCamera(new Rectanglef(-size.width / 2, -size.height / 2, size.width / 2, size.height / 2))
 	}
 
 	@Override

@@ -36,6 +36,13 @@ interface GraphicsRenderer {
 	void clear()
 
 	/**
+	 * Create a camera for viewing the given projection size.
+	 * 
+	 * @param projection
+	 */
+	void createCamera(Rectanglef projection)
+
+	/**
 	 * Create and fill a texture with the given image data.
 	 * 
 	 * @param data

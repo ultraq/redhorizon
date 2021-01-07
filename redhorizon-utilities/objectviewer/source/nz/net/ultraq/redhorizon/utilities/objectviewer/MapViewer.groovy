@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -71,10 +72,13 @@ class MapViewer implements WithGraphicsEngine {
 			withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 				// Add the map
-				def map = new MapRA(mapFile)
-				logger.info('Map details: {}', map)
-				graphicsEngine.addSceneElement(map)
-				graphicsEngine.camera.position.set(map.initialPosition, 0)
+				MapRA map
+				graphicsEngine.on(WindowCreatedEvent) { event ->
+					map = new MapRA(mapFile)
+					logger.info('Map details: {}', map)
+					graphicsEngine.addSceneElement(map)
+					graphicsEngine.camera.position.set(map.initialPosition, 0)
+				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
 

@@ -42,8 +42,8 @@ class GraphicsEngine extends EngineSubsystem {
 	private final Closure needsMainThreadCallback
 	private final List<SceneElement> sceneElements = []
 
-	final Camera camera = new Camera()
 	private OpenGLContext context
+	private Camera camera
 	private OpenGLRenderer renderer
 	private boolean started
 
@@ -72,6 +72,16 @@ class GraphicsEngine extends EngineSubsystem {
 	void addSceneElement(SceneElement sceneElement) {
 
 		sceneElements << sceneElement
+	}
+
+	/**
+	 * Return the current camera.
+	 * 
+	 * @return
+	 */
+	Camera getCamera() {
+
+		return camera
 	}
 
 	/**
@@ -112,13 +122,16 @@ class GraphicsEngine extends EngineSubsystem {
 				trigger(event)
 			}
 
-			trigger(new WindowCreatedEvent(openGlContext.windowSize, openGlContext.viewportSize, openGlContext.cameraSize))
+			camera = new Camera(openGlContext.windowSize, config.fixAspectRatio)
+
+			trigger(new WindowCreatedEvent(openGlContext.windowSize, camera.size))
 			return openGlContext
 		}
 		context.withCloseable {
 			context.withCurrent { ->
 				renderer = new OpenGLRenderer(context, config)
 				logger.debug(renderer.toString())
+				camera.init(renderer)
 			}
 			def graphicsElementStates = [:]
 
