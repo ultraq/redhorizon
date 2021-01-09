@@ -75,9 +75,9 @@ class ResourceManager implements Closeable {
 	 * @return
 	 */
 	@Memoized
-	public <T> T loadResource(String resourceName, Class<T> targetType, File directory = baseDirectory) {
+	public <T> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
 
-		return directory.listFiles().findResult { File file ->
+		return directory.listFiles().sort().findResult { File file ->
 			if (file.file) {
 				def fileName = file.name
 				if (fileName == resourceName) {
@@ -102,7 +102,7 @@ class ResourceManager implements Closeable {
 				}
 				return null
 			}
-			return loadResource(resourceName, targetType, file)
+			return loadFile(resourceName, targetType, file)
 		}
 	}
 }

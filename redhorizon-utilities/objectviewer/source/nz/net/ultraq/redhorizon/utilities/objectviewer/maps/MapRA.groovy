@@ -91,7 +91,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
-			def backgroundTileFile = resourceManager.loadResource(clearTileName, TmpFileRA)
+			def backgroundTileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
 
 			// Use the background tile to create a 5x4 repeating image
 			def combinedBackgroundData = backgroundTileFile.imagesData
@@ -250,7 +250,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							logger.warn("Skipping unknown mappack tile type: ${tileVal}")
 							return
 						}
-						def tileFile = resourceManager.loadResource(tile.name + theater.ext, TmpFileRA)
+						def tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
 
 						// Skip references to invalid tiles
 						if (tilePic >= tileFile.imagesData.length) {
@@ -312,8 +312,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			// representation for them
 			tileTypes.each { tilePos, tile ->
 				def tileFile = tile.isWall || tile.useShp ?
-					resourceManager.loadResource("${tile.name}.shp", ShpFile) :
-					resourceManager.loadResource(tile.name + theater.ext, ShpFile)
+					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
+					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
 				def imageVariant = 0
 
 				// Select the proper orientation for wall tiles
@@ -372,7 +372,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		MapRATerrain(ResourceManager resourceManager, Palette palette, Map<String,String> terrainData) {
 
 			terrainData.each { cell, terrainType ->
-				def terrainFile = resourceManager.loadResource(terrainType + theater.ext, ShpFile)
+				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
 				elements << new Image(terrainFile.width, terrainFile.height, palette.format.value,
