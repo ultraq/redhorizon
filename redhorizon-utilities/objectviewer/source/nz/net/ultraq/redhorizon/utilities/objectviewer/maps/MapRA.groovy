@@ -247,7 +247,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 						// Some unknown tile types still coming through?
 						if (!tile) {
-							logger.warn("Skipping unknown tile type: ${tileVal}")
+							logger.warn("Skipping unknown mappack tile type: ${tileVal}")
 							return
 						}
 						def tileFile = resourceManager.loadResource(tile.name + theater.ext, TmpFileRA)
@@ -297,6 +297,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 					if (tileVal != -1) {
 						def tile = MapRAOverlayPackTiles.find { tile ->
 							return tile.value == tileVal
+						}
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn("Skipping unknown overlay tile type: ${tileVal}")
+							return
 						}
 						tileTypes << [(tileCoord): tile]
 					}
