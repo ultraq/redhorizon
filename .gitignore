@@ -1,12 +1,12 @@
 /.gradle
 /.idea
+/.logs
 /bin
 /lib
-/Mods/_Red Alert/Mix/
-/Mods/_Tiberium Dawn/Mix/
-.logs
+/mix
 build
 *.aud
+*.ini
 *.mix
 *.pcx
 *.v00
