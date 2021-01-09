@@ -15,9 +15,3 @@
  */
 
 description = 'Event system for Red Horizon (something something "Event Horizon"? 🤔)'
-
-dependencies {
-	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
-		exclude module: 'groovy'
-	}
-}

@@ -66,6 +66,9 @@ subprojects {
 			'org.codehaus.groovy:groovy:3.0.7:indy',
 			'org.slf4j:slf4j-api:1.7.30'
 		)
+		implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
+			exclude module: 'groovy'
+		}
 		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.0-SNAPSHOT') {
 			exclude module: 'groovy'
 		}

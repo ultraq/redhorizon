@@ -22,9 +22,6 @@ dependencies {
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes')
 	)
-	implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
-		exclude module: 'groovy'
-	}
 }
 
 processResources {
