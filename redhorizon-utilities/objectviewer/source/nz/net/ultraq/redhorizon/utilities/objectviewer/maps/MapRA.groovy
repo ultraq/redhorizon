@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.maps
 
 import nz.net.ultraq.redhorizon.classic.codecs.PackData
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
@@ -27,6 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
@@ -34,7 +34,6 @@ import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.Memoized
 import java.nio.ByteBuffer
 
 /**
@@ -67,9 +66,10 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	/**
 	 * Construtor, build a map from the given map file.
 	 * 
+	 * @param resourceManager
 	 * @param mapFile
 	 */
-	MapRA(IniFile mapFile) {
+	MapRA(ResourceManager resourceManager, IniFile mapFile) {
 
 		name = mapFile['Basic']['Name']
 
@@ -90,13 +90,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		def waypoint98 = waypoints['98'] as int
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
-		// TODO: Figure out some way to share knowledge of the path to mix files
-		//       containing the necessary files
-		new MixFile(new File("mix/red-alert/MapTiles_${theater.label}.mix")).withCloseable { tilesMixFile ->
 			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
-			def backgroundTileFile = tilesMixFile.getEntryData(tilesMixFile.getEntry(clearTileName)).withBufferedStream { inputStream ->
-				return new TmpFileRA(inputStream)
-			}
+			def backgroundTileFile = resourceManager.loadResource(clearTileName, TmpFileRA)
 
 			// Use the background tile to create a 5x4 repeating image
 			def combinedBackgroundData = backgroundTileFile.imagesData
@@ -115,10 +110,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			)
 
 			// Build the various layers
-			layers << new MapRAMapPack(tilesMixFile, palette, mapDataToBytes(mapFile['MapPack'], 6))
-			layers << new MapRAOverlayPack(tilesMixFile, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
-			layers << new MapRATerrain(tilesMixFile, palette, mapFile['TERRAIN'])
-		}
+			layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
+			layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
+			layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
 	}
 
 	@Override
@@ -126,23 +120,6 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		layers.each { layer ->
 			layer.delete(renderer)
-		}
-	}
-
-	/**
-	 * Retrieve the map tile with the given name from the mix file, returned as
-	 * the specified file type.
-	 * 
-	 * @param mixFile
-	 * @param tileName
-	 * @param fileType
-	 * @return
-	 */
-	@Memoized
-	private static <T> T getTileByName(MixFile mixFile, String tileName, Class<T> fileType) {
-
-		return mixFile.getEntryData(mixFile.getEntry(tileName)).withBufferedStream { inputStream ->
-			return fileType.newInstance(inputStream)
 		}
 	}
 
@@ -194,7 +171,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 	/**
 	 * Return some information about this map.
-	 * 
+	 *
 	 * @return Map info.
 	 */
 	@Override
@@ -248,10 +225,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		/**
 		 * Constructor, build the MapPack layer from the given tile data.
 		 * 
-		 * @param tileMixFile
+		 * @param resourceManager
+		 * @param palette
 		 * @param tileData
 		 */
-		MapRAMapPack(MixFile tileMixFile, Palette palette, ByteBuffer tileData) {
+		MapRAMapPack(ResourceManager resourceManager, Palette palette, ByteBuffer tileData) {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
@@ -272,7 +250,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							logger.warn("Skipping unknown tile type: ${tileVal}")
 							return
 						}
-						def tileFile = getTileByName(tileMixFile, tile.name + theater.ext, TmpFileRA)
+						def tileFile = resourceManager.loadResource(tile.name + theater.ext, TmpFileRA)
 
 						// Skip references to invalid tiles
 						if (tilePic >= tileFile.imagesData.length) {
@@ -300,80 +278,76 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		/**
 		 * Constructor, build the OverlayPack layer from the given tile data.
 		 * 
-		 * @param tileMixFile
+		 * @param resourceManager
 		 * @param palette
 		 * @param tileData
 		 */
-		MapRAOverlayPack(MixFile tileMixFile, Palette palette, ByteBuffer tileData) {
+		MapRAOverlayPack(ResourceManager resourceManager, Palette palette, ByteBuffer tileData) {
 
-			Map<Vector2f,MapRAOverlayPackTiles> tileTypes = [:]
+			Map<Vector2f, MapRAOverlayPackTiles> tileTypes = [:]
 
-			// TODO: Figure out some way to share knowledge of the path to mix files
-			//       containing the necessary files
-			new MixFile(new File('mix/red-alert/Conquer.mix')).withCloseable { conquerMixFile ->
-				TILES_X.times { y ->
-					TILES_Y.times { x ->
-						def tileCoord = new Vector2f(x, y)
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+					def tileCoord = new Vector2f(x, y)
 
-						// Get the byte representing the tile
-						def tileVal = tileData.get()
+					// Get the byte representing the tile
+					def tileVal = tileData.get()
 
-						// Retrieve the appropriate tile, skip empty tiles
-						if (tileVal != -1) {
-							def tile = MapRAOverlayPackTiles.find { tile ->
-								return tile.value == tileVal
-							}
-							tileTypes << [(tileCoord): tile]
+					// Retrieve the appropriate tile, skip empty tiles
+					if (tileVal != -1) {
+						def tile = MapRAOverlayPackTiles.find { tile ->
+							return tile.value == tileVal
 						}
+						tileTypes << [(tileCoord): tile]
 					}
 				}
+			}
 
-				// Now that the tiles are all assembled, build the appropriate image
-				// representation for them
-				tileTypes.each { tilePos, tile ->
-					def tileFile = tile.isWall || tile.useShp ?
-						getTileByName(conquerMixFile, "${tile.name}.shp", ShpFile) :
-						getTileByName(tileMixFile, tile.name + theater.ext, ShpFile)
-					def imageVariant = 0
+			// Now that the tiles are all assembled, build the appropriate image
+			// representation for them
+			tileTypes.each { tilePos, tile ->
+				def tileFile = tile.isWall || tile.useShp ?
+					resourceManager.loadResource("${tile.name}.shp", ShpFile) :
+					resourceManager.loadResource(tile.name + theater.ext, ShpFile)
+				def imageVariant = 0
 
-					// Select the proper orientation for wall tiles
-					if (tile.isWall) {
-						if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
-							imageVariant |= 0x01
-						}
-						if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
-							imageVariant |= 0x02
-						}
-						if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
-							imageVariant |= 0x04
-						}
-						if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
-							imageVariant |= 0x08
-						}
+				// Select the proper orientation for wall tiles
+				if (tile.isWall) {
+					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
+						imageVariant |= 0x01
 					}
-					// Select the proper density for resources
-					else if (tile.isResource) {
-						def adjacent = (-1..1).inject(0) { accY, y ->
-							return accY + (-1..1).inject(0) { accX, x ->
-								if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
-									return accX + 1
-								}
-								return accX
-							}
-						}
-						imageVariant = tile.name().startsWith('GEM') ?
-							adjacent / 3 as int :
-							3 + adjacent
+					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
+						imageVariant |= 0x02
 					}
-
-					// TODO: Create a single texture for each tile and re-use it but
-					//       render it to a different place
-					def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-					def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
-						tileFile.imagesData[imageVariant].applyPalette(palette),
-						new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
-					elements << tileImage
+					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
+						imageVariant |= 0x04
+					}
+					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
+						imageVariant |= 0x08
+					}
 				}
+				// Select the proper density for resources
+				else if (tile.isResource) {
+					def adjacent = (-1..1).inject(0) { accY, y ->
+						return accY + (-1..1).inject(0) { accX, x ->
+							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
+								return accX + 1
+							}
+							return accX
+						}
+					}
+					imageVariant = tile.name().startsWith('GEM') ?
+						adjacent / 3 as int :
+						3 + adjacent
+				}
+
+				// TODO: Create a single texture for each tile and re-use it but
+				//       render it to a different place
+				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
+				def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
+					tileFile.imagesData[imageVariant].applyPalette(palette),
+					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
+				elements << tileImage
 			}
 		}
 	}
@@ -385,15 +359,15 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		/**
 		 * Constructor, build the terrain layer from the given terrain data.
-		 *
-		 * @param tileMixFile
+		 * 
+		 * @param resourceManager
 		 * @param palette
 		 * @param terrainData
 		 */
-		MapRATerrain(MixFile tileMixFile, Palette palette, Map<String,String> terrainData) {
+		MapRATerrain(ResourceManager resourceManager, Palette palette, Map<String,String> terrainData) {
 
 			terrainData.each { cell, terrainType ->
-				def terrainFile = getTileByName(tileMixFile, terrainType + theater.ext, ShpFile)
+				def terrainFile = resourceManager.loadResource(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
 				elements << new Image(terrainFile.width, terrainFile.height, palette.format.value,

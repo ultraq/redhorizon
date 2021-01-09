@@ -26,7 +26,8 @@ dependencies {
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw',
 		'org.lwjgl:lwjgl-openal',
-		'org.lwjgl:lwjgl-opengl'
+		'org.lwjgl:lwjgl-opengl',
+		'org.reflections:reflections:0.9.12'
 	)
 	runtimeOnly(
 		'org.lwjgl:lwjgl::natives-macos',

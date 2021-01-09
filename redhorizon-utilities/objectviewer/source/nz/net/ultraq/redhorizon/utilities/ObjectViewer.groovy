@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.utilities.objectviewer.MapViewer
 import nz.net.ultraq.redhorizon.utilities.objectviewer.UnitViewer
 
@@ -73,7 +74,7 @@ class ObjectViewer implements Callable<Integer> {
 
 	/**
 	 * Launch the unit viewer.
-	 *
+	 * 
 	 * @return
 	 */
 	@Override
@@ -82,11 +83,11 @@ class ObjectViewer implements Callable<Integer> {
 		Thread.currentThread().name = 'Object Viewer [main]'
 		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info('Loading {}...', this.file)
+		logger.info('Loading {}...', file)
 		def objectFile
 		def objectId
-		if (this.file.name.endsWith('.mix')) {
-			new MixFile(this.file).withCloseable { mix ->
+		if (file.name.endsWith('.mix')) {
+			new MixFile(file).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
@@ -102,10 +103,10 @@ class ObjectViewer implements Callable<Integer> {
 			}
 		}
 		else {
-			objectFile = this.file.withInputStream { inputStream ->
+			objectFile = file.withInputStream { inputStream ->
 				return getFileClass(file.name).newInstance(inputStream)
 			}
-			objectId = this.file.name[0..<-4]
+			objectId = file.name[0..<-4]
 		}
 
 		view(objectFile, objectId)
@@ -153,7 +154,12 @@ class ObjectViewer implements Callable<Integer> {
 				new UnitViewer(objectFile, objectId, paletteType).view()
 				break
 			case IniFile:
-				new MapViewer(objectFile, fullScreen).view()
+				// Assume the directory in which file resides is where we can search for items
+				new ResourceManager(file.parentFile,
+					'nz.net.ultraq.redhorizon.filetypes',
+					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+					new MapViewer(resourceManager, objectFile, fullScreen).view()
+				}
 				break
 			default:
 				logger.error('No viewer for the associated file class of {}', objectFile)
@@ -163,7 +169,7 @@ class ObjectViewer implements Callable<Integer> {
 
 	/**
 	 * Bootstrap the application using Picocli.
-	 *
+	 * 
 	 * @param args
 	 */
 	static void main(String[] args) {

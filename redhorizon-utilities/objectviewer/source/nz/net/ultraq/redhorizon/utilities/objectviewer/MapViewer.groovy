@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
 import org.joml.Vector2f
@@ -54,6 +55,7 @@ class MapViewer implements WithGraphicsEngine {
 	private static final Logger logger = LoggerFactory.getLogger(MapViewer)
 	private static final int TICK = 48
 
+	final ResourceManager resourceManager
 	final IniFile mapFile
 	final boolean fullScreen
 
@@ -74,7 +76,7 @@ class MapViewer implements WithGraphicsEngine {
 				// Add the map
 				MapRA map
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					map = new MapRA(mapFile)
+					map = new MapRA(resourceManager, mapFile)
 					logger.info('Map details: {}', map)
 					graphicsEngine.addSceneElement(map)
 					graphicsEngine.camera.position.set(map.initialPosition, 0)
