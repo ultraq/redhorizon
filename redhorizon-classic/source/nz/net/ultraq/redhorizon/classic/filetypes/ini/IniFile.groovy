@@ -31,6 +31,7 @@ import java.util.regex.Pattern
 @FileExtensions('ini')
 class IniFile implements MapFile {
 
+	private static final Pattern COMMENT_PATTERN = ~/^\s*;.*/
 	private static final Pattern SECTION_PATTERN = ~/\[(\w+)\](\s*;.*)?/
 	private static final Pattern LINE_PATTERN = ~/([^=]+)=([^;]+)(;.*)?/
 
@@ -48,6 +49,9 @@ class IniFile implements MapFile {
 		inputStream.withReader { reader ->
 			reader.eachLine { line ->
 				if (line) {
+					if (line.matches(COMMENT_PATTERN)) {
+						return
+					}
 					def sectionMatcher = SECTION_PATTERN.matcher(line)
 					if (sectionMatcher.matches()) {
 						def sectionHeader = sectionMatcher.group(1)
