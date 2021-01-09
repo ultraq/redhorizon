@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
 /**
  * The base unit renderer for drawing simple static bodies.
@@ -30,7 +30,7 @@ class UnitRenderer implements GraphicsElement {
 	protected final String type
 	protected final Unit unit
 	protected final int headings
-	protected final Image[] frames
+	protected final Texture[] textures
 	protected final float degreesPerHeading
 
 	/**
@@ -40,14 +40,14 @@ class UnitRenderer implements GraphicsElement {
 	 * @param unit
 	 * @param headings
 	 * @param turretHeadings
-	 * @param frames
+	 * @param textures
 	 */
-	UnitRenderer(String type, Unit unit, int headings, Image[] frames) {
+	UnitRenderer(String type, Unit unit, int headings, Texture[] textures) {
 
 		this.type = type
 		this.unit = unit
 		this.headings = headings
-		this.frames = frames
+		this.textures = textures
 
 		degreesPerHeading = (360f / headings) as float
 	}
@@ -55,23 +55,23 @@ class UnitRenderer implements GraphicsElement {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		frames.each { frame ->
-			frame.delete(renderer)
+		textures.each { texture ->
+			texture.delete(renderer)
 		}
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		frames.each { frame ->
-			frame.init(renderer)
+		textures.each { texture ->
+			texture.init(renderer)
 		}
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		frames[rotationFrames()].render(renderer)
+		renderer.drawTexture(textures[rotationFrames()].textureId, unit.dimensions)
 	}
 
 	protected int rotationFrames() {

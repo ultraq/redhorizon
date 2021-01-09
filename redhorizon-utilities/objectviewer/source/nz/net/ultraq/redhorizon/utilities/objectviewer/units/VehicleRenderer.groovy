@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
 /**
  * Vehicle-specific unit renderer.
@@ -35,11 +35,11 @@ class VehicleRenderer extends UnitRenderer {
 	 * @param unit
 	 * @param headings
 	 * @param turretHeadings
-	 * @param frames
+	 * @param textures
 	 */
-	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, Image[] frames) {
+	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, Texture[] textures) {
 
-		super(type, unit, headings, frames)
+		super(type, unit, headings, textures)
 		this.turretHeadings = turretHeadings
 	}
 
@@ -48,7 +48,7 @@ class VehicleRenderer extends UnitRenderer {
 
 		super.render(renderer)
 		if (turretHeadings) {
-			frames[headings + rotationFrames()].render(renderer)
+			renderer.drawTexture(textures[headings + rotationFrames()].textureId, unit.dimensions)
 		}
 	}
 }

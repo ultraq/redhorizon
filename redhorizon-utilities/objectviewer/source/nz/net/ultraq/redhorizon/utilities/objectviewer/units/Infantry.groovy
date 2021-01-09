@@ -35,16 +35,17 @@ class Infantry extends Unit {
 	 * @param data
 	 * @param imagesFile
 	 * @param palette
-	 * @param coordinates
+	 * @param dimensions
 	 * @param gameTime
 	 */
-	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
+	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef dimensions, GameTime gameTime) {
 
+		super(dimensions)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
 		unitRenderers << new UnitRenderer('body', this, bodyPart.headings,
-			buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)))
+			buildTextures(imagesFile, palette, frameIndex..<(frameIndex += bodyPart.headings)))
 
 		// TODO: Utilize alternative body frames for something
 		def bodyAltPart = data.shpFile.parts.bodyAlt
@@ -54,7 +55,7 @@ class Infantry extends Unit {
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+				buildTextures(imagesFile, palette, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
 				gameTime)
 		}
 

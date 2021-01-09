@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.media.Image
 
 import org.joml.Rectanglef
 
@@ -36,23 +36,24 @@ class Vehicle extends Unit {
 	 * @param data
 	 * @param imagesFile
 	 * @param palette
-	 * @param coordinates
+	 * @param dimensions
 	 * @param gameTime
 	 */
-	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef coordinates, GameTime gameTime) {
+	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef dimensions, GameTime gameTime) {
 
+		super(dimensions)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
 		def turretPart = data.shpFile.parts.turret
 		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
-			buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += bodyPart.headings)) +
-			(turretPart ? buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += turretPart.headings)) : [])
-			as Image[])
+			buildTextures(imagesFile, palette, frameIndex..<(frameIndex += bodyPart.headings)) +
+			(turretPart ? buildTextures(imagesFile, palette, frameIndex..<(frameIndex += turretPart.headings)) : [])
+			as Texture[])
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				buildImages(imagesFile, palette, coordinates, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+				buildTextures(imagesFile, palette, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
 				gameTime)
 		}
 

@@ -18,10 +18,11 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -38,7 +39,18 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 
 	protected final List<UnitRenderer> unitRenderers = []
 	protected UnitRenderer currentRenderer
+	protected Rectanglef dimensions
 	protected float heading
+
+	/**
+	 * Constructor, set this unit to draw over the given dimensions.
+	 * 
+	 * @param dimensions
+	 */
+	protected Unit(Rectanglef dimensions) {
+
+		this.dimensions = dimensions
+	}
 
 	/**
 	 * Build a series of images from the specified range of frame data of the unit
@@ -50,11 +62,13 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	 * @param range
 	 * @return
 	 */
-	protected static Image[] buildImages(ImagesFile imagesFile, Palette palette, Rectanglef coordinates, IntRange range) {
+	protected static Texture[] buildTextures(ImagesFile imagesFile, Palette palette, IntRange range) {
 
 		return range.collect { i ->
-			return new Image(imagesFile, i, coordinates, palette)
-		} as Image[]
+			return new Texture(imagesFile.width, imagesFile.height,
+				imagesFile.format !== FORMAT_INDEXED ? imagesFile.format.value : palette.format.value,
+				imagesFile.format !== FORMAT_INDEXED ? imagesFile.imagesData[i] : imagesFile.imagesData[i].applyPalette(palette))
+		} as Texture[]
 	}
 
 	@Override

@@ -112,10 +112,10 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 				withGraphicsEngine(executorService, config) { graphicsEngine ->
 
 					// Add the unit to the engine
-					def unitCoordinates = new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2).center()
+					def unitDimensions = new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2).center()
 					def unit = targetClass
 						.getDeclaredConstructor(UnitData, ImagesFile, Palette, Rectanglef, GameTime)
-						.newInstance(unitData, shpFile, palette, unitCoordinates, gameClock)
+						.newInstance(unitData, shpFile, palette, unitDimensions, gameClock)
 					graphicsEngine.addSceneElement(unit)
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
