@@ -81,10 +81,8 @@ class ResourceManager implements Closeable {
 			if (file.file) {
 				def fileName = file.name
 				if (fileName == resourceName) {
-					return file.withInputStream { is ->
-						return is.withBufferedStream { bis ->
-							return targetType.newInstance(bis)
-						}
+					return file.withInputStream { stream ->
+						return targetType.newInstance(stream)
 					}
 				}
 				def fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
