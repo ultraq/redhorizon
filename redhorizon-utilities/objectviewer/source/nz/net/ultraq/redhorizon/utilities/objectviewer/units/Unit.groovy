@@ -52,9 +52,8 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	 */
 	protected static Image[] buildImages(ImagesFile imagesFile, Palette palette, Rectanglef coordinates, IntRange range) {
 
-		return range.collect([]) { i ->
-			return new Image(imagesFile.width, imagesFile.height, palette.format.value,
-				imagesFile.imagesData[i].applyPalette(palette), coordinates)
+		return range.collect { i ->
+			return new Image(imagesFile, i, coordinates, palette)
 		} as Image[]
 	}
 

@@ -257,11 +257,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 							return
 						}
 
-						// TODO: Create a single texture for each tile and re-use it but
-						//       render it to a different place
 						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
-						def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
-							tileFile.imagesData[tilePic].applyPalette(palette),
+						def tileTexture = resourceManager.loadTexture(tileFile, tilePic, palette)
+						def tileImage = new Image(tileTexture,
 							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
 						elements << tileImage
 					}
@@ -349,9 +347,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				// TODO: Create a single texture for each tile and re-use it but
 				//       render it to a different place
 				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-				def tileImage = new Image(tileFile.width, tileFile.height, palette.format.value,
-					tileFile.imagesData[imageVariant].applyPalette(palette),
-					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
+				def tileImage = new Image(tileFile, imageVariant,
+					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)),
+					palette)
 				elements << tileImage
 			}
 		}
@@ -375,9 +373,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new Image(terrainFile.width, terrainFile.height, palette.format.value,
-					terrainFile.imagesData[0].applyPalette(palette),
-					new Rectanglef(cellPosXY, cellPosWH).makeValid())
+				elements << new Image(terrainFile, 0, new Rectanglef(cellPosXY, cellPosWH).makeValid(), palette)
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"

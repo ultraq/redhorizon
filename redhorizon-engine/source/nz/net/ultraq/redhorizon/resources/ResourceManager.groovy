@@ -16,8 +16,12 @@
 
 package nz.net.ultraq.redhorizon.resources
 
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.reflections.Reflections
 
@@ -102,5 +106,13 @@ class ResourceManager implements Closeable {
 			}
 			return loadFile(resourceName, targetType, file)
 		}
+	}
+
+	@Memoized
+	Texture loadTexture(ImagesFile imagesFile, int frame, Palette palette = null) {
+
+		return new Texture(imagesFile.width, imagesFile.height,
+			imagesFile.format !== FORMAT_INDEXED ? imagesFile.format.value : palette.format.value,
+			imagesFile.format !== FORMAT_INDEXED ? imagesFile.imagesData[frame] : imagesFile.imagesData[frame].applyPalette(palette))
 	}
 }
