@@ -258,10 +258,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 
 						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
-						def tileTexture = resourceManager.loadTexture(tileFile, tilePic, palette)
-						def tileImage = new Image(tileTexture,
+						elements << new Image(resourceManager.loadTexture(tileFile, tilePic, palette),
 							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
-						elements << tileImage
 					}
 				}
 			}
@@ -344,13 +342,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						3 + adjacent
 				}
 
-				// TODO: Create a single texture for each tile and re-use it but
-				//       render it to a different place
 				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-				def tileImage = new Image(tileFile, imageVariant,
-					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)),
-					palette)
-				elements << tileImage
+				elements << new Image(resourceManager.loadTexture(tileFile, imageVariant, palette),
+					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
 			}
 		}
 	}
@@ -373,7 +367,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new Image(terrainFile, 0, new Rectanglef(cellPosXY, cellPosWH).makeValid(), palette)
+				elements << new Image(resourceManager.loadTexture(terrainFile, 0, palette),
+					new Rectanglef(cellPosXY, cellPosWH).makeValid())
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"
