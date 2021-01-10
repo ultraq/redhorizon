@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
@@ -63,7 +64,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 	// Rendering information
 	private int lastFrame
-	private List<Integer> textureIds
+	private List<Texture> textures
 
 	/**
 	 * Constructor, create an animation out of animation file data.
@@ -137,14 +138,14 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		animationDataWorker.stop()
 		frames.drain()
-		renderer.deleteTextures(textureIds.findAll { it } as int[])
+		renderer.deleteTextures(textures.collect { it.textureId } as int[])
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
 		lastFrame = -1
-		textureIds = []
+		textures = []
 		framesQueued = 0
 	}
 
@@ -166,24 +167,24 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			// Try to load up to bufferSize frames ahead, maxing at 5 so we don't spent too much time in here
 			if (frames.size()) {
 				def framesAhead = Math.min(currentFrame + bufferSize, numFrames)
-				if (!textureIds[framesAhead]) {
+				if (!textures[framesAhead]) {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
-						def newTextureIds = frames.drain(Math.max(numFramesToRead, 5)).collect { frame ->
-							def newTextureId = renderer.createTexture(frame, format, width, height)
-							textureIds << newTextureId
-							return newTextureId
+						frames.drain(Math.max(numFramesToRead, 5)).each { frame ->
+							def newTexture = new Texture(width, height, format, frame)
+							newTexture.init(renderer)
+							textures << newTexture
+							framesQueued++
 						}
-						framesQueued += newTextureIds.size()
 					}
 				}
 			}
 
 			// Draw the current frame if available
 			if (currentFrame < numFrames) {
-				def textureId = textureIds[currentFrame]
-				if (textureId) {
-					renderer.drawTexture(textureId, dimensions)
+				def texture = textures[currentFrame]
+				if (texture) {
+					renderer.drawTexture(texture.textureId, dimensions)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)
@@ -197,10 +198,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 			// Delete used frames as the animation progresses to free up memory
 			if (lastFrame != -1 && lastFrame != currentFrame) {
-				def usedTextureIds = textureIds[lastFrame..<currentFrame]
-				renderer.deleteTextures(usedTextureIds as int[])
-				usedTextureIds.clear()
-				framesQueued -= usedTextureIds.size()
+				def usedTextures = textures[lastFrame..<currentFrame]
+				renderer.deleteTextures(usedTextures.collect { it.textureId } as int[])
+				usedTextures.clear()
+				framesQueued -= usedTextures.size()
 			}
 			lastFrame = currentFrame
 		}
