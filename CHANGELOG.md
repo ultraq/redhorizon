@@ -2,6 +2,19 @@
 Changelog
 =========
 
+### 0.31.2
+ - Upgrade the reflections library which came with a change that removes the
+   large Google Guava dependency - we're now 2MB lighter
+ - Use the current desktop refresh rate in full screen mode instead of always
+   replacing it with the highest the monitor can do
+ - Added a resource manager which can search for items inside a directory and
+   all its subdirectories, loosening one restriction of the map viewer only
+   working with my current setup.  However, a new restriction is that it doesn't
+   yet work on `.mix` files inside `.mix` files, so it's still somewhat specific
+   to my workspace 😅
+ - Sped up map rendering and reduced memory usage by reusing map tiles already
+   encountered
+
 ### 0.31.1
  - Lean on Java's built-in blowfish cipher to replace the BlowfishJ library I'd
    been using.
