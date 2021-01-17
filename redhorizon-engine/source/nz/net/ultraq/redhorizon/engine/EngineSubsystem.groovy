@@ -71,10 +71,9 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
-			throw ex
 		}
 		finally {
-			running = false
+			stop()
 			trigger(new RenderLoopStopEvent())
 		}
 	}
