@@ -27,13 +27,14 @@ import static org.lwjgl.opengl.GL21.*
 import java.nio.ByteBuffer
 
 /**
- * A graphics renderer using the OpenGL API.
+ * A graphics renderer using legacy OpenGL APIs, so OpenGL 2.1 and older, and
+ * fixed-function methods.
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer {
+class OpenGLLegacyRenderer implements GraphicsRenderer {
 
-	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
+	private static final Logger logger = LoggerFactory.getLogger(OpenGLLegacyRenderer)
 
 	// Configuration values
 	private final Colour clearColour
@@ -49,7 +50,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	 * @param camera
 	 * @param config
 	 */
-	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
+	OpenGLLegacyRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
 		GL.createCapabilities()
 

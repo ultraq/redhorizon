@@ -26,6 +26,11 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 class Colour {
 
+	/**
+	 * The number of bytes used to represent a colour value.
+	 */
+	static final int BYTES = 4
+
 	static final Colour BLACK  = new Colour(0, 0, 0)
 	static final Colour BLUE   = new Colour(0, 0, 1)
 	static final Colour GREEN  = new Colour(0, 1, 0)
@@ -37,6 +42,20 @@ class Colour {
 	final float g
 	final float b
 	final float a = 1
+
+	/**
+	 * Convert this colour into another type that can represent it.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	Object asType(Class clazz) {
+
+		if (clazz == float[]) {
+			return new float[]{ r, g, b, a }
+		}
+		throw new IllegalArgumentException("Cannot convert Colour to ${clazz}")
+	}
 
 	/**
 	 * Return a new colour from a base one but with a specific alpha value.

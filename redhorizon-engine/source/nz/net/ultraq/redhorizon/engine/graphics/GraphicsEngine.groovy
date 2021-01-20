@@ -44,7 +44,7 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private OpenGLContext context
 	private Camera camera
-	private OpenGLRenderer renderer
+	private OpenGLLegacyRenderer renderer
 	private boolean started
 
 	/**
@@ -129,7 +129,7 @@ class GraphicsEngine extends EngineSubsystem {
 		}
 		context.withCloseable {
 			context.withCurrent { ->
-				renderer = new OpenGLRenderer(context, config)
+				renderer = new OpenGLLegacyRenderer(context, config)
 				logger.debug(renderer.toString())
 				camera.init(renderer)
 			}
