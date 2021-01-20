@@ -44,7 +44,7 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private OpenGLContext context
 	private Camera camera
-	private OpenGLLegacyRenderer renderer
+	private OpenGLRenderer renderer
 	private boolean started
 
 	/**

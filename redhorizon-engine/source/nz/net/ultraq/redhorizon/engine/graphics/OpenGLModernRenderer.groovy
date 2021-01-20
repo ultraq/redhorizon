@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
@@ -33,13 +32,9 @@ import java.nio.FloatBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLModernRenderer implements GraphicsRenderer {
+class OpenGLModernRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLModernRenderer)
-
-	// Configuration values
-	private final Colour clearColour
-	private final boolean filter
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -50,7 +45,7 @@ class OpenGLModernRenderer implements GraphicsRenderer {
 	 */
 	OpenGLModernRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
-		GL.createCapabilities()
+		super(config)
 
 //		if (capabilities.GL_KHR_debug) {
 //			glEnable(GL_DEBUG_OUTPUT)
@@ -63,11 +58,7 @@ class OpenGLModernRenderer implements GraphicsRenderer {
 //			}, 0)
 //		}
 
-		clearColour = config.clearColour
-		glClearColor(clearColour.r, clearColour.g, clearColour.b, 1)
-
 		// Edge smoothing
-		filter = config.filter
 //		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST)
 //		glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
 //		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
@@ -280,13 +271,6 @@ class OpenGLModernRenderer implements GraphicsRenderer {
 			throw new Exception("OpenGL error: ${errorCode}")
 		}
 		return result
-	}
-
-	@Override
-	void clear() {
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-//		checkForError { -> glClear(GL_STENCIL_BUFFER_BIT) }
 	}
 
 	@Override

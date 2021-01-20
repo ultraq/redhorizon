@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.lwjgl.opengl.GL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
@@ -32,13 +31,9 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLLegacyRenderer implements GraphicsRenderer {
+class OpenGLLegacyRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLLegacyRenderer)
-
-	// Configuration values
-	private final Colour clearColour
-	private final boolean filter
 
 	private final Vector3f currentPosition = new Vector3f()
 
@@ -47,18 +42,13 @@ class OpenGLLegacyRenderer implements GraphicsRenderer {
 	 * Horizon's 2D game engine.
 	 * 
 	 * @param context
-	 * @param camera
 	 * @param config
 	 */
 	OpenGLLegacyRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
-		GL.createCapabilities()
-
-		clearColour = config.clearColour
-		glClearColor(clearColour.r, clearColour.g, clearColour.b, 1)
+		super(config)
 
 		// Edge smoothing
-		filter = config.filter
 		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
