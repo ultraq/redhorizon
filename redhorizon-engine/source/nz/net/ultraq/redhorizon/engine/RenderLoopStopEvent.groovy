@@ -18,10 +18,15 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.events.Event
 
+import groovy.transform.TupleConstructor
+
 /**
  * Event for when the render loop of an engine has ended.
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor
 class RenderLoopStopEvent extends Event {
+
+	final Exception exception
 }

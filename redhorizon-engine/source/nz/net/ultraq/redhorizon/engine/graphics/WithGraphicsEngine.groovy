@@ -79,7 +79,9 @@ trait WithGraphicsEngine {
 		})
 		graphicsEngine.on(RenderLoopStopEvent) { event ->
 			finishBarrier.countDown()
-			executionBarrier.await()
+			if (event.exception) {
+				executionBarrier.await()
+			}
 		}
 		def engine = executorService.submit(graphicsEngine)
 
