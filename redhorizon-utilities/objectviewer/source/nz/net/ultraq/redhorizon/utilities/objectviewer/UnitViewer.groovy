@@ -61,6 +61,7 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 
 	final ShpFile shpFile
 	final String unitId
+	final boolean modernRenderer
 	final PaletteTypes paletteType
 
 	/**
@@ -104,7 +105,8 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def config = new GraphicsConfiguration(
-			clearColour: Colour.WHITE
+			clearColour: Colour.WHITE,
+			modernRenderer: modernRenderer
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->

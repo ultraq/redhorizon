@@ -46,6 +46,7 @@ class ImageViewer implements WithGraphicsEngine {
 	final boolean filter
 	final boolean fixAspectRatio
 	final boolean fullScreen
+	final boolean modernRenderer
 
 	/**
 	 * View the configured file.
@@ -57,7 +58,8 @@ class ImageViewer implements WithGraphicsEngine {
 		def config = new GraphicsConfiguration(
 			filter: filter,
 			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen
+			fullScreen: fullScreen,
+			modernRenderer: modernRenderer
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->

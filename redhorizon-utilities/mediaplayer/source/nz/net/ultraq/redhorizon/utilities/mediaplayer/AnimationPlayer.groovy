@@ -49,6 +49,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 	final boolean filter
 	final boolean fixAspectRatio
 	final boolean fullScreen
+	final boolean modernRenderer
 	final boolean scaleLowRes
 	final boolean scanlines
 
@@ -62,7 +63,8 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 		def config = new GraphicsConfiguration(
 			filter: filter,
 			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen
+			fullScreen: fullScreen,
+			modernRenderer: modernRenderer
 		)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->

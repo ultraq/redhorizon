@@ -51,6 +51,7 @@ class ImagesViewer implements WithGraphicsEngine {
 	final boolean filter
 	final boolean fixAspectRatio
 	final boolean fullScreen
+	final boolean modernRenderer
 	final PaletteTypes paletteType
 
 	/**
@@ -63,7 +64,8 @@ class ImagesViewer implements WithGraphicsEngine {
 		def config = new GraphicsConfiguration(
 			filter: filter,
 			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen
+			fullScreen: fullScreen,
+			modernRenderer: modernRenderer
 		)
 
 		Palette palette

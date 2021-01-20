@@ -34,4 +34,5 @@ class GraphicsConfiguration {
 
 	boolean fixAspectRatio
 	boolean fullScreen
+	boolean modernRenderer
 }

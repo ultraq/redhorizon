@@ -69,6 +69,9 @@ class ObjectViewer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode.  Only applies to the mission viewer.')
 	boolean fullScreen
 
+	@Option(names = ['--modern-renderer'], description = 'Use the experimental modern OpenGL renderer (under development)')
+	boolean modernRenderer
+
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
@@ -151,14 +154,14 @@ class ObjectViewer implements Callable<Integer> {
 
 		switch (objectFile) {
 			case ShpFile:
-				new UnitViewer(objectFile, objectId, paletteType).view()
+				new UnitViewer(objectFile, objectId, modernRenderer, paletteType).view()
 				break
 			case IniFile:
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, fullScreen).view()
+					new MapViewer(resourceManager, objectFile, fullScreen, modernRenderer).view()
 				}
 				break
 			default:

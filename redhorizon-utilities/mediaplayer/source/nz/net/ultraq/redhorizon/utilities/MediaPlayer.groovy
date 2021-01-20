@@ -81,6 +81,9 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
+	@Option(names = ['--modern-renderer'], description = 'Use the experimental modern OpenGL renderer (under development)')
+	boolean modernRenderer
+
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
@@ -162,11 +165,11 @@ class MediaPlayer implements Callable<Integer> {
 
 		switch (file) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, fullScreen, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, fullScreen, modernRenderer, scaleLowRes, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, fullScreen, scaleLowRes, scanlines)
+				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, fullScreen, modernRenderer, scaleLowRes, scanlines)
 				animationPlayer.play()
 				break
 			case SoundFile:
@@ -174,11 +177,11 @@ class MediaPlayer implements Callable<Integer> {
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(file, filter, fixAspectRatio, fullScreen)
+				def imageViewer = new ImageViewer(file, filter, fixAspectRatio, fullScreen, modernRenderer)
 				imageViewer.view()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, fullScreen, paletteType)
+				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, fullScreen, modernRenderer, paletteType)
 				imagesViewer.view()
 				break
 			default:
