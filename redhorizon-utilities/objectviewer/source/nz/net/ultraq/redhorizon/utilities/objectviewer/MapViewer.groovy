@@ -57,8 +57,7 @@ class MapViewer implements WithGraphicsEngine {
 
 	final ResourceManager resourceManager
 	final IniFile mapFile
-	final boolean fullScreen
-	final boolean modernRenderer
+	final GraphicsConfiguration graphicsConfig
 
 	/**
 	 * Display the map.
@@ -67,13 +66,8 @@ class MapViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', mapFile)
 
-		def config = new GraphicsConfiguration(
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
-		)
-
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, config) { graphicsEngine ->
+			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the map
 				MapRA map

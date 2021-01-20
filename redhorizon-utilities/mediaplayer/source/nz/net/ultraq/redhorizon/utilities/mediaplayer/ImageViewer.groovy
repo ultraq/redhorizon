@@ -42,11 +42,7 @@ class ImageViewer implements WithGraphicsEngine {
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
 	final ImageFile imageFile
-
-	final boolean filter
-	final boolean fixAspectRatio
-	final boolean fullScreen
-	final boolean modernRenderer
+	final GraphicsConfiguration graphicsConfig
 
 	/**
 	 * View the configured file.
@@ -55,15 +51,8 @@ class ImageViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', imageFile)
 
-		def config = new GraphicsConfiguration(
-			filter: filter,
-			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
-		)
-
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, config) { graphicsEngine ->
+			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->

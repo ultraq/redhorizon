@@ -48,11 +48,7 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
 	final VideoFile videoFile
-
-	final boolean filter
-	final boolean fixAspectRatio
-	final boolean fullScreen
-	final boolean modernRenderer
+	final GraphicsConfiguration graphicsConfig
 	final boolean scaleLowRes
 	final boolean scanlines
 
@@ -63,17 +59,10 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 
 		logger.info('File details: {}', videoFile)
 
-		def config = new GraphicsConfiguration(
-			filter: filter,
-			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
-		)
-
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGameClock(executorService) { gameClock ->
 				withAudioEngine(executorService) { audioEngine ->
-					withGraphicsEngine(executorService, config) { graphicsEngine ->
+					withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 						// Add the video to the engines once we have the window dimensions
 						Video video

@@ -48,10 +48,7 @@ class ImagesViewer implements WithGraphicsEngine {
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 
 	final ImagesFile imagesFile
-	final boolean filter
-	final boolean fixAspectRatio
-	final boolean fullScreen
-	final boolean modernRenderer
+	final GraphicsConfiguration graphicsConfig
 	final PaletteTypes paletteType
 
 	/**
@@ -61,13 +58,6 @@ class ImagesViewer implements WithGraphicsEngine {
 
 		logger.info('File details: {}', imagesFile)
 
-		def config = new GraphicsConfiguration(
-			filter: filter,
-			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
-		)
-
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
 			palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
@@ -76,7 +66,7 @@ class ImagesViewer implements WithGraphicsEngine {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, config) { graphicsEngine ->
+			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Build a combined image of all the images once we have the window size
 				graphicsEngine.on(WindowCreatedEvent) { event ->

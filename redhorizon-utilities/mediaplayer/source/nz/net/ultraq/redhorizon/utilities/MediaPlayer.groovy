@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities
 
 import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -163,13 +164,20 @@ class MediaPlayer implements Callable<Integer> {
 	 */
 	private void play(Object file) {
 
+		def graphicsConfig = new GraphicsConfiguration(
+			filter: filter,
+			fixAspectRatio: fixAspectRatio,
+			fullScreen: fullScreen,
+			modernRenderer: modernRenderer
+		)
+
 		switch (file) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(file, filter, fixAspectRatio, fullScreen, modernRenderer, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(file, graphicsConfig, scaleLowRes, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(file, filter, fixAspectRatio, fullScreen, modernRenderer, scaleLowRes, scanlines)
+				def animationPlayer = new AnimationPlayer(file, graphicsConfig, scaleLowRes, scanlines)
 				animationPlayer.play()
 				break
 			case SoundFile:
@@ -177,11 +185,11 @@ class MediaPlayer implements Callable<Integer> {
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(file, filter, fixAspectRatio, fullScreen, modernRenderer)
+				def imageViewer = new ImageViewer(file, graphicsConfig)
 				imageViewer.view()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(file, filter, fixAspectRatio, fullScreen, modernRenderer, paletteType)
+				def imagesViewer = new ImagesViewer(file, graphicsConfig, paletteType)
 				imagesViewer.view()
 				break
 			default:

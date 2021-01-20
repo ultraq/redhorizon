@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.utilities.objectviewer.MapViewer
@@ -152,16 +154,21 @@ class ObjectViewer implements Callable<Integer> {
 	 */
 	private void view(Object objectFile, String objectId) {
 
+		def graphicsConfig = new GraphicsConfiguration(
+			fullScreen: fullScreen,
+			modernRenderer: modernRenderer
+		)
+
 		switch (objectFile) {
 			case ShpFile:
-				new UnitViewer(objectFile, objectId, modernRenderer, paletteType).view()
+				new UnitViewer(objectFile, objectId, graphicsConfig, paletteType).view()
 				break
 			case IniFile:
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, fullScreen, modernRenderer).view()
+					new MapViewer(resourceManager, objectFile, graphicsConfig).view()
 				}
 				break
 			default:

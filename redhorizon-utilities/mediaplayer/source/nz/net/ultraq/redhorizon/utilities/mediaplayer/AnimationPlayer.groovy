@@ -45,11 +45,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
 	final AnimationFile animationFile
-
-	final boolean filter
-	final boolean fixAspectRatio
-	final boolean fullScreen
-	final boolean modernRenderer
+	final GraphicsConfiguration graphicsConfig
 	final boolean scaleLowRes
 	final boolean scanlines
 
@@ -60,16 +56,9 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 		logger.info('File details: {}', animationFile)
 
-		def config = new GraphicsConfiguration(
-			filter: filter,
-			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
-		)
-
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, config) { graphicsEngine ->
+				withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation
