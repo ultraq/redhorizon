@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.engine.Context
 
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC
@@ -31,7 +31,7 @@ import java.nio.IntBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenALContext extends AbstractContext {
+class OpenALContext extends Context {
 
 	private final long alDevice
 	private final long alContext

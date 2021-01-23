@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.AbstractContext
+import nz.net.ultraq.redhorizon.engine.Context
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -36,7 +36,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
  * 
  * @author Emanuel Rabina
  */
-class OpenGLContext extends AbstractContext implements EventTarget {
+class OpenGLContext extends Context implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
 

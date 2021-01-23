@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.engine
  * 
  * @author Emanuel Rabina
  */
-abstract class AbstractContext implements Closeable {
+abstract class Context implements Closeable {
 
 	/**
 	 * Makes the context current on the executing thread.
