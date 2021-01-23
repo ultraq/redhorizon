@@ -27,26 +27,35 @@ import org.joml.Vector2f
 class JomlStaticExtensions {
 
 	/**
-	 * The number of bytes used to represent a {@code Matrix4f} when represented
-	 * as a {@code float} array.
+	 * The number of bytes used to represent a {@code Matrix4f}.
 	 * 
 	 * @param self
 	 * @return
 	 */
 	static int getBYTES(Matrix4f self) {
 
-		return Float.BYTES * 16
+		return 16 * Float.BYTES
 	}
 
 	/**
-	 * The number of bytes used to represent a {@code Vector2f} when represented
-	 * as a {@code float} array.
+	 * The number of bytes used to represent a {@code Vector2f}.
 	 *
 	 * @param self
 	 * @return
 	 */
 	static int getBYTES(Vector2f self) {
 
-		return Float.BYTES * 2
+		return Vector2f.FLOATS * Float.BYTES
+	}
+
+	/**
+	 * The number of floats used to represent a {@code Vector2f}.
+	 * 
+	 * @param self
+	 * @return
+	 */
+	static int getFLOATS(Vector2f self) {
+
+		return 2
 	}
 }

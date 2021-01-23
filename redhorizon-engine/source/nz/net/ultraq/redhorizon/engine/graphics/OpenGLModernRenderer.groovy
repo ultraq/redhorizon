@@ -184,25 +184,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
 
-//		def layoutSize = Colour.BYTES + Vector2f.BYTES
-		def layoutSize = Vector2f.BYTES
-
-		def verticesBuffer = FloatBuffer.allocateDirectNative(layoutSize * vertices.length)
-		vertices.each { vertex ->
-//			verticesBuffer.put(colour as float[])
-			verticesBuffer.put(vertex as float[])
-		}
-		verticesBuffer.flip()
-
-		def bufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
-
-//		checkForError { -> glEnableVertexAttribArray(0) }
-//		checkForError { -> glVertexAttribPointer(0, 4, GL_FLOAT, false, layoutSize, 0) }
-		checkForError { -> glEnableVertexAttribArray(0) }
-		checkForError { -> glVertexAttribPointer(0, 2, GL_FLOAT, false, layoutSize, 0) }
-
 		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.vert').withBufferedStream { stream ->
 			return checkShaderCompilation { ->
 				return createShader(GL_VERTEX_SHADER, stream.text)
@@ -217,14 +198,34 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 			def programId = checkForError { -> glCreateProgram() }
 			checkForError { -> glAttachShader(programId, vertexShaderId) }
 			checkForError { -> glAttachShader(programId, fragmentShaderId) }
-//			checkForError { -> glBindFragDataLocation(programId, 0, 'fragColour') }
 			checkForError { -> glLinkProgram(programId) }
 			checkForError { -> glValidateProgram(programId) }
 			return programId
 		}
 		checkForError { -> glDeleteShader(vertexShaderId) }
 		checkForError { -> glDeleteShader(fragmentShaderId) }
-		checkForError { -> glUseProgram(programId) }
+		checkForError { -> glBindFragDataLocation(programId, 0, 'vertexColour') }
+
+		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
+		def bytesPerVertex = Colour.BYTES + Vector2f.BYTES
+
+		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
+		vertices.each { vertex ->
+			verticesBuffer.put(colour as float[])
+			verticesBuffer.put(vertex as float[])
+		}
+		verticesBuffer.flip()
+
+		def bufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
+		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+
+		def colourAttribute = checkForError { -> glGetAttribLocation(programId, 'colour') }
+		checkForError { -> glEnableVertexAttribArray(colourAttribute) }
+		checkForError { -> glVertexAttribPointer(colourAttribute, 4, GL_FLOAT, false, bytesPerVertex, 0) }
+		def positionAttribute = checkForError { -> glGetAttribLocation(programId, 'position') }
+		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
+		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
 
 		return new Lines(
 			vertexArrayId: vertexArrayId,

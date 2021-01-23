@@ -27,9 +27,14 @@ import groovy.transform.TupleConstructor
 class Colour {
 
 	/**
-	 * The number of bytes used to represent a colour value.
+	 * The number of {@code byte}s used to represent a colour value.
 	 */
-	static final int BYTES = 4
+	static final int BYTES = FLOATS * Float.BYTES
+
+	/**
+	 * The number of {@code float}s used to represent a colour value.
+	 */
+	static final int FLOATS = 4
 
 	static final Colour BLACK  = new Colour(0, 0, 0)
 	static final Colour BLUE   = new Colour(0, 0, 1)
