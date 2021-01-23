@@ -120,13 +120,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void clear() {
-
-		checkForError { -> glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) }
-//		checkForError { -> glClear(GL_STENCIL_BUFFER_BIT) }
-	}
-
-	@Override
 	void createCamera(Rectanglef projection) {
 
 		logger.debug('Establishing a camera projection of size {}x{}', projection.lengthX(), projection.lengthY())
@@ -139,6 +132,15 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		)
 		glMatrixMode(GL_MODELVIEW)
 		glLoadIdentity()
+	}
+
+	@Override
+	Lines createLines(Colour colour, Vector2f... vertices) {
+
+		return new Lines(
+			colour: colour,
+			vertices: vertices
+		)
 	}
 
 	@Override
@@ -171,6 +173,10 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
+	void deleteLines(Lines lines) {
+	}
+
+	@Override
 	void deleteTextures(int... textureIds) {
 
 		checkForError { ->
@@ -185,9 +191,9 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void drawLines(Colour colour, Vector2f... vertices) {
+	void drawLines(Lines lines) {
 
-		drawPrimitive(GL_LINES, colour, vertices)
+		drawPrimitive(GL_LINES, lines.colour, lines.vertices)
 	}
 
 	/**

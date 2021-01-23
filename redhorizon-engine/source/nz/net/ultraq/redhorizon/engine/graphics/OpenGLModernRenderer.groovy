@@ -84,110 +84,10 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
-	}
 
-	void createLinesBuffer(Colour colour, Vector2f... vertices) {
-
-//		def layoutSize = Colour.BYTES + Vector2f.BYTES
-		def layoutSize = Vector2f.BYTES
-
-		def verticesBuffer = FloatBuffer.allocateDirectNative(layoutSize * vertices.length)
-		vertices.each { vertex ->
-//			verticesBuffer.put(colour as float[])
-			verticesBuffer.put(vertex as float[])
-		}
-		verticesBuffer.flip()
-
-		def bufferId = glGenBuffers()
-		glBindBuffer(GL_ARRAY_BUFFER, bufferId)
-		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
-
-//		glEnableVertexAttribArray(0)
-//		glVertexAttribPointer(0, 4, GL_FLOAT, false, layoutSize, 0)
-		glEnableVertexAttribArray(0)
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, layoutSize, 0)
-
-//		return bufferId
-	}
-
-	/**
-	 * Execure a closure that links a program, checking the status upon completion
-	 * and returning the program ID if successful, or throwing an exception if an
-	 * error occurred.
-	 * 
-	 * @param closure
-	 * @return
-	 */
-	private static int checkProgramLink(Closure<Integer> closure) {
-
-		def programId = closure()
-		def status = glGetProgrami(programId, GL_LINK_STATUS)
-		if (status != GL_TRUE) {
-			throw new RuntimeException(glGetProgramInfoLog(programId))
-		}
-		return programId
-	}
-
-	/**
-	 * Execute a closure that creates a shader, checking the status upon
-	 * completion and returning the shader ID if successful, or throwing an
-	 * exception if an error occurred.
-	 * 
-	 * @param closure
-	 * @return
-	 */
-	private static int checkShaderCompilation(Closure<Integer> closure) {
-
-		def shaderId = closure()
-		def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
-		if (status != GL_TRUE) {
-			throw new RuntimeException(glGetShaderInfoLog(shaderId))
-		}
-		return shaderId
-	}
-
-	int createFragmentShader(String shaderSource) {
-
-		return createShader(GL_FRAGMENT_SHADER, shaderSource)
-	}
-
-	int createProgram(int... shaderIds) {
-
-		return checkProgramLink { ->
-			def shaderProgram = glCreateProgram()
-			shaderIds.each { shaderId ->
-				glAttachShader(shaderProgram, shaderId)
-			}
-//			glBindFragDataLocation(shaderProgram, 0, 'fragColor') // TODO: 🤔
-			glLinkProgram(shaderProgram)
-//			glValidateProgram(shaderProgram)
-			glUseProgram(shaderProgram)
-			programId = shaderProgram
-			return shaderProgram
-		}
-	}
-
-	/**
-	 * Create a shader of the specified type, running a compilation check to make
-	 * sure it all went OK.
-	 * 
-	 * @param shaderType
-	 * @param shaderSource
-	 * @return
-	 */
-	private static int createShader(int shaderType, String shaderSource) {
-
-		return checkShaderCompilation { ->
-			def shaderId = glCreateShader(shaderType)
-			glShaderSource(shaderId, shaderSource)
-			glCompileShader(shaderId)
-			return shaderId
-		}
-	}
-
-	int createVertexShader(String shaderSource) {
-
-		return createShader(GL_VERTEX_SHADER, shaderSource)
+		// At least 1 vertex array required to work
+		def vertexArrayId = glGenVertexArrays()
+		glBindVertexArray(vertexArrayId)
 	}
 
 	void deleteArrays(int... arrayIds) {
@@ -273,8 +173,114 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		return result
 	}
 
+	/**
+	 * Execure a closure that links a program, checking the status upon completion
+	 * and returning the program ID if successful, or throwing an exception if an
+	 * error occurred.
+	 * 
+	 * @param closure
+	 * @return
+	 */
+	private static int checkProgramLink(Closure<Integer> closure) {
+
+		def programId = closure()
+		def status = glGetProgrami(programId, GL_LINK_STATUS)
+		if (status != GL_TRUE) {
+			throw new RuntimeException(glGetProgramInfoLog(programId))
+		}
+		return programId
+	}
+
+	/**
+	 * Execute a closure that creates a shader, checking the status upon
+	 * completion and returning the shader ID if successful, or throwing an
+	 * exception if an error occurred.
+	 * 
+	 * @param closure
+	 * @return
+	 */
+	private static int checkShaderCompilation(Closure<Integer> closure) {
+
+		def shaderId = closure()
+		def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
+		if (status != GL_TRUE) {
+			throw new RuntimeException(glGetShaderInfoLog(shaderId))
+		}
+		return shaderId
+	}
+
 	@Override
 	void createCamera(Rectanglef projection) {
+	}
+
+	@Override
+	Lines createLines(Colour colour, Vector2f... vertices) {
+
+//		def layoutSize = Colour.BYTES + Vector2f.BYTES
+		def layoutSize = Vector2f.BYTES
+
+		def verticesBuffer = FloatBuffer.allocateDirectNative(layoutSize * vertices.length)
+		vertices.each { vertex ->
+//			verticesBuffer.put(colour as float[])
+			verticesBuffer.put(vertex as float[])
+		}
+		verticesBuffer.flip()
+
+		def bufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
+		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+
+//		checkForError { -> glEnableVertexAttribArray(0) }
+//		checkForError { -> glVertexAttribPointer(0, 4, GL_FLOAT, false, layoutSize, 0) }
+		checkForError { -> glEnableVertexAttribArray(0) }
+		checkForError { -> glVertexAttribPointer(0, 2, GL_FLOAT, false, layoutSize, 0) }
+
+		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.vert').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_VERTEX_SHADER, stream.text)
+			}
+		}
+		def fragmentShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.frag').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_FRAGMENT_SHADER, stream.text)
+			}
+		}
+		def programId = checkProgramLink { ->
+			def programId = checkForError { -> glCreateProgram() }
+			checkForError { -> glAttachShader(programId, vertexShaderId) }
+			checkForError { -> glAttachShader(programId, fragmentShaderId) }
+//			checkForError { -> glBindFragDataLocation(programId, 0, 'fragColour') }
+			checkForError { -> glLinkProgram(programId) }
+			checkForError { -> glValidateProgram(programId) }
+			return programId
+		}
+		checkForError { -> glDeleteShader(vertexShaderId) }
+		checkForError { -> glDeleteShader(fragmentShaderId) }
+		checkForError { -> glUseProgram(programId) }
+
+		return new Lines(
+			bufferId: bufferId,
+			colour: colour,
+			vertices: vertices
+		)
+	}
+
+	/**
+	 * Create a shader of the specified type, running a compilation check to make
+	 * sure it all went OK.
+	 *
+	 * @param shaderType
+	 * @param shaderSource
+	 * @return
+	 */
+	private static int createShader(int shaderType, String shaderSource) {
+
+		return checkShaderCompilation { ->
+			def shaderId = glCreateShader(shaderType)
+			checkForError { -> glShaderSource(shaderId, shaderSource) }
+			checkForError { -> glCompileShader(shaderId) }
+			return shaderId
+		}
 	}
 
 	@Override
@@ -299,6 +305,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
+	void deleteLines(Lines lines) {
+
+		glDeleteBuffers(lines.bufferId)
+	}
+
+	@Override
 	void deleteTextures(int... textureIds) {
 
 		glDeleteTextures(textureIds)
@@ -311,9 +323,10 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void drawLines(Colour colour, Vector2f... vertices) {
+	void drawLines(Lines lines) {
 
-		drawPrimitive(GL_LINES, colour, vertices)
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, lines.bufferId) }
+		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}
 
 	/**
@@ -338,14 +351,14 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void drawTexture(int textureId, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
 
-		glBindTexture(GL_TEXTURE_2D, textureId)
-		glColor3f(1, 1, 1)
-		glBegin(GL_QUADS)
-		glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)
-		glTexCoord2f(0, flipVertical ? 0 : repeatY); glVertex2f(rectangle.minX, rectangle.maxY)
-		glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(rectangle.maxX, rectangle.maxY)
-		glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(rectangle.maxX, rectangle.minY)
-		glEnd()
+//		glBindTexture(GL_TEXTURE_2D, textureId)
+//		glColor3f(1, 1, 1)
+//		glBegin(GL_QUADS)
+//		glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)
+//		glTexCoord2f(0, flipVertical ? 0 : repeatY); glVertex2f(rectangle.minX, rectangle.maxY)
+//		glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(rectangle.maxX, rectangle.maxY)
+//		glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(rectangle.maxX, rectangle.minY)
+//		glEnd()
 	}
 
 	/**

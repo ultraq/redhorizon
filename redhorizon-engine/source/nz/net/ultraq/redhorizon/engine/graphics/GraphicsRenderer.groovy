@@ -43,6 +43,17 @@ interface GraphicsRenderer {
 	void createCamera(Rectanglef projection)
 
 	/**
+	 * Create an object representing line primitives so that they can be drawn
+	 * later.
+	 * 
+	 * @param colour
+	 * @param vertices Every pair of vertices represents the start and end points
+	 *                 of a line to be drawn.
+	 * @return New lines object.
+	 */
+	Lines createLines(Colour colour, Vector2f... vertices)
+
+	/**
 	 * Create and fill a texture with the given image data.
 	 * 
 	 * @param data
@@ -67,6 +78,13 @@ interface GraphicsRenderer {
 	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
 
 	/**
+	 * Delete the line data.
+	 * 
+	 * @param lines
+	 */
+	void deleteLines(Lines lines)
+
+	/**
 	 * Delete texture handles.
 	 * 
 	 * @param textureIds
@@ -84,10 +102,9 @@ interface GraphicsRenderer {
 	/**
 	 * Draw any number of coloured lines.
 	 * 
-	 * @param colour
-	 * @param vertices
+	 * @param lines
 	 */
-	void drawLines(Colour colour, Vector2f... vertices)
+	void drawLines(Lines lines)
 
 	/**
 	 * Draw the texture over the given rectangle.
