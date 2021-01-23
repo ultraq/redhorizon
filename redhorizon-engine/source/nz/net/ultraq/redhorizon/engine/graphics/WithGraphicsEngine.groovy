@@ -70,6 +70,7 @@ trait WithGraphicsEngine {
 
 		def executionBarrier = new CyclicBarrier(2)
 		def finishBarrier = new CountDownLatch(1)
+		def exception
 
 		// To allow the graphics engine to submit items to execute in this thread
 		FutureTask executable = null
@@ -80,6 +81,7 @@ trait WithGraphicsEngine {
 		graphicsEngine.on(RenderLoopStopEvent) { event ->
 			finishBarrier.countDown()
 			if (event.exception) {
+				exception = event.exception
 				executionBarrier.await()
 			}
 		}
@@ -98,7 +100,7 @@ trait WithGraphicsEngine {
 			}
 
 			// Shutdown phase
-			if (graphicsEngine.started && graphicsEngine.stopped) {
+			if (exception || (graphicsEngine.started && graphicsEngine.stopped)) {
 				finishBarrier.await()
 				break
 			}
