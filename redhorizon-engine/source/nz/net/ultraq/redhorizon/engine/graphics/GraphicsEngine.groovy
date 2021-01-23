@@ -129,7 +129,9 @@ class GraphicsEngine extends EngineSubsystem {
 		}
 		context.withCloseable {
 			context.withCurrent { ->
-				renderer = new OpenGLLegacyRenderer(context, config)
+				renderer = config.modernRenderer ?
+					new OpenGLModernRenderer(context, config) :
+					new OpenGLLegacyRenderer(context, config)
 				logger.debug(renderer.toString())
 				camera.init(renderer)
 			}

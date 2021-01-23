@@ -52,6 +52,7 @@ class OpenGLContext extends Context implements EventTarget {
 	// Configuration values
 	private final boolean fixAspectRatio
 	private final boolean fullScreen
+	private final boolean modernRenderer
 
 	private final long window
 
@@ -88,7 +89,8 @@ class OpenGLContext extends Context implements EventTarget {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
-		if (config.modernRenderer) {
+		modernRenderer = config.modernRenderer
+		if (modernRenderer) {
 			glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
