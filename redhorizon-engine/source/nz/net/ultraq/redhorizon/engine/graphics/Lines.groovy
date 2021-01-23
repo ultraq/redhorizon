@@ -28,7 +28,12 @@ import groovy.transform.MapConstructor
 @MapConstructor
 class Lines {
 
+	// Modern
+	final int vertexArrayId
 	final int bufferId
+	final int programId
+
+	// Legacy
 	final Colour colour
 	final Vector2f[] vertices
 }

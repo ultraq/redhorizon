@@ -78,47 +78,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		// Set up the viewport and projection
 		def viewportSize = context.framebufferSize
-//		logger.debug('Establishing a viewport of size {}', viewportSize)
-//		checkForError { -> glViewport(0, 0, viewportSize.width, viewportSize.height) }
+		logger.debug('Establishing a viewport of size {}', viewportSize)
+		checkForError { -> glViewport(0, 0, viewportSize.width, viewportSize.height) }
 //		context.on(FramebufferSizeEvent) { event ->
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
-
-		// At least 1 vertex array required to work
-		def vertexArrayId = glGenVertexArrays()
-		glBindVertexArray(vertexArrayId)
-	}
-
-	void deleteArrays(int... arrayIds) {
-
-		glDeleteVertexArrays(arrayIds)
-	}
-
-	void deleteBuffers(int... bufferIds) {
-
-		glDeleteBuffers(bufferIds)
-	}
-
-	void deleteShaders(int... shaderIds) {
-
-		shaderIds.each { shaderId ->
-			glDeleteShader(shaderId)
-		}
-	}
-
-	void deletePrograms(int... programIds) {
-
-		programIds.each { programId ->
-			glDeleteProgram(programId)
-		}
-	}
-
-	void runProgram(int programId, int bufferId) {
-
-//		glBindBuffer(GL_ARRAY_BUFFER, bufferId)
-//		glUseProgram(programId)
-		glDrawArrays(GL_TRIANGLES, 0, 3)
 	}
 
 	void useProgram(int programId) {
@@ -216,6 +181,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	Lines createLines(Colour colour, Vector2f... vertices) {
 
+		def vertexArrayId = checkForError { -> glGenVertexArrays() }
+		checkForError { -> glBindVertexArray(vertexArrayId) }
+
 //		def layoutSize = Colour.BYTES + Vector2f.BYTES
 		def layoutSize = Vector2f.BYTES
 
@@ -259,7 +227,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glUseProgram(programId) }
 
 		return new Lines(
+			vertexArrayId: vertexArrayId,
 			bufferId: bufferId,
+			programId: programId,
 			colour: colour,
 			vertices: vertices
 		)
@@ -307,7 +277,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void deleteLines(Lines lines) {
 
+		glDeleteProgram(lines.programId)
 		glDeleteBuffers(lines.bufferId)
+		glDeleteVertexArrays(lines.vertexArrayId)
 	}
 
 	@Override
@@ -325,7 +297,8 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void drawLines(Lines lines) {
 
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, lines.bufferId) }
+		checkForError { -> glUseProgram(lines.programId) }
+		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
 		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}
 
