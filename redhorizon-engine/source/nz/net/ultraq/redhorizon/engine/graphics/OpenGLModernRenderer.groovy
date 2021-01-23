@@ -113,32 +113,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	/**
-	 * Check for any OpenGL errors created by the OpenGL call in the given
-	 * closure, throwing them if they occur.
-	 * 
-	 * @param closure
-	 */
-	private static <T> T checkForError(Closure<T> closure) {
-
-		def result = closure()
-		def error = glGetError()
-		if (error != GL_NO_ERROR) {
-			def errorCode =
-				error == GL_INVALID_ENUM ? 'GL_INVALID_ENUM' :
-				error == GL_INVALID_VALUE ? 'GL_INVALID_VALUE' :
-				error == GL_INVALID_OPERATION ? 'GL_INVALID_OPERATION' :
-				error == GL_INVALID_FRAMEBUFFER_OPERATION ? 'GL_INVALID_FRAMEBUFFER_OPERATION' :
-				error == GL_OUT_OF_MEMORY ? 'GL_OUT_OF_MEMORY' :
-				error == GL_STACK_UNDERFLOW ? 'GL_STACK_UNDERFLOW' :
-				error == GL_STACK_OVERFLOW ? 'GL_STACK_OVERFLOW' :
-				error
-			logger.error("OpenGL error: ${errorCode}")
-			throw new Exception("OpenGL error: ${errorCode}")
-		}
-		return result
-	}
-
-	/**
 	 * Execure a closure that links a program, checking the status upon completion
 	 * and returning the program ID if successful, or throwing an exception if an
 	 * error occurred.

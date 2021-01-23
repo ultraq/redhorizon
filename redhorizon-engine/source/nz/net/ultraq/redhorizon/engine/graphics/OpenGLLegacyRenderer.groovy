@@ -91,32 +91,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
-
-	}
-
-	/**
-	 * Check for any OpenGL errors created by the OpenGL call in the given
-	 * closure, throwing them if they occur.
-	 * 
-	 * @param closure
-	 */
-	private static <T> T checkForError(Closure<T> closure) {
-
-		def result = closure()
-		def error = glGetError()
-		if (error != GL_NO_ERROR) {
-			def errorCode =
-				error == GL_INVALID_ENUM ? 'GL_INVALID_ENUM' :
-				error == GL_INVALID_VALUE ? 'GL_INVALID_VALUE' :
-				error == GL_INVALID_OPERATION ? 'GL_INVALID_OPERATION' :
-//				error == GL_INVALID_FRAMEBUFFER_OPERATION ? 'GL_INVALID_FRAMEBUFFER_OPERATION' : // OpenGL 3.0+
-				error == GL_OUT_OF_MEMORY ? 'GL_OUT_OF_MEMORY' :
-				error == GL_STACK_UNDERFLOW ? 'GL_STACK_UNDERFLOW' :
-				error == GL_STACK_OVERFLOW ? 'GL_STACK_OVERFLOW' :
-				error
-			throw new Exception("OpenGL error: ${errorCode}")
-		}
-		return result
 	}
 
 	@Override
