@@ -105,7 +105,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				new Vector2f(0, 0).asWorldCoords(),
 				new Vector2f(TILES_X, TILES_Y).asWorldCoords()
 			).makeValid()
-			layers << new Image(combinedWidth, combinedHeight, palette.format.value, combinedBackgroundData,
+			layers << new Image(combinedWidth, combinedHeight, palette.format, combinedBackgroundData,
 				backgroundDimensions,
 				backgroundDimensions.lengthX() / combinedWidth as float,
 				backgroundDimensions.lengthY() / combinedHeight as float
@@ -262,8 +262,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 
 						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
-						elements << new Image(resourceManager.loadTexture(tileFile, tilePic, palette),
-							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)))
+						elements << new Image(tileFile, tilePic,
+							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)),
+							palette)
 					}
 				}
 			}
@@ -347,8 +348,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				}
 
 				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-				elements << new Image(resourceManager.loadTexture(tileFile, imageVariant, palette),
-					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)))
+				elements << new Image(tileFile, imageVariant,
+					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)),
+					palette)
 			}
 		}
 	}
@@ -371,8 +373,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new Image(resourceManager.loadTexture(terrainFile, 0, palette),
-					new Rectanglef(cellPosXY, cellPosWH).makeValid())
+				elements << new Image(terrainFile, 0, new Rectanglef(cellPosXY, cellPosWH).makeValid(), palette)
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"

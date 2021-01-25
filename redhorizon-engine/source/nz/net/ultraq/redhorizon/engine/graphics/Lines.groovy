@@ -19,13 +19,16 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Vector2f
 
 import groovy.transform.MapConstructor
+import groovy.transform.VisibilityOptions
+import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
 
 /**
  * Representation of a set of coloured lines to render.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
+@MapConstructor(visibilityId = 'default')
+@VisibilityOptions(id = 'default', constructor = PACKAGE_PRIVATE)
 class Lines {
 
 	// Modern

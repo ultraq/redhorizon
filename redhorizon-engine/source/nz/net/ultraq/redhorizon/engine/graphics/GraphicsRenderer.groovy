@@ -60,22 +60,22 @@ interface GraphicsRenderer {
 	 * @param format
 	 * @param width
 	 * @param height
-	 * @return New texture handle.
+	 * @return New texture object.
 	 */
-	int createTexture(ByteBuffer data, int format, int width, int height)
+	Texture createTexture(ByteBuffer data, int format, int width, int height)
 
 	/**
 	 * Create and fill a texture with the given image data.
 	 * 
-	 * @param data
-	 * @param format
 	 * @param width
 	 * @param height
+	 * @param format
+	 * @param data
 	 * @param filter Specify nearest-neighbouer filtering on the texture,
 	 *               independent of the graphics configuration.
-	 * @return New texture handle.
+	 * @return New texture object.
 	 */
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
+	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
 
 	/**
 	 * Delete the line data.
@@ -85,11 +85,11 @@ interface GraphicsRenderer {
 	void deleteLines(Lines lines)
 
 	/**
-	 * Delete texture handles.
+	 * Delete texture data.
 	 * 
-	 * @param textureIds
+	 * @param texture
 	 */
-	void deleteTextures(int... textureIds)
+	void deleteTexture(Texture texture)
 
 	/**
 	 * Draw a coloured line that closes itself.
@@ -109,15 +109,27 @@ interface GraphicsRenderer {
 	/**
 	 * Draw the texture over the given rectangle.
 	 * 
-	 * @param textureId
+	 * @param texture
 	 * @param rectangle
 	 */
-	void drawTexture(int textureId, Rectanglef rectangle)
+	void drawTexture(Texture texture, Rectanglef rectangle)
 
 	/**
 	 * Draw the texture over the given rectangle.
 	 * 
-	 * @param textureId
+	 * @param texture
+	 * @param rectangle
+	 * @param repeatX
+	 *   Number of times to repeat the texture on the X axis
+	 * @param repeatY
+	 *   Number of times to repeat the texture on the Y axis
+	 */
+	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX, float repeatY)
+
+	/**
+	 * Draw the texture over the given rectangle.
+	 * 
+	 * @param texture
 	 * @param rectangle
 	 * @param repeatX
 	 *   Number of times to repeat the texture on the X axis
@@ -128,7 +140,7 @@ interface GraphicsRenderer {
 	 *   image data often having Y-coords in the opposite way to the rendering
 	 *   coordinates.
 	 */
-	void drawTexture(int textureId, Rectanglef rectangle, float repeatX, float repeatY, boolean flipVertical)
+	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX, float repeatY, boolean flipVertical)
 
 	/**
 	 * Update the camera projection.

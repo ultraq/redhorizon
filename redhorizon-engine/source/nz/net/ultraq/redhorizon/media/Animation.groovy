@@ -138,7 +138,9 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		animationDataWorker.stop()
 		frames.drain()
-		renderer.deleteTextures(textures.collect { it.textureId } as int[])
+		textures.each { texture ->
+			renderer.deleteTexture(texture)
+		}
 	}
 
 	@Override
@@ -171,9 +173,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
 						frames.drain(Math.max(numFramesToRead, 5)).each { frame ->
-							def newTexture = new Texture(width, height, format, frame)
-							newTexture.init(renderer)
-							textures << newTexture
+							textures << renderer.createTexture(frame, format, width, height)
 							framesQueued++
 						}
 					}
@@ -184,7 +184,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			if (currentFrame < numFrames) {
 				def texture = textures[currentFrame]
 				if (texture) {
-					renderer.drawTexture(texture.textureId, dimensions)
+					renderer.drawTexture(texture, dimensions)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)
@@ -199,7 +199,9 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			// Delete used frames as the animation progresses to free up memory
 			if (lastFrame != -1 && lastFrame != currentFrame) {
 				def usedTextures = textures[lastFrame..<currentFrame]
-				renderer.deleteTextures(usedTextures.collect { it.textureId } as int[])
+				usedTextures.each { texture ->
+					renderer.deleteTexture(texture)
+				}
 				usedTextures.clear()
 				framesQueued -= usedTextures.size()
 			}

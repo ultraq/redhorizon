@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -27,6 +28,7 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 
+import groovy.transform.MapConstructor
 import java.nio.ByteBuffer
 
 /**
@@ -34,11 +36,18 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor
 class Image implements GraphicsElement, SelfVisitable {
 
-	@Delegate
-	final Texture texture
+	final int width
+	final int height
+	final ColourFormat format
 	final Rectanglef dimensions
+	private ByteBuffer imageData
+	final float repeatX
+	final float repeatY
+
+	private Texture texture
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
@@ -51,7 +60,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	Image(ImageFile imageFile, Rectanglef dimensions, Palette palette = null) {
 
 		this(imageFile.width, imageFile.height,
-			imageFile.format !== FORMAT_INDEXED ? imageFile.format.value : palette.format.value,
+			imageFile.format !== FORMAT_INDEXED ? imageFile.format : palette.format,
 			imageFile.format !== FORMAT_INDEXED ? imageFile.imageData : imageFile.imageData.applyPalette(palette),
 			dimensions)
 	}
@@ -69,7 +78,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	Image(ImagesFile imagesFile, int frame, Rectanglef dimensions, Palette palette = null) {
 
 		this(imagesFile.width, imagesFile.height,
-			imagesFile.format !== FORMAT_INDEXED ? imagesFile.format.value : palette.format.value,
+			imagesFile.format !== FORMAT_INDEXED ? imagesFile.format : palette.format,
 			imagesFile.format !== FORMAT_INDEXED ? imagesFile.imagesData[frame] : imagesFile.imagesData[frame].applyPalette(palette),
 			dimensions)
 	}
@@ -85,27 +94,33 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param repeatX
 	 * @param repeatY
 	 */
-	Image(int width, int height, int format, ByteBuffer imageData, Rectanglef dimensions, float repeatX = 1, float repeatY = 1) {
+	Image(int width, int height, ColourFormat format, ByteBuffer imageData, Rectanglef dimensions, float repeatX = 1, float repeatY = 1) {
 
-		this(new Texture(width, height, format, imageData, null, repeatX, repeatY), dimensions)
+		this.width      = width
+		this.height     = height
+		this.format     = format
+		this.imageData  = ByteBuffer.fromBuffersDirect(imageData)
+		this.dimensions = dimensions
+		this.repeatX    = repeatX
+		this.repeatY    = repeatY
 	}
 
-	/**
-	 * Constructor, creates an image from new or existing texture data.
-	 * 
-	 * @param texture    A texture built from new data, or an existing texture so
-	 *                   that image data can be reused.
-	 * @param dimensions Dimensions over which to display the image over.
-	 */
-	Image(Texture texture, Rectanglef dimensions) {
+	@Override
+	void delete(GraphicsRenderer renderer) {
 
-		this.texture    = texture
-		this.dimensions = dimensions
+		renderer.deleteTexture(texture)
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		texture = renderer.createTexture(imageData, format.value, width, height)
+		imageData = null
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(textureId, dimensions, repeatX, repeatY, true)
+		renderer.drawTexture(texture, dimensions, repeatX, repeatY)
 	}
 }

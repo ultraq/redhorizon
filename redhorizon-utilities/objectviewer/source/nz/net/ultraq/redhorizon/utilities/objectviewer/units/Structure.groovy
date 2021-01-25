@@ -40,17 +40,17 @@ class Structure extends Unit {
 	 */
 	Structure(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef dimensions, GameTime gameTime) {
 
-		super(dimensions)
+		super(dimensions, imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 		def bodyPart = data.shpFile.parts.body
 
 		['', '-damaged'].forEach { status ->
 			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
-				buildTextures(imagesFile, palette, frameIndex..<(frameIndex += bodyPart.headings)))
+				buildImagesData(imagesFile, palette, frameIndex..<(frameIndex += bodyPart.headings)))
 
 			data.shpFile.animations?.each { animation ->
 				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
-					buildTextures(imagesFile, palette, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+					buildImagesData(imagesFile, palette, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
 					gameTime)
 			}
 		}

@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
@@ -27,6 +26,8 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.nio.ByteBuffer
 
 /**
  * The unit that gets displayed on the screen.
@@ -40,16 +41,23 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	protected final List<UnitRenderer> unitRenderers = []
 	protected UnitRenderer currentRenderer
 	protected Rectanglef dimensions
+
 	protected float heading
+	protected final int width
+	protected final int height
 
 	/**
 	 * Constructor, set this unit to draw over the given dimensions.
 	 * 
 	 * @param dimensions
+	 * @param width
+	 * @param height
 	 */
-	protected Unit(Rectanglef dimensions) {
+	protected Unit(Rectanglef dimensions, int width, int height) {
 
 		this.dimensions = dimensions
+		this.width = width
+		this.height = height
 	}
 
 	/**
@@ -62,13 +70,11 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	 * @param range
 	 * @return
 	 */
-	protected static Texture[] buildTextures(ImagesFile imagesFile, Palette palette, IntRange range) {
+	protected static ByteBuffer[] buildImagesData(ImagesFile imagesFile, Palette palette, IntRange range) {
 
-		return range.collect { i ->
-			return new Texture(imagesFile.width, imagesFile.height,
-				imagesFile.format !== FORMAT_INDEXED ? imagesFile.format.value : palette.format.value,
-				imagesFile.format !== FORMAT_INDEXED ? imagesFile.imagesData[i] : imagesFile.imagesData[i].applyPalette(palette))
-		} as Texture[]
+		return imagesFile.imagesData[range].collect { data ->
+			return ByteBuffer.fromBuffersDirect(imagesFile.format == FORMAT_INDEXED ? data.applyPalette(palette) : data)
+		}
 	}
 
 	@Override

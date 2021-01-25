@@ -23,6 +23,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
 
+import groovy.transform.Memoized
 import java.nio.ByteBuffer
 
 /**
@@ -118,13 +119,7 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height) {
-
-		return createTexture(data, format, width, height, filter)
-	}
-
-	@Override
-	int createTexture(ByteBuffer data, int format, int width, int height, boolean filter) {
+	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
 
 		int textureId = checkForError { ->
 			return glGenTextures()
@@ -143,7 +138,9 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, data)
 		}
 
-		return textureId
+		return new Texture(
+			textureId: textureId
+		)
 	}
 
 	@Override
@@ -151,10 +148,10 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void deleteTextures(int... textureIds) {
+	void deleteTexture(Texture texture) {
 
 		checkForError { ->
-			glDeleteTextures(textureIds)
+			glDeleteTextures(texture.textureId)
 		}
 	}
 
@@ -190,9 +187,9 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void drawTexture(int textureId, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
+	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
 
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
 		checkForError { -> glColor3f(1, 1, 1) }
 		glBegin(GL_QUADS)
 			glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)

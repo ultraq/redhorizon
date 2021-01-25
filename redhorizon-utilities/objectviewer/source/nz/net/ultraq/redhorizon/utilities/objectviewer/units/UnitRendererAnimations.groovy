@@ -18,7 +18,8 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
+
+import java.nio.ByteBuffer
 
 /**
  * Renderer for drawing animations.
@@ -42,13 +43,13 @@ class UnitRendererAnimations extends UnitRenderer {
 	 * @param unit
 	 * @param headings
 	 * @param framesPerHeading
-	 * @param textures
+	 * @param imageData
 	 * @param gameTime
 	 */
-	UnitRendererAnimations(String type, Unit unit, int headings, int framesPerHeading, Texture[] textures,
+	UnitRendererAnimations(String type, Unit unit, int headings, int framesPerHeading, ByteBuffer[] imageData,
 		GameTime gameTime) {
 
-		super(type, unit, headings, textures)
+		super(type, unit, headings, imageData)
 		this.framesPerHeading = framesPerHeading
 		this.gameTime = gameTime
 	}
@@ -57,7 +58,7 @@ class UnitRendererAnimations extends UnitRenderer {
 	void render(GraphicsRenderer renderer) {
 
 		def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
-		renderer.drawTexture(textures[rotationFrames() * framesPerHeading + currentFrame].textureId, unit.dimensions)
+		renderer.drawTexture(textures[rotationFrames() * framesPerHeading + currentFrame], unit.dimensions)
 	}
 
 	/**

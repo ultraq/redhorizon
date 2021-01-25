@@ -16,15 +16,21 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.MapConstructor
+import groovy.transform.VisibilityOptions
 import java.nio.ByteBuffer
+import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
 
 /**
- * Representation of a single texture, meant to be reused in the more complex
- * media types.
+ * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
-class Texture implements GraphicsElement {
+@MapConstructor(visibilityId = 'default')
+@VisibilityOptions(id = 'default', constructor = PACKAGE_PRIVATE)
+class Texture {
+
+	final int textureId
 
 	final int width
 	final int height
@@ -33,69 +39,4 @@ class Texture implements GraphicsElement {
 	final Boolean filter
 	final float repeatX
 	final float repeatY
-
-	private Integer textureId
-
-	/**
-	 * Constructor, creates a texture from the given image data.
-	 * 
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param textureData
-	 * @param filter
-	 * @param repeatX
-	 * @param repeatY
-	 */
-	Texture(int width, int height, int format, ByteBuffer textureData, Boolean filter = null, float repeatX = 1, float repeatY = 1) {
-
-		this.width       = width
-		this.height      = height
-		this.format      = format
-		this.textureData = ByteBuffer.fromBuffersDirect(textureData)
-		this.filter      = filter
-		this.repeatX     = repeatX
-		this.repeatY     = repeatY
-	}
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
-
-		if (textureId != null) {
-			renderer.deleteTextures(textureId)
-			textureId = null
-		}
-	}
-
-	/**
-	 * Get the ID assigned by the renderer for this texture.
-	 * 
-	 * @return
-	 */
-	Integer getTextureId() {
-
-		return textureId
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-
-		if (textureId == null) {
-			textureId = filter != null ?
-				renderer.createTexture(textureData, format, width, height, filter) :
-				renderer.createTexture(textureData, format, width, height)
-			textureData = null // The texture data can be freed from system RAM as it exists in VRAM
-		}
-	}
-
-	/**
-	 * Does nothing, as a texture does not have a location at which to be drawn.
-	 * Instead, the texture ID should be used by more complex media types that
-	 * have position information.
-	 * 
-	 * @param renderer
-	 */
-	@Override
-	void render(GraphicsRenderer renderer) {
-	}
 }

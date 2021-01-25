@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
@@ -35,7 +36,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 
 	private final Dimension overlay
 	private final Rectanglef dimensions
-	private int textureId
+	private Texture texture
 
 	/**
 	 * Constructor, set the dimensions over which the scanlines are to show.
@@ -58,7 +59,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTextures(textureId)
+		renderer.deleteTexture(texture)
 	}
 
 	@Override
@@ -73,12 +74,12 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 			}
 		}
 		scanlineTexture.rewind()
-		textureId = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
+		texture = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(textureId, dimensions)
+		renderer.drawTexture(texture, dimensions)
 	}
 }
