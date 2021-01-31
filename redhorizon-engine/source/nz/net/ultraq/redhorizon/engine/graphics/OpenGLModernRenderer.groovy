@@ -23,7 +23,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
 
-import groovy.transform.Memoized
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
@@ -36,6 +35,8 @@ import java.nio.FloatBuffer
 class OpenGLModernRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLModernRenderer)
+
+	private int linesShaderId
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -113,6 +114,31 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //		glUniformMatrix4fv(projectionModel, false, projection.get(FloatBuffer.allocateDirectNative(Matrix4f.BYTES)))
 	}
 
+	private void buildLinesShader() {
+
+		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.vert').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_VERTEX_SHADER, stream.text)
+			}
+		}
+		def fragmentShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.frag').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_FRAGMENT_SHADER, stream.text)
+			}
+		}
+		linesShaderId = checkProgramLink { ->
+			def programId = checkForError { -> glCreateProgram() }
+			checkForError { -> glAttachShader(programId, vertexShaderId) }
+			checkForError { -> glAttachShader(programId, fragmentShaderId) }
+			checkForError { -> glLinkProgram(programId) }
+			checkForError { -> glValidateProgram(programId) }
+			return programId
+		}
+		checkForError { -> glDeleteShader(vertexShaderId) }
+		checkForError { -> glDeleteShader(fragmentShaderId) }
+		checkForError { -> glBindFragDataLocation(linesShaderId, 0, 'vertexColour') }
+	}
+
 	/**
 	 * Execure a closure that links a program, checking the status upon completion
 	 * and returning the program ID if successful, or throwing an exception if an
@@ -150,36 +176,26 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
+	void close() {
+
+		if (linesShaderId) {
+			glDeleteProgram(linesShaderId)
+		}
+	}
+
+	@Override
 	void createCamera(Rectanglef projection) {
 	}
 
 	@Override
 	Lines createLines(Colour colour, Vector2f... vertices) {
 
+		if (!linesShaderId) {
+			buildLinesShader()
+		}
+
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
-
-		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.vert').withBufferedStream { stream ->
-			return checkShaderCompilation { ->
-				return createShader(GL_VERTEX_SHADER, stream.text)
-			}
-		}
-		def fragmentShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.frag').withBufferedStream { stream ->
-			return checkShaderCompilation { ->
-				return createShader(GL_FRAGMENT_SHADER, stream.text)
-			}
-		}
-		def programId = checkProgramLink { ->
-			def programId = checkForError { -> glCreateProgram() }
-			checkForError { -> glAttachShader(programId, vertexShaderId) }
-			checkForError { -> glAttachShader(programId, fragmentShaderId) }
-			checkForError { -> glLinkProgram(programId) }
-			checkForError { -> glValidateProgram(programId) }
-			return programId
-		}
-		checkForError { -> glDeleteShader(vertexShaderId) }
-		checkForError { -> glDeleteShader(fragmentShaderId) }
-		checkForError { -> glBindFragDataLocation(programId, 0, 'vertexColour') }
 
 		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
 		def bytesPerVertex = Colour.BYTES + Vector2f.BYTES
@@ -195,17 +211,16 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
 		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
 
-		def colourAttribute = checkForError { -> glGetAttribLocation(programId, 'colour') }
+		def colourAttribute = checkForError { -> glGetAttribLocation(linesShaderId, 'colour') }
 		checkForError { -> glEnableVertexAttribArray(colourAttribute) }
 		checkForError { -> glVertexAttribPointer(colourAttribute, 4, GL_FLOAT, false, bytesPerVertex, 0) }
-		def positionAttribute = checkForError { -> glGetAttribLocation(programId, 'position') }
+		def positionAttribute = checkForError { -> glGetAttribLocation(linesShaderId, 'position') }
 		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
 		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
 
 		return new Lines(
 			vertexArrayId: vertexArrayId,
 			bufferId: bufferId,
-			programId: programId,
 			colour: colour,
 			vertices: vertices
 		)
@@ -250,7 +265,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void deleteLines(Lines lines) {
 
-		glDeleteProgram(lines.programId)
 		glDeleteBuffers(lines.bufferId)
 		glDeleteVertexArrays(lines.vertexArrayId)
 	}
@@ -272,7 +286,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void drawLines(Lines lines) {
 
-		checkForError { -> glUseProgram(lines.programId) }
+		checkForError { -> glUseProgram(linesShaderId) }
 		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
 		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}

@@ -23,7 +23,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
 
-import groovy.transform.Memoized
 import java.nio.ByteBuffer
 
 /**
@@ -92,6 +91,10 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
+	}
+
+	@Override
+	void close() {
 	}
 
 	@Override

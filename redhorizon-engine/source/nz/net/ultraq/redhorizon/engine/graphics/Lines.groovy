@@ -34,7 +34,6 @@ class Lines {
 	// Modern
 	final int vertexArrayId
 	final int bufferId
-	final int programId
 
 	// Legacy
 	final Colour colour

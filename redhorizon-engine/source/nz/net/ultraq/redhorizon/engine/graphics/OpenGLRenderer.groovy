@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL33C.*
  * 
  * @author Emanuel Rabina
  */
-abstract class OpenGLRenderer implements GraphicsRenderer {
+abstract class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 
 	protected final GLCapabilities capabilities
 	protected final Colour clearColour
