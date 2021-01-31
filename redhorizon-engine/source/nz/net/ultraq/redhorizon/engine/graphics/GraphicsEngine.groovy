@@ -42,9 +42,8 @@ class GraphicsEngine extends EngineSubsystem {
 	private final Closure needsMainThreadCallback
 	private final List<SceneElement> sceneElements = []
 
-	private OpenGLContext context
+	private OpenGLContext openGlContext
 	private Camera camera
-	private OpenGLRenderer renderer
 	private boolean started
 
 	/**
@@ -101,7 +100,7 @@ class GraphicsEngine extends EngineSubsystem {
 	 */
 	boolean isStopped() {
 
-		return !running || context.windowShouldClose()
+		return !running || openGlContext.windowShouldClose()
 	}
 
 	/**
@@ -114,77 +113,68 @@ class GraphicsEngine extends EngineSubsystem {
 		Thread.currentThread().name = 'Graphics Engine'
 
 		// Initialization
-		context = waitForMainThread { ->
-			def openGlContext = new OpenGLContext(config)
-
-			// Re-fire input events
-			openGlContext.on(InputEvent) { event ->
+		openGlContext = waitForMainThread { ->
+			return new OpenGLContext(config)
+		}
+		openGlContext.withCloseable { context ->
+			context.on(InputEvent) { event ->
 				trigger(event)
 			}
-
-			camera = new Camera(openGlContext.windowSize, config.fixAspectRatio)
-
-			trigger(new WindowCreatedEvent(openGlContext.windowSize, camera.size))
-			return openGlContext
-		}
-		context.withCloseable {
 			context.withCurrent { ->
-				renderer = config.modernRenderer ?
+				camera = new Camera(context.windowSize, config.fixAspectRatio)
+				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
+
+				def openGlRenderer = config.modernRenderer ?
 					new OpenGLModernRenderer(context, config) :
 					new OpenGLLegacyRenderer(context, config)
-				logger.debug(renderer.toString())
-				camera.init(renderer)
-			}
-			def graphicsElementStates = [:]
+				openGlRenderer.withCloseable { renderer ->
 
-			// Rendering loop
-			logger.debug('Graphics engine in render loop...')
-			started = true
-			renderLoop { ->
-				context.withCurrent { ->
-					renderer.clear()
+					logger.debug(renderer.toString())
+					camera.init(renderer)
 
-					camera.render(renderer)
+					def graphicsElementStates = [:]
 
-					sceneElements.each { sceneElement ->
-						sceneElement.accept { element ->
-							if (element instanceof GraphicsElement) {
+					// Rendering loop
+					logger.debug('Graphics engine in render loop...')
+					started = true
+					renderLoop { ->
+						renderer.clear()
+						camera.render(renderer)
+						sceneElements.each { sceneElement ->
+							sceneElement.accept { element ->
+								if (element instanceof GraphicsElement) {
 
-								// Register the graphics element
-								if (!graphicsElementStates[element]) {
-									graphicsElementStates << [(element): STATE_NEW]
+									// Register the graphics element
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
+									}
+
+									def elementState = graphicsElementStates[element]
+
+									// Initialize the graphics element
+									if (elementState == STATE_NEW) {
+										element.init(renderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+
+									// Render the graphics element
+									element.render(renderer)
 								}
-
-								def elementState = graphicsElementStates[element]
-
-								// Initialize the graphics element
-								if (elementState == STATE_NEW) {
-									element.init(renderer)
-									elementState = STATE_INITIALIZED
-									graphicsElementStates << [(element): elementState]
-								}
-
-								// Render the graphics element
-								element.render(renderer)
 							}
+						}
+						context.swapBuffers()
+						waitForMainThread { ->
+							context.pollEvents()
 						}
 					}
 
-					context.swapBuffers()
-				}
-				waitForMainThread { ->
-					context.withCurrent { ->
-						context.pollEvents()
+					// Shutdown
+					logger.debug('Shutting down graphics engine')
+					camera.delete(renderer)
+					graphicsElementStates.keySet().each { graphicsElement ->
+						graphicsElement.delete(renderer)
 					}
-				}
-			}
-
-			// Shutdown
-			logger.debug('Shutting down graphics engine')
-			context.withCurrent { ->
-				camera.delete(renderer)
-				graphicsElementStates.keySet().each { graphicsElement ->
-					graphicsElement.delete(renderer)
 				}
 			}
 		}
@@ -193,14 +183,14 @@ class GraphicsEngine extends EngineSubsystem {
 	@Override
 	protected boolean shouldRender() {
 
-		return !context.windowShouldClose() && super.shouldRender()
+		return !openGlContext.windowShouldClose() && super.shouldRender()
 	}
 
 	@Override
 	void stop() {
 
 		if (running) {
-			context.windowShouldClose(true)
+			openGlContext.windowShouldClose(true)
 		}
 		super.stop()
 	}
