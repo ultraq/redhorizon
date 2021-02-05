@@ -16,22 +16,42 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Rectanglef
+
 import groovy.transform.MapConstructor
-import groovy.transform.PackageScope
 import groovy.transform.VisibilityOptions
 import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
 
 /**
- * Representation of a single texture to render.
+ * A variant of a {@code Texture} that references a parent texture and contains
+ * a pre-built vertex buffer for faster drawing.
  * 
  * @author Emanuel Rabina
  */
 @MapConstructor(visibilityId = 'default')
 @VisibilityOptions(id = 'default', constructor = PACKAGE_PRIVATE)
-class Texture {
+class MappedTexture {
 
-	final int textureId
+	final Texture parentTexture
 
-	@PackageScope
-	final List<MappedTexture> instances = []
+	// Modern
+	final int vertexArrayId
+	final int bufferId
+	final int elementBufferId
+
+	// Legacy
+	final Rectanglef surface
+	final float repeatX
+	final float repeatY
+	final boolean flipVertical
+
+	/**
+	 * Shortcut to the instanced texture ID.
+	 * 
+	 * @return
+	 */
+	int getTextureId() {
+
+		return parentTexture.textureId
+	}
 }

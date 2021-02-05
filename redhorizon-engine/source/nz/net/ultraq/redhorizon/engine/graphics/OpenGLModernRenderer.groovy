@@ -36,7 +36,8 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLModernRenderer)
 
-	private int linesShaderId
+	private int linesShaderProgramId
+	private int textureShaderProgramId
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -126,7 +127,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 				return createShader(GL_FRAGMENT_SHADER, stream.text)
 			}
 		}
-		linesShaderId = checkProgramLink { ->
+		linesShaderProgramId = checkProgramLink { ->
 			def programId = checkForError { -> glCreateProgram() }
 			checkForError { -> glAttachShader(programId, vertexShaderId) }
 			checkForError { -> glAttachShader(programId, fragmentShaderId) }
@@ -136,7 +137,31 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		}
 		checkForError { -> glDeleteShader(vertexShaderId) }
 		checkForError { -> glDeleteShader(fragmentShaderId) }
-		checkForError { -> glBindFragDataLocation(linesShaderId, 0, 'vertexColour') }
+		checkForError { -> glBindFragDataLocation(linesShaderProgramId, 0, 'vertexColour') }
+	}
+
+	private void buildTextureShader() {
+
+		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Texture.vert').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_VERTEX_SHADER, stream.text)
+			}
+		}
+		def fragmentShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Texture.frag').withBufferedStream { stream ->
+			return checkShaderCompilation { ->
+				return createShader(GL_FRAGMENT_SHADER, stream.text)
+			}
+		}
+		textureShaderProgramId = checkProgramLink { ->
+			def programId = checkForError { -> glCreateProgram() }
+			checkForError { -> glAttachShader(programId, vertexShaderId) }
+			checkForError { -> glAttachShader(programId, fragmentShaderId) }
+			checkForError { -> glLinkProgram(programId) }
+			checkForError { -> glValidateProgram(programId) }
+			return programId
+		}
+		checkForError { -> glDeleteShader(vertexShaderId) }
+		checkForError { -> glDeleteShader(fragmentShaderId) }
 	}
 
 	/**
@@ -178,8 +203,11 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void close() {
 
-		if (linesShaderId) {
-			glDeleteProgram(linesShaderId)
+		if (linesShaderProgramId) {
+			glDeleteProgram(linesShaderProgramId)
+		}
+		if (textureShaderProgramId) {
+			glDeleteProgram(textureShaderProgramId)
 		}
 	}
 
@@ -190,7 +218,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	Lines createLines(Colour colour, Vector2f... vertices) {
 
-		if (!linesShaderId) {
+		if (!linesShaderProgramId) {
 			buildLinesShader()
 		}
 
@@ -211,12 +239,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
 		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
 
-		def colourAttribute = checkForError { -> glGetAttribLocation(linesShaderId, 'colour') }
-		checkForError { -> glEnableVertexAttribArray(colourAttribute) }
-		checkForError { -> glVertexAttribPointer(colourAttribute, 4, GL_FLOAT, false, bytesPerVertex, 0) }
-		def positionAttribute = checkForError { -> glGetAttribLocation(linesShaderId, 'position') }
-		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
-		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
+		def colourAttrib = checkForError { -> glGetAttribLocation(linesShaderProgramId, 'colour') }
+		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
+		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
+		def positionAttrib = checkForError { -> glGetAttribLocation(linesShaderProgramId, 'position') }
+		checkForError { -> glEnableVertexAttribArray(positionAttrib) }
+		checkForError { -> glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
 
 		return new Lines(
 			vertexArrayId: vertexArrayId,
@@ -247,15 +275,26 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
 
-		int textureId = glGenTextures()
-		glBindTexture(GL_TEXTURE_2D, textureId)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		if (!textureShaderProgramId) {
+			buildTextureShader()
+		}
+
+		int textureId = checkForError { ->
+			return glGenTextures()
+		}
+		checkForError { ->
+			glBindTexture(GL_TEXTURE_2D, textureId)
+		}
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+
 		def colourFormat =
 			format == 3 ? GL_RGB :
 			format == 4 ? GL_RGBA :
 			0
-		glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, data)
+		checkForError { ->
+			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
+		}
 
 		return new Texture(
 			textureId: textureId
@@ -265,66 +304,96 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void deleteLines(Lines lines) {
 
-		glDeleteBuffers(lines.bufferId)
-		glDeleteVertexArrays(lines.vertexArrayId)
+		checkForError { -> glDeleteBuffers(lines.bufferId) }
+		checkForError { -> glDeleteVertexArrays(lines.vertexArrayId) }
 	}
 
 	@Override
-	void deleteTexture(Texture texture) {
+	void deleteTexture(MappedTexture texture) {
 
-		checkForError { ->
-			glDeleteTextures(texture.textureId)
+		checkForError { -> glDeleteBuffers(texture.bufferId, texture.elementBufferId) }
+		checkForError { -> glDeleteVertexArrays(texture.vertexArrayId) }
+
+		def textureInstances = texture.parentTexture.instances
+		textureInstances.remove(texture)
+		if (textureInstances.empty) {
+			checkForError { ->
+				glDeleteTextures(texture.textureId)
+			}
 		}
 	}
 
 	@Override
 	void drawLineLoop(Colour colour, Vector2f... vertices) {
-
-		drawPrimitive(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
 	void drawLines(Lines lines) {
 
-		checkForError { -> glUseProgram(linesShaderId) }
+		checkForError { -> glUseProgram(linesShaderProgramId) }
 		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
 		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}
 
-	/**
-	 * Draw any kind of coloured primitive.
-	 *
-	 * @param primitiveType
-	 * @param colour
-	 * @param vertices
-	 */
-	private static void drawPrimitive(int primitiveType, Colour colour, Vector2f... vertices) {
+	@Override
+	void drawTexture(MappedTexture texture) {
 
-//		withTextureEnvironmentMode(GL_COMBINE) { ->
-//			checkForError { -> glColor4f(colour.r, colour.g, colour.b, colour.a) }
-//			glBegin(primitiveType)
-//			vertices.each { vertex ->
-//				glVertex2f(vertex.x, vertex.y)
-//			}
-//			checkForError { -> glEnd() }
-//		}
+		checkForError { -> glUseProgram(textureShaderProgramId) }
+		checkForError { -> glBindVertexArray(texture.vertexArrayId) }
+		checkForError { -> glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0) }
 	}
 
 	@Override
-	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
+	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
 
-//		glBindTexture(GL_TEXTURE_2D, textureId)
-//		glColor3f(1, 1, 1)
-//		glBegin(GL_QUADS)
-//		glTexCoord2f(0, flipVertical ? repeatY : 0); glVertex2f(rectangle.minX, rectangle.minY)
-//		glTexCoord2f(0, flipVertical ? 0 : repeatY); glVertex2f(rectangle.minX, rectangle.maxY)
-//		glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(rectangle.maxX, rectangle.maxY)
-//		glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(rectangle.maxX, rectangle.minY)
-//		glEnd()
+		def vertexArrayId = checkForError { -> glGenVertexArrays() }
+		checkForError { -> glBindVertexArray(vertexArrayId) }
+
+		def floatsPerVertex = Vector2f.FLOATS + Vector2f.FLOATS
+		def bytesPerVertex = floatsPerVertex * Float.BYTES
+
+		def verticesBuffer = FloatBuffer
+			.allocateDirectNative(floatsPerVertex * 4)
+			.put([
+				0, flipVertical ? repeatY : 0,       surface.minX, surface.minY,
+				0, flipVertical ? 0 : repeatY,       surface.minX, surface.maxY,
+				repeatX, flipVertical ? 0 : repeatY, surface.maxX, surface.maxY,
+				repeatX, flipVertical ? repeatY : 0, surface.maxX, surface.minY
+			] as float[])
+			.flip()
+
+		def bufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
+		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+
+		// The above is unique vertices for a rectangle, but to draw a rectangle we
+		// need to draw 2 triangles that share 2 vertices, so generate an element
+		// buffer mapping triangle points to the above.
+		def elementBufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
+		checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, [0, 1, 3, 1, 2, 3] as int[], GL_STATIC_DRAW) }
+
+		def texCoordAttrib = checkForError { -> glGetAttribLocation(textureShaderProgramId, 'texCoord') }
+		checkForError { -> glEnableVertexAttribArray(texCoordAttrib) }
+		checkForError { -> glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, bytesPerVertex, 0) }
+		def positionAttribute = checkForError { -> glGetAttribLocation(textureShaderProgramId, 'position') }
+		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
+		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Vector2f.BYTES) }
+
+		// TODO: Move this to be handled by the Texture class?
+		def mappedTexture = new MappedTexture(
+			parentTexture: texture,
+			vertexArrayId: vertexArrayId,
+			bufferId: bufferId,
+			elementBufferId: elementBufferId
+		)
+		texture.instances << mappedTexture
+		return mappedTexture
 	}
 
 	/**
-	 *
+	 * Return some information about the renderer.
+	 * 
 	 * @return
 	 */
 	@Override

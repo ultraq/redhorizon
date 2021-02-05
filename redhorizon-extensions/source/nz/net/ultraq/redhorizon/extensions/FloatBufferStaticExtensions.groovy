@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.extensions
 
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
 /**
@@ -32,13 +31,12 @@ class FloatBufferStaticExtensions {
 	 * 
 	 * @param self
 	 * @param capacity
-	 * @return Natively ordered {@code FloatBuffer}.
+	 * @return Natively ordered and direct {@code FloatBuffer}.
 	 */
 	static FloatBuffer allocateDirectNative(FloatBuffer self, int capacity) {
 
 		return ByteBuffer
-			.allocateDirect(capacity << 2)
-			.order(ByteOrder.nativeOrder())
+			.allocateDirectNative(capacity << 2)
 			.asFloatBuffer()
 	}
 }

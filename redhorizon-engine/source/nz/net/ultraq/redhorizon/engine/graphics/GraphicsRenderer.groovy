@@ -89,7 +89,7 @@ interface GraphicsRenderer {
 	 * 
 	 * @param texture
 	 */
-	void deleteTexture(Texture texture)
+	void deleteTexture(MappedTexture texture)
 
 	/**
 	 * Draw a coloured line that closes itself.
@@ -107,30 +107,37 @@ interface GraphicsRenderer {
 	void drawLines(Lines lines)
 
 	/**
-	 * Draw the texture over the given rectangle.
+	 * Draw a mapped texture.
 	 * 
 	 * @param texture
-	 * @param rectangle
 	 */
-	void drawTexture(Texture texture, Rectanglef rectangle)
+	void drawTexture(MappedTexture texture)
 
 	/**
-	 * Draw the texture over the given rectangle.
+	 * Map an existing texture over the given surface.
 	 * 
 	 * @param texture
-	 * @param rectangle
+	 * @param surface
+	 */
+	MappedTexture mapTexture(Texture texture, Rectanglef surface)
+
+	/**
+	 * Map an existing texture over the given surface.
+	 * 
+	 * @param texture
+	 * @param surface
 	 * @param repeatX
 	 *   Number of times to repeat the texture on the X axis
 	 * @param repeatY
 	 *   Number of times to repeat the texture on the Y axis
 	 */
-	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX, float repeatY)
+	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX, float repeatY)
 
 	/**
-	 * Draw the texture over the given rectangle.
+	 * Map an existing texture over the given surface.
 	 * 
 	 * @param texture
-	 * @param rectangle
+	 * @param surface
 	 * @param repeatX
 	 *   Number of times to repeat the texture on the X axis
 	 * @param repeatY
@@ -140,7 +147,7 @@ interface GraphicsRenderer {
 	 *   image data often having Y-coords in the opposite way to the rendering
 	 *   coordinates.
 	 */
-	void drawTexture(Texture texture, Rectanglef rectangle, float repeatX, float repeatY, boolean flipVertical)
+	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX, float repeatY, boolean flipVertical)
 
 	/**
 	 * Update the camera projection.
