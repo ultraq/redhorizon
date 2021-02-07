@@ -89,13 +89,17 @@ abstract class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 		checkForError { ->
 			glBindTexture(GL_TEXTURE_2D, textureId)
 		}
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		checkForError { ->
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		}
+		checkForError { ->
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		}
 
 		def colourFormat =
 			format == 3 ? GL_RGB :
-				format == 4 ? GL_RGBA :
-					0
+			format == 4 ? GL_RGBA :
+			0
 		checkForError { ->
 			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
 		}
@@ -103,5 +107,13 @@ abstract class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 		return new Texture(
 			textureId: textureId
 		)
+	}
+
+	@Override
+	void deleteTexture(Texture texture) {
+
+		checkForError { ->
+			glDeleteTextures(texture.textureId)
+		}
 	}
 }

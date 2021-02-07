@@ -19,12 +19,12 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import groovy.transform.MapConstructor
 
 /**
- * Representation of a single texture to render.
+ * A shader is a small program that runs on the GPU.
  * 
  * @author Emanuel Rabina
  */
 @MapConstructor
-class Texture {
+class Shader {
 
-	final int textureId
+	final int programId
 }

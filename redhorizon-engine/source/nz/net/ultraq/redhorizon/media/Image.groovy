@@ -18,7 +18,9 @@ package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.MappedTexture
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -47,7 +49,9 @@ class Image implements GraphicsElement, SelfVisitable {
 	final float repeatX
 	final float repeatY
 
-	private MappedTexture texture
+	private Mesh mesh
+	private Texture texture
+	private Material material
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
@@ -108,22 +112,21 @@ class Image implements GraphicsElement, SelfVisitable {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTexture(texture)
+		renderer.deleteMaterial(material)
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		texture = renderer.mapTexture(
-			renderer.createTexture(imageData, format.value, width, height),
-			dimensions, repeatX, repeatY
-		)
+		mesh = renderer.createSpriteMesh(dimensions, repeatX, repeatY)
+		texture = renderer.createTexture(imageData, format.value, width, height)
 		imageData = null
+		material = renderer.createMaterial(mesh, texture)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(texture)
+		renderer.drawMaterial(material)
 	}
 }

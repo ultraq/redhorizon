@@ -14,42 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.extensions
 
-import org.joml.Rectanglef
-
-import groovy.transform.MapConstructor
+import java.nio.ByteBuffer
+import java.nio.IntBuffer
 
 /**
- * A variant of a {@code Texture} that references a parent texture and contains
- * a pre-built vertex buffer for faster drawing.
+ * Static method extensions to the {@code IntBuffer} class.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-class MappedTexture {
-
-	final Texture parentTexture
-
-	// Modern
-	// TODO: Should we be storing this stuff in a 'mesh'?
-	final int vertexArrayId
-	final int bufferId
-	final int elementBufferId
-
-	// Legacy
-	final Rectanglef surface
-	final float repeatX
-	final float repeatY
-	final boolean flipVertical
+class IntBufferStaticExtensions {
 
 	/**
-	 * Shortcut to the instanced texture ID.
-	 * 
-	 * @return
+	 * Allocates a direct {@code IntBuffer} with native byte ordering.
+	 *
+	 * @param self
+	 * @param capacity
+	 * @return Natively ordered and direct {@code IntBuffer}.
 	 */
-	int getTextureId() {
+	static IntBuffer allocateDirectNative(IntBuffer self, int capacity) {
 
-		return parentTexture.textureId
+		return ByteBuffer
+			.allocateDirectNative(capacity << 2)
+			.asIntBuffer()
 	}
 }

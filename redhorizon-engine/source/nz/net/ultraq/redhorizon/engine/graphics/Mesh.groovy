@@ -16,15 +16,28 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Rectanglef
+
 import groovy.transform.MapConstructor
 
 /**
- * Representation of a single texture to render.
+ * A mesh defines the shape of an object, and so contain data on points and
+ * edges.
  * 
  * @author Emanuel Rabina
  */
 @MapConstructor
-class Texture {
+class Mesh {
 
-	final int textureId
+	// Modern
+	final int vertexArrayId
+	final int bufferId
+	final int elementBufferId
+	final int elementType
+	final int elementCount
+
+	// Legacy
+	final Rectanglef surface
+	final float repeatX
+	final float repeatY
 }

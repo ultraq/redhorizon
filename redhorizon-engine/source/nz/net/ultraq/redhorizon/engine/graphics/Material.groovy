@@ -19,12 +19,15 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import groovy.transform.MapConstructor
 
 /**
- * Representation of a single texture to render.
+ * A material defines how a shape should be rendered, so contains meshes,
+ * colours, textures, and shaders.
  * 
  * @author Emanuel Rabina
  */
 @MapConstructor
-class Texture {
+class Material {
 
-	final int textureId
+	final Mesh mesh
+	final Texture texture
+	final Shader shader
 }

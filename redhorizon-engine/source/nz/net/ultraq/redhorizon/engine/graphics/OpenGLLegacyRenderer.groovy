@@ -120,19 +120,34 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
+	Material createMaterial(Mesh mesh, Texture texture) {
+
+		return new Material(
+			mesh: mesh,
+			texture: texture
+		)
+	}
+
+	@Override
+	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
+
+		return new Mesh(
+			surface: surface,
+			repeatX: repeatX,
+			repeatY: repeatY
+		)
+	}
+
+	@Override
 	void deleteLines(Lines lines) {
 	}
 
 	@Override
-	void deleteTexture(MappedTexture texture) {
+	void deleteMaterial(Material material) {
+	}
 
-		def textureInstances = texture.parentTexture.instances
-		textureInstances.remove(texture)
-		if (textureInstances.empty) {
-			checkForError { ->
-				glDeleteTextures(texture.textureId)
-			}
-		}
+	@Override
+	void deleteMesh(Mesh mesh) {
 	}
 
 	@Override
@@ -167,36 +182,20 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void drawTexture(MappedTexture texture) {
+	void drawMaterial(Material material) {
 
-		def surface = texture.surface
-		def repeatX = texture.repeatX
-		def repeatY = texture.repeatY
-		def flipVertical = texture.flipVertical
+		def surface = material.mesh.surface
+		def repeatX = material.mesh.repeatX
+		def repeatY = material.mesh.repeatY
 
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
 		checkForError { -> glColor3f(1, 1, 1) }
 		glBegin(GL_QUADS)
-			glTexCoord2f(0, flipVertical ? repeatY : 0);       glVertex2f(surface.minX, surface.minY)
-			glTexCoord2f(0, flipVertical ? 0 : repeatY);       glVertex2f(surface.minX, surface.maxY)
-			glTexCoord2f(repeatX, flipVertical ? 0 : repeatY); glVertex2f(surface.maxX, surface.maxY)
-			glTexCoord2f(repeatX, flipVertical ? repeatY : 0); glVertex2f(surface.maxX, surface.minY)
+			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
+			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
+			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
+			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
 		checkForError { -> glEnd() }
-	}
-
-	@Override
-	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX = 1, float repeatY = 1, boolean flipVertical = true) {
-
-		// TODO: Move this to be handled by the Texture class?
-		def mappedTexture = new MappedTexture(
-			parentTexture: texture,
-			surface: surface,
-			repeatX: repeatX,
-			repeatY: repeatY,
-			flipVertical: flipVertical
-		)
-		texture.instances << mappedTexture
-		return mappedTexture
 	}
 
 	/**

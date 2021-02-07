@@ -55,6 +55,35 @@ interface GraphicsRenderer {
 	Lines createLines(Colour colour, Vector2f... vertices)
 
 	/**
+	 * Create a new material from a mesh and texture.
+	 * 
+	 * @param mesh
+	 * @param texture
+	 * @return
+	 */
+	Material createMaterial(Mesh mesh, Texture texture)
+
+	/**
+	 * Create a mesh to represent a surface onto which a texture will go.
+	 * 
+	 * @param surface
+	 * @return
+	 */
+	Mesh createSpriteMesh(Rectanglef surface)
+
+	/**
+	 * Create a mesh to represent a surface onto which a texture will go.
+	 * 
+	 * @param surface
+	 * @param repeatX
+	 *   Number of times to repeat the texture on the X axis
+	 * @param repeatY
+	 *   Number of times to repeat the texture on the Y axis
+	 * @return
+	 */
+	Mesh createSpriteMesh(Rectanglef surface, float repeatX, float repeatY)
+
+	/**
 	 * Create and fill a texture with the given image data.
 	 * 
 	 * @param data
@@ -86,11 +115,25 @@ interface GraphicsRenderer {
 	void deleteLines(Lines lines)
 
 	/**
+	 * Delete all of the items tied to the material.
+	 * 
+	 * @param material
+	 */
+	void deleteMaterial(Material material)
+
+	/**
+	 * Delete mesh data.
+	 * 
+	 * @param mesh
+	 */
+	void deleteMesh(Mesh mesh)
+
+	/**
 	 * Delete texture data.
 	 * 
 	 * @param texture
 	 */
-	void deleteTexture(MappedTexture texture)
+	void deleteTexture(Texture texture)
 
 	/**
 	 * Draw a coloured line that closes itself.
@@ -108,47 +151,11 @@ interface GraphicsRenderer {
 	void drawLines(Lines lines)
 
 	/**
-	 * Draw a mapped texture.
+	 * Draw the material.
 	 * 
-	 * @param texture
+	 * @param material
 	 */
-	void drawTexture(MappedTexture texture)
-
-	/**
-	 * Map an existing texture over the given surface.
-	 * 
-	 * @param texture
-	 * @param surface
-	 */
-	MappedTexture mapTexture(Texture texture, Rectanglef surface)
-
-	/**
-	 * Map an existing texture over the given surface.
-	 * 
-	 * @param texture
-	 * @param surface
-	 * @param repeatX
-	 *   Number of times to repeat the texture on the X axis
-	 * @param repeatY
-	 *   Number of times to repeat the texture on the Y axis
-	 */
-	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX, float repeatY)
-
-	/**
-	 * Map an existing texture over the given surface.
-	 * 
-	 * @param texture
-	 * @param surface
-	 * @param repeatX
-	 *   Number of times to repeat the texture on the X axis
-	 * @param repeatY
-	 *   Number of times to repeat the texture on the Y axis
-	 * @param flipVertical
-	 *   Whether or not to flip the texture on its vertical axis to compensate for
-	 *   image data often having Y-coords in the opposite way to the rendering
-	 *   coordinates.
-	 */
-	MappedTexture mapTexture(Texture texture, Rectanglef surface, float repeatX, float repeatY, boolean flipVertical)
+	void drawMaterial(Material material)
 
 	/**
 	 * Update the camera projection.
