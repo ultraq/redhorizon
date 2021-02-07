@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import groovy.transform.CompileStatic
@@ -78,6 +79,28 @@ class ByteBufferImageExtensions {
 			image.rewind()
 		}
 		return compilation.rewind()
+	}
+
+	/**
+	 * Return a new image buffer where the pixels data on the vertical axis has
+	 * been flipped.  This is used to make the Y axis of an image format, where
+	 * often 0 means the top row of pixels, match a coordinate system where 0
+	 * means the bottom row of pixels.
+	 * 
+	 * @param self
+	 * @param width  Width of the image.
+	 * @param height Height of the image.
+	 * @param format The number of colour channels in each pixel.
+	 * @return A new buffer with the horizontal pixel data flipped.
+	 */
+	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, ColourFormat format) {
+
+		def flippedImageBuffer = ByteBuffer.allocateNative(self.capacity())
+		def rowSize = width * format.value
+		height.times { int y ->
+			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
+		}
+		return flippedImageBuffer.rewind()
 	}
 
 	/**

@@ -99,7 +99,7 @@ class Image implements GraphicsElement, SelfVisitable {
 		this.width      = width
 		this.height     = height
 		this.format     = format
-		this.imageData  = imageData
+		this.imageData  = imageData.flipVertical(width, height, format)
 		this.dimensions = dimensions
 		this.repeatX    = repeatX
 		this.repeatY    = repeatY
