@@ -24,7 +24,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
 
-import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
 /**
@@ -117,31 +116,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		return new Lines(
 			colour: colour,
 			vertices: vertices
-		)
-	}
-
-	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
-
-		int textureId = checkForError { ->
-			return glGenTextures()
-		}
-		checkForError { ->
-			glBindTexture(GL_TEXTURE_2D, textureId)
-		}
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-
-		def colourFormat =
-			format == 3 ? GL_RGB :
-			format == 4 ? GL_RGBA :
-			0
-		checkForError { ->
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
-		}
-
-		return new Texture(
-			textureId: textureId
 		)
 	}
 

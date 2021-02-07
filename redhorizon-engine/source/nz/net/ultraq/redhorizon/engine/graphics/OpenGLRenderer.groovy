@@ -21,6 +21,8 @@ import org.lwjgl.opengl.GLCapabilities
 import static org.lwjgl.opengl.GL21.*
 import static org.lwjgl.opengl.GL33C.*
 
+import java.nio.ByteBuffer
+
 /**
  * Common code between both of the OpenGL renderers.
  * 
@@ -76,5 +78,30 @@ abstract class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 	void clear() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+	}
+
+	@Override
+	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
+
+		int textureId = checkForError { ->
+			return glGenTextures()
+		}
+		checkForError { ->
+			glBindTexture(GL_TEXTURE_2D, textureId)
+		}
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+
+		def colourFormat =
+			format == 3 ? GL_RGB :
+				format == 4 ? GL_RGBA :
+					0
+		checkForError { ->
+			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
+		}
+
+		return new Texture(
+			textureId: textureId
+		)
 	}
 }

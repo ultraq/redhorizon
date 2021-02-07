@@ -24,7 +24,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
 
-import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
 /**
@@ -86,6 +85,10 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
+
+		// Create the shader programs used by this renderer
+		buildLinesShader()
+		buildTextureShader()
 	}
 
 	/**
@@ -195,13 +198,14 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		this.projection = projection
 
-		if (!linesShaderProgramId) {
-			buildLinesShader()
+		checkForError { -> glUseProgram(linesShaderProgramId) }
+		def linesProjectionUniform = checkForError { ->
+			return glGetUniformLocation(linesShaderProgramId, 'projection')
+		}
+		checkForError { ->
+			glUniformMatrix4fv(linesProjectionUniform, false, projection as float[])
 		}
 
-		if (!textureShaderProgramId) {
-			buildTextureShader()
-		}
 		checkForError { -> glUseProgram(textureShaderProgramId) }
 		def textureProjectionUniform = checkForError { ->
 			return glGetUniformLocation(textureShaderProgramId, 'projection')
@@ -215,10 +219,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 	@Override
 	Lines createLines(Colour colour, Vector2f... vertices) {
-
-		if (!linesShaderProgramId) {
-			buildLinesShader()
-		}
 
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
@@ -271,35 +271,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
-
-		if (!textureShaderProgramId) {
-			buildTextureShader()
-		}
-
-		int textureId = checkForError { ->
-			return glGenTextures()
-		}
-		checkForError { ->
-			glBindTexture(GL_TEXTURE_2D, textureId)
-		}
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-
-		def colourFormat =
-			format == 3 ? GL_RGB :
-			format == 4 ? GL_RGBA :
-			0
-		checkForError { ->
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
-		}
-
-		return new Texture(
-			textureId: textureId
-		)
-	}
-
-	@Override
 	void deleteLines(Lines lines) {
 
 		checkForError { -> glDeleteBuffers(lines.bufferId) }
@@ -329,15 +300,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	void drawLines(Lines lines) {
 
 		checkForError { -> glUseProgram(linesShaderProgramId) }
-
-		checkForError { -> glUseProgram(linesShaderProgramId) }
-		def linesProjectionUniform = checkForError { ->
-			return glGetUniformLocation(linesShaderProgramId, 'projection')
-		}
-		checkForError { ->
-			glUniformMatrix4fv(linesProjectionUniform, false, projection as float[])
-		}
-
 		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
 		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}
@@ -416,5 +378,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 	@Override
 	void updateCamera(Vector3f position) {
+
+		// TODO: Use a view matrix to make it look like we're moving the camera
 	}
 }
