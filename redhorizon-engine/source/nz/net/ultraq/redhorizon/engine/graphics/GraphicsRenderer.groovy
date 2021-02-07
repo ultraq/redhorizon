@@ -44,15 +44,25 @@ interface GraphicsRenderer {
 	void createCamera(Matrix4f projection)
 
 	/**
-	 * Create an object representing line primitives so that they can be drawn
-	 * later.
+	 * Create a mesh that represents a line loop - a series of points where lines
+	 * are drawn between them and then a final one is used to close the last and
+	 * first points.
+	 * 
+	 * @param colour
+	 * @param vertices
+	 * @return
+	 */
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices)
+
+	/**
+	 * Create a mesh representing disjoint lines.
 	 * 
 	 * @param colour
 	 * @param vertices Every pair of vertices represents the start and end points
 	 *                 of a line to be drawn.
-	 * @return New lines object.
+	 * @return New lines mesh.
 	 */
-	Lines createLines(Colour colour, Vector2f... vertices)
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Create a new material from a mesh and texture.
@@ -108,13 +118,6 @@ interface GraphicsRenderer {
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
 
 	/**
-	 * Delete the line data.
-	 * 
-	 * @param lines
-	 */
-	void deleteLines(Lines lines)
-
-	/**
 	 * Delete all of the items tied to the material.
 	 * 
 	 * @param material
@@ -136,26 +139,18 @@ interface GraphicsRenderer {
 	void deleteTexture(Texture texture)
 
 	/**
-	 * Draw a coloured line that closes itself.
-	 * 
-	 * @param colour
-	 * @param vertices
-	 */
-	void drawLineLoop(Colour colour, Vector2f... vertices)
-
-	/**
-	 * Draw any number of coloured lines.
-	 * 
-	 * @param lines
-	 */
-	void drawLines(Lines lines)
-
-	/**
 	 * Draw the material.
 	 * 
 	 * @param material
 	 */
 	void drawMaterial(Material material)
+
+	/**
+	 * Draw the mesh.
+	 * 
+	 * @param mesh
+	 */
+	void drawMesh(Mesh mesh)
 
 	/**
 	 * Update the camera projection.

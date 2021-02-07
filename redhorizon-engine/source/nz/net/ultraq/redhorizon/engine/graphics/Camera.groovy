@@ -55,7 +55,7 @@ class Camera implements GraphicsElement, SelfVisitable {
 				new Vector3f(),
 				new Vector3f(0, 1, 0)
 			)
-		logger.debug('Establishing an orthographic projection of width/height {}x{}', size.width, size.height)
+		logger.debug('Establishing an orthographic projection of {}', size)
 	}
 
 	@Override

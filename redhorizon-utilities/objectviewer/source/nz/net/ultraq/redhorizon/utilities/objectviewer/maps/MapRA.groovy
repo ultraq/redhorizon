@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Lines
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.resources.ResourceManager
@@ -63,7 +63,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	final Vector2f initialPosition
 
 	private final List<GraphicsElement> layers = []
-	private Lines lines
+	private Mesh axisLines
+	private Mesh boundaryLines
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -123,7 +124,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.delete(renderer)
 		}
-		renderer.deleteLines(lines)
+		renderer.deleteMesh(axisLines)
+		renderer.deleteMesh(boundaryLines)
 	}
 
 	@Override
@@ -132,7 +134,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.init(renderer)
 		}
-		lines = renderer.createLines(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
+		axisLines = renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
+		boundaryLines = renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), boundaryPoints)
 	}
 
 	/**
@@ -169,8 +172,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.render(renderer)
 		}
-		renderer.drawLines(lines)
-		renderer.drawLineLoop(Colour.YELLOW.withAlpha(0.5), boundaryPoints)
+		renderer.drawMesh(axisLines)
+		renderer.drawMesh(boundaryLines)
 	}
 
 	/**

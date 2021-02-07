@@ -111,10 +111,21 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	Lines createLines(Colour colour, Vector2f... vertices) {
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return new Lines(
+		return new Mesh(
 			colour: colour,
+			primitiveType: GL_LINE_LOOP,
+			vertices: vertices
+		)
+	}
+
+	@Override
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
+
+		return new Mesh(
+			colour: colour,
+			primitiveType: GL_LINES,
 			vertices: vertices
 		)
 	}
@@ -132,14 +143,11 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return new Mesh(
+			primitiveType: GL_QUADS,
 			surface: surface,
 			repeatX: repeatX,
 			repeatY: repeatY
 		)
-	}
-
-	@Override
-	void deleteLines(Lines lines) {
 	}
 
 	@Override
@@ -151,15 +159,26 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void drawLineLoop(Colour colour, Vector2f... vertices) {
+	void drawMaterial(Material material) {
 
-		drawPrimitive(GL_LINE_LOOP, colour, vertices)
+		def surface = material.mesh.surface
+		def repeatX = material.mesh.repeatX
+		def repeatY = material.mesh.repeatY
+
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
+		checkForError { -> glColor3f(1, 1, 1) }
+		glBegin(GL_QUADS)
+			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
+			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
+			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
+			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
+		checkForError { -> glEnd() }
 	}
 
 	@Override
-	void drawLines(Lines lines) {
+	void drawMesh(Mesh mesh) {
 
-		drawPrimitive(GL_LINES, lines.colour, lines.vertices)
+		drawPrimitive(mesh.primitiveType, mesh.colour, mesh.vertices)
 	}
 
 	/**
@@ -179,23 +198,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 			}
 			checkForError { -> glEnd() }
 		}
-	}
-
-	@Override
-	void drawMaterial(Material material) {
-
-		def surface = material.mesh.surface
-		def repeatX = material.mesh.repeatX
-		def repeatY = material.mesh.repeatY
-
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
-		checkForError { -> glColor3f(1, 1, 1) }
-		glBegin(GL_QUADS)
-			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
-			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
-			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
-			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
-		checkForError { -> glEnd() }
 	}
 
 	/**

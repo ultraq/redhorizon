@@ -122,38 +122,15 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	Lines createLines(Colour colour, Vector2f... vertices) {
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		def vertexArrayId = checkForError { -> glGenVertexArrays() }
-		checkForError { -> glBindVertexArray(vertexArrayId) }
+		return createPrimitivesMesh(colour, GL_LINE_LOOP, vertices)
+	}
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
-		def bytesPerVertex = Colour.BYTES + Vector2f.BYTES
+	@Override
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
-		vertices.each { vertex ->
-			verticesBuffer.put(colour as float[])
-			verticesBuffer.put(vertex as float[])
-		}
-		verticesBuffer.flip()
-
-		def bufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
-
-		def colourAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'colour') }
-		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
-		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
-		def positionAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'position') }
-		checkForError { -> glEnableVertexAttribArray(positionAttrib) }
-		checkForError { -> glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
-
-		return new Lines(
-			vertexArrayId: vertexArrayId,
-			bufferId: bufferId,
-			colour: colour,
-			vertices: vertices
-		)
+		return createPrimitivesMesh(colour, GL_LINES, vertices);
 	}
 
 	@Override
@@ -163,6 +140,48 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 			mesh: mesh,
 			texture: texture,
 			shader: textureShader
+		)
+	}
+
+	/**
+	 * Create a mesh used for drawing some kind of OpenGL primitive.
+	 * 
+	 * @param colour
+	 * @param vertexType
+	 * @param vertices
+	 * @return
+	 */
+	private Mesh createPrimitivesMesh(Colour colour, int vertexType, Vector2f... vertices) {
+
+		def vertexArrayId = checkForError { -> glGenVertexArrays() }
+		checkForError { -> glBindVertexArray(vertexArrayId) }
+
+		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
+		def bytesPerVertex = floatsPerVertex * Float.BYTES
+
+		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
+		vertices.each { vertex ->
+			verticesBuffer.put(colour as float[])
+			verticesBuffer.put(vertex as float[])
+		}
+		verticesBuffer.flip()
+
+		def vertexBufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
+		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+
+		def colourAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'colour') }
+		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
+		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
+		def positionAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'position') }
+		checkForError { -> glEnableVertexAttribArray(positionAttrib) }
+		checkForError { -> glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
+
+		return new Mesh(
+			vertexArrayId: vertexArrayId,
+			vertexBufferId: vertexBufferId,
+			vertexType: vertexType,
+			vertexCount: vertices.length
 		)
 	}
 
@@ -244,8 +263,8 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 			] as float[])
 			.flip()
 
-		def bufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, bufferId) }
+		def vertexBufferId = glGenBuffers()
+		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
 		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
 
 		// The above is unique vertices for a rectangle, but to draw a rectangle we
@@ -269,18 +288,11 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		return new Mesh(
 			vertexArrayId: vertexArrayId,
-			bufferId: bufferId,
+			vertexBufferId: vertexBufferId,
 			elementBufferId: elementBufferId,
 			elementType: GL_TRIANGLES,
 			elementCount: indexBuffer.capacity()
 		)
-	}
-
-	@Override
-	void deleteLines(Lines lines) {
-
-		checkForError { -> glDeleteBuffers(lines.bufferId) }
-		checkForError { -> glDeleteVertexArrays(lines.vertexArrayId) }
 	}
 
 	@Override
@@ -293,28 +305,35 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void deleteMesh(Mesh mesh) {
 
-		checkForError { -> glDeleteBuffers(mesh.bufferId, mesh.elementBufferId) }
+		if (mesh.elementBufferId) {
+			checkForError { -> glDeleteBuffers(mesh.elementBufferId) }
+		}
+		checkForError { -> glDeleteBuffers(mesh.vertexBufferId) }
 		checkForError { -> glDeleteVertexArrays(mesh.vertexArrayId) }
-	}
-
-	@Override
-	void drawLineLoop(Colour colour, Vector2f... vertices) {
-	}
-
-	@Override
-	void drawLines(Lines lines) {
-
-		checkForError { -> glUseProgram(linesShader.programId) }
-		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
-		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}
 
 	@Override
 	void drawMaterial(Material material) {
 
-		checkForError { -> glUseProgram(material.shader.programId) }
-		checkForError { -> glBindVertexArray(material.mesh.vertexArrayId) }
-		checkForError { -> glDrawElements(material.mesh.elementType, material.mesh.elementCount, GL_UNSIGNED_INT, 0) }
+		def shader = material.shader
+		def mesh = material.mesh
+
+		checkForError { -> glUseProgram(shader.programId) }
+		checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+		if (mesh.vertexType) {
+			checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+		}
+		else if (mesh.elementType) {
+			checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+		}
+	}
+
+	@Override
+	void drawMesh(Mesh mesh) {
+
+		checkForError { -> glUseProgram(linesShader.programId) }
+		checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+		checkForError { -> glDrawArrays(mesh.primitiveType, 0, mesh.vertices.length) }
 	}
 
 	/**

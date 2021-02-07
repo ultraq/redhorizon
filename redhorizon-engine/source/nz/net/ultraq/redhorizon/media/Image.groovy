@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -49,8 +47,6 @@ class Image implements GraphicsElement, SelfVisitable {
 	final float repeatX
 	final float repeatY
 
-	private Mesh mesh
-	private Texture texture
 	private Material material
 
 	/**
@@ -118,10 +114,11 @@ class Image implements GraphicsElement, SelfVisitable {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		mesh = renderer.createSpriteMesh(dimensions, repeatX, repeatY)
-		texture = renderer.createTexture(imageData, format.value, width, height)
+		material = renderer.createMaterial(
+			renderer.createSpriteMesh(dimensions, repeatX, repeatY),
+			renderer.createTexture(imageData, format.value, width, height)
+		)
 		imageData = null
-		material = renderer.createMaterial(mesh, texture)
 	}
 
 	@Override
