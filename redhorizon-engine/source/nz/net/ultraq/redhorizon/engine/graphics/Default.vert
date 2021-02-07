@@ -7,11 +7,11 @@ out vec4 vertexColour;
 
 //uniform mat4 model;
 //uniform mat4 view;
-//uniform mat4 projection;
+uniform mat4 projection;
 
 void main() {
 	vertexColour = colour;
 //	mat4 mvp = projection * view * model;
 //	gl_Position = mvp * vec4(position, 1.0);
-	gl_Position = position;
+	gl_Position = projection * position;
 }

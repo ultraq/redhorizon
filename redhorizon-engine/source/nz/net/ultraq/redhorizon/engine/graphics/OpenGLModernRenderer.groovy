@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -38,6 +39,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 	private int linesShaderProgramId
 	private int textureShaderProgramId
+	private Matrix4f projection
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -68,9 +70,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
 //		glLineWidth(2)
 
-		// Texturing controls
-//		glEnable(GL_TEXTURE_2D)
-
 		// Depth testing
 		checkForError { -> glEnable(GL_DEPTH_TEST) }
 		checkForError { -> glDepthFunc(GL_LEQUAL) }
@@ -79,7 +78,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glEnable(GL_BLEND) }
 		checkForError { -> glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
 
-		// Set up the viewport and projection
+		// Set up the viewport
 		def viewportSize = context.framebufferSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
 		checkForError { -> glViewport(0, 0, viewportSize.width, viewportSize.height) }
@@ -89,32 +88,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //		}
 	}
 
-	void useProgram(int programId) {
-
-		glUseProgram(programId)
-
-		// TODO: 🤔
-//		def colourAttrib = glGetAttribLocation(programId, 'colour')
-//		glEnableVertexAttribArray(colourAttrib)
-//		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, 6 * Float.BYTES, 0)
-//
-//		def positionAttrib = glGetAttribLocation(programId, 'position')
-//		glEnableVertexAttribArray(positionAttrib)
-//		glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, false, 6 * Float.BYTES, 4 * Float.BYTES) // 4 bytes for RGBA and 2 for Vector2f
-//
-//		def uniformModel = glGetUniformLocation(programId, 'model')
-//		def model = new Matrix4f()
-////		glUniformMatrix4fv(uniformModel, false, model.get(FloatBuffer.allocateDirectNative(Matrix4f.BYTES)))
-//		glUniformMatrix4fv(uniformModel, false, model as float[])
-//
-//		def viewModel = glGetUniformLocation(programId, 'view')
-//		def view = new Matrix4f()
-//		glUniformMatrix4fv(viewModel, false, view.get(FloatBuffer.allocateDirectNative(Matrix4f.BYTES)))
-//
-//		def projectionModel = glGetUniformLocation(programId, 'projection')
-//		glUniformMatrix4fv(projectionModel, false, projection.get(FloatBuffer.allocateDirectNative(Matrix4f.BYTES)))
-	}
-
+	/**
+	 * Reads and compiles the line shader program.
+	 */
 	private void buildLinesShader() {
 
 		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Default.vert').withBufferedStream { stream ->
@@ -140,6 +116,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glBindFragDataLocation(linesShaderProgramId, 0, 'vertexColour') }
 	}
 
+	/**
+	 * Reads and compiles the texture shader program.
+	 */
 	private void buildTextureShader() {
 
 		def vertexShaderId = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/Texture.vert').withBufferedStream { stream ->
@@ -212,7 +191,26 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void createCamera(Rectanglef projection) {
+	void createCamera(Matrix4f projection) {
+
+		this.projection = projection
+
+		if (!linesShaderProgramId) {
+			buildLinesShader()
+		}
+
+		if (!textureShaderProgramId) {
+			buildTextureShader()
+		}
+		checkForError { -> glUseProgram(textureShaderProgramId) }
+		def textureProjectionUniform = checkForError { ->
+			return glGetUniformLocation(textureShaderProgramId, 'projection')
+		}
+		checkForError { ->
+			def projectionBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
+			projection.get(projectionBuffer)
+			glUniformMatrix4fv(textureProjectionUniform, false, projectionBuffer)
+		}
 	}
 
 	@Override
@@ -331,6 +329,15 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	void drawLines(Lines lines) {
 
 		checkForError { -> glUseProgram(linesShaderProgramId) }
+
+		checkForError { -> glUseProgram(linesShaderProgramId) }
+		def linesProjectionUniform = checkForError { ->
+			return glGetUniformLocation(linesShaderProgramId, 'projection')
+		}
+		checkForError { ->
+			glUniformMatrix4fv(linesProjectionUniform, false, projection as float[])
+		}
+
 		checkForError { -> glBindVertexArray(lines.vertexArrayId) }
 		checkForError { -> glDrawArrays(GL_LINES, 0, lines.vertices.length) }
 	}

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -41,6 +42,13 @@ interface GraphicsRenderer {
 	 * @param projection
 	 */
 	void createCamera(Rectanglef projection)
+
+	/**
+	 * Create a camera with the given projection matrix.
+	 * 
+	 * @param projection
+	 */
+	void createCamera(Matrix4f projection)
 
 	/**
 	 * Create an object representing line primitives so that they can be drawn

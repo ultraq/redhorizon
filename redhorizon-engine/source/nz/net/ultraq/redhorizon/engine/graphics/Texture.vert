@@ -5,7 +5,9 @@ in vec4 position;
 
 out vec2 v_texCoord;
 
+uniform mat4 projection;
+
 void main() {
 	v_texCoord = texCoord;
-	gl_Position = position;
+	gl_Position = projection * position;
 }
