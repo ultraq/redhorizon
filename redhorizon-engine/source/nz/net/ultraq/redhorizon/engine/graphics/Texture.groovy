@@ -18,16 +18,13 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import groovy.transform.MapConstructor
 import groovy.transform.PackageScope
-import groovy.transform.VisibilityOptions
-import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
 
 /**
  * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(visibilityId = 'default')
-@VisibilityOptions(id = 'default', constructor = PACKAGE_PRIVATE)
+@MapConstructor
 class Texture {
 
 	final int textureId

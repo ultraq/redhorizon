@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Rectanglef
 
 import groovy.transform.MapConstructor
-import groovy.transform.VisibilityOptions
-import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
 
 /**
  * A variant of a {@code Texture} that references a parent texture and contains
@@ -28,13 +26,13 @@ import static groovy.transform.options.Visibility.PACKAGE_PRIVATE
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(visibilityId = 'default')
-@VisibilityOptions(id = 'default', constructor = PACKAGE_PRIVATE)
+@MapConstructor
 class MappedTexture {
 
 	final Texture parentTexture
 
 	// Modern
+	// TODO: Should we be storing this stuff in a 'mesh'?
 	final int vertexArrayId
 	final int bufferId
 	final int elementBufferId
