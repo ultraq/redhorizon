@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
 
 import java.nio.ByteBuffer
+import java.nio.FloatBuffer
 
 /**
  * A graphics renderer using legacy OpenGL APIs, so OpenGL 2.1 and older, and
@@ -98,16 +100,13 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void createCamera(Rectanglef projection) {
+	void createCamera(Matrix4f projection) {
 
-		logger.debug('Establishing a camera projection of size {}x{}', projection.lengthX(), projection.lengthY())
 		glMatrixMode(GL_PROJECTION)
-		glLoadIdentity()
-		glOrtho(
-			projection.minX, projection.maxX,
-			projection.minY, projection.maxY,
-			-1, 1
-		)
+		def projectionBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
+		projection.get(projectionBuffer)
+		glLoadMatrixf(projectionBuffer)
+
 		glMatrixMode(GL_MODELVIEW)
 		glLoadIdentity()
 	}

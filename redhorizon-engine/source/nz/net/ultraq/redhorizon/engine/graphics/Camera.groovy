@@ -20,8 +20,9 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector3f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * A representation of the player's view into the world.
@@ -29,6 +30,8 @@ import org.joml.Vector3f
  * @author Emanuel Rabina
  */
 class Camera implements GraphicsElement, SelfVisitable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
 	final Dimension size
 	final Matrix4f projection
@@ -52,6 +55,7 @@ class Camera implements GraphicsElement, SelfVisitable {
 				new Vector3f(),
 				new Vector3f(0, 1, 0)
 			)
+		logger.debug('Establishing an orthographic projection of width/height {}x{}', size.width, size.height)
 	}
 
 	@Override
@@ -61,7 +65,6 @@ class Camera implements GraphicsElement, SelfVisitable {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		renderer.createCamera(new Rectanglef(-size.width / 2, -size.height / 2, size.width / 2, size.height / 2))
 		renderer.createCamera(projection)
 	}
 

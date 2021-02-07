@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import static org.lwjgl.opengl.GL21.*
@@ -78,25 +76,5 @@ abstract class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 	void clear() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-	}
-
-	/**
-	 * A do-nothing implementation of this method so that the underlying renderer
-	 * can implement the appropriate one for it.
-	 * 
-	 * @param projection
-	 */
-	@Override
-	void createCamera(Rectanglef projection) {
-	}
-
-	/**
-	 * A do-nothing implementation of this method so that the underlying renderer
-	 * can implement the appropriate one for it.
-	 * 
-	 * @param projection
-	 */
-	@Override
-	void createCamera(Matrix4f projection) {
 	}
 }
