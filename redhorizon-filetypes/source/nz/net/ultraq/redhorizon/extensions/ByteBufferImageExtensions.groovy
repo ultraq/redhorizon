@@ -131,17 +131,17 @@ class ByteBufferImageExtensions {
 	 * @param scaleShift
 	 * @return
 	 */
-	static ByteBuffer scale(ByteBuffer self, int width, int height, int format, int scaleShift) {
+	static ByteBuffer scale(ByteBuffer self, int width, int height, ColourFormat format, int scaleShift) {
 
 		def scaledWidth = width << scaleShift
 		def scaledHeight = height << scaleShift
-		def scaledBuffer = ByteBuffer.allocateNative(scaledWidth * scaledHeight * format)
+		def scaledBuffer = ByteBuffer.allocateNative(scaledWidth * scaledHeight * format.value)
 
 		for (def y = 0; y < scaledHeight; y++) {
 			for (def x = 0; x < scaledWidth; x++) {
-				def selfPointer = ((y >> scaleShift) * width + (x >> scaleShift)) * format
-				def scalePointer = (y * scaledWidth + x) * format
-				scaledBuffer.position(scalePointer).put(self.array(), selfPointer, format)
+				def selfPointer = ((y >> scaleShift) * width + (x >> scaleShift)) * format.value
+				def scalePointer = (y * scaledWidth + x) * format.value
+				scaledBuffer.position(scalePointer).put(self.array(), selfPointer, format.value)
 			}
 		}
 		return scaledBuffer.rewind()

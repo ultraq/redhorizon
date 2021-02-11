@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
@@ -36,7 +36,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 
 	private final Dimension overlay
 	private final Rectanglef dimensions
-	private Texture texture
+	private Material material
 
 	/**
 	 * Constructor, set the dimensions over which the scanlines are to show.
@@ -51,6 +51,8 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 
 		this.overlay = new Dimension(overlay.width, overlay.height * 2 + 1)
 
+		// TODO: Use a transformation matrix instead of passing along dimensions
+		//       like this.
 		this.dimensions = new Rectanglef(dimensions)
 		this.dimensions.maxY += scale
 		this.dimensions.translate(0, -scale / 2 as float)
@@ -59,14 +61,14 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTexture(texture)
+		renderer.deleteMaterial(material)
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
 		// Build a texture to look like scanlines
-		def scanlineTexture = ByteBuffer.allocateDirectNative(overlay.width * overlay.height * 4)
+		def scanlineTexture = ByteBuffer.allocateNative(overlay.width * overlay.height * 4)
 		for (def y = 0; y < overlay.height; y += 2) {
 			scanlineTexture.position(y * overlay.width * 4)
 			for (def x = 0; x < overlay.width; x++) {
@@ -74,12 +76,16 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 			}
 		}
 		scanlineTexture.rewind()
-		texture = renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
+
+		material = renderer.createMaterial(
+			renderer.createSpriteMesh(dimensions),
+			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
+		)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(texture, dimensions)
+		renderer.drawMaterial(material)
 	}
 }

@@ -27,7 +27,7 @@ import groovy.transform.MapConstructor
 @MapConstructor
 class Material {
 
-	final Mesh mesh
-	final Texture texture
+	Mesh mesh
+	Texture texture
 	final Shader shader
 }

@@ -19,8 +19,11 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
@@ -49,7 +52,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	// Animation file attributes
 	final int width
 	final int height
-	final int format
+	final ColourFormat format
 	final int numFrames
 	final float frameRate
 	final Rectanglef dimensions
@@ -64,6 +67,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 	// Rendering information
 	private int lastFrame
+	private Material material
+	private Mesh frameMesh
 	private List<Texture> textures
 
 	/**
@@ -79,7 +84,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean scale, GameTime gameTime,
 		ExecutorService executorService) {
 
-		this(animationFile.width, animationFile.height, animationFile.format.value, animationFile.numFrames, animationFile.frameRate,
+		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
 			dimensions, scale, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
@@ -102,7 +107,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param gameTime
 	 */
 	@PackageScope
-	Animation(int width, int height, int format, int numFrames, float frameRate, Rectanglef dimensions,
+	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate, Rectanglef dimensions,
 		boolean scale, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
@@ -114,17 +119,16 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		this.format     = format
 		this.numFrames  = numFrames
 		this.frameRate  = frameRate
+		// TODO: Apply a transformation matrix so that we're not passing around
+		//       specific dimensions for objects like this
 		this.dimensions = dimensions
 
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
 		this.animationDataWorker = animationDataWorker
 		this.animationDataWorker.on(StreamingFrameEvent) { event ->
-			def frame = event.frame
-			if (scale) {
-				frame = event.frame.scale(width, height, format, 1)
-			}
-			frames << ByteBuffer.fromBuffersDirect(frame)
+			def frame = event.frame.flipVertical(width, height, format)
+			frames << (scale ? frame.scale(width, height, format, 1) : frame)
 			if (bufferReady.count && !frames.remainingCapacity()) {
 				bufferReady.countDown()
 			}
@@ -138,6 +142,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		animationDataWorker.stop()
 		frames.drain()
+		renderer.deleteMesh(frameMesh)
 		textures.each { texture ->
 			renderer.deleteTexture(texture)
 		}
@@ -147,6 +152,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void init(GraphicsRenderer renderer) {
 
 		lastFrame = -1
+		frameMesh = renderer.createSpriteMesh(dimensions)
+		material = renderer.createMaterial(frameMesh, null)
 		textures = []
 		framesQueued = 0
 	}
@@ -173,7 +180,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
 						frames.drain(Math.max(numFramesToRead, 5)).each { frame ->
-							textures << renderer.createTexture(frame, format, width, height)
+							textures << renderer.createTexture(frame, format.value, width, height)
 							framesQueued++
 						}
 					}
@@ -184,7 +191,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 			if (currentFrame < numFrames) {
 				def texture = textures[currentFrame]
 				if (texture) {
-					renderer.drawTexture(texture, dimensions)
+					material.texture = texture
+					renderer.drawMaterial(material)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)

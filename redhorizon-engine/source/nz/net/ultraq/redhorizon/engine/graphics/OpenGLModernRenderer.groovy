@@ -317,7 +317,11 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		def shader = material.shader
 		def mesh = material.mesh
+		def texture = material.texture
 
+		if (texture) {
+			checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
+		}
 		checkForError { -> glUseProgram(shader.programId) }
 		checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
 		if (mesh.vertexType) {

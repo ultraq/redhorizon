@@ -20,23 +20,20 @@ package nz.net.ultraq.redhorizon.filetypes
  * Certain files are better read by streaming their data out rather than
  * obtaining it all in one go, usually for the purpose of saving memory that
  * will be freed-up anyway.  This interface provides the ability for files to
- * expose that streaming data through {@link Worker} classes that can be
- * controlled by the consuming thread.
+ * expose that streaming data through {@link Worker} classes that can be started
+ * and listened to from the by the consuming thread.
  * 
  * @author Emanuel Rabina
  */
 interface Streaming {
 
-	// TODO: This seems very much like events.  Maybe I should extract the event
-	//       system in the engine package so it can be used here?
-
 	/**
-	 * Returns a worker that can be used for streaming file data.  Closures can
-	 * then be attached to the worker for handling the data as it comes.  The
-	 * parameters to that closure will always be {@code String} describing the
-	 * kind of data, and the {@code ByteBuffer} of said data.
+	 * Returns a worker that can be used for streaming file data.  Workers can be
+	 * listened to for events that contain data in useful portions that are usable
+	 * by some kind of consumer.
 	 * 
-	 * @return A worker that can be executed as its own thread for generating the
+	 * @return
+	 *   A worker that can be executed as its own thread for generating the
 	 *   streaming data.
 	 */
 	Worker getStreamingDataWorker()
