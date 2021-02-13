@@ -56,9 +56,10 @@ class ImageViewer implements WithGraphicsEngine {
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					graphicsEngine.addSceneElement(new Image(imageFile, calculateCenteredDimensions(
-						imageFile.width, imageFile.height, event.cameraSize)
-					))
+					def image = new Image(imageFile)
+					image.scale = calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize)
+					image.position.sub(imageFile.width / 2, imageFile.height / 2, 0)
+					graphicsEngine.addSceneElement(image)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')

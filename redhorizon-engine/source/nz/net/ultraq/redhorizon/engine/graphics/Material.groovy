@@ -16,7 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import org.joml.Matrix4f
+import org.joml.Vector3f
 
 /**
  * A material defines how a shape should be rendered, so contains meshes,
@@ -24,9 +25,46 @@ import groovy.transform.MapConstructor
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
 class Material {
+
+	final Matrix4f modelMatrix = new Matrix4f()
 
 	Mesh mesh
 	Texture texture
+
+	/**
+	 * Adjust the scale of this material.
+	 * 
+	 * @param xyz
+	 * @param origin
+	 */
+	Material scale(float xyz) {
+
+		modelMatrix.scale(xyz)
+		return this
+	}
+
+	/**
+	 * Translates the position of this material.
+	 * 
+	 * @param offset
+	 */
+	Material translate(Vector3f offset) {
+
+		modelMatrix.translate(offset)
+		return this
+	}
+
+	/**
+	 * Translates the position of this material.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	Material translate(float x, float y, float z) {
+
+		modelMatrix.translate(x, y, z)
+		return this
+	}
 }

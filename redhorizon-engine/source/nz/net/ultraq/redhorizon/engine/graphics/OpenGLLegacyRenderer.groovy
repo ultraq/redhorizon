@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL21.*
@@ -35,8 +34,6 @@ import java.nio.FloatBuffer
 class OpenGLLegacyRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLLegacyRenderer)
-
-	private final Vector3f currentPosition = new Vector3f()
 
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
@@ -164,15 +161,18 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		def surface = material.mesh.surface
 		def repeatX = material.mesh.repeatX
 		def repeatY = material.mesh.repeatY
+		def modelMatrix = material.modelMatrix
 
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
-		checkForError { -> glColor3f(1, 1, 1) }
-		glBegin(GL_QUADS)
+		withMatrix(modelMatrix) { ->
+			checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
+			checkForError { -> glColor3f(1, 1, 1) }
+			glBegin(GL_QUADS)
 			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
 			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
 			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
 			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
-		checkForError { -> glEnd() }
+			checkForError { -> glEnd() }
+		}
 	}
 
 	@Override
@@ -217,12 +217,30 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void updateCamera(Vector3f position) {
+	void updateCamera(Matrix4f view) {
 
-		if (currentPosition.x != position.x || currentPosition.y != position.y) {
-			glTranslatef(currentPosition.x - position.x as float, currentPosition.y - position.y as float, 0)
-			currentPosition.set(position)
-		}
+		def viewBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
+		view.get(viewBuffer)
+		checkForError { -> glLoadMatrixf(viewBuffer) }
+	}
+
+	/**
+	 * Execute the given closure with its own matrix independent from the current
+	 * one.
+	 * 
+	 * @param matrix
+	 * @param closure
+	 */
+	private static void withMatrix(Matrix4f matrix, Closure closure) {
+
+		checkForError { -> glPushMatrix() }
+
+		def matrixBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
+		matrix.get(matrixBuffer)
+		checkForError { -> glLoadMatrixf(matrixBuffer) }
+		closure()
+
+		checkForError { -> glPopMatrix() }
 	}
 
 	/**

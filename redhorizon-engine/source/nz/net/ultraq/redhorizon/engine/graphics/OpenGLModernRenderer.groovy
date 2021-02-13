@@ -21,7 +21,6 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
@@ -105,6 +104,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void createCamera(Matrix4f projection) {
 
+		// TODO: Only use program once since it's the only program?
 		checkForError { -> glUseProgram(standardShader.programId) }
 		def projectionUniform = checkForError { ->
 			return glGetUniformLocation(standardShader.programId, 'projection')
@@ -297,9 +297,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		def mesh = material.mesh
 		def texture = material.texture
+		def modelMatrix = material.modelMatrix
 
 		withTexture(texture.textureId) { ->
 			checkForError { -> glUseProgram(standardShader.programId) }
+			def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
+			checkForError { -> glUniformMatrix4fv(modelLocation, false, modelMatrix as float[]) }
 			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
 			if (mesh.vertexType) {
 				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
@@ -359,9 +362,11 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	}
 
 	@Override
-	void updateCamera(Vector3f position) {
+	void updateCamera(Matrix4f projection) {
 
-		// TODO: Use a view matrix to make it look like we're moving the camera
+		checkForError { -> glUseProgram(standardShader.programId) }
+		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
+		checkForError { -> glUniformMatrix4fv(viewLocation, false, projection as float[]) }
 	}
 
 	/**

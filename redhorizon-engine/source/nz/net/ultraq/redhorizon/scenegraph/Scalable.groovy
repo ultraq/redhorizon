@@ -1,5 +1,5 @@
 /* 
- * Copyright 2017, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,11 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * Interface for an element that can be a part of a scene.
+ * Trait for objects that can be scaled in the game world.
  * 
  * @author Emanuel Rabina
  */
-interface SceneElement extends Positionable, Scalable {
+trait Scalable {
 
-	/**
-	 * Accept any scene visitor.
-	 * 
-	 * @param visitor
-	 */
-	void accept(SceneVisitor visitor)
+	float scale = 1
 }

@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 
 import java.nio.ByteBuffer
 
@@ -153,9 +152,9 @@ interface GraphicsRenderer {
 	void drawMesh(Mesh mesh)
 
 	/**
-	 * Update the camera projection.
+	 * Update the camera's projection matrix.
 	 * 
-	 * @param position
+	 * @param projection
 	 */
-	void updateCamera(Vector3f position)
+	void updateCamera(Matrix4f projection)
 }

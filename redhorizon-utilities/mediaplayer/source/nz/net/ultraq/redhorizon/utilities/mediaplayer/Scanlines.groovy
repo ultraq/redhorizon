@@ -35,27 +35,17 @@ import java.nio.ByteBuffer
 class Scanlines implements GraphicsElement, SelfVisitable {
 
 	private final Dimension overlay
-	private final Rectanglef dimensions
 	private Material material
 
 	/**
-	 * Constructor, set the dimensions over which the scanlines are to show.
+	 * Constructor, set the size of the object over which the scanlines are to
+	 * show.
 	 * 
 	 * @param overlay
-	 * @param dimensions
 	 */
-	Scanlines(Dimension overlay, Rectanglef dimensions) {
-
-		// Modify overlay and coordinates so that scanlines appear between lines
-		def scale = (dimensions.maxY - dimensions.minY) / overlay.height
+	Scanlines(Dimension overlay) {
 
 		this.overlay = new Dimension(overlay.width, overlay.height * 2 + 1)
-
-		// TODO: Use a transformation matrix instead of passing along dimensions
-		//       like this.
-		this.dimensions = new Rectanglef(dimensions)
-		this.dimensions.maxY += scale
-		this.dimensions.translate(0, -scale / 2 as float)
 	}
 
 	@Override
@@ -78,9 +68,12 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 		scanlineTexture.rewind()
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(dimensions),
+			renderer.createSpriteMesh(new Rectanglef(0, 0, overlay.width, overlay.height)),
 			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
 		)
+			.scale(scale)
+			.translate(position)
+			.translate(0, -scale / 2 as float, 0)
 	}
 
 	@Override

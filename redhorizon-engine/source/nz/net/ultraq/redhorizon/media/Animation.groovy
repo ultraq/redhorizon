@@ -55,7 +55,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	final ColourFormat format
 	final int numFrames
 	final float frameRate
-	final Rectanglef dimensions
 
 	private final Worker animationDataWorker
 	private final BlockingQueue<ByteBuffer> frames
@@ -74,18 +73,18 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	/**
 	 * Constructor, create an animation out of animation file data.
 	 * 
-	 * @param animationFile   Animation source.
-	 * @param dimensions      Dimensions over which to display the animation over.
-	 * @param scale           Double the output resolution of low-resolution
-	 *                        animations.
+	 * @param animationFile
+	 *   Animation source.
+	 * @param scale
+	 *   Whether or not to double the input resolution of low-resolution
+	 *   animations.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, Rectanglef dimensions, boolean scale, GameTime gameTime,
-		ExecutorService executorService) {
+	Animation(AnimationFile animationFile, boolean scale, GameTime gameTime, ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
-			dimensions, scale, animationFile.frameRate as int,
+			scale, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
@@ -100,28 +99,26 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	 * @param format
 	 * @param numFrames
 	 * @param frameRate
-	 * @param dimensions
 	 * @param scale
+	 *   Whether or not to double the input resolution of low-resolution
+	 *   animations.
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 * @param gameTime
 	 */
 	@PackageScope
-	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate, Rectanglef dimensions,
+	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
 		boolean scale, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		this.width      = width << (scale ? 1 : 0)
-		this.height     = height << (scale ? 1 : 0)
-		this.format     = format
-		this.numFrames  = numFrames
-		this.frameRate  = frameRate
-		// TODO: Apply a transformation matrix so that we're not passing around
-		//       specific dimensions for objects like this
-		this.dimensions = dimensions
+		this.width     = width << (scale ? 1 : 0)
+		this.height    = height << (scale ? 1 : 0)
+		this.format    = format
+		this.numFrames = numFrames
+		this.frameRate = frameRate
 
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
@@ -152,8 +149,10 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void init(GraphicsRenderer renderer) {
 
 		lastFrame = -1
-		frameMesh = renderer.createSpriteMesh(dimensions)
+		frameMesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
 		material = renderer.createMaterial(frameMesh, null)
+			.scale(scale)
+			.translate(position)
 		textures = []
 		framesQueued = 0
 	}

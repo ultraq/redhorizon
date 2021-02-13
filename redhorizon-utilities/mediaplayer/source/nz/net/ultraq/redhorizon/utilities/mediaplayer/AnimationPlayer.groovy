@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.StopEvent
 
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -63,9 +64,19 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation
 					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def animationCoordinates = calculateCenteredDimensions(animationFile.width, animationFile.height, event.cameraSize)
+						def width = animationFile.width
+						def height = animationFile.height
+						if (scaleLowRes) {
+							width <<= 1
+							height <<= 1
+						}
+						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
+						def offset = new Vector3f(width / 2, height / 2, 0)
 
-						animation = new Animation(animationFile, animationCoordinates, scaleLowRes, gameClock, executorService)
+						animation = new Animation(animationFile, scaleLowRes, gameClock, executorService)
+						animation.scale = scale
+						animation.position.sub(offset)
+
 						animation.on(StopEvent) { stopEvent ->
 							logger.debug('Animation stopped')
 							graphicsEngine.stop()
@@ -74,10 +85,10 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 						graphicsEngine.addSceneElement(animation)
 
 						if (scanlines) {
-							graphicsEngine.addSceneElement(new Scanlines(
-								new Dimension(animationFile.width, animationFile.height),
-								animationCoordinates
-							))
+							def scanlines = new Scanlines(new Dimension(width, height))
+							scanlines.scale = scale
+							scanlines.position.sub(offset)
+							graphicsEngine.addSceneElement(scanlines)
 						}
 					}
 

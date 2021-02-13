@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -29,12 +28,13 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class Camera implements GraphicsElement, SelfVisitable {
+class Camera implements GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
 	final Dimension size
 	final Matrix4f projection
+	final Matrix4f view = new Matrix4f()
 
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
@@ -71,6 +71,6 @@ class Camera implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.updateCamera(position)
+		renderer.updateCamera(view)
 	}
 }

@@ -56,6 +56,19 @@ trait WithGraphicsEngine {
 	}
 
 	/**
+	 * Calculate how much to scale an image by to fit the full screen.
+	 * 
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param screen
+	 * @return A factor of how much to scale the image by.
+	 */
+	float calculateScaleForFullScreen(int imageWidth, int imageHeight, Dimension screen) {
+
+		return Math.max(screen.width / imageWidth, screen.height / imageHeight)
+	}
+
+	/**
 	 * Execute the given context within the context of having a graphics engine,
 	 * setting it up, passing it along to the closure, and finally shutting it
 	 * down.
