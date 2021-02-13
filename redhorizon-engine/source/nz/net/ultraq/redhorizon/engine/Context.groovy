@@ -16,12 +16,17 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 /**
  * Common methods for OpenAL/GL execution contexts.
  * 
  * @author Emanuel Rabina
  */
 abstract class Context implements Closeable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Context)
 
 	/**
 	 * Makes the context current on the executing thread.
@@ -44,6 +49,10 @@ abstract class Context implements Closeable {
 		try {
 			makeCurrent()
 			closure()
+		}
+		catch (Exception ex) {
+			logger.error('An error occurred within the scope of the context', ex)
+			throw ex
 		}
 		finally {
 			releaseCurrent()

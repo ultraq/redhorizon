@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
-import org.joml.Rectanglef
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -77,10 +77,9 @@ class ImagesViewer implements WithGraphicsEngine {
 					if (imagesFile.format == FORMAT_INDEXED) {
 						combinedImage = combinedImage.applyPalette(palette)
 					}
-					graphicsEngine.addSceneElement(new Image(combinedWidth, combinedHeight,
-						(palette?.format ?: imagesFile.format).value, combinedImage,
-						new Rectanglef(0, 0, combinedWidth, combinedHeight).center()
-					))
+					def image = new Image(combinedWidth, combinedHeight, (palette?.format ?: imagesFile.format), combinedImage)
+					image.position -= new Vector3f(combinedWidth / 2, combinedHeight / 2, 0)
+					graphicsEngine.addSceneElement(image)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
