@@ -57,7 +57,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
-			animation = new Animation(videoFile.width, videoFile.height, videoFile.format.value, videoFile.numFrames, videoFile.frameRate,
+			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
 				dimensions, scale, videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
