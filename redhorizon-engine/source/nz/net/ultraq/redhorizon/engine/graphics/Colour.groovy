@@ -59,6 +59,9 @@ class Colour {
 		if (clazz == float[]) {
 			return new float[]{ r, g, b, a }
 		}
+		if (clazz == byte[]) {
+			return new byte[]{ r * 255, g * 255, b * 255, a * 255 }
+		}
 		throw new IllegalArgumentException("Cannot convert Colour to ${clazz}")
 	}
 

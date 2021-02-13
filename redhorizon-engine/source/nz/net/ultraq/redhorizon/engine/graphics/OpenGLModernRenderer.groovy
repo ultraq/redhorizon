@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
+
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -24,6 +26,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
 
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
@@ -37,8 +40,8 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLModernRenderer)
 
-	private Shader linesShader
-	private Shader textureShader
+	private Texture mockTexture
+	private Shader standardShader
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -86,38 +89,28 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //			glViewport(0, 0, event.width, event.height)
 //		}
 
+		// Generate the 1x1 white 'mock texture' used by the shader for rendering primitives
+		mockTexture = createTexture(ByteBuffer.wrapNative(Colour.WHITE as byte[]), FORMAT_RGBA.value, 1, 1)
+
 		// Create the shader programs used by this renderer
-		linesShader = createShader('Default')
-//		checkForError { -> glBindFragDataLocation(linesShader.shaderId, 0, 'vertexColour') }
-		textureShader = createShader('Texture')
+		standardShader = createShader('Standard')
 	}
 
 	@Override
 	void close() {
 
-		glDeleteProgram(linesShader.programId)
-		glDeleteProgram(textureShader.programId)
+		glDeleteProgram(standardShader.programId)
 	}
 
 	@Override
 	void createCamera(Matrix4f projection) {
 
-		checkForError { -> glUseProgram(linesShader.programId) }
-		def linesProjectionUniform = checkForError { ->
-			return glGetUniformLocation(linesShader.programId, 'projection')
+		checkForError { -> glUseProgram(standardShader.programId) }
+		def projectionUniform = checkForError { ->
+			return glGetUniformLocation(standardShader.programId, 'projection')
 		}
 		checkForError { ->
-			glUniformMatrix4fv(linesProjectionUniform, false, projection as float[])
-		}
-
-		checkForError { -> glUseProgram(textureShader.programId) }
-		def textureProjectionUniform = checkForError { ->
-			return glGetUniformLocation(textureShader.programId, 'projection')
-		}
-		checkForError { ->
-			def projectionBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
-			projection.get(projectionBuffer)
-			glUniformMatrix4fv(textureProjectionUniform, false, projectionBuffer)
+			glUniformMatrix4fv(projectionUniform, false, projection as float[])
 		}
 	}
 
@@ -130,7 +123,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return createPrimitivesMesh(colour, GL_LINES, vertices);
+		return createPrimitivesMesh(colour, GL_LINES, vertices)
 	}
 
 	@Override
@@ -138,8 +131,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		return new Material(
 			mesh: mesh,
-			texture: texture,
-			shader: textureShader
+			texture: texture
 		)
 	}
 
@@ -156,13 +148,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
-		def bytesPerVertex = floatsPerVertex * Float.BYTES
-
+		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
 		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
 		vertices.each { vertex ->
 			verticesBuffer.put(colour as float[])
 			verticesBuffer.put(vertex as float[])
+			verticesBuffer.put([0, 0] as float[])
 		}
 		verticesBuffer.flip()
 
@@ -170,12 +161,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
 		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
 
-		def colourAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'colour') }
-		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
-		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
-		def positionAttrib = checkForError { -> glGetAttribLocation(linesShader.programId, 'position') }
-		checkForError { -> glEnableVertexAttribArray(positionAttrib) }
-		checkForError { -> glVertexAttribPointer(positionAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
+		setVertexBufferLayout()
 
 		return new Mesh(
 			vertexArrayId: vertexArrayId,
@@ -250,16 +236,15 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def floatsPerVertex = Vector2f.FLOATS + Vector2f.FLOATS
-		def bytesPerVertex = floatsPerVertex * Float.BYTES
-
+		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
 		def verticesBuffer = FloatBuffer
 			.allocateDirectNative(floatsPerVertex * 4)
 			.put([
-				0,       0,       surface.minX, surface.minY,
-				0,       repeatY, surface.minX, surface.maxY,
-				repeatX, repeatY, surface.maxX, surface.maxY,
-				repeatX, 0,       surface.maxX, surface.minY
+				// Colour   // Position                 // Texture
+				1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
+				1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
+				1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
+				1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0,
 			] as float[])
 			.flip()
 
@@ -279,12 +264,7 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
 		checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
 
-		def texCoordAttrib = checkForError { -> glGetAttribLocation(textureShader.programId, 'texCoord') }
-		checkForError { -> glEnableVertexAttribArray(texCoordAttrib) }
-		checkForError { -> glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, bytesPerVertex, 0) }
-		def positionAttribute = checkForError { -> glGetAttribLocation(textureShader.programId, 'position') }
-		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
-		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Vector2f.BYTES) }
+		setVertexBufferLayout()
 
 		return new Mesh(
 			vertexArrayId: vertexArrayId,
@@ -315,29 +295,51 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void drawMaterial(Material material) {
 
-		def shader = material.shader
 		def mesh = material.mesh
 		def texture = material.texture
 
-		if (texture) {
-			checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
-		}
-		checkForError { -> glUseProgram(shader.programId) }
-		checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-		if (mesh.vertexType) {
-			checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
-		}
-		else if (mesh.elementType) {
-			checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+		withTexture(texture.textureId) { ->
+			checkForError { -> glUseProgram(standardShader.programId) }
+			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+			if (mesh.vertexType) {
+				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+			}
+			else if (mesh.elementType) {
+				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+			}
 		}
 	}
 
 	@Override
 	void drawMesh(Mesh mesh) {
 
-		checkForError { -> glUseProgram(linesShader.programId) }
-		checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-		checkForError { -> glDrawArrays(mesh.primitiveType, 0, mesh.vertices.length) }
+		withTexture(mockTexture.textureId) { ->
+			checkForError { -> glUseProgram(standardShader.programId) }
+			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+			checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+		}
+	}
+
+	/**
+	 * Sets the layout of the currently-bound vertex buffer data for use with the
+	 * standard shader.
+	 */
+	private void setVertexBufferLayout() {
+
+		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
+		def bytesPerVertex = floatsPerVertex * Float.BYTES
+
+		def colourAttrib = checkForError { -> glGetAttribLocation(standardShader.programId, 'colour') }
+		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
+		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
+
+		def positionAttribute = checkForError { -> glGetAttribLocation(standardShader.programId, 'position') }
+		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
+		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
+
+		def texCoordAttrib = checkForError { -> glGetAttribLocation(standardShader.programId, 'texCoord') }
+		checkForError { -> glEnableVertexAttribArray(texCoordAttrib) }
+		checkForError { -> glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES + Vector2f.BYTES) }
 	}
 
 	/**
@@ -360,5 +362,18 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	void updateCamera(Vector3f position) {
 
 		// TODO: Use a view matrix to make it look like we're moving the camera
+	}
+
+	/**
+	 * Execute a closure within the context of a bound texture.
+	 * 
+	 * @param textureId
+	 * @param closure
+	 */
+	private static void withTexture(int textureId, Closure closure) {
+
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
+		closure()
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
 	}
 }

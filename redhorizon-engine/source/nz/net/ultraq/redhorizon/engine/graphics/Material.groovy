@@ -29,5 +29,4 @@ class Material {
 
 	Mesh mesh
 	Texture texture
-	final Shader shader
 }
