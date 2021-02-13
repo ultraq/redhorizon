@@ -26,4 +26,15 @@ import org.joml.Vector3f
 trait Positionable {
 
 	final Vector3f position = new Vector3f()
+
+	/**
+	 * Update the position of this object.  Makes sure that position reassignments
+	 * don't result in object allocation.
+	 * 
+	 * @param newPosition
+	 */
+	void setPosition(Vector3f newPosition) {
+
+		position.set(newPosition)
+	}
 }

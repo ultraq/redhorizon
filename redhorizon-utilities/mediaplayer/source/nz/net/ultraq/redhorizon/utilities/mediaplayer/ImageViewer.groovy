@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
 
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -58,7 +59,7 @@ class ImageViewer implements WithGraphicsEngine {
 				graphicsEngine.on(WindowCreatedEvent) { event ->
 					def image = new Image(imageFile)
 					image.scale = calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize)
-					image.position.sub(imageFile.width / 2, imageFile.height / 2, 0)
+					image.position -= new Vector3f(imageFile.width / 2, imageFile.height / 2, 0)
 					graphicsEngine.addSceneElement(image)
 				}
 

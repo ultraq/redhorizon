@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.Video
 
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -67,9 +68,19 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 						// Add the video to the engines once we have the window dimensions
 						Video video
 						graphicsEngine.on(WindowCreatedEvent) { event ->
-							def videoCoordinates = calculateCenteredDimensions(videoFile.width, videoFile.height, event.cameraSize)
+							def width = videoFile.width
+							def height = videoFile.height
+							if (scaleLowRes) {
+								width <<= 1
+								height <<= 1
+							}
+							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
+							def offset = new Vector3f(width / 2, height / 2, 0)
 
-							video = new Video(videoFile, videoCoordinates, scaleLowRes, gameClock, executorService)
+							video = new Video(videoFile, scaleLowRes, gameClock, executorService)
+							video.scale = scale
+							video.position -= offset
+
 							video.on(StopEvent) { stopEvent ->
 								logger.debug('Video stopped')
 								audioEngine.stop()
@@ -79,10 +90,10 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 							graphicsEngine.addSceneElement(video)
 
 							if (scanlines) {
-								graphicsEngine.addSceneElement(new Scanlines(
-									new Dimension(videoFile.width, videoFile.height),
-									videoCoordinates
-								))
+								def scanlines = new Scanlines(new Dimension(width, height))
+								scanlines.scale = scale
+								scanlines.position -= offset
+								graphicsEngine.addSceneElement(scanlines)
 							}
 						}
 

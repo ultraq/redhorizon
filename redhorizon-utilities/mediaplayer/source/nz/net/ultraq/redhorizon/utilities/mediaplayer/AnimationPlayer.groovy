@@ -75,7 +75,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 
 						animation = new Animation(animationFile, scaleLowRes, gameClock, executorService)
 						animation.scale = scale
-						animation.position.sub(offset)
+						animation.position -= offset
 
 						animation.on(StopEvent) { stopEvent ->
 							logger.debug('Animation stopped')
@@ -87,7 +87,7 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 						if (scanlines) {
 							def scanlines = new Scanlines(new Dimension(width, height))
 							scanlines.scale = scale
-							scanlines.position.sub(offset)
+							scanlines.position -= offset
 							graphicsEngine.addSceneElement(scanlines)
 						}
 					}

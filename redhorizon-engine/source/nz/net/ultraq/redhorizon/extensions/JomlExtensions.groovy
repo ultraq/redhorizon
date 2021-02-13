@@ -107,4 +107,28 @@ class JomlExtensions {
 		}
 		return self.translate(-self.maxX / 2 as int, -self.maxY / 2 as int)
 	}
+
+	/**
+	 * Overload the {@code -} operator to perform vector subtraction.
+	 * 
+	 * @param self
+	 * @param v
+	 * @return
+	 */
+	static Vector3f minus(Vector3f self, Vector3f v) {
+
+		return self.sub(v)
+	}
+
+	/**
+	 * Overload the {@code +} operator to perform vector addition.
+	 * 
+	 * @param self
+	 * @param v
+	 * @return
+	 */
+	static Vector3f plus(Vector3f self, Vector3f v) {
+
+		return self.add(v)
+	}
 }

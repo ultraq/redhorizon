@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
-import org.joml.Rectanglef
-
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.CountDownLatch
@@ -37,25 +35,6 @@ import java.util.concurrent.FutureTask
 trait WithGraphicsEngine {
 
 	/**
-	 * Calculate the ideal centered dimensions for the image that stretches to fit
-	 * the given dimensions while maintaining the target aspect ratio.
-	 * 
-	 * @param imageWidth
-	 * @param imageHeight
-	 * @param max
-	 * @return
-	 */
-	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, Dimension max) {
-
-		def widthScale = max.width / imageWidth
-		def heightScale = max.height / imageHeight
-		return (widthScale < heightScale ?
-			new Rectanglef(0, 0, max.width, imageHeight * widthScale) :
-			new Rectanglef(0, 0, imageWidth * heightScale, max.height)
-		).center()
-	}
-
-	/**
 	 * Calculate how much to scale an image by to fit the full screen.
 	 * 
 	 * @param imageWidth
@@ -65,7 +44,7 @@ trait WithGraphicsEngine {
 	 */
 	float calculateScaleForFullScreen(int imageWidth, int imageHeight, Dimension screen) {
 
-		return Math.max(screen.width / imageWidth, screen.height / imageHeight)
+		return Math.min(screen.width / imageWidth, screen.height / imageHeight)
 	}
 
 	/**

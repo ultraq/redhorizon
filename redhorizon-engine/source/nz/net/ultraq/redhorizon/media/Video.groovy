@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
-import org.joml.Rectanglef
+import org.joml.Vector3f
 
 import java.util.concurrent.ExecutorService
 
@@ -44,21 +44,20 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	/**
 	 * Constructor, creates a video out of video file data.
 	 * 
-	 * @param videoFile       Video source.
-	 * @param dimensions      Dimensions over which to display the video over.
-	 * @param scale           Double the output resolution of low-resolution
-	 *                        videos.
+	 * @param videoFile
+	 *   Video source.
+	 * @param scale
+	 *   Whether or not to double the input resolution of low-resolution videos.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, Rectanglef dimensions, boolean scale, GameTime gameTime,
-		ExecutorService executorService) {
+	Video(VideoFile videoFile, boolean scale, GameTime gameTime, ExecutorService executorService) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
-				dimensions, scale, videoFile.frameRate * 2 as int, videoWorker, gameTime)
+				scale, videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}
@@ -77,6 +76,18 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	}
 
 	@Override
+	Vector3f getPosition() {
+
+		return animation.position
+	}
+
+	@Override
+	float getScale() {
+
+		return animation.scale
+	}
+
+	@Override
 	boolean isPlaying() {
 
 		return animation.playing && soundTrack.playing
@@ -88,6 +99,19 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 		animation.play()
 		soundTrack.play()
 		Playable.super.play()
+	}
+
+	@Override
+	void setPosition(Vector3f position) {
+
+		// TODO: Adjust position of the soundtrack and listener?
+		animation.position = position
+	}
+
+	@Override
+	void setScale(float scale) {
+
+		animation.scale = scale
 	}
 
 	@Override
