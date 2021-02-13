@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-@FileExtensions(['int', 'snow', 'tem'])
+@FileExtensions(['int', 'sno', 'tem'])
 class TmpFileRA implements ImagesFile {
 
 	// File header
