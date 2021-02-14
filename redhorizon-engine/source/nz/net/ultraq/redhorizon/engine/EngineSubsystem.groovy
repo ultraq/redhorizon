@@ -49,9 +49,9 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 	 * Perform the render loop within a certain render budget, sleeping the thread
 	 * if necessary to not exceed it.
 	 * 
-	 * @param renderLoop
+	 * @param closure
 	 */
-	protected void renderLoop(Closure renderLoop) {
+	protected void renderLoop(Closure closure) {
 
 		running = true
 		trigger(new RenderLoopStartEvent())
@@ -59,7 +59,7 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 		try {
 			while (shouldRender()) {
 				def loopStart = System.currentTimeMillis()
-				renderLoop()
+				closure()
 				def loopEnd = System.currentTimeMillis()
 
 				def renderExecutionTime = loopEnd - loopStart

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
@@ -118,6 +119,9 @@ class GraphicsEngine extends EngineSubsystem {
 		}
 		openGlContext.withCloseable { context ->
 			context.on(InputEvent) { event ->
+				trigger(event)
+			}
+			context.on(ContextErrorEvent) { event ->
 				trigger(event)
 			}
 			context.withCurrent { ->

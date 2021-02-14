@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -24,7 +26,7 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-abstract class Context implements Closeable {
+abstract class Context implements Closeable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Context)
 
@@ -52,7 +54,7 @@ abstract class Context implements Closeable {
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred within the scope of the context', ex)
-			throw ex
+			trigger(new ContextErrorEvent(ex))
 		}
 		finally {
 			releaseCurrent()

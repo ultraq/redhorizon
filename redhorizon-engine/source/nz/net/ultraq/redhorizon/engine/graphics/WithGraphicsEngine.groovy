@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
@@ -70,6 +71,11 @@ trait WithGraphicsEngine {
 			executable = toExecute
 			executionBarrier.await()
 		})
+		graphicsEngine.on(ContextErrorEvent) { event ->
+			finishBarrier.countDown()
+			exception = event.exception
+			executionBarrier.await()
+		}
 		graphicsEngine.on(RenderLoopStopEvent) { event ->
 			finishBarrier.countDown()
 			if (event.exception) {
