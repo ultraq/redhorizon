@@ -20,8 +20,6 @@ import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import org.joml.Rectanglef
-
 /**
  * An implementation of the rendered unit for infantry types.
  * 
@@ -35,12 +33,11 @@ class Infantry extends Unit {
 	 * @param data
 	 * @param imagesFile
 	 * @param palette
-	 * @param dimensions
 	 * @param gameTime
 	 */
-	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, Rectanglef dimensions, GameTime gameTime) {
+	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
 
-		super(dimensions, imagesFile.width, imagesFile.height)
+		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body

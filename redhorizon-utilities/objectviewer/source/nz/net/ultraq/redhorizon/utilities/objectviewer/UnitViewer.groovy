@@ -32,7 +32,7 @@ import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.UnitData
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Vehicle
 
-import org.joml.Rectanglef
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
@@ -112,10 +112,11 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 				withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the unit to the engine
-					def unitDimensions = new Rectanglef(0, 0, shpFile.width * 2, shpFile.height * 2).center()
 					def unit = targetClass
-						.getDeclaredConstructor(UnitData, ImagesFile, Palette, Rectanglef, GameTime)
-						.newInstance(unitData, shpFile, palette, unitDimensions, gameClock)
+						.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
+						.newInstance(unitData, shpFile, palette, gameClock)
+					unit.scale = 2
+					unit.position -= new Vector3f(shpFile.width / 2, shpFile.height / 2, 0)
 					graphicsEngine.addSceneElement(unit)
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')

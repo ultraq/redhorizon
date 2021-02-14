@@ -67,7 +67,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	// Rendering information
 	private int lastFrame
 	private Material material
-	private Mesh frameMesh
+	private Mesh mesh
 	private List<Texture> textures
 
 	/**
@@ -139,7 +139,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		animationDataWorker.stop()
 		frames.drain()
-		renderer.deleteMesh(frameMesh)
+		renderer.deleteMesh(mesh)
 		textures.each { texture ->
 			renderer.deleteTexture(texture)
 		}
@@ -149,8 +149,8 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 	void init(GraphicsRenderer renderer) {
 
 		lastFrame = -1
-		frameMesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
-		material = renderer.createMaterial(frameMesh, null)
+		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
+		material = renderer.createMaterial(mesh, null)
 			.scale(scale)
 			.translate(position)
 		textures = []

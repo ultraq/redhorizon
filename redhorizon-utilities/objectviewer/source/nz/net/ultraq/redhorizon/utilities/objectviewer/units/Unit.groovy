@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
-import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -40,22 +39,19 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 
 	protected final List<UnitRenderer> unitRenderers = []
 	protected UnitRenderer currentRenderer
-	protected Rectanglef dimensions
 
 	protected float heading
 	protected final int width
 	protected final int height
 
 	/**
-	 * Constructor, set this unit to draw over the given dimensions.
+	 * Constructor, set the unit's width and height.
 	 * 
-	 * @param dimensions
 	 * @param width
 	 * @param height
 	 */
-	protected Unit(Rectanglef dimensions, int width, int height) {
+	protected Unit(int width, int height) {
 
-		this.dimensions = dimensions
 		this.width = width
 		this.height = height
 	}
@@ -73,7 +69,8 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	protected static ByteBuffer[] buildImagesData(ImagesFile imagesFile, Palette palette, IntRange range) {
 
 		return imagesFile.imagesData[range].collect { data ->
-			return ByteBuffer.fromBuffersDirect(imagesFile.format == FORMAT_INDEXED ? data.applyPalette(palette) : data)
+			def imageData = data.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
+			return imagesFile.format == FORMAT_INDEXED ? imageData.applyPalette(palette) : imageData
 		}
 	}
 

@@ -18,6 +18,10 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+
+import org.joml.Rectanglef
 
 import java.nio.ByteBuffer
 
@@ -33,6 +37,8 @@ class UnitRendererAnimations extends UnitRenderer {
 	protected int framesPerHeading
 	protected GameTime gameTime
 
+	private Material material
+	private Mesh mesh
 	private long animationTimeStart
 
 	/**
@@ -55,10 +61,28 @@ class UnitRendererAnimations extends UnitRenderer {
 	}
 
 	@Override
+	void delete(GraphicsRenderer renderer) {
+
+		super.delete(renderer)
+		renderer.deleteMesh(mesh)
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		super.init(renderer)
+		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
+		material = renderer.createMaterial(mesh, null)
+			.scale(unit.scale)
+			.translate(unit.position)
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 
 		def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
-		renderer.drawTexture(textures[rotationFrames() * framesPerHeading + currentFrame], unit.dimensions)
+		material.texture = textures[rotationFrames() * framesPerHeading + currentFrame]
+		renderer.drawMaterial(material)
 	}
 
 	/**

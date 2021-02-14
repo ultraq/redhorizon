@@ -18,8 +18,12 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
+
+import org.joml.Rectanglef
 
 import java.nio.ByteBuffer
 
@@ -36,6 +40,8 @@ class UnitRenderer implements GraphicsElement {
 	protected final ByteBuffer[] imagesData
 	protected final float degreesPerHeading
 
+	protected Material material
+	protected Mesh mesh
 	protected Texture[] textures
 
 	/**
@@ -60,6 +66,7 @@ class UnitRenderer implements GraphicsElement {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
+		renderer.deleteMesh(mesh)
 		textures.each { texture ->
 			renderer.deleteTexture(texture)
 		}
@@ -69,6 +76,10 @@ class UnitRenderer implements GraphicsElement {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
+		material = renderer.createMaterial(mesh, null)
+			.scale(unit.scale)
+			.translate(unit.position)
 		textures = imagesData.collect { data ->
 			return renderer.createTexture(data, FORMAT_RGBA.value, unit.width, unit.height)
 		}
@@ -77,7 +88,8 @@ class UnitRenderer implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawTexture(textures[rotationFrames()], unit.dimensions)
+		material.texture = textures[rotationFrames()]
+		renderer.drawMaterial(material)
 	}
 
 	/**

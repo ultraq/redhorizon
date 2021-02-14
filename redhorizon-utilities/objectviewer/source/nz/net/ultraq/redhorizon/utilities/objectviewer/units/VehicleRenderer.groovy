@@ -17,6 +17,10 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+
+import org.joml.Rectanglef
 
 import java.nio.ByteBuffer
 
@@ -28,6 +32,9 @@ import java.nio.ByteBuffer
 class VehicleRenderer extends UnitRenderer {
 
 	protected final int turretHeadings
+
+	protected Material material
+	protected Mesh mesh
 
 	/**
 	 * Constructor, create a vehicle renderer with the following frames.
@@ -45,11 +52,33 @@ class VehicleRenderer extends UnitRenderer {
 	}
 
 	@Override
+	void delete(GraphicsRenderer renderer) {
+
+		super.delete(renderer)
+		if (turretHeadings) {
+			renderer.deleteMesh(mesh)
+		}
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		super.init(renderer)
+		if (turretHeadings) {
+			mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
+			material = renderer.createMaterial(mesh, null)
+				.scale(unit.scale)
+				.translate(unit.position)
+		}
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 
 		super.render(renderer)
 		if (turretHeadings) {
-			renderer.drawTexture(textures[headings + rotationFrames()], unit.dimensions)
+			material.texture = textures[headings + rotationFrames()]
+			renderer.drawMaterial(material)
 		}
 	}
 }
