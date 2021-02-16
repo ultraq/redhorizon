@@ -23,5 +23,32 @@ package nz.net.ultraq.redhorizon.scenegraph
  */
 trait Scalable {
 
-	float scale = 1
+	float scaleX = 1
+	float scaleY = 1
+
+	/**
+	 * Provided both X and Y axes have the same scale factor, return their shared
+	 * value.
+	 * 
+	 * @return
+	 */
+	float getScale() {
+
+		if (scaleX != scaleY) {
+			throw new Exception('x & y scale factors are different')
+		}
+		return scaleX
+	}
+
+	/**
+	 * Apply the same scale factor to both axes.
+	 * 
+	 * @param xy
+	 * @return
+	 */
+	void setScale(float xy) {
+
+		scaleX = xy
+		scaleY = xy
+	}
 }

@@ -108,10 +108,10 @@ class Image implements GraphicsElement, SelfVisitable {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height), repeatX, repeatY),
+			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
 			renderer.createTexture(imageData, format.value, width, height)
 		)
-			.scale(scale)
+			.scale(scaleX, scaleY)
 			.translate(position)
 		imageData = null
 	}

@@ -73,7 +73,7 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 		)
 			.scale(scale)
 			.translate(position)
-			.translate(0, -scale / 2 as float, 0)
+			.translate(0, -scale / 2 as float)
 	}
 
 	@Override

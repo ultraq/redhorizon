@@ -27,7 +27,7 @@ import org.joml.Vector3f
  */
 class Material {
 
-	final Matrix4f modelMatrix = new Matrix4f()
+	final Matrix4f model = new Matrix4f()
 
 	Mesh mesh
 	Texture texture
@@ -40,7 +40,21 @@ class Material {
 	 */
 	Material scale(float xyz) {
 
-		modelMatrix.scale(xyz)
+		model.scale(xyz)
+		return this
+	}
+
+	/**
+	 * Adjust the scale of this material.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	Material scale(float x, float y, float z = 1) {
+
+		model.scale(x, y, z)
 		return this
 	}
 
@@ -51,7 +65,7 @@ class Material {
 	 */
 	Material translate(Vector3f offset) {
 
-		modelMatrix.translate(offset)
+		model.translate(offset)
 		return this
 	}
 
@@ -62,9 +76,9 @@ class Material {
 	 * @param y
 	 * @param z
 	 */
-	Material translate(float x, float y, float z) {
+	Material translate(float x, float y, float z = 1) {
 
-		modelMatrix.translate(x, y, z)
+		model.translate(x, y, z)
 		return this
 	}
 }
