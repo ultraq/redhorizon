@@ -95,7 +95,8 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Overload the {@code -} operator to perform vector subtraction.
+	 * Overload the {@code -} operator to perform vector subtraction.  Note that
+	 * this creates a new object to store the result and is returned.
 	 * 
 	 * @param self
 	 * @param v
@@ -103,11 +104,12 @@ class JomlExtensions {
 	 */
 	static Vector3f minus(Vector3f self, Vector3f v) {
 
-		return self.sub(v)
+		return self.sub(v, new Vector3f())
 	}
 
 	/**
-	 * Overload the {@code +} operator to perform vector addition.
+	 * Overload the {@code +} operator to perform vector addition.  Note that
+	 * this creates a new object to store the result and is returned.
 	 * 
 	 * @param self
 	 * @param v
@@ -115,6 +117,6 @@ class JomlExtensions {
 	 */
 	static Vector3f plus(Vector3f self, Vector3f v) {
 
-		return self.add(v)
+		return self.add(v, new Vector3f())
 	}
 }
