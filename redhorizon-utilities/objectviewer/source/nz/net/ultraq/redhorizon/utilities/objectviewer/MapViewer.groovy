@@ -25,9 +25,11 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapLines
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
 import org.joml.Vector2f
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
@@ -71,11 +73,15 @@ class MapViewer implements WithGraphicsEngine {
 
 				// Add the map
 				MapRA map
+				Vector3f mapInitialPosition
 				graphicsEngine.on(WindowCreatedEvent) { event ->
 					map = new MapRA(resourceManager, mapFile)
+					mapInitialPosition = new Vector3f(map.initialPosition, 0)
 					logger.info('Map details: {}', map)
 					graphicsEngine.addSceneElement(map)
-					graphicsEngine.camera.position.set(map.initialPosition, 0)
+					graphicsEngine.camera.center(mapInitialPosition)
+
+					graphicsEngine.addSceneElement(new MapLines(map))
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
@@ -84,20 +90,21 @@ class MapViewer implements WithGraphicsEngine {
 				graphicsEngine.on(KeyEvent) { event ->
 					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 						switch (event.key) {
+							// Add options so it's not hard-coded to my weird inverted setup 😅
+							case GLFW_KEY_UP:
+								graphicsEngine.camera.translate(0, -TICK)
+								break
 							case GLFW_KEY_DOWN:
-								graphicsEngine.camera.position.add(0, -TICK, 0)
+								graphicsEngine.camera.translate(0, TICK)
 								break
 							case GLFW_KEY_LEFT:
-								graphicsEngine.camera.position.add(-TICK, 0, 0)
+								graphicsEngine.camera.translate(TICK, 0)
 								break
 							case GLFW_KEY_RIGHT:
-								graphicsEngine.camera.position.add(TICK, 0, 0)
-								break
-							case GLFW_KEY_UP:
-								graphicsEngine.camera.position.add(0, TICK, 0)
+								graphicsEngine.camera.translate(-TICK, 0)
 								break
 							case GLFW_KEY_SPACE:
-								graphicsEngine.camera.position.set(map.initialPosition, 0)
+								graphicsEngine.camera.center(mapInitialPosition)
 								break
 							case GLFW_KEY_ESCAPE:
 								graphicsEngine.stop()
@@ -108,7 +115,7 @@ class MapViewer implements WithGraphicsEngine {
 
 				// Use scroll input or click-and-drag to move around the map
 				graphicsEngine.on(ScrollEvent) { event ->
-					graphicsEngine.camera.position.add(3 * -event.xOffset as float, 3 * event.yOffset as float, 0)
+					graphicsEngine.camera.translate(3 * event.xOffset as float, 3 * -event.yOffset as float)
 				}
 				def cursorPosition = new Vector2f()
 				def dragging = false
@@ -116,7 +123,7 @@ class MapViewer implements WithGraphicsEngine {
 					if (dragging) {
 						def diffX = cursorPosition.x - event.xPos as float
 						def diffY = cursorPosition.y - event.yPos as float
-						graphicsEngine.camera.position.add(diffX, -diffY, 0)
+						graphicsEngine.camera.translate(-diffX, diffY)
 					}
 					cursorPosition.set(event.xPos as float, event.yPos as float)
 				}

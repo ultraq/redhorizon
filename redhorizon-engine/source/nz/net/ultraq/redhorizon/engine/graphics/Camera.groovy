@@ -58,6 +58,18 @@ class Camera implements GraphicsElement {
 		logger.debug('Establishing an orthographic projection of {}', size)
 	}
 
+	/**
+	 * Move the camera so it centers the given point in the view.
+	 * 
+	 * @param point
+	 * @return
+	 */
+	Camera center(Vector3f point) {
+
+		view.translate(view.origin(new Vector3f()).sub(point))
+		return this
+	}
+
 	@Override
 	void delete(GraphicsRenderer renderer) {
 	}
@@ -72,5 +84,19 @@ class Camera implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		renderer.updateCamera(view)
+	}
+
+	/**
+	 * Translates the position of this camera.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	Camera translate(float x, float y, float z = 0) {
+
+		view.translate(x, y, z)
+		return this
 	}
 }
