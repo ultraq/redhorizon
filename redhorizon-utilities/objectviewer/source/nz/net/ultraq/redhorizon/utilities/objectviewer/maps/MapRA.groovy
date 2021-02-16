@@ -21,10 +21,8 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.resources.ResourceManager
@@ -32,6 +30,7 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -51,20 +50,17 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	private static final int TILE_WIDTH = 24
 	private static final int TILE_HEIGHT = 24
 
-	private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
-	private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)
-	private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
-	private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
+	static final Vector2f WORLD_OFFSET = new Vector2f(
+		-TILES_X * TILE_WIDTH / 2,
+		-TILES_Y * TILE_HEIGHT / 2
+	)
 
 	final String name
 	final Theaters theater
 	final Rectanglef boundary
-	final Vector2f[] boundaryPoints
 	final Vector2f initialPosition
 
 	private final List<GraphicsElement> layers = []
-	private Mesh axisLines
-	private Mesh boundaryLines
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -87,35 +83,16 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
 		def mapWH = new Vector2f(mapXY).add(mapSection['Width'] as int, mapSection['Height'] as int)
 		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
-		boundaryPoints = boundary.asPoints()
 
 		def waypoints = mapFile['Waypoints']
 		def waypoint98 = waypoints['98'] as int
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
-			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
-			def backgroundTileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
-
-			// Use the background tile to create a 5x4 repeating image
-			def combinedBackgroundData = backgroundTileFile.imagesData
-				.combineImages(backgroundTileFile.width, backgroundTileFile.height, theater.clearX)
-				.applyPalette(palette)
-			def combinedWidth = backgroundTileFile.width * theater.clearX
-			def combinedHeight = backgroundTileFile.height * theater.clearY
-			def backgroundDimensions = new Rectanglef(
-				new Vector2f(0, 0).asWorldCoords(),
-				new Vector2f(TILES_X, TILES_Y).asWorldCoords()
-			).makeValid()
-			layers << new Image(combinedWidth, combinedHeight, palette.format, combinedBackgroundData,
-				backgroundDimensions,
-				backgroundDimensions.lengthX() / combinedWidth as float,
-				backgroundDimensions.lengthY() / combinedHeight as float
-			)
-
-			// Build the various layers
-			layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
-			layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
-			layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
+		// Build the various layers
+		layers << new BackgroundLayer(resourceManager, palette)
+//		layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
+//		layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
+//		layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
 	}
 
 	@Override
@@ -124,8 +101,6 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.delete(renderer)
 		}
-		renderer.deleteMesh(axisLines)
-		renderer.deleteMesh(boundaryLines)
 	}
 
 	@Override
@@ -134,8 +109,6 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.init(renderer)
 		}
-		axisLines = renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX)
-		boundaryLines = renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), boundaryPoints)
 	}
 
 	/**
@@ -172,8 +145,6 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers.each { layer ->
 			layer.render(renderer)
 		}
-		renderer.drawMesh(axisLines)
-		renderer.drawMesh(boundaryLines)
 	}
 
 	/**
@@ -193,7 +164,57 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	}
 
 	/**
-	 * Common code for rendering a map layer.
+	 * Special layer for the background image.
+	 */
+	private class BackgroundLayer implements GraphicsElement {
+
+		private final Image image
+
+		/**
+		 * Constructor, create the background image layer.
+		 * 
+		 * @param resourceManager
+		 * @param palette
+		 */
+		private BackgroundLayer(ResourceManager resourceManager, Palette palette) {
+
+			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
+			def tileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
+
+			// Use the background tile to create a 5x4 repeating image
+			def imageData = tileFile.imagesData
+				.combineImages(tileFile.width, tileFile.height, theater.clearX)
+				.applyPalette(palette)
+			def width = tileFile.width * theater.clearX
+			def height = tileFile.height * theater.clearY
+			def repeatX = (TILES_X * TILE_WIDTH) / width as float
+			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
+
+			image = new Image(width, height, palette.format, imageData, repeatX, repeatY)
+			image.position.add(new Vector3f(WORLD_OFFSET.x, WORLD_OFFSET.y, 0))
+		}
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			image.delete(renderer)
+		}
+
+		@Override
+		void init(GraphicsRenderer renderer) {
+
+			image.init(renderer)
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			image.render(renderer)
+		}
+	}
+
+	/**
+	 * Common code for rendering a map layer consisting of multiple elements.
 	 */
 	private abstract class MapLayer implements GraphicsElement {
 
@@ -265,9 +286,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 
 						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
-						elements << new Image(tileFile, tilePic,
-							new Rectanglef(tilePos, new Vector2f(tilePos).add(tileFile.width, tileFile.height)),
-							palette)
+						def tileImage = new Image(tileFile, tilePic, palette)
+						tileImage.position = new Vector3f(tilePos, 0)
+						elements << tileImage
 					}
 				}
 			}
@@ -351,9 +372,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				}
 
 				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-				elements << new Image(tileFile, imageVariant,
-					new Rectanglef(tilePosW, new Vector2f(tilePosW).add(tileFile.width, tileFile.height)),
-					palette)
+				def tileImage = new Image(tileFile, imageVariant, palette)
+				tileImage.position = new Vector3f(tilePosW, 0)
+				elements << tileImage
 			}
 		}
 	}
@@ -375,16 +396,18 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			terrainData.each { cell, terrainType ->
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
-				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new Image(terrainFile, 0, new Rectanglef(cellPosXY, cellPosWH).makeValid(), palette)
+//				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
+				def terrainImage = new Image(terrainFile, 0, palette)
+				terrainImage.position = new Vector3f(cellPosXY, 0)
+				elements << terrainImage
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"
 			// those higher up the map
-			elements.sort { imageA, imageB ->
-				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
-				       imageB.dimensions.minX - imageA.dimensions.minX
-			}
+//			elements.sort { imageA, imageB ->
+//				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
+//				       imageB.dimensions.minX - imageA.dimensions.minX
+//			}
 		}
 	}
 }

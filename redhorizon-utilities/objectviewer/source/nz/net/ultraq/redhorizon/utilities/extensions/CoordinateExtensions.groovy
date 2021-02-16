@@ -32,6 +32,11 @@ class CoordinateExtensions {
 	private static final int TILE_WIDTH = 24
 	private static final int TILE_HEIGHT = 24
 
+	static final Vector2f WORLD_OFFSET = new Vector2f(
+		-TILES_X * TILE_WIDTH / 2,
+		-TILES_Y * TILE_HEIGHT / 2
+	)
+
 	/**
 	 * Convert a number representing a cell value into a cell coordinates.
 	 * 
@@ -41,6 +46,22 @@ class CoordinateExtensions {
 	static Vector2f asCellCoords(Integer self) {
 
 		return new Vector2f(self % TILES_Y, Math.ceil(self / TILES_Y) as float)
+	}
+
+	/**
+	 * Convert a set of cell coordinates into model coordinates.
+	 * 
+	 * @param self
+	 * @param objectHeightInCells
+	 *   Optional, height of the object whose coordinates are being translated.
+	 * @return
+	 */
+	static Vector2f asModelCoords(Vector2f self, int objectHeightInCells = 0) {
+
+		return self
+			.add(0, objectHeightInCells)
+			.set(self.x, TILES_Y - self.y)
+			.mul(TILE_WIDTH, TILE_HEIGHT)
 	}
 
 	/**
@@ -54,9 +75,8 @@ class CoordinateExtensions {
 	static Vector2f asWorldCoords(Vector2f self, int objectHeightInCells = 0) {
 
 		return self
-			.add(0, objectHeightInCells)
-			.set(self.x - (TILES_X / 2), (TILES_Y / 2) - self.y as float)
-			.mul(TILE_WIDTH, TILE_HEIGHT)
+			.asModelCoords(objectHeightInCells)
+			.add(WORLD_OFFSET)
 	}
 
 	/**
