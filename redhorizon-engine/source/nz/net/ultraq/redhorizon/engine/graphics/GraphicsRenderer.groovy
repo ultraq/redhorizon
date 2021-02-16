@@ -145,13 +145,6 @@ interface GraphicsRenderer {
 	void drawMaterial(Material material)
 
 	/**
-	 * Draw the mesh.
-	 * 
-	 * @param mesh
-	 */
-	void drawMesh(Mesh mesh)
-
-	/**
 	 * Update the camera's projection matrix.
 	 * 
 	 * @param projection

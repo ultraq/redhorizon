@@ -65,11 +65,8 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 //		}
 
 		// Edge smoothing
-//		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST)
-//		glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
-//		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
-//		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
-//		glLineWidth(2)
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
 
 		// Depth testing
 		checkForError { -> glEnable(GL_DEPTH_TEST) }
@@ -279,7 +276,9 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	void deleteMaterial(Material material) {
 
 		deleteMesh(material.mesh)
-		deleteTexture(material.texture)
+		if (material.texture) {
+			deleteTexture(material.texture)
+		}
 	}
 
 	@Override
@@ -297,12 +296,12 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 
 		def mesh = material.mesh
 		def texture = material.texture
-		def modelMatrix = material.modelMatrix
+		def model = material.model
 
-		withTexture(texture.textureId) { ->
+		withTexture((texture ?: mockTexture).textureId) { ->
 			checkForError { -> glUseProgram(standardShader.programId) }
 			def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
-			checkForError { -> glUniformMatrix4fv(modelLocation, false, modelMatrix as float[]) }
+			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
 			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
 			if (mesh.vertexType) {
 				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
@@ -310,16 +309,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 			else if (mesh.elementType) {
 				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
 			}
-		}
-	}
-
-	@Override
-	void drawMesh(Mesh mesh) {
-
-		withTexture(mockTexture.textureId) { ->
-			checkForError { -> glUseProgram(standardShader.programId) }
-			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-			checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
 		}
 	}
 

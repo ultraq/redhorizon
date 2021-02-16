@@ -161,9 +161,9 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		def surface = material.mesh.surface
 		def repeatX = material.mesh.repeatX
 		def repeatY = material.mesh.repeatY
-		def modelMatrix = material.modelMatrix
+		def model = material.model
 
-		withMatrix(modelMatrix) { ->
+		withMatrix(model) { ->
 			checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
 			checkForError { -> glColor3f(1, 1, 1) }
 			glBegin(GL_QUADS)
@@ -173,12 +173,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
 			checkForError { -> glEnd() }
 		}
-	}
-
-	@Override
-	void drawMesh(Mesh mesh) {
-
-		drawPrimitive(mesh.primitiveType, mesh.colour, mesh.vertices)
 	}
 
 	/**
