@@ -52,7 +52,7 @@ abstract class Context implements Closeable, EventTarget {
 			makeCurrent()
 			closure()
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			logger.error('An error occurred within the scope of the context', ex)
 			trigger(new ContextErrorEvent(ex))
 		}

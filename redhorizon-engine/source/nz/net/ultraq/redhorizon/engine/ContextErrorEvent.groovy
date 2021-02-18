@@ -28,5 +28,5 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 class ContextErrorEvent extends Event {
 
-	final Exception exception
+	final Throwable exception
 }
