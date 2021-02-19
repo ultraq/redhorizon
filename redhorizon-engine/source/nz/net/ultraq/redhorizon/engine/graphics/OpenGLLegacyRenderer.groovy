@@ -202,22 +202,6 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		checkForError { -> glEnd() }
 	}
 
-	/**
-	 * Return some information about the renderer.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		return """
-			OpenGL graphics renderer
-			 - Vendor: ${glGetString(GL_VENDOR)}
-			 - Device name: ${glGetString(GL_RENDERER)}
-			 - OpenGL version: ${glGetString(GL_VERSION)}
-		""".stripIndent()
-	}
-
 	@Override
 	void updateCamera(Matrix4f view) {
 

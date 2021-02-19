@@ -334,22 +334,6 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES + Vector2f.BYTES) }
 	}
 
-	/**
-	 * Return some information about the renderer.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		return """
-			OpenGL graphics renderer
-			 - Vendor: ${glGetString(GL_VENDOR)}
-			 - Device name: ${glGetString(GL_RENDERER)}
-			 - OpenGL version: ${glGetString(GL_VERSION)}
-		""".stripIndent()
-	}
-
 	@Override
 	void updateCamera(Matrix4f projection) {
 
