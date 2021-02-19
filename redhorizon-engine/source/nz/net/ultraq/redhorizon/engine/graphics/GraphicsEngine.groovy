@@ -128,8 +128,6 @@ class GraphicsEngine extends EngineSubsystem {
 				trigger(event)
 			}
 			context.withCurrent { ->
-				ImGui.createContext()
-
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
 				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
 
@@ -139,6 +137,7 @@ class GraphicsEngine extends EngineSubsystem {
 				openGlRenderer.withCloseable { renderer ->
 					logger.debug(renderer.toString())
 
+					ImGui.createContext()
 					def imGuiGlfw = new ImGuiImplGlfw()
 					def imGuiGl3 = new ImGuiImplGl3()
 					imGuiGl3.init('#version 330 core')
@@ -198,6 +197,10 @@ class GraphicsEngine extends EngineSubsystem {
 					graphicsElementStates.keySet().each { graphicsElement ->
 						graphicsElement.delete(renderer)
 					}
+
+					imGuiGlfw.dispose()
+					imGuiGl3.dispose()
+					ImGui.destroyContext()
 				}
 			}
 		}
