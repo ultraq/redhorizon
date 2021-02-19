@@ -35,6 +35,9 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLLegacyRenderer)
 
+	private Matrix4f view = new Matrix4f()
+	private Matrix4f modelView = new Matrix4f()
+
 	/**
 	 * Constructor, creates an OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
@@ -158,20 +161,13 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	@Override
 	void drawMaterial(Material material) {
 
-		def surface = material.mesh.surface
-		def repeatX = material.mesh.repeatX
-		def repeatY = material.mesh.repeatY
-		def model = material.model
-
-		withMatrix(model) { ->
-			checkForError { -> glBindTexture(GL_TEXTURE_2D, material.texture.textureId) }
-			checkForError { -> glColor3f(1, 1, 1) }
-			glBegin(GL_QUADS)
-			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
-			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
-			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
-			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
-			checkForError { -> glEnd() }
+		withMatrix(modelView.set(view).mul(material.model)) { ->
+			if (material.texture) {
+				drawTexture(material.texture.textureId, material.mesh.surface, material.mesh.repeatX, material.mesh.repeatY)
+			}
+			else {
+				drawPrimitive(material.mesh.primitiveType, material.mesh.colour, material.mesh.vertices)
+			}
 		}
 	}
 
@@ -194,6 +190,18 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 		}
 	}
 
+	private static void drawTexture(int textureId, Rectanglef surface, float repeatX = 1, float repeatY = 1) {
+
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
+		checkForError { -> glColor3f(1, 1, 1) }
+		glBegin(GL_QUADS)
+			glTexCoord2f(0,       0);       glVertex2f(surface.minX, surface.minY)
+			glTexCoord2f(0,       repeatY); glVertex2f(surface.minX, surface.maxY)
+			glTexCoord2f(repeatX, repeatY); glVertex2f(surface.maxX, surface.maxY)
+			glTexCoord2f(repeatX, 0);       glVertex2f(surface.maxX, surface.minY)
+		checkForError { -> glEnd() }
+	}
+
 	/**
 	 * Return some information about the renderer.
 	 * 
@@ -213,9 +221,7 @@ class OpenGLLegacyRenderer extends OpenGLRenderer {
 	@Override
 	void updateCamera(Matrix4f view) {
 
-		def viewBuffer = FloatBuffer.allocateDirectNative(Matrix4f.FLOATS)
-		view.get(viewBuffer)
-		checkForError { -> glLoadMatrixf(viewBuffer) }
+		this.view.set(view)
 	}
 
 	/**
