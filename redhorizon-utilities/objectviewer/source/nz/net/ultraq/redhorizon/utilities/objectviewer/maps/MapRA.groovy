@@ -90,9 +90,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		// Build the various layers
 		layers << new BackgroundLayer(resourceManager, palette)
-//		layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
-//		layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
-//		layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
+		layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
+		layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
+		layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
 	}
 
 	@Override
