@@ -22,6 +22,9 @@ import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
+import imgui.ImGui
+import imgui.gl3.ImGuiImplGl3
+import imgui.glfw.ImGuiImplGlfw
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -125,6 +128,8 @@ class GraphicsEngine extends EngineSubsystem {
 				trigger(event)
 			}
 			context.withCurrent { ->
+				ImGui.createContext()
+
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
 				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
 
@@ -132,8 +137,13 @@ class GraphicsEngine extends EngineSubsystem {
 					new OpenGLModernRenderer(context, config) :
 					new OpenGLLegacyRenderer(context, config)
 				openGlRenderer.withCloseable { renderer ->
-
 					logger.debug(renderer.toString())
+
+					def imGuiGlfw = new ImGuiImplGlfw()
+					def imGuiGl3 = new ImGuiImplGl3()
+					imGuiGl3.init('#version 330 core')
+					imGuiGlfw.init(context.window, true)
+
 					camera.init(renderer)
 
 					def graphicsElementStates = [:]
@@ -143,6 +153,11 @@ class GraphicsEngine extends EngineSubsystem {
 					started = true
 					renderLoop { ->
 						renderer.clear()
+
+						imGuiGlfw.newFrame()
+						ImGui.newFrame()
+						ImGui.text('Hello!')
+
 						camera.render(renderer)
 						sceneElements.each { sceneElement ->
 							sceneElement.accept { element ->
@@ -167,6 +182,10 @@ class GraphicsEngine extends EngineSubsystem {
 								}
 							}
 						}
+
+						ImGui.render()
+						imGuiGl3.renderDrawData(ImGui.getDrawData())
+
 						context.swapBuffers()
 						waitForMainThread { ->
 							context.pollEvents()

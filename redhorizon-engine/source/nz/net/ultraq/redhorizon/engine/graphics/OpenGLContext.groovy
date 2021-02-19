@@ -54,8 +54,7 @@ class OpenGLContext extends Context implements EventTarget {
 	private final boolean fullScreen
 	private final boolean modernRenderer
 
-	private final long window
-
+	final long window
 	final Dimension windowSize
 	final Dimension framebufferSize
 
