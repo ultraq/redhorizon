@@ -294,20 +294,22 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 	@Override
 	void drawMaterial(Material material) {
 
-		def mesh = material.mesh
-		def texture = material.texture
-		def model = material.model
+		averageNanos('drawMaterial', 2f) { ->
+			def mesh = material.mesh
+			def texture = material.texture
+			def model = material.model
 
-		withTexture((texture ?: mockTexture).textureId) { ->
-			checkForError { -> glUseProgram(standardShader.programId) }
-			def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
-			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
-			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-			if (mesh.vertexType) {
-				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
-			}
-			else if (mesh.elementType) {
-				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+			withTexture((texture ?: mockTexture).textureId) { ->
+				checkForError { -> glUseProgram(standardShader.programId) }
+				def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
+				checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
+				checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+				if (mesh.vertexType) {
+					checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+				}
+				else if (mesh.elementType) {
+					checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+				}
 			}
 		}
 	}
