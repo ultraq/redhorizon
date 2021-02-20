@@ -22,16 +22,25 @@ import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 
+import groovy.transform.PackageScope
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
  * setup needed to make it work.
  * 
  * @author Emanuel Rabina
  */
+@Singleton(strict = false)
 class ImGuiRenderer implements AutoCloseable {
+
+	static final int MAX_DEBUG_LINES = 10
+	private static ImGuiRenderer rendererInstance
 
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
+	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window.
@@ -45,6 +54,23 @@ class ImGuiRenderer implements AutoCloseable {
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3.init('#version 330 core')
 		imGuiGlfw.init(context.window, true)
+
+		rendererInstance = this
+	}
+
+	/**
+	 * Add a line to be displayed in the debug overlay.  A maximum of
+	 * {@link ImGuiRenderer#MAX_DEBUG_LINES} are allowed in the overlay, with old
+	 * lines being pushed out.
+	 * 
+	 * @param line
+	 */
+	@PackageScope
+	void addDebugLine(String line) {
+
+		while (!debugLines.offer(line)) {
+			debugLines.poll()
+		}
 	}
 
 	@Override
@@ -56,18 +82,23 @@ class ImGuiRenderer implements AutoCloseable {
 	}
 
 	/**
-	 * Draws a small overlay containing the current framerate and frametime.
+	 * Draws a small overlay containing the current framerate, frametime, and any
+	 * recent log messages.
 	 */
-	void drawFpsOverlay() {
+	void drawDebugOverlay() {
 
-		// TODO: Change this to a generic drawOverlay() method that takes a list of
-		//       lines to include
 		ImGui.setNextWindowPos(10, 10)
-		ImGui.setNextWindowBgAlpha(0.25f)
+		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration |  ImGuiWindowFlags.AlwaysAutoResize |
 				ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
+		if (debugLines.size()) {
+			ImGui.separator()
+			debugLines.toArray().each { line ->
+				ImGui.text(line)
+			}
+		}
 		ImGui.end()
 	}
 
@@ -79,6 +110,16 @@ class ImGuiRenderer implements AutoCloseable {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
+	}
+
+	/**
+	 * Return the running instance of the ImGui renderer.
+	 * 
+	 * @return
+	 */
+	static ImGuiRenderer getInstance() {
+
+		return rendererInstance
 	}
 
 	/**

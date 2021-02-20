@@ -171,7 +171,7 @@ class GraphicsEngine extends EngineSubsystem {
 								}
 							}
 
-							imGuiRenderer.drawFpsOverlay()
+							imGuiRenderer.drawDebugOverlay()
 							imGuiRenderer.endFrame()
 
 							context.swapBuffers()
