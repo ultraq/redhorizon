@@ -22,9 +22,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
-import imgui.ImGui
-import imgui.gl3.ImGuiImplGl3
-import imgui.glfw.ImGuiImplGlfw
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -137,70 +134,59 @@ class GraphicsEngine extends EngineSubsystem {
 				openGlRenderer.withCloseable { renderer ->
 					logger.debug(renderer.toString())
 
-					ImGui.createContext()
-					def imGuiGlfw = new ImGuiImplGlfw()
-					def imGuiGl3 = new ImGuiImplGl3()
-					imGuiGl3.init('#version 330 core')
-					imGuiGlfw.init(context.window, true)
+					new ImGuiRenderer(context).withCloseable { imGuiRenderer ->
+						camera.init(renderer)
 
-					camera.init(renderer)
+						def graphicsElementStates = [:]
 
-					def graphicsElementStates = [:]
+						// Rendering loop
+						logger.debug('Graphics engine in render loop...')
+						started = true
+						renderLoop { ->
+							renderer.clear()
+							imGuiRenderer.startFrame()
 
-					// Rendering loop
-					logger.debug('Graphics engine in render loop...')
-					started = true
-					renderLoop { ->
-						renderer.clear()
+							camera.render(renderer)
+							sceneElements.each { sceneElement ->
+								sceneElement.accept { element ->
+									if (element instanceof GraphicsElement) {
 
-						imGuiGlfw.newFrame()
-						ImGui.newFrame()
-						ImGui.text('Hello!')
+										// Register the graphics element
+										if (!graphicsElementStates[element]) {
+											graphicsElementStates << [(element): STATE_NEW]
+										}
 
-						camera.render(renderer)
-						sceneElements.each { sceneElement ->
-							sceneElement.accept { element ->
-								if (element instanceof GraphicsElement) {
+										def elementState = graphicsElementStates[element]
 
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
+										// Initialize the graphics element
+										if (elementState == STATE_NEW) {
+											element.init(renderer)
+											elementState = STATE_INITIALIZED
+											graphicsElementStates << [(element): elementState]
+										}
+
+										// Render the graphics element
+										element.render(renderer)
 									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
 								}
+							}
+
+							imGuiRenderer.drawFpsOverlay()
+							imGuiRenderer.endFrame()
+
+							context.swapBuffers()
+							waitForMainThread { ->
+								context.pollEvents()
 							}
 						}
 
-						ImGui.render()
-						imGuiGl3.renderDrawData(ImGui.getDrawData())
-
-						context.swapBuffers()
-						waitForMainThread { ->
-							context.pollEvents()
+						// Shutdown
+						logger.debug('Shutting down graphics engine')
+						camera.delete(renderer)
+						graphicsElementStates.keySet().each { graphicsElement ->
+							graphicsElement.delete(renderer)
 						}
 					}
-
-					// Shutdown
-					logger.debug('Shutting down graphics engine')
-					camera.delete(renderer)
-					graphicsElementStates.keySet().each { graphicsElement ->
-						graphicsElement.delete(renderer)
-					}
-
-					imGuiGlfw.dispose()
-					imGuiGl3.dispose()
-					ImGui.destroyContext()
 				}
 			}
 		}
