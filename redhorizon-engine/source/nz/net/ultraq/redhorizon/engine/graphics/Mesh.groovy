@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Rectanglef
-import org.joml.Vector2f
-
 import groovy.transform.MapConstructor
 
 /**
@@ -30,7 +27,6 @@ import groovy.transform.MapConstructor
 @MapConstructor
 class Mesh {
 
-	// Modern
 	final int vertexArrayId
 	final int vertexBufferId
 	final int vertexType
@@ -38,12 +34,4 @@ class Mesh {
 	final int elementBufferId
 	final int elementType
 	final int elementCount
-
-	// Legacy
-	final Colour colour
-	final int primitiveType
-	final Vector2f[] vertices
-	final Rectanglef surface
-	final float repeatX
-	final float repeatY
 }
