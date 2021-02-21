@@ -225,7 +225,7 @@ class VqaFileWorker extends Worker {
 
 					// Video data
 					case ~/VPT./:
-						def frame = average('Decoding frame', 15) { ->
+						def frame = average('Decoding frame', 1f) { ->
 							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 						}
 						trigger(new StreamingFrameEvent(frame))

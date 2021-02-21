@@ -56,7 +56,7 @@ class WsaFileWorker extends Worker {
 
 		// Decode frame by frame
 		for (def frame = 0; canContinue && frame < numFrames; frame++) {
-			def colouredFrame = average('WsaFile - Decoding frame', 10) { ->
+			def colouredFrame = average('WsaFile - Decoding frame', 1f) { ->
 				def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
 				def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
 
