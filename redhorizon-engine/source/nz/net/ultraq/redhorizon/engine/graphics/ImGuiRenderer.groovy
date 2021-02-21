@@ -32,7 +32,6 @@ import java.util.concurrent.BlockingQueue
  * 
  * @author Emanuel Rabina
  */
-@Singleton(strict = false)
 class ImGuiRenderer implements AutoCloseable {
 
 	static final int MAX_DEBUG_LINES = 10
