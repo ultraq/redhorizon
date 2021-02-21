@@ -32,7 +32,15 @@ class GraphicsConfiguration {
 	 */
 	boolean filter
 
+	/**
+	 * Whether to adjust the aspect ratio of visual elements for today's displays,
+	 * given that a lot of the graphics of the time were on CRT displays using
+	 * resolutions that resulted in tall pixels.
+	 */
 	boolean fixAspectRatio
+
+	/**
+	 * Set to use the entire screen instead of a floating window.
+	 */
 	boolean fullScreen
-	boolean modernRenderer
 }

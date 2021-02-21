@@ -70,9 +70,6 @@ class ObjectViewer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode.  Only applies to the mission viewer.')
 	boolean fullScreen
 
-	@Option(names = ['--modern-renderer'], description = 'Use the experimental modern OpenGL renderer (under development)')
-	boolean modernRenderer
-
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
@@ -154,8 +151,7 @@ class ObjectViewer implements Callable<Integer> {
 	private void view(Object objectFile, String objectId) {
 
 		def graphicsConfig = new GraphicsConfiguration(
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
+			fullScreen: fullScreen
 		)
 
 		switch (objectFile) {

@@ -128,10 +128,7 @@ class GraphicsEngine extends EngineSubsystem {
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
 				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
 
-				def openGlRenderer = config.modernRenderer ?
-					new OpenGLModernRenderer(context, config) :
-					new OpenGLLegacyRenderer(context, config)
-				openGlRenderer.withCloseable { renderer ->
+				new OpenGLModernRenderer(context, config).withCloseable { renderer ->
 					logger.debug(renderer.toString())
 
 					new ImGuiRenderer(context).withCloseable { imGuiRenderer ->

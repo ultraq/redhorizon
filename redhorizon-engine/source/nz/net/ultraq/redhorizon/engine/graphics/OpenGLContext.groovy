@@ -88,17 +88,10 @@ class OpenGLContext extends Context implements EventTarget {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
-		modernRenderer = config.modernRenderer
-		if (modernRenderer) {
-			glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
-			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
-		}
-		else {
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2)
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
-		}
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
 
 		logger.debug('Creating a window of size {}', windowSize)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', fullScreen ? monitor : NULL, NULL)

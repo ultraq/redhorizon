@@ -82,9 +82,6 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
-	@Option(names = ['--modern-renderer'], description = 'Use the experimental modern OpenGL renderer (under development)')
-	boolean modernRenderer
-
 	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
 	PaletteTypes paletteType
 
@@ -167,8 +164,7 @@ class MediaPlayer implements Callable<Integer> {
 		def graphicsConfig = new GraphicsConfiguration(
 			filter: filter,
 			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen,
-			modernRenderer: modernRenderer
+			fullScreen: fullScreen
 		)
 
 		switch (file) {
