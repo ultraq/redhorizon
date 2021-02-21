@@ -142,20 +142,20 @@ class PcxFile implements ImageFile, InternalPalette {
 			runLengthEncoding.decode(encodedImage, scanLine)
 			scanLines << scanLine
 		}
-		def rawImageData = ByteBuffer.allocateNative(width * height)
-		for (def y = yMin; y <= yMax; y++) {
+		def indexedData = ByteBuffer.allocateNative(width * height)
+		(yMin..yMax).each { y ->
 			def scanLine = scanLines[y]
-			for (def x = xMin; x <= xMax; x++) {
-				rawImageData.put(scanLine.get(x))
+			(xMin..xMax).each { x ->
+				indexedData.put(scanLine.get(x))
 			}
 		}
-		rawImageData.rewind()
+		indexedData.flip()
 
 		def paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 		palette = new Palette(PALETTE_COLOURS, FORMAT_RGB, paletteData)
 
 		// Apply palette to raw image data to create the final image
-		imageData = rawImageData.applyPalette(palette)
+		imageData = indexedData.applyPalette(palette)
 	}
 
 	/**
