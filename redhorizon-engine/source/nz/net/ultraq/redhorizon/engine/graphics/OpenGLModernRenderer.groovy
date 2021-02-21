@@ -299,18 +299,21 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 			def texture = material.texture
 			def model = material.model
 
-			withTexture((texture ?: mockTexture).textureId) { ->
-				checkForError { -> glUseProgram(standardShader.programId) }
-				def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
-				checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
-				checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-				if (mesh.vertexType) {
-					checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
-				}
-				else if (mesh.elementType) {
-					checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
-				}
+			checkForError { -> glBindTexture(GL_TEXTURE_2D, (texture ?: mockTexture).textureId) }
+			checkForError { -> glUseProgram(standardShader.programId) }
+
+			def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
+			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
+			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+			if (mesh.vertexType) {
+				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
 			}
+			else if (mesh.elementType) {
+				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+			}
+
+			checkForError { -> glUseProgram(0) }
+			checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
 		}
 	}
 
@@ -342,18 +345,5 @@ class OpenGLModernRenderer extends OpenGLRenderer {
 		checkForError { -> glUseProgram(standardShader.programId) }
 		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
 		checkForError { -> glUniformMatrix4fv(viewLocation, false, projection as float[]) }
-	}
-
-	/**
-	 * Execute a closure within the context of a bound texture.
-	 * 
-	 * @param textureId
-	 * @param closure
-	 */
-	private static void withTexture(int textureId, Closure closure) {
-
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
-		closure()
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
 	}
 }
