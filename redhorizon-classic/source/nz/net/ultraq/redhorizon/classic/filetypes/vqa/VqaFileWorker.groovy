@@ -141,12 +141,9 @@ class VqaFileWorker extends Worker {
 	 */
 	private ByteBuffer decodeSound(VqaChunkHeader header, ByteBuffer data) {
 
-		if (header.dataCompressed) {
-			def soundBytes = ByteBuffer.allocateNative(header.length << 2) // IMA ADPCM is always 4x the compression?
-			audioDecoder.decode(data, soundBytes)
-			return soundBytes
-		}
-		return data
+		return header.dataCompressed ?
+			audioDecoder.decode(data, ByteBuffer.allocateNative(header.length << 2)) : // IMA ADPCM is always 4x the compression
+			data
 	}
 
 	@Override
@@ -174,9 +171,7 @@ class VqaFileWorker extends Worker {
 		}
 
 		def decompressData = { ByteBuffer data, int decompressedSize ->
-			def decompressedData = ByteBuffer.allocateNative(decompressedSize)
-			lcw.decode(data, decompressedData)
-			return decompressedData
+			return lcw.decode(data, ByteBuffer.allocateNative(decompressedSize))
 		}
 
 		def readChunkData = { VqaChunkHeader header, int decompressedSize = 0 ->

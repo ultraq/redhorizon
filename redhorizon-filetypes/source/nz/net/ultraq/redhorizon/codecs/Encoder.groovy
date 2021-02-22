@@ -31,6 +31,7 @@ interface Encoder {
 	 * 
 	 * @param source
 	 * @param dest
+	 * @return The destination buffer.
 	 */
-	void encode(ByteBuffer source, ByteBuffer dest)
+	ByteBuffer encode(ByteBuffer source, ByteBuffer dest)
 }

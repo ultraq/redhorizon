@@ -86,16 +86,13 @@ class WsaFileDune2 {
 
 		frames = new ByteBuffer[numFrames]
 		frames.length.times { frame ->
-			def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
-			def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
-
-			def intermediateFrame = ByteBuffer.allocateNative(delta)
-			def indexedFrame = ByteBuffer.allocateNative(frameSize)
-
-			lcw.decode(compressedFrame, intermediateFrame)
-			xorDelta.decode(intermediateFrame, indexedFrame)
-
-			frames[frame] = indexedFrame
+			frames[frame] = xorDelta.decode(
+				lcw.decode(
+					ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
+					ByteBuffer.allocateNative(delta)
+				),
+				ByteBuffer.allocateNative(frameSize)
+			)
 		}
 	}
 

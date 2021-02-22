@@ -89,9 +89,7 @@ class CpsFile implements ImageFile, InternalPalette, Writable {
 		}
 
 		// Image data
-		imageData = ByteBuffer.allocateNative(imageSize)
-		def lcw = new LCW()
-		lcw.decode(imageData, ByteBuffer.wrapNative(input.readNBytes(imageSize)))
+		imageData = new LCW().decode(ByteBuffer.wrapNative(input.readNBytes(imageSize)), ByteBuffer.allocateNative(imageSize))
 	}
 
 	/**
@@ -130,8 +128,7 @@ class CpsFile implements ImageFile, InternalPalette, Writable {
 		def lcw = new LCW()
 
 		// Encode image
-		def encodedImage = ByteBuffer.allocateNative(imageData.capacity())
-		lcw.encode(imageData, encodedImage)
+		def encodedImage = lcw.encode(imageData, ByteBuffer.allocateNative(imageData.capacity()))
 
 		// Write header
 		output.writeShort(8 + encodedImage.limit()) // Header + image - this value itself

@@ -31,6 +31,7 @@ interface Decoder {
 	 * 
 	 * @param source
 	 * @param dest
+	 * @return The destination buffer.
 	 */
-	void decode(ByteBuffer source, ByteBuffer dest)
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest)
 }

@@ -138,9 +138,7 @@ class PcxFile implements ImageFile, InternalPalette {
 		def scanLines = new ArrayList<ByteBuffer>()
 		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
 		while (encodedImage.hasRemaining()) {
-			def scanLine = ByteBuffer.allocateNative(planes * bytesPerLine)
-			runLengthEncoding.decode(encodedImage, scanLine)
-			scanLines << scanLine
+			scanLines << runLengthEncoding.decode(encodedImage, ByteBuffer.allocateNative(planes * bytesPerLine))
 		}
 		def indexedData = ByteBuffer.allocateNative(width * height)
 		(yMin..yMax).each { y ->

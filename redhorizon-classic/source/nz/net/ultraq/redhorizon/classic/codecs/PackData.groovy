@@ -38,7 +38,7 @@ class PackData implements Decoder {
 	final int chunks
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Decode base64 data into standard binary
 		ByteBuffer mapBytes2 = base64Decoder.decode(source).order(ByteOrder.nativeOrder())
@@ -70,6 +70,6 @@ class PackData implements Decoder {
 		for (ByteBuffer mapchunk: mapChunks) {
 			dest.put(mapchunk)
 		}
-		dest.rewind()
+		return dest.flip()
 	}
 }

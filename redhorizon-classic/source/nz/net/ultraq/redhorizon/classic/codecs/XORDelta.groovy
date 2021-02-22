@@ -107,7 +107,7 @@ class XORDelta implements Encoder, Decoder {
 	}
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (true) {
 			byte command = source.get()
@@ -179,14 +179,14 @@ class XORDelta implements Encoder, Decoder {
 				}
 			}
 		}
-		source.rewind()
-		dest.flip()
 		xorSource.rewind()
 		xorSource = dest
+		source.rewind()
+		return dest.flip()
 	}
 
 	@Override
-	void encode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer encode(ByteBuffer source, ByteBuffer dest) {
 
 		// Encode the source
 		while (source.hasRemaining()) {
@@ -263,7 +263,7 @@ class XORDelta implements Encoder, Decoder {
 
 		source.rewind()
 		xorSource.rewind()
-		dest.flip()
+		return dest.flip()
 	}
 
 	/**

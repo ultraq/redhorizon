@@ -70,7 +70,7 @@ class LCW implements Encoder, Decoder {
 	private static final int  CMD_FILL_THRESHOLD   = 3
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (true) {
 			byte command = source.get()
@@ -134,11 +134,11 @@ class LCW implements Encoder, Decoder {
 			}
 		}
 		source.rewind()
-		dest.flip()
+		return dest.flip()
 	}
 
 	@Override
-	void encode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer encode(ByteBuffer source, ByteBuffer dest) {
 
 		// Format80 data must be opened by the transfer command
 		dest.put((byte)(CMD_TRANSFER | 1))
@@ -207,7 +207,7 @@ class LCW implements Encoder, Decoder {
 		dest.put(CMD_TRANSFER)
 
 		source.rewind()
-		dest.flip()
+		return dest.flip()
 	}
 
 	/**

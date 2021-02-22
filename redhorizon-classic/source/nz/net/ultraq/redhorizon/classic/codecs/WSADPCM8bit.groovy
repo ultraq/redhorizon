@@ -45,12 +45,11 @@ class WSADPCM8bit implements Decoder {
 	]
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Mere copy if chunk is uncompressed
 		if (source.limit() == dest.limit()) {
-			dest.put(source).rewind()
-			return
+			return dest.put(source).flip()
 		}
 
 		// Decompression
@@ -121,6 +120,6 @@ class WSADPCM8bit implements Decoder {
 				}
 			}
 		}
-		dest.flip()
+		return dest.flip()
 	}
 }

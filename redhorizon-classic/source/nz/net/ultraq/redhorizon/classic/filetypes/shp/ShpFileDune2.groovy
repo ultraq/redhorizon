@@ -86,8 +86,6 @@ import java.nio.ByteBuffer
  */
 class ShpFileDune2 {
 
-	private final NativeDataInputStream input
-
 	// File header
 	final short numImages
 	final int[] imageOffsets
@@ -102,7 +100,7 @@ class ShpFileDune2 {
 	 */
 	ShpFileDune2(InputStream inputStream) {
 
-		input = new NativeDataInputStream(inputStream)
+		def input = new NativeDataInputStream(inputStream)
 
 		// File header (read ahead for offset check)
 		numImages = input.readShort()
@@ -126,21 +124,20 @@ class ShpFileDune2 {
 		images = new ByteBuffer[numImages]
 		images.length.times { i ->
 			def imageHeader = new ShpImageInfoDune2(input)
-			def compressedImage = ByteBuffer.wrapNative(input.readNBytes(imageHeader.compressedSize))
+			def imageData = ByteBuffer.wrapNative(input.readNBytes(imageHeader.compressedSize))
 			def imageSize = imageHeader.width * imageHeader.height
 
 			// Decompress the image data
 			def image = ByteBuffer.allocate(imageSize)
-			if (imageHeader.compressed) {
-				def intermediateImage = ByteBuffer.allocateNative(imageHeader.uncompressedSize & 0xffff)
-				lcw.decode(compressedImage, intermediateImage)
-				rleZero.decode(intermediateImage, image)
-			}
-			else {
-				rleZero.decode(compressedImage, image)
-			}
-
-			images[i] = image
+			images[i] = imageHeader.compressed ?
+				rleZero.decode(
+					lcw.decode(
+						imageData,
+						ByteBuffer.allocateNative(imageHeader.uncompressedSize & 0xffff)
+					),
+					image
+				) :
+				rleZero.decode(imageData, image)
 		}
 	}
 

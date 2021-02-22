@@ -42,7 +42,7 @@ class RLEZero implements Encoder, Decoder {
 	private static final byte CMD_FILL_VAL = 0
 
 	@Override
-	void decode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (source.hasRemaining()) {
 			byte command = source.get()
@@ -59,11 +59,11 @@ class RLEZero implements Encoder, Decoder {
 				dest.put(command)
 			}
 		}
-		dest.flip()
+		return dest.flip()
 	}
 
 	@Override
-	void encode(ByteBuffer source, ByteBuffer dest) {
+	ByteBuffer encode(ByteBuffer source, ByteBuffer dest) {
 
 		int count = 0
 		int limit = Math.min(source.limit(), 255)
@@ -93,6 +93,6 @@ class RLEZero implements Encoder, Decoder {
 			dest.put(value)
 		}
 		source.rewind()
-		dest.flip()
+		return dest.flip()
 	}
 }

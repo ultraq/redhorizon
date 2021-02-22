@@ -57,15 +57,13 @@ class WsaFileWorker extends Worker {
 		// Decode frame by frame
 		for (def frame = 0; canContinue && frame < numFrames; frame++) {
 			def colouredFrame = average('WsaFile - Decoding frame', 1f) { ->
-				def compressedFrameSize = frameOffsets[frame + 1] - frameOffsets[frame]
-				def compressedFrame = ByteBuffer.wrapNative(input.readNBytes(compressedFrameSize))
-
-				def intermediateFrame = ByteBuffer.allocateNative(delta)
-				def indexedFrame = ByteBuffer.allocateNative(frameSize)
-
-				lcw.decode(compressedFrame, intermediateFrame)
-				xorDelta.decode(intermediateFrame, indexedFrame)
-
+				def indexedFrame = xorDelta.decode(
+					lcw.decode(
+						ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
+						ByteBuffer.allocateNative(delta)
+					),
+					ByteBuffer.allocateNative(frameSize)
+				)
 				return indexedFrame.applyPalette(palette)
 			}
 			trigger(new StreamingFrameEvent(colouredFrame))

@@ -134,9 +134,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		sourceBytes.flip()
 
 		// Decode section bytes
-		def mapBytes = ByteBuffer.allocateNative(49152) // 128x128x3 bytes max
-		new PackData(chunks).decode(sourceBytes, mapBytes)
-		return mapBytes
+		return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
 	}
 
 	@Override
