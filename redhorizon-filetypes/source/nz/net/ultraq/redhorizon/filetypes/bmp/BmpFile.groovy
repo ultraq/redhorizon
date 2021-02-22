@@ -53,9 +53,10 @@ class BmpFile implements ImageFile {
 		imageData = ByteBuffer.allocateNative(width * height * format.value)
 		def rgbArray = image.getRGB(0, 0, width, height, null, 0, width)
 		rgbArray.each { pixel ->
-			imageData.put(pixel >>> 16 as byte)
-			imageData.put(pixel >>> 8 as byte)
-			imageData.put(pixel as byte)
+			imageData
+				.put(pixel >>> 16 as byte)
+				.put(pixel >>> 8 as byte)
+				.put(pixel as byte)
 		}
 		imageData.rewind()
 	}

@@ -190,9 +190,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
 		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
 		vertices.each { vertex ->
-			verticesBuffer.put(colour as float[])
-			verticesBuffer.put(vertex as float[])
-			verticesBuffer.put([0, 0] as float[])
+			verticesBuffer
+				.put(colour as float[])
+				.put(vertex as float[])
+				.put([0, 0] as float[])
 		}
 		verticesBuffer.flip()
 
