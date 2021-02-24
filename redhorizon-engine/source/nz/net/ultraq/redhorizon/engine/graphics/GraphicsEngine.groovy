@@ -131,7 +131,7 @@ class GraphicsEngine extends EngineSubsystem {
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
 					logger.debug(renderer.toString())
 
-					new ImGuiRenderer(context).withCloseable { imGuiRenderer ->
+					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]

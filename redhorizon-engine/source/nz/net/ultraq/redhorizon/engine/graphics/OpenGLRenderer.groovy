@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Matrix4f
@@ -37,9 +38,10 @@ import java.nio.IntBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
+class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
+	private static final RendererEvent materialDrawnEvent = new RendererEvent(materialDrawn: true)
 
 	protected final GLCapabilities capabilities
 	protected final Colour clearColour
@@ -395,6 +397,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable {
 			checkForError { -> glUseProgram(0) }
 			checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
 		}
+
+		trigger(materialDrawnEvent)
 	}
 
 	/**

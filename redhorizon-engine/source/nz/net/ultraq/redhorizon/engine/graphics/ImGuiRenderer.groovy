@@ -40,19 +40,28 @@ class ImGuiRenderer implements AutoCloseable {
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
+	private int materialsDrawn = 0
 
 	/**
-	 * Create a new ImGui renderer to work with an existing OpenGL window.
+	 * Create a new ImGui renderer to work with an existing OpenGL window and
+	 * renderer.
 	 * 
 	 * @param context
+	 * @param renderer
 	 */
-	ImGuiRenderer(OpenGLContext context) {
+	ImGuiRenderer(OpenGLContext context, OpenGLRenderer renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3.init('#version 330 core')
 		imGuiGlfw.init(context.window, true)
+
+		renderer.on(RendererEvent) { event ->
+			if (event.materialDrawn) {
+				materialsDrawn++
+			}
+		}
 
 		rendererInstance = this
 	}
@@ -90,8 +99,10 @@ class ImGuiRenderer implements AutoCloseable {
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration |  ImGuiWindowFlags.AlwaysAutoResize |
-				ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
+			ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
+		ImGui.text("Materials drawn: ${materialsDrawn}")
+		materialsDrawn = 0
 		if (debugLines.size()) {
 			ImGui.separator()
 			debugLines.toArray().each { line ->
