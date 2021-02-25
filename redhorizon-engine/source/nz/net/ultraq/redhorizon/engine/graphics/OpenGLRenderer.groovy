@@ -143,15 +143,15 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void createCamera(Matrix4f projection) {
+	void createCamera(Matrix4f projection, Matrix4f view) {
 
 		checkForError { -> glUseProgram(standardShader.programId) }
-		def projectionUniform = checkForError { ->
-			return glGetUniformLocation(standardShader.programId, 'projection')
-		}
-		checkForError { ->
-			glUniformMatrix4fv(projectionUniform, false, projection as float[])
-		}
+
+		def projectionUniform = checkForError { -> glGetUniformLocation(standardShader.programId, 'projection') }
+		checkForError { -> glUniformMatrix4fv(projectionUniform, false, projection as float[]) }
+		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
+		checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+
 		checkForError { -> glUseProgram(0) }
 	}
 
@@ -440,10 +440,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void updateCamera(Matrix4f projection) {
+	void updateCamera(Matrix4f view) {
 
 		checkForError { -> glUseProgram(standardShader.programId) }
+
 		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
-		checkForError { -> glUniformMatrix4fv(viewLocation, false, projection as float[]) }
+		checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+
+		checkForError { -> glUseProgram(0) }
 	}
 }

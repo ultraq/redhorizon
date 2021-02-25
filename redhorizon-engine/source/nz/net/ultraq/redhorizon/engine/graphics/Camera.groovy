@@ -35,6 +35,7 @@ class Camera implements GraphicsElement {
 	final Dimension size
 	final Matrix4f projection
 	final Matrix4f view = new Matrix4f()
+	private boolean moved = false
 
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
@@ -77,13 +78,18 @@ class Camera implements GraphicsElement {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		renderer.createCamera(projection)
+		renderer.createCamera(projection, view)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.updateCamera(view)
+		averageNanos('updateCamera', 2f) { ->
+			if (moved) {
+				renderer.updateCamera(view)
+				moved = false
+			}
+		}
 	}
 
 	/**
@@ -97,6 +103,7 @@ class Camera implements GraphicsElement {
 	Camera translate(float x, float y, float z = 0) {
 
 		view.translate(x, y, z)
+		moved = true
 		return this
 	}
 }

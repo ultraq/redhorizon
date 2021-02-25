@@ -36,11 +36,12 @@ interface GraphicsRenderer {
 	void clear()
 
 	/**
-	 * Create a camera with the given projection matrix.
+	 * Create a camera with the given projection and view matrices.
 	 * 
+	 * @param view
 	 * @param projection
 	 */
-	void createCamera(Matrix4f projection)
+	void createCamera(Matrix4f projection, Matrix4f view)
 
 	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
@@ -145,9 +146,9 @@ interface GraphicsRenderer {
 	void drawMaterial(Material material)
 
 	/**
-	 * Update the camera's projection matrix.
+	 * Update the camera's view matrix.
 	 * 
-	 * @param projection
+	 * @param view
 	 */
-	void updateCamera(Matrix4f projection)
+	void updateCamera(Matrix4f view)
 }
