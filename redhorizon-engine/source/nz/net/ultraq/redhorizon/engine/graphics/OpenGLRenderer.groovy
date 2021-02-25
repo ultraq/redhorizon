@@ -41,7 +41,7 @@ import java.nio.IntBuffer
 class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
-	private static final RendererEvent materialDrawnEvent = new RendererEvent(materialDrawn: true)
+	private static final RendererEvent materialDrawnEvent = new MaterialDrawnEvent()
 
 	protected final GLCapabilities capabilities
 	protected final Colour clearColour

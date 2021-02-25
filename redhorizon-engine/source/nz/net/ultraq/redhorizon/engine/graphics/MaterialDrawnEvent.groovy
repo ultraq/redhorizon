@@ -16,12 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.events.Event
-
 /**
- * Common type for all rendering events.
+ * Event fired when a material has been drawn.
  * 
  * @author Emanuel Rabina
  */
-abstract class RendererEvent extends Event {
+class MaterialDrawnEvent extends RendererEvent {
 }

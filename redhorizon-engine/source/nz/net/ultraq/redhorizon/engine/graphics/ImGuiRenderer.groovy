@@ -57,10 +57,8 @@ class ImGuiRenderer implements AutoCloseable {
 		imGuiGl3.init('#version 330 core')
 		imGuiGlfw.init(context.window, true)
 
-		renderer.on(RendererEvent) { event ->
-			if (event.materialDrawn) {
-				materialsDrawn++
-			}
+		renderer.on(MaterialDrawnEvent) { event ->
+			materialsDrawn++
 		}
 
 		rendererInstance = this
