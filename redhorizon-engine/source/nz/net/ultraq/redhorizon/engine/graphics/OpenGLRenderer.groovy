@@ -27,6 +27,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
 
+import groovy.transform.Memoized
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
@@ -389,8 +390,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			}
 			checkForError { -> glUseProgram(shader.programId) }
 
-			def modelLocation = checkForError { -> glGetUniformLocation(shader.programId, 'model') }
+			def modelLocation = getProgramUniformLocation(shader, 'model')
 			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
+
 			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
 			if (mesh.vertexType) {
 				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
@@ -406,6 +408,19 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		trigger(materialDrawnEvent)
+	}
+
+	/**
+	 * Cached function for looking up a uniform location in a shader program.
+	 * 
+	 * @param shader
+	 * @param name
+	 * @return
+	 */
+	@Memoized
+	private static int getProgramUniformLocation(Shader shader, String name) {
+
+		return checkForError { -> glGetUniformLocation(shader.programId, name) }
 	}
 
 	/**
@@ -449,7 +464,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		// TODO: Use a uniform buffer object to share these values across shaders
 		shaders.each { shader ->
-			def viewLocation = checkForError { -> glGetUniformLocation(shader.programId, 'view') }
+			def viewLocation = getProgramUniformLocation(shader, 'view')
 			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
 		}
 	}
