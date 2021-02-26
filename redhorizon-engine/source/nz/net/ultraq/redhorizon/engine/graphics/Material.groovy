@@ -31,6 +31,7 @@ class Material {
 
 	Mesh mesh
 	Texture texture
+	Shader shader
 
 	/**
 	 * Adjust the scale of this material.

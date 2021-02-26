@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
@@ -28,6 +27,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL33C.*
 
+import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
@@ -47,8 +47,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final Colour clearColour
 	protected final boolean filter
 
-	private Texture mockTexture
-	private Shader standardShader
+	private final List<Shader> shaders = []
+	private final Shader primitiveShader
+	private final Shader textureShader
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -98,11 +99,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 //			glViewport(0, 0, event.width, event.height)
 //		}
 
-		// Generate the 1x1 white 'mock texture' used by the shader for rendering primitives
-		mockTexture = createTexture(ByteBuffer.wrapNative(Colour.WHITE as byte[]), FORMAT_RGBA.value, 1, 1)
-
 		// Create the shader programs used by this renderer
-		standardShader = createShader('Standard')
+		primitiveShader = createShader('Primitive')
+		textureShader = createShader('Texture')
 	}
 
 	/**
@@ -139,18 +138,24 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
-		glDeleteProgram(standardShader.programId)
+		shaders.each { shader ->
+			glDeleteProgram(shader.programId)
+		}
 	}
 
 	@Override
 	void createCamera(Matrix4f projection, Matrix4f view) {
 
-		checkForError { -> glUseProgram(standardShader.programId) }
+		// TODO: Use a uniform buffer object to share these values across shaders
+		shaders.each { shader ->
+			def programId = shader.programId
+			checkForError { -> glUseProgram(programId) }
 
-		def projectionUniform = checkForError { -> glGetUniformLocation(standardShader.programId, 'projection') }
-		checkForError { -> glUniformMatrix4fv(projectionUniform, false, projection as float[]) }
-		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
-		checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+			def projectionLocation = checkForError { -> glGetUniformLocation(programId, 'projection') }
+			checkForError { -> glUniformMatrix4fv(projectionLocation, false, projection as float[]) }
+			def viewLocation = checkForError { -> glGetUniformLocation(programId, 'view') }
+			checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+		}
 
 		checkForError { -> glUseProgram(0) }
 	}
@@ -172,7 +177,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		return new Material(
 			mesh: mesh,
-			texture: texture
+			texture: texture,
+			shader: mesh.vertexType ? primitiveShader : textureShader
 		)
 	}
 
@@ -195,7 +201,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			verticesBuffer
 				.put(colour as float[])
 				.put(vertex as float[])
-				.put([0, 0] as float[])
 		}
 		verticesBuffer.flip()
 
@@ -203,7 +208,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
 		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
 
-		setVertexBufferLayout()
+		setVertexBufferLayout(primitiveShader,
+			BufferLayoutParts.COLOUR,
+			BufferLayoutParts.POSITION
+		)
 
 		return new Mesh(
 			vertexArrayId: vertexArrayId,
@@ -216,19 +224,22 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	/**
 	 * Create a new shader program for the shader sources of the given name.
 	 * 
-	 * @param vertexShaderSource
-	 * @param fragmentShaderSource
+	 * @param name
 	 * @return
 	 */
-	private Shader createShader(String shaderType) {
+	private Shader createShader(String name) {
 
-		/**
-		 * Create a shader of the specified type, running a compilation check to
-		 * make sure it all went OK.
+		/* 
+		 * Create a shader of the specified name and type, running a compilation
+		 * check to make sure it all went OK.
 		 */
-		def createShader = { int type, String source ->
-			def shaderId = glCreateShader(type)
-			checkForError { -> glShaderSource(shaderId, source) }
+		def createShader = { int type ->
+			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
+			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
+				return stream.text
+			}
+			def shaderId = checkForError { -> glCreateShader(type) }
+			checkForError { -> glShaderSource(shaderId, shaderSource) }
 			checkForError { -> glCompileShader(shaderId) }
 
 			def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
@@ -239,7 +250,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return shaderId
 		}
 
-		/**
+		/* 
 		 * Link multiple shader parts together into a shader program.
 		 */
 		def createProgram = { int vertexShaderId, int fragmentShaderId ->
@@ -257,19 +268,17 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return programId
 		}
 
-		def vertexShaderId = getResourceAsStream("nz/net/ultraq/redhorizon/engine/graphics/${shaderType}.vert").withBufferedStream { stream ->
-			return createShader(GL_VERTEX_SHADER, stream.text)
-		}
-		def fragmentShaderId = getResourceAsStream("nz/net/ultraq/redhorizon/engine/graphics/${shaderType}.frag").withBufferedStream { stream ->
-			return createShader(GL_FRAGMENT_SHADER, stream.text)
-		}
+		def vertexShaderId = createShader(GL_VERTEX_SHADER)
+		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
 		checkForError { -> glDeleteShader(vertexShaderId) }
 		checkForError { -> glDeleteShader(fragmentShaderId) }
 
-		return new Shader(
+		def shader = new Shader(
 			programId: programId
 		)
+		shaders << shader
+		return shader
 	}
 
 	@Override
@@ -306,7 +315,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
 		checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
 
-		setVertexBufferLayout()
+		setVertexBufferLayout(textureShader,
+			BufferLayoutParts.COLOUR,
+			BufferLayoutParts.POSITION,
+			BufferLayoutParts.TEXCOORD
+		)
 
 		return new Mesh(
 			vertexArrayId: vertexArrayId,
@@ -323,15 +336,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		int textureId = checkForError { ->
 			return glGenTextures()
 		}
-		checkForError { ->
-			glBindTexture(GL_TEXTURE_2D, textureId)
-		}
-		checkForError { ->
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		}
-		checkForError { ->
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		}
+		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 
 		def colourFormat =
 			format == 3 ? GL_RGB :
@@ -379,12 +386,15 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		averageNanos('drawMaterial', 2f) { ->
 			def mesh = material.mesh
 			def texture = material.texture
+			def shader = material.shader
 			def model = material.model
 
-			checkForError { -> glBindTexture(GL_TEXTURE_2D, (texture ?: mockTexture).textureId) }
-			checkForError { -> glUseProgram(standardShader.programId) }
+			if (texture) {
+				checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
+			}
+			checkForError { -> glUseProgram(shader.programId) }
 
-			def modelLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'model') }
+			def modelLocation = checkForError { -> glGetUniformLocation(shader.programId, 'model') }
 			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
 			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
 			if (mesh.vertexType) {
@@ -395,7 +405,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			}
 
 			checkForError { -> glUseProgram(0) }
-			checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
+			if (texture) {
+				checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
+			}
 		}
 
 		trigger(materialDrawnEvent)
@@ -403,24 +415,22 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	/**
 	 * Sets the layout of the currently-bound vertex buffer data for use with the
-	 * standard shader.
+	 * given shader.
+	 * 
+	 * @param shader
+	 * @param parts
 	 */
-	private void setVertexBufferLayout() {
+	private static void setVertexBufferLayout(Shader shader, BufferLayoutParts... parts) {
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-		def bytesPerVertex = floatsPerVertex * Float.BYTES
-
-		def colourAttrib = checkForError { -> glGetAttribLocation(standardShader.programId, 'colour') }
-		checkForError { -> glEnableVertexAttribArray(colourAttrib) }
-		checkForError { -> glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, false, bytesPerVertex, 0) }
-
-		def positionAttribute = checkForError { -> glGetAttribLocation(standardShader.programId, 'position') }
-		checkForError { -> glEnableVertexAttribArray(positionAttribute) }
-		checkForError { -> glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES) }
-
-		def texCoordAttrib = checkForError { -> glGetAttribLocation(standardShader.programId, 'texCoord') }
-		checkForError { -> glEnableVertexAttribArray(texCoordAttrib) }
-		checkForError { -> glVertexAttribPointer(texCoordAttrib, 2, GL_FLOAT, false, bytesPerVertex, Colour.BYTES + Vector2f.BYTES) }
+		def floatsPerVertex = parts.sum { part -> part.size } as int
+		def stride = floatsPerVertex * Float.BYTES
+		def offset = 0
+		parts.each { part ->
+			def location = checkForError { -> glGetAttribLocation(shader.programId, part.name) }
+			checkForError { -> glEnableVertexAttribArray(location) }
+			checkForError { -> glVertexAttribPointer(location, part.size, GL_FLOAT, false, stride, offset) }
+			offset += (part.size * Float.BYTES)
+		}
 	}
 
 	/**
@@ -442,11 +452,29 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void updateCamera(Matrix4f view) {
 
-		checkForError { -> glUseProgram(standardShader.programId) }
+		// TODO: Use a uniform buffer object to share these values across shaders
+		shaders.each { shader ->
+			def programId = shader.programId
+			checkForError { -> glUseProgram(programId) }
 
-		def viewLocation = checkForError { -> glGetUniformLocation(standardShader.programId, 'view') }
-		checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+			def viewLocation = checkForError { -> glGetUniformLocation(shader.programId, 'view') }
+			checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+		}
 
 		checkForError { -> glUseProgram(0) }
+	}
+
+	/**
+	 * A description of the data comprising a section of a vertex buffer layout.
+	 */
+	@TupleConstructor(defaults = false)
+	private static enum BufferLayoutParts {
+
+		COLOUR   ('colour',   Colour.FLOATS),
+		POSITION ('position', Vector2f.FLOATS),
+		TEXCOORD ('texCoord', Vector2f.FLOATS)
+
+		final String name
+		final int size
 	}
 }
