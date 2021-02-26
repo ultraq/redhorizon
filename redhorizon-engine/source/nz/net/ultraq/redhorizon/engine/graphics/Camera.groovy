@@ -84,7 +84,7 @@ class Camera implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		averageNanos('updateCamera', 2f) { ->
+		averageNanos('Camera.render', 2f) { ->
 			if (moved) {
 				renderer.updateCamera(view)
 				moved = false

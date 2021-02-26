@@ -148,16 +148,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		// TODO: Use a uniform buffer object to share these values across shaders
 		shaders.each { shader ->
-			def programId = shader.programId
-			checkForError { -> glUseProgram(programId) }
-
-			def projectionLocation = checkForError { -> glGetUniformLocation(programId, 'projection') }
-			checkForError { -> glUniformMatrix4fv(projectionLocation, false, projection as float[]) }
-			def viewLocation = checkForError { -> glGetUniformLocation(programId, 'view') }
-			checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+			def projectionLocation = getProgramUniformLocation(shader, 'projection')
+			checkForError { -> glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projection as float[]) }
+			def viewLocation = getProgramUniformLocation(shader, 'view')
+			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
 		}
-
-		checkForError { -> glUseProgram(0) }
 	}
 
 	@Override
@@ -454,14 +449,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		// TODO: Use a uniform buffer object to share these values across shaders
 		shaders.each { shader ->
-			def programId = shader.programId
-			checkForError { -> glUseProgram(programId) }
-
 			def viewLocation = checkForError { -> glGetUniformLocation(shader.programId, 'view') }
-			checkForError { -> glUniformMatrix4fv(viewLocation, false, view as float[]) }
+			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
 		}
-
-		checkForError { -> glUseProgram(0) }
 	}
 
 	/**
