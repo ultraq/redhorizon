@@ -25,7 +25,7 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL33C.*
+import static org.lwjgl.opengl.GL41C.*
 
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
