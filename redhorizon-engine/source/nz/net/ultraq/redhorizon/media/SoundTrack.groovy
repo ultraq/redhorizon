@@ -95,7 +95,7 @@ class SoundTrack implements AudioElement, Playable, SelfVisitable {
 		this.bufferSize = bufferSize
 		this.soundDataWorker = soundDataWorker
 		this.soundDataWorker.on(StreamingSampleEvent) { event ->
-			samples << ByteBuffer.fromBuffersDirect(event.sample)
+			samples << event.sample
 			if (bufferReady.count && !samples.remainingCapacity()) {
 				bufferReady.countDown()
 			}

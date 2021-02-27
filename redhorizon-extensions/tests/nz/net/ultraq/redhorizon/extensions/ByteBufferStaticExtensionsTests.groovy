@@ -28,11 +28,6 @@ import java.nio.ByteOrder
  */
 class ByteBufferStaticExtensionsTests extends Specification {
 
-	def "allocateDirectNative returns a natively ordered buffer"() {
-		expect:
-			ByteBuffer.allocateDirectNative(8).order() == ByteOrder.nativeOrder()
-	}
-
 	def "allocateNative returns a natively ordered buffer"() {
 		expect:
 			ByteBuffer.allocateNative(8).order() == ByteOrder.nativeOrder()

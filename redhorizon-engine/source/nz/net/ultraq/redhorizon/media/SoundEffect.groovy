@@ -53,7 +53,7 @@ class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
 		bits      = soundFile.bits
 		channels  = soundFile.channels
 		frequency = soundFile.frequency
-		buffer    = ByteBuffer.fromBuffersDirect(soundFile.getSoundData())
+		buffer    = soundFile.soundData
 	}
 
 	@Override

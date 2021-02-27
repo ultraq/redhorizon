@@ -27,20 +27,6 @@ import java.nio.ByteOrder
 class ByteBufferStaticExtensions {
 
 	/**
-	 * Allocates a direct {@code ByteBuffer} with native byte ordering.
-	 * 
-	 * @param self
-	 * @param capacity
-	 * @return Natively ordered {@code ByteBuffer}.
-	 */
-	static ByteBuffer allocateDirectNative(ByteBuffer self, int capacity) {
-
-		return ByteBuffer
-			.allocateDirect(capacity)
-			.order(ByteOrder.nativeOrder())
-	}
-
-	/**
 	 * Allocates a {@code ByteBuffer} with native byte ordering.
 	 * 
 	 * @param self
@@ -66,21 +52,6 @@ class ByteBufferStaticExtensions {
 
 		return buffers
 			.inject(ByteBuffer.allocateNative(buffers.sum { it.limit() })) { acc, b -> acc.put(b) }
-			.rewind()
-	}
-
-	/**
-	 * Allocate a direct, native-ordered {@code ByteBuffer}, with data from
-	 * one or more {@code ByteBuffer}s.
-	 * 
-	 * @param self
-	 * @param buffers
-	 * @return
-	 */
-	static ByteBuffer fromBuffersDirect(ByteBuffer self, ByteBuffer... buffers) {
-
-		return buffers
-			.inject(ByteBuffer.allocateDirectNative(buffers.sum { it.limit() })) { acc, b -> acc.put(b) }
 			.rewind()
 	}
 

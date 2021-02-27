@@ -26,12 +26,11 @@ import org.lwjgl.opengl.GLCapabilities
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
+import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
 
 /**
  * A graphics renderer utilizing the modern OpenGL API, so OpenGL 3.3+ and
@@ -191,18 +190,19 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
-		vertices.each { vertex ->
-			verticesBuffer
-				.put(colour as float[])
-				.put(vertex as float[])
-		}
-		verticesBuffer.flip()
-
 		def vertexBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		stackPush().withCloseable { stack ->
+			def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
+			def verticesBuffer = stack.mallocFloat(floatsPerVertex * vertices.length)
+			vertices.each { vertex ->
+				verticesBuffer
+					.put(colour as float[])
+					.put(vertex as float[])
+			}
+			verticesBuffer.flip()
+			checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
+			checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		}
 
 		setVertexBufferLayout(primitiveShader,
 			BufferLayoutParts.COLOUR,
@@ -283,33 +283,35 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def vertexArrayId = checkForError { -> glGenVertexArrays() }
 		checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-		def verticesBuffer = FloatBuffer
-			.allocateDirectNative(floatsPerVertex * 4)
-			.put([
-				// Colour   // Position                 // Texture
-				1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
-				1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
-				1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
-				1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0,
-			] as float[])
-			.flip()
-
 		def vertexBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		stackPush().withCloseable { stack ->
+			def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
+			def verticesBuffer = stack.mallocFloat(floatsPerVertex * 4)
+				.put([
+					// Colour   // Position                 // Texture
+					1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
+					1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
+					1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
+					1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0,
+				] as float[])
+				.flip()
+
+			checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
+			checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		}
 
 		// The above is unique vertices for a rectangle, but to draw a rectangle we
 		// need to draw 2 triangles that share 2 vertices, so generate an element
 		// buffer mapping triangle points to the above.
-		def indexBuffer = IntBuffer
-			.allocateDirectNative(6)
-			.put([0, 1, 3, 1, 2, 3] as int[])
-			.flip()
-
 		def elementBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
-		checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
+		stackPush().withCloseable { stack ->
+			def indexBuffer = stack.mallocInt(6)
+				.put([0, 1, 3, 1, 2, 3] as int[])
+				.flip()
+
+			checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
+			checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
+		}
 
 		setVertexBufferLayout(textureShader,
 			BufferLayoutParts.COLOUR,
@@ -322,7 +324,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			vertexBufferId: vertexBufferId,
 			elementBufferId: elementBufferId,
 			elementType: GL_TRIANGLES,
-			elementCount: indexBuffer.capacity()
+			elementCount: 6
 		)
 	}
 
@@ -340,8 +342,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			format == 3 ? GL_RGB :
 			format == 4 ? GL_RGBA :
 			0
-		checkForError { ->
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
+		stackPush().withCloseable { stack ->
+			def textureBuffer = stack.malloc(data.capacity()).put(data).flip()
+			data.rewind()
+			checkForError { -> glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer) }
 		}
 
 		return new Texture(
@@ -379,7 +383,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void drawMaterial(Material material) {
 
-		averageNanos('drawMaterial', 2f, logger) { ->
+		averageNanos('drawMaterial', 1f, logger) { ->
 			def mesh = material.mesh
 			def texture = material.texture
 			def shader = material.shader
