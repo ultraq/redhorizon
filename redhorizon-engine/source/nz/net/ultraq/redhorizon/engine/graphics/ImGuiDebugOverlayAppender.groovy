@@ -32,7 +32,15 @@ class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> {
 	@Override
 	protected void append(E eventObject) {
 
-		def encodedEvent = encoder.encode(eventObject)
-		ImGuiRenderer.instance?.addDebugLine(new String(encodedEvent))
+		def imGuiRenderer = ImGuiRenderer.instance
+		if (imGuiRenderer) {
+			def message = new String(encoder.encode(eventObject))
+			if (eventObject.message.contains('average time')) {
+				imGuiRenderer.setPersistentLine(eventObject.argumentArray[0], message)
+			}
+			else {
+				imGuiRenderer.addDebugLine(message)
+			}
+		}
 	}
 }

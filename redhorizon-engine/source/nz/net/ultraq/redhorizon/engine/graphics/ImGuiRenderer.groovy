@@ -40,6 +40,7 @@ class ImGuiRenderer implements AutoCloseable {
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
+	private final Map<String,String> persistentLines = [:]
 	private int materialsDrawn = 0
 
 	/**
@@ -100,6 +101,9 @@ class ImGuiRenderer implements AutoCloseable {
 			ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Materials drawn: ${materialsDrawn}")
+		persistentLines.keySet().sort().each { key ->
+			ImGui.text(persistentLines[key])
+		}
 		materialsDrawn = 0
 		if (debugLines.size()) {
 			ImGui.separator()
@@ -128,6 +132,19 @@ class ImGuiRenderer implements AutoCloseable {
 	static ImGuiRenderer getInstance() {
 
 		return rendererInstance
+	}
+
+	/**
+	 * Set a line that appears with the other persistent debug lines in the
+	 * overlay.
+	 * 
+	 * @param key
+	 * @param line
+	 */
+	@PackageScope
+	void setPersistentLine(String key, String line) {
+
+		persistentLines[key] = line
 	}
 
 	/**
