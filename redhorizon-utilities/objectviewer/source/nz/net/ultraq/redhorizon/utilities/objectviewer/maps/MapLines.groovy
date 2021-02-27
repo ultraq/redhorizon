@@ -62,7 +62,7 @@ class MapLines implements GraphicsElement, SelfVisitable {
 			null
 		)
 		boundaryLines = renderer.createMaterial(
-			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary.asPoints()),
+			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
 			null
 		)
 	}

@@ -69,19 +69,21 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	int createBuffer(ByteBuffer data, int bits, int channels, int frequency) {
 
-		int bufferId = checkForError { -> alGenBuffers() }
-		def format =
-			bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
-			bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
-			bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
-			bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
-			0
-		stackPush().withCloseable { stack ->
-			def soundBuffer = stack.malloc(data.capacity()).put(data).flip()
+		return stackPush().withCloseable { stack ->
+			int bufferId = checkForError { -> alGenBuffers() }
+			def format =
+				bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
+				bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
+				bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
+				bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
+				0
+			def soundBuffer = stack.malloc(data.capacity())
+				.put(data)
+				.flip()
 			data.rewind()
 			checkForError { -> alBufferData(bufferId, format, soundBuffer, frequency) }
+			return bufferId
 		}
-		return bufferId
 	}
 
 	@Override
@@ -169,17 +171,21 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation) {
 
-		checkForError { -> alListenerfv(AL_POSITION, position as float[]) }
+		stackPush().withCloseable { stack ->
+			checkForError { -> alListenerfv(AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS))) }
 //		checkForError { -> alListenerfv(AL_VELOCITY, velocity as float[]) }
 //		checkForError { -> alListenerfv(AL_ORIENTATION, orientation as float[]) }
+		}
 	}
 
 	@Override
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
 
-		checkForError { -> alSourcefv(sourceId, AL_POSITION, position as float[]) }
+		stackPush().withCloseable { stack ->
+			checkForError { -> alSourcefv(sourceId, AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS))) }
 //		checkForError { -> alSourcefv(sourceId, AL_DIRECTION, direction as float[]) }
 //		checkForError { -> alSourcefv(sourceId, AL_VELOCITY, velocity as float[]) }
+		}
 	}
 
 	@Override

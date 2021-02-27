@@ -146,12 +146,17 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void createCamera(Matrix4f projection, Matrix4f view) {
 
-		// TODO: Use a uniform buffer object to share these values across shaders
-		shaders.each { shader ->
-			def projectionLocation = getProgramUniformLocation(shader, 'projection')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projection as float[]) }
-			def viewLocation = getProgramUniformLocation(shader, 'view')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
+		stackPush().withCloseable { stack ->
+			// TODO: Use a uniform buffer object to share these values across shaders
+			shaders.each { shader ->
+				def projectionBuffer = projection.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def projectionLocation = getProgramUniformLocation(shader, 'projection')
+				checkForError { -> glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projectionBuffer) }
+
+				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def viewLocation = getProgramUniformLocation(shader, 'view')
+				checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer) }
+			}
 		}
 	}
 
@@ -187,34 +192,33 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 */
 	private Mesh createPrimitivesMesh(Colour colour, int vertexType, Vector2f... vertices) {
 
-		def vertexArrayId = checkForError { -> glGenVertexArrays() }
-		checkForError { -> glBindVertexArray(vertexArrayId) }
+		return stackPush().withCloseable { stack ->
+			def vertexArrayId = checkForError { -> glGenVertexArrays() }
+			checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def vertexBufferId = glGenBuffers()
-		stackPush().withCloseable { stack ->
-			def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS
-			def verticesBuffer = stack.mallocFloat(floatsPerVertex * vertices.length)
+			def vertexBufferId = glGenBuffers()
+			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS) * vertices.length)
 			vertices.each { vertex ->
 				verticesBuffer
-					.put(colour as float[])
-					.put(vertex as float[])
+					.put(colour.r, colour.g, colour.b, colour.a)
+					.put(vertex.x, vertex.y)
 			}
 			verticesBuffer.flip()
 			checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
 			checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+
+			setVertexBufferLayout(primitiveShader,
+				BufferLayoutParts.COLOUR,
+				BufferLayoutParts.POSITION
+			)
+
+			return new Mesh(
+				vertexArrayId: vertexArrayId,
+				vertexBufferId: vertexBufferId,
+				vertexType: vertexType,
+				vertexCount: vertices.length
+			)
 		}
-
-		setVertexBufferLayout(primitiveShader,
-			BufferLayoutParts.COLOUR,
-			BufferLayoutParts.POSITION
-		)
-
-		return new Mesh(
-			vertexArrayId: vertexArrayId,
-			vertexBufferId: vertexBufferId,
-			vertexType: vertexType,
-			vertexCount: vertices.length
-		)
 	}
 
 	/**
@@ -280,77 +284,74 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
-		def vertexArrayId = checkForError { -> glGenVertexArrays() }
-		checkForError { -> glBindVertexArray(vertexArrayId) }
+		return stackPush().withCloseable { stack ->
+			def vertexArrayId = checkForError { -> glGenVertexArrays() }
+			checkForError { -> glBindVertexArray(vertexArrayId) }
 
-		def vertexBufferId = glGenBuffers()
-		stackPush().withCloseable { stack ->
-			def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-			def verticesBuffer = stack.mallocFloat(floatsPerVertex * 4)
-				.put([
+			def vertexBufferId = glGenBuffers()
+			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS) * 4)
+				.put(
 					// Colour   // Position                 // Texture
-					1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
-					1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
+					1, 1, 1, 1, surface.minX, surface.minY, 0, 0,
+					1, 1, 1, 1, surface.minX, surface.maxY, 0, repeatY,
 					1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
-					1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0,
-				] as float[])
+					1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0
+				)
 				.flip()
-
 			checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
 			checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
-		}
 
-		// The above is unique vertices for a rectangle, but to draw a rectangle we
-		// need to draw 2 triangles that share 2 vertices, so generate an element
-		// buffer mapping triangle points to the above.
-		def elementBufferId = glGenBuffers()
-		stackPush().withCloseable { stack ->
+			// The above is unique vertices for a rectangle, but to draw a rectangle we
+			// need to draw 2 triangles that share 2 vertices, so generate an element
+			// buffer mapping triangle points to the above.
+			def elementBufferId = glGenBuffers()
 			def indexBuffer = stack.mallocInt(6)
-				.put([0, 1, 3, 1, 2, 3] as int[])
+				.put(0, 1, 3, 1, 2, 3)
 				.flip()
-
 			checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
 			checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
+
+			setVertexBufferLayout(textureShader,
+				BufferLayoutParts.COLOUR,
+				BufferLayoutParts.POSITION,
+				BufferLayoutParts.TEXCOORD
+			)
+
+			return new Mesh(
+				vertexArrayId: vertexArrayId,
+				vertexBufferId: vertexBufferId,
+				elementBufferId: elementBufferId,
+				elementType: GL_TRIANGLES,
+				elementCount: 6
+			)
 		}
-
-		setVertexBufferLayout(textureShader,
-			BufferLayoutParts.COLOUR,
-			BufferLayoutParts.POSITION,
-			BufferLayoutParts.TEXCOORD
-		)
-
-		return new Mesh(
-			vertexArrayId: vertexArrayId,
-			vertexBufferId: vertexBufferId,
-			elementBufferId: elementBufferId,
-			elementType: GL_TRIANGLES,
-			elementCount: 6
-		)
 	}
 
 	@Override
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
 
-		int textureId = checkForError { ->
-			return glGenTextures()
-		}
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		return stackPush().withCloseable { stack ->
+			int textureId = checkForError { ->
+				return glGenTextures()
+			}
+			checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
+			checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+			checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
 
-		def colourFormat =
-			format == 3 ? GL_RGB :
-			format == 4 ? GL_RGBA :
-			0
-		stackPush().withCloseable { stack ->
-			def textureBuffer = stack.malloc(data.capacity()).put(data).flip()
+			def colourFormat =
+				format == 3 ? GL_RGB :
+				format == 4 ? GL_RGBA :
+				0
+			def textureBuffer = stack.malloc(data.capacity())
+				.put(data)
+				.flip()
 			data.rewind()
 			checkForError { -> glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer) }
-		}
 
-		return new Texture(
-			textureId: textureId
-		)
+			return new Texture(
+				textureId: textureId
+			)
+		}
 	}
 
 	@Override
@@ -384,34 +385,37 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void drawMaterial(Material material) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
-			def mesh = material.mesh
-			def texture = material.texture
-			def shader = material.shader
-			def model = material.model
+			stackPush().withCloseable { stack ->
+				def mesh = material.mesh
+				def texture = material.texture
+				def shader = material.shader
+				def model = material.model
 
-			if (texture) {
-				checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
-			}
-			checkForError { -> glUseProgram(shader.programId) }
+				if (texture) {
+					checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
+				}
+				checkForError { -> glUseProgram(shader.programId) }
 
-			def modelLocation = getProgramUniformLocation(shader, 'model')
-			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
+				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def modelLocation = getProgramUniformLocation(shader, 'model')
+				checkForError { -> glUniformMatrix4fv(modelLocation, false, modelBuffer) }
 
-			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
-			if (mesh.vertexType) {
-				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
-			}
-			else if (mesh.elementType) {
-				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+				checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+				if (mesh.vertexType) {
+					checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+				}
+				else if (mesh.elementType) {
+					checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+				}
+
+				checkForError { -> glUseProgram(0) }
+				if (texture) {
+					checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
+				}
 			}
 
-			checkForError { -> glUseProgram(0) }
-			if (texture) {
-				checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
-			}
+			trigger(materialDrawnEvent)
 		}
-
-		trigger(materialDrawnEvent)
 	}
 
 	/**
@@ -466,10 +470,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void updateCamera(Matrix4f view) {
 
-		// TODO: Use a uniform buffer object to share these values across shaders
-		shaders.each { shader ->
-			def viewLocation = getProgramUniformLocation(shader, 'view')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
+		stackPush().withCloseable { stack ->
+			// TODO: Use a uniform buffer object to share these values across shaders
+			shaders.each { shader ->
+				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def viewLocation = getProgramUniformLocation(shader, 'view')
+				checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer) }
+			}
 		}
 	}
 
