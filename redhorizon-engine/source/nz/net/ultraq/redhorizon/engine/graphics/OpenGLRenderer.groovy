@@ -379,7 +379,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void drawMaterial(Material material) {
 
-		averageNanos('drawMaterial', 2f) { ->
+		averageNanos('drawMaterial', 2f, logger) { ->
 			def mesh = material.mesh
 			def texture = material.texture
 			def shader = material.shader

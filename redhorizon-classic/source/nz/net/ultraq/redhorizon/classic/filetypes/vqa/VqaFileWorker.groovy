@@ -150,7 +150,7 @@ class VqaFileWorker extends Worker {
 	void work() {
 
 		Thread.currentThread().name = 'VqaFile :: Decoding'
-		logger.debug('VqaFile decoding started')
+		logger.debug('Decoding started')
 
 		def codebook = null
 		def codebookCompressed = false
@@ -220,7 +220,7 @@ class VqaFileWorker extends Worker {
 
 					// Video data
 					case ~/VPT./:
-						def frame = average('Decoding frame', 1f) { ->
+						def frame = average('Decoding frame', 1f, logger) { ->
 							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 						}
 						trigger(new StreamingFrameEvent(frame))
@@ -255,7 +255,7 @@ class VqaFileWorker extends Worker {
 		}
 
 		if (!stopped) {
-			logger.debug('VqaFile decoding complete')
+			logger.debug('Decoding complete')
 		}
 	}
 }

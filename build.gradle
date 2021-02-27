@@ -60,6 +60,10 @@ subprojects {
 	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/3.4.0/gradle-support.gradle'
 
 	sourceCompatibility = 11
+//	configurations.all {
+//		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//		resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+//	}
 
 	dependencies {
 		implementation(

@@ -19,7 +19,7 @@
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%-5level - %msg%n</pattern>
+			<pattern>[%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
@@ -32,7 +32,7 @@
 
 	<appender name="gui" class="nz.net.ultraq.redhorizon.engine.graphics.ImGuiDebugOverlayAppender">
 		<encoder>
-			<pattern>%-5level - %msg%n</pattern>
+			<pattern>%-5level %logger{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
 

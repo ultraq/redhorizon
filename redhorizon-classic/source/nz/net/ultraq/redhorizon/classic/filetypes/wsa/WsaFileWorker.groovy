@@ -48,7 +48,7 @@ class WsaFileWorker extends Worker {
 	void work() {
 
 		Thread.currentThread().name = 'WsaFile :: Decoding'
-		logger.debug('WsaFile decoding started')
+		logger.debug('Decoding started')
 
 		def frameSize = width * height
 		def xorDelta = new XORDelta(frameSize)
@@ -56,7 +56,7 @@ class WsaFileWorker extends Worker {
 
 		// Decode frame by frame
 		for (def frame = 0; canContinue && frame < numFrames; frame++) {
-			def colouredFrame = average('WsaFile - Decoding frame', 1f) { ->
+			def colouredFrame = average('Decoding frame', 1f, logger) { ->
 				def indexedFrame = xorDelta.decode(
 					lcw.decode(
 						ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
@@ -70,7 +70,7 @@ class WsaFileWorker extends Worker {
 		}
 
 		if (!stopped) {
-			logger.debug('WsaFile decoding complete')
+			logger.debug('Decoding complete')
 		}
 	}
 }
