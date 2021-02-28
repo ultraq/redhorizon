@@ -23,9 +23,11 @@ import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
+import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
+import static org.lwjgl.opengl.KHRDebug.*
 
 import groovy.transform.Memoized
 import groovy.transform.TupleConstructor
@@ -34,8 +36,7 @@ import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
 /**
- * A graphics renderer utilizing the modern OpenGL API, so OpenGL 3.3+ and
- * shaders only.
+ * A graphics renderer utilizing the modern OpenGL API, version 4.1.
  * 
  * @author Emanuel Rabina
  */
@@ -44,9 +45,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 	private static final RendererEvent materialDrawnEvent = new MaterialDrawnEvent()
 
-	protected final GLCapabilities capabilities
-	protected final Colour clearColour
-	protected final boolean filter
+	private final GraphicsConfiguration config
+	private final GLCapabilities capabilities
+	private final boolean useCheckErrorFallback
 
 	private final List<Shader> shaders = []
 	private final Shader primitiveShader
@@ -61,40 +62,40 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 */
 	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
+		this.config = config
 		capabilities = GL.createCapabilities()
 
-//		if (capabilities.GL_KHR_debug) {
-//			glEnable(GL_DEBUG_OUTPUT)
-//			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
-//			glDebugMessageCallback(new GLDebugMessageCallback() {
-//				@Override
-//				void invoke(int source, int type, int id, int severity, int length, long message, long userParam) {
-//					logger.error('OpenGL error: {}', getMessage(length, message))
-//				}
-//			}, 0)
-//		}
+		if (capabilities.GL_KHR_debug) {
+			glEnable(GL_DEBUG_OUTPUT)
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
+			glDebugMessageCallback(new GLDebugMessageCallback() {
+				@Override
+				void invoke(int source, int type, int id, int severity, int length, long message, long userParam) {
+					if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+						throw new Exception("OpenGL error: ${getMessage(length, message)}")
+					}
+				}
+			}, 0)
+			useCheckErrorFallback = false
+		}
+		else {
+			useCheckErrorFallback = true
+		}
 
-		clearColour = config.clearColour
-		filter = config.filter
-
-		glClearColor(clearColour.r, clearColour.g, clearColour.b, 1)
-
-		// Edge smoothing
-		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
+		glClearColor(config.clearColour.r, config.clearColour.g, config.clearColour.b, config.clearColour.a)
 
 		// Depth testing
-		checkForError { -> glEnable(GL_DEPTH_TEST) }
-		checkForError { -> glDepthFunc(GL_LEQUAL) }
+		glEnable(GL_DEPTH_TEST)
+		glDepthFunc(GL_LEQUAL)
 
 		// Blending and blending function
-		checkForError { -> glEnable(GL_BLEND) }
-		checkForError { -> glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
+		glEnable(GL_BLEND)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
 		def viewportSize = context.framebufferSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
-		checkForError { -> glViewport(0, 0, viewportSize.width, viewportSize.height) }
+		glViewport(0, 0, viewportSize.width, viewportSize.height)
 //		context.on(FramebufferSizeEvent) { event ->
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
@@ -111,7 +112,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * 
 	 * @param closure
 	 */
-	protected static <T> T checkForError(Closure<T> closure) {
+	private static <T> T checkForError(Closure<T> closure) {
 
 		def result = closure()
 		def error = glGetError()
@@ -150,9 +151,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		// TODO: Use a uniform buffer object to share these values across shaders
 		shaders.each { shader ->
 			def projectionLocation = getProgramUniformLocation(shader, 'projection')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projection as float[]) }
+			glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projection as float[])
 			def viewLocation = getProgramUniformLocation(shader, 'view')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
+			glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[])
 		}
 	}
 
@@ -188,8 +189,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 */
 	private Mesh createPrimitivesMesh(Colour colour, int vertexType, Vector2f... vertices) {
 
-		def vertexArrayId = checkForError { -> glGenVertexArrays() }
-		checkForError { -> glBindVertexArray(vertexArrayId) }
+		def vertexArrayId = glGenVertexArrays()
+		glBindVertexArray(vertexArrayId)
 
 		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
 		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
@@ -201,8 +202,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		verticesBuffer.flip()
 
 		def vertexBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
 
 		setVertexBufferLayout(primitiveShader,
 			BufferLayoutParts.COLOUR,
@@ -234,9 +235,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
 				return stream.text
 			}
-			def shaderId = checkForError { -> glCreateShader(type) }
-			checkForError { -> glShaderSource(shaderId, shaderSource) }
-			checkForError { -> glCompileShader(shaderId) }
+			def shaderId = glCreateShader(type)
+			glShaderSource(shaderId, shaderSource)
+			glCompileShader(shaderId)
 
 			def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
 			if (status != GL_TRUE) {
@@ -250,11 +251,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		 * Link multiple shader parts together into a shader program.
 		 */
 		def createProgram = { int vertexShaderId, int fragmentShaderId ->
-			def programId = checkForError { -> glCreateProgram() }
-			checkForError { -> glAttachShader(programId, vertexShaderId) }
-			checkForError { -> glAttachShader(programId, fragmentShaderId) }
-			checkForError { -> glLinkProgram(programId) }
-			checkForError { -> glValidateProgram(programId) }
+			def programId = glCreateProgram()
+			glAttachShader(programId, vertexShaderId)
+			glAttachShader(programId, fragmentShaderId)
+			glLinkProgram(programId)
+			glValidateProgram(programId)
 
 			def status = glGetProgrami(programId, GL_LINK_STATUS)
 			if (status != GL_TRUE) {
@@ -267,8 +268,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def vertexShaderId = createShader(GL_VERTEX_SHADER)
 		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
-		checkForError { -> glDeleteShader(vertexShaderId) }
-		checkForError { -> glDeleteShader(fragmentShaderId) }
+		glDeleteShader(vertexShaderId)
+		glDeleteShader(fragmentShaderId)
 
 		def shader = new Shader(
 			programId: programId
@@ -280,8 +281,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
-		def vertexArrayId = checkForError { -> glGenVertexArrays() }
-		checkForError { -> glBindVertexArray(vertexArrayId) }
+		def vertexArrayId = glGenVertexArrays()
+		glBindVertexArray(vertexArrayId)
 
 		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
 		def verticesBuffer = FloatBuffer
@@ -296,8 +297,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			.flip()
 
 		def vertexBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId) }
-		checkForError { -> glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW) }
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
 
 		// The above is unique vertices for a rectangle, but to draw a rectangle we
 		// need to draw 2 triangles that share 2 vertices, so generate an element
@@ -308,8 +309,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			.flip()
 
 		def elementBufferId = glGenBuffers()
-		checkForError { -> glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId) }
-		checkForError { -> glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW) }
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
 
 		setVertexBufferLayout(textureShader,
 			BufferLayoutParts.COLOUR,
@@ -327,22 +328,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = this.filter) {
+	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = config.filter) {
 
-		int textureId = checkForError { ->
-			return glGenTextures()
-		}
-		checkForError { -> glBindTexture(GL_TEXTURE_2D, textureId) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
-		checkForError { -> glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST) }
+		int textureId = glGenTextures()
+		glBindTexture(GL_TEXTURE_2D, textureId)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
 		def colourFormat =
 			format == 3 ? GL_RGB :
 			format == 4 ? GL_RGBA :
 			0
-		checkForError { ->
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
-		}
+		glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
 
 		return new Texture(
 			textureId: textureId
@@ -362,18 +359,16 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteMesh(Mesh mesh) {
 
 		if (mesh.elementBufferId) {
-			checkForError { -> glDeleteBuffers(mesh.elementBufferId) }
+			glDeleteBuffers(mesh.elementBufferId)
 		}
-		checkForError { -> glDeleteBuffers(mesh.vertexBufferId) }
-		checkForError { -> glDeleteVertexArrays(mesh.vertexArrayId) }
+		glDeleteBuffers(mesh.vertexBufferId)
+		glDeleteVertexArrays(mesh.vertexArrayId)
 	}
 
 	@Override
 	void deleteTexture(Texture texture) {
 
-		checkForError { ->
-			glDeleteTextures(texture.textureId)
-		}
+		glDeleteTextures(texture.textureId)
 	}
 
 	@Override
@@ -386,24 +381,24 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def model = material.model
 
 			if (texture) {
-				checkForError { -> glBindTexture(GL_TEXTURE_2D, texture.textureId) }
+				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 			}
-			checkForError { -> glUseProgram(shader.programId) }
+			glUseProgram(shader.programId)
 
 			def modelLocation = getProgramUniformLocation(shader, 'model')
-			checkForError { -> glUniformMatrix4fv(modelLocation, false, model as float[]) }
+			glUniformMatrix4fv(modelLocation, false, model as float[])
 
-			checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+			glBindVertexArray(mesh.vertexArrayId)
 			if (mesh.vertexType) {
-				checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+				glDrawArrays(mesh.vertexType, 0, mesh.vertexCount)
 			}
 			else if (mesh.elementType) {
-				checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+				glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
 			}
 
-			checkForError { -> glUseProgram(0) }
+			glUseProgram(0)
 			if (texture) {
-				checkForError { -> glBindTexture(GL_TEXTURE_2D, 0) }
+				glBindTexture(GL_TEXTURE_2D, 0)
 			}
 		}
 
@@ -420,7 +415,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Memoized
 	private static int getProgramUniformLocation(Shader shader, String name) {
 
-		return checkForError { -> glGetUniformLocation(shader.programId, name) }
+		return glGetUniformLocation(shader.programId, name)
 	}
 
 	/**
@@ -436,9 +431,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def stride = floatsPerVertex * Float.BYTES
 		def offset = 0
 		parts.each { part ->
-			def location = checkForError { -> glGetAttribLocation(shader.programId, part.name) }
-			checkForError { -> glEnableVertexAttribArray(location) }
-			checkForError { -> glVertexAttribPointer(location, part.size, GL_FLOAT, false, stride, offset) }
+			def location = glGetAttribLocation(shader.programId, part.name)
+			glEnableVertexAttribArray(location)
+			glVertexAttribPointer(location, part.size, GL_FLOAT, false, stride, offset)
 			offset += (part.size * Float.BYTES)
 		}
 	}
@@ -465,7 +460,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		// TODO: Use a uniform buffer object to share these values across shaders
 		shaders.each { shader ->
 			def viewLocation = getProgramUniformLocation(shader, 'view')
-			checkForError { -> glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[]) }
+			glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[])
 		}
 	}
 

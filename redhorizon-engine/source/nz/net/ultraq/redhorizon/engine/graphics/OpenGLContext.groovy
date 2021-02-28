@@ -49,11 +49,7 @@ class OpenGLContext extends Context implements EventTarget {
 	// The aspect ratio of a 320x200 image on modern displays
 	private static final float ASPECT_RATIO_MODERN = 16 / 10
 
-	// Configuration values
-	private final boolean fixAspectRatio
-	private final boolean fullScreen
-	private final boolean modernRenderer
-
+	private final GraphicsConfiguration config
 	final long window
 	final Dimension windowSize
 	final Dimension framebufferSize
@@ -64,6 +60,8 @@ class OpenGLContext extends Context implements EventTarget {
 	 * @param config
 	 */
 	OpenGLContext(GraphicsConfiguration config) {
+
+		this.config = config
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -77,13 +75,11 @@ class OpenGLContext extends Context implements EventTarget {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
-		fixAspectRatio = config.fixAspectRatio
-		fullScreen = config.fullScreen
 		def monitor = glfwGetPrimaryMonitor()
 		def videoMode = glfwGetVideoMode(monitor)
-		windowSize = fullScreen ?
+		windowSize = config.fullScreen ?
 			new Dimension(videoMode.width(), videoMode.height()) :
-			calculateWindowSize(fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
+			calculateWindowSize(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
@@ -92,9 +88,12 @@ class OpenGLContext extends Context implements EventTarget {
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
+		if (config.debug) {
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
+		}
 
 		logger.debug('Creating a window of size {}', windowSize)
-		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', fullScreen ? monitor : NULL, NULL)
+		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', config.fullScreen ? monitor : NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}

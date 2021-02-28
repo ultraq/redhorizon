@@ -18,29 +18,38 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import static Colour.BLACK
 
+import groovy.transform.MapConstructor
+
 /**
  * Graphics configuration object.
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor(excludes = ['debug'])
 class GraphicsConfiguration {
 
-	Colour clearColour = BLACK
+	final Colour clearColour = BLACK
+
+	/**
+	 * Enable debugging checks and logging.  Is always {@code true} during
+	 * development.
+	 */
+	final boolean debug = true
 
 	/**
 	 * Whether to use nearest-neighbour filtering on textures.
 	 */
-	boolean filter
+	final boolean filter
 
 	/**
 	 * Whether to adjust the aspect ratio of visual elements for today's displays,
 	 * given that a lot of the graphics of the time were on CRT displays using
 	 * resolutions that resulted in tall pixels.
 	 */
-	boolean fixAspectRatio
+	final boolean fixAspectRatio
 
 	/**
 	 * Set to use the entire screen instead of a floating window.
 	 */
-	boolean fullScreen
+	final boolean fullScreen
 }
