@@ -20,8 +20,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
+import nz.net.ultraq.redhorizon.filetypes.Palette
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 
@@ -38,11 +40,13 @@ class UnitRenderer implements GraphicsElement {
 	protected final Unit unit
 	protected final int headings
 	protected final ByteBuffer[] imagesData
+	protected final Palette palette
 	protected final float degreesPerHeading
 
 	protected Material material
 	protected Mesh mesh
 	protected Texture[] textures
+	protected Texture texturePalette
 
 	/**
 	 * Constructor, create a unit renderer with the following frames.
@@ -52,13 +56,15 @@ class UnitRenderer implements GraphicsElement {
 	 * @param headings
 	 * @param turretHeadings
 	 * @param imagesData
+	 * @param palette
 	 */
-	UnitRenderer(String type, Unit unit, int headings, ByteBuffer[] imagesData) {
+	UnitRenderer(String type, Unit unit, int headings, ByteBuffer[] imagesData, Palette palette) {
 
 		this.type = type
 		this.unit = unit
 		this.headings = headings
 		this.imagesData = imagesData
+		this.palette = palette
 
 		degreesPerHeading = (360f / headings) as float
 	}
@@ -71,17 +77,20 @@ class UnitRenderer implements GraphicsElement {
 			renderer.deleteTexture(texture)
 		}
 		textures = null
+		renderer.deleteTexture(texturePalette)
+		texturePalette = null
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
-		material = renderer.createMaterial(mesh, null)
+		texturePalette = renderer.createTexturePalette(palette)
+		material = renderer.createMaterial(mesh, null, texturePalette, ShaderType.TEXTURE_PALETTE)
 			.scale(unit.scale)
 			.translate(unit.position)
 		textures = imagesData.collect { data ->
-			return renderer.createTexture(data, FORMAT_RGBA.value, unit.width, unit.height)
+			return renderer.createTexture(data, FORMAT_INDEXED.value, unit.width, unit.height)
 		}
 	}
 

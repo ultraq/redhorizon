@@ -150,7 +150,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		lastFrame = -1
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
-		material = renderer.createMaterial(mesh, null)
+		material = renderer.createMaterial(mesh)
 			.scale(scale)
 			.translate(position)
 		textures = []

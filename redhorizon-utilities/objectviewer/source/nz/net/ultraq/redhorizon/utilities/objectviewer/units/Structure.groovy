@@ -43,12 +43,12 @@ class Structure extends Unit {
 
 		['', '-damaged'].forEach { status ->
 			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
-				buildImagesData(imagesFile, palette, frameIndex..<(frameIndex += bodyPart.headings)))
+				buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)), palette)
 
 			data.shpFile.animations?.each { animation ->
 				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
-					buildImagesData(imagesFile, palette, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
-					gameTime)
+					buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+					palette, gameTime)
 			}
 		}
 

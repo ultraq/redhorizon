@@ -18,10 +18,7 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-
-import org.joml.Rectanglef
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.nio.ByteBuffer
 
@@ -37,8 +34,6 @@ class UnitRendererAnimations extends UnitRenderer {
 	protected int framesPerHeading
 	protected GameTime gameTime
 
-	private Material material
-	private Mesh mesh
 	private long animationTimeStart
 
 	/**
@@ -50,31 +45,15 @@ class UnitRendererAnimations extends UnitRenderer {
 	 * @param headings
 	 * @param framesPerHeading
 	 * @param imageData
+	 * @param palette
 	 * @param gameTime
 	 */
 	UnitRendererAnimations(String type, Unit unit, int headings, int framesPerHeading, ByteBuffer[] imageData,
-		GameTime gameTime) {
+		Palette palette, GameTime gameTime) {
 
-		super(type, unit, headings, imageData)
+		super(type, unit, headings, imageData, palette)
 		this.framesPerHeading = framesPerHeading
 		this.gameTime = gameTime
-	}
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
-
-		super.delete(renderer)
-		renderer.deleteMesh(mesh)
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-
-		super.init(renderer)
-		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
-		material = renderer.createMaterial(mesh, null)
-			.scale(unit.scale)
-			.translate(unit.position)
 	}
 
 	@Override

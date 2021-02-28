@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
@@ -50,6 +51,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private final List<Shader> shaders = []
 	private final Shader primitiveShader
 	private final Shader textureShader
+	private final Shader paletteShader
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -98,6 +100,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		// Create the shader programs used by this renderer
 		primitiveShader = createShader('Primitive')
 		textureShader = createShader('Texture')
+		paletteShader = createShader('TexturePalette')
 	}
 
 	/**
@@ -105,6 +108,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * closure, throwing them if they occur.
 	 * 
 	 * @param closure
+	 * @return
 	 */
 	private static <T> T checkForError(Closure<T> closure) {
 
@@ -146,10 +150,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			// TODO: Use a uniform buffer object to share these values across shaders
 			shaders.each { shader ->
 				def projectionBuffer = projection.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def projectionLocation = getProgramUniformLocation(shader, 'projection')
+				def projectionLocation = getUniformLocation(shader, 'projection')
 				glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projectionBuffer)
 				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def viewLocation = getProgramUniformLocation(shader, 'view')
+				def viewLocation = getUniformLocation(shader, 'view')
 				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
 			}
 		}
@@ -168,12 +172,16 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture) {
+	Material createMaterial(Mesh mesh, Texture texture = null, Texture palette = null, ShaderType shaderType = null) {
 
 		return new Material(
 			mesh: mesh,
 			texture: texture,
-			shader: mesh.vertexType ? primitiveShader : textureShader
+			palette: palette,
+			shader:
+				shaderType == ShaderType.TEXTURE ? textureShader :
+				shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
+				primitiveShader
 		)
 	}
 
@@ -239,7 +247,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
 			if (status != GL_TRUE) {
-				throw new RuntimeException(glGetShaderInfoLog(shaderId))
+				throw new Exception(glGetShaderInfoLog(shaderId))
 			}
 
 			return shaderId
@@ -257,7 +265,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			def status = glGetProgrami(programId, GL_LINK_STATUS)
 			if (status != GL_TRUE) {
-				throw new RuntimeException(glGetProgramInfoLog(programId))
+				throw new Exception(glGetProgramInfoLog(programId))
 			}
 
 			return programId
@@ -270,6 +278,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glDeleteShader(fragmentShaderId)
 
 		def shader = new Shader(
+			name: name,
 			programId: programId
 		)
 		shaders << shader
@@ -331,7 +340,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
-			def colourFormat =
+			def internalFormat =
+				format == 1 ? GL_R8 :
+				format == 3 ? GL_RGB :
+				format == 4 ? GL_RGBA :
+				0
+			def pixelFormat =
+				format == 1 ? GL_RED :
 				format == 3 ? GL_RGB :
 				format == 4 ? GL_RGBA :
 				0
@@ -339,7 +354,33 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				.put(data)
 				.flip()
 			data.rewind()
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, textureBuffer)
+
+			return new Texture(
+				textureId: textureId
+			)
+		}
+	}
+
+	@Override
+	Texture createTexturePalette(Palette palette) {
+
+		return stackPush().withCloseable { stack ->
+			def paletteBuffer = stack.malloc(palette.size * palette.format.value)
+			palette.size.times { i ->
+				paletteBuffer.put(palette[i])
+			}
+			paletteBuffer.flip()
+
+			int textureId = glGenTextures()
+			glBindTexture(GL_TEXTURE_1D, textureId)
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+			def format =
+				palette.format.value == 3 ? GL_RGB :
+				palette.format.value == 4 ? GL_RGBA :
+				0
+			glTexImage1D(GL_TEXTURE_1D, 0, format, palette.size, 0, format, GL_UNSIGNED_BYTE, paletteBuffer)
 
 			return new Texture(
 				textureId: textureId
@@ -379,30 +420,45 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			stackPush().withCloseable { stack ->
 				def mesh = material.mesh
 				def texture = material.texture
+				def palette = material.palette
 				def shader = material.shader
 				def model = material.model
 
+				glUseProgram(shader.programId)
 				if (texture) {
-				glBindTexture(GL_TEXTURE_2D, texture.textureId)
+					def textureLocation = getUniformLocation(shader, 'u_texture')
+					glUniform1i(textureLocation, 0)
+					glActiveTexture(GL_TEXTURE0)
+					glBindTexture(GL_TEXTURE_2D, texture.textureId)
 				}
-			glUseProgram(shader.programId)
+				if (palette) {
+					def paletteLocation = getUniformLocation(shader, 'u_palette')
+					glUniform1i(paletteLocation, 1)
+					glActiveTexture(GL_TEXTURE1)
+					glBindTexture(GL_TEXTURE_1D, palette.textureId)
+				}
 
 				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def modelLocation = getProgramUniformLocation(shader, 'model')
-				checkForError { -> glUniformMatrix4fv(modelLocation, false, modelBuffer) }
+				def modelLocation = getUniformLocation(shader, 'model')
+				glUniformMatrix4fv(modelLocation, false, modelBuffer)
 
-			glBindVertexArray(mesh.vertexArrayId)
+				glBindVertexArray(mesh.vertexArrayId)
 				if (mesh.vertexType) {
-				glDrawArrays(mesh.vertexType, 0, mesh.vertexCount)
+					glDrawArrays(mesh.vertexType, 0, mesh.vertexCount)
 				}
 				else if (mesh.elementType) {
-				glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
+					glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
 				}
 
-			glUseProgram(0)
-				if (texture) {
-				glBindTexture(GL_TEXTURE_2D, 0)
+				if (palette) {
+					glActiveTexture(GL_TEXTURE1)
+					glBindTexture(GL_TEXTURE_1D, 0)
 				}
+				if (texture) {
+					glActiveTexture(GL_TEXTURE2)
+					glBindTexture(GL_TEXTURE_2D, 0)
+				}
+				glUseProgram(0)
 			}
 
 			trigger(materialDrawnEvent)
@@ -417,7 +473,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @return
 	 */
 	@Memoized
-	private static int getProgramUniformLocation(Shader shader, String name) {
+	private static int getUniformLocation(Shader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
 	}
@@ -465,7 +521,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			// TODO: Use a uniform buffer object to share these values across shaders
 			shaders.each { shader ->
 				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def viewLocation = getProgramUniformLocation(shader, 'view')
+				def viewLocation = getUniformLocation(shader, 'view')
 				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
 			}
 		}

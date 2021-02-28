@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.filetypes.Palette
+
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -65,13 +67,23 @@ interface GraphicsRenderer {
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
-	 * Create a new material from a mesh and texture.
+	 * Create a new material with just a mesh.
+	 * 
+	 * @param mesh
+	 * @return
+	 */
+	Material createMaterial(Mesh mesh)
+
+	/**
+	 * Create a new material with all of its parts.
 	 * 
 	 * @param mesh
 	 * @param texture
+	 * @param palette
+	 * @param shaderType
 	 * @return
 	 */
-	Material createMaterial(Mesh mesh, Texture texture)
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, ShaderType shaderType)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
@@ -116,6 +128,14 @@ interface GraphicsRenderer {
 	 * @return New texture object.
 	 */
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
+
+	/**
+	 * Create a texture out of a palette.
+	 * 
+	 * @param palette
+	 * @return New texture representing a palette.
+	 */
+	Texture createTexturePalette(Palette palette)
 
 	/**
 	 * Delete all of the items tied to the material.

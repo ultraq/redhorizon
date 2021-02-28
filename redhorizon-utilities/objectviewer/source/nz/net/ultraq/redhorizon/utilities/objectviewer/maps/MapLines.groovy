@@ -58,12 +58,10 @@ class MapLines implements GraphicsElement, SelfVisitable {
 				X_AXIS_MIN,
 				X_AXIS_MAX,
 				Y_AXIS_MIN,
-				Y_AXIS_MAX),
-			null
+				Y_AXIS_MAX)
 		)
 		boundaryLines = renderer.createMaterial(
-			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
-			null
+			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[])
 		)
 	}
 

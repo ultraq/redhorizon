@@ -16,27 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
-
 /**
- * A shader is a small program that runs on the GPU.
+ * The available shader types to use in rendering.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-class Shader {
+enum ShaderType {
 
-	final String name
-	final int programId
-
-	/**
-	 * Return the name of this shader program.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		return "${name} shader program"
-	}
+	PRIMITIVE,
+	TEXTURE,
+	TEXTURE_PALETTE
 }

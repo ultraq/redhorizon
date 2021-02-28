@@ -30,7 +30,9 @@ class Material {
 	final Matrix4f model = new Matrix4f()
 
 	Mesh mesh
+	// TODO: Create a texture list
 	Texture texture
+	Texture palette
 	Shader shader
 
 	/**

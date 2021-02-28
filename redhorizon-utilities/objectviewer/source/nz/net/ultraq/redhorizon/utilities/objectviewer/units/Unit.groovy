@@ -19,9 +19,7 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -61,16 +59,14 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 	 * graphics.
 	 * 
 	 * @param imagesFile
-	 * @param palette
 	 * @param coordinates
 	 * @param range
 	 * @return
 	 */
-	protected static ByteBuffer[] buildImagesData(ImagesFile imagesFile, Palette palette, IntRange range) {
+	protected static ByteBuffer[] buildImagesData(ImagesFile imagesFile, IntRange range) {
 
 		return imagesFile.imagesData[range].collect { data ->
-			def imageData = data.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
-			return imagesFile.format == FORMAT_INDEXED ? imageData.applyPalette(palette) : imageData
+			return data.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
 		}
 	}
 

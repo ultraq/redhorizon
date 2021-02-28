@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -109,7 +110,9 @@ class Image implements GraphicsElement, SelfVisitable {
 
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
-			renderer.createTexture(imageData, format.value, width, height)
+			renderer.createTexture(imageData, format.value, width, height),
+			null,
+			ShaderType.TEXTURE
 		)
 			.scale(scaleX, scaleY)
 			.translate(position)
