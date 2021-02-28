@@ -47,7 +47,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private final GraphicsConfiguration config
 	private final GLCapabilities capabilities
-	private final boolean useCheckErrorFallback
 
 	private final List<Shader> shaders = []
 	private final Shader primitiveShader
@@ -65,7 +64,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		this.config = config
 		capabilities = GL.createCapabilities()
 
-		if (capabilities.GL_KHR_debug) {
+		if (config.debug && capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
 			glDebugMessageCallback(new GLDebugMessageCallback() {
@@ -76,10 +75,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					}
 				}
 			}, 0)
-			useCheckErrorFallback = false
-		}
-		else {
-			useCheckErrorFallback = true
 		}
 
 		glClearColor(config.clearColour.r, config.clearColour.g, config.clearColour.b, config.clearColour.a)
