@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 
@@ -44,6 +43,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
+	private final Palette palette
 	final float repeatX
 	final float repeatY
 
@@ -58,9 +58,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	 */
 	Image(ImageFile imageFile, Palette palette = null) {
 
-		this(imageFile.width, imageFile.height,
-			imageFile.format !== FORMAT_INDEXED ? imageFile.format : palette.format,
-			imageFile.format !== FORMAT_INDEXED ? imageFile.imageData : imageFile.imageData.applyPalette(palette))
+		this(imageFile.width, imageFile.height, imageFile.format, imageFile.imageData, palette)
 	}
 
 	/**
@@ -74,9 +72,7 @@ class Image implements GraphicsElement, SelfVisitable {
 	 */
 	Image(ImagesFile imagesFile, int frame, Palette palette = null) {
 
-		this(imagesFile.width, imagesFile.height,
-			imagesFile.format !== FORMAT_INDEXED ? imagesFile.format : palette.format,
-			imagesFile.format !== FORMAT_INDEXED ? imagesFile.imagesData[frame] : imagesFile.imagesData[frame].applyPalette(palette))
+		this(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData[frame], palette)
 	}
 
 	/**
@@ -86,15 +82,17 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param height
 	 * @param format
 	 * @param imageData
+	 * @param palette
 	 * @param repeatX
 	 * @param repeatY
 	 */
-	Image(int width, int height, ColourFormat format, ByteBuffer imageData, float repeatX = 1, float repeatY = 1) {
+	Image(int width, int height, ColourFormat format, ByteBuffer imageData, Palette palette = null, float repeatX = 1, float repeatY = 1) {
 
 		this.width     = width
 		this.height    = height
 		this.format    = format
 		this.imageData = imageData.flipVertical(width, height, format)
+		this.palette   = palette
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
 	}
@@ -111,8 +109,8 @@ class Image implements GraphicsElement, SelfVisitable {
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
 			renderer.createTexture(imageData, format.value, width, height),
-			null,
-			ShaderType.TEXTURE
+			palette ? renderer.createTexturePalette(palette) : null,
+			palette ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
 		)
 			.scale(scaleX, scaleY)
 			.translate(position)

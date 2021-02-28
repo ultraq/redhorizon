@@ -182,13 +182,12 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			// Use the background tile to create a 5x4 repeating image
 			def imageData = tileFile.imagesData
 				.combineImages(tileFile.width, tileFile.height, theater.clearX)
-				.applyPalette(palette)
 			def width = tileFile.width * theater.clearX
 			def height = tileFile.height * theater.clearY
 			def repeatX = (TILES_X * TILE_WIDTH) / width as float
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
-			image = new Image(width, height, palette.format, imageData, repeatX, repeatY)
+			image = new Image(width, height, tileFile.format, imageData, palette, repeatX, repeatY)
 			image.position.add(new Vector3f(WORLD_OFFSET.x, WORLD_OFFSET.y, 0))
 		}
 

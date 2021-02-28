@@ -362,6 +362,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 	}
 
+	@Memoized
 	@Override
 	Texture createTexturePalette(Palette palette) {
 
@@ -394,6 +395,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		deleteMesh(material.mesh)
 		if (material.texture) {
 			deleteTexture(material.texture)
+		}
+		if (material.palette) {
+			deleteTexture(material.palette)
 		}
 	}
 
