@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
-import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -29,69 +28,24 @@ import org.joml.Vector3f
 class JomlExtensions {
 
 	/**
-	 * Return each point around the rectangle as a series of vectors.
+	 * Return an array of points {@code Vector2f}s, each representing a point of
+	 * this rectangle.
 	 * 
 	 * @param self
+	 * @param clazz
 	 * @return An array of 4 vectors, one for each x/y point around the rectangle.
 	 */
-	static Vector2f[] asPoints(Rectanglef self) {
+	static Object asType(Rectanglef self, Class clazz) {
 
-		return [
-			new Vector2f(self.minX, self.minY),
-			new Vector2f(self.minX, self.maxY),
-			new Vector2f(self.maxX, self.maxY),
-			new Vector2f(self.maxX, self.minY)
-		]
-	}
-
-	/**
-	 * Return a matrix's values as a {@code float[]}.
-	 * 
-	 * @param self
-	 * @param clazz
-	 * @return
-	 */
-	static Object asType(Matrix4f self, Class clazz) {
-
-		if (clazz == float[]) {
-			return new float[]{
-				self.m00(), self.m01(), self.m02(), self.m03(),
-				self.m10(), self.m11(), self.m12(), self.m13(),
-				self.m20(), self.m21(), self.m22(), self.m23(),
-				self.m30(), self.m31(), self.m32(), self.m33()
+		if (clazz == Vector2f[]) {
+			return new Vector2f[] {
+				new Vector2f(self.minX, self.minY),
+				new Vector2f(self.minX, self.maxY),
+				new Vector2f(self.maxX, self.maxY),
+				new Vector2f(self.maxX, self.minY)
 			}
 		}
-		throw new IllegalArgumentException("Cannot convert Vector2f to type ${clazz}")
-	}
-
-	/**
-	 * Return a vector's values as a {@code float[]}.
-	 * 
-	 * @param self
-	 * @param clazz
-	 * @return
-	 */
-	static Object asType(Vector2f self, Class clazz) {
-
-		if (clazz == float[]) {
-			return new float[]{ self.x, self.y }
-		}
-		throw new IllegalArgumentException("Cannot convert Vector2f to type ${clazz}")
-	}
-
-	/**
-	 * Return a vector's values as a {@code float[]}.
-	 * 
-	 * @param self
-	 * @param clazz
-	 * @return
-	 */
-	static Object asType(Vector3f self, Class clazz) {
-
-		if (clazz == float[]) {
-			return new float[]{ self.x, self.y, self.z }
-		}
-		throw new IllegalArgumentException("Cannot convert Vector3f to type ${clazz}")
+		throw new IllegalArgumentException("Cannot convert Rectanglef to type ${clazz}")
 	}
 
 	/**

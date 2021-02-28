@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.extensions
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
+import org.joml.Vector3f
 
 /**
  * Extensions to JOML classes to work with Red Horizon.
@@ -57,5 +58,16 @@ class JomlStaticExtensions {
 	static int getFLOATS(Vector2f self) {
 
 		return 2
+	}
+
+	/**
+	 * The number of floats used to represent a {@code Vector3f}.
+	 * 
+	 * @param self
+	 * @return
+	 */
+	static int getFLOATS(Vector3f self) {
+
+		return 3
 	}
 }

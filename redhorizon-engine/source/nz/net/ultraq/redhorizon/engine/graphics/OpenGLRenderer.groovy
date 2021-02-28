@@ -28,12 +28,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.opengl.KHRDebug.*
+import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
 
 /**
  * A graphics renderer utilizing the modern OpenGL API, version 4.1.
@@ -143,12 +142,16 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void createCamera(Matrix4f projection, Matrix4f view) {
 
-		// TODO: Use a uniform buffer object to share these values across shaders
-		shaders.each { shader ->
-			def projectionLocation = getProgramUniformLocation(shader, 'projection')
-			glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projection as float[])
-			def viewLocation = getProgramUniformLocation(shader, 'view')
-			glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[])
+		stackPush().withCloseable { stack ->
+			// TODO: Use a uniform buffer object to share these values across shaders
+			shaders.each { shader ->
+				def projectionBuffer = projection.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def projectionLocation = getProgramUniformLocation(shader, 'projection')
+				glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projectionBuffer)
+				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def viewLocation = getProgramUniformLocation(shader, 'view')
+				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
+			}
 		}
 	}
 
@@ -184,33 +187,33 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 */
 	private Mesh createPrimitivesMesh(Colour colour, int vertexType, Vector2f... vertices) {
 
-		def vertexArrayId = glGenVertexArrays()
-		glBindVertexArray(vertexArrayId)
+		return stackPush().withCloseable { stack ->
+			def vertexArrayId = glGenVertexArrays()
+			glBindVertexArray(vertexArrayId)
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-		def verticesBuffer = FloatBuffer.allocateDirectNative(floatsPerVertex * vertices.length)
-		vertices.each { vertex ->
-			verticesBuffer
-				.put(colour as float[])
-				.put(vertex as float[])
+			def vertexBufferId = glGenBuffers()
+			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS) * vertices.length)
+			vertices.each { vertex ->
+				verticesBuffer
+					.put(colour.r, colour.g, colour.b, colour.a)
+					.put(vertex.x, vertex.y)
+			}
+			verticesBuffer.flip()
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+			glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
+
+			setVertexBufferLayout(primitiveShader,
+				BufferLayoutParts.COLOUR,
+				BufferLayoutParts.POSITION
+			)
+
+			return new Mesh(
+				vertexArrayId: vertexArrayId,
+				vertexBufferId: vertexBufferId,
+				vertexType: vertexType,
+				vertexCount: vertices.length
+			)
 		}
-		verticesBuffer.flip()
-
-		def vertexBufferId = glGenBuffers()
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
-
-		setVertexBufferLayout(primitiveShader,
-			BufferLayoutParts.COLOUR,
-			BufferLayoutParts.POSITION
-		)
-
-		return new Mesh(
-			vertexArrayId: vertexArrayId,
-			vertexBufferId: vertexBufferId,
-			vertexType: vertexType,
-			vertexCount: vertices.length
-		)
 	}
 
 	/**
@@ -276,69 +279,72 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
-		def vertexArrayId = glGenVertexArrays()
-		glBindVertexArray(vertexArrayId)
+		return stackPush().withCloseable { stack ->
+			def vertexArrayId = glGenVertexArrays()
+			glBindVertexArray(vertexArrayId)
 
-		def floatsPerVertex = Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS
-		def verticesBuffer = FloatBuffer
-			.allocateDirectNative(floatsPerVertex * 4)
-			.put([
-				// Colour   // Position                 // Texture
-				1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
-				1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
-				1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
-				1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0,
-			] as float[])
-			.flip()
+			def vertexBufferId = glGenBuffers()
+			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS) * 4)
+				.put(
+					// Colour   // Position                 // Texture
+					1, 1, 1, 1, surface.minX, surface.minY, 0, 0,
+					1, 1, 1, 1, surface.minX, surface.maxY, 0, repeatY,
+					1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
+					1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0
+				)
+				.flip()
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+			glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
 
-		def vertexBufferId = glGenBuffers()
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-		glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
+			// The above is unique vertices for a rectangle, but to draw a rectangle we
+			// need to draw 2 triangles that share 2 vertices, so generate an element
+			// buffer mapping triangle points to the above.
+			def elementBufferId = glGenBuffers()
+			def indexBuffer = stack.mallocInt(6)
+				.put(0, 1, 3, 1, 2, 3)
+				.flip()
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
 
-		// The above is unique vertices for a rectangle, but to draw a rectangle we
-		// need to draw 2 triangles that share 2 vertices, so generate an element
-		// buffer mapping triangle points to the above.
-		def indexBuffer = IntBuffer
-			.allocateDirectNative(6)
-			.put([0, 1, 3, 1, 2, 3] as int[])
-			.flip()
+			setVertexBufferLayout(textureShader,
+				BufferLayoutParts.COLOUR,
+				BufferLayoutParts.POSITION,
+				BufferLayoutParts.TEXCOORD
+			)
 
-		def elementBufferId = glGenBuffers()
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
-
-		setVertexBufferLayout(textureShader,
-			BufferLayoutParts.COLOUR,
-			BufferLayoutParts.POSITION,
-			BufferLayoutParts.TEXCOORD
-		)
-
-		return new Mesh(
-			vertexArrayId: vertexArrayId,
-			vertexBufferId: vertexBufferId,
-			elementBufferId: elementBufferId,
-			elementType: GL_TRIANGLES,
-			elementCount: indexBuffer.capacity()
-		)
+			return new Mesh(
+				vertexArrayId: vertexArrayId,
+				vertexBufferId: vertexBufferId,
+				elementBufferId: elementBufferId,
+				elementType: GL_TRIANGLES,
+				elementCount: 6
+			)
+		}
 	}
 
 	@Override
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = config.filter) {
 
-		int textureId = glGenTextures()
-		glBindTexture(GL_TEXTURE_2D, textureId)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		return stackPush().withCloseable { stack ->
+			int textureId = glGenTextures()
+			glBindTexture(GL_TEXTURE_2D, textureId)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
-		def colourFormat =
-			format == 3 ? GL_RGB :
-			format == 4 ? GL_RGBA :
-			0
-		glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, ByteBuffer.fromBuffersDirect(data))
+			def colourFormat =
+				format == 3 ? GL_RGB :
+				format == 4 ? GL_RGBA :
+				0
+			def textureBuffer = stack.malloc(data.capacity())
+				.put(data)
+				.flip()
+			data.rewind()
+			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
 
-		return new Texture(
-			textureId: textureId
-		)
+			return new Texture(
+				textureId: textureId
+			)
+		}
 	}
 
 	@Override
@@ -369,35 +375,38 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void drawMaterial(Material material) {
 
-		averageNanos('drawMaterial', 2f, logger) { ->
-			def mesh = material.mesh
-			def texture = material.texture
-			def shader = material.shader
-			def model = material.model
+		averageNanos('drawMaterial', 1f, logger) { ->
+			stackPush().withCloseable { stack ->
+				def mesh = material.mesh
+				def texture = material.texture
+				def shader = material.shader
+				def model = material.model
 
-			if (texture) {
+				if (texture) {
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
-			}
+				}
 			glUseProgram(shader.programId)
 
-			def modelLocation = getProgramUniformLocation(shader, 'model')
-			glUniformMatrix4fv(modelLocation, false, model as float[])
+				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def modelLocation = getProgramUniformLocation(shader, 'model')
+				checkForError { -> glUniformMatrix4fv(modelLocation, false, modelBuffer) }
 
 			glBindVertexArray(mesh.vertexArrayId)
-			if (mesh.vertexType) {
+				if (mesh.vertexType) {
 				glDrawArrays(mesh.vertexType, 0, mesh.vertexCount)
-			}
-			else if (mesh.elementType) {
+				}
+				else if (mesh.elementType) {
 				glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
-			}
+				}
 
 			glUseProgram(0)
-			if (texture) {
+				if (texture) {
 				glBindTexture(GL_TEXTURE_2D, 0)
+				}
 			}
-		}
 
-		trigger(materialDrawnEvent)
+			trigger(materialDrawnEvent)
+		}
 	}
 
 	/**
@@ -452,10 +461,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void updateCamera(Matrix4f view) {
 
-		// TODO: Use a uniform buffer object to share these values across shaders
-		shaders.each { shader ->
-			def viewLocation = getProgramUniformLocation(shader, 'view')
-			glProgramUniformMatrix4fv(shader.programId, viewLocation, false, view as float[])
+		stackPush().withCloseable { stack ->
+			// TODO: Use a uniform buffer object to share these values across shaders
+			shaders.each { shader ->
+				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def viewLocation = getProgramUniformLocation(shader, 'view')
+				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
+			}
 		}
 	}
 

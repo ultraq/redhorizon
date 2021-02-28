@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.geometry.Orientation
 
 import org.joml.Vector3f
 import static org.lwjgl.openal.AL10.*
+import static org.lwjgl.system.MemoryStack.stackPush
 
 import java.nio.ByteBuffer
 
@@ -56,115 +57,93 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void attachBufferToSource(int sourceId, int bufferId) {
 
-		checkForError { ->
-			alSourcei(sourceId, AL_BUFFER, bufferId)
-		}
+		checkForError { -> alSourcei(sourceId, AL_BUFFER, bufferId) }
 	}
 
 	@Override
 	int buffersProcessed(int sourceId) {
 
-		return checkForError { ->
-			return alGetSourcei(sourceId, AL_BUFFERS_PROCESSED)
-		}
+		return checkForError { -> alGetSourcei(sourceId, AL_BUFFERS_PROCESSED) }
 	}
 
 	@Override
 	int createBuffer(ByteBuffer data, int bits, int channels, int frequency) {
 
-		int bufferId = checkForError { ->
-			return alGenBuffers()
+		return stackPush().withCloseable { stack ->
+			int bufferId = checkForError { -> alGenBuffers() }
+			def format =
+				bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
+				bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
+				bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
+				bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
+				0
+			def soundBuffer = stack.malloc(data.capacity())
+				.put(data)
+				.flip()
+			data.rewind()
+			checkForError { -> alBufferData(bufferId, format, soundBuffer, frequency) }
+			return bufferId
 		}
-		def format =
-			bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
-			bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
-			bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
-			bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
-			0
-		checkForError { ->
-			alBufferData(bufferId, format, data, frequency)
-		}
-		return bufferId
 	}
 
 	@Override
 	int createSource() {
 
-		return checkForError { ->
-			return alGenSources()
-		}
+		return checkForError { -> alGenSources() }
 	}
 
 	@Override
 	void deleteBuffers(int... bufferIds) {
 
-		checkForError { ->
-			alDeleteBuffers(bufferIds)
-		}
+		checkForError { -> alDeleteBuffers(bufferIds) }
 	}
 
 	@Override
 	void deleteSource(int sourceId) {
 
-		checkForError { ->
-			alDeleteSources(sourceId)
-		}
+		checkForError { -> alDeleteSources(sourceId) }
 	}
 
 	@Override
 	void pauseSource(int sourceId) {
 
-		checkForError { ->
-			alSourcePause(sourceId)
-		}
+		checkForError { -> alSourcePause(sourceId) }
 	}
 
 	@Override
 	void playSource(int sourceId) {
 
-		checkForError { ->
-			alSourcePlay(sourceId)
-		}
+		checkForError { -> alSourcePlay(sourceId) }
 	}
 
 	@Override
 	void queueBuffers(int sourceId, int... bufferIds) {
 
-		checkForError { ->
-			alSourceQueueBuffers(sourceId, bufferIds)
-		}
+		checkForError { -> alSourceQueueBuffers(sourceId, bufferIds) }
 	}
 
 	@Override
 	boolean sourceExists(int sourceId) {
 
-		return checkForError { ->
-			return alIsSource(sourceId)
-		}
+		return checkForError { -> alIsSource(sourceId) }
 	}
 
 	@Override
 	boolean sourcePaused(int sourceId) {
 
-		return checkForError { ->
-			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PAUSED
-		}
+		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PAUSED }
 	}
 
 	@Override
 	boolean sourcePlaying(int sourceId) {
 
-		return checkForError { ->
-			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING
-		}
+		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING }
 	}
 
 	@Override
 	boolean sourceStopped(int sourceId) {
 
-		return checkForError { ->
-			return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_STOPPED
-		}
+		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_STOPPED }
 	}
 
 	/**
@@ -186,32 +165,32 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	void unqueueBuffers(int sourceId, int... bufferIds) {
 
-		checkForError { ->
-			alSourceUnqueueBuffers(sourceId, bufferIds)
-		}
+		checkForError { -> alSourceUnqueueBuffers(sourceId, bufferIds) }
 	}
 
 	@Override
 	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation) {
 
-		checkForError { -> alListenerfv(AL_POSITION, position as float[]) }
+		stackPush().withCloseable { stack ->
+			checkForError { -> alListenerfv(AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS))) }
 //		checkForError { -> alListenerfv(AL_VELOCITY, velocity as float[]) }
 //		checkForError { -> alListenerfv(AL_ORIENTATION, orientation as float[]) }
+		}
 	}
 
 	@Override
 	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity) {
 
-		checkForError { -> alSourcefv(sourceId, AL_POSITION, position as float[]) }
+		stackPush().withCloseable { stack ->
+			checkForError { -> alSourcefv(sourceId, AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS))) }
 //		checkForError { -> alSourcefv(sourceId, AL_DIRECTION, direction as float[]) }
 //		checkForError { -> alSourcefv(sourceId, AL_VELOCITY, velocity as float[]) }
+		}
 	}
 
 	@Override
 	void updateVolume(float volume) {
 
-		checkForError { ->
-			alListenerf(AL_GAIN, volume)
-		}
+		checkForError { -> alListenerf(AL_GAIN, volume) }
 	}
 }
