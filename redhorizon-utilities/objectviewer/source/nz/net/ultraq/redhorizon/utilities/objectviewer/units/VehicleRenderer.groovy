@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.nio.ByteBuffer
 
@@ -38,11 +37,10 @@ class VehicleRenderer extends UnitRenderer {
 	 * @param headings
 	 * @param turretHeadings
 	 * @param imagesData
-	 * @param palette
 	 */
-	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, ByteBuffer[] imagesData, Palette palette) {
+	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, ByteBuffer[] imagesData) {
 
-		super(type, unit, headings, imagesData, palette)
+		super(type, unit, headings, imagesData)
 		this.turretHeadings = turretHeadings
 	}
 

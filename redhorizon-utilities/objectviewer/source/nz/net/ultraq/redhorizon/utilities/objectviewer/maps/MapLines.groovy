@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Vector2f
@@ -58,10 +59,14 @@ class MapLines implements GraphicsElement, SelfVisitable {
 				X_AXIS_MIN,
 				X_AXIS_MAX,
 				Y_AXIS_MIN,
-				Y_AXIS_MAX)
+				Y_AXIS_MAX),
+			null,
+			ShaderType.PRIMITIVE
 		)
 		boundaryLines = renderer.createMaterial(
-			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[])
+			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
+			null,
+			ShaderType.PRIMITIVE
 		)
 	}
 

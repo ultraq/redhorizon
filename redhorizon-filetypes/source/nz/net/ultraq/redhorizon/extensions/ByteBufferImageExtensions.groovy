@@ -45,7 +45,7 @@ class ByteBufferImageExtensions {
 			dest.put(palette[self.get() & 0xff])
 		}
 		self.rewind()
-		return dest.rewind()
+		return dest.flip()
 	}
 
 	/**
@@ -78,7 +78,7 @@ class ByteBufferImageExtensions {
 			}
 			image.rewind()
 		}
-		return compilation.rewind()
+		return compilation.flip()
 	}
 
 	/**
@@ -100,7 +100,7 @@ class ByteBufferImageExtensions {
 		height.times { int y ->
 			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
 		}
-		return flippedImageBuffer.rewind()
+		return flippedImageBuffer.flip()
 	}
 
 	/**
@@ -144,6 +144,6 @@ class ByteBufferImageExtensions {
 				scaledBuffer.position(scalePointer).put(self.array(), selfPointer, format.value)
 			}
 		}
-		return scaledBuffer.rewind()
+		return scaledBuffer.flip()
 	}
 }

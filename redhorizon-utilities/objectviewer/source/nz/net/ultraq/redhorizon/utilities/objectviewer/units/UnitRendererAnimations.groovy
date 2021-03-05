@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.nio.ByteBuffer
 
@@ -45,13 +44,12 @@ class UnitRendererAnimations extends UnitRenderer {
 	 * @param headings
 	 * @param framesPerHeading
 	 * @param imageData
-	 * @param palette
 	 * @param gameTime
 	 */
 	UnitRendererAnimations(String type, Unit unit, int headings, int framesPerHeading, ByteBuffer[] imageData,
-		Palette palette, GameTime gameTime) {
+		GameTime gameTime) {
 
-		super(type, unit, headings, imageData, palette)
+		super(type, unit, headings, imageData)
 		this.framesPerHeading = framesPerHeading
 		this.gameTime = gameTime
 	}

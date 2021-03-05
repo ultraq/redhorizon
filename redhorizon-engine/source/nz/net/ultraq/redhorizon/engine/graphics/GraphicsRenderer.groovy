@@ -67,23 +67,14 @@ interface GraphicsRenderer {
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
-	 * Create a new material with just a mesh.
-	 * 
-	 * @param mesh
-	 * @return
-	 */
-	Material createMaterial(Mesh mesh)
-
-	/**
 	 * Create a new material with all of its parts.
 	 * 
 	 * @param mesh
 	 * @param texture
-	 * @param palette
 	 * @param shaderType
 	 * @return
 	 */
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, ShaderType shaderType)
+	Material createMaterial(Mesh mesh, Texture texture, ShaderType shaderType)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
@@ -164,6 +155,13 @@ interface GraphicsRenderer {
 	 * @param material
 	 */
 	void drawMaterial(Material material)
+
+	/**
+	 * Apply the given palette texture as the palette shader sampler uniform.
+	 * 
+	 * @param palette
+	 */
+	void setPalette(Texture palette)
 
 	/**
 	 * Update the camera's view matrix.

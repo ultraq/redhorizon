@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
@@ -44,6 +45,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 	private static final RendererEvent materialDrawnEvent = new MaterialDrawnEvent()
+	private static final RendererEvent meshCreatedEvent = new MeshCreatedEvent()
+	private static final RendererEvent textureCreatedEvent = new TextureCreatedEvent()
 
 	private final GraphicsConfiguration config
 	private final GLCapabilities capabilities
@@ -172,12 +175,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture = null, Texture palette = null, ShaderType shaderType = null) {
+	Material createMaterial(Mesh mesh, Texture texture = null, ShaderType shaderType = null) {
 
 		return new Material(
 			mesh: mesh,
 			texture: texture,
-			palette: palette,
 			shader:
 				shaderType == ShaderType.TEXTURE ? textureShader :
 				shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
@@ -214,6 +216,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				BufferLayoutParts.COLOUR,
 				BufferLayoutParts.POSITION
 			)
+
+			trigger(meshCreatedEvent)
 
 			return new Mesh(
 				vertexArrayId: vertexArrayId,
@@ -321,6 +325,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				BufferLayoutParts.TEXCOORD
 			)
 
+			trigger(meshCreatedEvent)
+
 			return new Mesh(
 				vertexArrayId: vertexArrayId,
 				vertexBufferId: vertexBufferId,
@@ -340,21 +346,17 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
-			def internalFormat =
-				format == 1 ? GL_R8 :
-				format == 3 ? GL_RGB :
-				format == 4 ? GL_RGBA :
-				0
-			def pixelFormat =
+			def colourFormat =
 				format == 1 ? GL_RED :
 				format == 3 ? GL_RGB :
 				format == 4 ? GL_RGBA :
 				0
-			def textureBuffer = stack.malloc(data.capacity())
-				.put(data)
+			def textureBuffer = stack.malloc(data.remaining())
+				.put(data.array(), data.position(), data.remaining())
 				.flip()
-			data.rewind()
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, pixelFormat, GL_UNSIGNED_BYTE, textureBuffer)
+			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
+
+			trigger(textureCreatedEvent)
 
 			return new Texture(
 				textureId: textureId
@@ -362,26 +364,27 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 	}
 
-	@Memoized
 	@Override
 	Texture createTexturePalette(Palette palette) {
 
 		return stackPush().withCloseable { stack ->
+			int textureId = glGenTextures()
+			glBindTexture(GL_TEXTURE_1D, textureId)
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
+			def colourFormat =
+				palette.format == FORMAT_RGB ? GL_RGB :
+				palette.format == FORMAT_RGBA ? GL_RGBA :
+				0
 			def paletteBuffer = stack.malloc(palette.size * palette.format.value)
 			palette.size.times { i ->
 				paletteBuffer.put(palette[i])
 			}
 			paletteBuffer.flip()
+			glTexImage1D(GL_TEXTURE_1D, 0, colourFormat, palette.size, 0, colourFormat, GL_UNSIGNED_BYTE, paletteBuffer)
 
-			int textureId = glGenTextures()
-			glBindTexture(GL_TEXTURE_1D, textureId)
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			def format =
-				palette.format.value == 3 ? GL_RGB :
-				palette.format.value == 4 ? GL_RGBA :
-				0
-			glTexImage1D(GL_TEXTURE_1D, 0, format, palette.size, 0, format, GL_UNSIGNED_BYTE, paletteBuffer)
+			trigger(textureCreatedEvent)
 
 			return new Texture(
 				textureId: textureId
@@ -395,9 +398,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		deleteMesh(material.mesh)
 		if (material.texture) {
 			deleteTexture(material.texture)
-		}
-		if (material.palette) {
-			deleteTexture(material.palette)
 		}
 	}
 
@@ -424,7 +424,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			stackPush().withCloseable { stack ->
 				def mesh = material.mesh
 				def texture = material.texture
-				def palette = material.palette
 				def shader = material.shader
 				def model = material.model
 
@@ -434,12 +433,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glUniform1i(textureLocation, 0)
 					glActiveTexture(GL_TEXTURE0)
 					glBindTexture(GL_TEXTURE_2D, texture.textureId)
-				}
-				if (palette) {
-					def paletteLocation = getUniformLocation(shader, 'u_palette')
-					glUniform1i(paletteLocation, 1)
-					glActiveTexture(GL_TEXTURE1)
-					glBindTexture(GL_TEXTURE_1D, palette.textureId)
 				}
 
 				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
@@ -454,12 +447,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
 				}
 
-				if (palette) {
-					glActiveTexture(GL_TEXTURE1)
-					glBindTexture(GL_TEXTURE_1D, 0)
-				}
 				if (texture) {
-					glActiveTexture(GL_TEXTURE2)
+					glActiveTexture(GL_TEXTURE0)
 					glBindTexture(GL_TEXTURE_2D, 0)
 				}
 				glUseProgram(0)
@@ -480,6 +469,17 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private static int getUniformLocation(Shader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
+	}
+
+	@Override
+	void setPalette(Texture palette) {
+
+		def paletteLocation = getUniformLocation(paletteShader, 'u_palette')
+		glProgramUniform1i(paletteShader.programId, paletteLocation, 1)
+		glActiveTexture(GL_TEXTURE1)
+		glBindTexture(GL_TEXTURE_1D, palette.textureId)
+//		glActiveTexture(GL_TEXTURE1)
+//		glBindTexture(GL_TEXTURE_1D, 0)
 	}
 
 	/**

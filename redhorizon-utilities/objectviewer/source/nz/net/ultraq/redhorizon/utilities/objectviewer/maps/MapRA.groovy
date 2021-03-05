@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.resources.ResourceManager
@@ -61,6 +62,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	final Vector2f initialPosition
 
 	private final List<GraphicsElement> layers = []
+	private Palette palette
+	private Texture texturePalette
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -77,7 +80,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		theater = Theaters.find { theater ->
 			return theater.label.equalsIgnoreCase(theaterString)
 		}
-		def palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
+		palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
 		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
@@ -89,15 +92,16 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		// Build the various layers
-		layers << new BackgroundLayer(resourceManager, palette)
-		layers << new MapRAMapPack(resourceManager, palette, mapDataToBytes(mapFile['MapPack'], 6))
-		layers << new MapRAOverlayPack(resourceManager, palette, mapDataToBytes(mapFile['OverlayPack'], 2))
-		layers << new MapRATerrain(resourceManager, palette, mapFile['TERRAIN'])
+		layers << new BackgroundLayer(resourceManager)
+		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
+		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
+		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
+		renderer.deleteTexture(texturePalette)
 		layers.each { layer ->
 			layer.delete(renderer)
 		}
@@ -106,6 +110,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		texturePalette = renderer.createTexturePalette(palette)
+		palette = null
 		layers.each { layer ->
 			layer.init(renderer)
 		}
@@ -140,6 +146,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
+		renderer.setPalette(texturePalette)
 		layers.each { layer ->
 			layer.render(renderer)
 		}
@@ -172,9 +179,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		 * Constructor, create the background image layer.
 		 * 
 		 * @param resourceManager
-		 * @param palette
 		 */
-		private BackgroundLayer(ResourceManager resourceManager, Palette palette) {
+		private BackgroundLayer(ResourceManager resourceManager) {
 
 			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
 			def tileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
@@ -187,7 +193,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			def repeatX = (TILES_X * TILE_WIDTH) / width as float
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
-			image = new Image(width, height, tileFile.format, imageData, palette, repeatX, repeatY)
+			image = new Image(width, height, tileFile.format, imageData, repeatX, repeatY)
 			image.position.add(new Vector3f(WORLD_OFFSET.x, WORLD_OFFSET.y, 0))
 		}
 
@@ -251,10 +257,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		 * Constructor, build the MapPack layer from the given tile data.
 		 * 
 		 * @param resourceManager
-		 * @param palette
 		 * @param tileData
 		 */
-		MapRAMapPack(ResourceManager resourceManager, Palette palette, ByteBuffer tileData) {
+		MapRAMapPack(ResourceManager resourceManager, ByteBuffer tileData) {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
@@ -283,7 +288,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 
 						def tilePos = new Vector2f(tileCoord).asWorldCoords(1)
-						def tileImage = new Image(tileFile, tilePic, palette)
+						def tileImage = new Image(tileFile, tilePic)
 						tileImage.position = new Vector3f(tilePos, 0)
 						elements << tileImage
 					}
@@ -301,10 +306,9 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		 * Constructor, build the OverlayPack layer from the given tile data.
 		 * 
 		 * @param resourceManager
-		 * @param palette
 		 * @param tileData
 		 */
-		MapRAOverlayPack(ResourceManager resourceManager, Palette palette, ByteBuffer tileData) {
+		MapRAOverlayPack(ResourceManager resourceManager, ByteBuffer tileData) {
 
 			Map<Vector2f, MapRAOverlayPackTiles> tileTypes = [:]
 
@@ -369,7 +373,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				}
 
 				def tilePosW = new Vector2f(tilePos).asWorldCoords(1)
-				def tileImage = new Image(tileFile, imageVariant, palette)
+				def tileImage = new Image(tileFile, imageVariant)
 				tileImage.position = new Vector3f(tilePosW, 0)
 				elements << tileImage
 			}
@@ -385,16 +389,15 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		 * Constructor, build the terrain layer from the given terrain data.
 		 * 
 		 * @param resourceManager
-		 * @param palette
 		 * @param terrainData
 		 */
-		MapRATerrain(ResourceManager resourceManager, Palette palette, Map<String,String> terrainData) {
+		MapRATerrain(ResourceManager resourceManager, Map<String,String> terrainData) {
 
 			terrainData.each { cell, terrainType ->
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				def terrainImage = new Image(terrainFile, 0, palette)
+				def terrainImage = new Image(terrainFile, 0)
 				terrainImage.position = new Vector3f(cellPosXY, 0)
 				elements << terrainImage
 			}

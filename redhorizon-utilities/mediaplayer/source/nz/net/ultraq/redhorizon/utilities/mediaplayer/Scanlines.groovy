@@ -71,7 +71,6 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, overlay.width, overlay.height)),
 			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true),
-			null,
 			ShaderType.TEXTURE
 		)
 			.scale(scale)

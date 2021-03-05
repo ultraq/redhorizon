@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
@@ -43,7 +42,6 @@ class Image implements GraphicsElement, SelfVisitable {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
-	private final Palette palette
 	final float repeatX
 	final float repeatY
 
@@ -52,13 +50,11 @@ class Image implements GraphicsElement, SelfVisitable {
 	/**
 	 * Constructor, creates an image out of the given image file data.
 	 * 
-	 * @param imageFile  Image source.
-	 * @param palette    If the image data requires a palette, then this is used
-	 *                   to complete it.
+	 * @param imageFile Image source.
 	 */
-	Image(ImageFile imageFile, Palette palette = null) {
+	Image(ImageFile imageFile) {
 
-		this(imageFile.width, imageFile.height, imageFile.format, imageFile.imageData, palette)
+		this(imageFile.width, imageFile.height, imageFile.format, imageFile.imageData)
 	}
 
 	/**
@@ -67,12 +63,10 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * 
 	 * @param imagesFile Image source.
 	 * @param frame      The specific frame in the source to use
-	 * @param palette    If the image data requires a palette, then this is used
-	 *                   to complete it.
 	 */
-	Image(ImagesFile imagesFile, int frame, Palette palette = null) {
+	Image(ImagesFile imagesFile, int frame) {
 
-		this(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData[frame], palette)
+		this(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData[frame])
 	}
 
 	/**
@@ -82,17 +76,15 @@ class Image implements GraphicsElement, SelfVisitable {
 	 * @param height
 	 * @param format
 	 * @param imageData
-	 * @param palette
 	 * @param repeatX
 	 * @param repeatY
 	 */
-	Image(int width, int height, ColourFormat format, ByteBuffer imageData, Palette palette = null, float repeatX = 1, float repeatY = 1) {
+	Image(int width, int height, ColourFormat format, ByteBuffer imageData, float repeatX = 1, float repeatY = 1) {
 
 		this.width     = width
 		this.height    = height
 		this.format    = format
 		this.imageData = imageData.flipVertical(width, height, format)
-		this.palette   = palette
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
 	}
@@ -109,8 +101,7 @@ class Image implements GraphicsElement, SelfVisitable {
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
 			renderer.createTexture(imageData, format.value, width, height),
-			palette ? renderer.createTexturePalette(palette) : null,
-			palette ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
+			format === ColourFormat.FORMAT_INDEXED ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
 		)
 			.scale(scaleX, scaleY)
 			.translate(position)

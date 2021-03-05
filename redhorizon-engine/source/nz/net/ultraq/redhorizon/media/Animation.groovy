@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
@@ -150,7 +151,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 
 		lastFrame = -1
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
-		material = renderer.createMaterial(mesh)
+		material = renderer.createMaterial(mesh, null, ShaderType.TEXTURE)
 			.scale(scale)
 			.translate(position)
 		textures = []

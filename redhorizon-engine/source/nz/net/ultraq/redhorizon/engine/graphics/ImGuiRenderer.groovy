@@ -42,6 +42,8 @@ class ImGuiRenderer implements AutoCloseable {
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
 	private int materialsDrawn = 0
+	private int meshesCreated = 0
+	private int texturesCreated = 0
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
@@ -58,8 +60,16 @@ class ImGuiRenderer implements AutoCloseable {
 		imGuiGl3.init('#version 330 core')
 		imGuiGlfw.init(context.window, true)
 
-		renderer.on(MaterialDrawnEvent) { event ->
-			materialsDrawn++
+		renderer.on(RendererEvent) { event ->
+			if (event instanceof MaterialDrawnEvent) {
+				materialsDrawn++
+			}
+			else if (event instanceof MeshCreatedEvent) {
+				meshesCreated++
+			}
+			else if (event instanceof TextureCreatedEvent) {
+				texturesCreated++
+			}
 		}
 
 		rendererInstance = this
@@ -96,21 +106,29 @@ class ImGuiRenderer implements AutoCloseable {
 
 		ImGui.setNextWindowPos(10, 10)
 		ImGui.setNextWindowBgAlpha(0.4f)
+
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration |  ImGuiWindowFlags.AlwaysAutoResize |
 			ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
+
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Materials drawn: ${materialsDrawn}")
+		ImGui.text("Meshes created: ${meshesCreated}")
+		ImGui.text("Textures created: ${texturesCreated}")
+
+		ImGui.separator()
 		persistentLines.keySet().sort().each { key ->
 			ImGui.text(persistentLines[key])
 		}
 		materialsDrawn = 0
+
 		if (debugLines.size()) {
 			ImGui.separator()
 			debugLines.toArray().each { line ->
 				ImGui.text(line)
 			}
 		}
+
 		ImGui.end()
 	}
 
