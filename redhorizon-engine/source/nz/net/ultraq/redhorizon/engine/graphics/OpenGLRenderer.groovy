@@ -354,7 +354,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def textureBuffer = stack.malloc(data.remaining())
 				.put(data.array(), data.position(), data.remaining())
 				.flip()
+			def matchesAlignment = (width * format) % 4 == 0
+			if (!matchesAlignment) {
+				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 1) }
+			}
 			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
+			if (!matchesAlignment) {
+				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
+			}
 
 			trigger(textureCreatedEvent)
 
