@@ -33,7 +33,6 @@ import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
-import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 
 /**
@@ -44,17 +43,20 @@ import java.nio.ByteBuffer
 class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
-	private static final RendererEvent materialDrawnEvent = new MaterialDrawnEvent()
-	private static final RendererEvent meshCreatedEvent = new MeshCreatedEvent()
-	private static final RendererEvent textureCreatedEvent = new TextureCreatedEvent()
 
-	private final GraphicsConfiguration config
-	private final GLCapabilities capabilities
+	protected static final RendererEvent drawEvent = new DrawEvent()
+	protected static final RendererEvent meshCreatedEvent = new MeshCreatedEvent()
+	protected static final RendererEvent textureCreatedEvent = new TextureCreatedEvent()
 
-	private final List<Shader> shaders = []
-	private final Shader primitiveShader
-	private final Shader textureShader
-	private final Shader paletteShader
+	protected final GraphicsConfiguration config
+	protected final GLCapabilities capabilities
+
+	protected final List<Shader> shaders = []
+	protected final Shader primitiveShader
+	protected final Shader textureShader
+	protected final Shader paletteShader
+
+	private OpenGLBatchRenderer batchRenderer
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -81,7 +83,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			}, 0)
 		}
 
-		glClearColor(config.clearColour.r, config.clearColour.g, config.clearColour.b, config.clearColour.a)
+		def clearColour = config.clearColour
+		glClearColor(clearColour.r, clearColour.g, clearColour.b, clearColour.a)
 
 		// Depth testing
 		glEnable(GL_DEPTH_TEST)
@@ -113,10 +116,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @param closure
 	 * @return
 	 */
-	private static <T> T checkForError(Closure<T> closure) {
+	protected static <T> T checkForError(Closure<T> closure) {
+
+		def error
+
+		// Clear any existing errors out
+		do {
+			error = glGetError()
+		}
+		while (error != GL_NO_ERROR)
 
 		def result = closure()
-		def error = glGetError()
+		error = glGetError()
 		if (error != GL_NO_ERROR) {
 			def errorCode =
 				error == GL_INVALID_ENUM ? 'GL_INVALID_ENUM' :
@@ -135,7 +146,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void clear() {
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+		checkForError { -> glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) }
 	}
 
 	@Override
@@ -198,33 +209,37 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private Mesh createPrimitivesMesh(Colour colour, int vertexType, Vector2f... vertices) {
 
 		return stackPush().withCloseable { stack ->
-			def vertexArrayId = glGenVertexArrays()
-			glBindVertexArray(vertexArrayId)
+			return checkForError { ->
+				def vertexArrayId = glGenVertexArrays()
+				glBindVertexArray(vertexArrayId)
 
-			def vertexBufferId = glGenBuffers()
-			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS) * vertices.length)
-			vertices.each { vertex ->
-				verticesBuffer
-					.put(colour.r, colour.g, colour.b, colour.a)
-					.put(vertex.x, vertex.y)
+				def vertexBufferId = glGenBuffers()
+				glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+
+				def vertexBufferLayout = setVertexBufferLayout(primitiveShader,
+					VertexBufferLayoutParts.COLOUR,
+					VertexBufferLayoutParts.POSITION
+				)
+
+				def vertexBuffer = stack.mallocFloat(vertexBufferLayout.size() * vertices.length)
+				vertices.each { vertex ->
+					vertexBuffer
+						.put(colour.r, colour.g, colour.b, colour.a)
+						.put(vertex.x, vertex.y)
+				}
+				vertexBuffer.flip()
+				glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
+
+				trigger(meshCreatedEvent)
+
+				return new Mesh(
+					vertexArrayId: vertexArrayId,
+					vertexBufferId: vertexBufferId,
+					vertexType: vertexType,
+					vertexCount: vertices.length,
+					vertexBufferLayout: vertexBufferLayout
+				)
 			}
-			verticesBuffer.flip()
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-			glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
-
-			setVertexBufferLayout(primitiveShader,
-				BufferLayoutParts.COLOUR,
-				BufferLayoutParts.POSITION
-			)
-
-			trigger(meshCreatedEvent)
-
-			return new Mesh(
-				vertexArrayId: vertexArrayId,
-				vertexBufferId: vertexBufferId,
-				vertexType: vertexType,
-				vertexCount: vertices.length
-			)
 		}
 	}
 
@@ -293,47 +308,52 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return stackPush().withCloseable { stack ->
-			def vertexArrayId = glGenVertexArrays()
-			glBindVertexArray(vertexArrayId)
+			return checkForError { ->
+				def vertexArrayId = glGenVertexArrays()
+				glBindVertexArray(vertexArrayId)
 
-			def vertexBufferId = glGenBuffers()
-			def verticesBuffer = stack.mallocFloat((Colour.FLOATS + Vector2f.FLOATS + Vector2f.FLOATS) * 4)
-				.put(
-					// Colour   // Position                 // Texture
-					1, 1, 1, 1, surface.minX, surface.minY, 0, 0,
-					1, 1, 1, 1, surface.minX, surface.maxY, 0, repeatY,
-					1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
-					1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0
+				def vertexBufferId = glGenBuffers()
+				glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+				// NOTE: This is using the texture shader, but it could just as easily
+				//       be the palette one too.  Currently they have the same layout so
+				//       it works 😅  See my note in the method being called about this.
+				def vertexBufferLayout = setVertexBufferLayout(textureShader,
+					VertexBufferLayoutParts.COLOUR,
+					VertexBufferLayoutParts.POSITION,
+					VertexBufferLayoutParts.TEXCOORD
 				)
-				.flip()
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-			glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW)
+				def vertexBuffer = stack.mallocFloat(vertexBufferLayout.size() * 4)
+					.put(
+						// Colour   // Position                 // Texture
+						1, 1, 1, 1, surface.minX, surface.minY, 0,       0,
+						1, 1, 1, 1, surface.minX, surface.maxY, 0,       repeatY,
+						1, 1, 1, 1, surface.maxX, surface.maxY, repeatX, repeatY,
+						1, 1, 1, 1, surface.maxX, surface.minY, repeatX, 0
+					)
+					.flip()
+				glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
 
-			// The above is unique vertices for a rectangle, but to draw a rectangle we
-			// need to draw 2 triangles that share 2 vertices, so generate an element
-			// buffer mapping triangle points to the above.
-			def elementBufferId = glGenBuffers()
-			def indexBuffer = stack.mallocInt(6)
-				.put(0, 1, 3, 1, 2, 3)
-				.flip()
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
+				// The above is unique vertices for a rectangle, but to draw a rectangle we
+				// need to draw 2 triangles that share 2 vertices, so generate an element
+				// buffer mapping triangle points to the above.
+				def elementBufferId = glGenBuffers()
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
+				def indexBuffer = stack.mallocInt(6)
+					.put(0, 1, 3, 1, 2, 3)
+					.flip()
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
 
-			setVertexBufferLayout(textureShader,
-				BufferLayoutParts.COLOUR,
-				BufferLayoutParts.POSITION,
-				BufferLayoutParts.TEXCOORD
-			)
+				trigger(meshCreatedEvent)
 
-			trigger(meshCreatedEvent)
-
-			return new Mesh(
-				vertexArrayId: vertexArrayId,
-				vertexBufferId: vertexBufferId,
-				elementBufferId: elementBufferId,
-				elementType: GL_TRIANGLES,
-				elementCount: 6
-			)
+				return new Mesh(
+					vertexArrayId: vertexArrayId,
+					vertexBufferId: vertexBufferId,
+					vertexBufferLayout: vertexBufferLayout,
+					elementBufferId: elementBufferId,
+					elementType: GL_TRIANGLES,
+					elementCount: 6
+				)
+			}
 		}
 	}
 
@@ -341,33 +361,35 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = config.filter) {
 
 		return stackPush().withCloseable { stack ->
-			int textureId = glGenTextures()
-			glBindTexture(GL_TEXTURE_2D, textureId)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+			return checkForError { ->
+				int textureId = glGenTextures()
+				glBindTexture(GL_TEXTURE_2D, textureId)
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
-			def colourFormat =
-				format == 1 ? GL_RED :
-				format == 3 ? GL_RGB :
-				format == 4 ? GL_RGBA :
-				0
-			def textureBuffer = stack.malloc(data.remaining())
-				.put(data.array(), data.position(), data.remaining())
-				.flip()
+				def colourFormat =
+					format == 1 ? GL_RED :
+					format == 3 ? GL_RGB :
+					format == 4 ? GL_RGBA :
+					0
+				def textureBuffer = stack.malloc(data.remaining())
+					.put(data.array(), data.position(), data.remaining())
+					.flip()
 			def matchesAlignment = (width * format) % 4 == 0
 			if (!matchesAlignment) {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 1) }
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
+				glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
 			if (!matchesAlignment) {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
 			}
 
-			trigger(textureCreatedEvent)
+				trigger(textureCreatedEvent)
 
-			return new Texture(
-				textureId: textureId
-			)
+				return new Texture(
+					textureId: textureId
+				)
+			}
 		}
 	}
 
@@ -375,27 +397,29 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Texture createTexturePalette(Palette palette) {
 
 		return stackPush().withCloseable { stack ->
-			int textureId = glGenTextures()
-			glBindTexture(GL_TEXTURE_1D, textureId)
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+			return checkForError { ->
+				int textureId = glGenTextures()
+				glBindTexture(GL_TEXTURE_1D, textureId)
+				glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+				glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-			def colourFormat =
-				palette.format == FORMAT_RGB ? GL_RGB :
-				palette.format == FORMAT_RGBA ? GL_RGBA :
-				0
-			def paletteBuffer = stack.malloc(palette.size * palette.format.value)
-			palette.size.times { i ->
-				paletteBuffer.put(palette[i])
+				def colourFormat =
+					palette.format == FORMAT_RGB ? GL_RGB :
+					palette.format == FORMAT_RGBA ? GL_RGBA :
+					0
+				def paletteBuffer = stack.malloc(palette.size * palette.format.value)
+				palette.size.times {i ->
+					paletteBuffer.put(palette[i])
+				}
+				paletteBuffer.flip()
+				glTexImage1D(GL_TEXTURE_1D, 0, colourFormat, palette.size, 0, colourFormat, GL_UNSIGNED_BYTE, paletteBuffer)
+
+				trigger(textureCreatedEvent)
+
+				return new Texture(
+					textureId: textureId
+				)
 			}
-			paletteBuffer.flip()
-			glTexImage1D(GL_TEXTURE_1D, 0, colourFormat, palette.size, 0, colourFormat, GL_UNSIGNED_BYTE, paletteBuffer)
-
-			trigger(textureCreatedEvent)
-
-			return new Texture(
-				textureId: textureId
-			)
 		}
 	}
 
@@ -429,40 +453,56 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
-				def mesh = material.mesh
-				def texture = material.texture
-				def shader = material.shader
-				def model = material.model
+				checkForError { ->
+					def mesh = material.mesh
+					def texture = material.texture
+					def shader = material.shader
+					def model = material.model
 
-				glUseProgram(shader.programId)
-				if (texture) {
-					def textureLocation = getUniformLocation(shader, 'u_texture')
-					glUniform1i(textureLocation, 0)
-					glActiveTexture(GL_TEXTURE0)
-					glBindTexture(GL_TEXTURE_2D, texture.textureId)
-				}
+					glUseProgram(shader.programId)
+					if (texture) {
+						checkForError { ->
+							def texturesLocation = getUniformLocation(shader, 'u_textures')
+							glUniform1iv(texturesLocation, 0)
+							glActiveTexture(GL_TEXTURE0)
+							glBindTexture(GL_TEXTURE_2D, texture.textureId)
+						}
+					}
 
-				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def modelLocation = getUniformLocation(shader, 'model')
-				glUniformMatrix4fv(modelLocation, false, modelBuffer)
+					def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
+					def modelLocation = checkForError { -> getUniformLocation(shader, 'model') }
+					checkForError { -> glUniformMatrix4fv(modelLocation, false, modelBuffer) }
 
-				glBindVertexArray(mesh.vertexArrayId)
-				if (mesh.vertexType) {
-					glDrawArrays(mesh.vertexType, 0, mesh.vertexCount)
-				}
-				else if (mesh.elementType) {
-					glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0)
-				}
+					checkForError { -> glBindVertexArray(mesh.vertexArrayId) }
+					if (mesh.vertexType) {
+						checkForError { -> glDrawArrays(mesh.vertexType, 0, mesh.vertexCount) }
+					}
+					else if (mesh.elementType) {
+						checkForError { -> glDrawElements(mesh.elementType, mesh.elementCount, GL_UNSIGNED_INT, 0) }
+					}
+					trigger(drawEvent)
 
-				if (texture) {
-					glActiveTexture(GL_TEXTURE0)
-					glBindTexture(GL_TEXTURE_2D, 0)
+//					if (texture) {
+//						glActiveTexture(GL_TEXTURE1)
+//						glBindTexture(GL_TEXTURE_2D, 0)
+//					}
+//					glUseProgram(0)
 				}
-				glUseProgram(0)
 			}
-
-			trigger(materialDrawnEvent)
 		}
+	}
+
+	/**
+	 * Cached function for looking up an attribute location in a shader program.
+	 * 
+	 * @param shader
+	 * @param name
+	 * @return
+	 */
+	@Memoized
+	protected static int getAttribLocation(Shader shader, String name) {
+
+		return glGetAttribLocation(shader.programId, name)
 	}
 
 	/**
@@ -473,7 +513,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @return
 	 */
 	@Memoized
-	private static int getUniformLocation(Shader shader, String name) {
+	protected static int getUniformLocation(Shader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
 	}
@@ -482,31 +522,38 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void setPalette(Texture palette) {
 
 		def paletteLocation = getUniformLocation(paletteShader, 'u_palette')
-		glProgramUniform1i(paletteShader.programId, paletteLocation, 1)
-		glActiveTexture(GL_TEXTURE1)
+		glProgramUniform1i(paletteShader.programId, paletteLocation, 15)
+		glActiveTexture(GL_TEXTURE15)
 		glBindTexture(GL_TEXTURE_1D, palette.textureId)
-//		glActiveTexture(GL_TEXTURE1)
+//		glActiveTexture(GL_TEXTURE0)
 //		glBindTexture(GL_TEXTURE_1D, 0)
 	}
 
 	/**
-	 * Sets the layout of the currently-bound vertex buffer data for use with the
-	 * given shader.
+	 * Creates an object describing the layout of the currently-bound vertex
+	 * buffer for use with the given shader.
 	 * 
 	 * @param shader
 	 * @param parts
+	 * @return
 	 */
-	private static void setVertexBufferLayout(Shader shader, BufferLayoutParts... parts) {
+	protected static VertexBufferLayout setVertexBufferLayout(Shader shader, VertexBufferLayoutParts... parts) {
 
-		def floatsPerVertex = parts.sum { part -> part.size } as int
-		def stride = floatsPerVertex * Float.BYTES
-		def offset = 0
+		// TODO: Right now, I think this only works is because the inputs are all in
+		//       the same order!  In which case, maybe I can reduce the number of
+		//       shader programs again or create a map between layout positions and
+		//       input names.
+		def layout = new VertexBufferLayout(parts)
+		def stride = layout.sizeInBytes()
 		parts.each { part ->
-			def location = glGetAttribLocation(shader.programId, part.name)
+			def location = getAttribLocation(shader, part.name)
+			if (location == -1) {
+				throw new Exception("Component ${part.name} isn't a part of the ${shader}")
+			}
 			glEnableVertexAttribArray(location)
-			glVertexAttribPointer(location, part.size, GL_FLOAT, false, stride, offset)
-			offset += (part.size * Float.BYTES)
+			glVertexAttribPointer(location, part.size, GL_FLOAT, false, stride, layout.offsetOfInBytes(part))
 		}
+		return layout
 	}
 
 	/**
@@ -538,17 +585,23 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 	}
 
-	/**
-	 * A description of the data comprising a section of a vertex buffer layout.
-	 */
-	@TupleConstructor(defaults = false)
-	private static enum BufferLayoutParts {
+	@Override
+	void withBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix, Closure closure) {
 
-		COLOUR   ('colour',   Colour.FLOATS),
-		POSITION ('position', Vector2f.FLOATS),
-		TEXCOORD ('texCoord', Vector2f.FLOATS)
+		if (!batchRenderer) {
+			batchRenderer = new OpenGLBatchRenderer(this)
+			batchRenderer.on(RendererEvent) { event ->
+				trigger(event)
+			}
+		}
 
-		final String name
-		final int size
+		// TODO: Remove these restrictions on the batch
+		batchRenderer.shader =
+			shaderType == ShaderType.TEXTURE ? textureShader :
+			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
+			primitiveShader
+		batchRenderer.modelMatrix = modelMatrix
+
+		closure(batchRenderer)
 	}
 }

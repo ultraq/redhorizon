@@ -18,28 +18,23 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Vector2f
 
-import groovy.transform.MapConstructor
+import groovy.transform.PackageScope
+import groovy.transform.TupleConstructor
 
 /**
- * A mesh defines the shape of an object, and so contain data on points and
- * edges.
+ * A description of the data comprising a section of a vertex buffer layout.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-class Mesh {
+@PackageScope
+@TupleConstructor(defaults = false)
+enum VertexBufferLayoutParts {
 
-	final int vertexArrayId
-	final int vertexBufferId
-	final int vertexType
-	final int vertexCount
-	final VertexBufferLayout vertexBufferLayout
-	final int elementBufferId
-	final int elementType
-	final int elementCount
+	COLOUR   ('colour',   Colour.FLOATS),
+	POSITION ('position', Vector2f.FLOATS),
+	TEXCOORD ('texCoord', Vector2f.FLOATS),
+	TEXUNIT  ('texUnit',  1)
 
-	// Batch rendering
-	final List<Colour> colours
-	final List<Vector2f> vertices
-	final List<Vector2f> textureCoordinates
+	final String name
+	final int size
 }

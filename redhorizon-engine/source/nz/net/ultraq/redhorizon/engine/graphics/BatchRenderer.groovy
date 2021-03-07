@@ -16,30 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Vector2f
-
-import groovy.transform.MapConstructor
-
 /**
- * A mesh defines the shape of an object, and so contain data on points and
- * edges.
+ * A specialized graphics renderer for grouping objects together and rendering
+ * them in a single draw call.  This happens automatically as the buffer set
+ * aside for the objects fills up, or manually via the {@link #flush} method.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-class Mesh {
+interface BatchRenderer extends GraphicsRenderer {
 
-	final int vertexArrayId
-	final int vertexBufferId
-	final int vertexType
-	final int vertexCount
-	final VertexBufferLayout vertexBufferLayout
-	final int elementBufferId
-	final int elementType
-	final int elementCount
-
-	// Batch rendering
-	final List<Colour> colours
-	final List<Vector2f> vertices
-	final List<Vector2f> textureCoordinates
+	/**
+	 * Render all objects accumulated in the renderer, clearing out the object
+	 * buffer for more data.
+	 */
+	void flush()
 }

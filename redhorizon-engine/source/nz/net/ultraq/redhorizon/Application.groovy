@@ -24,6 +24,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
+import org.joml.Rectanglef
+
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.CountDownLatch
@@ -39,6 +41,25 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 abstract class Application {
+
+	/**
+	 * Calculate the ideal centered dimensions for an image that stretches to fit
+	 * the given dimensions while maintaining the target aspect ratio.
+	 * 
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param screen
+	 * @return
+	 */
+	Rectanglef calculateCenteredDimensions(int imageWidth, int imageHeight, Dimension screen) {
+
+		def widthScale = screen.width / imageWidth
+		def heightScale = screen.height / imageHeight
+		return (widthScale < heightScale ?
+			new Rectanglef(0, 0, screen.width, imageHeight * widthScale) :
+			new Rectanglef(0, 0, imageWidth * heightScale, screen.height)
+		).center()
+	}
 
 	/**
 	 * Calculate how much to scale an image by to fit the full screen.

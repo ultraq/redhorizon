@@ -27,4 +27,7 @@ import groovy.transform.MapConstructor
 class Texture {
 
 	final int textureId
+
+	// Batch rendering
+	int textureUnit
 }

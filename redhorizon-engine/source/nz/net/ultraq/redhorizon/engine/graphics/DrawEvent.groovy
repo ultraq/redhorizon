@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * Event fired when a material has been drawn.
+ * Event fired when a draw call has been issued.
  * 
  * @author Emanuel Rabina
  */
-class MaterialDrawnEvent extends RendererEvent {
+class DrawEvent extends RendererEvent {
 }

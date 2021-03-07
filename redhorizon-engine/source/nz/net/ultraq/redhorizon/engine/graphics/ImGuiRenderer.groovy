@@ -41,7 +41,7 @@ class ImGuiRenderer implements AutoCloseable {
 	private final ImGuiImplGlfw imGuiGlfw
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
-	private int materialsDrawn = 0
+	private int drawCalls = 0
 	private int meshesCreated = 0
 	private int texturesCreated = 0
 
@@ -61,8 +61,8 @@ class ImGuiRenderer implements AutoCloseable {
 		imGuiGlfw.init(context.window, true)
 
 		renderer.on(RendererEvent) { event ->
-			if (event instanceof MaterialDrawnEvent) {
-				materialsDrawn++
+			if (event instanceof DrawEvent) {
+				drawCalls++
 			}
 			else if (event instanceof MeshCreatedEvent) {
 				meshesCreated++
@@ -112,15 +112,15 @@ class ImGuiRenderer implements AutoCloseable {
 			ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoMove)
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
-		ImGui.text("Materials drawn: ${materialsDrawn}")
+		ImGui.text("Draw calls: ${drawCalls}")
 		ImGui.text("Meshes created: ${meshesCreated}")
 		ImGui.text("Textures created: ${texturesCreated}")
+		drawCalls = 0
 
 		ImGui.separator()
 		persistentLines.keySet().sort().each { key ->
 			ImGui.text(persistentLines[key])
 		}
-		materialsDrawn = 0
 
 		if (debugLines.size()) {
 			ImGui.separator()
