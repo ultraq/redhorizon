@@ -1,9 +1,9 @@
 #version 410 core
 
-in vec4 colour;
-in vec4 position;
-in vec2 texCoord;
-in float texUnit;
+layout (location = 0) in vec4 colour;
+layout (location = 1) in vec4 position;
+layout (location = 2) in vec2 texCoord;
+layout (location = 3) in float texUnit;
 
 out vec4 v_vertexColour;
 out vec2 v_texCoord;

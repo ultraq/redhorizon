@@ -30,11 +30,12 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 enum VertexBufferLayoutParts {
 
-	COLOUR   ('colour',   Colour.FLOATS),
-	POSITION ('position', Vector2f.FLOATS),
-	TEXCOORD ('texCoord', Vector2f.FLOATS),
-	TEXUNIT  ('texUnit',  1)
+	COLOUR   ('colour',   0, Colour.FLOATS),
+	POSITION ('position', 1, Vector2f.FLOATS),
+	TEXCOORD ('texCoord', 2, Vector2f.FLOATS),
+	TEXUNIT  ('texUnit',  3, 1)
 
 	final String name
+	final int location
 	final int size
 }
