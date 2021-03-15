@@ -26,7 +26,8 @@ subprojects {
 
 	application {
 		applicationDefaultJvmArgs = [
-			"-Dredhorizon.version=${version}"
+			"-Dredhorizon.version=${version}",
+			'-Dorg.lwjgl.system.stackSize=10240'
 		]
 	}
 
@@ -41,7 +42,6 @@ class CustomUnixStartScriptGenerator implements ScriptGenerator {
 	@Override
 	void generateScript(JavaAppStartScriptGenerationDetails details, Writer writer) {
 		details.defaultJvmOpts.add(0, '-XstartOnFirstThread')
-		details.defaultJvmOpts << '-Dorg.lwjgl.system.stackSize=10240'
 		generator.generateScript(details, writer)
 	}
 }
