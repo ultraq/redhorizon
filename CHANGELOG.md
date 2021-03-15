@@ -2,6 +2,13 @@
 Changelog
 =========
 
+### 0.32.0
+ - Replaced the OpenGL fixed-function pipeline with a modern shader-based
+   renderer.  This opens up Red Horizon to do paletted textures on the GPU.  A
+   minimum of OpenGL 4.1 is now needed.
+ - Added ImGui to include debug info, which was normally emitted in log files,
+   right in the view.
+
 ### 0.31.2
  - Upgrade the reflections library which came with a change that removes the
    large Google Guava dependency - we're now 2MB lighter
