@@ -50,7 +50,7 @@ class GameClock implements GameTime {
 		executorService.execute { ->
 			Thread.currentThread().name = 'Game clock'
 			while (running) {
-				Thread.sleep(1) { ex ->
+				sleep(1) { ex ->
 					running = false
 					return true
 				}

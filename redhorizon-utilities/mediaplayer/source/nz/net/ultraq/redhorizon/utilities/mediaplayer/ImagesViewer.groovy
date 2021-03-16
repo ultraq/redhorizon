@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -43,7 +43,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImagesViewer implements WithGraphicsEngine {
+class ImagesViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 
@@ -66,7 +66,7 @@ class ImagesViewer implements WithGraphicsEngine {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Build a combined image of all the images once we have the window size
 				graphicsEngine.on(WindowCreatedEvent) { event ->

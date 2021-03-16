@@ -16,9 +16,8 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
-import nz.net.ultraq.redhorizon.engine.WithGameClock
-import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
@@ -36,7 +35,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class SoundPlayer implements WithAudioEngine, WithGameClock {
+class SoundPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundPlayer)
 
@@ -50,8 +49,8 @@ class SoundPlayer implements WithAudioEngine, WithGameClock {
 		logger.info('File details: {}', soundFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGameClock(executorService) { gameClock ->
-				withAudioEngine(executorService) { audioEngine ->
+			useGameClock(executorService) { gameClock ->
+				useAudioEngine(executorService) { audioEngine ->
 
 					// Try determine the appropriate media for the sound file
 					def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB

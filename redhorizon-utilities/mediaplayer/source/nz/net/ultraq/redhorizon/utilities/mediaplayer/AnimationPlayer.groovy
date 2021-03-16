@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
-import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
+
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -41,7 +41,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
+class AnimationPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
@@ -58,8 +58,8 @@ class AnimationPlayer implements WithGameClock, WithGraphicsEngine {
 		logger.info('File details: {}', animationFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGameClock(executorService) { gameClock ->
+				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation

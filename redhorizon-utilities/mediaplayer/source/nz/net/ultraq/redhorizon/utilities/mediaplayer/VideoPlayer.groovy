@@ -16,12 +16,10 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
-import nz.net.ultraq.redhorizon.engine.WithGameClock
-import nz.net.ultraq.redhorizon.engine.audio.WithAudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -44,7 +42,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine {
+class VideoPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
@@ -61,9 +59,9 @@ class VideoPlayer implements WithAudioEngine, WithGameClock, WithGraphicsEngine 
 		logger.info('File details: {}', videoFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGameClock(executorService) { gameClock ->
-				withAudioEngine(executorService) { audioEngine ->
-					withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGameClock(executorService) { gameClock ->
+				useAudioEngine(executorService) { audioEngine ->
+					useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 						// Add the video to the engines once we have the window dimensions
 						Video video

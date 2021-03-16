@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.utilities.mediaplayer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
@@ -38,7 +38,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImageViewer implements WithGraphicsEngine {
+class ImageViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
@@ -53,7 +53,7 @@ class ImageViewer implements WithGraphicsEngine {
 		logger.info('File details: {}', imageFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->

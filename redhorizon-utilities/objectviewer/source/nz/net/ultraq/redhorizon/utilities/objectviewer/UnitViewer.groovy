@@ -16,16 +16,15 @@
 
 package nz.net.ultraq.redhorizon.utilities.objectviewer
 
+import nz.net.ultraq.redhorizon.Application
+import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.engine.GameTime
-import nz.net.ultraq.redhorizon.engine.WithGameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.UnitData
@@ -54,7 +53,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class UnitViewer implements WithGameClock, WithGraphicsEngine {
+class UnitViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
 
@@ -105,8 +104,8 @@ class UnitViewer implements WithGameClock, WithGraphicsEngine {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGameClock(executorService) { gameClock ->
-				withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGameClock(executorService) { gameClock ->
+				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the unit to the engine
 					def unit = targetClass

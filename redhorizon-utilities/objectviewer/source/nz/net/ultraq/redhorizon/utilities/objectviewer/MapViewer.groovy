@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.utilities.objectviewer
 
+import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.WithGraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -52,7 +52,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MapViewer implements WithGraphicsEngine {
+class MapViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapViewer)
 	private static final int TICK = 48
@@ -69,7 +69,7 @@ class MapViewer implements WithGraphicsEngine {
 		logger.info('File details: {}', mapFile)
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			withGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the map
 				MapRA map
