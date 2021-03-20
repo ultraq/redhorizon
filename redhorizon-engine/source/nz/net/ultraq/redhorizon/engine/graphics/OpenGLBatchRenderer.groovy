@@ -44,8 +44,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		VertexBufferLayoutParts.TEXCOORD,
 		VertexBufferLayoutParts.TEXUNIT
 	)
-	private static final int MAX_VERTICES = 8
-	private static final int MAX_INDICES = 12
+	private static final int MAX_QUADS = 16 // TODO: Batch renderer is currently limited to drawing quads 😅
+	private static final int MAX_VERTICES = MAX_QUADS * 4
+	private static final int MAX_INDICES = MAX_QUADS * 6
 
 	Shader shader
 	Matrix4f modelMatrix
