@@ -97,8 +97,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		batchElementBufferId = glGenBuffers()
 		stackPush().withCloseable { stack ->
 			def indexBuffer = stack.mallocInt(MAX_INDICES)
-			(MAX_INDICES / 6).times { i ->
-				indexBuffer.put(i + 0, i + 1, i + 3, i + 1, i + 2, i + 3)
+			for (def i = 0; i < MAX_INDICES / 6; i++) {
+				def j = i * 4
+				indexBuffer.put(j + 0, j + 1, j + 3, j + 1, j + 2, j + 3)
 			}
 			indexBuffer.flip()
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchElementBufferId)
@@ -117,19 +118,19 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	@Override
 	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return createMesh(colour, vertices)
+		return renderer.createMesh(colour, vertices)
 	}
 
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return createMesh(colour, vertices)
+		return renderer.createMesh(colour, vertices)
 	}
 
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
-		return createMesh(
+		return renderer.createMesh(
 			Colour.WHITE,
 			surface as Vector2f[],
 			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
@@ -190,7 +191,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				samplers[index] = index
 			}
 			def textureLocation = getUniformLocation(shader, 'u_textures')
-			glUniform1iv(textureLocation, 0)
+			glUniform1iv(textureLocation, samplers)
 
 			def modelBuffer = modelMatrix.get(stack.mallocFloat(Matrix4f.FLOATS))
 			def modelLocation = getUniformLocation(shader, 'model')
