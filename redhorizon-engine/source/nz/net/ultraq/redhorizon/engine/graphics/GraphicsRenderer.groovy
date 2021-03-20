@@ -35,6 +35,24 @@ import java.nio.ByteBuffer
 interface GraphicsRenderer {
 
 	/**
+	 * Use the renderer in a batch rendering mode within the context of the given
+	 * closure.  While the renderer will auto-flush when its buffers are full,
+	 * callers will still need to do a final call to {@link BatchRenderer#flush}
+	 * when they are done with it to ensure that all rendered objects are drawn to
+	 * the screen.
+	 * <p>
+	 * The batch renderer is currently limited in some aspects in that the same
+	 * shader and certain uniforms must be used across the batch.  These appear as
+	 * parameters on this method.
+	 * 
+	 * @param shaderType
+	 * @param modelMatrix
+	 * @param closure
+	 */
+	void asBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer') Closure closure)
+
+	/**
 	 * Clears the buffer.
 	 */
 	void clear()
@@ -171,22 +189,4 @@ interface GraphicsRenderer {
 	 * @param view
 	 */
 	void updateCamera(Matrix4f view)
-
-	/**
-	 * Use the renderer in a batch rendering mode within the context of the given
-	 * closure.  While the renderer will auto-flush when its buffers are full,
-	 * callers will still need to do a final call to {@link BatchRenderer#flush}
-	 * when they are done with it to ensure that all rendered objects are drawn to
-	 * the screen.
-	 * <p>
-	 * The batch renderer is currently limited in some aspects in that the same
-	 * shader and certain uniforms must be used across the batch.  These appear as
-	 * parameters on this method.
-	 * 
-	 * @param shaderType
-	 * @param modelMatrix
-	 * @param closure
-	 */
-	void withBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer') Closure closure)
 }

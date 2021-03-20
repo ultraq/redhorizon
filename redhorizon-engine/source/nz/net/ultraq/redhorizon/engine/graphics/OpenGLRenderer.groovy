@@ -109,6 +109,26 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		paletteShader = createShader('TexturePalette')
 	}
 
+	@Override
+	void asBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix, Closure closure) {
+
+		if (!batchRenderer) {
+			batchRenderer = new OpenGLBatchRenderer(this)
+			batchRenderer.on(RendererEvent) { event ->
+				trigger(event)
+			}
+		}
+
+		// TODO: Remove these restrictions on the batch
+		batchRenderer.shader =
+			shaderType == ShaderType.TEXTURE ? textureShader :
+			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
+			primitiveShader
+		batchRenderer.modelMatrix = modelMatrix
+
+		closure(batchRenderer)
+	}
+
 	/**
 	 * Check for any OpenGL errors created by the OpenGL call in the given
 	 * closure, throwing them if they occur.
@@ -548,25 +568,5 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
 			}
 		}
-	}
-
-	@Override
-	void withBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix, Closure closure) {
-
-		if (!batchRenderer) {
-			batchRenderer = new OpenGLBatchRenderer(this)
-			batchRenderer.on(RendererEvent) { event ->
-				trigger(event)
-			}
-		}
-
-		// TODO: Remove these restrictions on the batch
-		batchRenderer.shader =
-			shaderType == ShaderType.TEXTURE ? textureShader :
-			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
-			primitiveShader
-		batchRenderer.modelMatrix = modelMatrix
-
-		closure(batchRenderer)
 	}
 }
