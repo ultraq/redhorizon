@@ -60,6 +60,7 @@ class MapViewer extends Application {
 	final ResourceManager resourceManager
 	final IniFile mapFile
 	final GraphicsConfiguration graphicsConfig
+	final boolean batchRenderer
 
 	/**
 	 * Display the map.
@@ -75,7 +76,7 @@ class MapViewer extends Application {
 				MapRA map
 				Vector3f mapInitialPosition
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					map = new MapRA(resourceManager, mapFile)
+					map = new MapRA(resourceManager, mapFile, batchRenderer)
 					mapInitialPosition = new Vector3f(map.initialPosition, 0)
 					logger.info('Map details: {}', map)
 					graphicsEngine.addSceneElement(map)

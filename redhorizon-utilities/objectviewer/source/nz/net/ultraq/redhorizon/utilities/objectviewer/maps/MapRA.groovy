@@ -55,6 +55,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		-TILES_Y * TILE_HEIGHT / 2
 	)
 
+	final boolean batchRenderer
+
 	final String name
 	final Theaters theater
 	final Rectanglef boundary
@@ -69,8 +71,11 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	 * 
 	 * @param resourceManager
 	 * @param mapFile
+	 * @param batchRenderer
 	 */
-	MapRA(ResourceManager resourceManager, IniFile mapFile) {
+	MapRA(ResourceManager resourceManager, IniFile mapFile, boolean batchRenderer) {
+
+		this.batchRenderer = batchRenderer
 
 		name = mapFile['Basic']['Name']
 
@@ -112,9 +117,16 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		texturePalette = renderer.createTexturePalette(palette)
 		palette = null
 
-		renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+		if (batchRenderer) {
+			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+				layers.each {layer ->
+					layer.init(batchRenderer)
+				}
+			}
+		}
+		else {
 			layers.each {layer ->
-				layer.init(batchRenderer)
+				layer.init(renderer)
 			}
 		}
 	}
@@ -149,11 +161,19 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	void render(GraphicsRenderer renderer) {
 
 		renderer.setPalette(texturePalette)
-		renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
-			layers.each {layer ->
-				layer.render(batchRenderer)
+
+		if (batchRenderer) {
+			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+				layers.each {layer ->
+					layer.render(batchRenderer)
+				}
+				batchRenderer.flush()
 			}
-			batchRenderer.flush()
+		}
+		else {
+			layers.each {layer ->
+				layer.render(renderer)
+			}
 		}
 	}
 

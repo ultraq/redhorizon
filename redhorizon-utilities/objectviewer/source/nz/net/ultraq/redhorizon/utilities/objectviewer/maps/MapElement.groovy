@@ -70,7 +70,7 @@ class MapElement implements GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(this.position.x, this.position.y, this.position.x + width as float, this.position.y + height as float)),
+			renderer.createSpriteMesh(new Rectanglef(position.x, position.y, position.x + width as float, position.y + height as float)),
 			renderer.createTexture(imageData, format.value, width, height),
 			ShaderType.TEXTURE_PALETTE
 		)

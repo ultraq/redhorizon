@@ -81,7 +81,7 @@ class MapBackground implements GraphicsElement {
 					position.x + width * repeatX as float, position.y + height * repeatY as float),
 				repeatX, repeatY),
 			renderer.createTexture(imageData, format.value, width, height),
-			format === ColourFormat.FORMAT_INDEXED ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
+			ShaderType.TEXTURE_PALETTE
 		)
 		imageData = null
 	}

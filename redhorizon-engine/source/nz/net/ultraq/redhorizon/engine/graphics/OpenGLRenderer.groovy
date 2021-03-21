@@ -269,6 +269,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			if (mesh.textureCoordinates) {
 				layoutParts << VertexBufferLayoutParts.TEXCOORD
 			}
+			layoutParts << VertexBufferLayoutParts.TEXUNIT
+			layoutParts << VertexBufferLayoutParts.MODEL_INDEX
 			def vertexBufferLayout = setVertexBufferLayout(*layoutParts)
 
 			// Buffer to hold all the vertex data
@@ -284,6 +286,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					def textureCoordinate = textureCoordinates[index]
 					vertexBuffer.put(textureCoordinate.x, textureCoordinate.y)
 				}
+				vertexBuffer.put(0 as float, 0 as float)
 			}
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
@@ -491,9 +494,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glBindTexture(GL_TEXTURE_2D, texture.textureId)
 				}
 
-				def modelBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def modelLocation = getUniformLocation(shader, 'model')
-				glUniformMatrix4fv(modelLocation, false, modelBuffer)
+				def modelsBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def modelsLocation = getUniformLocation(shader, 'models')
+				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
 
 				glBindVertexArray(mesh.vertexArrayId)
 				if (mesh.elementType) {
