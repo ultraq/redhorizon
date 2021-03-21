@@ -45,10 +45,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		VertexBufferLayoutParts.TEXUNIT,
 		VertexBufferLayoutParts.MODEL_INDEX
 	)
-	private static final int MAX_QUADS = 16 // TODO: Batch renderer is currently limited to drawing quads 😅
+	private static final int MAX_QUADS = 100 // TODO: Batch renderer is currently limited to drawing quads 😅
 	private static final int MAX_VERTICES = MAX_QUADS * 4
 	private static final int MAX_INDICES = MAX_QUADS * 6
-	private static final int MAX_TRANSFORMS = 15 // TODO: Capped at the number of textures, make it so it's not
 
 	Shader shader
 
@@ -57,7 +56,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	])
 	private final OpenGLRenderer renderer
 
-	private final int maxTextureUnits
+	private final int maxTransforms // TODO: Capped at the number of textures, make it so it's not
 	private final int batchVertexArrayId
 	private final int batchVertexBufferId
 	private final int batchElementBufferId
@@ -77,7 +76,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		this.renderer = renderer
 
 		// Set up batch limits
-		maxTextureUnits = glGetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) - 1 // Last slot reserved for palette
+		maxTransforms = renderer.maxTextureUnits
 
 		// Set up the buffers used for batching our geometry
 		batchVertexArrayId = glGenVertexArrays()
@@ -148,9 +147,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		def texture = material.texture
 
 		// If there is no space for the next material, flush the current buffers
-		if (!(mesh.vertices.size() <= (MAX_VERTICES - batchVertices)) ||
-			!(mesh.indices.size() <= (MAX_INDICES - batchIndices)) ||
-			!(texture && (batchTextureUnit < maxTextureUnits))) {
+		if (((MAX_VERTICES - batchVertices < mesh.vertices.size())) ||
+			((MAX_INDICES - batchIndices) < mesh.indices.size()) ||
+			(texture && (renderer.maxTextureUnits - batchTextureUnit < 1))) {
 			flush()
 		}
 
@@ -180,8 +179,8 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				// Build the sampler and model arrays for all of the materials in the
 				// batch buffer, fill the vertex buffer with vertex data from each
 				// material
-				def samplers = new int[maxTextureUnits]
-				def models = stack.mallocFloat(Matrix4f.FLOATS * MAX_TRANSFORMS)
+				def samplers = new int[renderer.maxTextureUnits]
+				def models = stack.mallocFloat(Matrix4f.FLOATS * maxTransforms)
 				def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * batchVertices)
 				batchMaterials.eachWithIndex { material, materialIndex ->
 					def texture = material.texture

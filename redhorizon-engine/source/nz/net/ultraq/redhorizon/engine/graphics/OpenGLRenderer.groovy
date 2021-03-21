@@ -50,6 +50,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
+	protected final int maxTextureUnits
 
 	protected final List<Shader> shaders = []
 	protected final Shader primitiveShader
@@ -69,6 +70,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		this.config = config
 		capabilities = GL.createCapabilities()
+
+		// Set up hardware limits
+		maxTextureUnits = glGetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) - 1 // Last slot reserved for palette
 
 		if (config.debug && capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)
@@ -319,10 +323,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		 * Create a shader of the specified name and type, running a compilation
 		 * check to make sure it all went OK.
 		 */
-		def createShader = { int type ->
+		def createShader = { int type, Closure<String> mod = null ->
 			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
 			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
-				return stream.text
+				return mod ? mod(stream.text) : stream.text
 			}
 			def shaderId = glCreateShader(type)
 			glShaderSource(shaderId, shaderSource)
@@ -354,8 +358,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return programId
 		}
 
-		def vertexShaderId = createShader(GL_VERTEX_SHADER)
-		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
+		def capTextureUnits = { source ->
+			return source.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
+		}
+		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
+		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
@@ -517,8 +524,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void setPalette(Texture palette) {
 
 		def paletteLocation = getUniformLocation(paletteShader, 'u_palette')
-		glProgramUniform1i(paletteShader.programId, paletteLocation, 15)
-		glActiveTexture(GL_TEXTURE15)
+		glProgramUniform1i(paletteShader.programId, paletteLocation, maxTextureUnits)
+		glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
 		glBindTexture(GL_TEXTURE_1D, palette.textureId)
 	}
 

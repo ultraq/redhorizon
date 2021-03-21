@@ -10,7 +10,7 @@ out vec4 v_vertexColour;
 out vec2 v_texCoord;
 out float v_texUnit;
 
-uniform mat4 models[15];
+uniform mat4 models[maxTextureUnits];
 uniform mat4 view;
 uniform mat4 projection;
 

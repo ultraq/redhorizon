@@ -6,7 +6,7 @@ in float v_texUnit;
 
 out vec4 fragColour;
 
-uniform sampler2D u_textures[15];
+uniform sampler2D u_textures[maxTextureUnits];
 uniform sampler1D u_palette;
 
 void main() {
