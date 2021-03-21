@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
 
 import org.joml.Rectanglef
 
-import groovy.transform.MapConstructor
 import java.nio.ByteBuffer
 
 /**
@@ -35,7 +34,6 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
 class Image implements GraphicsElement, SelfVisitable {
 
 	final int width
