@@ -46,10 +46,9 @@ interface GraphicsRenderer {
 	 * parameters on this method.
 	 * 
 	 * @param shaderType
-	 * @param modelMatrix
 	 * @param closure
 	 */
-	void asBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix,
+	void asBatchRenderer(ShaderType shaderType,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer') Closure closure)
 
 	/**

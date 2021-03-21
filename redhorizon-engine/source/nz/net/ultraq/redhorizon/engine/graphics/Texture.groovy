@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import groovy.transform.MapConstructor
-import groovy.transform.PackageScope
 
 /**
  * Representation of a single texture to render.
@@ -28,8 +27,4 @@ import groovy.transform.PackageScope
 class Texture {
 
 	final int textureId
-
-	// Batch rendering
-	@PackageScope
-	int textureUnit
 }

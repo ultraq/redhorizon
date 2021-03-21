@@ -110,7 +110,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void asBatchRenderer(ShaderType shaderType, Matrix4f modelMatrix, Closure closure) {
+	void asBatchRenderer(ShaderType shaderType, Closure closure) {
 
 		if (!batchRenderer) {
 			batchRenderer = new OpenGLBatchRenderer(this)
@@ -124,7 +124,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			shaderType == ShaderType.TEXTURE ? textureShader :
 			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
 			primitiveShader
-		batchRenderer.modelMatrix = modelMatrix
 
 		closure(batchRenderer)
 	}
@@ -266,7 +265,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			if (mesh.textureCoordinates) {
 				layoutParts << VertexBufferLayoutParts.TEXCOORD
 			}
-			def vertexBufferLayout = setVertexBufferLayout(layoutParts as VertexBufferLayoutParts[])
+			def vertexBufferLayout = setVertexBufferLayout(*layoutParts)
 
 			// Buffer to hold all the vertex data
 			def colour = mesh.colour

@@ -27,11 +27,11 @@ import org.joml.Vector3f
  */
 class Material {
 
-	final Matrix4f model = new Matrix4f()
-
 	Mesh mesh
 	Texture texture
 	Shader shader
+
+	final Matrix4f model = new Matrix4f()
 
 	/**
 	 * Adjust the scale of this material.
