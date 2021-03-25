@@ -40,8 +40,6 @@ class Image implements GraphicsElement, SceneElement {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
-	final float repeatX
-	final float repeatY
 
 	private Material material
 
@@ -74,17 +72,13 @@ class Image implements GraphicsElement, SceneElement {
 	 * @param height
 	 * @param format
 	 * @param imageData
-	 * @param repeatX
-	 * @param repeatY
 	 */
-	Image(int width, int height, ColourFormat format, ByteBuffer imageData, float repeatX = 1, float repeatY = 1) {
+	Image(int width, int height, ColourFormat format, ByteBuffer imageData) {
 
 		this.width     = width
 		this.height    = height
 		this.format    = format
 		this.imageData = imageData.flipVertical(width, height, format)
-		this.repeatX   = repeatX
-		this.repeatY   = repeatY
 
 		this.bounds.set(0, 0, width, height)
 	}
@@ -99,7 +93,7 @@ class Image implements GraphicsElement, SceneElement {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
+			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			renderer.createTexture(imageData, format.value, width, height),
 			format === ColourFormat.FORMAT_INDEXED ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
 		)

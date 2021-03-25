@@ -31,7 +31,11 @@ import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -46,6 +50,7 @@ import java.util.concurrent.Executors
 class ImagesViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
+	private static final int TICK = 48
 
 	final ImagesFile imagesFile
 	final GraphicsConfiguration graphicsConfig
@@ -68,26 +73,34 @@ class ImagesViewer extends Application {
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
-				// Build a combined image of all the images once we have the window size
+				def center = new Vector3f()
+
+				// Represent each frame of the image in a long strip
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					def imagesAcross = imagesFile.imagesData.imagesAcross(imagesFile.width, event.windowSize.width)
-					def combinedWidth = imagesFile.width * imagesAcross
-					def combinedHeight = imagesFile.height * Math.ceil(imagesFile.numImages / imagesAcross) as int
-					def combinedImage = imagesFile.imagesData.combineImages(imagesFile.width, imagesFile.height, imagesAcross)
-					if (imagesFile.format == FORMAT_INDEXED) {
-						combinedImage = combinedImage.applyPalette(palette)
+					graphicsEngine.scene.palette = palette
+					imagesFile.numImages.times { i ->
+						def image = new Image(imagesFile, i)
+						image.translate(new Vector3f(imagesFile.width * i, -imagesFile.height / 2, 0))
+						graphicsEngine.scene << image
 					}
-					def image = new Image(combinedWidth, combinedHeight, (palette?.format ?: imagesFile.format), combinedImage)
-					image.position -= new Vector3f(combinedWidth / 2, combinedHeight / 2, 0)
-					graphicsEngine.addSceneElement(image)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
 
 				// Key event handler
 				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS) {
+					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 						switch (event.key) {
+						// Add options so it's not hard-coded to my weird inverted setup 😅
+						case GLFW_KEY_LEFT:
+							graphicsEngine.camera.translate(TICK, 0)
+							break
+						case GLFW_KEY_RIGHT:
+							graphicsEngine.camera.translate(-TICK, 0)
+							break
+						case GLFW_KEY_SPACE:
+							graphicsEngine.camera.center(center)
+							break
 						case GLFW_KEY_ESCAPE:
 							graphicsEngine.stop()
 							break

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.extensions
 
 import org.joml.FrustumIntersection
+import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -74,6 +75,19 @@ class JomlExtensions {
 	static Vector3f minus(Vector3f self, Vector3f v) {
 
 		return self.sub(v, new Vector3f())
+	}
+
+	/**
+	 * Overload the {@code *} operator to perform matrix multiplication.  Note
+	 * that this creates a new object to store the result and is returned.
+	 * 
+	 * @param self
+	 * @param right
+	 * @return
+	 */
+	static Matrix4f multiply(Matrix4f self, Matrix4f right) {
+
+		return self.mul(right, new Matrix4f())
 	}
 
 	/**

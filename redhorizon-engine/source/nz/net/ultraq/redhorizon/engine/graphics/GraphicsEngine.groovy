@@ -127,6 +127,7 @@ class GraphicsEngine extends EngineSubsystem {
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
+						def paletteTexture = null
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
@@ -136,10 +137,14 @@ class GraphicsEngine extends EngineSubsystem {
 							imGuiRenderer.startFrame()
 
 							camera.render(renderer)
+							if (scene.palette && !paletteTexture) {
+								paletteTexture = renderer.createTexturePalette(scene.palette)
+								renderer.setPalette(paletteTexture)
+							}
 
 							// Reduce the list of renderable items to those just visible in the scene
 							def visibleElements = []
-							def frustumIntersection = new FrustumIntersection(camera.projection)
+							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 							scene.accept { element ->
 								if (frustumIntersection.testPlaneXY(element.bounds)) {
 									visibleElements << element
@@ -179,6 +184,9 @@ class GraphicsEngine extends EngineSubsystem {
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
 						camera.delete(renderer)
+						if (paletteTexture) {
+							renderer.deleteTexture(paletteTexture)
+						}
 						graphicsElementStates.keySet().each { graphicsElement ->
 							graphicsElement.delete(renderer)
 						}
