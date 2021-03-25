@@ -477,14 +477,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void drawMaterial(Material material) {
+	void drawMaterial(Material material, Matrix4f transform) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
 				def mesh = material.mesh
 				def texture = material.texture
 				def shader = material.shader
-				def model = material.model
 
 				glUseProgram(shader.programId)
 				if (texture) {
@@ -494,7 +493,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glBindTexture(GL_TEXTURE_2D, texture.textureId)
 				}
 
-				def modelsBuffer = model.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def modelsBuffer = transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
 

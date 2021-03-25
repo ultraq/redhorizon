@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.extensions
 
+import org.joml.FrustumIntersection
 import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -86,5 +87,36 @@ class JomlExtensions {
 	static Vector3f plus(Vector3f self, Vector3f v) {
 
 		return self.add(v, new Vector3f())
+	}
+
+	/**
+	 * Set a rectangle to represent the given dimensions extended from the origin.
+	 * 
+	 * @param self
+	 * @param minX
+	 * @param minY
+	 * @param maxX
+	 * @param maxY
+	 * @return
+	 */
+	static Rectanglef set(Rectanglef self, float minX, float minY, float maxX, float maxY) {
+
+		self.minX = minX
+		self.minY = minY
+		self.maxX = maxX
+		self.maxY = maxY
+		return self
+	}
+
+	/**
+	 * Test whether an XY plane represented by a rectangle is within this frustum.
+	 * 
+	 * @param self
+	 * @param plane
+	 * @return
+	 */
+	static boolean testPlaneXY(FrustumIntersection self, Rectanglef plane) {
+
+		return self.testPlaneXY(plane.minX, plane.minY, plane.maxX, plane.maxY)
 	}
 }

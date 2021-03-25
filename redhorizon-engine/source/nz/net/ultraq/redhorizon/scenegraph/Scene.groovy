@@ -17,26 +17,38 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * Entry point for the Red Horizon scene graph, holds the root node and any
- * other objects that make up the 'world'.
+ * Entry point for the Red Horizon scene graph, holds all of the objects that
+ * make up the 'world'.
  * 
  * @author Emanuel Rabina
  */
-class Scene implements SceneElement {
+class Scene implements Visitable {
 
-	final Node root = new Node()
-//	final Listener listener = new Listener()
-//	private Camera camera;
+	private List<SceneElement> elements = []
 
 	/**
 	 * Allow visitors into the scene for traversal.
 	 * 
 	 * @param visitor
 	 */
+	@Override
 	void accept(SceneVisitor visitor) {
 
-//		listener.accept(visitor)
-		root.accept(visitor)
+		elements.each { element ->
+			element.accept(visitor)
+		}
+	}
+
+	/**
+	 * Overloads the {@code <<} operator to add elements to this scene.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	Scene leftShift(SceneElement element) {
+
+		elements << element
+		return this
 	}
 
 	/**

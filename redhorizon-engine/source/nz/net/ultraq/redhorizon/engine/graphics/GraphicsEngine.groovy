@@ -19,9 +19,10 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
+import org.joml.FrustumIntersection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,11 +42,12 @@ class GraphicsEngine extends EngineSubsystem {
 
 	private final GraphicsConfiguration config
 	private final Closure needsMainThreadCallback
-	private final List<SceneElement> sceneElements = []
 
 	private OpenGLContext openGlContext
 	private Camera camera
 	private boolean started
+
+	Scene scene = new Scene()
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
@@ -62,16 +64,6 @@ class GraphicsEngine extends EngineSubsystem {
 
 		this.config = config
 		this.needsMainThreadCallback = needsMainThreadCallback
-	}
-
-	/**
-	 * Add an element to start rendering from the next pass.
-	 * 
-	 * @param sceneElement
-	 */
-	void addSceneElement(SceneElement sceneElement) {
-
-		sceneElements << sceneElement
 	}
 
 	/**
@@ -144,27 +136,34 @@ class GraphicsEngine extends EngineSubsystem {
 							imGuiRenderer.startFrame()
 
 							camera.render(renderer)
-							sceneElements.each { sceneElement ->
-								sceneElement.accept { element ->
-									if (element instanceof GraphicsElement) {
 
-										// Register the graphics element
-										if (!graphicsElementStates[element]) {
-											graphicsElementStates << [(element): STATE_NEW]
-										}
+							// Reduce the list of renderable items to those just visible in the scene
+							def visibleElements = []
+							def frustumIntersection = new FrustumIntersection(camera.projection)
+							scene.accept { element ->
+								if (frustumIntersection.testPlaneXY(element.bounds)) {
+									visibleElements << element
+								}
+							}
+							visibleElements.each { element ->
+								if (element instanceof GraphicsElement) {
 
-										def elementState = graphicsElementStates[element]
-
-										// Initialize the graphics element
-										if (elementState == STATE_NEW) {
-											element.init(renderer)
-											elementState = STATE_INITIALIZED
-											graphicsElementStates << [(element): elementState]
-										}
-
-										// Render the graphics element
-										element.render(renderer)
+									// Register the graphics element
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
 									}
+
+									def elementState = graphicsElementStates[element]
+
+									// Initialize the graphics element
+									if (elementState == STATE_NEW) {
+										element.init(renderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+
+									// Render the graphics element
+									element.render(renderer)
 								}
 							}
 

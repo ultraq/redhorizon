@@ -169,11 +169,11 @@ interface GraphicsRenderer {
 	void deleteTexture(Texture texture)
 
 	/**
-	 * Draw the material.
+	 * Draw the material with the given transform.
 	 * 
 	 * @param material
 	 */
-	void drawMaterial(Material material)
+	void drawMaterial(Material material, Matrix4f transform)
 
 	/**
 	 * Apply the given palette texture as the palette shader sampler uniform.

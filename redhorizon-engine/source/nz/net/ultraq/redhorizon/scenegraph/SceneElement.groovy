@@ -16,17 +16,49 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import org.joml.Matrix4f
+import org.joml.Rectanglef
+import org.joml.Vector3f
+
 /**
  * Interface for an element that can be a part of a scene.
  * 
  * @author Emanuel Rabina
  */
-interface SceneElement extends Positionable, Scalable {
+trait SceneElement implements Visitable {
+
+	final Matrix4f transform = new Matrix4f()
+	final Rectanglef bounds = new Rectanglef()
+
+	@Override
+	void accept(SceneVisitor visitor) {
+
+		visitor.visit(this)
+	}
 
 	/**
-	 * Accept any scene visitor.
+	 * Scale the X and Y values of this element.
 	 * 
-	 * @param visitor
+	 * @param factor
+	 * @return
 	 */
-	void accept(SceneVisitor visitor)
+	SceneElement scaleXY(float factor) {
+
+		transform.scaleXY(factor, factor)
+		bounds.scale(factor)
+		return this
+	}
+
+	/**
+	 * Translate the position of this element.
+	 * 
+	 * @param offset
+	 * @return
+	 */
+	SceneElement translate(Vector3f offset) {
+
+		transform.translate(offset)
+		bounds.translate(offset.x, offset.y)
+		return this
+	}
 }

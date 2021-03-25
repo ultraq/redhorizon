@@ -61,6 +61,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private final int batchVertexBufferId
 	private final int batchElementBufferId
 	private List<Material> batchMaterials = []
+	private List<Matrix4f> batchTransforms = []
 	private int batchVertices = 0
 	private int batchIndices = 0
 	private int batchTextureUnit = 0
@@ -141,7 +142,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	}
 
 	@Override
-	void drawMaterial(Material material) {
+	void drawMaterial(Material material, Matrix4f transform) {
 
 		def mesh = material.mesh
 		def texture = material.texture
@@ -156,6 +157,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		// TODO: See if the texture is being used in a previous material and so
 		//       set the active texture target to that one
 		batchMaterials << material
+		batchTransforms << transform
 		batchVertices += mesh.vertices.size()
 		batchIndices += mesh.indices.size()
 		if (texture) {
@@ -188,7 +190,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 					glBindTexture(GL_TEXTURE_2D, texture.textureId)
 					samplers[materialIndex] = materialIndex
 
-					material.model.get(materialIndex * Matrix4f.FLOATS, models)
+					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, models)
 
 					def mesh = material.mesh
 					def colour = mesh.colour

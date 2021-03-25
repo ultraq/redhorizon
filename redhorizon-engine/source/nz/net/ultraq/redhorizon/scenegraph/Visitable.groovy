@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * A material defines how a shape should be rendered, so references meshes,
- * colours, textures, and a shader.
+ * Elements in a scene which are visitable.
  * 
  * @author Emanuel Rabina
  */
-class Material {
+interface Visitable {
 
-	Mesh mesh
-	Texture texture
-	Shader shader
+	/**
+	 * Accept any scene visitor.
+	 *
+	 * @param visitor
+	 */
+	void accept(SceneVisitor visitor)
 }

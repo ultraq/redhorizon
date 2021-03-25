@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
 
@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class Image implements GraphicsElement, SelfVisitable {
+class Image implements GraphicsElement, SceneElement {
 
 	final int width
 	final int height
@@ -85,6 +85,8 @@ class Image implements GraphicsElement, SelfVisitable {
 		this.imageData = imageData.flipVertical(width, height, format)
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
+
+		this.bounds.set(0, 0, width, height)
 	}
 
 	@Override
@@ -101,14 +103,12 @@ class Image implements GraphicsElement, SelfVisitable {
 			renderer.createTexture(imageData, format.value, width, height),
 			format === ColourFormat.FORMAT_INDEXED ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
 		)
-			.scale(scaleX, scaleY)
-			.translate(position)
 		imageData = null
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.drawMaterial(material, transform)
 	}
 }
