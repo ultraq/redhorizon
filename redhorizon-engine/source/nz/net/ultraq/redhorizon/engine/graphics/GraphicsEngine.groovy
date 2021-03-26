@@ -127,7 +127,6 @@ class GraphicsEngine extends EngineSubsystem {
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
-						def paletteTexture = null
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
@@ -137,10 +136,6 @@ class GraphicsEngine extends EngineSubsystem {
 							imGuiRenderer.startFrame()
 
 							camera.render(renderer)
-							if (scene.palette && !paletteTexture) {
-								paletteTexture = renderer.createTexturePalette(scene.palette)
-								renderer.setPalette(paletteTexture)
-							}
 
 							// Reduce the list of renderable items to those just visible in the scene
 							def visibleElements = []
@@ -184,9 +179,6 @@ class GraphicsEngine extends EngineSubsystem {
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
 						camera.delete(renderer)
-						if (paletteTexture) {
-							renderer.deleteTexture(paletteTexture)
-						}
 						graphicsElementStates.keySet().each { graphicsElement ->
 							graphicsElement.delete(renderer)
 						}

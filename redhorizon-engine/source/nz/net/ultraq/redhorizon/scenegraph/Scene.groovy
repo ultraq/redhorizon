@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.redhorizon.filetypes.Palette
-
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
  * make up the 'world'.
@@ -27,7 +25,6 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 class Scene implements Visitable {
 
 	private List<SceneElement> elements = []
-	Palette palette
 
 	/**
 	 * Allow visitors into the scene for traversal.
