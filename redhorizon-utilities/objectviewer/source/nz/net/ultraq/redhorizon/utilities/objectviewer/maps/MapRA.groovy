@@ -55,8 +55,6 @@ class MapRA implements GraphicsElement, SceneElement {
 		-TILES_Y * TILE_HEIGHT / 2
 	)
 
-	final boolean batchRenderer
-
 	final String name
 	final Theaters theater
 	final Rectanglef boundary
@@ -71,11 +69,8 @@ class MapRA implements GraphicsElement, SceneElement {
 	 * 
 	 * @param resourceManager
 	 * @param mapFile
-	 * @param batchRenderer
 	 */
-	MapRA(ResourceManager resourceManager, IniFile mapFile, boolean batchRenderer) {
-
-		this.batchRenderer = batchRenderer
+	MapRA(ResourceManager resourceManager, IniFile mapFile) {
 
 		name = mapFile['Basic']['Name']
 

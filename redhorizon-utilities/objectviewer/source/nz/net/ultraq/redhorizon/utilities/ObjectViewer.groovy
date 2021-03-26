@@ -68,9 +68,6 @@ class ObjectViewer implements Callable<Integer> {
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
 	String entryName
 
-	@Option(names = ['--batch-renderer'], description = 'Use the batch renderer.  Experimental, only applies to the mission viewer.')
-	boolean batchRenderer
-
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
@@ -170,7 +167,7 @@ class ObjectViewer implements Callable<Integer> {
 				new ResourceManager(file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, graphicsConfig, batchRenderer).view()
+					new MapViewer(resourceManager, objectFile, graphicsConfig).view()
 				}
 				break
 			default:
