@@ -68,6 +68,7 @@ class Camera implements GraphicsElement {
 	Camera center(Vector3f point) {
 
 		view.translate(view.origin(new Vector3f()).sub(point))
+		moved = true
 		return this
 	}
 
