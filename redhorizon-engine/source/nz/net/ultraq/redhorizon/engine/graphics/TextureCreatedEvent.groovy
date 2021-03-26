@@ -16,10 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.TupleConstructor
+
 /**
  * Event fired when a texture is created.
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class TextureCreatedEvent extends RendererEvent {
+
+	final Texture texture
 }

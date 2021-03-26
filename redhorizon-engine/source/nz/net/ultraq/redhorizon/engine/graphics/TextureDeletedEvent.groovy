@@ -19,12 +19,12 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import groovy.transform.TupleConstructor
 
 /**
- * Event triggered when a mesh is made.
+ * Event fired when a texture is deleted.
  * 
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MeshCreatedEvent extends RendererEvent {
+class TextureDeletedEvent extends RendererEvent {
 
-	final Mesh mesh
+	final Texture texture
 }

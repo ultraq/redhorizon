@@ -24,7 +24,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MeshCreatedEvent extends RendererEvent {
+class MeshDeletedEvent extends RendererEvent {
 
 	final Mesh mesh
 }

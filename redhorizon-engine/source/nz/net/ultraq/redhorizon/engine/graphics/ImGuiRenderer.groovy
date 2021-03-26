@@ -42,8 +42,8 @@ class ImGuiRenderer implements AutoCloseable {
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
 	private int drawCalls = 0
-	private int meshesCreated = 0
-	private int texturesCreated = 0
+	private int activeMeshes = 0
+	private int activeTextures = 0
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
@@ -65,10 +65,16 @@ class ImGuiRenderer implements AutoCloseable {
 				drawCalls++
 			}
 			else if (event instanceof MeshCreatedEvent) {
-				meshesCreated++
+				activeMeshes++
+			}
+			else if (event instanceof MeshDeletedEvent) {
+				activeMeshes--
 			}
 			else if (event instanceof TextureCreatedEvent) {
-				texturesCreated++
+				activeTextures++
+			}
+			else if (event instanceof TextureDeletedEvent) {
+				activeTextures--
 			}
 		}
 
@@ -113,8 +119,8 @@ class ImGuiRenderer implements AutoCloseable {
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Draw calls: ${drawCalls}")
-		ImGui.text("Meshes created: ${meshesCreated}")
-		ImGui.text("Textures created: ${texturesCreated}")
+		ImGui.text("Active meshes: ${activeMeshes}")
+		ImGui.text("Active textures: ${activeTextures}")
 		drawCalls = 0
 
 		ImGui.separator()
