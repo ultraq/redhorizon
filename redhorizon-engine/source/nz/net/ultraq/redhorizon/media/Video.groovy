@@ -21,8 +21,11 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
+import org.joml.Matrix4f
+import org.joml.Rectanglef
 import org.joml.Vector3f
 
 import java.util.concurrent.ExecutorService
@@ -34,7 +37,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
+class Video implements AudioElement, GraphicsElement, Playable, SceneElement {
 
 	@Delegate
 	private final Animation animation
@@ -76,15 +79,22 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	}
 
 	@Override
-	Vector3f getPosition() {
+	void accept(SceneVisitor visitor) {
 
-		return animation.position
+		visitor.visit(animation)
+		visitor.visit(soundTrack)
 	}
 
 	@Override
-	float getScale() {
+	Rectanglef getBounds() {
 
-		return animation.scale
+		return SceneElement.super.bounds
+	}
+
+	@Override
+	Matrix4f getTransform() {
+
+		return SceneElement.super.transform
 	}
 
 	@Override
@@ -96,29 +106,28 @@ class Video implements AudioElement, GraphicsElement, Playable, SelfVisitable {
 	@Override
 	void play() {
 
-		animation.play()
-		soundTrack.play()
+		[animation, soundTrack]*.play()
 		Playable.super.play()
 	}
 
 	@Override
-	void setPosition(Vector3f position) {
+	SceneElement scaleXY(float factor) {
 
-		// TODO: Adjust position of the soundtrack and listener?
-		animation.position = position
-	}
-
-	@Override
-	void setScale(float scale) {
-
-		animation.scale = scale
+		[animation, soundTrack]*.scaleXY(factor)
+		return SceneElement.super.scaleXY(factor)
 	}
 
 	@Override
 	void stop() {
 
-		animation.stop()
-		soundTrack.stop()
+		[animation, soundTrack]*.stop()
 		Playable.super.stop()
+	}
+
+	@Override
+	SceneElement translate(Vector3f offset) {
+
+		[animation, soundTrack]*.translate(offset)
+		return SceneElement.super.translate(offset)
 	}
 }

@@ -73,11 +73,11 @@ class VideoPlayer extends Application {
 								height <<= 1
 							}
 							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-							def offset = new Vector3f(width / 2, height / 2, 0)
+							def offset = new Vector3f(-width / 2, -height / 2, 0)
 
 							video = new Video(videoFile, scaleLowRes, gameClock, executorService)
-							video.scale = scale
-							video.position -= offset
+							video.scaleXY(scale)
+							video.translate(offset)
 
 							video.on(StopEvent) { stopEvent ->
 								logger.debug('Video stopped')
@@ -85,13 +85,13 @@ class VideoPlayer extends Application {
 								graphicsEngine.stop()
 							}
 							audioEngine.addSceneElement(video)
-							graphicsEngine.addSceneElement(video)
+							graphicsEngine.scene << video
 
 							if (scanlines) {
-								def scanlines = new Scanlines(new Dimension(width, height))
-								scanlines.scale = scale
-								scanlines.position -= offset
-								graphicsEngine.addSceneElement(scanlines)
+								graphicsEngine.scene << new Scanlines(new Dimension(width, height))
+									.scaleXY(scale)
+									.translate(offset)
+									.translate(new Vector3f(0, -scale / 2 as float, 0))
 							}
 						}
 

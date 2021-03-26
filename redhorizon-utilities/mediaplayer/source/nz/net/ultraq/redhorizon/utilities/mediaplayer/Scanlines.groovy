@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Rectanglef
@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class Scanlines implements GraphicsElement, SelfVisitable {
+class Scanlines implements GraphicsElement, SceneElement {
 
 	private final Dimension overlay
 	private Material material
@@ -73,14 +73,11 @@ class Scanlines implements GraphicsElement, SelfVisitable {
 			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true),
 			ShaderType.TEXTURE
 		)
-			.scale(scale)
-			.translate(position)
-			.translate(0, -scale / 2 as float)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.drawMaterial(material, transform)
 	}
 }

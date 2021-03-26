@@ -28,7 +28,7 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class Animation implements GraphicsElement, Playable, SelfVisitable {
+class Animation implements GraphicsElement, Playable, SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 
@@ -152,8 +152,6 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 		lastFrame = -1
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
 		material = renderer.createMaterial(mesh, null, ShaderType.TEXTURE)
-			.scale(scale)
-			.translate(position)
 		textures = []
 		framesQueued = 0
 	}
@@ -192,7 +190,7 @@ class Animation implements GraphicsElement, Playable, SelfVisitable {
 				def texture = textures[currentFrame]
 				if (texture) {
 					material.texture = texture
-					renderer.drawMaterial(material)
+					renderer.drawMaterial(material, transform)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)

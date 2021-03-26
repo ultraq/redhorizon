@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class SoundTrack implements AudioElement, Playable, SelfVisitable {
+class SoundTrack implements AudioElement, Playable, SceneElement {
 
 	// Sound information
 	final int bits

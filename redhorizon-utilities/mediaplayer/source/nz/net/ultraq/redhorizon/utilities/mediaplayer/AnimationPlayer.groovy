@@ -71,24 +71,24 @@ class AnimationPlayer extends Application {
 							height <<= 1
 						}
 						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-						def offset = new Vector3f(width / 2, height / 2, 0)
+						def offset = new Vector3f(-width / 2, -height / 2, 0)
 
 						animation = new Animation(animationFile, scaleLowRes, gameClock, executorService)
-						animation.scale = scale
-						animation.position -= offset
+						animation.scaleXY(scale)
+						animation.translate(offset)
 
 						animation.on(StopEvent) { stopEvent ->
 							logger.debug('Animation stopped')
 							graphicsEngine.stop()
 							gameClock.stop()
 						}
-						graphicsEngine.addSceneElement(animation)
+						graphicsEngine.scene << animation
 
 						if (scanlines) {
-							def scanlines = new Scanlines(new Dimension(width, height))
-							scanlines.scale = scale
-							scanlines.position -= offset
-							graphicsEngine.addSceneElement(scanlines)
+							graphicsEngine.scene << new Scanlines(new Dimension(width, height))
+								.scaleXY(scale)
+								.translate(offset)
+								.translate(new Vector3f(0, -scale / 2 as float, 0))
 						}
 					}
 
