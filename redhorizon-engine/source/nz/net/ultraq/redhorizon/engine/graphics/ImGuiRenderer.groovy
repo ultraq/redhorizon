@@ -52,7 +52,7 @@ class ImGuiRenderer implements AutoCloseable {
 	 * @param context
 	 * @param renderer
 	 */
-	ImGuiRenderer(OpenGLContext context, OpenGLRenderer renderer) {
+	ImGuiRenderer(OpenGLContext context, GraphicsRenderer renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
