@@ -33,6 +33,8 @@ import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
 
 /**
@@ -110,7 +112,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void asBatchRenderer(ShaderType shaderType, Closure closure) {
+	void asBatchRenderer(ShaderType shaderType,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer')
+		Closure closure) {
 
 		if (!batchRenderer) {
 			batchRenderer = new OpenGLBatchRenderer(this)
