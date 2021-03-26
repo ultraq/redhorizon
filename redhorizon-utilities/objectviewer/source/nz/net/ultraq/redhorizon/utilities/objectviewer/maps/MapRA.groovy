@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
@@ -32,7 +31,6 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -131,19 +129,6 @@ class MapRA implements GraphicsElement, SceneElement {
 
 		texturePalette = renderer.createTexturePalette(palette)
 		palette = null
-
-//		if (batchRenderer) {
-//			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
-//				layers.each {layer ->
-//					layer.init(batchRenderer)
-//				}
-//			}
-//		}
-//		else {
-//			layers.each {layer ->
-//				layer.init(renderer)
-//			}
-//		}
 	}
 
 	/**
@@ -176,20 +161,6 @@ class MapRA implements GraphicsElement, SceneElement {
 	void render(GraphicsRenderer renderer) {
 
 		renderer.setPalette(texturePalette)
-
-//		if (batchRenderer) {
-//			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
-//				layers.each {layer ->
-//					layer.render(batchRenderer)
-//				}
-//				batchRenderer.flush()
-//			}
-//		}
-//		else {
-//			layers.each {layer ->
-//				layer.render(renderer)
-//			}
-//		}
 	}
 
 	/**
@@ -213,7 +184,6 @@ class MapRA implements GraphicsElement, SceneElement {
 	 */
 	private class BackgroundLayer implements SceneElement {
 
-		@Delegate
 		private final MapBackground background
 
 		/**
@@ -236,6 +206,13 @@ class MapRA implements GraphicsElement, SceneElement {
 
 			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY)
 				.translate(WORLD_OFFSET.x, WORLD_OFFSET.y, 0)
+		}
+
+		@Override
+		void accept(SceneVisitor visitor) {
+
+			visitor.visit(this)
+			background.accept(visitor)
 		}
 	}
 

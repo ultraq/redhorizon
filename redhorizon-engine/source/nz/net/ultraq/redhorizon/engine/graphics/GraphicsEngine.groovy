@@ -145,26 +145,29 @@ class GraphicsEngine extends EngineSubsystem {
 									visibleElements << element
 								}
 							}
-							visibleElements.each { element ->
-								if (element instanceof GraphicsElement) {
+							renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+								visibleElements.each { element ->
+									if (element instanceof GraphicsElement) {
 
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
+										// Register the graphics element
+										if (!graphicsElementStates[element]) {
+											graphicsElementStates << [(element): STATE_NEW]
+										}
+
+										def elementState = graphicsElementStates[element]
+
+										// Initialize the graphics element
+										if (elementState == STATE_NEW) {
+											element.init(batchRenderer)
+											elementState = STATE_INITIALIZED
+											graphicsElementStates << [(element): elementState]
+										}
+
+										// Render the graphics element
+										element.render(batchRenderer)
 									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
 								}
+								batchRenderer.flush()
 							}
 
 							imGuiRenderer.drawDebugOverlay()

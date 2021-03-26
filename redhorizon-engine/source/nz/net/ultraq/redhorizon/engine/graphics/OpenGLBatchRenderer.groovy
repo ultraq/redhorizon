@@ -113,18 +113,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	}
 
 	@Override
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
-
-		return renderer.createMesh(colour, vertices)
-	}
-
-	@Override
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
-
-		return renderer.createMesh(colour, vertices)
-	}
-
-	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return renderer.createMesh(
@@ -146,6 +134,14 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 		def mesh = material.mesh
 		def texture = material.texture
+
+		// TODO: Really crude method of deferring to the standard renderer for
+		//       things that this batch renderer wasn't configured to handle.  Gotta
+		//       think of a better way to do this.
+		if (material.shader != shader) {
+			renderer.drawMaterial(material, transform)
+			return
+		}
 
 		// If there is no space for the next material, flush the current buffers
 		if (((MAX_VERTICES - batchVertices < mesh.vertices.size())) ||
@@ -226,6 +222,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				batchIndices = 0
 				batchTextureUnit = 0
 				batchMaterials.clear()
+				batchTransforms.clear()
 			}
 		}
 	}
