@@ -20,16 +20,10 @@ import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.media.Image
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Vector3f
@@ -108,62 +102,6 @@ class ImagesViewer extends Application {
 					}
 				}
 			}
-		}
-	}
-
-	/**
-	 * A series of images laid out in a long horizontal strip.
-	 */
-	private class ImageStrip implements SceneElement, GraphicsElement {
-
-		final List<Image> images = []
-		final Palette palette
-		private Texture paletteTexture
-
-		/**
-		 * Constructor, build a strip of images from a file containing multiple
-		 * images.
-		 * 
-		 * @param imagesFile
-		 * @param palette
-		 */
-		ImageStrip(ImagesFile imagesFile, Palette palette) {
-
-			this.palette = palette
-			this.bounds.set(0, 0, imagesFile.width * imagesFile.numImages, imagesFile.height)
-
-			imagesFile.numImages.times { i ->
-				def image = new Image(imagesFile, i)
-				image.translate(new Vector3f(imagesFile.width * i, -imagesFile.height / 2, 0))
-				images << image
-			}
-		}
-
-		@Override
-		void accept(SceneVisitor visitor) {
-
-			visitor.visit(this)
-			images.each { image ->
-				visitor.visit(image)
-			}
-		}
-
-		@Override
-		void delete(GraphicsRenderer renderer) {
-
-			renderer.deleteTexture(paletteTexture)
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-
-			paletteTexture = renderer.createTexturePalette(palette)
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			renderer.setPalette(paletteTexture)
 		}
 	}
 }
