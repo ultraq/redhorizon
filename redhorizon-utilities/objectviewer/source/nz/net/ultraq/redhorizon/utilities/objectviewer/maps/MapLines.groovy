@@ -21,19 +21,16 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Vector2f
-
-import groovy.transform.TupleConstructor
 
 /**
  * Map overlays and lines to help with debugging maps.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(includes = ['map'])
-class MapLines implements GraphicsElement, SelfVisitable {
+class MapLines implements GraphicsElement, SceneElement<MapLines> {
 
 	private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
 	private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)
@@ -43,6 +40,17 @@ class MapLines implements GraphicsElement, SelfVisitable {
 	final MapRA map
 	private Material axisLines
 	private Material boundaryLines
+
+	/**
+	 * Constructor, set the bounds of this object for culling purposes.
+	 * 
+	 * @param map
+	 */
+	MapLines(MapRA map) {
+
+		this.map = map
+		this.bounds.set(X_AXIS_MIN.x, Y_AXIS_MIN.y, X_AXIS_MAX.x, Y_AXIS_MAX.y)
+	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
@@ -73,7 +81,7 @@ class MapLines implements GraphicsElement, SelfVisitable {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(axisLines)
-		renderer.drawMaterial(boundaryLines)
+		renderer.drawMaterial(axisLines, transform)
+		renderer.drawMaterial(boundaryLines, transform)
 	}
 }

@@ -79,10 +79,10 @@ class MapViewer extends Application {
 					map = new MapRA(resourceManager, mapFile, batchRenderer)
 					mapInitialPosition = new Vector3f(map.initialPosition, 0)
 					logger.info('Map details: {}', map)
-					graphicsEngine.addSceneElement(map)
+					graphicsEngine.scene << map
 					graphicsEngine.camera.center(mapInitialPosition)
 
-					graphicsEngine.addSceneElement(new MapLines(map))
+					graphicsEngine.scene << new MapLines(map)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')

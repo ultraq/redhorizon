@@ -23,9 +23,10 @@ import org.joml.Vector3f
 /**
  * Interface for an element that can be a part of a scene.
  * 
+ * @param <T>
  * @author Emanuel Rabina
  */
-trait SceneElement implements Visitable {
+trait SceneElement<T extends SceneElement> implements Visitable {
 
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
@@ -42,7 +43,7 @@ trait SceneElement implements Visitable {
 	 * @param factor
 	 * @return
 	 */
-	SceneElement scaleXY(float factor) {
+	T scaleXY(float factor) {
 
 		transform.scaleXY(factor, factor)
 		bounds.scale(factor)
@@ -55,7 +56,7 @@ trait SceneElement implements Visitable {
 	 * @param offset
 	 * @return
 	 */
-	SceneElement translate(Vector3f offset) {
+	T translate(Vector3f offset) {
 
 		transform.translate(offset)
 		bounds.translate(offset.x, offset.y)

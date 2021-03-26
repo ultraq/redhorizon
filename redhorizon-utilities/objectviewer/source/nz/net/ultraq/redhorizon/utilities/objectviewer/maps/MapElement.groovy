@@ -22,9 +22,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
-import org.joml.Vector2f
 
 import java.nio.ByteBuffer
 
@@ -33,13 +33,12 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapElement implements GraphicsElement {
+class MapElement implements GraphicsElement, SceneElement<MapElement> {
 
 	final int width
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
-	private final Vector2f position
 
 	private Material material
 
@@ -49,15 +48,15 @@ class MapElement implements GraphicsElement {
 	 * 
 	 * @param imagesFile
 	 * @param frame
-	 * @param position
 	 */
-	MapElement(ImagesFile imagesFile, int frame, Vector2f position) {
+	MapElement(ImagesFile imagesFile, int frame) {
 
 		this.width     = imagesFile.width
 		this.height    = imagesFile.height
 		this.format    = imagesFile.format
 		this.imageData = imagesFile.imagesData[frame].flipVertical(width, height, format)
-		this.position  = position
+
+		this.bounds.set(0, 0, width, height)
 	}
 
 	@Override
@@ -70,7 +69,7 @@ class MapElement implements GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(position.x, position.y, position.x + width as float, position.y + height as float)),
+			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			renderer.createTexture(imageData, format.value, width, height),
 			ShaderType.TEXTURE_PALETTE
 		)
@@ -80,6 +79,6 @@ class MapElement implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.drawMaterial(material, transform)
 	}
 }

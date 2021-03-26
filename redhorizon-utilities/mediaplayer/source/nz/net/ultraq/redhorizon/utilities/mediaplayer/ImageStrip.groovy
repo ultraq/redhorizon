@@ -62,7 +62,7 @@ class ImageStrip implements GraphicsElement, SceneElement {
 
 		visitor.visit(this)
 		images.each { image ->
-			visitor.visit(image)
+			image.accept(visitor)
 		}
 	}
 

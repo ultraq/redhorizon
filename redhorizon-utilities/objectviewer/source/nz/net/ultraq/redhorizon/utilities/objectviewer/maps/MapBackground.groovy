@@ -21,9 +21,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
-import org.joml.Vector2f
 
 import java.nio.ByteBuffer
 
@@ -32,7 +32,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapBackground implements GraphicsElement {
+class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 
 	final int width
 	final int height
@@ -40,7 +40,6 @@ class MapBackground implements GraphicsElement {
 	private ByteBuffer imageData
 	final float repeatX
 	final float repeatY
-	final Vector2f position
 
 	private Material material
 
@@ -53,9 +52,8 @@ class MapBackground implements GraphicsElement {
 	 * @param imageData
 	 * @param repeatX
 	 * @param repeatY
-	 * @param position
 	 */
-	MapBackground(int imageWidth, int imageHeight, ColourFormat imageFormat, ByteBuffer imageData, float repeatX, float repeatY, Vector2f position) {
+	MapBackground(int imageWidth, int imageHeight, ColourFormat imageFormat, ByteBuffer imageData, float repeatX, float repeatY) {
 
 		this.width     = imageWidth
 		this.height    = imageHeight
@@ -63,7 +61,8 @@ class MapBackground implements GraphicsElement {
 		this.imageData = imageData.flipVertical(width, height, format)
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
-		this.position  = position
+
+		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
 
 	@Override
@@ -76,10 +75,7 @@ class MapBackground implements GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(
-				new Rectanglef(position.x, position.y,
-					position.x + width * repeatX as float, position.y + height * repeatY as float),
-				repeatX, repeatY),
+			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
 			renderer.createTexture(imageData, format.value, width, height),
 			ShaderType.TEXTURE_PALETTE
 		)
@@ -89,6 +85,6 @@ class MapBackground implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.drawMaterial(material, transform)
 	}
 }

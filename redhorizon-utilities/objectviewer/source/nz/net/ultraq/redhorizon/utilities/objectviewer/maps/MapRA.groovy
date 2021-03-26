@@ -27,10 +27,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,7 +43,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapRA implements GraphicsElement, SelfVisitable {
+class MapRA implements GraphicsElement, SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -62,7 +64,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
-	private final List<GraphicsElement> layers = []
+	private final List<SceneElement> layers = []
 	private Palette palette
 	private Texture texturePalette
 
@@ -100,15 +102,28 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
 		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
 		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
+
+		def halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
+		def halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
+		bounds.set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+		layers.each { layer ->
+			layer.bounds.set(bounds)
+		}
+	}
+
+	@Override
+	void accept(SceneVisitor visitor) {
+
+		visitor.visit(this)
+		layers.each { layer ->
+			layer.accept(visitor)
+		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteTexture(texturePalette)
-		layers.each { layer ->
-			layer.delete(renderer)
-		}
 	}
 
 	@Override
@@ -117,18 +132,18 @@ class MapRA implements GraphicsElement, SelfVisitable {
 		texturePalette = renderer.createTexturePalette(palette)
 		palette = null
 
-		if (batchRenderer) {
-			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
-				layers.each {layer ->
-					layer.init(batchRenderer)
-				}
-			}
-		}
-		else {
-			layers.each {layer ->
-				layer.init(renderer)
-			}
-		}
+//		if (batchRenderer) {
+//			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+//				layers.each {layer ->
+//					layer.init(batchRenderer)
+//				}
+//			}
+//		}
+//		else {
+//			layers.each {layer ->
+//				layer.init(renderer)
+//			}
+//		}
 	}
 
 	/**
@@ -162,19 +177,19 @@ class MapRA implements GraphicsElement, SelfVisitable {
 
 		renderer.setPalette(texturePalette)
 
-		if (batchRenderer) {
-			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
-				layers.each {layer ->
-					layer.render(batchRenderer)
-				}
-				batchRenderer.flush()
-			}
-		}
-		else {
-			layers.each {layer ->
-				layer.render(renderer)
-			}
-		}
+//		if (batchRenderer) {
+//			renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+//				layers.each {layer ->
+//					layer.render(batchRenderer)
+//				}
+//				batchRenderer.flush()
+//			}
+//		}
+//		else {
+//			layers.each {layer ->
+//				layer.render(renderer)
+//			}
+//		}
 	}
 
 	/**
@@ -196,7 +211,7 @@ class MapRA implements GraphicsElement, SelfVisitable {
 	/**
 	 * Special layer for the background image.
 	 */
-	private class BackgroundLayer implements GraphicsElement {
+	private class BackgroundLayer implements SceneElement {
 
 		@Delegate
 		private final MapBackground background
@@ -219,39 +234,24 @@ class MapRA implements GraphicsElement, SelfVisitable {
 			def repeatX = (TILES_X * TILE_WIDTH) / width as float
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
-			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY,
-				new Vector2f(WORLD_OFFSET.x, WORLD_OFFSET.y))
+			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY)
+				.translate(new Vector3f(WORLD_OFFSET.x, WORLD_OFFSET.y, 0))
 		}
 	}
 
 	/**
 	 * Common code for rendering a map layer consisting of multiple elements.
 	 */
-	private abstract class MapLayer implements GraphicsElement {
+	private abstract class MapLayer implements SceneElement<MapLayer> {
 
 		protected final List<MapElement> elements = []
 
 		@Override
-		void delete(GraphicsRenderer renderer) {
+		void accept(SceneVisitor visitor) {
 
+			visitor.visit(this)
 			elements.each { element ->
-				element.delete(renderer)
-			}
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-
-			elements.each { element ->
-				element.init(renderer)
-			}
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			elements.each { element ->
-				element.render(renderer)
+				element.accept(visitor)
 			}
 		}
 	}
@@ -296,8 +296,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 						}
 
 						def position = new Vector2f(tileCoord).asWorldCoords(1)
-						def packElement = new MapElement(tileFile, tilePic, position)
-						elements << packElement
+						elements << new MapElement(tileFile, tilePic)
+							.translate(new Vector3f(position.x, position.y, 0))
 					}
 				}
 			}
@@ -380,8 +380,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				}
 
 				def position = new Vector2f(tilePos).asWorldCoords(1)
-				def overlayElement = new MapElement(tileFile, imageVariant, position)
-				elements << overlayElement
+				elements << new MapElement(tileFile, imageVariant)
+					.translate(new Vector3f(position.x, position.y, 0))
 			}
 		}
 	}
@@ -403,8 +403,8 @@ class MapRA implements GraphicsElement, SelfVisitable {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				def terrainElement = new MapElement(terrainFile, 0, cellPosXY)
-				elements << terrainElement
+				elements << new MapElement(terrainFile, 0)
+					.translate(new Vector3f(cellPosXY.x, cellPosXY.y, 0))
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"
