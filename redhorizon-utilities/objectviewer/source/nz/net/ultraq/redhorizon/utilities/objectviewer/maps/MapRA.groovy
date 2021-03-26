@@ -235,7 +235,7 @@ class MapRA implements GraphicsElement, SceneElement {
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
 			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY)
-				.translate(new Vector3f(WORLD_OFFSET.x, WORLD_OFFSET.y, 0))
+				.translate(WORLD_OFFSET.x, WORLD_OFFSET.y, 0)
 		}
 	}
 
@@ -271,7 +271,6 @@ class MapRA implements GraphicsElement, SceneElement {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
-					def tileCoord = new Vector2f(x, y)
 
 					// Get the byte representing the tile
 					def tileValOffset = y * TILES_Y + x
@@ -295,9 +294,8 @@ class MapRA implements GraphicsElement, SceneElement {
 							return
 						}
 
-						def position = new Vector2f(tileCoord).asWorldCoords(1)
 						elements << new MapElement(tileFile, tilePic)
-							.translate(new Vector3f(position.x, position.y, 0))
+							.translate(new Vector2f(x, y).asWorldCoords(1))
 					}
 				}
 			}
@@ -321,7 +319,6 @@ class MapRA implements GraphicsElement, SceneElement {
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
-					def tileCoord = new Vector2f(x, y)
 
 					// Get the byte representing the tile
 					def tileVal = tileData.get()
@@ -336,7 +333,7 @@ class MapRA implements GraphicsElement, SceneElement {
 							logger.warn("Skipping unknown overlay tile type: ${tileVal}")
 							return
 						}
-						tileTypes << [(tileCoord): tile]
+						tileTypes << [(new Vector2f(x, y)): tile]
 					}
 				}
 			}
@@ -379,9 +376,8 @@ class MapRA implements GraphicsElement, SceneElement {
 						3 + adjacent
 				}
 
-				def position = new Vector2f(tilePos).asWorldCoords(1)
 				elements << new MapElement(tileFile, imageVariant)
-					.translate(new Vector3f(position.x, position.y, 0))
+					.translate(new Vector2f(tilePos).asWorldCoords(1))
 			}
 		}
 	}
@@ -404,7 +400,7 @@ class MapRA implements GraphicsElement, SceneElement {
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
 				elements << new MapElement(terrainFile, 0)
-					.translate(new Vector3f(cellPosXY.x, cellPosXY.y, 0))
+					.translate(cellPosXY)
 			}
 
 			// Sort the terrain elements so that ones lower down the map render "over"

@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
 
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -57,10 +56,9 @@ class ImageViewer extends Application {
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					def image = new Image(imageFile)
-					image.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize)) 
-					image.translate(new Vector3f(-imageFile.width / 2, -imageFile.height / 2, 0))
-					graphicsEngine.scene << image
+					graphicsEngine.scene << new Image(imageFile)
+						.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize))
+						.translate(-imageFile.width / 2, -imageFile.height / 2, 0)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')

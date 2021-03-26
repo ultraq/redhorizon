@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.StopEvent
 
-import org.joml.Vector3f
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -71,12 +71,11 @@ class AnimationPlayer extends Application {
 							height <<= 1
 						}
 						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-						def offset = new Vector3f(-width / 2, -height / 2, 0)
+						def offset = new Vector2f(-width / 2, -height / 2)
 
 						animation = new Animation(animationFile, scaleLowRes, gameClock, executorService)
-						animation.scaleXY(scale)
-						animation.translate(offset)
-
+							.scaleXY(scale)
+							.translate(offset)
 						animation.on(StopEvent) { stopEvent ->
 							logger.debug('Animation stopped')
 							graphicsEngine.stop()
@@ -88,7 +87,7 @@ class AnimationPlayer extends Application {
 							graphicsEngine.scene << new Scanlines(new Dimension(width, height))
 								.scaleXY(scale)
 								.translate(offset)
-								.translate(new Vector3f(0, -scale / 2 as float, 0))
+								.translate(0, -scale / 2 as float, 0)
 						}
 					}
 

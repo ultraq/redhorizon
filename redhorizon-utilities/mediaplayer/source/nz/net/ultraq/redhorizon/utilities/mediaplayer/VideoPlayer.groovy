@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.Video
 
-import org.joml.Vector3f
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -73,7 +73,7 @@ class VideoPlayer extends Application {
 								height <<= 1
 							}
 							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-							def offset = new Vector3f(-width / 2, -height / 2, 0)
+							def offset = new Vector2f(-width / 2, -height / 2)
 
 							video = new Video(videoFile, scaleLowRes, gameClock, executorService)
 							video.scaleXY(scale)
@@ -91,7 +91,7 @@ class VideoPlayer extends Application {
 								graphicsEngine.scene << new Scanlines(new Dimension(width, height))
 									.scaleXY(scale)
 									.translate(offset)
-									.translate(new Vector3f(0, -scale / 2 as float, 0))
+									.translate(0, -scale / 2 as float, 0)
 							}
 						}
 

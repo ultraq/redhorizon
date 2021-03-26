@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class Animation implements GraphicsElement, Playable, SceneElement {
+class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 

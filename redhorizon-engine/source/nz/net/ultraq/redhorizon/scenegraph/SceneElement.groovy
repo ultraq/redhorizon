@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.scenegraph
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
+import org.joml.Vector2f
 import org.joml.Vector3f
 
 /**
@@ -58,8 +59,33 @@ trait SceneElement<T extends SceneElement> implements Visitable {
 	 */
 	T translate(Vector3f offset) {
 
-		transform.translate(offset)
-		bounds.translate(offset.x, offset.y)
+		return translate(offset.x, offset.y, offset.z)
+	}
+
+	/**
+	 * Translate the position of this element.
+	 * 
+	 * @param xyOffset
+	 * @param z
+	 * @return
+	 */
+	T translate(Vector2f xyOffset, float z = 0) {
+
+		return translate(xyOffset.x, xyOffset.y, z)
+	}
+
+	/**
+	 * Translate the position of this element.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	T translate(float x, float y, float z) {
+
+		transform.translate(x, y, z)
+		bounds.translate(x, y)
 		return this
 	}
 }

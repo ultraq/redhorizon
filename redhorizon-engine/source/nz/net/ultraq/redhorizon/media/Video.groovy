@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
-import org.joml.Vector3f
 
 import java.util.concurrent.ExecutorService
 
@@ -37,7 +36,7 @@ import java.util.concurrent.ExecutorService
  * 
  * @author Emanuel Rabina
  */
-class Video implements AudioElement, GraphicsElement, Playable, SceneElement {
+class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Video> {
 
 	@Delegate
 	private final Animation animation
@@ -111,10 +110,11 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement {
 	}
 
 	@Override
-	SceneElement scaleXY(float factor) {
+	Video scaleXY(float factor) {
 
 		[animation, soundTrack]*.scaleXY(factor)
-		return SceneElement.super.scaleXY(factor)
+		SceneElement.super.scaleXY(factor)
+		return this
 	}
 
 	@Override
@@ -125,9 +125,10 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement {
 	}
 
 	@Override
-	SceneElement translate(Vector3f offset) {
+	Video translate(float x, float y, float z) {
 
-		[animation, soundTrack]*.translate(offset)
-		return SceneElement.super.translate(offset)
+		[animation, soundTrack]*.translate(x, y, z)
+		SceneElement.super.translate(x, y, z)
+		return this
 	}
 }

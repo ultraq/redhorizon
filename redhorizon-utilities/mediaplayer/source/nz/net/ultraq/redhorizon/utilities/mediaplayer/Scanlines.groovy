@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class Scanlines implements GraphicsElement, SceneElement {
+class Scanlines implements GraphicsElement, SceneElement<SceneElement> {
 
 	private final Dimension overlay
 	private Material material

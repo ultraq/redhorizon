@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class Image implements GraphicsElement, SceneElement {
+class Image implements GraphicsElement, SceneElement<Image> {
 
 	final int width
 	final int height

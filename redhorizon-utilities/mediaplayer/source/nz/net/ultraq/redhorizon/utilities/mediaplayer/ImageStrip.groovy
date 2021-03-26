@@ -25,14 +25,12 @@ import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
-import org.joml.Vector3f
-
 /**
  * A series of images laid out in a long horizontal strip.
  * 
  * @author Emanuel Rabina
  */
-class ImageStrip implements GraphicsElement, SceneElement {
+class ImageStrip implements GraphicsElement, SceneElement<ImageStrip> {
 
 	final List<Image> images = []
 	final Palette palette
@@ -49,11 +47,11 @@ class ImageStrip implements GraphicsElement, SceneElement {
 
 		this.palette = palette
 		this.bounds.set(0, 0, imagesFile.width * imagesFile.numImages, imagesFile.height)
+		translate(0, -imagesFile.height / 2 as float, 0)
 
 		imagesFile.numImages.times { i ->
-			def image = new Image(imagesFile, i)
-			image.translate(new Vector3f(imagesFile.width * i, -imagesFile.height / 2, 0))
-			images << image
+			images << new Image(imagesFile, i)
+				.translate(imagesFile.width * i, -imagesFile.height / 2, 0)
 		}
 	}
 
