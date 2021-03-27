@@ -52,7 +52,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	Shader shader
 
 	@Delegate(excludes = [
-	  'createSpriteMesh', 'createTexture'
+	  'createMaterial', 'createSpriteMesh', 'createTexture'
 	])
 	private final OpenGLRenderer renderer
 
@@ -110,6 +110,12 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		glDeleteVertexArrays(batchVertexArrayId)
 		glDeleteBuffers(batchVertexBufferId, batchElementBufferId)
 		renderer.close()
+	}
+
+	@Override
+	Material createMaterial(Mesh mesh, Texture texture = renderer.whiteTexture, ShaderType shaderType = ShaderType.TEXTURE) {
+
+		return renderer.createMaterial(mesh, texture, shaderType)
 	}
 
 	@Override

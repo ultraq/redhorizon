@@ -67,14 +67,10 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 				X_AXIS_MIN,
 				X_AXIS_MAX,
 				Y_AXIS_MIN,
-				Y_AXIS_MAX),
-			null,
-			ShaderType.PRIMITIVE
+				Y_AXIS_MAX)
 		)
 		boundaryLines = renderer.createMaterial(
-			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
-			null,
-			ShaderType.PRIMITIVE
+			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[])
 		)
 	}
 

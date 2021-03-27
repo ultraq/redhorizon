@@ -51,9 +51,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final int maxTextureUnits
 
 	protected final List<Shader> shaders = []
-	protected final Shader primitiveShader
 	protected final Shader textureShader
 	protected final Shader paletteShader
+	protected Texture whiteTexture
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -106,9 +106,16 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 //		}
 
 		// Create the shader programs used by this renderer
-		primitiveShader = createShader('Primitive')
 		textureShader = createShader('Texture')
 		paletteShader = createShader('TexturePalette')
+
+		// The white texture used as a fallback when no texture is bound
+		stackPush().withCloseable { stack ->
+			def textureBytes = ByteBuffer.allocateNative(4)
+				.putInt(0xffffffff as int)
+				.flip()
+			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1, false)
+		}
 	}
 
 	@Override
@@ -124,10 +131,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		// TODO: Remove these restrictions on the batch
-		batchRenderer.shader =
-			shaderType == ShaderType.TEXTURE ? textureShader :
-			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
-			primitiveShader
+		batchRenderer.shader = shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader : textureShader
 
 		closure(batchRenderer)
 	}
@@ -209,15 +213,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture = null, ShaderType shaderType = null) {
+	Material createMaterial(Mesh mesh, Texture texture = whiteTexture, ShaderType shaderType = ShaderType.TEXTURE) {
 
 		return new Material(
 			mesh: mesh,
 			texture: texture,
-			shader:
-				shaderType == ShaderType.TEXTURE ? textureShader :
-				shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
-				primitiveShader
+			shader: shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader : textureShader
 		)
 	}
 
