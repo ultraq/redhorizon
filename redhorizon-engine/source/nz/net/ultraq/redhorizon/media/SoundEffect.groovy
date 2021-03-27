@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.scenegraph.Movable
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import java.nio.ByteBuffer
 
@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, Movable, Playable, SelfVisitable {
+class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
 
 	// Sound information
 	final int bits
