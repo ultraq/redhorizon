@@ -50,7 +50,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private static final int MAX_INDICES = MAX_QUADS * 6
 
 	@Delegate(excludes = [
-	  'createSpriteMesh', 'createTexture'
+	  'createMaterial', 'createSpriteMesh', 'createTexture'
 	])
 	private final OpenGLRenderer renderer
 
@@ -119,6 +119,12 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(colour, vertices, null, GL_LINES)
+	}
+
+	@Override
+	Material createMaterial(Mesh mesh, Texture texture = renderer.whiteTexture, ShaderType shaderType = ShaderType.TEXTURE) {
+
+		return renderer.createMaterial(mesh, texture, shaderType)
 	}
 
 	@Override

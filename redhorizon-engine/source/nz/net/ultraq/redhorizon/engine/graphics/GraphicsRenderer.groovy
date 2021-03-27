@@ -82,6 +82,14 @@ interface GraphicsRenderer {
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
+	 * Create a new material with just a mesh and the default texture and shader.
+	 * 
+	 * @param mesh
+	 * @return
+	 */
+	Material createMaterial(Mesh mesh)
+
+	/**
 	 * Create a new material with all of its parts.
 	 * 
 	 * @param mesh

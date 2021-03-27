@@ -23,7 +23,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
  */
 enum ShaderType {
 
-	PRIMITIVE,
 	TEXTURE,
 	TEXTURE_PALETTE
 }
