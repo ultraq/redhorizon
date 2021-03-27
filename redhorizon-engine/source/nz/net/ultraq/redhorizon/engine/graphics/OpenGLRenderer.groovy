@@ -199,13 +199,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(colour, vertices, null, GL_LINE_LOOP))
+		return createMeshData(createMesh(GL_LINE_LOOP, colour, vertices))
 	}
 
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(colour, vertices, null, GL_LINES))
+		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
 	@Override
@@ -221,26 +221,24 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	/**
 	 * Build a mesh object.
 	 * 
+	 * @param vertexType
 	 * @param colour
 	 *   The colour to use for all vertices.  Currently doesn't support different
 	 *   colours for each vertex.
 	 * @param vertices
 	 * @param textureCoordinates
 	 * @param indices
-	 * @param vertexType
-	 * @param elementType
 	 * @return
 	 */
-	protected Mesh createMesh(Colour colour, Vector2f[] vertices, Vector2f[] textureCoordinates = null, int[] indices = null,
-		int vertexType = 0, int elementType = 0) {
+	protected Mesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
+		Vector2f[] textureCoordinates = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
 
 		def mesh = new Mesh(
+			vertexType: vertexType,
 			colour: colour,
 			vertices: vertices,
 			textureCoordinates: textureCoordinates,
-			indices: indices,
-			vertexType: vertexType,
-			elementType: elementType
+			indices: indices
 		)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
@@ -380,12 +378,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return createMeshData(createMesh(
+			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
 			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[],
-			0,
-			GL_TRIANGLES
+			new int[]{ 0, 1, 3, 1, 2, 3 }
 		))
 	}
 
@@ -500,10 +497,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
 
 				glBindVertexArray(mesh.vertexArrayId)
-				if (mesh.elementType) {
-					glDrawElements(mesh.elementType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
+				if (mesh.indices) {
+					glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
 				}
-				else if (mesh.vertexType) {
+				else {
 					glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
 				}
 

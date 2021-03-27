@@ -30,15 +30,14 @@ import groovy.transform.PackageScope
 @MapConstructor
 class Mesh {
 
+	final int vertexType
 	final Colour colour
 	final Vector2f[] vertices
 	final Vector2f[] textureCoordinates
-	final int[] indices
-	final int vertexType
-	final int elementType
-
 	@PackageScope int vertexArrayId
 	@PackageScope int vertexBufferId
 	@PackageScope VertexBufferLayout vertexBufferLayout
+
+	final int[] indices
 	@PackageScope int elementBufferId
 }

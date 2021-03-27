@@ -70,7 +70,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 	// Information about the current batch materials
 	private Shader batchShader
-	private int batchElementType
 	private int batchVertexType
 
 	/**
@@ -112,13 +111,13 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	@Override
 	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return renderer.createMesh(colour, vertices, null, GL_LINE_LOOP)
+		return renderer.createMesh(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return renderer.createMesh(colour, vertices, null, GL_LINES)
+		return renderer.createMesh(GL_LINES, colour, vertices)
 	}
 
 	@Override
@@ -131,12 +130,11 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return renderer.createMesh(
+			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
 			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[],
-			0,
-			GL_TRIANGLES
+			new int[]{ 0, 1, 3, 1, 2, 3 }
 		)
 	}
 
@@ -157,7 +155,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		// for the next material, flush the current buffers
 		if (
 			shader != batchShader ||
-			mesh.elementType != batchElementType ||
 			mesh.vertexType != batchVertexType ||
 			((MAX_VERTICES - batchVertices < mesh.vertices.size())) ||
 			((MAX_INDICES - batchIndices) < mesh.indices.size()) ||
@@ -170,7 +167,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 			glUseProgram(shader.programId)
 		}
 		batchShader = shader
-		batchElementType = mesh.elementType
 		batchVertexType = mesh.vertexType
 		batchMaterials << material
 		batchTransforms << transform
@@ -206,11 +202,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				def indexOffset = 0
 				batchMaterials.eachWithIndex { material, materialIndex ->
 					def texture = material.texture
-					if (texture) {
-						glActiveTexture(GL_TEXTURE0 + materialIndex)
-						glBindTexture(GL_TEXTURE_2D, texture.textureId)
-						samplers[materialIndex] = materialIndex
-					}
+					glActiveTexture(GL_TEXTURE0 + materialIndex)
+					glBindTexture(GL_TEXTURE_2D, texture.textureId)
+					samplers[materialIndex] = materialIndex
 
 					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, models)
 
@@ -218,7 +212,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 					def colour = mesh.colour
 					def textureCoordinates = mesh.textureCoordinates
 					mesh.vertices.eachWithIndex { vertex, vertexIndex ->
-						def textureCoordinate = textureCoordinates ? textureCoordinates[vertexIndex] : new Vector2f(0, 0)
+						def textureCoordinate = textureCoordinates[vertexIndex]
 						vertexBuffer.put(
 							colour.r, colour.g, colour.b, colour.a,
 							vertex.x, vertex.y,
@@ -227,12 +221,10 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 							materialIndex
 						)
 					}
-					if (mesh.indices) {
-						mesh.indices.each { index ->
-							indexBuffer.put(index + indexOffset)
-						}
-						indexOffset += mesh.vertices.size()
+					mesh.indices.each { index ->
+						indexBuffer.put(index + indexOffset)
 					}
+					indexOffset += mesh.vertices.size()
 				}
 				vertexBuffer.flip()
 				indexBuffer.flip()
@@ -243,15 +235,13 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				def modelsLocation = getUniformLocation(batchShader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, models)
 				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer)
-				if (batchElementType) {
-					glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer)
-				}
+				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer)
 
 				// Draw it!
-				if (batchElementType) {
-					glDrawElements(batchElementType, batchIndices, GL_UNSIGNED_INT, 0)
+				if (indexBuffer.capacity()) {
+					glDrawElements(batchVertexType, batchIndices, GL_UNSIGNED_INT, 0)
 				}
-				else if (batchVertexType) {
+				else {
 					glDrawArrays(batchVertexType, 0, batchVertices)
 				}
 				trigger(new DrawEvent())
