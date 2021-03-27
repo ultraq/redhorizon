@@ -49,22 +49,29 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private static final int MAX_VERTICES = MAX_QUADS * 4
 	private static final int MAX_INDICES = MAX_QUADS * 6
 
-	Shader shader
-
 	@Delegate(excludes = [
 	  'createSpriteMesh', 'createTexture'
 	])
 	private final OpenGLRenderer renderer
 
 	private final int maxTransforms // TODO: Capped at the number of textures, make it so it's not
+
+	// Batch buffers
 	private final int batchVertexArrayId
 	private final int batchVertexBufferId
 	private final int batchElementBufferId
+
+	// Batched data to be rendered on flush
 	private List<Material> batchMaterials = []
 	private List<Matrix4f> batchTransforms = []
 	private int batchVertices = 0
 	private int batchIndices = 0
 	private int batchTextureUnit = 0
+
+	// Information about the current batch materials
+	private Shader batchShader
+	private int batchElementType
+	private int batchVertexType
 
 	/**
 	 * Create a new batch renderer that wraps an existing renderer, using it for
@@ -79,7 +86,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		// Set up batch limits
 		maxTransforms = renderer.maxTextureUnits
 
-		// Set up the buffers used for batching our geometry
+		// Set up and bind the buffers used for batching our geometry
 		batchVertexArrayId = glGenVertexArrays()
 		glBindVertexArray(batchVertexArrayId)
 
@@ -89,19 +96,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 		setVertexBufferLayout(VERTEX_BUFFER_LAYOUT.layout)
 
-		// Generate an index buffer that repeats the pattern needed to draw quads up
-		// to the size of the buffer
 		batchElementBufferId = glGenBuffers()
-		stackPush().withCloseable { stack ->
-			def indexBuffer = stack.mallocInt(MAX_INDICES)
-			for (def i = 0; i < MAX_INDICES / 6; i++) {
-				def j = i * 4
-				indexBuffer.put(j + 0, j + 1, j + 3, j + 1, j + 2, j + 3)
-			}
-			indexBuffer.flip()
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchElementBufferId)
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
-		}
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchElementBufferId)
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDICES * Integer.BYTES, GL_DYNAMIC_DRAW)
 	}
 
 	@Override
@@ -113,13 +110,27 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	}
 
 	@Override
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+
+		return renderer.createMesh(colour, vertices, null, GL_LINE_LOOP)
+	}
+
+	@Override
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
+
+		return renderer.createMesh(colour, vertices, null, GL_LINES)
+	}
+
+	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return renderer.createMesh(
 			Colour.WHITE,
 			surface as Vector2f[],
 			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[]
+			[0, 1, 3, 1, 2, 3] as int[],
+			0,
+			GL_TRIANGLES
 		)
 	}
 
@@ -134,28 +145,34 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 		def mesh = material.mesh
 		def texture = material.texture
+		def shader = material.shader
 
-		// TODO: Really crude method of deferring to the standard renderer for
-		//       things that this batch renderer wasn't configured to handle.  Gotta
-		//       think of a better way to do this.
-		if (material.shader != shader) {
-			renderer.drawMaterial(material, transform)
-			return
-		}
-
-		// If there is no space for the next material, flush the current buffers
-		if (((MAX_VERTICES - batchVertices < mesh.vertices.size())) ||
+		// If there is a change in shader, vertex information, or there is no space
+		// for the next material, flush the current buffers
+		if (
+			shader != batchShader ||
+			mesh.elementType != batchElementType ||
+			mesh.vertexType != batchVertexType ||
+			((MAX_VERTICES - batchVertices < mesh.vertices.size())) ||
 			((MAX_INDICES - batchIndices) < mesh.indices.size()) ||
-			(texture && (renderer.maxTextureUnits - batchTextureUnit < 1))) {
+			(texture && (renderer.maxTextureUnits - batchTextureUnit < 1))
+		) {
 			flush()
 		}
 
-		// TODO: See if the texture is being used in a previous material and so
-		//       set the active texture target to that one
+		if (shader != batchShader) {
+			glUseProgram(shader.programId)
+		}
+		batchShader = shader
+		batchElementType = mesh.elementType
+		batchVertexType = mesh.vertexType
 		batchMaterials << material
 		batchTransforms << transform
 		batchVertices += mesh.vertices.size()
 		batchIndices += mesh.indices.size()
+
+		// TODO: See if the texture is being used in a previous material and so
+		//       set the active texture target to that one
 		if (texture) {
 			batchTextureUnit++
 		}
@@ -172,19 +189,22 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 			}
 
 			stackPush().withCloseable { stack ->
-				glUseProgram(shader.programId)
 
 				// Build the sampler and model arrays for all of the materials in the
-				// batch buffer, fill the vertex buffer with vertex data from each
+				// batch buffer, fill the vertex and index buffers with data from each
 				// material
 				def samplers = new int[renderer.maxTextureUnits]
-				def models = stack.mallocFloat(Matrix4f.FLOATS * maxTransforms)
+				def models = stack.mallocFloat(batchTransforms.size() * Matrix4f.FLOATS)
 				def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * batchVertices)
+				def indexBuffer = stack.mallocInt(batchIndices)
+				def indexOffset = 0
 				batchMaterials.eachWithIndex { material, materialIndex ->
 					def texture = material.texture
-					glActiveTexture(GL_TEXTURE0 + materialIndex)
-					glBindTexture(GL_TEXTURE_2D, texture.textureId)
-					samplers[materialIndex] = materialIndex
+					if (texture) {
+						glActiveTexture(GL_TEXTURE0 + materialIndex)
+						glBindTexture(GL_TEXTURE_2D, texture.textureId)
+						samplers[materialIndex] = materialIndex
+					}
 
 					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, models)
 
@@ -192,7 +212,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 					def colour = mesh.colour
 					def textureCoordinates = mesh.textureCoordinates
 					mesh.vertices.eachWithIndex { vertex, vertexIndex ->
-						def textureCoordinate = textureCoordinates[vertexIndex]
+						def textureCoordinate = textureCoordinates ? textureCoordinates[vertexIndex] : new Vector2f(0, 0)
 						vertexBuffer.put(
 							colour.r, colour.g, colour.b, colour.a,
 							vertex.x, vertex.y,
@@ -201,20 +221,33 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 							materialIndex
 						)
 					}
+					if (mesh.indices) {
+						mesh.indices.each { index ->
+							indexBuffer.put(index + indexOffset)
+						}
+						indexOffset += mesh.vertices.size()
+					}
 				}
 				vertexBuffer.flip()
+				indexBuffer.flip()
 
 				// Pass all the built data to OpenGL
-				def textureLocation = getUniformLocation(shader, 'u_textures')
+				def textureLocation = getUniformLocation(batchShader, 'u_textures')
 				glUniform1iv(textureLocation, samplers)
-				def modelsLocation = getUniformLocation(shader, 'models')
+				def modelsLocation = getUniformLocation(batchShader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, models)
-				glBindBuffer(GL_ARRAY_BUFFER, batchVertexBufferId)
 				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer)
+				if (batchElementType) {
+					glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer)
+				}
 
 				// Draw it!
-				glBindVertexArray(batchVertexArrayId)
-				glDrawElements(GL_TRIANGLES, batchIndices, GL_UNSIGNED_INT, 0)
+				if (batchElementType) {
+					glDrawElements(batchElementType, batchIndices, GL_UNSIGNED_INT, 0)
+				}
+				else if (batchVertexType) {
+					glDrawArrays(batchVertexType, 0, batchVertices)
+				}
 				trigger(new DrawEvent())
 
 				// Reset batch tracking variables

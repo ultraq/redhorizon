@@ -112,7 +112,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void asBatchRenderer(ShaderType shaderType,
+	void asBatchRenderer(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer')
 		Closure closure) {
 
@@ -122,13 +122,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				trigger(event)
 			}
 		}
-
-		// TODO: Remove these restrictions on the batch
-		batchRenderer.shader =
-			shaderType == ShaderType.TEXTURE ? textureShader :
-			shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader :
-			primitiveShader
-
 		closure(batchRenderer)
 	}
 
@@ -199,13 +192,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(colour, vertices), GL_LINE_LOOP)
+		return createMeshData(createMesh(colour, vertices, null, GL_LINE_LOOP))
 	}
 
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(colour, vertices), GL_LINES)
+		return createMeshData(createMesh(colour, vertices, null, GL_LINES))
 	}
 
 	@Override
@@ -230,15 +223,20 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @param vertices
 	 * @param textureCoordinates
 	 * @param indices
+	 * @param vertexType
+	 * @param elementType
 	 * @return
 	 */
-	protected Mesh createMesh(Colour colour, Vector2f[] vertices, Vector2f[] textureCoordinates = null, int[] indices) {
+	protected Mesh createMesh(Colour colour, Vector2f[] vertices, Vector2f[] textureCoordinates = null, int[] indices = null,
+		int vertexType = 0, int elementType = 0) {
 
 		def mesh = new Mesh(
 			colour: colour,
 			vertices: vertices,
 			textureCoordinates: textureCoordinates,
-			indices: indices
+			indices: indices,
+			vertexType: vertexType,
+			elementType: elementType
 		)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
@@ -249,11 +247,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * OpenGL primitive.
 	 * 
 	 * @param mesh
-	 * @param vertexType
-	 * @param elementType
 	 * @return
 	 */
-	private static Mesh createMeshData(Mesh mesh, int vertexType, int elementType = 0) {
+	private static Mesh createMeshData(Mesh mesh) {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -305,10 +301,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			mesh.vertexArrayId = vertexArrayId
 			mesh.vertexBufferId = vertexBufferId
 			mesh.vertexBufferLayout = vertexBufferLayout
-			mesh.vertexType = vertexType
 			if (mesh.indices) {
 				mesh.elementBufferId = elementBufferId
-				mesh.elementType = elementType
 			}
 			return mesh
 		}
@@ -385,8 +379,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			Colour.WHITE,
 			surface as Vector2f[],
 			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[]
-		), 0, GL_TRIANGLES)
+			[0, 1, 3, 1, 2, 3] as int[],
+			0,
+			GL_TRIANGLES
+		))
 	}
 
 	@Override

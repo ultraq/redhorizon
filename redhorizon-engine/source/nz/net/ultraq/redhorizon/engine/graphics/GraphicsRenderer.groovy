@@ -40,16 +40,12 @@ interface GraphicsRenderer {
 	 * callers will still need to do a final call to {@link BatchRenderer#flush}
 	 * when they are done with it to ensure that all rendered objects are drawn to
 	 * the screen.
-	 * <p>
-	 * The batch renderer is currently limited in some aspects in that the same
-	 * shader and certain uniforms must be used across the batch.  These appear as
-	 * parameters on this method.
 	 * 
-	 * @param shaderType
 	 * @param closure
 	 */
-	void asBatchRenderer(ShaderType shaderType,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer') Closure closure)
+	void asBatchRenderer(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer')
+		Closure closure)
 
 	/**
 	 * Clears the buffer.

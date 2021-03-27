@@ -82,7 +82,6 @@ class MapViewer extends Application {
 					graphicsEngine.camera.center(mapInitialPosition)
 
 					graphicsEngine.scene << new MapLines(map)
-						.translate(0, 0, 1)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')

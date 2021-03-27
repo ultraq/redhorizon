@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
+import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.EngineSubsystem
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -126,7 +127,7 @@ class GraphicsEngine extends EngineSubsystem {
 					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->
 						camera.init(renderer)
 
-						def graphicsElementStates = [:]
+						Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
@@ -138,34 +139,34 @@ class GraphicsEngine extends EngineSubsystem {
 							camera.render(renderer)
 
 							// Reduce the list of renderable items to those just visible in the scene
-							def visibleElements = []
+							List<GraphicsElement> visibleElements = []
 							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-							scene.accept { element ->
-								if (frustumIntersection.testPlaneXY(element.bounds)) {
-									visibleElements << element
+							averageNanos('objectCulling', 1f, logger) { ->
+								scene.accept { element ->
+									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+										visibleElements << element
+									}
 								}
 							}
-							renderer.asBatchRenderer(ShaderType.TEXTURE_PALETTE) { batchRenderer ->
+							renderer.asBatchRenderer { batchRenderer ->
 								visibleElements.each { element ->
-									if (element instanceof GraphicsElement) {
 
-										// Register the graphics element
-										if (!graphicsElementStates[element]) {
-											graphicsElementStates << [(element): STATE_NEW]
-										}
-
-										def elementState = graphicsElementStates[element]
-
-										// Initialize the graphics element
-										if (elementState == STATE_NEW) {
-											element.init(batchRenderer)
-											elementState = STATE_INITIALIZED
-											graphicsElementStates << [(element): elementState]
-										}
-
-										// Render the graphics element
-										element.render(batchRenderer)
+									// Register the graphics element
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
 									}
+
+									def elementState = graphicsElementStates[element]
+
+									// Initialize the graphics element
+									if (elementState == STATE_NEW) {
+										element.init(batchRenderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+
+									// Render the graphics element
+									element.render(batchRenderer)
 								}
 								batchRenderer.flush()
 							}

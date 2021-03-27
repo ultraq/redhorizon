@@ -34,11 +34,11 @@ class Mesh {
 	final Vector2f[] vertices
 	final Vector2f[] textureCoordinates
 	final int[] indices
+	final int vertexType
+	final int elementType
 
 	@PackageScope int vertexArrayId
 	@PackageScope int vertexBufferId
 	@PackageScope VertexBufferLayout vertexBufferLayout
-	@PackageScope int vertexType
 	@PackageScope int elementBufferId
-	@PackageScope int elementType
 }

@@ -49,7 +49,6 @@ import java.util.concurrent.Executors
 class ImagesViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
-	private static final int TICK = 48
 
 	final ImagesFile imagesFile
 	final GraphicsConfiguration graphicsConfig
@@ -73,6 +72,7 @@ class ImagesViewer extends Application {
 			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
 
 				def center = new Vector3f()
+				def tick = imagesFile.width
 
 				// Represent each frame of the image in a long strip
 				graphicsEngine.on(WindowCreatedEvent) { event ->
@@ -87,10 +87,10 @@ class ImagesViewer extends Application {
 						switch (event.key) {
 						// Add options so it's not hard-coded to my weird inverted setup 😅
 						case GLFW_KEY_LEFT:
-							graphicsEngine.camera.translate(TICK, 0)
+							graphicsEngine.camera.translate(tick, 0)
 							break
 						case GLFW_KEY_RIGHT:
-							graphicsEngine.camera.translate(-TICK, 0)
+							graphicsEngine.camera.translate(-tick, 0)
 							break
 						case GLFW_KEY_SPACE:
 							graphicsEngine.camera.center(center)
