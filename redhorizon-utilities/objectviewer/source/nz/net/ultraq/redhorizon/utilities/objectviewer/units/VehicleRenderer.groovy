@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.utilities.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 
 import java.nio.ByteBuffer
 
@@ -27,7 +29,8 @@ import java.nio.ByteBuffer
  */
 class VehicleRenderer extends UnitRenderer {
 
-	protected final int turretHeadings
+	private final int turretHeadings
+	private Material turretMaterial
 
 	/**
 	 * Constructor, create a vehicle renderer with the following frames.
@@ -45,12 +48,21 @@ class VehicleRenderer extends UnitRenderer {
 	}
 
 	@Override
+	void init(GraphicsRenderer renderer) {
+
+		super.init(renderer)
+		if (turretHeadings) {
+			turretMaterial = renderer.createMaterial(mesh, null, ShaderType.STANDARD_PALETTE)
+		}
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 
 		super.render(renderer)
 		if (turretHeadings) {
-			material.texture = textures[headings + rotationFrames()]
-			renderer.drawMaterial(material)
+			turretMaterial.texture = textures[headings + rotationFrames()]
+			renderer.drawMaterial(turretMaterial, unit.transform)
 		}
 	}
 }

@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.scenegraph.SelfVisitable
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-abstract class Unit implements GraphicsElement, SelfVisitable {
+abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Unit)
 
@@ -58,6 +58,8 @@ abstract class Unit implements GraphicsElement, SelfVisitable {
 		this.width = width
 		this.height = height
 		this.palette = palette
+
+		bounds.set(0, 0, width, height)
 	}
 
 	/**

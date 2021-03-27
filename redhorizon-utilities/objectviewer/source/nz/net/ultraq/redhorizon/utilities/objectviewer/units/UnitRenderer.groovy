@@ -78,9 +78,7 @@ class UnitRenderer implements GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
-		material = renderer.createMaterial(mesh, null, ShaderType.TEXTURE_PALETTE)
-			.scale(unit.scale)
-			.translate(unit.position)
+		material = renderer.createMaterial(mesh, null, ShaderType.STANDARD_PALETTE)
 		textures = imagesData.collect { data ->
 			return renderer.createTexture(data, FORMAT_INDEXED.value, unit.width, unit.height)
 		}
@@ -90,7 +88,7 @@ class UnitRenderer implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		material.texture = textures[rotationFrames()]
-		renderer.drawMaterial(material)
+		renderer.drawMaterial(material, unit.transform)
 	}
 
 	/**
