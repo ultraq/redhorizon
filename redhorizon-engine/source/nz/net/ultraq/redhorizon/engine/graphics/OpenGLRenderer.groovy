@@ -51,8 +51,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final int maxTextureUnits
 
 	protected final List<Shader> shaders = []
-	protected final Shader textureShader
-	protected final Shader paletteShader
+	protected final Shader standardShader
+	protected final Shader standardPaletteShader
 	protected Texture whiteTexture
 
 	private OpenGLBatchRenderer batchRenderer
@@ -106,8 +106,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 //		}
 
 		// Create the shader programs used by this renderer
-		textureShader = createShader('Texture')
-		paletteShader = createShader('TexturePalette')
+		standardShader = createShader(ShaderType.STANDARD.name)
+		standardPaletteShader = createShader(ShaderType.STANDARD_PALETTE.name)
 
 		// The white texture used as a fallback when no texture is bound
 		stackPush().withCloseable { stack ->
@@ -209,12 +209,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture = whiteTexture, ShaderType shaderType = ShaderType.TEXTURE) {
+	Material createMaterial(Mesh mesh, Texture texture = whiteTexture, ShaderType shaderType = ShaderType.STANDARD) {
 
 		return new Material(
 			mesh: mesh,
 			texture: texture,
-			shader: shaderType == ShaderType.TEXTURE_PALETTE ? paletteShader : textureShader
+			shader: shaderType == ShaderType.STANDARD_PALETTE ? standardPaletteShader : standardShader
 		)
 	}
 
@@ -525,8 +525,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void setPalette(Texture palette) {
 
-		def paletteLocation = getUniformLocation(paletteShader, 'u_palette')
-		glProgramUniform1i(paletteShader.programId, paletteLocation, maxTextureUnits)
+		def paletteLocation = getUniformLocation(standardPaletteShader, 'u_palette')
+		glProgramUniform1i(standardPaletteShader.programId, paletteLocation, maxTextureUnits)
 		glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
 		glBindTexture(GL_TEXTURE_1D, palette.textureId)
 	}

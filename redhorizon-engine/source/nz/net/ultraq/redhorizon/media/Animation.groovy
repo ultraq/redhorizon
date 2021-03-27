@@ -151,7 +151,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 		lastFrame = -1
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
-		material = renderer.createMaterial(mesh, null, ShaderType.TEXTURE)
+		material = renderer.createMaterial(mesh, null)
 		textures = []
 		framesQueued = 0
 	}

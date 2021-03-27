@@ -95,7 +95,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			renderer.createTexture(imageData, format.value, width, height),
-			format === ColourFormat.FORMAT_INDEXED ? ShaderType.TEXTURE_PALETTE : ShaderType.TEXTURE
+			format === ColourFormat.FORMAT_INDEXED ? ShaderType.STANDARD_PALETTE : ShaderType.STANDARD
 		)
 		imageData = null
 	}

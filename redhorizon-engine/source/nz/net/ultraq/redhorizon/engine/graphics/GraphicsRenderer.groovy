@@ -90,6 +90,15 @@ interface GraphicsRenderer {
 	Material createMaterial(Mesh mesh)
 
 	/**
+	 * Create a new material with a mesh, texture, and the default shader.
+	 * 
+	 * @param mesh
+	 * @param texture
+	 * @return
+	 */
+	Material createMaterial(Mesh mesh, Texture texture)
+
+	/**
 	 * Create a new material with all of its parts.
 	 * 
 	 * @param mesh

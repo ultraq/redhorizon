@@ -16,13 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.TupleConstructor
+
 /**
  * The available shader types to use in rendering.
  * 
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 enum ShaderType {
 
-	TEXTURE,
-	TEXTURE_PALETTE
+	STANDARD         ('Standard'),
+	STANDARD_PALETTE ('StandardPalette')
+
+	final String name
 }

@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.utilities.mediaplayer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
@@ -70,8 +69,7 @@ class Scanlines implements GraphicsElement, SceneElement<SceneElement> {
 
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, overlay.width, overlay.height)),
-			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true),
-			ShaderType.TEXTURE
+			renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true)
 		)
 	}
 
