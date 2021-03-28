@@ -38,13 +38,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
-	private static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
-		VertexBufferLayoutParts.COLOUR,
-		VertexBufferLayoutParts.POSITION,
-		VertexBufferLayoutParts.TEXCOORD,
-		VertexBufferLayoutParts.TEXUNIT,
-		VertexBufferLayoutParts.MODEL_INDEX
-	)
 	private static final int MAX_QUADS = 100 // TODO: Batch renderer is currently limited to drawing quads 😅
 	private static final int MAX_VERTICES = MAX_QUADS * 4
 	private static final int MAX_INDICES = MAX_QUADS * 6
@@ -93,7 +86,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		glBindBuffer(GL_ARRAY_BUFFER, batchVertexBufferId)
 		glBufferData(GL_ARRAY_BUFFER, MAX_VERTICES * VERTEX_BUFFER_LAYOUT.sizeInBytes(), GL_DYNAMIC_DRAW)
 
-		setVertexBufferLayout(VERTEX_BUFFER_LAYOUT.layout)
+		enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
 
 		batchElementBufferId = glGenBuffers()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchElementBufferId)

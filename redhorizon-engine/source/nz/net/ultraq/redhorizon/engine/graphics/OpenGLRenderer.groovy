@@ -46,6 +46,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
+	protected static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
+		VertexBufferLayoutParts.COLOUR,
+		VertexBufferLayoutParts.POSITION,
+		VertexBufferLayoutParts.TEXCOORD,
+		VertexBufferLayoutParts.TEXUNIT,
+		VertexBufferLayoutParts.MODEL_INDEX
+	)
+
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
@@ -260,22 +268,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def vertexBufferId = glGenBuffers()
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 
-			def layoutParts = [
-				VertexBufferLayoutParts.COLOUR,
-				VertexBufferLayoutParts.POSITION
-			]
-			if (mesh.textureCoordinates) {
-				layoutParts << VertexBufferLayoutParts.TEXCOORD
-			}
-			layoutParts << VertexBufferLayoutParts.TEXUNIT
-			layoutParts << VertexBufferLayoutParts.MODEL_INDEX
-			def vertexBufferLayout = setVertexBufferLayout(*layoutParts)
+			enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
 
 			// Buffer to hold all the vertex data
 			def colour = mesh.colour
 			def vertices = mesh.vertices
 			def textureCoordinates = mesh.textureCoordinates
-			def vertexBuffer = stack.mallocFloat(vertexBufferLayout.size() * vertices.size())
+			def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
 				vertexBuffer
 					.put(colour.r, colour.g, colour.b, colour.a)
@@ -510,6 +509,22 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	/**
+	 * Enables the vertex attributes specified by the given vertex buffer layout
+	 * object.
+	 * 
+	 * @param parts
+	 * @return
+	 */
+	protected static void enableVertexBufferLayout(VertexBufferLayout layout) {
+
+		def stride = layout.sizeInBytes()
+		layout.parts.each { part ->
+			glEnableVertexAttribArray(part.location)
+			glVertexAttribPointer(part.location, part.size, GL_FLOAT, false, stride, layout.offsetOfInBytes(part))
+		}
+	}
+
+	/**
 	 * Cached function for looking up a uniform location in a shader program.
 	 * 
 	 * @param shader
@@ -529,24 +544,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glProgramUniform1i(standardPaletteShader.programId, paletteLocation, maxTextureUnits)
 		glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
 		glBindTexture(GL_TEXTURE_1D, palette.textureId)
-	}
-
-	/**
-	 * Creates an object describing the layout of the currently-bound vertex
-	 * buffer for use with the given shader.
-	 * 
-	 * @param parts
-	 * @return
-	 */
-	protected static VertexBufferLayout setVertexBufferLayout(VertexBufferLayoutParts... parts) {
-
-		def layout = new VertexBufferLayout(parts)
-		def stride = layout.sizeInBytes()
-		parts.each { part ->
-			glEnableVertexAttribArray(part.location)
-			glVertexAttribPointer(part.location, part.size, GL_FLOAT, false, stride, layout.offsetOfInBytes(part))
-		}
-		return layout
 	}
 
 	/**
