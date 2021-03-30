@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.EngineSubsystem
+import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class AudioEngine extends EngineSubsystem {
+class AudioEngine extends Engine {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 50

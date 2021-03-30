@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
-import nz.net.ultraq.redhorizon.engine.EngineSubsystem
+import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
@@ -37,7 +37,7 @@ import java.util.concurrent.FutureTask
  * 
  * @author Emanuel Rabina
  */
-class GraphicsEngine extends EngineSubsystem {
+class GraphicsEngine extends Engine {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 

@@ -21,14 +21,17 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 /**
- * Common code for the engine subsystems.
+ * Common code for any of the specific engine systems.
  * 
  * @author Emanuel Rabina
  */
-abstract class EngineSubsystem implements EventTarget, Runnable {
+abstract class Engine implements EventTarget, Runnable {
 
-	private static final Logger logger = LoggerFactory.getLogger(EngineSubsystem)
+	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
 	private final int targetRenderTimeMs
 
@@ -38,9 +41,8 @@ abstract class EngineSubsystem implements EventTarget, Runnable {
 	 * Constructor, set the target render time.
 	 * 
 	 * @param targetRenderTimeMs
-	 * @param renderLoopCondition
 	 */
-	protected EngineSubsystem(int targetRenderTimeMs = 0) {
+	protected Engine(int targetRenderTimeMs = 0) {
 
 		this.targetRenderTimeMs = targetRenderTimeMs
 	}
