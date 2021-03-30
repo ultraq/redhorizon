@@ -52,7 +52,7 @@ class ImGuiRenderer implements AutoCloseable {
 	 * @param context
 	 * @param renderer
 	 */
-	ImGuiRenderer(OpenGLContext context, GraphicsRenderer renderer) {
+	ImGuiRenderer(OpenGLContext context, OpenGLRenderer renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -130,7 +130,7 @@ class ImGuiRenderer implements AutoCloseable {
 
 		if (debugLines.size()) {
 			ImGui.separator()
-			debugLines.toArray().each { line ->
+			debugLines.each { line ->
 				ImGui.text(line)
 			}
 		}
