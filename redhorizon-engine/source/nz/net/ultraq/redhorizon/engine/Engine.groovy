@@ -33,6 +33,7 @@ abstract class Engine implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
+	protected final ExecutorService executorService = Executors.newSingleThreadExecutor()
 	private final int targetRenderTimeMs
 
 	protected boolean running
@@ -56,7 +57,7 @@ abstract class Engine implements EventTarget, Runnable {
 	protected void renderLoop(Closure closure) {
 
 		running = true
-		trigger(new RenderLoopStartEvent())
+		trigger(new RenderLoopStartEvent(), executorService)
 
 		try {
 			while (shouldRender()) {
@@ -70,11 +71,11 @@ abstract class Engine implements EventTarget, Runnable {
 					Thread.sleep(waitTime)
 				}
 			}
-			trigger(new RenderLoopStopEvent())
+			trigger(new RenderLoopStopEvent(), executorService)
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
-			trigger(new RenderLoopStopEvent(ex))
+			trigger(new RenderLoopStopEvent(ex), executorService)
 		}
 		finally {
 			stop()

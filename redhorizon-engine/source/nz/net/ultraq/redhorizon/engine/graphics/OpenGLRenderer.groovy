@@ -36,6 +36,7 @@ import groovy.transform.Memoized
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
+import java.util.concurrent.ExecutorService
 
 /**
  * A graphics renderer utilizing the modern OpenGL API, version 4.1.
@@ -54,6 +55,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		VertexBufferLayoutParts.MODEL_INDEX
 	)
 
+	protected final ExecutorService executorService
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
@@ -71,10 +73,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * 
 	 * @param context
 	 * @param config
+	 * @param executorService
 	 */
-	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
+	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config, ExecutorService executorService) {
 
 		this.config = config
+		this.executorService = executorService
+
 		capabilities = GL.createCapabilities()
 
 		// Set up hardware limits
@@ -246,7 +251,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			textureCoordinates: textureCoordinates,
 			indices: indices
 		)
-		trigger(new MeshCreatedEvent(mesh))
+		trigger(new MeshCreatedEvent(mesh), executorService)
 		return mesh
 	}
 
@@ -409,7 +414,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
 			}
 
-			trigger(new TextureCreatedEvent())
+			trigger(new TextureCreatedEvent(), executorService)
 
 			return new Texture(
 				textureId: textureId
@@ -440,7 +445,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def texture = new Texture(
 				textureId: textureId
 			)
-			trigger(new TextureCreatedEvent(texture))
+			trigger(new TextureCreatedEvent(texture), executorService)
 			return texture
 		}
 	}
@@ -462,14 +467,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 		glDeleteBuffers(mesh.vertexBufferId)
 		glDeleteVertexArrays(mesh.vertexArrayId)
-		trigger(new MeshDeletedEvent(mesh))
+		trigger(new MeshDeletedEvent(mesh), executorService)
 	}
 
 	@Override
 	void deleteTexture(Texture texture) {
 
 		glDeleteTextures(texture.textureId)
-		trigger(new TextureDeletedEvent(texture))
+		trigger(new TextureDeletedEvent(texture), executorService)
 	}
 
 	@Override
@@ -501,7 +506,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
 				}
 
-				trigger(new DrawEvent())
+				trigger(new DrawEvent(), executorService)
 			}
 		}
 	}

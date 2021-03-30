@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
  * make up the 'world'.
@@ -24,7 +26,7 @@ package nz.net.ultraq.redhorizon.scenegraph
  */
 class Scene implements Visitable {
 
-	private List<SceneElement> elements = []
+	private List<SceneElement> elements = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Allow visitors into the scene for traversal.

@@ -96,11 +96,8 @@ class VideoPlayer extends Application {
 						}
 
 						graphicsEngine.on(RenderLoopStartEvent) { event ->
-							executorService.submit { ->
-								Thread.currentThread().name = 'Video starter'
-								video.play()
-								logger.debug('Video started')
-							}
+							video.play()
+							logger.debug('Video started')
 						}
 
 						logger.info('Waiting for video to finish.  Close the window to exit.')

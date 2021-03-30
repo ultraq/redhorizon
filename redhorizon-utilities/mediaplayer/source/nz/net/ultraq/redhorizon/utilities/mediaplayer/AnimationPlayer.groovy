@@ -92,11 +92,8 @@ class AnimationPlayer extends Application {
 					}
 
 					graphicsEngine.on(RenderLoopStartEvent) { event ->
-						executorService.execute { ->
-							Thread.currentThread().name = 'Animation starter'
-							animation.play()
-							logger.debug('Animation started')
-						}
+						animation.play()
+						logger.debug('Animation started')
 					}
 
 					logger.info('Waiting for animation to finish.  Close the window to exit.')

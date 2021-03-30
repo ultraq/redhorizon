@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
+import java.util.concurrent.ExecutorService
+
 /**
  * The OpenGL context, a concept used by OpenGL to control rendering threads.
  * Using GLFW, this object represents both the window and the OpenGL context.
@@ -58,9 +60,11 @@ class OpenGLContext extends Context implements EventTarget {
 	 * Constructor, create a new OpenGL window and context using GLFW.
 	 * 
 	 * @param config
+	 * @param executorService
 	 */
-	OpenGLContext(GraphicsConfiguration config) {
+	OpenGLContext(GraphicsConfiguration config, ExecutorService executorService) {
 
+		super(executorService)
 		this.config = config
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
@@ -110,16 +114,16 @@ class OpenGLContext extends Context implements EventTarget {
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
-			trigger(new KeyEvent(key, scancode, action, mods))
+			trigger(new KeyEvent(key, scancode, action, mods), executorService)
 		}
 		glfwSetScrollCallback(window) { long window, double xoffset, double yoffset ->
-			trigger(new ScrollEvent(xoffset, yoffset))
+			trigger(new ScrollEvent(xoffset, yoffset), executorService)
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
-			trigger(new MouseButtonEvent(button, action, mods))
+			trigger(new MouseButtonEvent(button, action, mods), executorService)
 		}
 		glfwSetCursorPosCallback(window) { window, double xpos, double ypos ->
-			trigger(new CursorPositionEvent(xpos, ypos))
+			trigger(new CursorPositionEvent(xpos, ypos), executorService)
 		}
 
 		withCurrent { ->

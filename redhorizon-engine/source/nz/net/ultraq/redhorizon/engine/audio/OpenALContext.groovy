@@ -25,6 +25,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
 
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
+import java.util.concurrent.ExecutorService
 
 /**
  * The OpenAL context, a concept used by OpenAL to control audio output.
@@ -38,8 +39,12 @@ class OpenALContext extends Context {
 
 	/**
 	 * Constructor, build a new OpenAL context with the default OpenAL device.
+	 * 
+	 * @param executorService
 	 */
-	OpenALContext() {
+	OpenALContext(ExecutorService executorService) {
+
+		super(executorService)
 
 		alDevice = alcOpenDevice((ByteBuffer)null)
 		def alcCapabilities = ALC.createCapabilities(alDevice)

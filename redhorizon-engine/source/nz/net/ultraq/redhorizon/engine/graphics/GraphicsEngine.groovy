@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
-import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -108,22 +107,21 @@ class GraphicsEngine extends Engine {
 
 		// Initialization
 		openGlContext = waitForMainThread { ->
-			return new OpenGLContext(config)
+			return new OpenGLContext(config, executorService)
 		}
 		openGlContext.withCloseable { context ->
 			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
-				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
+				trigger(new WindowCreatedEvent(context.windowSize, camera.size), executorService)
 
-				new OpenGLRenderer(context, config).withCloseable { renderer ->
-					logger.debug(renderer.toString())
-
+				new OpenGLRenderer(context, config, executorService).withCloseable { renderer ->
 					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->
+						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
+						def graphicsElementStates = [:]
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
@@ -135,7 +133,7 @@ class GraphicsEngine extends Engine {
 							camera.render(renderer)
 
 							// Reduce the list of renderable items to those just visible in the scene
-							List<GraphicsElement> visibleElements = []
+							def visibleElements = []
 							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 							averageNanos('objectCulling', 1f, logger) { ->
 								scene.accept { element ->

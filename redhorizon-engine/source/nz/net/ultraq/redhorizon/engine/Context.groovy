@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.ExecutorService
+
 /**
  * Common methods for OpenAL/GL execution contexts.
  * 
@@ -29,6 +31,18 @@ import org.slf4j.LoggerFactory
 abstract class Context implements Closeable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Context)
+
+	protected final ExecutorService executorService
+
+	/**
+	 * Constructor, set the executor for firing async events.
+	 * 
+	 * @param executorService
+	 */
+	protected Context(ExecutorService executorService) {
+
+		this.executorService = executorService
+	}
 
 	/**
 	 * Makes the context current on the executing thread.
