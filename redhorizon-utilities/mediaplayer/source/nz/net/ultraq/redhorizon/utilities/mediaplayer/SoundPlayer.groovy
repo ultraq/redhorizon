@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
 import nz.net.ultraq.redhorizon.media.StopEvent
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,16 +49,17 @@ class SoundPlayer extends Application {
 
 		logger.info('File details: {}', soundFile)
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useAudioEngine(executorService) { audioEngine ->
+				useAudioEngine(scene, executorService) { audioEngine ->
 
 					// Try determine the appropriate media for the sound file
 					def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
 						new SoundTrack(soundFile, gameClock, executorService) :
 						new SoundEffect(soundFile)
-
-					audioEngine.addSceneElement(sound)
+					scene << sound
 
 					sound.on(StopEvent) { event ->
 						logger.debug('Sound stopped')

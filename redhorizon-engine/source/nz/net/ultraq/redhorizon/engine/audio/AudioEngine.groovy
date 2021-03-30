@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.slf4j.Logger
@@ -34,24 +34,17 @@ class AudioEngine extends Engine {
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 50
 
-	private final List<SceneElement> sceneElements = []
+	private final Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
+	 * 
+	 * @param scene
 	 */
-	AudioEngine() {
+	AudioEngine(Scene scene) {
 
 		super(TARGET_RENDER_TIME_MS)
-	}
-
-	/**
-	 * Add an element to start rendering from the next pass.
-	 *
-	 * @param sceneElement
-	 */
-	void addSceneElement(SceneElement sceneElement) {
-
-		sceneElements << sceneElement
+		this.scene = scene
 	}
 
 	/**
@@ -75,28 +68,30 @@ class AudioEngine extends Engine {
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
 				renderLoop { ->
-					sceneElements.each { sceneElement ->
-						sceneElement.accept { element ->
-							if (element instanceof AudioElement) {
 
-								// Register the audio element
-								if (!audioElementStates[element]) {
-									audioElementStates << [(element): STATE_NEW]
-								}
-
-								def elementState = audioElementStates[element]
-
-								// Initialize the audio element
-								if (elementState == STATE_NEW) {
-									element.init(renderer)
-									elementState = STATE_INITIALIZED
-									audioElementStates << [(element): elementState]
-								}
-
-								// Render the audio element
-								element.render(renderer)
-							}
+					def audibleElements = []
+					scene.accept { element ->
+						if (element instanceof AudioElement) {
+							audibleElements << element
 						}
+					}
+					audibleElements.each { element ->
+
+						// Register the audio element
+						if (!audioElementStates[element]) {
+							audioElementStates << [(element): STATE_NEW]
+						}
+
+						// Initialize the audio element
+						def elementState = audioElementStates[element]
+						if (elementState == STATE_NEW) {
+							element.init(renderer)
+							elementState = STATE_INITIALIZED
+							audioElementStates << [(element): elementState]
+						}
+
+						// Render the audio element
+						element.render(renderer)
 					}
 				}
 

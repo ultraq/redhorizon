@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.StopEvent
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -57,9 +58,11 @@ class AnimationPlayer extends Application {
 
 		logger.info('File details: {}', animationFile)
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation
@@ -81,10 +84,10 @@ class AnimationPlayer extends Application {
 							graphicsEngine.stop()
 							gameClock.stop()
 						}
-						graphicsEngine.scene << animation
+						scene << animation
 
 						if (scanlines) {
-							graphicsEngine.scene << new Scanlines(new Dimension(width, height))
+							scene << new Scanlines(new Dimension(width, height))
 								.scaleXY(scale)
 								.translate(offset)
 								.translate(0, -scale / 2 as float, 0)

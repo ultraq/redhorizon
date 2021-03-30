@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.Video
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -58,10 +59,12 @@ class VideoPlayer extends Application {
 
 		logger.info('File details: {}', videoFile)
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useAudioEngine(executorService) { audioEngine ->
-					useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				useAudioEngine(scene, executorService) { audioEngine ->
+					useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 						// Add the video to the engines once we have the window dimensions
 						Video video
@@ -84,11 +87,10 @@ class VideoPlayer extends Application {
 								audioEngine.stop()
 								graphicsEngine.stop()
 							}
-							audioEngine.addSceneElement(video)
-							graphicsEngine.scene << video
+							scene << video
 
 							if (scanlines) {
-								graphicsEngine.scene << new Scanlines(new Dimension(width, height))
+								scene << new Scanlines(new Dimension(width, height))
 									.scaleXY(scale)
 									.translate(offset)
 									.translate(0, -scale / 2 as float, 0)

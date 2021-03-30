@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -51,12 +52,14 @@ class ImageViewer extends Application {
 
 		logger.info('File details: {}', imageFile)
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					graphicsEngine.scene << new Image(imageFile)
+					scene << new Image(imageFile)
 						.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize))
 						.translate(-imageFile.width / 2, -imageFile.height / 2, 0)
 				}

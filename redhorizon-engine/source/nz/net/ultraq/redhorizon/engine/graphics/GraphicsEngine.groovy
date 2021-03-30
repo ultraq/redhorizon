@@ -47,11 +47,12 @@ class GraphicsEngine extends Engine {
 	private Camera camera
 	private boolean started
 
-	Scene scene = new Scene()
+	private final Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
+	 * @param scene
 	 * @param config
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
@@ -59,9 +60,10 @@ class GraphicsEngine extends Engine {
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(GraphicsConfiguration config,
+	GraphicsEngine(Scene scene, GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
+		this.scene = scene
 		this.config = config
 		this.needsMainThreadCallback = needsMainThreadCallback
 	}

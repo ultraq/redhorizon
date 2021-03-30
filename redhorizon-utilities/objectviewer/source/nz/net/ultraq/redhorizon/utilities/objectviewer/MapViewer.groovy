@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapLines
 import nz.net.ultraq.redhorizon.utilities.objectviewer.maps.MapRA
 
@@ -68,8 +69,10 @@ class MapViewer extends Application {
 
 		logger.info('File details: {}', mapFile)
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 				// Add the map
 				MapRA map
@@ -78,10 +81,10 @@ class MapViewer extends Application {
 					map = new MapRA(resourceManager, mapFile)
 					mapInitialPosition = new Vector3f(map.initialPosition, 0)
 					logger.info('Map details: {}', map)
-					graphicsEngine.scene << map
+					scene << map
 					graphicsEngine.camera.center(mapInitialPosition)
 
-					graphicsEngine.scene << new MapLines(map)
+					scene << new MapLines(map)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')

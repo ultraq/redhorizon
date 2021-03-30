@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.utilities.objectviewer.units.UnitData
@@ -102,9 +103,11 @@ class UnitViewer extends Application {
 			return new PalFile(inputStream).withAlphaMask()
 		}
 
+		def scene = new Scene()
+
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 					// Add the unit to the engine
 					def unit = targetClass
@@ -112,7 +115,7 @@ class UnitViewer extends Application {
 						.newInstance(unitData, shpFile, palette, gameClock)
 						.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
 						.scaleXY(2)
-					graphicsEngine.scene << unit
+					scene << unit
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
 

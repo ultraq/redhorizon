@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Vector3f
@@ -61,6 +62,8 @@ class ImagesViewer extends Application {
 
 		logger.info('File details: {}', imagesFile)
 
+		def scene = new Scene()
+
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
 			palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
@@ -69,14 +72,14 @@ class ImagesViewer extends Application {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 				def center = new Vector3f()
 				def tick = imagesFile.width
 
 				// Represent each frame of the image in a long strip
 				graphicsEngine.on(WindowCreatedEvent) { event ->
-					graphicsEngine.scene << new ImageStrip(imagesFile, palette)
+					scene << new ImageStrip(imagesFile, palette)
 				}
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
