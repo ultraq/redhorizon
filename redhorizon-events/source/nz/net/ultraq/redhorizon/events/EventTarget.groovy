@@ -32,12 +32,26 @@ trait EventTarget {
 	 * Register an event listener on this event target.  When the event is fired
 	 * by the target, then the listener will be invoked with that event.
 	 * 
-	 * @param event
+	 * @param eventClass
 	 * @param eventListener
 	 */
-	public <E extends Event> void on(Class<E> event, EventListener<E> eventListener) {
+	public <E extends Event> void on(Class<E> eventClass, EventListener<E> eventListener) {
 
-		eventListeners << new EventAndListenerPair(event, eventListener)
+		eventListeners << new EventAndListenerPair(eventClass, eventListener)
+	}
+
+	/**
+	 * Re-fire events on this class through the given event target, effectively
+	 * forwarding events.
+	 * 
+	 * @param eventClass
+	 * @param newTarget
+	 */
+	public <E extends Event> void relay(Class<E> eventClass, EventTarget newTarget) {
+
+		this.on(eventClass) { event ->
+			newTarget.trigger(event)
+		}
 	}
 
 	/**

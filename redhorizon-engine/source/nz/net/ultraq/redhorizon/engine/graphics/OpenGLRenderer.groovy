@@ -133,9 +133,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		if (!batchRenderer) {
 			batchRenderer = new OpenGLBatchRenderer(this)
-			batchRenderer.on(RendererEvent) { event ->
-				trigger(event)
-			}
+			batchRenderer.relay(RendererEvent, this)
 		}
 		closure(batchRenderer)
 	}

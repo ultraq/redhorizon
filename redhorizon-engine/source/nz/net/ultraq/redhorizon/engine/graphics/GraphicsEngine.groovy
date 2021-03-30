@@ -111,12 +111,8 @@ class GraphicsEngine extends EngineSubsystem {
 			return new OpenGLContext(config)
 		}
 		openGlContext.withCloseable { context ->
-			context.on(InputEvent) { event ->
-				trigger(event)
-			}
-			context.on(ContextErrorEvent) { event ->
-				trigger(event)
-			}
+			context.relay(InputEvent, this)
+			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
 				trigger(new WindowCreatedEvent(context.windowSize, camera.size))
