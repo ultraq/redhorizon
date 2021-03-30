@@ -237,7 +237,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				else {
 					glDrawArrays(batchVertexType, 0, batchVertices)
 				}
-				trigger(new DrawEvent(), renderer.executorService)
+				trigger(new DrawEvent())
 
 				// Reset batch tracking variables
 				batchVertices = 0

@@ -55,7 +55,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		VertexBufferLayoutParts.MODEL_INDEX
 	)
 
-	protected final ExecutorService executorService
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
@@ -73,12 +72,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * 
 	 * @param context
 	 * @param config
-	 * @param executorService
 	 */
-	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config, ExecutorService executorService) {
+	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
 
 		this.config = config
-		this.executorService = executorService
 
 		capabilities = GL.createCapabilities()
 
@@ -251,7 +248,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			textureCoordinates: textureCoordinates,
 			indices: indices
 		)
-		trigger(new MeshCreatedEvent(mesh), executorService)
+		trigger(new MeshCreatedEvent(mesh))
 		return mesh
 	}
 
@@ -414,7 +411,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
 			}
 
-			trigger(new TextureCreatedEvent(), executorService)
+			trigger(new TextureCreatedEvent())
 
 			return new Texture(
 				textureId: textureId
@@ -445,7 +442,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def texture = new Texture(
 				textureId: textureId
 			)
-			trigger(new TextureCreatedEvent(texture), executorService)
+			trigger(new TextureCreatedEvent(texture))
 			return texture
 		}
 	}
@@ -467,14 +464,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 		glDeleteBuffers(mesh.vertexBufferId)
 		glDeleteVertexArrays(mesh.vertexArrayId)
-		trigger(new MeshDeletedEvent(mesh), executorService)
+		trigger(new MeshDeletedEvent(mesh))
 	}
 
 	@Override
 	void deleteTexture(Texture texture) {
 
 		glDeleteTextures(texture.textureId)
-		trigger(new TextureDeletedEvent(texture), executorService)
+		trigger(new TextureDeletedEvent(texture))
 	}
 
 	@Override
@@ -506,7 +503,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 					glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
 				}
 
-				trigger(new DrawEvent(), executorService)
+				trigger(new DrawEvent())
 			}
 		}
 	}

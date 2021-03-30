@@ -116,7 +116,7 @@ class GraphicsEngine extends Engine {
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
 				trigger(new WindowCreatedEvent(context.windowSize, camera.size), executorService)
 
-				new OpenGLRenderer(context, config, executorService).withCloseable { renderer ->
+				new OpenGLRenderer(context, config).withCloseable { renderer ->
 					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
