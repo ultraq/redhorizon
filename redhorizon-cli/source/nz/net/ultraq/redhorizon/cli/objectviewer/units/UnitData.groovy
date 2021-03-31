@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,36 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
-include(
-	'redhorizon-classic',
-	'redhorizon-cli',
-	'redhorizon-engine',
-	'redhorizon-events',
-	'redhorizon-extensions',
-	'redhorizon-filetypes'
-)
+/**
+ * Model of the data of a C&C unit type.
+ * 
+ * @author Emanuel Rabina
+ */
+class UnitData {
+
+	String type
+	ShpFile shpFile
+
+	static class ShpFile {
+		ShpFileParts parts
+		ShpFileAnimations[] animations
+	}
+
+	static class ShpFileParts {
+		ShpFilePart body
+		ShpFilePart bodyAlt
+		ShpFilePart turret
+	}
+
+	static class ShpFilePart {
+		int headings
+	}
+
+	static class ShpFileAnimations {
+		String type
+		int frames
+		int headings
+	}
+}
