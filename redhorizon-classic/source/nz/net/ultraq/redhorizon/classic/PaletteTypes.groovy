@@ -26,9 +26,9 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 enum PaletteTypes {
 
-	RA_SNOW('ra-snow.pal'),
-	RA_TEMPERATE('ra-temperate.pal'),
-	TD_TEMPERATE('td-temperate.pal')
+	RA_SNOW      ('ra-snow.pal'),
+	RA_TEMPERATE ('ra-temperate.pal'),
+	TD_TEMPERATE ('td-temperate.pal')
 
 	final String file
 }
