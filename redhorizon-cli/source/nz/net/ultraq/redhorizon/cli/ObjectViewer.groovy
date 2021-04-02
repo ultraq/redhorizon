@@ -16,25 +16,21 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.MapViewer
 import nz.net.ultraq.redhorizon.cli.objectviewer.UnitViewer
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 
-import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
-import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
@@ -62,17 +58,14 @@ class ObjectViewer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', description = 'Path to the object file file to view, or a mix file that contains the object')
-	File file
-
-	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to view')
-	String entryName
+	@Mixin
+	FileOptions fileOptions
 
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
-	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
-	PaletteTypes paletteType
+	@Mixin
+	PaletteOptions paletteOptions
 
 	/**
 	 * Launch the unit viewer.
@@ -85,95 +78,36 @@ class ObjectViewer implements Callable<Integer> {
 		Thread.currentThread().name = 'Object Viewer [main]'
 		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
-		logger.info('Loading {}...', file)
-		def objectFile
-		def objectId
-		if (file.name.endsWith('.mix')) {
-			new MixFile(file).withCloseable { mix ->
-				def entry = mix.getEntry(entryName)
-				if (entry) {
-					logger.info('Loading {}...', entryName)
-					objectFile = mix.getEntryData(entry).withBufferedStream { inputStream ->
-						return getFileClass(entryName).newInstance(inputStream)
-					}
-					objectId = entryName[0..<-4]
-				}
-				else {
-					logger.error('{} not found in {}', entryName, file)
-					throw new IllegalArgumentException()
-				}
-			}
-		}
-		else {
-			objectFile = file.withInputStream { inputStream ->
-				return getFileClass(file.name).newInstance(inputStream)
-			}
-			objectId = file.name[0..<-4]
-		}
-
-		view(objectFile, objectId)
-
-		return 0
-	}
-
-	/**
-	 * Find the appropriate class for reading a file with the given name.
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	private Class<?> getFileClass(String filename) {
-
-		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
-		def fileClass = new Reflections(
-			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes'
-		)
-			.getTypesAnnotatedWith(FileExtensions)
-			.find { type ->
-				def annotation = type.getAnnotation(FileExtensions)
-				return annotation.value().any { extension ->
-					return extension.equalsIgnoreCase(suffix)
-				}
-			}
-		if (!fileClass) {
-			logger.error('No implementation for {} filetype', suffix)
-			throw new IllegalArgumentException()
-		}
-		return fileClass
-	}
-
-	/**
-	 * Display the unit.
-	 * 
-	 * @param objectFile
-	 * @param objectId
-	 */
-	private void view(Object objectFile, String objectId) {
+		def objectFile = fileOptions.loadFile(logger)
+		def objectId = fileOptions.entryName ?
+			fileOptions.entryName[0..fileOptions.entryName.indexOf('.')] :
+			fileOptions.file.name[0..fileOptions.file.name.indexOf('.')]
 
 		switch (objectFile) {
-			case ShpFile:
-				def graphicsConfig = new GraphicsConfiguration(
-					clearColour: Colour.WHITE,
-					fullScreen: fullScreen
-				)
-				new UnitViewer(objectFile, objectId, graphicsConfig, paletteType).view()
-				break
-			case IniFile:
-				def graphicsConfig = new GraphicsConfiguration(
-					fullScreen: fullScreen
-				)
-				// Assume the directory in which file resides is where we can search for items
-				new ResourceManager(file.parentFile,
-					'nz.net.ultraq.redhorizon.filetypes',
-					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, graphicsConfig).view()
-				}
-				break
-			default:
-				logger.error('No viewer for the associated file class of {}', objectFile)
-				throw new UnsupportedOperationException()
+		case ShpFile:
+			def graphicsConfig = new GraphicsConfiguration(
+				clearColour: Colour.WHITE,
+				fullScreen: fullScreen
+			)
+			new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType).view()
+			break
+		case IniFile:
+			def graphicsConfig = new GraphicsConfiguration(
+				fullScreen: fullScreen
+			)
+			// Assume the directory in which file resides is where we can search for items
+			new ResourceManager(fileOptions.file.parentFile,
+				'nz.net.ultraq.redhorizon.filetypes',
+				'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+				new MapViewer(resourceManager, objectFile, graphicsConfig).view()
+			}
+			break
+		default:
+			logger.error('No viewer for the associated file class of {}', objectFile)
+			throw new UnsupportedOperationException()
 		}
+
+		return 0
 	}
 
 	/**
@@ -182,15 +116,6 @@ class ObjectViewer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(
-			new CommandLine(new ObjectViewer())
-				.registerConverter(PaletteTypes, { value ->
-					return PaletteTypes.find { paletteType ->
-						return value == paletteType.name().toLowerCase().replaceAll('_', '-')
-					}
-				})
-				.setCaseInsensitiveEnumValuesAllowed(true)
-				.execute(args)
-		)
+		System.exit(new CommandLine(new ObjectViewer()).execute(args))
 	}
 }
