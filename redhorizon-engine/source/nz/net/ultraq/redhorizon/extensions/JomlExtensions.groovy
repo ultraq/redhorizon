@@ -112,11 +112,7 @@ class JomlExtensions {
 	 */
 	static Rectanglef set(Rectanglef self, Rectanglef r) {
 
-		self.minX = r.minX
-		self.minY = r.minY
-		self.maxX = r.maxX
-		self.maxY = r.maxY
-		return self
+		return self.set(r.minX, r.minY, r.maxX, r.maxY)
 	}
 
 	/**
