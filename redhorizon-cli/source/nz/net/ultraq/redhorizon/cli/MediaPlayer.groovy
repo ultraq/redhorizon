@@ -57,6 +57,7 @@ import java.util.concurrent.Callable
 		'========================',
 		''
 	],
+	description = 'Play/View a variety of supported media formats',
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
@@ -82,7 +83,13 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
-	@Option(names = ['--palette'], defaultValue = 'ra-temperate', description = 'Which game palette to apply to a paletted image.  One of "ra-snow", "ra-temperate", or "td-temperate".  Defaults to ra-temperate')
+	@Option(
+		names = ['--palette'],
+		defaultValue = 'ra-temperate',
+		description = 'Which game palette to apply to a paletted image.  One of ${COMPLETION-CANDIDATES}.  Defaults to ra-temperate',
+		converter = PaletteTypesConverter,
+		completionCandidates = { PaletteTypesConverter.COMPLETION_CANDIDATES }
+	)
 	PaletteTypes paletteType
 
 	@Option(names = ['--scale-low-res'], description = 'Double the output resolution of low-res animations and videos (320x200 or lower).  Useful in conjunction with filtering so that the result is still filtered but less blurry.')
@@ -133,7 +140,7 @@ class MediaPlayer implements Callable<Integer> {
 	 * @param filename
 	 * @return
 	 */
-	private Class<?> getFileClass(String filename) {
+	private static Class<?> getFileClass(String filename) {
 
 		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
 		def fileClass = new Reflections(
