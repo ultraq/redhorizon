@@ -207,15 +207,6 @@ class MediaPlayer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(
-			new CommandLine(new MediaPlayer())
-				.registerConverter(PaletteTypes, { value ->
-					return PaletteTypes.find { paletteType ->
-						return value == paletteType.name().toLowerCase().replaceAll('_', '-')
-					}
-				})
-				.setCaseInsensitiveEnumValuesAllowed(true)
-				.execute(args)
-		)
+		System.exit(new CommandLine(new MediaPlayer()).execute(args))
 	}
 }
