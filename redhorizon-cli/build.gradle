@@ -36,6 +36,8 @@ dependencies {
 }
 
 application {
+	mainClass = 'nz.net.ultraq.redhorizon.RedHorizonCLI'
+	applicationName = 'redhorizon'
 	applicationDefaultJvmArgs = [
 		"-Dredhorizon.version=${version}",
 		'-Dorg.lwjgl.system.stackSize=10240'
