@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
+import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.FutureTask
 
 /**
@@ -109,6 +110,7 @@ class GraphicsEngine extends Engine {
 	void run() {
 
 		Thread.currentThread().name = 'Graphics Engine'
+		def forkJoinPool = ForkJoinPool.commonPool()
 
 		// Initialization
 		openGlContext = waitForMainThread { ->
@@ -138,13 +140,16 @@ class GraphicsEngine extends Engine {
 							camera.render(renderer)
 
 							// Reduce the list of renderable items to those just visible in the scene
-							def visibleElements = []
 							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-							averageNanos('objectCulling', 1f, logger) { ->
-								scene.accept { element ->
-									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-										visibleElements << element
+							def visibleElements = averageNanos('objectCulling', 1f, logger) { ->
+								def sceneElements = []
+								averageNanos('sceneCollect', 1f, logger) { ->
+									scene.accept { element ->
+										sceneElements << element
 									}
+								}
+								return averageNanos('sceneCull', 1f, logger) { ->
+									return forkJoinPool.invoke(new ObjectCullingTask(frustumIntersection, sceneElements))
 								}
 							}
 //							renderer.asBatchRenderer { batchRenderer ->
