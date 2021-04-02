@@ -21,11 +21,6 @@ import nz.net.ultraq.redhorizon.cli.converter.Png2ShpConverter
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
-import picocli.CommandLine.Model.CommandSpec
-import picocli.CommandLine.ParameterException
-import picocli.CommandLine.Spec
-
-import java.util.concurrent.Callable
 
 /**
  * CLI tool for converting from one file format to another.
@@ -48,22 +43,7 @@ import java.util.concurrent.Callable
 	synopsisSubcommandLabel = 'COMMAND',
 	version = '${sys:redhorizon.version}'
 )
-class Converter implements Callable<Integer> {
-
-	@Spec
-	CommandSpec commandSpec
-
-	/**
-	 * If invoked, then a subcommand hasn't been specified and so an error is
-	 * thrown.
-	 * 
-	 * @return
-	 */
-	@Override
-	Integer call() {
-
-		throw new ParameterException(commandSpec.commandLine(), 'Conversion subcommand required')
-	}
+class Converter {
 
 	/**
 	 * Bootstrap the application using Picocli.

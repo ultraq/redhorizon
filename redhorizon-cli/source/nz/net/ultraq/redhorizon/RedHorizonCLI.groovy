@@ -16,15 +16,13 @@
 
 package nz.net.ultraq.redhorizon
 
+import nz.net.ultraq.redhorizon.cli.Converter
 import nz.net.ultraq.redhorizon.cli.MediaPlayer
+import nz.net.ultraq.redhorizon.cli.MixReader
+import nz.net.ultraq.redhorizon.cli.ObjectViewer
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
-import picocli.CommandLine.Model.CommandSpec
-import picocli.CommandLine.Spec
-import picocli.CommandLine.ParameterException
-
-import java.util.concurrent.Callable
 
 /**
  * The top-level CLI program, hosting all the other programs as subcommands.
@@ -42,26 +40,14 @@ import java.util.concurrent.Callable
 	description = 'The Red Horizon command-line interface',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-	  MediaPlayer
+		Converter,
+	  MediaPlayer,
+		MixReader,
+		ObjectViewer
 	],
 	version = '${sys:redhorizon.version}'
 )
-class RedHorizonCLI implements Callable<Integer> {
-
-	@Spec
-	CommandSpec commandSpec
-
-	/**
-	 * If invoked, then a subcommand hasn't been specified and so an error is
-	 * thrown.
-	 * 
-	 * @return
-	 */
-	@Override
-	Integer call() {
-
-		throw new ParameterException(commandSpec.commandLine(), 'Subcommand required')
-	}
+class RedHorizonCLI {
 
 	/**
 	 * Bootstrap the application using Picocli.
