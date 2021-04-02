@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import ch.qos.logback.core.encoder.Encoder

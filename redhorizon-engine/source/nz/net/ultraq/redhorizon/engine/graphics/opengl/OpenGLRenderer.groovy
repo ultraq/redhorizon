@@ -1,5 +1,5 @@
 /* 
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutParts
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
@@ -36,7 +52,6 @@ import groovy.transform.Memoized
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
 
 /**
  * A graphics renderer utilizing the modern OpenGL API, version 4.1.
@@ -301,7 +316,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			mesh.vertexArrayId = vertexArrayId
 			mesh.vertexBufferId = vertexBufferId
-			mesh.vertexBufferLayout = vertexBufferLayout
+			mesh.vertexBufferLayout = VERTEX_BUFFER_LAYOUT
 			if (mesh.indices) {
 				mesh.elementBufferId = elementBufferId
 			}
@@ -322,7 +337,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		 * check to make sure it all went OK.
 		 */
 		def createShader = { int type, Closure<String> mod = null ->
-			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
+			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/opengl/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
 			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
 				return mod ? mod(stream.text) : stream.text
 			}

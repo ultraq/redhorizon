@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
+
+import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
+import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 
 import imgui.ImGui
 import imgui.flag.ImGuiWindowFlags

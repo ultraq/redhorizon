@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
+import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 

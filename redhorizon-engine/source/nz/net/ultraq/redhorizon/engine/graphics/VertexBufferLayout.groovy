@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 
 /**
@@ -24,7 +23,6 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
-@PackageScope
 @TupleConstructor(defaults = false)
 class VertexBufferLayout {
 

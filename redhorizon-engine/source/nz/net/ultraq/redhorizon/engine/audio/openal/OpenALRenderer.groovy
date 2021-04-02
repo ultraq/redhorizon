@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.engine.audio.openal
 
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.geometry.Orientation
 
 import org.joml.Vector3f

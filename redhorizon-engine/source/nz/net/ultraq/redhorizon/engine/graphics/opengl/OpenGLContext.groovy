@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.Context
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent

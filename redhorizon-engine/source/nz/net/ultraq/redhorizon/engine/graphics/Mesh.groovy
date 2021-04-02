@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import org.joml.Vector2f
 
 import groovy.transform.MapConstructor
-import groovy.transform.PackageScope
 
 /**
  * A mesh defines the shape of an object, and so contain data on points and
@@ -34,10 +33,10 @@ class Mesh {
 	final Colour colour
 	final Vector2f[] vertices
 	final Vector2f[] textureCoordinates
-	@PackageScope int vertexArrayId
-	@PackageScope int vertexBufferId
-	@PackageScope VertexBufferLayout vertexBufferLayout
+	int vertexArrayId
+	int vertexBufferId
+	VertexBufferLayout vertexBufferLayout
 
 	final int[] indices
-	@PackageScope int elementBufferId
+	int elementBufferId
 }

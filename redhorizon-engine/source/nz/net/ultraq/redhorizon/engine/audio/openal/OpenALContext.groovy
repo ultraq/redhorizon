@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.engine.audio.openal
 
 import nz.net.ultraq.redhorizon.engine.Context
 

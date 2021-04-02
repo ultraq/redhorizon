@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.ImGuiRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*

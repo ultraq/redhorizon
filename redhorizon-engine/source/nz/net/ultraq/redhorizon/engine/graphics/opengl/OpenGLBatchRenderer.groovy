@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.engine.graphics.OpenGLRenderer.*
+import static OpenGLRenderer.*
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
