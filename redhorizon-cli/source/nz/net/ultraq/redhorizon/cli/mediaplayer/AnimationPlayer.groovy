@@ -31,6 +31,9 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
