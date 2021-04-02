@@ -2,6 +2,11 @@
 Changelog
 =========
 
+### 0.33.0
+ - Merged all of the various CLI tools into a single one.  Now each tool is a
+   subcommand of a main `redhorizon` one.
+ - Implemented basic batch rendering and object culling to speed up rendering
+
 ### 0.32.0
  - Replaced the OpenGL fixed-function pipeline with a modern shader-based
    renderer.  This opens up Red Horizon to do paletted textures on the GPU.  A
