@@ -42,9 +42,6 @@ freeetype`.
 CLI Tools
 ---------
 
-Each of the tools below are subcommands of the main `redhorizon` CLI too, eg: to
-run the media player, use `redhorizon play (options here)`
-
 ### convert
 
 The main file conversion utility under which more specialized converters exist
