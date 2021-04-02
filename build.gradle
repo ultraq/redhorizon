@@ -67,7 +67,7 @@ subprojects {
 		implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 			exclude module: 'groovy'
 		}
-		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.0-SNAPSHOT') {
+		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.0') {
 			exclude module: 'groovy'
 		}
 		testImplementation('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
