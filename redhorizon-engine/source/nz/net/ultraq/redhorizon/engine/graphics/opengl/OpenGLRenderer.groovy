@@ -75,6 +75,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
+	protected final int maxTransforms = 100
 
 	protected final List<Shader> shaders = []
 	protected final Shader standardShader
@@ -99,6 +100,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		// Set up hardware limits
 		maxTextureUnits = glGetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) - 1 // Last slot reserved for palette
+//		def maxTransforms = glGetInteger(GL_MAX_UNIFORM_BLOCK_SIZE)
 
 		if (config.debug && capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)
@@ -381,11 +383,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return programId
 		}
 
-		def capTextureUnits = { source ->
-			return source.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
+		def setMaximums = { source ->
+			return source
+				.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
+				.replace('[maxTransforms]', "[${maxTransforms}]")
 		}
-		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
-		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)
+		def vertexShaderId = createShader(GL_VERTEX_SHADER, setMaximums)
+		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, setMaximums)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
