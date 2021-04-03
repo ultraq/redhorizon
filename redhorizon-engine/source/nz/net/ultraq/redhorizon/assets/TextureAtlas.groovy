@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.assets
 
-import nz.net.ultraq.redhorizon.geometry.Dimension
-
-import groovy.transform.MapConstructor
-import java.nio.ByteBuffer
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
 /**
- * Representation of a single texture to render.
+ * A combination of several images, all laid out within a single texture so that
+ * only 1 texture unit is required for all of the image data.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-class Texture {
+class TextureAtlas {
 
-	final Dimension dimensions
-	final int format
-	ByteBuffer data
-	int textureId
-	int layer
+	// Fix to holding 24x24 tiles (map tiles) for now
+	final int width = 2400
+	final int height = 2400
+
+	private final List<Texture> textures = []
+
+	
 }

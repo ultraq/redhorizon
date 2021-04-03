@@ -32,7 +32,8 @@ enum VertexBufferLayoutParts {
 	POSITION    ('position',   1, Vector2f.FLOATS),
 	TEXCOORD    ('texCoord',   2, Vector2f.FLOATS),
 	TEXUNIT     ('texUnit',    3, 1),
-	MODEL_INDEX ('modelIndex', 4, 1)
+	TEXLAYER    ('texLayer',   4, 1),
+	MODEL_INDEX ('modelIndex', 5, 1)
 
 	final String name
 	final int location

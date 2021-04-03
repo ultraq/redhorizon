@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.geometry
 
 import org.joml.Rectanglef
 
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor
 
 /**
@@ -25,6 +26,7 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
+@EqualsAndHashCode
 @TupleConstructor(defaults = false)
 class Dimension {
 

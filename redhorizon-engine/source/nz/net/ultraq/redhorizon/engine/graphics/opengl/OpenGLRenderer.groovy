@@ -34,6 +34,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutParts
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import org.joml.Matrix4f
@@ -67,6 +68,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		VertexBufferLayoutParts.POSITION,
 		VertexBufferLayoutParts.TEXCOORD,
 		VertexBufferLayoutParts.TEXUNIT,
+		VertexBufferLayoutParts.TEXLAYER,
 		VertexBufferLayoutParts.MODEL_INDEX
 	)
 
@@ -437,6 +439,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			trigger(new TextureCreatedEvent())
 
 			return new Texture(
+				dimensions: new Dimension(width, height),
+				format: format,
+				data: data,
 				textureId: textureId
 			)
 		}
