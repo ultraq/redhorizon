@@ -199,6 +199,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
+		if (batchRenderer) {
+			batchRenderer.close()
+		}
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)

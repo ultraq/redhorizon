@@ -107,7 +107,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 		glDeleteVertexArrays(batchVertexArrayId)
 		glDeleteBuffers(batchVertexBufferId, batchElementBufferId)
-		renderer.close()
 	}
 
 	@Override
