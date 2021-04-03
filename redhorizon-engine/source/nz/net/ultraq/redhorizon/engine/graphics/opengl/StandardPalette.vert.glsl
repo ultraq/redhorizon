@@ -10,9 +10,11 @@ out vec4 v_vertexColour;
 out vec2 v_texCoord;
 out float v_texUnit;
 
+layout (std140) uniform Camera {
+	mat4 projection;
+	mat4 view;
+};
 uniform mat4 models[maxTextureUnits];
-uniform mat4 view;
-uniform mat4 projection;
 
 void main() {
 	v_vertexColour = colour;

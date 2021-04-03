@@ -78,6 +78,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final Shader standardShader
 	protected final Shader standardPaletteShader
 	protected Texture whiteTexture
+	protected int cameraBufferObject
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -198,6 +199,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
+		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)
 		}
@@ -207,15 +209,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void createCamera(Matrix4f projection, Matrix4f view) {
 
 		stackPush().withCloseable { stack ->
-			// TODO: Use a uniform buffer object to share these values across shaders
-			shaders.each { shader ->
-				def projectionBuffer = projection.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def projectionLocation = getUniformLocation(shader, 'projection')
-				glProgramUniformMatrix4fv(shader.programId, projectionLocation, false, projectionBuffer)
-				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def viewLocation = getUniformLocation(shader, 'view')
-				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
+			cameraBufferObject = glGenBuffers()
+			glBindBuffer(GL_UNIFORM_BUFFER, cameraBufferObject)
+			def projectionAndViewBuffer = stack.mallocFloat(Matrix4f.FLOATS * 2)
+			projection.get(0, projectionAndViewBuffer)
+			view.get(Matrix4f.FLOATS, projectionAndViewBuffer)
+			glBufferData(GL_UNIFORM_BUFFER, projectionAndViewBuffer, GL_DYNAMIC_DRAW)
+
+			shaders.eachWithIndex { shader, index ->
+				def blockIndex = glGetUniformBlockIndex(shader.programId, 'Camera')
+				glUniformBlockBinding(shader.programId, blockIndex, 0)
 			}
+			glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBufferObject)
 		}
 	}
 
@@ -581,12 +586,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void updateCamera(Matrix4f view) {
 
 		stackPush().withCloseable { stack ->
-			// TODO: Use a uniform buffer object to share these values across shaders
-			shaders.each { shader ->
-				def viewBuffer = view.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def viewLocation = getUniformLocation(shader, 'view')
-				glProgramUniformMatrix4fv(shader.programId, viewLocation, false, viewBuffer)
-			}
+			glBindBuffer(GL_UNIFORM_BUFFER, cameraBufferObject)
+			glBufferSubData(GL_UNIFORM_BUFFER, Matrix4f.BYTES, view.get(stack.mallocFloat(Matrix4f.FLOATS)))
 		}
 	}
 }
