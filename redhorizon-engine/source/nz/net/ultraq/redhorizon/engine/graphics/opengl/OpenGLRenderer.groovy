@@ -445,8 +445,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return new Texture(
 				dimensions: new Dimension(width, height),
 				format: format,
-				data: data,
-				textureId: textureId
+				textureId: textureId,
+				target: GL_TEXTURE_2D
 			)
 		}
 	}

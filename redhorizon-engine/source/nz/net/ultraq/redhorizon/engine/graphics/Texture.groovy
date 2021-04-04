@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import groovy.transform.MapConstructor
-import java.nio.ByteBuffer
 
 /**
  * Representation of a single texture to render.
@@ -31,7 +30,7 @@ class Texture {
 
 	final Dimension dimensions
 	final int format
-	ByteBuffer data
 	int textureId
+	int target
 	int layer
 }
