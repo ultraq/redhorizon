@@ -143,14 +143,11 @@ class GraphicsEngine extends Engine {
 							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 							def visibleElements = averageNanos('objectCulling', 1f, logger) { ->
 								def sceneElements = []
-								averageNanos('sceneCollect', 1f, logger) { ->
-									scene.accept { element ->
-										sceneElements << element
-									}
+								scene.accept { element ->
+									sceneElements << element
 								}
-								return averageNanos('sceneCull', 1f, logger) { ->
-									return forkJoinPool.invoke(new ObjectCullingTask(frustumIntersection, sceneElements))
-								}
+								return forkJoinPool.invoke(new ObjectCullingTask(frustumIntersection, sceneElements,
+									(sceneElements.size() >> 1) + 1))
 							}
 //							renderer.asBatchRenderer { batchRenderer ->
 								visibleElements.each { element ->
