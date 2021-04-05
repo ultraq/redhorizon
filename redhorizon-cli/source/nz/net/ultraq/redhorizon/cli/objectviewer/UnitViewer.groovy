@@ -72,7 +72,7 @@ class UnitViewer extends Application {
 		def unitConfig
 		try {
 			unitConfig = getResourceAsStream(
-				"nz/net/ultraq/redhorizon/utilities/objectviewer/configurations/${unitId.toLowerCase()}.json")
+				"nz/net/ultraq/redhorizon/cli/objectviewer/configurations/${unitId.toLowerCase()}.json")
 				.withBufferedStream { inputStream ->
 					return inputStream.text
 				}
