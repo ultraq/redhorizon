@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -74,11 +73,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
 
+	final Shader standardShader
+	final Shader standardPaletteShader
 	protected final List<Shader> shaders = []
-	protected final Shader standardShader
-	protected final Shader standardPaletteShader
 	protected Texture whiteTexture
+	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
+	protected Texture currentPalette
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -132,8 +133,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 //		}
 
 		// Create the shader programs used by this renderer
-		standardShader = createShader(ShaderType.STANDARD.name)
-		standardPaletteShader = createShader(ShaderType.STANDARD_PALETTE.name)
+		standardShader = createShader('Standard')
+		standardPaletteShader = createShader('StandardPalette')
 
 		// The white texture used as a fallback when no texture is bound
 		stackPush().withCloseable { stack ->
@@ -202,6 +203,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		if (batchRenderer) {
 			batchRenderer.close()
 		}
+		glDeleteTextures(*paletteTextureIds)
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)
@@ -237,16 +239,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
-	}
-
-	@Override
-	Material createMaterial(Mesh mesh, Texture texture = whiteTexture, ShaderType shaderType = ShaderType.STANDARD) {
-
-		return new Material(
-			mesh: mesh,
-			texture: texture,
-			shader: shaderType == ShaderType.STANDARD_PALETTE ? standardPaletteShader : standardShader
-		)
 	}
 
 	/**
@@ -442,11 +434,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 	}
 
+	@Memoized
 	@Override
 	Texture createTexturePalette(Palette palette) {
 
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
+			paletteTextureIds << textureId
 			glBindTexture(GL_TEXTURE_1D, textureId)
 			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -474,7 +468,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteMaterial(Material material) {
 
 		deleteMesh(material.mesh)
-		if (material.texture) {
+		if (material.texture && !paletteTextureIds.contains(material.texture.textureId)) {
 			deleteTexture(material.texture)
 		}
 	}
@@ -503,16 +497,24 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
 				def mesh = material.mesh
-				def texture = material.texture
+				def texture = material.texture ?: whiteTexture
+				def palette = material.palette
 				def shader = material.shader
 
 				glUseProgram(shader.programId)
-				if (texture) {
-					def texturesLocation = getUniformLocation(shader, 'u_textures')
-					glUniform1iv(texturesLocation, 0)
-					glActiveTexture(GL_TEXTURE0)
-					glBindTexture(GL_TEXTURE_2D, texture.textureId)
+
+				if (palette && palette != currentPalette) {
+					def paletteLocation = getUniformLocation(shader, 'u_palette')
+					glProgramUniform1i(shader.programId, paletteLocation, maxTextureUnits)
+					glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
+					glBindTexture(GL_TEXTURE_1D, palette.textureId)
+					currentPalette = palette
 				}
+
+				def texturesLocation = getUniformLocation(shader, 'u_textures')
+				glUniform1iv(texturesLocation, 0)
+				glActiveTexture(GL_TEXTURE0)
+				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
 				def modelsBuffer = transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
@@ -558,15 +560,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected static int getUniformLocation(Shader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
-	}
-
-	@Override
-	void setPalette(Texture palette) {
-
-		def paletteLocation = getUniformLocation(standardPaletteShader, 'u_palette')
-		glProgramUniform1i(standardPaletteShader.programId, paletteLocation, maxTextureUnits)
-		glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
-		glBindTexture(GL_TEXTURE_1D, palette.textureId)
 	}
 
 	/**

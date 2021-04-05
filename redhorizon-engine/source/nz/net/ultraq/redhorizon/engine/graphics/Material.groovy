@@ -26,5 +26,6 @@ class Material {
 
 	Mesh mesh
 	Texture texture
+	Texture palette
 	Shader shader
 }

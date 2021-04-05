@@ -19,9 +19,9 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
@@ -39,6 +39,7 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
+	private Palette palette
 
 	private Material material
 
@@ -48,13 +49,15 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	 * 
 	 * @param imagesFile
 	 * @param frame
+	 * @param palette
 	 */
-	MapElement(ImagesFile imagesFile, int frame) {
+	MapElement(ImagesFile imagesFile, int frame, Palette palette) {
 
 		this.width     = imagesFile.width
 		this.height    = imagesFile.height
 		this.format    = imagesFile.format
 		this.imageData = imagesFile.imagesData[frame].flipVertical(width, height, format)
+		this.palette   = palette
 
 		this.bounds.set(0, 0, width, height)
 	}
@@ -68,12 +71,14 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			renderer.createTexture(imageData, format.value, width, height),
-			ShaderType.STANDARD_PALETTE
+		material = new Material(
+			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
+			texture: renderer.createTexture(imageData, format.value, width, height),
+			palette: renderer.createTexturePalette(palette),
+			shader: renderer.standardPaletteShader
 		)
 		imageData = null
+		palette = null
 	}
 
 	@Override

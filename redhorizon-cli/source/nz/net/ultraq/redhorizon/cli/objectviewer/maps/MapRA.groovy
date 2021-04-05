@@ -21,9 +21,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
@@ -41,7 +38,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapRA implements GraphicsElement, SceneElement {
+class MapRA implements SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -62,7 +59,6 @@ class MapRA implements GraphicsElement, SceneElement {
 
 	private final List<SceneElement> layers = []
 	private Palette palette
-	private Texture texturePalette
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -113,19 +109,6 @@ class MapRA implements GraphicsElement, SceneElement {
 		}
 	}
 
-	@Override
-	void delete(GraphicsRenderer renderer) {
-
-		renderer.deleteTexture(texturePalette)
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-
-		texturePalette = renderer.createTexturePalette(palette)
-		palette = null
-	}
-
 	/**
 	 * Converts a map's character data into bytes that represent the tiles used
 	 * throughout the map.
@@ -150,12 +133,6 @@ class MapRA implements GraphicsElement, SceneElement {
 
 		// Decode section bytes
 		return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		renderer.setPalette(texturePalette)
 	}
 
 	/**
@@ -199,7 +176,7 @@ class MapRA implements GraphicsElement, SceneElement {
 			def repeatX = (TILES_X * TILE_WIDTH) / width as float
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
-			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY)
+			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY, palette)
 				.translate(WORLD_OFFSET.x, WORLD_OFFSET.y, 0)
 		}
 
@@ -266,7 +243,7 @@ class MapRA implements GraphicsElement, SceneElement {
 							return
 						}
 
-						elements << new MapElement(tileFile, tilePic)
+						elements << new MapElement(tileFile, tilePic, palette)
 							.translate(new Vector2f(x, y).asWorldCoords(1))
 					}
 				}
@@ -348,7 +325,7 @@ class MapRA implements GraphicsElement, SceneElement {
 						3 + adjacent
 				}
 
-				elements << new MapElement(tileFile, imageVariant)
+				elements << new MapElement(tileFile, imageVariant, palette)
 					.translate(new Vector2f(tilePos).asWorldCoords(1))
 			}
 		}
@@ -371,7 +348,7 @@ class MapRA implements GraphicsElement, SceneElement {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new MapElement(terrainFile, 0)
+				elements << new MapElement(terrainFile, 0, palette)
 					.translate(cellPosXY)
 			}
 

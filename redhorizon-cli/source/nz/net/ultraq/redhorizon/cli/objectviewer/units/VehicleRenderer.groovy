@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.nio.ByteBuffer
 
@@ -40,26 +40,31 @@ class VehicleRenderer extends UnitRenderer {
 	 * @param headings
 	 * @param turretHeadings
 	 * @param imagesData
+	 * @param palette
 	 */
-	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, ByteBuffer[] imagesData) {
+	VehicleRenderer(String type, Unit unit, int headings, int turretHeadings, ByteBuffer[] imagesData, Palette palette) {
 
-		super(type, unit, headings, imagesData)
+		super(type, unit, headings, imagesData, palette)
 		this.turretHeadings = turretHeadings
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		Object.init(renderer)
+		super.init(renderer)
 		if (turretHeadings) {
-			turretMaterial = renderer.createMaterial(mesh, null, ShaderType.STANDARD_PALETTE)
+			turretMaterial = new Material(
+				mesh: mesh,
+				palette: renderer.createTexturePalette(palette),
+				shader: renderer.standardPaletteShader
+			)
 		}
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		Object.render(renderer)
+		super.render(renderer)
 		if (turretHeadings) {
 			turretMaterial.texture = textures[headings + rotationFrames()]
 			renderer.drawMaterial(turretMaterial, unit.transform)

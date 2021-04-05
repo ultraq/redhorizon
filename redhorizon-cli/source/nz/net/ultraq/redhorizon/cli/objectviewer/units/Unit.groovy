@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
@@ -44,7 +43,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	protected final int width
 	protected final int height
 	protected Palette palette
-	protected Texture texturePalette
 
 	/**
 	 * Constructor, set the unit's width and height.
@@ -81,7 +79,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTexture(texturePalette)
 		unitRenderers.each { unitRenderer ->
 			unitRenderer.delete(renderer)
 		}
@@ -90,8 +87,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		texturePalette = renderer.createTexturePalette(palette)
-		palette = null
 		unitRenderers.each { unitRenderer ->
 			unitRenderer.init(renderer)
 		}
@@ -116,7 +111,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.setPalette(texturePalette)
 		currentRenderer.render(renderer)
 	}
 

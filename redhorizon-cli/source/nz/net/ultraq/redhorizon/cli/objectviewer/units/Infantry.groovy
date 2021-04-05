@@ -42,7 +42,7 @@ class Infantry extends Unit {
 
 		def bodyPart = data.shpFile.parts.body
 		unitRenderers << new UnitRenderer('body', this, bodyPart.headings,
-			buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)))
+			buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)), palette)
 
 		// TODO: Utilize alternative body frames for something
 		def bodyAltPart = data.shpFile.parts.bodyAlt

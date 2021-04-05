@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static OpenGLRenderer.*
@@ -52,7 +51,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private static final int MAX_INDICES = MAX_QUADS * 6
 
 	@Delegate(excludes = [
-	  'createMaterial', 'createSpriteMesh', 'createTexture'
+	  'createSpriteMesh', 'createTexture'
 	])
 	private final OpenGLRenderer renderer
 
@@ -122,12 +121,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture = renderer.whiteTexture, ShaderType shaderType = ShaderType.STANDARD) {
-
-		return renderer.createMaterial(mesh, texture, shaderType)
-	}
-
-	@Override
 	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
 
 		return renderer.createMesh(
@@ -149,7 +142,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	void drawMaterial(Material material, Matrix4f transform) {
 
 		def mesh = material.mesh
-		def texture = material.texture
+		def texture = material.texture ?: renderer.whiteTexture
 		def shader = material.shader
 
 		// If there is a change in shader, vertex information, or there is no space
@@ -202,7 +195,17 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				def indexBuffer = stack.mallocInt(batchIndices)
 				def indexOffset = 0
 				batchMaterials.eachWithIndex { material, materialIndex ->
-					def texture = material.texture
+					def texture = material.texture ?: renderer.whiteTexture
+					def palette = material.palette
+
+					if (palette && palette != renderer.currentPalette) {
+						def paletteLocation = getUniformLocation(batchShader, 'u_palette')
+						glProgramUniform1i(batchShader.programId, paletteLocation, renderer.maxTextureUnits)
+						glActiveTexture(GL_TEXTURE0 + renderer.maxTextureUnits)
+						glBindTexture(GL_TEXTURE_1D, palette.textureId)
+						renderer.currentPalette = palette
+					}
+
 					glActiveTexture(GL_TEXTURE0 + materialIndex)
 					glBindTexture(GL_TEXTURE_2D, texture.textureId)
 					samplers[materialIndex] = materialIndex

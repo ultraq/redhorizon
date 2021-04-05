@@ -16,15 +16,12 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
-
 /**
  * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
 class Texture {
 
-	final int textureId
+	int textureId
 }

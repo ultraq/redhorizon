@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.media.Image
@@ -30,11 +27,10 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
  * 
  * @author Emanuel Rabina
  */
-class ImageStrip implements GraphicsElement, SceneElement<ImageStrip> {
+class ImageStrip implements SceneElement<ImageStrip> {
 
 	final List<Image> images = []
 	final Palette palette
-	private Texture paletteTexture
 
 	/**
 	 * Constructor, build a strip of images from a file containing multiple
@@ -50,7 +46,7 @@ class ImageStrip implements GraphicsElement, SceneElement<ImageStrip> {
 		translate(0, -imagesFile.height / 2 as float, 0)
 
 		imagesFile.numImages.times { i ->
-			images << new Image(imagesFile, i)
+			images << new Image(imagesFile, i, palette)
 				.translate(imagesFile.width * i, -imagesFile.height / 2, 0)
 		}
 	}
@@ -62,23 +58,5 @@ class ImageStrip implements GraphicsElement, SceneElement<ImageStrip> {
 		images.each { image ->
 			image.accept(visitor)
 		}
-	}
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
-
-		renderer.deleteTexture(paletteTexture)
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-
-		paletteTexture = renderer.createTexturePalette(palette)
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		renderer.setPalette(paletteTexture)
 	}
 }

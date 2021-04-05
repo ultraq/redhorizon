@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
@@ -40,6 +40,7 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	private ByteBuffer imageData
 	final float repeatX
 	final float repeatY
+	private Palette palette
 
 	private Material material
 
@@ -52,8 +53,10 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	 * @param imageData
 	 * @param repeatX
 	 * @param repeatY
+	 * @param palette
 	 */
-	MapBackground(int imageWidth, int imageHeight, ColourFormat imageFormat, ByteBuffer imageData, float repeatX, float repeatY) {
+	MapBackground(int imageWidth, int imageHeight, ColourFormat imageFormat, ByteBuffer imageData, float repeatX, float repeatY,
+		Palette palette) {
 
 		this.width     = imageWidth
 		this.height    = imageHeight
@@ -61,6 +64,7 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 		this.imageData = imageData.flipVertical(width, height, format)
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
+		this.palette   = palette
 
 		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
@@ -74,12 +78,14 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
-			renderer.createTexture(imageData, format.value, width, height),
-			ShaderType.STANDARD_PALETTE
+		material = new Material(
+			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float), repeatX, repeatY),
+			texture: renderer.createTexture(imageData, format.value, width, height),
+			palette: renderer.createTexturePalette(palette),
+			shader: renderer.standardPaletteShader
 		)
 		imageData = null
+		palette = null
 	}
 
 	@Override

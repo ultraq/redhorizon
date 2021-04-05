@@ -19,10 +19,10 @@ package nz.net.ultraq.redhorizon.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
@@ -40,29 +40,37 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
+	final Palette palette
 
 	private Material material
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
 	 * 
-	 * @param imageFile Image source.
+	 * @param imageFile
+	 *   Image source.
+	 * @param palette
+	 *   If the image data requires a palette, then this is used to complete it.
 	 */
-	Image(ImageFile imageFile) {
+	Image(ImageFile imageFile, Palette palette = null) {
 
-		this(imageFile.width, imageFile.height, imageFile.format, imageFile.imageData)
+		this(imageFile.width, imageFile.height, imageFile.format, imageFile.imageData, palette)
 	}
 
 	/**
 	 * Constructor, creates an image out of a specific frame in a multi-image
 	 * file.
 	 * 
-	 * @param imagesFile Image source.
-	 * @param frame      The specific frame in the source to use
+	 * @param imagesFile
+	 *   Image source.
+	 * @param frame
+	 *   The specific frame in the source to use
+	 * @param palette
+	 *   If the image data requires a palette, then this is used to complete it.
 	 */
-	Image(ImagesFile imagesFile, int frame) {
+	Image(ImagesFile imagesFile, int frame, Palette palette = null) {
 
-		this(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData[frame])
+		this(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData[frame], palette)
 	}
 
 	/**
@@ -72,13 +80,15 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	 * @param height
 	 * @param format
 	 * @param imageData
+	 * @param palette
 	 */
-	Image(int width, int height, ColourFormat format, ByteBuffer imageData) {
+	Image(int width, int height, ColourFormat format, ByteBuffer imageData, Palette palette = null) {
 
 		this.width     = width
 		this.height    = height
 		this.format    = format
 		this.imageData = imageData.flipVertical(width, height, format)
+		this.palette   = palette
 
 		this.bounds.set(0, 0, width, height)
 	}
@@ -92,10 +102,11 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = renderer.createMaterial(
-			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			renderer.createTexture(imageData, format.value, width, height),
-			format === ColourFormat.FORMAT_INDEXED ? ShaderType.STANDARD_PALETTE : ShaderType.STANDARD
+		material = new Material(
+			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
+			texture: renderer.createTexture(imageData, format.value, width, height),
+			palette: palette ? renderer.createTexturePalette(palette) : null,
+			shader: palette ? renderer.standardPaletteShader : renderer.standardShader
 		)
 		imageData = null
 	}

@@ -47,12 +47,12 @@ class Vehicle extends Unit {
 		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
 			buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)) +
 			(turretPart ? buildImagesData(imagesFile, frameIndex..<(frameIndex += turretPart.headings)) : [])
-			as ByteBuffer[])
+			as ByteBuffer[], palette)
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
 				buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
-				gameTime)
+				palette, gameTime)
 		}
 
 		currentRenderer = unitRenderers.first()
