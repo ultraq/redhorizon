@@ -16,4 +16,5 @@
 
 moduleName = redhorizon-cli
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.cli.extensions.CoordinateExtensions
+extensionClasses = nz.net.ultraq.redhorizon.cli.extensions.CoordinateExtensions,\
+                   nz.net.ultraq.redhorizon.cli.extensions.FileExtensions

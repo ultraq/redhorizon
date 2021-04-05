@@ -34,7 +34,7 @@ class FileOptions {
 	File file
 
 	@Parameters(index = '1', arity = '0..1', description = 'If <file> is a mix file, this is the name of the object in the mix file to open')
-	String entryName
+	File entryName
 
 	/**
 	 * Find the appropriate class for reading a file with the given name.
@@ -76,16 +76,16 @@ class FileOptions {
 		logger.info('Loading {}...', file)
 		if (file.name.endsWith('.mix')) {
 			new MixFile(file).withCloseable { mix ->
-				def entry = mix.getEntry(entryName)
+				def entry = mix.getEntry(entryName.name)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
 					mix.getEntryData(entry).withBufferedStream { inputStream ->
-						def fileClass = getFileClass(entryName, logger).newInstance(inputStream)
+						def fileClass = getFileClass(entryName.name, logger).newInstance(inputStream)
 						closure(fileClass)
 					}
 				}
 				else {
-					logger.error('{} not found in {}', entryName, file)
+					logger.error('{} not found in {}', entryName.name, file)
 					throw new IllegalArgumentException()
 				}
 			}

@@ -79,12 +79,9 @@ class ObjectViewer implements Callable<Integer> {
 		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
 		fileOptions.useFile(logger) { objectFile ->
-			def objectId = fileOptions.entryName ?
-				fileOptions.entryName[0..fileOptions.entryName.indexOf('.')] :
-				fileOptions.file.name[0..fileOptions.file.name.indexOf('.')]
-
 			switch (objectFile) {
 			case ShpFile:
+				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
 				def graphicsConfig = new GraphicsConfiguration(
 					clearColour: Colour.WHITE,
 					fullScreen: fullScreen
