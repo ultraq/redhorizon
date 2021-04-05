@@ -66,25 +66,23 @@ class FileOptions {
 
 	/**
 	 * Load the file indicated by the {@code file} and {@code entryName}
-	 * parameters.
+	 * parameters, passing it along to the given closure.
 	 * 
 	 * @param logger
-	 * @return
+	 * @param closure
 	 */
-	protected Object loadFile(Logger logger) {
+	protected void useFile(Logger logger, Closure closure) {
 
 		logger.info('Loading {}...', file)
-		def objectFile
-		def objectId
 		if (file.name.endsWith('.mix')) {
 			new MixFile(file).withCloseable { mix ->
 				def entry = mix.getEntry(entryName)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
-					objectFile = mix.getEntryData(entry).withBufferedStream { inputStream ->
-						return getFileClass(entryName, logger).newInstance(inputStream)
+					mix.getEntryData(entry).withBufferedStream { inputStream ->
+						def fileClass = getFileClass(entryName, logger).newInstance(inputStream)
+						closure(fileClass)
 					}
-					objectId = entryName[0..<-4]
 				}
 				else {
 					logger.error('{} not found in {}', entryName, file)
@@ -93,12 +91,10 @@ class FileOptions {
 			}
 		}
 		else {
-			objectFile = file.withInputStream { inputStream ->
-				return getFileClass(file.name, logger).newInstance(inputStream)
+			file.withInputStream { inputStream ->
+				def fileClass = getFileClass(file.name, logger).newInstance(inputStream)
+				closure(fileClass)
 			}
-			objectId = file.name[0..<-4]
 		}
-
-		return objectFile
 	}
 }

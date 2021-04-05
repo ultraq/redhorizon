@@ -98,37 +98,38 @@ class MediaPlayer implements Callable<Integer> {
 		Thread.currentThread().name = 'Media Player [main]'
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
-		def mediaFile = fileOptions.loadFile(logger)
-		def graphicsConfig = new GraphicsConfiguration(
-			filter: filter,
-			fixAspectRatio: fixAspectRatio,
-			fullScreen: fullScreen
-		)
+		fileOptions.useFile(logger) { mediaFile ->
+			def graphicsConfig = new GraphicsConfiguration(
+				filter: filter,
+				fixAspectRatio: fixAspectRatio,
+				fullScreen: fullScreen
+			)
 
-		switch (mediaFile) {
-		case VideoFile:
-			def videoPlayer = new VideoPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
-			videoPlayer.play()
-			break
-		case AnimationFile:
-			def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
-			animationPlayer.play()
-			break
-		case SoundFile:
-			def soundPlayer = new SoundPlayer(mediaFile)
-			soundPlayer.play()
-			break
-		case ImageFile:
-			def imageViewer = new ImageViewer(mediaFile, graphicsConfig)
-			imageViewer.view()
-			break
-		case ImagesFile:
-			def imagesViewer = new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType)
-			imagesViewer.view()
-			break
-		default:
-			logger.error('No media player for the associated file class of {}', mediaFile)
-			throw new UnsupportedOperationException()
+			switch (mediaFile) {
+			case VideoFile:
+				def videoPlayer = new VideoPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
+				videoPlayer.play()
+				break
+			case AnimationFile:
+				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
+				animationPlayer.play()
+				break
+			case SoundFile:
+				def soundPlayer = new SoundPlayer(mediaFile)
+				soundPlayer.play()
+				break
+			case ImageFile:
+				def imageViewer = new ImageViewer(mediaFile, graphicsConfig)
+				imageViewer.view()
+				break
+			case ImagesFile:
+				def imagesViewer = new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType)
+				imagesViewer.view()
+				break
+			default:
+				logger.error('No media player for the associated file class of {}', mediaFile)
+				throw new UnsupportedOperationException()
+			}
 		}
 
 		return 0

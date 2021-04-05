@@ -78,33 +78,34 @@ class ObjectViewer implements Callable<Integer> {
 		Thread.currentThread().name = 'Object Viewer [main]'
 		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
 
-		def objectFile = fileOptions.loadFile(logger)
-		def objectId = fileOptions.entryName ?
-			fileOptions.entryName[0..fileOptions.entryName.indexOf('.')] :
-			fileOptions.file.name[0..fileOptions.file.name.indexOf('.')]
+		fileOptions.useFile(logger) { objectFile ->
+			def objectId = fileOptions.entryName ?
+				fileOptions.entryName[0..fileOptions.entryName.indexOf('.')] :
+				fileOptions.file.name[0..fileOptions.file.name.indexOf('.')]
 
-		switch (objectFile) {
-		case ShpFile:
-			def graphicsConfig = new GraphicsConfiguration(
-				clearColour: Colour.WHITE,
-				fullScreen: fullScreen
-			)
-			new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType).view()
-			break
-		case IniFile:
-			def graphicsConfig = new GraphicsConfiguration(
-				fullScreen: fullScreen
-			)
-			// Assume the directory in which file resides is where we can search for items
-			new ResourceManager(fileOptions.file.parentFile,
-				'nz.net.ultraq.redhorizon.filetypes',
-				'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-				new MapViewer(resourceManager, objectFile, graphicsConfig).view()
+			switch (objectFile) {
+			case ShpFile:
+				def graphicsConfig = new GraphicsConfiguration(
+					clearColour: Colour.WHITE,
+					fullScreen: fullScreen
+				)
+				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType).view()
+				break
+			case IniFile:
+				def graphicsConfig = new GraphicsConfiguration(
+					fullScreen: fullScreen
+				)
+				// Assume the directory in which file resides is where we can search for items
+				new ResourceManager(fileOptions.file.parentFile,
+					'nz.net.ultraq.redhorizon.filetypes',
+					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+					new MapViewer(resourceManager, objectFile, graphicsConfig).view()
+				}
+				break
+			default:
+				logger.error('No viewer for the associated file class of {}', objectFile)
+				throw new UnsupportedOperationException()
 			}
-			break
-		default:
-			logger.error('No viewer for the associated file class of {}', objectFile)
-			throw new UnsupportedOperationException()
 		}
 
 		return 0
