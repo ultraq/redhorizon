@@ -21,10 +21,13 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -38,7 +41,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapRA implements SceneElement {
+class MapRA implements GraphicsElement, SceneElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -57,6 +60,7 @@ class MapRA implements SceneElement {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
+	private final TileSet tileSet = new TileSet()
 	private final List<SceneElement> layers = []
 	private Palette palette
 
@@ -109,6 +113,22 @@ class MapRA implements SceneElement {
 		}
 	}
 
+	@Override
+	void delete(GraphicsRenderer renderer) {
+
+		renderer.deleteTexture(tileSet)
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		// TODO: Move image flipping to the renderer since it's an OpenGL detail?
+		def tileSetTexture = renderer.createTexture(
+			tileSet.tilesetData.flipVertical(tileSet.tilesetWidth, tileSet.tilesetHeight, FORMAT_INDEXED),
+			FORMAT_INDEXED.value, tileSet.tilesetWidth, tileSet.tilesetHeight)
+		tileSet.textureId = tileSetTexture.textureId
+	}
+
 	/**
 	 * Converts a map's character data into bytes that represent the tiles used
 	 * throughout the map.
@@ -149,6 +169,10 @@ class MapRA implements SceneElement {
 			 - Theater: ${theater}
 			 - Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
 		""".stripIndent()
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
 	}
 
 	/**
@@ -243,7 +267,8 @@ class MapRA implements SceneElement {
 							return
 						}
 
-						elements << new MapElement(tileFile, tilePic, palette)
+						tileSet.addTiles(tileFile)
+						elements << new MapElement(tileSet, tileFile, tilePic, palette)
 							.translate(new Vector2f(x, y).asWorldCoords(1))
 					}
 				}
@@ -325,7 +350,8 @@ class MapRA implements SceneElement {
 						3 + adjacent
 				}
 
-				elements << new MapElement(tileFile, imageVariant, palette)
+				tileSet.addTiles(tileFile)
+				elements << new MapElement(tileSet, tileFile, imageVariant, palette)
 					.translate(new Vector2f(tilePos).asWorldCoords(1))
 			}
 		}
@@ -348,7 +374,8 @@ class MapRA implements SceneElement {
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
-				elements << new MapElement(terrainFile, 0, palette)
+				tileSet.addTiles(terrainFile)
+				elements << new MapElement(tileSet, terrainFile, 0, palette)
 					.translate(cellPosXY)
 			}
 

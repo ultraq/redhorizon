@@ -85,21 +85,10 @@ interface GraphicsRenderer {
 	 * Create a mesh to represent a surface onto which a texture will go.
 	 * 
 	 * @param surface
+	 * @param textureCoords
 	 * @return
 	 */
-	Mesh createSpriteMesh(Rectanglef surface)
-
-	/**
-	 * Create a mesh to represent a surface onto which a texture will go.
-	 * 
-	 * @param surface
-	 * @param repeatX
-	 *   Number of times to repeat the texture on the X axis
-	 * @param repeatY
-	 *   Number of times to repeat the texture on the Y axis
-	 * @return
-	 */
-	Mesh createSpriteMesh(Rectanglef surface, float repeatX, float repeatY)
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates)
 
 	/**
 	 * Create and fill a texture with the given image data.

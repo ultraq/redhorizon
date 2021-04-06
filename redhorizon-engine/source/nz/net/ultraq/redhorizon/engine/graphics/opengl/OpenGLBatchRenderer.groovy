@@ -121,13 +121,13 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, float repeatX = 1, float repeatY = 1) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates = new Rectanglef(0, 0, 1, 1)) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
-			new Rectanglef(0, 0, repeatX, repeatY) as Vector2f[],
+			textureCoordinates as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		)
 	}

@@ -19,14 +19,11 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.Rectanglef
-
-import java.nio.ByteBuffer
 
 /**
  * The graphical form of a map tile.
@@ -35,10 +32,9 @@ import java.nio.ByteBuffer
  */
 class MapElement implements GraphicsElement, SceneElement<MapElement> {
 
-	final int width
-	final int height
-	final ColourFormat format
-	private ByteBuffer imageData
+	final TileSet tileSet
+	final ImagesFile tileFile
+	final int frame
 	private Palette palette
 
 	private Material material
@@ -47,19 +43,19 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	 * Constructor, create a  map element from a map sprite, set to the given
 	 * position.
 	 * 
-	 * @param imagesFile
+	 * @param tileSet
+	 * @param tileFile
 	 * @param frame
 	 * @param palette
 	 */
-	MapElement(ImagesFile imagesFile, int frame, Palette palette) {
+	MapElement(TileSet tileSet, ImagesFile tileFile, int frame, Palette palette) {
 
-		this.width     = imagesFile.width
-		this.height    = imagesFile.height
-		this.format    = imagesFile.format
-		this.imageData = imagesFile.imagesData[frame].flipVertical(width, height, format)
-		this.palette   = palette
+		this.tileSet  = tileSet
+		this.tileFile = tileFile
+		this.frame    = frame
+		this.palette  = palette
 
-		this.bounds.set(0, 0, width, height)
+		this.bounds.set(0, 0, tileFile.width, tileFile.height)
 	}
 
 	@Override
@@ -72,12 +68,13 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	void init(GraphicsRenderer renderer) {
 
 		material = new Material(
-			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			texture: renderer.createTexture(imageData, format.value, width, height),
+			mesh: renderer.createSpriteMesh(
+				new Rectanglef(0, 0, tileFile.width, tileFile.height),
+				tileSet.getCoordinates(tileFile, frame)),
+			texture: tileSet,
 			palette: renderer.createTexturePalette(palette),
 			shader: renderer.standardPaletteShader
 		)
-		imageData = null
 		palette = null
 	}
 
