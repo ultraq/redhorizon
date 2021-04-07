@@ -373,13 +373,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return programId
 		}
 
-		def capTextureUnits = { source ->
+		def setMaximums = { source ->
 			return source
 				.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
 				.replace('[maxTransforms]', "[${maxTransforms}]")
 		}
-		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
-		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)
+		def vertexShaderId = createShader(GL_VERTEX_SHADER, setMaximums)
+		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, setMaximums)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)

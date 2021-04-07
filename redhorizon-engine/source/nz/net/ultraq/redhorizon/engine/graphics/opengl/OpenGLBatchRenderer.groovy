@@ -59,6 +59,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private final int batchVertexArrayId
 	private final int batchVertexBufferId
 	private final int batchElementBufferId
+	private final int batchUniformBufferId
 
 	// Batched data to be rendered on flush
 	private List<Material> batchMaterials = []
@@ -100,13 +101,21 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 		batchElementBufferId = glGenBuffers()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, batchElementBufferId)
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxIndices * Integer.BYTES, GL_DYNAMIC_DRAW)
-	}
+
+		batchUniformBufferId = glGenBuffers()
+		glBindBuffer(GL_UNIFORM_BUFFER, batchUniformBufferId)
+		glBufferData(GL_UNIFORM_BUFFER, renderer.maxTransforms * Matrix4f.BYTES, GL_DYNAMIC_DRAW)
+		renderer.shaders.eachWithIndex { shader, index ->
+			def blockIndex = glGetUniformBlockIndex(shader.programId, 'Transforms')
+			glUniformBlockBinding(shader.programId, blockIndex, 1)
+		}
+		glBindBufferBase(GL_UNIFORM_BUFFER, 1, batchUniformBufferId)	}
 
 	@Override
 	void close() {
 
 		glDeleteVertexArrays(batchVertexArrayId)
-		glDeleteBuffers(batchVertexBufferId, batchElementBufferId)
+		glDeleteBuffers(batchVertexBufferId, batchElementBufferId, batchUniformBufferId)
 	}
 
 	@Override
@@ -188,7 +197,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				// batch buffer, fill the vertex and index buffers with data from each
 				// material
 				def samplers = batchTextures.values() as int[]
-				def models = stack.mallocFloat(batchTransforms.size() * Matrix4f.FLOATS)
+				def modelsBuffer = stack.mallocFloat(batchTransforms.size() * Matrix4f.FLOATS)
 				def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * batchVertices)
 				def indexBuffer = stack.mallocInt(batchIndices)
 				def indexOffset = 0
@@ -212,7 +221,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 						glBindTexture(GL_TEXTURE_2D, texture.textureId)
 					}
 
-					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, models)
+					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, modelsBuffer)
 
 					def mesh = material.mesh
 					def colour = mesh.colour
@@ -236,10 +245,10 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				indexBuffer.flip()
 
 				// Pass all the built data to OpenGL
-				def textureLocation = getUniformLocation(batchShader, 'u_textures')
-				glUniform1iv(textureLocation, samplers)
-				def modelsLocation = getUniformLocation(batchShader, 'models')
-				glUniformMatrix4fv(modelsLocation, false, models)
+				def texturesLocation = getUniformLocation(batchShader, 'u_textures')
+				glUniform1iv(texturesLocation, samplers)
+				glBindBuffer(GL_UNIFORM_BUFFER, batchUniformBufferId)
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, modelsBuffer)
 				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer)
 				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer)
 
