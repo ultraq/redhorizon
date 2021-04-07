@@ -16,11 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.EqualsAndHashCode
+
 /**
  * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
+@EqualsAndHashCode
 class Texture {
 
 	int textureId

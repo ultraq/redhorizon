@@ -72,6 +72,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 	protected final int maxTextureUnits
+	protected final int maxTransforms
 
 	final Shader standardShader
 	final Shader standardPaletteShader
@@ -98,6 +99,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		// Set up hardware limits
 		maxTextureUnits = glGetInteger(GL_MAX_TEXTURE_IMAGE_UNITS) - 1 // Last slot reserved for palette
+		maxTransforms = 32
 
 		if (config.debug && capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)
@@ -372,7 +374,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		def capTextureUnits = { source ->
-			return source.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
+			return source
+				.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
+				.replace('[maxTransforms]', "[${maxTransforms}]")
 		}
 		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
 		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)

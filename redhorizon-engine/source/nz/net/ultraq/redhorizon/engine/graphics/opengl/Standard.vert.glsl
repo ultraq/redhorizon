@@ -14,7 +14,7 @@ layout (std140) uniform Camera {
 	mat4 projection;
 	mat4 view;
 };
-uniform mat4 models[maxTextureUnits];
+uniform mat4 models[maxTransforms];
 
 void main() {
 	v_vertexColour = colour;
