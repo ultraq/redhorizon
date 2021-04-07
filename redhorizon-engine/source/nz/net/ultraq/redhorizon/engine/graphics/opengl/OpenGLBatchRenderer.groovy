@@ -187,12 +187,15 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				// Build the sampler and model arrays for all of the materials in the
 				// batch buffer, fill the vertex and index buffers with data from each
 				// material
+				def samplers = batchTextures.values() as int[]
 				def models = stack.mallocFloat(batchTransforms.size() * Matrix4f.FLOATS)
 				def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * batchVertices)
 				def indexBuffer = stack.mallocInt(batchIndices)
 				def indexOffset = 0
+				def lastActiveTextureUnit = -1
 				batchMaterials.eachWithIndex { material, materialIndex ->
 					def texture = material.texture ?: renderer.whiteTexture
+					def textureUnit = batchTextures[texture]
 					def palette = material.palette
 
 					if (palette && palette != renderer.currentPalette) {
@@ -203,8 +206,11 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 						renderer.currentPalette = palette
 					}
 
-					glActiveTexture(GL_TEXTURE0 + materialIndex)
-					glBindTexture(GL_TEXTURE_2D, texture.textureId)
+					if (texture && (lastActiveTextureUnit == -1 || lastActiveTextureUnit != textureUnit)) {
+						lastActiveTextureUnit = textureUnit
+						glActiveTexture(GL_TEXTURE0 + textureUnit)
+						glBindTexture(GL_TEXTURE_2D, texture.textureId)
+					}
 
 					batchTransforms[materialIndex].get(materialIndex * Matrix4f.FLOATS, models)
 
@@ -217,7 +223,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 							colour.r, colour.g, colour.b, colour.a,
 							vertex.x, vertex.y,
 							textureCoordinate.x, textureCoordinate.y,
-							batchTextures[texture] as float,
+							textureUnit as float,
 							materialIndex
 						)
 					}
@@ -226,7 +232,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 					}
 					indexOffset += mesh.vertices.size()
 				}
-				def samplers = batchTextures.values() as int[]
 				vertexBuffer.flip()
 				indexBuffer.flip()
 
