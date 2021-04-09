@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
 class TileSet extends Texture {
 
 	final int tilesetWidth = 1200
-	final int tilesetHeight = 2400
+	final int tilesetHeight = 4800
 	final ByteBuffer tilesetData = ByteBuffer.allocateNative(tilesetWidth * tilesetHeight)
 
 	private final List<ImagesFile> tileFileList = []
