@@ -248,7 +248,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		return new Material(
 			mesh: mesh,
-			texture: texture,
+			texture: texture ?: whiteTexture,
 			palette: palette,
 			shader: palette ? standardPaletteShader : standardShader,
 			transform: transform
@@ -511,7 +511,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
 				def mesh = material.mesh
-				def texture = material.texture ?: whiteTexture
+				def texture = material.texture
 				def palette = material.palette
 				def shader = material.shader
 
@@ -602,13 +602,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material withMaterialBuilder(
+	Material withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
 		Closure closure) {
 
-		def materialBuilder = new OpenGLMaterialBuilder(this)
+		def materialBuilder = new OpenGLMaterialBundler(this)
 		materialBuilder.relay(RendererEvent, this)
 		closure(materialBuilder)
-		return materialBuilder.build()
+		return materialBuilder.bundle()
 	}
 }

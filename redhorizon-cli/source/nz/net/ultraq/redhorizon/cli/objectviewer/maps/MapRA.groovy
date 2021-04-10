@@ -293,9 +293,9 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		@Override
 		void init(GraphicsRenderer renderer) {
 
-			material = renderer.withMaterialBuilder { builder ->
+			material = renderer.withMaterialBundler { bundler ->
 				elements.each { element ->
-					element.init(builder)
+					element.init(bundler)
 				}
 			}
 		}

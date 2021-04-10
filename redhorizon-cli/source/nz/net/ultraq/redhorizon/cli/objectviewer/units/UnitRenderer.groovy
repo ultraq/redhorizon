@@ -83,11 +83,11 @@ class UnitRenderer implements GraphicsElement {
 		textures = imagesData.collect { data ->
 			return renderer.createTexture(data, FORMAT_INDEXED.value, unit.width, unit.height)
 		}
-		material = new Material(
-			mesh: mesh,
-			palette: renderer.createTexturePalette(palette),
-			shader: renderer.standardPaletteShader,
-			transform: unit.transform
+		material = renderer.createMaterial(
+			mesh,
+			null,
+			renderer.createTexturePalette(palette),
+			unit.transform
 		)
 	}
 

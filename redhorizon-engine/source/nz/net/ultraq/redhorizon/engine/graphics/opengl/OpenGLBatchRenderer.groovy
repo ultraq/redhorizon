@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static OpenGLRenderer.*
@@ -68,7 +67,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private Map<Texture,Integer> batchTextures = [:]
 
 	// Information about the current batch materials
-	private Shader batchShader
 	private int batchVertexType
 
 	/**
@@ -142,13 +140,11 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	void drawMaterial(Material material) {
 
 		def mesh = material.mesh
-		def texture = material.texture ?: renderer.whiteTexture
-		def shader = material.shader
+		def texture = material.texture
 
-		// If there is a change in shader, vertex information, or there is no space
-		// for the next material, flush the current buffers
+		// If there is a change in vertex information, or there is no space for the
+		// next material, flush the current buffers
 		if (
-			shader != batchShader ||
 			mesh.vertexType != batchVertexType ||
 			((maxVertices - batchVertices < mesh.vertices.size())) ||
 			((maxIndices - batchIndices) < mesh.indices.size()) ||
@@ -157,10 +153,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 			flush()
 		}
 
-		if (shader != batchShader) {
-			glUseProgram(shader.programId)
-		}
-		batchShader = shader
 		batchVertexType = mesh.vertexType
 		batchMaterials << material
 		batchVertices += mesh.vertices.size()
@@ -181,6 +173,8 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 			}
 
 			stackPush().withCloseable { stack ->
+				glUseProgram(standardShader.programId)
+				glBindVertexArray(batchVertexArrayId)
 
 				// Build the sampler and model arrays for all of the materials in the
 				// batch buffer, fill the vertex and index buffers with data from each
@@ -192,17 +186,19 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				def indexOffset = 0
 				def lastActiveTextureUnit = -1
 				batchMaterials.eachWithIndex { material, materialIndex ->
-					def texture = material.texture ?: renderer.whiteTexture
+					def texture = material.texture
 					def textureUnit = batchTextures[texture]
 					def palette = material.palette
 
 					if (palette && palette != renderer.currentPalette) {
-						def paletteLocation = getUniformLocation(batchShader, 'u_palette')
+						def paletteLocation = getUniformLocation(renderer.standardShader, 'palette')
 						glUniform1i(paletteLocation, renderer.maxTextureUnits)
 						glActiveTexture(GL_TEXTURE0 + renderer.maxTextureUnits)
 						glBindTexture(GL_TEXTURE_1D, palette.textureId)
 						renderer.currentPalette = palette
 					}
+					def usePaletteLocation = getUniformLocation(renderer.standardShader, 'usePalette')
+					glUniform1i(usePaletteLocation, palette ? 1 : 0)
 
 					if (texture && (lastActiveTextureUnit == -1 || lastActiveTextureUnit != textureUnit)) {
 						lastActiveTextureUnit = textureUnit
@@ -234,9 +230,9 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 				indexBuffer.flip()
 
 				// Pass all the built data to OpenGL
-				def textureLocation = getUniformLocation(batchShader, 'u_textures')
+				def textureLocation = getUniformLocation(renderer.standardShader, 'textures')
 				glUniform1iv(textureLocation, samplers)
-				def modelsLocation = getUniformLocation(batchShader, 'models')
+				def modelsLocation = getUniformLocation(renderer.standardShader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, models)
 				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer)
 				glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer)

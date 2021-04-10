@@ -188,7 +188,7 @@ interface GraphicsRenderer {
 	 *   closure.  This material can then be rendered as normal to render all of
 	 *   the created materials at once.
 	 */
-	Material withMaterialBuilder(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
+	Material withMaterialBundler(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
 		Closure closure)
 }

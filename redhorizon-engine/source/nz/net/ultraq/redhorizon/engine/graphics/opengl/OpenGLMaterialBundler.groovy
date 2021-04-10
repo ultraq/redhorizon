@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder
+import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -41,7 +41,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class OpenGLMaterialBuilder implements MaterialBuilder, EventTarget {
+class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
 	@Delegate(excludes = [
 		'createSpriteMesh', 'createTexture'
@@ -51,7 +51,7 @@ class OpenGLMaterialBuilder implements MaterialBuilder, EventTarget {
 	private final List<Material> materials = []
 
 	@Override
-	Material build() {
+	Material bundle() {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()

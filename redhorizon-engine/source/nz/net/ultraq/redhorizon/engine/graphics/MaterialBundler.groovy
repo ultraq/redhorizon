@@ -22,7 +22,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
  * 
  * @author Emanuel Rabina
  */
-interface MaterialBuilder extends GraphicsRenderer {
+interface MaterialBundler extends GraphicsRenderer {
 
 	/**
 	 * Build a batched material that represents all of the materials created
@@ -30,5 +30,5 @@ interface MaterialBuilder extends GraphicsRenderer {
 	 * 
 	 * @return
 	 */
-	Material build()
+	Material bundle()
 }
