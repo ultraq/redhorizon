@@ -71,7 +71,7 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 			renderer.createSpriteMesh(
 				new Rectanglef(0, 0, tileFile.width, tileFile.height),
 				tileSet.getCoordinates(tileFile, frame)),
-			tileSet,
+			tileSet.texture,
 			renderer.createTexturePalette(palette),
 			transform
 		)

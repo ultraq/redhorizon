@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
+
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+
+import groovy.transform.MapConstructor
 
 /**
- * A shader is a small program that runs on the GPU.
+ * OpenGL implementation of a material.
  * 
  * @author Emanuel Rabina
  */
-abstract class Shader {
-
-	abstract String name
-
-	/**
-	 * Return the name of this shader program.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		return "${name} shader program"
-	}
+@MapConstructor(includeSuperProperties = true)
+class OpenGLMaterial extends Material {
 }

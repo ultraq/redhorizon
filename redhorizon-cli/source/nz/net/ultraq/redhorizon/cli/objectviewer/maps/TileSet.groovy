@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
@@ -31,7 +33,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class TileSet extends Texture {
+class TileSet implements GraphicsElement {
 
 	final int tilesetWidth = 1536
 	final int tilesetHeight = 4800
@@ -39,6 +41,7 @@ class TileSet extends Texture {
 
 	private final List<ImagesFile> tileFileList = []
 	private final Map<ImagesFile,Integer> tileFileMap = [:]
+	private Texture texture
 
 	/**
 	 * Add more tiles to the tileset.
@@ -75,6 +78,12 @@ class TileSet extends Texture {
 		tileFileMap << [(tilesFile): yStart]
 	}
 
+	@Override
+	void delete(GraphicsRenderer renderer) {
+
+		renderer.deleteTexture(texture)
+	}
+
 	/**
 	 * Return the rectangle representing the texture coordinates in the tileset
 	 * for the given tile file and frame.
@@ -93,5 +102,28 @@ class TileSet extends Texture {
 			(xStart + tileFile.width) / tilesetWidth,
 			1 - (yStart / tilesetHeight)
 		)
+	}
+
+	/**
+	 * Return the texture underlying this tileset, if available.
+	 * 
+	 * @return
+	 */
+	Texture getTexture() {
+
+		return texture
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
+		// TODO: Move image flipping to the renderer since it's an OpenGL detail?
+		texture = renderer.createTexture(
+			tilesetData.flipVertical(tilesetWidth, tilesetHeight, FORMAT_INDEXED),
+			FORMAT_INDEXED.value, tilesetWidth, tilesetHeight)
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
 	}
 }

@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
+
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+
+import org.joml.Vector2f
+
+import groovy.transform.MapConstructor
 
 /**
- * A shader is a small program that runs on the GPU.
+ * OpenGL implementation of a mesh.
  * 
  * @author Emanuel Rabina
  */
-abstract class Shader {
+@MapConstructor
+class OpenGLMesh extends Mesh {
 
-	abstract String name
+	final int vertexType
+	final Colour colour
+	final Vector2f[] vertices
+	final Vector2f[] textureUVs
+	int vertexArrayId
+	int vertexBufferId
 
-	/**
-	 * Return the name of this shader program.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		return "${name} shader program"
-	}
+	final int[] indices
+	int elementBufferId
 }

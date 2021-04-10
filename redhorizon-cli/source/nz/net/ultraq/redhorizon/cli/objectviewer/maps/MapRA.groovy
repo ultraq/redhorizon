@@ -117,17 +117,13 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTexture(tileSet)
+		tileSet.delete(renderer)
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		// TODO: Move image flipping to the renderer since it's an OpenGL detail?
-		def tileSetTexture = renderer.createTexture(
-			tileSet.tilesetData.flipVertical(tileSet.tilesetWidth, tileSet.tilesetHeight, FORMAT_INDEXED),
-			FORMAT_INDEXED.value, tileSet.tilesetWidth, tileSet.tilesetHeight)
-		tileSet.textureId = tileSetTexture.textureId
+		tileSet.init(renderer)
 	}
 
 	/**

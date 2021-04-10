@@ -24,7 +24,7 @@ import org.joml.Matrix4f
  * 
  * @author Emanuel Rabina
  */
-class Material {
+abstract class Material {
 
 	Mesh mesh
 	Texture texture

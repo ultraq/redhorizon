@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -41,7 +42,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
+class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventTarget {
 
 	@Delegate(excludes = [
 		'createSpriteMesh', 'createTexture'
@@ -104,9 +105,10 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 			// Return a new material based off the first one in the list which is
 			// assumed to be representative of the entire batch
 			def templateMaterial = materials.first()
-			return new Material(
-				mesh: new Mesh(
+			return new OpenGLMaterial(
+				mesh: new OpenGLMesh(
 					vertexType: templateMaterial.mesh.vertexType,
+					colour: templateMaterial.mesh.colour,
 					vertices: allVertices,
 					vertexArrayId: vertexArrayId,
 					vertexBufferId: vertexBufferId,

@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -72,9 +71,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
-	protected final Shader standardShader
-	protected final Shader standardPaletteShader
-	protected final List<Shader> shaders = []
+	protected final OpenGLShader standardShader
+	protected final OpenGLShader standardPaletteShader
+	protected final List<OpenGLShader> shaders = []
 	protected Texture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
@@ -141,7 +140,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def textureBytes = ByteBuffer.allocateNative(4)
 				.putInt(0xffffffff as int)
 				.flip()
-			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1, false)
+			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1, false) as OpenGLTexture
 		}
 	}
 
@@ -244,7 +243,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform) {
 
-		return new Material(
+		return new OpenGLMaterial(
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
 			palette: palette,
@@ -265,10 +264,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @param indices
 	 * @return
 	 */
-	protected Mesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
+	protected OpenGLMesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
 		Vector2f[] textureUVs = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
 
-		def mesh = new Mesh(
+		def mesh = new OpenGLMesh(
 			vertexType: vertexType,
 			colour: colour,
 			vertices: vertices,
@@ -286,7 +285,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @param mesh
 	 * @return
 	 */
-	private static Mesh createMeshData(Mesh mesh) {
+	private static OpenGLMesh createMeshData(OpenGLMesh mesh) {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -340,7 +339,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @param name
 	 * @return
 	 */
-	private Shader createShader(String name) {
+	private OpenGLShader createShader(String name) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
@@ -392,7 +391,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
 
-		def shader = new Shader(
+		def shader = new OpenGLShader(
 			name: name,
 			programId: programId
 		)
@@ -438,7 +437,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
 			}
 
-			def texture = new Texture(
+			def texture = new OpenGLTexture(
 				textureId: textureId
 			)
 			trigger(new TextureCreatedEvent(texture))
@@ -468,7 +467,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			paletteBuffer.flip()
 			glTexImage1D(GL_TEXTURE_1D, 0, colourFormat, palette.size, 0, colourFormat, GL_UNSIGNED_BYTE, paletteBuffer)
 
-			def texture = new Texture(
+			def texture = new OpenGLTexture(
 				textureId: textureId
 			)
 			trigger(new TextureCreatedEvent(texture))
@@ -480,7 +479,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteMaterial(Material material) {
 
 		deleteMesh(material.mesh)
-		if (material.texture && !paletteTextureIds.contains(material.texture.textureId)) {
+		def texture = material.texture as OpenGLTexture
+		if (texture && !paletteTextureIds.contains(texture.textureId)) {
 			deleteTexture(material.texture)
 		}
 	}
@@ -488,6 +488,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void deleteMesh(Mesh mesh) {
 
+		mesh = mesh as OpenGLMesh
 		if (mesh.elementBufferId) {
 			glDeleteBuffers(mesh.elementBufferId)
 		}
@@ -499,6 +500,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void deleteTexture(Texture texture) {
 
+		texture = texture as OpenGLTexture
 		glDeleteTextures(texture.textureId)
 		trigger(new TextureDeletedEvent(texture))
 	}
@@ -508,10 +510,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
-				def mesh = material.mesh
-				def texture = material.texture
-				def palette = material.palette
-				def shader = material.shader
+				def mesh = material.mesh as OpenGLMesh
+				def texture = material.texture as OpenGLTexture
+				def palette = material.palette as OpenGLTexture
+				def shader = material.shader as OpenGLShader
 
 				glUseProgram(shader.programId)
 
@@ -569,7 +571,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * @return
 	 */
 	@Memoized
-	protected static int getUniformLocation(Shader shader, String name) {
+	protected static int getUniformLocation(OpenGLShader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
 	}
