@@ -2,6 +2,11 @@
 Changelog
 =========
 
+### 0.33.1
+ - Another rendering performance improvement by bundling several materials into
+   a single one such that it all lives in GPU memory and is rendered in a single
+   draw call.  Currently used for drawing all map tiles.
+
 ### 0.33.0
  - Merged all of the various CLI tools into a single one.  Now each tool is a
    subcommand of a main `redhorizon` one.
