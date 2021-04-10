@@ -86,7 +86,8 @@ class UnitRenderer implements GraphicsElement {
 		material = new Material(
 			mesh: mesh,
 			palette: renderer.createTexturePalette(palette),
-			shader: renderer.standardPaletteShader
+			shader: renderer.standardPaletteShader,
+			transform: unit.transform
 		)
 	}
 
@@ -94,7 +95,7 @@ class UnitRenderer implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		material.texture = textures[rotationFrames()]
-		renderer.drawMaterial(material, unit.transform)
+		renderer.drawMaterial(material)
 	}
 
 	/**

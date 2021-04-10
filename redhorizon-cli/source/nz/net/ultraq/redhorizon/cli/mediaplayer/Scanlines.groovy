@@ -70,13 +70,14 @@ class Scanlines implements GraphicsElement, SceneElement<SceneElement> {
 		material = new Material(
 			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, overlay.width, overlay.height)),
 			texture: renderer.createTexture(scanlineTexture, FORMAT_RGBA.value, overlay.width, overlay.height, true),
-			shader: renderer.standardShader
+			shader: renderer.standardShader,
+			transform: transform
 		)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material, transform)
+		renderer.drawMaterial(material)
 	}
 }

@@ -153,7 +153,8 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		textures = []
 		material = new Material(
 			mesh: mesh,
-			shader: renderer.standardShader
+			shader: renderer.standardShader,
+			transform: transform
 		)
 		framesQueued = 0
 	}
@@ -192,7 +193,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 				def texture = textures[currentFrame]
 				if (texture) {
 					material.texture = texture
-					renderer.drawMaterial(material, transform)
+					renderer.drawMaterial(material)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)

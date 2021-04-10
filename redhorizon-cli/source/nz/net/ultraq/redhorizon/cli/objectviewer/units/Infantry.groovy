@@ -53,7 +53,7 @@ class Infantry extends Unit {
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
 				buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
-				gameTime)
+				palette, gameTime)
 		}
 
 		currentRenderer = unitRenderers.first()

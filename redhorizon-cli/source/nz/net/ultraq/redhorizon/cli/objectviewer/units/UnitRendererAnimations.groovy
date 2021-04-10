@@ -61,7 +61,7 @@ class UnitRendererAnimations extends UnitRenderer {
 
 		def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
 		material.texture = textures[rotationFrames() * framesPerHeading + currentFrame]
-		renderer.drawMaterial(material, unit.transform)
+		renderer.drawMaterial(material)
 	}
 
 	/**

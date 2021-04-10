@@ -102,11 +102,12 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = new Material(
-			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			texture: renderer.createTexture(imageData, format.value, width, height),
-			palette: palette ? renderer.createTexturePalette(palette) : null,
-			shader: palette ? renderer.standardPaletteShader : renderer.standardShader
+		material = renderer.createMaterial(
+			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
+			renderer.createTexture(imageData, format.value, width, height),
+			palette ? renderer.createTexturePalette(palette) : null,
+			palette ? renderer.standardPaletteShader : renderer.standardShader,
+			transform
 		)
 		imageData = null
 	}
@@ -114,6 +115,6 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material, transform)
+		renderer.drawMaterial(material)
 	}
 }

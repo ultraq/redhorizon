@@ -56,7 +56,8 @@ class VehicleRenderer extends UnitRenderer {
 			turretMaterial = new Material(
 				mesh: mesh,
 				palette: renderer.createTexturePalette(palette),
-				shader: renderer.standardPaletteShader
+				shader: renderer.standardPaletteShader,
+				transform: unit.transform
 			)
 		}
 	}
@@ -67,7 +68,7 @@ class VehicleRenderer extends UnitRenderer {
 		super.render(renderer)
 		if (turretHeadings) {
 			turretMaterial.texture = textures[headings + rotationFrames()]
-			renderer.drawMaterial(turretMaterial, unit.transform)
+			renderer.drawMaterial(turretMaterial)
 		}
 	}
 }
