@@ -111,6 +111,7 @@ class GraphicsEngine extends Engine {
 
 		Thread.currentThread().name = 'Graphics Engine'
 		def forkJoinPool = ForkJoinPool.commonPool()
+		def numProcessors = Runtime.runtime.availableProcessors()
 
 		// Initialization
 		openGlContext = waitForMainThread { ->
@@ -146,8 +147,9 @@ class GraphicsEngine extends Engine {
 								scene.accept { element ->
 									sceneElements << element
 								}
+								def taskSize = Math.max(Math.ceil(sceneElements.size() / numProcessors / 2), 200) as int
 								return forkJoinPool.invoke(new ObjectCullingTask(frustumIntersection, sceneElements,
-									(sceneElements.size() >> 1) + 1))
+									taskSize))
 							}
 //							renderer.asBatchRenderer { batchRenderer ->
 								visibleElements.each { element ->
