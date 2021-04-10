@@ -62,10 +62,8 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	final Vector2f initialPosition
 
 	private final TileSet tileSet = new TileSet()
-	private final BackgroundLayer background
-	private final List<MapLayer> layers = []
+	private final List<SceneElement> layers = []
 	private Palette palette
-	private Material layersMaterial
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -94,7 +92,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		// Build the various layers
-		background = new BackgroundLayer(resourceManager)
+		layers << new BackgroundLayer(resourceManager)
 		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
 		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
 		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
@@ -110,14 +108,16 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	@Override
 	void accept(SceneVisitor visitor) {
 
-		background.accept(visitor)
 		visitor.visit(this)
+		layers.each { layer ->
+			layer.accept(visitor)
+		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteMaterial(layersMaterial)
+		renderer.deleteTexture(tileSet)
 	}
 
 	@Override
@@ -128,16 +128,6 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 			tileSet.tilesetData.flipVertical(tileSet.tilesetWidth, tileSet.tilesetHeight, FORMAT_INDEXED),
 			FORMAT_INDEXED.value, tileSet.tilesetWidth, tileSet.tilesetHeight)
 		tileSet.textureId = tileSetTexture.textureId
-
-		layersMaterial = renderer.withMaterialBuilder { builder ->
-			layers.each { layer ->
-				layer.accept { element ->
-					if (element instanceof GraphicsElement) {
-						element.init(builder)
-					}
-				}
-			}
-		}
 	}
 
 	/**
@@ -168,8 +158,6 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 	@Override
 	void render(GraphicsRenderer renderer) {
-
-		renderer.drawMaterial(layersMaterial)
 	}
 
 	/**
@@ -245,7 +233,9 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	/**
 	 * The "MapPack" layer of a Red Alert map.
 	 */
-	private class MapRAMapPack extends MapLayer {
+	private class MapRAMapPack extends MapLayer implements GraphicsElement {
+
+		private Material material
 
 		/**
 		 * Constructor, build the MapPack layer from the given tile data.
@@ -286,6 +276,34 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 					}
 				}
 			}
+		}
+
+		@Override
+		void accept(SceneVisitor visitor) {
+
+			visitor.visit(this)
+		}
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			renderer.deleteMaterial(material)
+		}
+
+		@Override
+		void init(GraphicsRenderer renderer) {
+
+			material = renderer.withMaterialBuilder { builder ->
+				elements.each { element ->
+					element.init(builder)
+				}
+			}
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			renderer.drawMaterial(material)
 		}
 	}
 
