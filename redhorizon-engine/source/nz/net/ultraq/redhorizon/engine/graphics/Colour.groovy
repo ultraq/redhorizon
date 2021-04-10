@@ -36,13 +36,14 @@ class Colour {
 	 */
 	static final int FLOATS = 4
 
-	static final Colour BLACK  = new Colour(0, 0, 0)
-	static final Colour BLUE   = new Colour(0, 0, 1)
-	static final Colour GREEN  = new Colour(0, 1, 0)
-	static final Colour RED    = new Colour(1, 0, 0)
-	static final Colour WHITE  = new Colour(1, 1, 1)
-	static final Colour YELLOW = new Colour(1, 1, 0)
+	static final Colour BLACK  = new Colour('Black',  0, 0, 0)
+	static final Colour BLUE   = new Colour('Blue',   0, 0, 1)
+	static final Colour GREEN  = new Colour('Green',  0, 1, 0)
+	static final Colour RED    = new Colour('Red',    1, 0, 0)
+	static final Colour WHITE  = new Colour('White',  1, 1, 1)
+	static final Colour YELLOW = new Colour('Yellow', 1, 1, 0)
 
+	final String name
 	final float r
 	final float g
 	final float b
@@ -66,6 +67,17 @@ class Colour {
 	}
 
 	/**
+	 * Return this colour in the form: "Name (r, g, b, a)"
+	 * 
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		return "${name} (${r}, ${g}, ${b}, ${a})"
+	}
+
+	/**
 	 * Return a new colour from a base one but with a specific alpha value.
 	 * 
 	 * @param alpha
@@ -73,6 +85,6 @@ class Colour {
 	 */
 	Colour withAlpha(float alpha) {
 
-		return new Colour(this.r, this.g, this.b, alpha)
+		return new Colour(this.name, this.r, this.g, this.b, alpha)
 	}
 }

@@ -61,6 +61,18 @@ interface GraphicsRenderer {
 	void createCamera(Matrix4f projection, Matrix4f view)
 
 	/**
+	 * Create a material out of the given component parts.
+	 * 
+	 * @param mesh
+	 * @param texture
+	 * @param palette
+	 * @param shader
+	 * @param transform
+	 * @return
+	 */
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Shader shader, Matrix4f transform)
+
+	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
 	 * are drawn between them and then a final one is used to close the last and
 	 * first points.
@@ -80,6 +92,15 @@ interface GraphicsRenderer {
 	 * @return New lines mesh.
 	 */
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
+
+	/**
+	 * Create a mesh to represent a surface onto which a texture will go, using
+	 * the default texture coordinates.
+	 * 
+	 * @param surface
+	 * @return
+	 */
+	Mesh createSpriteMesh(Rectanglef surface)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
@@ -144,11 +165,11 @@ interface GraphicsRenderer {
 	void deleteTexture(Texture texture)
 
 	/**
-	 * Draw the material with the given transform.
+	 * Render a material.
 	 * 
 	 * @param material
 	 */
-	void drawMaterial(Material material, Matrix4f transform)
+	void drawMaterial(Material material)
 
 	/**
 	 * Return the shader for paletted textures.
@@ -170,4 +191,19 @@ interface GraphicsRenderer {
 	 * @param view
 	 */
 	void updateCamera(Matrix4f view)
+
+	/**
+	 * Use a batching material builder within the context of the given closure
+	 * that will return a single renderable material that is the sum of all the
+	 * materials initialized within the closure.
+	 * 
+	 * @param closure
+	 * @return
+	 *   A material that represents all of the materials created within the
+	 *   closure.  This material can then be rendered as normal to render all of
+	 *   the created materials at once.
+	 */
+	Material withMaterialBuilder(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
+		Closure closure)
 }

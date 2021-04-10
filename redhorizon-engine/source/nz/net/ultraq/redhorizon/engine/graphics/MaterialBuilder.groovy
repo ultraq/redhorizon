@@ -16,19 +16,19 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Matrix4f
-
 /**
- * A material defines how a shape should be rendered, so references meshes,
- * colours, textures, and a shader.
+ * A builder for batching together several similar materials into a single one,
+ * which can then be used for rendering them all out with a single draw call.
  * 
  * @author Emanuel Rabina
  */
-class Material {
+interface MaterialBuilder extends GraphicsRenderer {
 
-	Mesh mesh
-	Texture texture
-	Texture palette
-	Shader shader
-	Matrix4f transform
+	/**
+	 * Build a batched material that represents all of the materials created
+	 * using {@link #createMaterial}.
+	 * 
+	 * @return
+	 */
+	Material build()
 }

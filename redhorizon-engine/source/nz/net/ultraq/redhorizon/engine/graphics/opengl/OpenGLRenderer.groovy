@@ -243,6 +243,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
+	@Override
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Shader shader, Matrix4f transform) {
+
+		return new Material(
+			mesh: mesh,
+			texture: texture,
+			palette: palette,
+			shader: shader,
+			transform: transform
+		)
+	}
+
 	/**
 	 * Build a mesh object.
 	 * 
@@ -285,25 +297,24 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def vertexBufferId = glGenBuffers()
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 
-			enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
-
 			// Buffer to hold all the vertex data
 			def colour = mesh.colour
 			def vertices = mesh.vertices
 			def textureCoordinates = mesh.textureCoordinates
 			def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
-				vertexBuffer
-					.put(colour.r, colour.g, colour.b, colour.a)
-					.put(vertex.x, vertex.y)
-				if (textureCoordinates) {
-					def textureCoordinate = textureCoordinates[index]
-					vertexBuffer.put(textureCoordinate.x, textureCoordinate.y)
-				}
-				vertexBuffer.put(0 as float, 0 as float)
+				def textureCoordinate = textureCoordinates[index]
+				vertexBuffer.put(
+					colour.r, colour.g, colour.b, colour.a,
+					vertex.x, vertex.y,
+					textureCoordinate.x, textureCoordinate.y,
+					0, 0
+				)
 			}
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
+
+			enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
 
 			// Buffer for all the index data, if applicable
 			int elementBufferId = 0
@@ -318,7 +329,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			mesh.vertexArrayId = vertexArrayId
 			mesh.vertexBufferId = vertexBufferId
-			mesh.vertexBufferLayout = VERTEX_BUFFER_LAYOUT
 			if (mesh.indices) {
 				mesh.elementBufferId = elementBufferId
 			}
@@ -430,11 +440,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
 			}
 
-			trigger(new TextureCreatedEvent())
-
-			return new Texture(
+			def texture = new Texture(
 				textureId: textureId
 			)
+			trigger(new TextureCreatedEvent(texture))
+			return texture
 		}
 	}
 
@@ -496,7 +506,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void drawMaterial(Material material, Matrix4f transform) {
+	void drawMaterial(Material material) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
@@ -509,7 +519,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 				if (palette && palette != currentPalette) {
 					def paletteLocation = getUniformLocation(shader, 'u_palette')
-					glProgramUniform1i(shader.programId, paletteLocation, maxTextureUnits)
+					glUniform1i(paletteLocation, maxTextureUnits)
 					glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
 					glBindTexture(GL_TEXTURE_1D, palette.textureId)
 					currentPalette = palette
@@ -520,7 +530,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
-				def modelsBuffer = transform.get(stack.mallocFloat(Matrix4f.FLOATS))
+				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
 
@@ -589,5 +599,16 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			glBindBuffer(GL_UNIFORM_BUFFER, cameraBufferObject)
 			glBufferSubData(GL_UNIFORM_BUFFER, Matrix4f.BYTES, view.get(stack.mallocFloat(Matrix4f.FLOATS)))
 		}
+	}
+
+	@Override
+	Material withMaterialBuilder(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
+		Closure closure) {
+
+		def materialBuilder = new OpenGLMaterialBuilder(this)
+		materialBuilder.relay(RendererEvent, this)
+		closure(materialBuilder)
+		return materialBuilder.build()
 	}
 }

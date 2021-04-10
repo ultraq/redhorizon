@@ -84,7 +84,8 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 				new Rectanglef(0, 0, repeatX, repeatY)),
 			texture: renderer.createTexture(imageData, format.value, width, height),
 			palette: renderer.createTexturePalette(palette),
-			shader: renderer.standardPaletteShader
+			shader: renderer.standardPaletteShader,
+			transform: transform
 		)
 		imageData = null
 		palette = null
@@ -93,6 +94,6 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material, transform)
+		renderer.drawMaterial(material)
 	}
 }

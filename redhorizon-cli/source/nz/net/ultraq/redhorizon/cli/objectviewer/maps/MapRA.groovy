@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
@@ -41,7 +42,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class MapRA implements GraphicsElement, SceneElement {
+class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -61,8 +62,10 @@ class MapRA implements GraphicsElement, SceneElement {
 	final Vector2f initialPosition
 
 	private final TileSet tileSet = new TileSet()
-	private final List<SceneElement> layers = []
+	private final BackgroundLayer background
+	private final List<MapLayer> layers = []
 	private Palette palette
+	private Material layersMaterial
 
 	/**
 	 * Construtor, build a map from the given map file.
@@ -91,7 +94,7 @@ class MapRA implements GraphicsElement, SceneElement {
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		// Build the various layers
-		layers << new BackgroundLayer(resourceManager)
+		background = new BackgroundLayer(resourceManager)
 		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
 		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
 		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
@@ -107,16 +110,14 @@ class MapRA implements GraphicsElement, SceneElement {
 	@Override
 	void accept(SceneVisitor visitor) {
 
+		background.accept(visitor)
 		visitor.visit(this)
-		layers.each { layer ->
-			layer.accept(visitor)
-		}
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteTexture(tileSet)
+		renderer.deleteMaterial(layersMaterial)
 	}
 
 	@Override
@@ -127,6 +128,16 @@ class MapRA implements GraphicsElement, SceneElement {
 			tileSet.tilesetData.flipVertical(tileSet.tilesetWidth, tileSet.tilesetHeight, FORMAT_INDEXED),
 			FORMAT_INDEXED.value, tileSet.tilesetWidth, tileSet.tilesetHeight)
 		tileSet.textureId = tileSetTexture.textureId
+
+		layersMaterial = renderer.withMaterialBuilder { builder ->
+			layers.each { layer ->
+				layer.accept { element ->
+					if (element instanceof GraphicsElement) {
+						element.init(builder)
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -155,6 +166,12 @@ class MapRA implements GraphicsElement, SceneElement {
 		return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
 	}
 
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+		renderer.drawMaterial(layersMaterial)
+	}
+
 	/**
 	 * Return some information about this map.
 	 *
@@ -171,14 +188,10 @@ class MapRA implements GraphicsElement, SceneElement {
 		""".stripIndent()
 	}
 
-	@Override
-	void render(GraphicsRenderer renderer) {
-	}
-
 	/**
 	 * Special layer for the background image.
 	 */
-	private class BackgroundLayer implements SceneElement {
+	private class BackgroundLayer implements SceneElement<BackgroundLayer> {
 
 		private final MapBackground background
 

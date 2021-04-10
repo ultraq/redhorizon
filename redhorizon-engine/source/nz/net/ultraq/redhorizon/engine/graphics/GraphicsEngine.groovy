@@ -147,7 +147,7 @@ class GraphicsEngine extends Engine {
 									}
 								}
 							}
-							renderer.asBatchRenderer { batchRenderer ->
+//							renderer.asBatchRenderer { batchRenderer ->
 								visibleElements.each { element ->
 
 									// Register the graphics element
@@ -159,16 +159,16 @@ class GraphicsEngine extends Engine {
 
 									// Initialize the graphics element
 									if (elementState == STATE_NEW) {
-										element.init(batchRenderer)
+										element.init(renderer)
 										elementState = STATE_INITIALIZED
 										graphicsElementStates << [(element): elementState]
 									}
 
 									// Render the graphics element
-									element.render(batchRenderer)
+									element.render(renderer)
 								}
-								batchRenderer.flush()
-							}
+//								batchRenderer.flush()
+//							}
 
 							imGuiRenderer.drawDebugOverlay()
 							imGuiRenderer.endFrame()

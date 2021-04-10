@@ -67,13 +67,14 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = new Material(
-			mesh: renderer.createSpriteMesh(
+		material = renderer.createMaterial(
+			renderer.createSpriteMesh(
 				new Rectanglef(0, 0, tileFile.width, tileFile.height),
 				tileSet.getCoordinates(tileFile, frame)),
-			texture: tileSet,
-			palette: renderer.createTexturePalette(palette),
-			shader: renderer.standardPaletteShader
+			tileSet,
+			renderer.createTexturePalette(palette),
+			renderer.standardPaletteShader,
+			transform
 		)
 		palette = null
 	}
@@ -81,6 +82,6 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material, transform)
+		renderer.drawMaterial(material)
 	}
 }
