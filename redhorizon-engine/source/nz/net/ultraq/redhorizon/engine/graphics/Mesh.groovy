@@ -35,7 +35,6 @@ class Mesh {
 	final Vector2f[] textureCoordinates
 	int vertexArrayId
 	int vertexBufferId
-	VertexBufferLayout vertexBufferLayout
 
 	final int[] indices
 	int elementBufferId
