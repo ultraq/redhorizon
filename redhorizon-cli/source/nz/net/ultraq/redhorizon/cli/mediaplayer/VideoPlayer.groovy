@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -48,6 +49,7 @@ class VideoPlayer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
 	final VideoFile videoFile
+	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
 	final boolean scaleLowRes
 	final boolean scanlines
@@ -63,7 +65,7 @@ class VideoPlayer extends Application {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useAudioEngine(scene, executorService) { audioEngine ->
+				useAudioEngine(scene, executorService, audioConfig) { audioEngine ->
 					useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
 
 						// Add the video to the engines once we have the window dimensions

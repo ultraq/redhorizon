@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.cli.mediaplayer.SoundPlayer
 import nz.net.ultraq.redhorizon.cli.mediaplayer.ImageViewer
 import nz.net.ultraq.redhorizon.cli.mediaplayer.ImagesViewer
 import nz.net.ultraq.redhorizon.cli.mediaplayer.VideoPlayer
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -83,6 +84,9 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
 	boolean scanlines
 
+	@Option(names = ['--volume'], defaultValue = '100', description = 'The volume level, as a number from 0-100')
+	int volume
+
 	@Mixin
 	PaletteOptions paletteOptions
 
@@ -104,10 +108,13 @@ class MediaPlayer implements Callable<Integer> {
 				fixAspectRatio: fixAspectRatio,
 				fullScreen: fullScreen
 			)
+			def audioConfig = new AudioConfiguration(
+				volume: volume / 100
+			)
 
 			switch (mediaFile) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig, scaleLowRes, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
@@ -115,7 +122,7 @@ class MediaPlayer implements Callable<Integer> {
 				animationPlayer.play()
 				break
 			case SoundFile:
-				def soundPlayer = new SoundPlayer(mediaFile)
+				def soundPlayer = new SoundPlayer(mediaFile, audioConfig)
 				soundPlayer.play()
 				break
 			case ImageFile:

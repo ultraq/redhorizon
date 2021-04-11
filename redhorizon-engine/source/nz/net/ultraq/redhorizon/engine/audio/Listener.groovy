@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.geometry.Orientation
 import nz.net.ultraq.redhorizon.scenegraph.Positionable
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Vector3f
 
@@ -32,12 +31,6 @@ class Listener implements AudioElement, Positionable, SceneElement {
 
 	final Vector3f velocity = new Vector3f(0, 0, 0)
 	final Orientation orientation = new Orientation()
-
-	@Override
-	void accept(SceneVisitor visitor) {
-
-		visitor.visit(this)
-	}
 
 	/**
 	 * Does nothing.

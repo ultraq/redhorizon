@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio.openal
 
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.geometry.Orientation
 
@@ -31,6 +32,20 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 class OpenALRenderer implements AudioRenderer {
+
+	private final AudioConfiguration config
+
+	/**
+	 * Constructor, create an OpenAL renderer with the given configuration.
+	 * 
+	 * @param config
+	 */
+	OpenALRenderer(AudioConfiguration config) {
+
+		this.config = config
+
+		alListenerf(AL_GAIN, config.volume)
+	}
 
 	/**
 	 * Check for any OpenAL errors created by the OpenAL call in the given

@@ -37,16 +37,19 @@ class AudioEngine extends Engine {
 	private static final int TARGET_RENDER_TIME_MS = 50
 
 	private final Scene scene
+	private final AudioConfiguration config
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
 	 * @param scene
+	 * @param config
 	 */
-	AudioEngine(Scene scene) {
+	AudioEngine(Scene scene, AudioConfiguration config) {
 
 		super(TARGET_RENDER_TIME_MS)
 		this.scene = scene
+		this.config = config
 	}
 
 	/**
@@ -63,7 +66,7 @@ class AudioEngine extends Engine {
 		// Initialization
 		new OpenALContext(executorService).withCloseable { context ->
 			context.withCurrent { ->
-				def renderer = new OpenALRenderer()
+				def renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
 				def audioElementStates = [:]
 

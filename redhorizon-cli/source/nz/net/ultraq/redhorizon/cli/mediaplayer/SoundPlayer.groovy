@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
@@ -41,6 +42,7 @@ class SoundPlayer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(SoundPlayer)
 
 	final SoundFile soundFile
+	final AudioConfiguration audioConfig
 
 	/**
 	 * Play the configured audio file.
@@ -53,7 +55,7 @@ class SoundPlayer extends Application {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useAudioEngine(scene, executorService) { audioEngine ->
+				useAudioEngine(scene, executorService, audioConfig) { audioEngine ->
 
 					// Try determine the appropriate media for the sound file
 					def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB

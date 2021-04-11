@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
@@ -61,13 +62,15 @@ abstract class Application {
 	 * 
 	 * @param scene
 	 * @param executorService
+	 * @param audioConfig
 	 * @param closure
 	 */
 	protected static void useAudioEngine(Scene scene, ExecutorService executorService,
+		AudioConfiguration audioConfig,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.audio.AudioEngine')
 		Closure closure) {
 
-		def audioEngine = new AudioEngine(scene)
+		def audioEngine = new AudioEngine(scene, audioConfig)
 		def engine = executorService.submit(audioEngine)
 
 		closure(audioEngine)
