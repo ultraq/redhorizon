@@ -78,14 +78,13 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		material = new Material(
-			mesh: renderer.createSpriteMesh(
+		material = renderer.createMaterial(
+			renderer.createSpriteMesh(
 				new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
 				new Rectanglef(0, 0, repeatX, repeatY)),
-			texture: renderer.createTexture(imageData, format.value, width, height),
-			palette: renderer.createTexturePalette(palette),
-			shader: renderer.standardPaletteShader,
-			transform: transform
+			renderer.createTexture(imageData, format.value, width, height),
+			renderer.createTexturePalette(palette),
+			transform
 		)
 		imageData = null
 		palette = null

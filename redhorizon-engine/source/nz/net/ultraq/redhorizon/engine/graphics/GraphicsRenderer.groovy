@@ -66,11 +66,10 @@ interface GraphicsRenderer {
 	 * @param mesh
 	 * @param texture
 	 * @param palette
-	 * @param shader
 	 * @param transform
 	 * @return
 	 */
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Shader shader, Matrix4f transform)
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform)
 
 	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
@@ -106,10 +105,10 @@ interface GraphicsRenderer {
 	 * Create a mesh to represent a surface onto which a texture will go.
 	 * 
 	 * @param surface
-	 * @param textureCoords
+	 * @param textureUVs
 	 * @return
 	 */
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates)
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**
 	 * Create and fill a texture with the given image data.
@@ -170,20 +169,6 @@ interface GraphicsRenderer {
 	 * @param material
 	 */
 	void drawMaterial(Material material)
-
-	/**
-	 * Return the shader for paletted textures.
-	 * 
-	 * @return
-	 */
-	Shader getStandardPaletteShader()
-
-	/**
-	 * Return the shader for non-paletted textures.
-	 * 
-	 * @return
-	 */
-	Shader getStandardShader()
 
 	/**
 	 * Update the camera's view matrix.

@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 
@@ -73,15 +72,14 @@ class OpenGLMaterialBuilder implements MaterialBuilder, EventTarget {
 			materials.eachWithIndex { material, materialIndex ->
 				def mesh = material.mesh
 				def colour = mesh.colour
-				def vertices = mesh.vertices
-				def textureCoordinates = mesh.textureCoordinates
-				vertices.eachWithIndex { vertex, vertexIndex ->
+				def textureUVs = mesh.textureUVs
+				mesh.vertices.eachWithIndex { vertex, vertexIndex ->
 					def position = material.transform.transformPosition(new Vector3f(vertex, 0))
-					def textureCoordinate = textureCoordinates[vertexIndex]
+					def textureUV = textureUVs[vertexIndex]
 					vertexBuffer.put(
 						colour.r, colour.g, colour.b, colour.a,
 						position.x, position.y,
-						textureCoordinate.x, textureCoordinate.y,
+						textureUV.x, textureUV.y,
 						0, 0
 					)
 				}
@@ -136,13 +134,13 @@ class OpenGLMaterialBuilder implements MaterialBuilder, EventTarget {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates = new Rectanglef(0, 0, 1, 1)) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
-			textureCoordinates as Vector2f[],
+			textureUVs as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		)
 	}
@@ -154,9 +152,9 @@ class OpenGLMaterialBuilder implements MaterialBuilder, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Shader shader, Matrix4f transform) {
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform) {
 
-		def material = renderer.createMaterial(mesh, texture, palette, shader, transform)
+		def material = renderer.createMaterial(mesh, texture, palette, transform)
 		materials << material
 		return material
 	}

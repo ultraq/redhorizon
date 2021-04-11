@@ -73,7 +73,6 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 				tileSet.getCoordinates(tileFile, frame)),
 			tileSet,
 			renderer.createTexturePalette(palette),
-			renderer.standardPaletteShader,
 			transform
 		)
 		palette = null

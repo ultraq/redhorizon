@@ -1,14 +1,14 @@
 #version 410 core
 
 in vec4 v_vertexColour;
-in vec2 v_texCoord;
-in float v_texUnit;
+in vec2 v_textureUVs;
+in float v_textureUnit;
 
-out vec4 fragColour;
+out vec4 fragmentColour;
 
-uniform sampler2D u_textures[maxTextureUnits];
+uniform sampler2D textures[maxTextureUnits];
 
 void main() {
-	vec4 texColour = texture(u_textures[int(v_texUnit)], v_texCoord);
-	fragColour = texColour * v_vertexColour;
+	vec4 textureColour = texture(textures[int(v_textureUnit)], v_textureUVs);
+	fragmentColour = textureColour * v_vertexColour;
 }

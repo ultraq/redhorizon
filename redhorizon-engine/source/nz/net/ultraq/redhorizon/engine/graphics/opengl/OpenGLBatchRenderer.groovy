@@ -214,7 +214,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 
 					def mesh = material.mesh
 					def colour = mesh.colour
-					def textureCoordinates = mesh.textureCoordinates
+					def textureCoordinates = mesh.textureUVs
 					mesh.vertices.eachWithIndex { vertex, vertexIndex ->
 						def textureCoordinate = textureCoordinates[vertexIndex]
 						vertexBuffer.put(

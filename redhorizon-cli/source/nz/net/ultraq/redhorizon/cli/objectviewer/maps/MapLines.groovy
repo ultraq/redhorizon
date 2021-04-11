@@ -61,15 +61,17 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		axisLines = new Material(
-			mesh: renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX),
-			shader: renderer.standardShader,
-			transform: transform
+		axisLines = renderer.createMaterial(
+			renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX),
+			null,
+			null,
+			transform
 		)
-		boundaryLines = new Material(
-			mesh: renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
-			shader: renderer.standardShader,
-			transform: transform
+		boundaryLines = renderer.createMaterial(
+			renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
+			null,
+			null,
+			transform
 		)
 	}
 

@@ -32,7 +32,7 @@ class Mesh {
 	final int vertexType
 	final Colour colour
 	final Vector2f[] vertices
-	final Vector2f[] textureCoordinates
+	final Vector2f[] textureUVs
 	int vertexArrayId
 	int vertexBufferId
 

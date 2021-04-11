@@ -28,11 +28,11 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 enum VertexBufferLayoutParts {
 
-	COLOUR      ('colour',     0, Colour.FLOATS),
-	POSITION    ('position',   1, Vector2f.FLOATS),
-	TEXCOORD    ('texCoord',   2, Vector2f.FLOATS),
-	TEXUNIT     ('texUnit',    3, 1),
-	MODEL_INDEX ('modelIndex', 4, 1)
+	COLOUR       ('colour',      0, Colour.FLOATS),
+	POSITION     ('position',    1, Vector2f.FLOATS),
+	TEXTURE_UVS  ('textureUVs',  2, Vector2f.FLOATS),
+	TEXTURE_UNIT ('textureUnit', 3, 1),
+	MODEL_INDEX  ('modelIndex',  4, 1)
 
 	final String name
 	final int location

@@ -64,8 +64,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
 		VertexBufferLayoutParts.COLOUR,
 		VertexBufferLayoutParts.POSITION,
-		VertexBufferLayoutParts.TEXCOORD,
-		VertexBufferLayoutParts.TEXUNIT,
+		VertexBufferLayoutParts.TEXTURE_UVS,
+		VertexBufferLayoutParts.TEXTURE_UNIT,
 		VertexBufferLayoutParts.MODEL_INDEX
 	)
 
@@ -74,8 +74,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
-	final Shader standardShader
-	final Shader standardPaletteShader
+	protected final Shader standardShader
+	protected final Shader standardPaletteShader
 	protected final List<Shader> shaders = []
 	protected Texture whiteTexture
 	protected List<Integer> paletteTextureIds = []
@@ -244,13 +244,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Shader shader, Matrix4f transform) {
+	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform) {
 
 		return new Material(
 			mesh: mesh,
 			texture: texture,
 			palette: palette,
-			shader: shader,
+			shader: palette ? standardPaletteShader : standardShader,
 			transform: transform
 		)
 	}
@@ -263,18 +263,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 *   The colour to use for all vertices.  Currently doesn't support different
 	 *   colours for each vertex.
 	 * @param vertices
-	 * @param textureCoordinates
+	 * @param textureUVs
 	 * @param indices
 	 * @return
 	 */
 	protected Mesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
-		Vector2f[] textureCoordinates = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
+		Vector2f[] textureUVs = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
 
 		def mesh = new Mesh(
 			vertexType: vertexType,
 			colour: colour,
 			vertices: vertices,
-			textureCoordinates: textureCoordinates,
+			textureUVs: textureUVs,
 			indices: indices
 		)
 		trigger(new MeshCreatedEvent(mesh))
@@ -300,14 +300,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			// Buffer to hold all the vertex data
 			def colour = mesh.colour
 			def vertices = mesh.vertices
-			def textureCoordinates = mesh.textureCoordinates
+			def textureUVs = mesh.textureUVs
 			def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
-				def textureCoordinate = textureCoordinates[index]
+				def textureUV = textureUVs[index]
 				vertexBuffer.put(
 					colour.r, colour.g, colour.b, colour.a,
 					vertex.x, vertex.y,
-					textureCoordinate.x, textureCoordinate.y,
+					textureUV.x, textureUV.y,
 					0, 0
 				)
 			}
@@ -403,13 +403,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates = new Rectanglef(0, 0, 1, 1)) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
-			textureCoordinates as Vector2f[],
+			textureUVs as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		))
 	}
@@ -518,14 +518,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				glUseProgram(shader.programId)
 
 				if (palette && palette != currentPalette) {
-					def paletteLocation = getUniformLocation(shader, 'u_palette')
+					def paletteLocation = getUniformLocation(shader, 'palette')
 					glUniform1i(paletteLocation, maxTextureUnits)
 					glActiveTexture(GL_TEXTURE0 + maxTextureUnits)
 					glBindTexture(GL_TEXTURE_1D, palette.textureId)
 					currentPalette = palette
 				}
 
-				def texturesLocation = getUniformLocation(shader, 'u_textures')
+				def texturesLocation = getUniformLocation(shader, 'textures')
 				glUniform1iv(texturesLocation, 0)
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
