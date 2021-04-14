@@ -18,12 +18,15 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Matrix4f
 
+import groovy.transform.MapConstructor
+
 /**
  * A material defines how a shape should be rendered, so references meshes,
  * colours, textures, and a shader.
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor
 abstract class Material {
 
 	Mesh mesh

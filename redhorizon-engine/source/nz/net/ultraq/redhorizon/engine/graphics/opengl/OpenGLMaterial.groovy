@@ -18,13 +18,19 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 
-import groovy.transform.MapConstructor
-
 /**
  * OpenGL implementation of a material.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(includeSuperProperties = true)
 class OpenGLMaterial extends Material {
+
+	/**
+	 * Configure the material with a map argument.
+	 * 
+	 * @param args
+	 */
+	OpenGLMaterial(Map args) {
+		super(args)
+	}
 }

@@ -18,18 +18,21 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Vector2f
 
+import groovy.transform.MapConstructor
+
 /**
  * A mesh defines the shape of an object, and so contain data on points and
  * edges.
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor
 abstract class Mesh {
 
-	abstract int vertexType
-	abstract Colour colour
-	abstract Vector2f[] vertices
-	abstract Vector2f[] textureUVs
+	final int vertexType
+	final Colour colour
+	final Vector2f[] vertices
+	final Vector2f[] textureUVs
 
-	abstract int[] indices
+	final int[] indices
 }

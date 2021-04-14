@@ -16,28 +16,28 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-
-import org.joml.Vector2f
-
-import groovy.transform.MapConstructor
 
 /**
  * OpenGL implementation of a mesh.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
 class OpenGLMesh extends Mesh {
 
-	final int vertexType
-	final Colour colour
-	final Vector2f[] vertices
-	final Vector2f[] textureUVs
 	int vertexArrayId
 	int vertexBufferId
-
-	final int[] indices
 	int elementBufferId
+
+	/**
+	 * Configure the mesh with a map argument.
+	 * 
+	 * @param args
+	 */
+	OpenGLMesh(Map args) {
+		super(args)
+		vertexArrayId = args.vertexArrayId ?: 0
+		vertexBufferId = args.vertexBufferId ?: 0
+		elementBufferId = args.elementBufferId ?: 0
+	}
 }

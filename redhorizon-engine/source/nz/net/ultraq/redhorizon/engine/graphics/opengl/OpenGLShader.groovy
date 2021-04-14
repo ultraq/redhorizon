@@ -18,16 +18,22 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 
-import groovy.transform.MapConstructor
-
 /**
  * OpenGL implementation of a shader.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
 class OpenGLShader extends Shader {
 
-	final String name
 	final int programId
+
+	/**
+	 * Configure the shader with a map argument.
+	 * 
+	 * @param args
+	 */
+	OpenGLShader(Map args) {
+		super(args)
+		programId = args?.programId ?: 0
+	}
 }
