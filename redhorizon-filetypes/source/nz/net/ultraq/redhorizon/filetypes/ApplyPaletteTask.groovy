@@ -16,8 +16,10 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
+import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
+import java.util.concurrent.ForkJoinTask
 import java.util.concurrent.RecursiveTask
 
 /**
@@ -25,14 +27,15 @@ import java.util.concurrent.RecursiveTask
  * 
  * @author Emanuel Rabina
  */
+@CompileStatic
 @TupleConstructor(defaults = false)
 class ApplyPaletteTask extends RecursiveTask<ByteBuffer> {
 
-	private static final int TASK_THRESHOLD = 32000 // 320x100, or half an old resolution frame
+	private static final int TASK_THRESHOLD = 16000 // 320x50, or quarter of an old resolution frame
 
 	final ByteBuffer indexedData
 	final Palette palette
-	final IntRange range
+//	final ByteBuffer colouredData
 
 	/**
 	 * Apply the palette to the indexed data, returning the result in a new
@@ -42,28 +45,31 @@ class ApplyPaletteTask extends RecursiveTask<ByteBuffer> {
 	 */
 	private ByteBuffer applyPalette() {
 
-		def dest = ByteBuffer.allocateNative(range.size() * palette.format.value)
-		range.each { index ->
-			dest.put(palette[indexedData.get(index) & 0xff])
+		def colouredData = ByteBuffer.allocateNative(indexedData.remaining() * palette.format.value)
+		while (indexedData.hasRemaining()) {
+			colouredData.put(palette[indexedData.get() & 0xff])
 		}
-		return dest.flip()
+		return colouredData.flip()
 	}
 
 	@Override
 	protected ByteBuffer compute() {
 
-		def jobSize = range.size()
+		def jobSize = indexedData.remaining()
 		if (jobSize > TASK_THRESHOLD) {
-			def tasks = []
+			List<ForkJoinTask<ByteBuffer>> tasks = []
 			for (def i = 0; i < jobSize; i += TASK_THRESHOLD) {
-				tasks << new ApplyPaletteTask(indexedData, palette, i..<(Math.min(i + TASK_THRESHOLD, jobSize)))
+				tasks << new ApplyPaletteTask(
+					indexedData.duplicate().position(i).limit(Math.min(i + TASK_THRESHOLD, jobSize)),
+					palette
+				)
 					.fork()
 			}
-			def colouredBuffer = ByteBuffer.allocateNative(jobSize * palette.format.value)
+			def colouredData = ByteBuffer.allocateNative(jobSize * palette.format.value)
 			tasks.each { task ->
-				colouredBuffer.put(task.join())
+				colouredData.put(task.join())
 			}
-			return colouredBuffer.flip()
+			return colouredData.flip()
 		}
 		return applyPalette()
 	}

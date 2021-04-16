@@ -67,7 +67,7 @@ class WsaFileWorker extends Worker {
 					),
 					ByteBuffer.allocateNative(frameSize)
 				)
-				return forkJoinPool.invoke(new ApplyPaletteTask(indexedFrame, palette, 0..<indexedFrame.capacity()))
+				return forkJoinPool.invoke(new ApplyPaletteTask(indexedFrame, palette))
 			}
 			trigger(new StreamingFrameEvent(colouredFrame))
 		}
