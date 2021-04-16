@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes.wsa
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
+import nz.net.ultraq.redhorizon.filetypes.ApplyPaletteTask
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory
 import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
+import java.util.concurrent.ForkJoinPool
 
 /**
  * A worker for decoding WSA file frame data.
@@ -49,6 +51,7 @@ class WsaFileWorker extends Worker {
 
 		Thread.currentThread().name = 'WsaFile :: Decoding'
 		logger.debug('Decoding started')
+		def forkJoinPool = ForkJoinPool.commonPool()
 
 		def frameSize = width * height
 		def xorDelta = new XORDelta(frameSize)
@@ -64,7 +67,7 @@ class WsaFileWorker extends Worker {
 					),
 					ByteBuffer.allocateNative(frameSize)
 				)
-				return indexedFrame.applyPalette(palette)
+				return forkJoinPool.invoke(new ApplyPaletteTask(indexedFrame, palette, 0..<indexedFrame.capacity()))
 			}
 			trigger(new StreamingFrameEvent(colouredFrame))
 		}
