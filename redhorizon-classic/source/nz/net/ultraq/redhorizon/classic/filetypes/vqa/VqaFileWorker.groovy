@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.classic.filetypes.VgaPalette
-import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.ApplyPaletteTask
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
+import java.util.concurrent.ForkJoinPool
 
 /**
  * A worker for decoding VQA file video data.
@@ -120,19 +121,6 @@ class VqaFileWorker extends Worker {
 	}
 
 	/**
-	 * Decodes a frame of video, found in a VPT* chunk.
-	 * 
-	 * @param data       The VPT chunk data.
-	 * @param codeBook   Current lookup table for screen block data.
-	 * @param vqaPalette Current palette.
-	 * @return A fully coloured frame of video.
-	 */
-	private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook, Palette vqaPalette) {
-
-		return decodeFrame(data, codeBook).applyPalette(vqaPalette)
-	}
-
-	/**
 	 * Decodes a chunk of sound, found in an SND* chunk.
 	 * 
 	 * @param header The SND chunk header.
@@ -151,6 +139,7 @@ class VqaFileWorker extends Worker {
 
 		Thread.currentThread().name = 'VqaFile :: Decoding'
 		logger.debug('Decoding started')
+		def forkJoinPool = ForkJoinPool.commonPool()
 
 		def codebook = null
 		def codebookCompressed = false
@@ -221,7 +210,8 @@ class VqaFileWorker extends Worker {
 					// Video data
 					case ~/VPT./:
 						def frame = average('Decoding frame', 1f, logger) { ->
-							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
+							def indexedFrame = decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook)
+							return forkJoinPool.invoke(new ApplyPaletteTask(indexedFrame, vqaPalette))
 						}
 						trigger(new StreamingFrameEvent(frame))
 						break

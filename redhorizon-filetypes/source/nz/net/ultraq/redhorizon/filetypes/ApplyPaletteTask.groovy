@@ -35,7 +35,6 @@ class ApplyPaletteTask extends RecursiveTask<ByteBuffer> {
 
 	final ByteBuffer indexedData
 	final Palette palette
-//	final ByteBuffer colouredData
 
 	/**
 	 * Apply the palette to the indexed data, returning the result in a new
