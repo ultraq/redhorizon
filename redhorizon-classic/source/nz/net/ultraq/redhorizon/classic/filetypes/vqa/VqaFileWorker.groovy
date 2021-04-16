@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
-import java.util.concurrent.ForkJoinPool
 
 /**
  * A worker for decoding VQA file video data.
@@ -139,7 +138,6 @@ class VqaFileWorker extends Worker {
 
 		Thread.currentThread().name = 'VqaFile :: Decoding'
 		logger.debug('Decoding started')
-		def forkJoinPool = ForkJoinPool.commonPool()
 
 		def codebook = null
 		def codebookCompressed = false
@@ -211,7 +209,7 @@ class VqaFileWorker extends Worker {
 					case ~/VPT./:
 						def frame = average('Decoding frame', 1f, logger) { ->
 							def indexedFrame = decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook)
-							return forkJoinPool.invoke(new ApplyPaletteTask(indexedFrame, vqaPalette))
+							return new ApplyPaletteTask(indexedFrame, vqaPalette).invoke()
 						}
 						trigger(new StreamingFrameEvent(frame))
 						break
