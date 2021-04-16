@@ -31,9 +31,10 @@ import java.util.concurrent.RecursiveTask
 @TupleConstructor(defaults = false)
 class ObjectCullingTask extends RecursiveTask<List<SceneElement>> {
 
+	private static final int TASK_THRESHOLD = 200
+
 	final FrustumIntersection frustumIntersection
 	final List<SceneElement> sceneElements
-	final int taskThreshold
 
 	/**
 	 * Cull the scene elements, returning only those visible within the given
@@ -49,11 +50,17 @@ class ObjectCullingTask extends RecursiveTask<List<SceneElement>> {
 	@Override
 	protected List<SceneElement> compute() {
 
-		if (sceneElements.size() > taskThreshold) {
-			def head = new ObjectCullingTask(frustumIntersection, sceneElements[0..<taskThreshold], taskThreshold)
-			def tail = new ObjectCullingTask(frustumIntersection, sceneElements[taskThreshold..<sceneElements.size()], taskThreshold)
-			tail.fork()
-			return head.compute() + tail.join()
+		def numSceneElements = sceneElements.size()
+		if (numSceneElements > TASK_THRESHOLD) {
+			def tasks = []
+			for (def i = 0; i < numSceneElements; i += TASK_THRESHOLD) {
+				tasks << new ObjectCullingTask(frustumIntersection, sceneElements[i..<Math.min(i + TASK_THRESHOLD, numSceneElements)])
+					.fork()
+			}
+			return tasks.inject([]) { acc, task ->
+				acc.addAll(task.join())
+				return acc
+			}
 		}
 		return cullObjects()
 	}

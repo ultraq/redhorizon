@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
-import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.FutureTask
 
 /**
@@ -110,8 +109,6 @@ class GraphicsEngine extends Engine {
 	void run() {
 
 		Thread.currentThread().name = 'Graphics Engine'
-		def forkJoinPool = ForkJoinPool.commonPool()
-		def numProcessors = Runtime.runtime.availableProcessors()
 
 		// Initialization
 		openGlContext = waitForMainThread { ->
@@ -147,9 +144,7 @@ class GraphicsEngine extends Engine {
 								scene.accept { element ->
 									sceneElements << element
 								}
-								def taskSize = Math.max(Math.ceil(sceneElements.size() / numProcessors / 2), 200) as int
-								return forkJoinPool.invoke(new ObjectCullingTask(frustumIntersection, sceneElements,
-									taskSize))
+								return new ObjectCullingTask(frustumIntersection, sceneElements).invoke()
 							}
 //							renderer.asBatchRenderer { batchRenderer ->
 								visibleElements.each { element ->
