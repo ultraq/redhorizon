@@ -33,7 +33,7 @@ vec4 textureScale(sampler2D tex, vec2 uv) {
 	vec2 texelOffset = (centerDist - clamp(centerDist, -regionRange, regionRange)) * scale + 0.5;
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
-	return vec4(texture(tex, targetUVs).rgb, 1.0);
+	return texture(tex, targetUVs);
 }
 
 /**
