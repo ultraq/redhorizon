@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.MapConstructor
 
 /**
  * OpenGL implementation of a texture.
@@ -27,8 +26,17 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @EqualsAndHashCode
-@MapConstructor
 class OpenGLTexture extends Texture {
 
 	final int textureId
+
+	/**
+	 * Configure the texture with a map argument.
+	 * 
+	 * @param args
+	 */
+	OpenGLTexture(Map args) {
+		super(args)
+		textureId = args.textureId ?: 0
+	}
 }

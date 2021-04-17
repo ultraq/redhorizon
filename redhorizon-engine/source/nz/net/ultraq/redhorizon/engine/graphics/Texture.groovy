@@ -16,10 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.MapConstructor
+
 /**
  * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
+@EqualsAndHashCode
+@MapConstructor
 abstract class Texture {
+
+	final int width
+	final int height
 }
