@@ -31,7 +31,6 @@ abstract class Material {
 
 	Mesh mesh
 	Texture texture
-	Texture palette
 	Shader shader
 	Matrix4f transform
 }

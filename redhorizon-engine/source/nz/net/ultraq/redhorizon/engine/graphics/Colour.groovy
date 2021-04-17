@@ -36,12 +36,13 @@ class Colour {
 	 */
 	static final int FLOATS = 4
 
-	static final Colour BLACK  = new Colour('Black',  0, 0, 0)
-	static final Colour BLUE   = new Colour('Blue',   0, 0, 1)
-	static final Colour GREEN  = new Colour('Green',  0, 1, 0)
-	static final Colour RED    = new Colour('Red',    1, 0, 0)
-	static final Colour WHITE  = new Colour('White',  1, 1, 1)
-	static final Colour YELLOW = new Colour('Yellow', 1, 1, 0)
+	static final Colour BLACK  = new Colour('Black',  0.0, 0.0, 0.0)
+	static final Colour BLUE   = new Colour('Blue',   0.0, 0.0, 1.0)
+	static final Colour GREEN  = new Colour('Green',  0.0, 1.0, 0.0)
+	static final Colour GREY   = new Colour('Grey',   0.5, 0.5, 0.5)
+	static final Colour RED    = new Colour('Red',    1.0, 0.0, 0.0)
+	static final Colour WHITE  = new Colour('White',  1.0, 1.0, 1.0)
+	static final Colour YELLOW = new Colour('Yellow', 1.0, 1.0, 0.0)
 
 	final String name
 	final float r

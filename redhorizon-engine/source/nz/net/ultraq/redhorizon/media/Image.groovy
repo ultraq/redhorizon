@@ -40,7 +40,6 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	final int height
 	final ColourFormat format
 	private ByteBuffer imageData
-	final Palette palette
 
 	private Material material
 
@@ -86,9 +85,8 @@ class Image implements GraphicsElement, SceneElement<Image> {
 
 		this.width     = width
 		this.height    = height
-		this.format    = format
-		this.imageData = imageData.flipVertical(width, height, format)
-		this.palette   = palette
+		this.format    = palette?.format ?: format
+		this.imageData = (palette ? imageData.applyPalette(palette) : imageData).flipVertical(width, height, this.format)
 
 		this.bounds.set(0, 0, width, height)
 	}
@@ -104,8 +102,8 @@ class Image implements GraphicsElement, SceneElement<Image> {
 
 		material = renderer.createMaterial(
 			renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			renderer.createTexture(imageData, format.value, width, height),
-			palette ? renderer.createTexturePalette(palette) : null,
+			renderer.createTexture(imageData, format.value, width, height)
+			,
 			transform
 		)
 		imageData = null

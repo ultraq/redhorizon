@@ -35,7 +35,6 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	final TileSet tileSet
 	final ImagesFile tileFile
 	final int frame
-	private Palette palette
 
 	private Material material
 
@@ -46,14 +45,12 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	 * @param tileSet
 	 * @param tileFile
 	 * @param frame
-	 * @param palette
 	 */
-	MapElement(TileSet tileSet, ImagesFile tileFile, int frame, Palette palette) {
+	MapElement(TileSet tileSet, ImagesFile tileFile, int frame) {
 
 		this.tileSet  = tileSet
 		this.tileFile = tileFile
 		this.frame    = frame
-		this.palette  = palette
 
 		this.bounds.set(0, 0, tileFile.width, tileFile.height)
 	}
@@ -72,10 +69,8 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 				new Rectanglef(0, 0, tileFile.width, tileFile.height),
 				tileSet.getCoordinates(tileFile, frame)),
 			tileSet.texture,
-			renderer.createTexturePalette(palette),
 			transform
 		)
-		palette = null
 	}
 
 	@Override

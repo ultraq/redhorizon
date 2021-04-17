@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
@@ -35,13 +36,26 @@ import java.nio.ByteBuffer
  */
 class TileSet implements GraphicsElement {
 
-	final int tilesetWidth = 1536
-	final int tilesetHeight = 4800
-	final ByteBuffer tilesetData = ByteBuffer.allocateNative(tilesetWidth * tilesetHeight)
+	private final int tilesetWidth = 1536
+	private final int tilesetHeight = 4800
+	private final ByteBuffer tilesetData
+
+	final Palette palette
 
 	private final List<ImagesFile> tileFileList = []
 	private final Map<ImagesFile,Integer> tileFileMap = [:]
 	private Texture texture
+
+	/**
+	 * Constructor, build a tileset to fit data that uses the given palette.
+	 * 
+	 * @param palette
+	 */
+	TileSet(Palette palette) {
+
+		this.palette = palette
+		tilesetData = ByteBuffer.allocateNative(tilesetWidth * tilesetHeight * palette.format.value)
+	}
 
 	/**
 	 * Add more tiles to the tileset.
@@ -65,11 +79,13 @@ class TileSet implements GraphicsElement {
 		}
 
 		// Insert image data into the next rows here
+		def tileWidth = tilesFile.width * palette.format.value
 		tilesFile.imagesData.eachWithIndex { imageData, i ->
+			def colouredImageData = imageData.applyPalette(palette)
 			tilesFile.height.times { y ->
 				tilesetData
-					.position(((yStart + y) * tilesetWidth) + (i * tilesFile.width))
-					.put(imageData.array(), imageData.position() + (y * tilesFile.width), tilesFile.width)
+					.position(((yStart + y) * tilesetWidth * palette.format.value) + (i * tileWidth))
+					.put(colouredImageData.array(), colouredImageData.position() + (y * tileWidth), tileWidth)
 			}
 		}
 		tilesetData.rewind()
@@ -119,8 +135,8 @@ class TileSet implements GraphicsElement {
 
 		// TODO: Move image flipping to the renderer since it's an OpenGL detail?
 		texture = renderer.createTexture(
-			tilesetData.flipVertical(tilesetWidth, tilesetHeight, FORMAT_INDEXED),
-			FORMAT_INDEXED.value, tilesetWidth, tilesetHeight)
+			tilesetData.flipVertical(tilesetWidth, tilesetHeight, palette.format),
+			palette.format.value, tilesetWidth, tilesetHeight)
 	}
 
 	@Override

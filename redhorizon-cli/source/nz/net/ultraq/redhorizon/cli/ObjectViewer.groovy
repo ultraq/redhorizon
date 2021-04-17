@@ -83,7 +83,7 @@ class ObjectViewer implements Callable<Integer> {
 			case ShpFile:
 				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
 				def graphicsConfig = new GraphicsConfiguration(
-					clearColour: Colour.WHITE,
+					clearColour: Colour.GREY,
 					fullScreen: fullScreen
 				)
 				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType).view()

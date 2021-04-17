@@ -39,19 +39,19 @@ class Vehicle extends Unit {
 	 */
 	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
 
-		super(imagesFile.width, imagesFile.height, palette)
+		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
 		def turretPart = data.shpFile.parts.turret
 		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
-			buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)) +
-			(turretPart ? buildImagesData(imagesFile, frameIndex..<(frameIndex += turretPart.headings)) : [])
+			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] +
+			(turretPart ? imagesFile.imagesData[frameIndex..<(frameIndex += turretPart.headings)] : [])
 			as ByteBuffer[], palette)
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+				imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
 				palette, gameTime)
 		}
 

@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.filetypes.Palette
-
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -65,11 +63,10 @@ interface GraphicsRenderer {
 	 * 
 	 * @param mesh
 	 * @param texture
-	 * @param palette
 	 * @param transform
 	 * @return
 	 */
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform)
+	Material createMaterial(Mesh mesh, Texture texture, Matrix4f transform)
 
 	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
@@ -133,14 +130,6 @@ interface GraphicsRenderer {
 	 * @return New texture object.
 	 */
 	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
-
-	/**
-	 * Create a texture out of a palette.
-	 * 
-	 * @param palette
-	 * @return New texture representing a palette.
-	 */
-	Texture createTexturePalette(Palette palette)
 
 	/**
 	 * Delete all of the items tied to the material.

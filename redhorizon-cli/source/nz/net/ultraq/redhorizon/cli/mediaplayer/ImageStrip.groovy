@@ -30,7 +30,6 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 class ImageStrip implements SceneElement<ImageStrip> {
 
 	final List<Image> images = []
-	final Palette palette
 
 	/**
 	 * Constructor, build a strip of images from a file containing multiple
@@ -41,7 +40,6 @@ class ImageStrip implements SceneElement<ImageStrip> {
 	 */
 	ImageStrip(ImagesFile imagesFile, Palette palette) {
 
-		this.palette = palette
 		this.bounds.set(0, 0, imagesFile.width * imagesFile.numImages, imagesFile.height)
 		translate(0, -imagesFile.height / 2 as float, 0)
 

@@ -40,7 +40,6 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	private ByteBuffer imageData
 	final float repeatX
 	final float repeatY
-	private Palette palette
 
 	private Material material
 
@@ -49,22 +48,19 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
-	 * @param imageFormat
 	 * @param imageData
 	 * @param repeatX
 	 * @param repeatY
 	 * @param palette
 	 */
-	MapBackground(int imageWidth, int imageHeight, ColourFormat imageFormat, ByteBuffer imageData, float repeatX, float repeatY,
-		Palette palette) {
+	MapBackground(int imageWidth, int imageHeight, ByteBuffer imageData, float repeatX, float repeatY, Palette palette) {
 
 		this.width     = imageWidth
 		this.height    = imageHeight
-		this.format    = imageFormat
-		this.imageData = imageData.flipVertical(width, height, format)
+		this.format    = palette.format
+		this.imageData = imageData.applyPalette(palette).flipVertical(width, height, format)
 		this.repeatX   = repeatX
 		this.repeatY   = repeatY
-		this.palette   = palette
 
 		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
@@ -83,11 +79,9 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 				new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
 				new Rectanglef(0, 0, repeatX, repeatY)),
 			renderer.createTexture(imageData, format.value, width, height),
-			renderer.createTexturePalette(palette),
 			transform
 		)
 		imageData = null
-		palette = null
 	}
 
 	@Override

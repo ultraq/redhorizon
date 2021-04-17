@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -61,7 +60,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
-	private final TileSet tileSet = new TileSet()
+	private final TileSet tileSet
 	private final List<SceneElement> layers = []
 	private Palette palette
 
@@ -90,6 +89,8 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		def waypoints = mapFile['Waypoints']
 		def waypoint98 = waypoints['98'] as int
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
+
+		tileSet = new TileSet(palette)
 
 		// Build the various layers
 		layers << new BackgroundLayer(resourceManager)
@@ -197,7 +198,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 			def repeatX = (TILES_X * TILE_WIDTH) / width as float
 			def repeatY = (TILES_Y * TILE_HEIGHT) / height as float
 
-			background = new MapBackground(width, height, tileFile.format, imageData, repeatX, repeatY, palette)
+			background = new MapBackground(width, height, imageData, repeatX, repeatY, palette)
 				.translate(WORLD_OFFSET.x, WORLD_OFFSET.y, 0)
 		}
 
@@ -267,7 +268,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 						}
 
 						tileSet.addTiles(tileFile)
-						elements << new MapElement(tileSet, tileFile, tilePic, palette)
+						elements << new MapElement(tileSet, tileFile, tilePic)
 							.translate(new Vector2f(x, y).asWorldCoords(1))
 					}
 				}
@@ -378,7 +379,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 				}
 
 				tileSet.addTiles(tileFile)
-				elements << new MapElement(tileSet, tileFile, imageVariant, palette)
+				elements << new MapElement(tileSet, tileFile, imageVariant)
 					.translate(new Vector2f(tilePos).asWorldCoords(1))
 			}
 		}
@@ -402,7 +403,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 				def cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
 //				def cellPosWH = new Vector2f(cellPosXY).add(terrainFile.width, terrainFile.height)
 				tileSet.addTiles(terrainFile)
-				elements << new MapElement(tileSet, terrainFile, 0, palette)
+				elements << new MapElement(tileSet, terrainFile, 0)
 					.translate(cellPosXY)
 			}
 

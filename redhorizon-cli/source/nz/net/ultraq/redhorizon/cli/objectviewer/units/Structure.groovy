@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
+import java.nio.ByteBuffer
+
 /**
  * A rendered unit for building/structure types.
  * 
@@ -37,17 +39,18 @@ class Structure extends Unit {
 	 */
 	Structure(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
 
-		super(imagesFile.width, imagesFile.height, palette)
+		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 		def bodyPart = data.shpFile.parts.body
 
 		['', '-damaged'].forEach { status ->
 			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
-				buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)), palette)
+				imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] as ByteBuffer[],
+				palette)
 
 			data.shpFile.animations?.each { animation ->
 				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
-					buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+					imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
 					palette, gameTime)
 			}
 		}

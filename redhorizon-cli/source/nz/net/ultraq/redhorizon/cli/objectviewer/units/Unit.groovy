@@ -18,14 +18,10 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import java.nio.ByteBuffer
 
 /**
  * The unit that gets displayed on the screen.
@@ -39,41 +35,22 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	protected final List<UnitRenderer> unitRenderers = []
 	protected UnitRenderer currentRenderer
 
-	protected float heading
 	protected final int width
 	protected final int height
-	protected Palette palette
+	protected float heading
 
 	/**
 	 * Constructor, set the unit's width and height.
 	 * 
 	 * @param width
 	 * @param height
-	 * @param palette
 	 */
-	protected Unit(int width, int height, Palette palette) {
+	protected Unit(int width, int height) {
 
 		this.width = width
 		this.height = height
-		this.palette = palette
 
 		bounds.set(0, 0, width, height)
-	}
-
-	/**
-	 * Build a series of images from the specified range of frame data of the unit
-	 * graphics.
-	 * 
-	 * @param imagesFile
-	 * @param coordinates
-	 * @param range
-	 * @return
-	 */
-	protected static ByteBuffer[] buildImagesData(ImagesFile imagesFile, IntRange range) {
-
-		return imagesFile.imagesData[range].collect { data ->
-			return data.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
-		}
 	}
 
 	@Override

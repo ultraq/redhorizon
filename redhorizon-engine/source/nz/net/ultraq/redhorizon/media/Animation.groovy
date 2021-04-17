@@ -154,7 +154,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		material = renderer.createMaterial(
 			mesh,
 			null,
-			null,
 			transform
 		)
 		framesQueued = 0

@@ -116,7 +116,6 @@ class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventT
 					elementBufferId: elementBufferId
 				),
 				texture: templateMaterial.texture,
-				palette: templateMaterial.palette,
 				shader: templateMaterial.shader,
 				transform: new Matrix4f()
 			)
@@ -154,9 +153,9 @@ class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventT
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture, Texture palette, Matrix4f transform) {
+	Material createMaterial(Mesh mesh, Texture texture, Matrix4f transform) {
 
-		def material = renderer.createMaterial(mesh, texture, palette, transform)
+		def material = renderer.createMaterial(mesh, texture, transform)
 		materials << material
 		return material
 	}

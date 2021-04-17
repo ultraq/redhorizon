@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
+import java.nio.ByteBuffer
+
 /**
  * An implementation of the rendered unit for infantry types.
  * 
@@ -37,12 +39,13 @@ class Infantry extends Unit {
 	 */
 	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
 
-		super(imagesFile.width, imagesFile.height, palette)
+		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
 		unitRenderers << new UnitRenderer('body', this, bodyPart.headings,
-			buildImagesData(imagesFile, frameIndex..<(frameIndex += bodyPart.headings)), palette)
+			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] as ByteBuffer[],
+			palette)
 
 		// TODO: Utilize alternative body frames for something
 		def bodyAltPart = data.shpFile.parts.bodyAlt
@@ -52,7 +55,7 @@ class Infantry extends Unit {
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				buildImagesData(imagesFile, frameIndex..<(frameIndex += (animation.frames * animation.headings))),
+				imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
 				palette, gameTime)
 		}
 
