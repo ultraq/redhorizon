@@ -102,48 +102,4 @@ class ByteBufferImageExtensions {
 		}
 		return flippedImageBuffer.flip()
 	}
-
-	/**
-	 * Given several image buffers, find out how many images will fit across so
-	 * that the resulting combined width is less-than or equal-to {@code limitX}
-	 * pixels.
-	 * 
-	 * @param self
-	 * @param width  Width of each image.
-	 * @param limitX Desired combined image width to stay below.
-	 * @return Number of images that will fit within {@code limitX} pixels.
-	 */
-	static int imagesAcross(ByteBuffer[] self, int width, int limitX) {
-
-		return width < limitX ? Math.min(limitX / width as int, self.length) : 1
-	}
-
-	/**
-	 * Return a new image buffer where the width and height dimensions have been
-	 * right-shifted by the given amount.  (The reason for only scaling by binary
-	 * shifting is that the scaling algorithm is really slow if it has to use
-	 * division!)
-	 * 
-	 * @param self
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param scaleShift
-	 * @return
-	 */
-	static ByteBuffer scale(ByteBuffer self, int width, int height, ColourFormat format, int scaleShift) {
-
-		def scaledWidth = width << scaleShift
-		def scaledHeight = height << scaleShift
-		def scaledBuffer = ByteBuffer.allocateNative(scaledWidth * scaledHeight * format.value)
-
-		for (def y = 0; y < scaledHeight; y++) {
-			for (def x = 0; x < scaledWidth; x++) {
-				def selfPointer = ((y >> scaleShift) * width + (x >> scaleShift)) * format.value
-				def scalePointer = (y * scaledWidth + x) * format.value
-				scaledBuffer.position(scalePointer).put(self.array(), selfPointer, format.value)
-			}
-		}
-		return scaledBuffer.flip()
-	}
 }

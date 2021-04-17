@@ -50,7 +50,6 @@ class AnimationPlayer extends Application {
 
 	final AnimationFile animationFile
 	final GraphicsConfiguration graphicsConfig
-	final boolean scaleLowRes
 	final boolean scanlines
 
 	/**
@@ -71,14 +70,10 @@ class AnimationPlayer extends Application {
 					graphicsEngine.on(WindowCreatedEvent) { event ->
 						def width = animationFile.width
 						def height = animationFile.height
-						if (scaleLowRes) {
-							width <<= 1
-							height <<= 1
-						}
 						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
 						def offset = new Vector2f(-width / 2, -height / 2)
 
-						animation = new Animation(animationFile, scaleLowRes, gameClock, executorService)
+						animation = new Animation(animationFile, gameClock, executorService)
 							.scaleXY(scale)
 							.translate(offset)
 						animation.on(StopEvent) { stopEvent ->

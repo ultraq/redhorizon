@@ -48,18 +48,16 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	 * 
 	 * @param videoFile
 	 *   Video source.
-	 * @param scale
-	 *   Whether or not to double the input resolution of low-resolution videos.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, boolean scale, GameTime gameTime, ExecutorService executorService) {
+	Video(VideoFile videoFile, GameTime gameTime, ExecutorService executorService) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
-				scale, videoFile.frameRate * 2 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}

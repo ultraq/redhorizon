@@ -78,9 +78,6 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
-	@Option(names = ['--scale-low-res'], description = 'Double the output resolution of low-res animations and videos (320x200 or lower).  Useful in conjunction with filtering so that the result is still filtered but less blurry.')
-	boolean scaleLowRes
-
 	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
 	boolean scanlines
 
@@ -114,11 +111,11 @@ class MediaPlayer implements Callable<Integer> {
 
 			switch (mediaFile) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig, scaleLowRes, scanlines)
+				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig, scanlines)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scaleLowRes, scanlines)
+				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scanlines)
 				animationPlayer.play()
 				break
 			case SoundFile:

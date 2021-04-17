@@ -75,16 +75,13 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * 
 	 * @param animationFile
 	 *   Animation source.
-	 * @param scale
-	 *   Whether or not to double the input resolution of low-resolution
-	 *   animations.
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, boolean scale, GameTime gameTime, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, GameTime gameTime, ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
-			scale, animationFile.frameRate as int,
+			animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
@@ -99,23 +96,20 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * @param format
 	 * @param numFrames
 	 * @param frameRate
-	 * @param scale
-	 *   Whether or not to double the input resolution of low-resolution
-	 *   animations.
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 * @param gameTime
 	 */
 	@PackageScope
 	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
-		boolean scale, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
+		int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		this.width     = width << (scale ? 1 : 0)
-		this.height    = height << (scale ? 1 : 0)
+		this.width     = width
+		this.height    = height
 		this.format    = format
 		this.numFrames = numFrames
 		this.frameRate = frameRate
@@ -124,8 +118,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		this.bufferSize = bufferSize
 		this.animationDataWorker = animationDataWorker
 		this.animationDataWorker.on(StreamingFrameEvent) { event ->
-			def frame = event.frame.flipVertical(width, height, format)
-			frames << (scale ? frame.scale(width, height, format, 1) : frame)
+			frames << event.frame.flipVertical(width, height, format)
 			if (bufferReady.count && !frames.remainingCapacity()) {
 				bufferReady.countDown()
 			}

@@ -51,7 +51,6 @@ class VideoPlayer extends Application {
 	final VideoFile videoFile
 	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
-	final boolean scaleLowRes
 	final boolean scanlines
 
 	/**
@@ -73,14 +72,10 @@ class VideoPlayer extends Application {
 						graphicsEngine.on(WindowCreatedEvent) { event ->
 							def width = videoFile.width
 							def height = videoFile.height
-							if (scaleLowRes) {
-								width <<= 1
-								height <<= 1
-							}
 							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
 							def offset = new Vector2f(-width / 2, -height / 2)
 
-							video = new Video(videoFile, scaleLowRes, gameClock, executorService)
+							video = new Video(videoFile, gameClock, executorService)
 							video.scaleXY(scale)
 							video.translate(offset)
 
