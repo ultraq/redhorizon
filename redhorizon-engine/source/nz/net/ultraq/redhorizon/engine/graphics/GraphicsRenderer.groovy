@@ -119,19 +119,6 @@ interface GraphicsRenderer {
 	Texture createTexture(ByteBuffer data, int format, int width, int height)
 
 	/**
-	 * Create and fill a texture with the given image data.
-	 * 
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param data
-	 * @param filter Specify nearest-neighbouer filtering on the texture,
-	 *               independent of the graphics configuration.
-	 * @return New texture object.
-	 */
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter)
-
-	/**
 	 * Delete all of the items tied to the material.
 	 * 
 	 * @param material

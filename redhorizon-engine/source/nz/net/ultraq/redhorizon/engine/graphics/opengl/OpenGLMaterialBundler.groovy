@@ -34,7 +34,6 @@ import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.TupleConstructor
-import java.nio.ByteBuffer
 
 /**
  * A material builder for OpenGL.
@@ -45,7 +44,7 @@ import java.nio.ByteBuffer
 class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventTarget {
 
 	@Delegate(excludes = [
-		'createSpriteMesh', 'createTexture'
+		'createSpriteMesh'
 	])
 	final OpenGLRenderer renderer
 
@@ -144,12 +143,6 @@ class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventT
 			textureUVs as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		)
-	}
-
-	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = renderer.config.filter) {
-
-		return renderer.createTexture(data, format, width, height, filter)
 	}
 
 	@Override

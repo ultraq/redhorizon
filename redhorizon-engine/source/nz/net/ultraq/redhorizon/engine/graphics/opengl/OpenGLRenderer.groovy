@@ -34,6 +34,7 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -137,7 +138,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def textureBytes = ByteBuffer.allocateNative(4)
 				.putInt(0xffffffff as int)
 				.flip()
-			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1, false) as OpenGLTexture
+			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
 		}
 	}
 
@@ -217,7 +218,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			view.get(Matrix4f.FLOATS, projectionAndViewBuffer)
 			glBufferData(GL_UNIFORM_BUFFER, projectionAndViewBuffer, GL_DYNAMIC_DRAW)
 
-			shaders.eachWithIndex { shader, index ->
+			shaders.each { shader ->
 				def blockIndex = glGetUniformBlockIndex(shader.programId, 'Camera')
 				glUniformBlockBinding(shader.programId, blockIndex, 0)
 			}
@@ -408,13 +409,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = config.filter) {
+	Texture createTexture(ByteBuffer data, int format, int width, int height) {
 
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
 			glBindTexture(GL_TEXTURE_2D, textureId)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
 
 			def colourFormat =
 				format == 1 ? GL_RED :
@@ -434,7 +435,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			}
 
 			def texture = new OpenGLTexture(
-				textureId: textureId
+				textureId: textureId,
+				width: width,
+				height: height
 			)
 			trigger(new TextureCreatedEvent(texture))
 			return texture
@@ -486,6 +489,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				glUniform1iv(texturesLocation, 0)
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
+
+				glUniform2fv(getUniformLocation(shader, 'textureSourceSize'), stack.floats(texture.width, texture.height))
+
+				// TODO: Store mesh dimensions somewhere?  Currently just a series of
+				//       points but no way to get the original size from the Rectanglef
+				//       that it was built with 🤔
+				def textureTargetSize = mesh.vertices[2].mul(material.transform.getScale(new Vector3f()).x, new Vector2f())
+				glUniform2fv(getUniformLocation(shader, 'textureTargetSize'), textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS)))
 
 				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
