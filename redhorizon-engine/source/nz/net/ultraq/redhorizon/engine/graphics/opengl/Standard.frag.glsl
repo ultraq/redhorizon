@@ -1,14 +1,19 @@
 #version 410 core
 
+#define scanlineBaseBrightness float(0.95)
+#define scanlineHorizontalModulation float(0.0)
+#define scanlineVerticalModulation float(0.15)
+
 in vec4 v_vertexColour;
 in vec2 v_textureUVs;
 in float v_textureUnit;
 in vec2 v_texelPosition;
 in vec2 v_textureScale;
+in vec2 v_omega;
 
 out vec4 fragmentColour;
 
-uniform sampler2D textures[maxTextureUnits];
+uniform sampler2D textures[MAX_TEXTURE_UNITS];
 uniform vec2 textureSourceSize;
 uniform vec2 textureTargetSize;
 
@@ -33,7 +38,12 @@ vec4 textureScale(sampler2D tex, vec2 uv) {
 	vec2 texelOffset = (centerDist - clamp(centerDist, -regionRange, regionRange)) * scale + 0.5;
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
-	return texture(tex, targetUVs);
+	vec4 textureColour = texture(tex, targetUVs);
+
+	// thick scanlines (thickness pre-calculated in vertex shader based on source resolution)
+	vec2 sineComp = vec2(scanlineHorizontalModulation, scanlineVerticalModulation);
+
+	return textureColour * (scanlineBaseBrightness + dot(sineComp * sin(uv * v_omega), vec2(1.0, 1.0)));
 }
 
 /**

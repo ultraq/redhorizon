@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import org.joml.Matrix4f
@@ -71,6 +72,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
+	protected final Dimension viewportSize
 	protected final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
 	protected Texture whiteTexture
@@ -122,7 +124,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
-		def viewportSize = context.framebufferSize
+		viewportSize = context.framebufferSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
 		glViewport(0, 0, viewportSize.width, viewportSize.height)
 //		context.on(FramebufferSizeEvent) { event ->
@@ -379,8 +381,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 		def capTextureUnits = { source ->
 			return source
-				.replace('[maxTextureUnits]', "[${maxTextureUnits}]")
-				.replace('[maxTransforms]', "[${maxTransforms}]")
+				.replace('MAX_TEXTURE_UNITS', "${maxTextureUnits}")
+				.replace('MAX_TRANSFORMS', "${maxTransforms}")
+				.replace('OUTPUT_RESOLUTION_WIDTH', "${viewportSize.width}")
+				.replace('OUTPUT_RESOLUTION_HEIGHT', "${viewportSize.height}")
 		}
 		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
 		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)
