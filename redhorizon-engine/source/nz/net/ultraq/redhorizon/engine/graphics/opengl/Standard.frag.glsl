@@ -24,7 +24,7 @@ uniform bool useScanlines;
  * hardware bilinear filtering to smooth out the transitions between pixels,
  * while appearing sharp.
  * 
- * Based off the `sharp-bilinear-simple` shader made for RetroArch/LibRetro,
+ * Based on the `sharp-bilinear-simple` shader made for RetroArch/LibRetro,
  * found here: https://github.com/rsn8887/Sharp-Bilinear-Shaders
  */
 vec4 textureScale(sampler2D tex, vec2 uv) {
@@ -39,13 +39,20 @@ vec4 textureScale(sampler2D tex, vec2 uv) {
 	vec2 texelOffset = (centerDist - clamp(centerDist, -regionRange, regionRange)) * scale + 0.5;
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
-	vec4 textureColour = texture(tex, targetUVs);
+	return texture(tex, targetUVs);
+}
 
-	if (useScanlines) {
-		vec2 sineComp = vec2(scanlineHorizontalModulation, scanlineVerticalModulation);
-		textureColour = textureColour * (scanlineBaseBrightness + dot(sineComp * sin(uv * v_omega), vec2(1.0, 1.0)));
-	}
-	return textureColour;
+/**
+ * Return a value that the current colour can be multiplied by that will give
+ * the appearance of scanlines across the screen.
+ * 
+ * Based on the scanline shaders found in RetroArch/LibRetro, found here:
+ * https://github.com/libretro/glsl-shaders
+ */
+vec4 insertScanlines(vec2 uv) {
+
+	vec2 sineComp = vec2(scanlineHorizontalModulation, scanlineVerticalModulation);
+	return vec4(scanlineBaseBrightness + dot(sineComp * sin(uv * v_omega - 1), vec2(1.0, 1.0)));
 }
 
 /**
@@ -54,6 +61,7 @@ vec4 textureScale(sampler2D tex, vec2 uv) {
  */
 void main() {
 
-	vec4 textureColour = textureScale(textures[int(v_textureUnit)], v_textureUVs);
-	fragmentColour = textureColour * v_vertexColour;
+	fragmentColour = textureScale(textures[int(v_textureUnit)], v_textureUVs);
+	fragmentColour *= useScanlines ? insertScanlines(v_textureUVs) : vec4(1.0, 1.0, 1.0, 1.0);
+	fragmentColour *= v_vertexColour;
 }
