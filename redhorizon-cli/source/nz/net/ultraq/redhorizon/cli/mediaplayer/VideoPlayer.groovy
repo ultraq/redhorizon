@@ -84,13 +84,6 @@ class VideoPlayer extends Application {
 								graphicsEngine.stop()
 							}
 							scene << video
-
-//							if (scanlines) {
-//								scene << new Scanlines(new Dimension(width, height))
-//									.scaleXY(scale)
-//									.translate(offset)
-//									.translate(0, -scale / 2 as float, 0)
-//							}
 						}
 
 						graphicsEngine.on(RenderLoopStartEvent) { event ->
