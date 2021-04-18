@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
-import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -73,7 +72,7 @@ class AnimationPlayer extends Application {
 						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
 						def offset = new Vector2f(-width / 2, -height / 2)
 
-						animation = new Animation(animationFile, gameClock, executorService)
+						animation = new Animation(animationFile, scanlines, gameClock, executorService)
 							.scaleXY(scale)
 							.translate(offset)
 						animation.on(StopEvent) { stopEvent ->
@@ -83,12 +82,12 @@ class AnimationPlayer extends Application {
 						}
 						scene << animation
 
-						if (scanlines) {
-							scene << new Scanlines(new Dimension(width, height))
-								.scaleXY(scale)
-								.translate(offset)
-								.translate(0, -scale / 2 as float, 0)
-						}
+//						if (scanlines) {
+//							scene << new Scanlines(new Dimension(width, height))
+//								.scaleXY(scale)
+//								.translate(offset)
+//								.translate(0, -scale / 2 as float, 0)
+//						}
 					}
 
 					graphicsEngine.on(RenderLoopStartEvent) { event ->

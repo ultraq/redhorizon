@@ -33,4 +33,6 @@ abstract class Material {
 	Texture texture
 	Shader shader
 	Matrix4f transform
+
+	boolean scanlines
 }

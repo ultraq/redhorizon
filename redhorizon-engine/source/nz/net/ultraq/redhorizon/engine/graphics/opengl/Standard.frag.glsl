@@ -1,6 +1,6 @@
 #version 410 core
 
-#define scanlineBaseBrightness float(0.95)
+#define scanlineBaseBrightness float(1.0)
 #define scanlineHorizontalModulation float(0.0)
 #define scanlineVerticalModulation float(0.15)
 
@@ -16,6 +16,7 @@ out vec4 fragmentColour;
 uniform sampler2D textures[MAX_TEXTURE_UNITS];
 uniform vec2 textureSourceSize;
 uniform vec2 textureTargetSize;
+uniform bool useScanlines;
 
 /**
  * A texture scaler that samples textures such that they have the appearance of
@@ -40,10 +41,11 @@ vec4 textureScale(sampler2D tex, vec2 uv) {
 
 	vec4 textureColour = texture(tex, targetUVs);
 
-	// thick scanlines (thickness pre-calculated in vertex shader based on source resolution)
-	vec2 sineComp = vec2(scanlineHorizontalModulation, scanlineVerticalModulation);
-
-	return textureColour * (scanlineBaseBrightness + dot(sineComp * sin(uv * v_omega), vec2(1.0, 1.0)));
+	if (useScanlines) {
+		vec2 sineComp = vec2(scanlineHorizontalModulation, scanlineVerticalModulation);
+		textureColour = textureColour * (scanlineBaseBrightness + dot(sineComp * sin(uv * v_omega), vec2(1.0, 1.0)));
+	}
+	return textureColour;
 }
 
 /**

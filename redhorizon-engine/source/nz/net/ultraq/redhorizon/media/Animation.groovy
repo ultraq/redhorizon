@@ -55,6 +55,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	final ColourFormat format
 	final int numFrames
 	final float frameRate
+	final boolean scanlines
 
 	private final Worker animationDataWorker
 	private final BlockingQueue<ByteBuffer> frames
@@ -75,13 +76,14 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * 
 	 * @param animationFile
 	 *   Animation source.
+	 * @param scanlines
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, GameTime gameTime, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, boolean scanlines, GameTime gameTime, ExecutorService executorService) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
-			animationFile.frameRate as int,
+			scanlines, animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
@@ -96,13 +98,14 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * @param format
 	 * @param numFrames
 	 * @param frameRate
+	 * @param scanlines
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 * @param gameTime
 	 */
 	@PackageScope
 	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
-		int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
+		boolean scanlines, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
@@ -113,6 +116,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		this.format    = format
 		this.numFrames = numFrames
 		this.frameRate = frameRate
+		this.scanlines = scanlines
 
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
@@ -149,6 +153,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 			null,
 			transform
 		)
+		material.scanlines = scanlines
 		framesQueued = 0
 	}
 

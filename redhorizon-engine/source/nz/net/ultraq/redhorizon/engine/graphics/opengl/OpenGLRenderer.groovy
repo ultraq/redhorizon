@@ -502,6 +502,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				def textureTargetSize = mesh.vertices[2].mul(material.transform.getScale(new Vector3f()).x, new Vector2f())
 				glUniform2fv(getUniformLocation(shader, 'textureTargetSize'), textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS)))
 
+				glUniform1i(getUniformLocation(shader, 'useScanlines'), material.scanlines ? 1 : 0)
+
 				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
 				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
