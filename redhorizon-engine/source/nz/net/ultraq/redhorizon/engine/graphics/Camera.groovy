@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Matrix4f
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class Camera implements GraphicsElement {
+class Camera implements GraphicsElement, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
@@ -86,6 +87,7 @@ class Camera implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		if (moved) {
+			trigger(new CameraMovedEvent())
 			renderer.updateCamera(view)
 			moved = false
 		}

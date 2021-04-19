@@ -16,7 +16,17 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.graphics.Camera
+import nz.net.ultraq.redhorizon.engine.graphics.CameraMovedEvent
+
+import org.joml.FrustumIntersection
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
@@ -26,7 +36,13 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Scene implements Visitable {
 
-	private List<SceneElement> elements = new CopyOnWriteArrayList<>()
+	private static final Logger logger = LoggerFactory.getLogger(Scene)
+
+	private final List<SceneElement> elements = new CopyOnWriteArrayList<>()
+
+	private final ExecutorService executorService = Executors.newCachedThreadPool()
+	private List<SceneElement> visibleElements = []
+	private final visibleElementsLock = new Semaphore(1, true)
 
 	/**
 	 * Allow visitors into the scene for traversal.
@@ -42,6 +58,58 @@ class Scene implements Visitable {
 	}
 
 	/**
+	 * Attach a camera to the scene, letting it be used for culling objects that
+	 * aren't visible through the camera's view.
+	 * 
+	 * @param camera
+	 */
+	void addCamera(Camera camera) {
+
+		// Off-thread object culling
+		camera.on(CameraMovedEvent) { event ->
+			executorService.execute { ->
+				Thread.currentThread().name = 'Scene object culling'
+				def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+				def nextVisibleElements = []
+				averageNanos('objectCulling', 1f, logger) { ->
+					accept { element ->
+						if (frustumIntersection.testPlaneXY(element.bounds)) {
+							nextVisibleElements << element
+						}
+					}
+				}
+				visibleElementsLock.acquireAndRelease { ->
+					visibleElements = nextVisibleElements
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds an element to this scene.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	Scene addSceneElement(SceneElement element) {
+
+		elements << element
+		return this
+	}
+
+	/**
+	 * Return an iterator over the currently-visible elements in the scene.
+	 * 
+	 * @return
+	 */
+	Iterator<SceneElement> getVisibleElementsIterator() {
+
+		return visibleElementsLock.acquireAndRelease { ->
+			return visibleElements.iterator()
+		}
+	}
+
+	/**
 	 * Overloads the {@code <<} operator to add elements to this scene.
 	 * 
 	 * @param element
@@ -49,8 +117,7 @@ class Scene implements Visitable {
 	 */
 	Scene leftShift(SceneElement element) {
 
-		elements << element
-		return this
+		return addSceneElement(element)
 	}
 
 	/**
