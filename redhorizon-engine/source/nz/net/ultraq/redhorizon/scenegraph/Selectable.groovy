@@ -17,20 +17,19 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * Interface for game objects that are selectable from the game world via the
- * user interface, and as such can response to user interface events.
+ * Interface for elements that are selectable by some input in a scene.
  * 
  * @author Emanuel Rabina
  */
 interface Selectable {
 
 	/**
-	 * Notification that this object has been deselected by the user.
+	 * Called when this element has been deselected by soem action.
 	 */
 	void deselect()
 
 	/**
-	 * Notification that this object has been selected by the user.
+	 * Called when this element has been selected by some action.
 	 */
 	void select()
 }
