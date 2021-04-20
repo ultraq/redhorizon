@@ -53,8 +53,6 @@ class ImageStrip implements SceneElement<ImageStrip> {
 	void accept(SceneVisitor visitor) {
 
 		visitor.visit(this)
-		images.each { image ->
-			image.accept(visitor)
-		}
+		images*.accept(visitor)
 	}
 }

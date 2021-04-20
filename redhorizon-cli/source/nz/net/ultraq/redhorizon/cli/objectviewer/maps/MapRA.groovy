@@ -110,9 +110,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	void accept(SceneVisitor visitor) {
 
 		visitor.visit(this)
-		layers.each { layer ->
-			layer.accept(visitor)
-		}
+		layers*.accept(visitor)
 	}
 
 	@Override
@@ -221,9 +219,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		void accept(SceneVisitor visitor) {
 
 			visitor.visit(this)
-			elements.each { element ->
-				element.accept(visitor)
-			}
+			elements*.accept(visitor)
 		}
 	}
 
@@ -291,9 +287,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		void init(GraphicsRenderer renderer) {
 
 			material = renderer.withMaterialBundler { bundler ->
-				elements.each { element ->
-					element.init(bundler)
-				}
+				elements*.init(bundler)
 			}
 		}
 

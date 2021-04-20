@@ -60,9 +60,7 @@ class ResourceManager implements Closeable {
 	@Override
 	void close() {
 
-		archiveFiles.each { filePath, archive ->
-			archive.close()
-		}
+		archiveFiles.values()*.close()
 	}
 
 	/**

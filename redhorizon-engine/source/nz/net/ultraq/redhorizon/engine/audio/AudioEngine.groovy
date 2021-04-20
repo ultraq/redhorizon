@@ -102,9 +102,7 @@ class AudioEngine extends Engine {
 
 				// Shutdown
 				logger.debug('Shutting down audio engine')
-				audioElementStates.keySet().each { audioElement ->
-					audioElement.delete(renderer)
-				}
+				audioElementStates.keySet()*.delete(renderer)
 			}
 		}
 	}

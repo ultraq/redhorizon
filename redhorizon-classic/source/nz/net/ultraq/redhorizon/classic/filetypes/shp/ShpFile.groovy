@@ -160,9 +160,7 @@ class ShpFile implements ImagesFile, Writable {
 			// Fill the target frame with 1 row from the current pointer
 			imagesData[frame].put(sourceData, width)
 		}
-		imagesData.each { imageData ->
-			imageData.rewind()
-		}
+		imagesData*.rewind()
 		sourceData.rewind()
 	}
 
