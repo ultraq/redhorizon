@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.CameraMovedEvent
 
 import org.joml.FrustumIntersection
+import org.joml.Matrix4f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -39,6 +40,9 @@ class Scene implements Visitable {
 	private static final Logger logger = LoggerFactory.getLogger(Scene)
 
 	private final List<SceneElement> elements = new CopyOnWriteArrayList<>()
+	private Camera camera
+	private Matrix4f viewProjectionMatrix
+	private FrustumIntersection lastFrustum
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
 	private List<SceneElement> visibleElements = []
@@ -52,9 +56,7 @@ class Scene implements Visitable {
 	@Override
 	void accept(SceneVisitor visitor) {
 
-		elements.each { element ->
-			element.accept(visitor)
-		}
+		elements*.accept(visitor)
 	}
 
 	/**
@@ -65,19 +67,16 @@ class Scene implements Visitable {
 	 */
 	void addCamera(Camera camera) {
 
+		this.camera = camera
+		viewProjectionMatrix = new Matrix4f()
+		lastFrustum = new FrustumIntersection(camera.projection.mul(camera.view, viewProjectionMatrix))
+
 		// Off-thread object culling
 		camera.on(CameraMovedEvent) { event ->
 			executorService.execute { ->
 				Thread.currentThread().name = 'Scene object culling'
-				def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-				def nextVisibleElements = []
-				averageNanos('objectCulling', 1f, logger) { ->
-					accept { element ->
-						if (frustumIntersection.testPlaneXY(element.bounds)) {
-							nextVisibleElements << element
-						}
-					}
-				}
+				lastFrustum = new FrustumIntersection(camera.projection.mul(camera.view, viewProjectionMatrix))
+				def nextVisibleElements = checkVisibility(this)
 				visibleElementsLock.acquireAndRelease { ->
 					visibleElements = nextVisibleElements
 				}
@@ -94,7 +93,33 @@ class Scene implements Visitable {
 	Scene addSceneElement(SceneElement element) {
 
 		elements << element
+		if (camera) {
+			def newVisibleElements = checkVisibility(element)
+			visibleElementsLock.acquireAndRelease { ->
+				visibleElements = newVisibleElements
+			}
+		}
 		return this
+	}
+
+	/**
+	 * Perform a visibility check of the given element and it's sub-elements,
+	 * returning a list of those visible elements.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	private List<SceneElement> checkVisibility(Visitable visitable) {
+
+		return averageNanos('objectCulling', 1f, logger) { ->
+			def newVisibleElements = []
+			visitable.accept { element ->
+				if (lastFrustum.testPlaneXY(element.bounds)) {
+					newVisibleElements << element
+				}
+			}
+			return newVisibleElements
+		}
 	}
 
 	/**

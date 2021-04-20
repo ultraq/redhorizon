@@ -137,23 +137,25 @@ class GraphicsEngine extends Engine {
 
 							camera.render(renderer)
 							scene.visibleElementsIterator.each { element ->
+								if (element instanceof GraphicsElement) {
 
-								// Register the graphics element
-								if (!graphicsElementStates[element]) {
-									graphicsElementStates << [(element): STATE_NEW]
+									// Register the graphics element
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
+									}
+
+									def elementState = graphicsElementStates[element]
+
+									// Initialize the graphics element
+									if (elementState == STATE_NEW) {
+										element.init(renderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+
+									// Render the graphics element
+									element.render(renderer)
 								}
-
-								def elementState = graphicsElementStates[element]
-
-								// Initialize the graphics element
-								if (elementState == STATE_NEW) {
-									element.init(renderer)
-									elementState = STATE_INITIALIZED
-									graphicsElementStates << [(element): elementState]
-								}
-
-								// Render the graphics element
-								element.render(renderer)
 							}
 
 							imGuiRenderer.drawDebugOverlay()
@@ -168,9 +170,7 @@ class GraphicsEngine extends Engine {
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
 						camera.delete(renderer)
-						graphicsElementStates.keySet().each { graphicsElement ->
-							graphicsElement.delete(renderer)
-						}
+						graphicsElementStates.keySet()*.delete(renderer)
 					}
 				}
 			}
