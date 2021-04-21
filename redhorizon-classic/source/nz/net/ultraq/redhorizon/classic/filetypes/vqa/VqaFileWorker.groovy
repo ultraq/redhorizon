@@ -37,6 +37,10 @@ import java.nio.ByteBuffer
 /**
  * A worker for decoding VQA file video data.
  * 
+ * TODO: Try speed up decoding here by delegating sound/frame data to new
+ *       threads.  That could remove a lot of the @CompileStatic we've been
+ *       leaning on.
+ * 
  * @author Emanuel Rabina
  */
 @PackageScope
