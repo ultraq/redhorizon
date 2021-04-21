@@ -26,21 +26,19 @@ import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -108,13 +106,15 @@ class UnitViewer extends Application {
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
 				useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+					graphicsEngine.on(WindowCreatedEvent) { event ->
+						graphicsEngine.camera.scale(2)
+					}
 
 					// Add the unit to the engine
 					def unit = targetClass
 						.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
 						.newInstance(unitData, shpFile, palette, gameClock)
 						.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
-						.scaleXY(2)
 					scene << unit
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
@@ -142,6 +142,43 @@ class UnitViewer extends Application {
 									graphicsEngine.stop()
 									break
 							}
+						}
+					}
+
+					// Use click-and-drag to move around the map
+					def cursorPosition = new Vector2f()
+					def dragging = false
+					graphicsEngine.on(CursorPositionEvent) { event ->
+						if (dragging) {
+							def diffX = cursorPosition.x - event.xPos as float
+							def diffY = cursorPosition.y - event.yPos as float
+							graphicsEngine.camera.translate(-diffX, diffY)
+						}
+						cursorPosition.set(event.xPos as float, event.yPos as float)
+					}
+					graphicsEngine.on(MouseButtonEvent) { event ->
+						if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+							if (event.action == GLFW_PRESS) {
+								dragging = true
+							}
+							else if (event.action == GLFW_RELEASE) {
+								dragging = false
+							}
+						}
+					}
+
+					// Zoom in/out on the unit using the scroll wheel
+					graphicsEngine.on(ScrollEvent) { event ->
+						if (event.yOffset < 0) {
+							graphicsEngine.camera.scale(0.95)
+						}
+						else if (event.yOffset > 0) {
+							graphicsEngine.camera.scale(1.05)
+						}
+					}
+					graphicsEngine.on(MouseButtonEvent) { event ->
+						if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
+							graphicsEngine.camera.reset()
 						}
 					}
 				}

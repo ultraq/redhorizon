@@ -33,16 +33,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
@@ -116,10 +107,7 @@ class MapViewer extends Application {
 					}
 				}
 
-				// Use scroll input or click-and-drag to move around the map
-				graphicsEngine.on(ScrollEvent) { event ->
-					graphicsEngine.camera.translate(3 * event.xOffset as float, 3 * -event.yOffset as float)
-				}
+				// Use click-and-drag to move around the map
 				def cursorPosition = new Vector2f()
 				def dragging = false
 				graphicsEngine.on(CursorPositionEvent) { event ->
@@ -138,6 +126,21 @@ class MapViewer extends Application {
 						else if (event.action == GLFW_RELEASE) {
 							dragging = false
 						}
+					}
+				}
+
+				// Zoom in/out on the unit using the scroll wheel
+				graphicsEngine.on(ScrollEvent) { event ->
+					if (event.yOffset < 0) {
+						graphicsEngine.camera.scale(0.95)
+					}
+					else if (event.yOffset > 0) {
+						graphicsEngine.camera.scale(1.05)
+					}
+				}
+				graphicsEngine.on(MouseButtonEvent) { event ->
+					if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
+						graphicsEngine.camera.reset()
 					}
 				}
 			}

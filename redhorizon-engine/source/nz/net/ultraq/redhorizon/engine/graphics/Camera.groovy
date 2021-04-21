@@ -67,7 +67,18 @@ class Camera implements GraphicsElement {
 	 */
 	Camera center(Vector3f point) {
 
-		view.translate(view.origin(new Vector3f()).sub(point))
+		return center(point.x, point.y, point.z)
+	}
+
+	/**
+	 * Move the camera so it centers the given point in the view.
+	 * 
+	 * @param point
+	 * @return
+	 */
+	Camera center(float x, float y, float z = 0) {
+
+		view.translate(view.origin(new Vector3f()).sub(x, y, z))
 		moved = true
 		return this
 	}
@@ -89,6 +100,31 @@ class Camera implements GraphicsElement {
 			renderer.updateCamera(view)
 			moved = false
 		}
+	}
+
+	/**
+	 * Reset this camera's view to its initial state.
+	 * 
+	 * @return
+	 */
+	Camera reset() {
+
+		view.identity()
+		moved = true
+		return this
+	}
+
+	/**
+	 * Scale the camera view as a way of altering the perceived zoom.
+	 * 
+	 * @param factor
+	 * @return
+	 */
+	Camera scale(float factor) {
+
+		view.scaleLocal(factor)
+		moved = true
+		return this
 	}
 
 	/**

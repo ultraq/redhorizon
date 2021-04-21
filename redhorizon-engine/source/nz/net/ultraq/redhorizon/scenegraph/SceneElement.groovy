@@ -82,7 +82,7 @@ trait SceneElement<T extends SceneElement> implements Visitable {
 	 * @param z
 	 * @return
 	 */
-	T translate(float x, float y, float z) {
+	T translate(float x, float y, float z = 0) {
 
 		transform.translate(x, y, z)
 		bounds.translate(x, y)
