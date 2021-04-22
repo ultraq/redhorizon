@@ -204,7 +204,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		void accept(SceneVisitor visitor) {
 
 			visitor.visit(this)
-			background.accept(visitor)
+			visitor.visit(background)
 		}
 	}
 
@@ -219,7 +219,9 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		void accept(SceneVisitor visitor) {
 
 			visitor.visit(this)
-			elements*.accept(visitor)
+			elements.each { element ->
+				visitor.visit(element)
+			}
 		}
 	}
 

@@ -26,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Scene implements Visitable {
 
-	private List<SceneElement> elements = new CopyOnWriteArrayList<>()
+	private final List<SceneElement> elements = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Allow visitors into the scene for traversal.
@@ -42,6 +42,18 @@ class Scene implements Visitable {
 	}
 
 	/**
+	 * Add an element to this scene.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	Scene addSceneElement(SceneElement element) {
+
+		elements << element
+		return this
+	}
+
+	/**
 	 * Overloads the {@code <<} operator to add elements to this scene.
 	 * 
 	 * @param element
@@ -49,8 +61,7 @@ class Scene implements Visitable {
 	 */
 	Scene leftShift(SceneElement element) {
 
-		elements << element
-		return this
+		return addSceneElement(element)
 	}
 
 	/**
