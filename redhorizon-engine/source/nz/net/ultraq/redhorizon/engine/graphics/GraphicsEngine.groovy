@@ -147,28 +147,25 @@ class GraphicsEngine extends Engine {
 									}
 								}
 							}
-//							renderer.asBatchRenderer { batchRenderer ->
-								visibleElements.each { element ->
+							visibleElements.each { element ->
 
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
-									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
+								// Register the graphics element
+								if (!graphicsElementStates[element]) {
+									graphicsElementStates << [(element): STATE_NEW]
 								}
-//								batchRenderer.flush()
-//							}
+
+								def elementState = graphicsElementStates[element]
+
+								// Initialize the graphics element
+								if (elementState == STATE_NEW) {
+									element.init(renderer)
+									elementState = STATE_INITIALIZED
+									graphicsElementStates << [(element): elementState]
+								}
+
+								// Render the graphics element
+								element.render(renderer)
+							}
 
 							imGuiRenderer.drawDebugOverlay()
 							imGuiRenderer.endFrame()
