@@ -103,13 +103,14 @@ class Camera implements GraphicsElement {
 	}
 
 	/**
-	 * Reset this camera's view to its initial state.
+	 * Reset this camera's scale.
 	 * 
 	 * @return
 	 */
-	Camera reset() {
+	Camera resetScale() {
 
-		view.identity()
+		def scale = view.getScale(new Vector3f())
+		view.scaleLocal(1 / scale.x as float, 1 / scale.y as float, 1)
 		moved = true
 		return this
 	}
@@ -122,7 +123,7 @@ class Camera implements GraphicsElement {
 	 */
 	Camera scale(float factor) {
 
-		view.scaleLocal(factor)
+		view.scaleLocal(factor, factor, 1)
 		moved = true
 		return this
 	}

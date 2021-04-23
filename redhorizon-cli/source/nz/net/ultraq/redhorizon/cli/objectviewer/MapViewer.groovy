@@ -140,7 +140,7 @@ class MapViewer extends Application {
 				}
 				graphicsEngine.on(MouseButtonEvent) { event ->
 					if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
-						graphicsEngine.camera.reset()
+						graphicsEngine.camera.resetScale()
 					}
 				}
 			}
