@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteTypes
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
@@ -27,15 +26,11 @@ import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -51,7 +46,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class UnitViewer extends Application {
+class UnitViewer extends Viewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
 
@@ -119,7 +114,9 @@ class UnitViewer extends Application {
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
 
-					// Key event handler
+					applyViewerInputs(graphicsEngine)
+
+					// Custom inputs
 					graphicsEngine.on(KeyEvent) { event ->
 						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 							switch (event.key) {
@@ -142,43 +139,6 @@ class UnitViewer extends Application {
 									graphicsEngine.stop()
 									break
 							}
-						}
-					}
-
-					// Use click-and-drag to move around the map
-					def cursorPosition = new Vector2f()
-					def dragging = false
-					graphicsEngine.on(CursorPositionEvent) { event ->
-						if (dragging) {
-							def diffX = cursorPosition.x - event.xPos as float
-							def diffY = cursorPosition.y - event.yPos as float
-							graphicsEngine.camera.translate(-diffX, diffY)
-						}
-						cursorPosition.set(event.xPos as float, event.yPos as float)
-					}
-					graphicsEngine.on(MouseButtonEvent) { event ->
-						if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-							if (event.action == GLFW_PRESS) {
-								dragging = true
-							}
-							else if (event.action == GLFW_RELEASE) {
-								dragging = false
-							}
-						}
-					}
-
-					// Zoom in/out on the unit using the scroll wheel
-					graphicsEngine.on(ScrollEvent) { event ->
-						if (event.yOffset < 0) {
-							graphicsEngine.camera.scale(0.95)
-						}
-						else if (event.yOffset > 0) {
-							graphicsEngine.camera.scale(1.05)
-						}
-					}
-					graphicsEngine.on(MouseButtonEvent) { event ->
-						if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
-							graphicsEngine.camera.reset()
 						}
 					}
 				}
