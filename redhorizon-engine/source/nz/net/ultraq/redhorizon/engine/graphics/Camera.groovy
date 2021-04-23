@@ -138,7 +138,8 @@ class Camera implements GraphicsElement {
 	 */
 	Camera translate(float x, float y, float z = 0) {
 
-		view.translate(x, y, z)
+		def scale = view.getScale(new Vector3f())
+		view.translate(x / scale.x as float, y / scale.y as float, z)
 		moved = true
 		return this
 	}
