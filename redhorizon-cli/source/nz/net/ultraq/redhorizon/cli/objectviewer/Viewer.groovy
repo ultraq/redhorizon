@@ -38,8 +38,9 @@ abstract class Viewer extends Application {
 	 * applications.
 	 * 
 	 * @param graphicsEngine
+	 * @param touchpadInput
 	 */
-	protected static void applyViewerInputs(GraphicsEngine graphicsEngine) {
+	protected static void applyViewerInputs(GraphicsEngine graphicsEngine, boolean touchpadInput) {
 
 		// Key event handler
 		graphicsEngine.on(KeyEvent) { event ->
@@ -52,40 +53,72 @@ abstract class Viewer extends Application {
 			}
 		}
 
-		// Use click-and-drag to move around
-		def cursorPosition = new Vector2f()
-		def dragging = false
-		graphicsEngine.on(CursorPositionEvent) { event ->
-			if (dragging) {
-				def diffX = cursorPosition.x - event.xPos as float
-				def diffY = cursorPosition.y - event.yPos as float
-				graphicsEngine.camera.translate(-diffX, diffY)
-			}
-			cursorPosition.set(event.xPos as float, event.yPos as float)
-		}
-		graphicsEngine.on(MouseButtonEvent) { event ->
-			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-				if (event.action == GLFW_PRESS) {
-					dragging = true
-				}
-				else if (event.action == GLFW_RELEASE) {
-					dragging = false
+		if (touchpadInput) {
+			def ctrl = false
+			graphicsEngine.on(KeyEvent) { event ->
+				if (event.key == GLFW_KEY_LEFT_CONTROL) {
+					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
 				}
 			}
-		}
+			graphicsEngine.on(ScrollEvent) { event ->
 
-		// Zoom in/out using the scroll wheel
-		graphicsEngine.on(ScrollEvent) { event ->
-			if (event.yOffset < 0) {
-				graphicsEngine.camera.scale(0.95)
+				// Zoom in/out using CTRL + scroll up/down
+				if (ctrl) {
+					if (event.yOffset < 0) {
+						graphicsEngine.camera.scale(0.95)
+					}
+					else if (event.yOffset > 0) {
+						graphicsEngine.camera.scale(1.05)
+					}
+				}
+				// Use scroll input to move around the map
+				else {
+					graphicsEngine.camera.translate(3 * event.xOffset as float, 3 * -event.yOffset as float)
+				}
 			}
-			else if (event.yOffset > 0) {
-				graphicsEngine.camera.scale(1.05)
+			graphicsEngine.on(MouseButtonEvent) { event ->
+				if (ctrl && event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+					graphicsEngine.camera.resetScale()
+				}
 			}
 		}
-		graphicsEngine.on(MouseButtonEvent) { event ->
-			if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
-				graphicsEngine.camera.resetScale()
+		else {
+
+			// Use click-and-drag to move around
+			def cursorPosition = new Vector2f()
+			def dragging = false
+			graphicsEngine.on(CursorPositionEvent) { event ->
+				if (dragging) {
+					def diffX = cursorPosition.x - event.xPos as float
+					def diffY = cursorPosition.y - event.yPos as float
+					graphicsEngine.camera.translate(-diffX, diffY)
+				}
+				cursorPosition.set(event.xPos as float, event.yPos as float)
+			}
+			graphicsEngine.on(MouseButtonEvent) { event ->
+				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+					if (event.action == GLFW_PRESS) {
+						dragging = true
+					}
+					else if (event.action == GLFW_RELEASE) {
+						dragging = false
+					}
+				}
+			}
+
+			// Zoom in/out using the scroll wheel
+			graphicsEngine.on(ScrollEvent) { event ->
+				if (event.yOffset < 0) {
+					graphicsEngine.camera.scale(0.95)
+				}
+				else if (event.yOffset > 0) {
+					graphicsEngine.camera.scale(1.05)
+				}
+			}
+			graphicsEngine.on(MouseButtonEvent) { event ->
+				if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
+					graphicsEngine.camera.resetScale()
+				}
 			}
 		}
 	}

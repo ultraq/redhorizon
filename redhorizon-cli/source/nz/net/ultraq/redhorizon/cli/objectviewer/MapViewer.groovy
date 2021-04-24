@@ -47,6 +47,7 @@ class MapViewer extends Viewer {
 	final ResourceManager resourceManager
 	final IniFile mapFile
 	final GraphicsConfiguration graphicsConfig
+	final boolean touchpadInput
 
 	/**
 	 * Display the map.
@@ -75,7 +76,7 @@ class MapViewer extends Viewer {
 
 				logger.info('Displaying the image in another window.  Close the window to exit.')
 
-				applyViewerInputs(graphicsEngine)
+				applyViewerInputs(graphicsEngine, touchpadInput)
 
 				// Custom inputs
 				graphicsEngine.on(KeyEvent) { event ->

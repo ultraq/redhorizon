@@ -54,6 +54,7 @@ class UnitViewer extends Viewer {
 	final String unitId
 	final GraphicsConfiguration graphicsConfig
 	final PaletteTypes paletteType
+	final boolean touchpadInput
 
 	/**
 	 * Display the unit.
@@ -114,7 +115,7 @@ class UnitViewer extends Viewer {
 
 					logger.info('Displaying the image in another window.  Close the window to exit.')
 
-					applyViewerInputs(graphicsEngine)
+					applyViewerInputs(graphicsEngine, touchpadInput)
 
 					// Custom inputs
 					graphicsEngine.on(KeyEvent) { event ->

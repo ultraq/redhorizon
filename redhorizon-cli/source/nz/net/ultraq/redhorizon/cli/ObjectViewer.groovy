@@ -67,6 +67,9 @@ class ObjectViewer implements Callable<Integer> {
 	@Mixin
 	PaletteOptions paletteOptions
 
+	@Option(names = ['--touchpad-input'], description = 'Use touchpad scroll gestures to navigate')
+	boolean touchpadInput
+
 	/**
 	 * Launch the unit viewer.
 	 * 
@@ -86,7 +89,7 @@ class ObjectViewer implements Callable<Integer> {
 					clearColour: Colour.GREY,
 					fullScreen: fullScreen
 				)
-				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType).view()
+				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType, touchpadInput).view()
 				break
 			case IniFile:
 				def graphicsConfig = new GraphicsConfiguration(
@@ -96,7 +99,7 @@ class ObjectViewer implements Callable<Integer> {
 				new ResourceManager(fileOptions.file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, graphicsConfig).view()
+					new MapViewer(resourceManager, objectFile, graphicsConfig, touchpadInput).view()
 				}
 				break
 			default:
