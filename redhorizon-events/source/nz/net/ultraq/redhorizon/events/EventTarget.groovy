@@ -47,7 +47,7 @@ trait EventTarget {
 	 */
 	public <E extends Event> void relay(Class<E> eventClass, EventTarget newTarget) {
 
-		this.on(eventClass) { event ->
+		on(eventClass) { event ->
 			newTarget.trigger(event)
 		}
 	}
