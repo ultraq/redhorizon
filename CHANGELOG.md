@@ -6,6 +6,9 @@ Changelog
  - Another rendering performance improvement by bundling several materials into
    a single one such that it all lives in GPU memory and is rendered in a single
    draw call.  Currently used for drawing all map tiles.
+ - Move a lot of the graphical effects to shaders to run on the GPU: the
+   scanline effect, and the smooth scaling of low-res graphics to higher
+   resolutions.
 
 ### 0.33.0
  - Merged all of the various CLI tools into a single one.  Now each tool is a
