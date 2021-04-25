@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.events
 
-import java.util.concurrent.ExecutorService
-
 /**
  * Inspired by the DOM, an event target is a class that can generate events
  * which can be listened for by the appropriate event listeners.
@@ -55,29 +53,17 @@ trait EventTarget {
 	}
 
 	/**
-	 * Fire the event, invoking all listeners registered for that event.  If the
-	 * optional {@code executorService} is provided, then listeners are notified
-	 * using the executor's {@code execute} method.
+	 * Fire the event, invoking all listeners registered for that event.
 	 * 
 	 * @param event
-	 * @param executorService
 	 * @return This object.
 	 */
-	public <E extends Event> void trigger(E event, ExecutorService executorService = null) {
+	public <E extends Event> void trigger(E event) {
 
-		def notifyListeners = { ->
-			eventListeners.each { pair ->
-				if (pair.event.isInstance(event)) {
-					pair.listener.handleEvent(event)
-				}
+		eventListeners.each { pair ->
+			if (pair.event.isInstance(event)) {
+				pair.listener.handleEvent(event)
 			}
-		}
-
-		if (executorService) {
-			executorService.execute(notifyListeners)
-		}
-		else {
-			notifyListeners()
 		}
 	}
 }

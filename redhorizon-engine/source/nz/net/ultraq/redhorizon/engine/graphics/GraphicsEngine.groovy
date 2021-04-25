@@ -119,7 +119,7 @@ class GraphicsEngine extends Engine {
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
 				camera = new Camera(context.windowSize, config.fixAspectRatio)
-				trigger(new WindowCreatedEvent(context.windowSize, camera.size), executorService)
+				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, camera.size))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
 					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->

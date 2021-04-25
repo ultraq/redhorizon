@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
@@ -57,7 +58,7 @@ abstract class Engine implements EventTarget, Runnable {
 	protected void renderLoop(Closure closure) {
 
 		running = true
-		trigger(new RenderLoopStartEvent(), executorService)
+		triggerOnSeparateThread(new RenderLoopStartEvent())
 
 		try {
 			while (shouldRender()) {
@@ -71,11 +72,11 @@ abstract class Engine implements EventTarget, Runnable {
 					Thread.sleep(waitTime)
 				}
 			}
-			trigger(new RenderLoopStopEvent(), executorService)
+			triggerOnSeparateThread(new RenderLoopStopEvent())
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
-			trigger(new RenderLoopStopEvent(ex), executorService)
+			triggerOnSeparateThread(new RenderLoopStopEvent(ex))
 		}
 		finally {
 			stop()
@@ -101,5 +102,17 @@ abstract class Engine implements EventTarget, Runnable {
 	void stop() {
 
 		running = false
+	}
+
+	/**
+	 * Fire an event on a separate thread using the built-in executor.
+	 * 
+	 * @param event
+	 */
+	protected void triggerOnSeparateThread(Event event) {
+
+		executorService.execute { ->
+			trigger(event)
+		}
 	}
 }

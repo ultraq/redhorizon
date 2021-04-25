@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.events
 
 import spock.lang.Specification
-import java.util.concurrent.ExecutorService
 
 /**
  * Tests for the event target trait which includes the event registration and
@@ -53,19 +52,6 @@ class EventTargetTests extends Specification {
 		when:
 			target.trigger(event)
 		then:
-			1 * listener.handleEvent(event)
-	}
-
-	def 'Executor service used when provided'() {
-		given:
-			def event = new TestEvent()
-			def executorService = Mock(ExecutorService)
-		when:
-			target.trigger(event, executorService)
-		then:
-			1 * executorService.execute(_) >> { Runnable runnable ->
-				runnable.run()
-			}
 			1 * listener.handleEvent(event)
 	}
 }

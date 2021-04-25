@@ -115,16 +115,16 @@ class OpenGLContext extends Context implements EventTarget {
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
-			trigger(new KeyEvent(key, scancode, action, mods), executorService)
+			triggerOnSeparateThread(new KeyEvent(key, scancode, action, mods))
 		}
 		glfwSetScrollCallback(window) { long window, double xoffset, double yoffset ->
-			trigger(new ScrollEvent(xoffset, yoffset), executorService)
+			triggerOnSeparateThread(new ScrollEvent(xoffset, yoffset))
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
-			trigger(new MouseButtonEvent(button, action, mods), executorService)
+			triggerOnSeparateThread(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { window, double xpos, double ypos ->
-			trigger(new CursorPositionEvent(xpos, ypos), executorService)
+			triggerOnSeparateThread(new CursorPositionEvent(xpos, ypos))
 		}
 
 		withCurrent { ->

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
@@ -53,6 +54,18 @@ abstract class Context implements Closeable, EventTarget {
 	 * Releases the context that is current on the executing thread.
 	 */
 	abstract void releaseCurrent()
+
+	/**
+	 * Fire an event on a separate thread using the built-in executor.
+	 * 
+	 * @param event
+	 */
+	protected void triggerOnSeparateThread(Event event) {
+
+		executorService.execute { ->
+			trigger(event)
+		}
+	}
 
 	/**
 	 * Execute the given closure with the context current on the executing thread,
