@@ -102,44 +102,43 @@ class UnitViewer extends Viewer {
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
 				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-					graphicsEngine.scene = scene
-					graphicsEngine.on(WindowCreatedEvent) { event ->
-						graphicsEngine.camera.scale(2)
-					}
+					useInputEngine(executorService, graphicsEngine) { inputEngine ->
+						graphicsEngine.scene = scene
+						graphicsEngine.on(WindowCreatedEvent) { event ->
+							graphicsEngine.camera.scale(2)
+						}
 
-					// Add the unit to the engine
-					def unit = targetClass
-						.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
-						.newInstance(unitData, shpFile, palette, gameClock)
-						.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
-					scene << unit
+						// Add the unit to the engine
+						def unit = targetClass
+							.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
+							.newInstance(unitData, shpFile, palette, gameClock)
+							.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
+						scene << unit
 
-					logger.info('Displaying the image in another window.  Close the window to exit.')
+						logger.info('Displaying the image in another window.  Close the window to exit.')
 
-					applyViewerInputs(graphicsEngine, touchpadInput)
+						applyViewerInputs(inputEngine, graphicsEngine, touchpadInput)
 
-					// Custom inputs
-					graphicsEngine.on(KeyEvent) { event ->
-						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-							switch (event.key) {
-								case GLFW_KEY_LEFT:
-									unit.rotateLeft()
-									break
-								case GLFW_KEY_RIGHT:
-									unit.rotateRight()
-									break
-								case GLFW_KEY_UP:
-									unit.previousAnimation()
-									break
-								case GLFW_KEY_DOWN:
-									unit.nextAnimation()
-									break
-								case GLFW_KEY_SPACE:
-									gameClock.togglePause()
-									break
-								case GLFW_KEY_ESCAPE:
-									graphicsEngine.stop()
-									break
+						// Custom inputs
+						graphicsEngine.on(KeyEvent) { event ->
+							if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+								switch (event.key) {
+									case GLFW_KEY_LEFT:
+										unit.rotateLeft()
+										break
+									case GLFW_KEY_RIGHT:
+										unit.rotateRight()
+										break
+									case GLFW_KEY_UP:
+										unit.previousAnimation()
+										break
+									case GLFW_KEY_DOWN:
+										unit.nextAnimation()
+										break
+									case GLFW_KEY_SPACE:
+										gameClock.togglePause()
+										break
+								}
 							}
 						}
 					}

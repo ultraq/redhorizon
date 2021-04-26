@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
+import nz.net.ultraq.redhorizon.engine.input.InputEngine
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
@@ -34,20 +35,22 @@ import static org.lwjgl.glfw.GLFW.*
 abstract class Viewer extends Application {
 
 	/**
-	 * Listen on the graphics engine to apply the same controls in all viewer
+	 * Listen on the input engine to apply the same controls in all viewer
 	 * applications.
 	 * 
+	 * @param inputEngine
 	 * @param graphicsEngine
 	 * @param touchpadInput
 	 */
-	protected static void applyViewerInputs(GraphicsEngine graphicsEngine, boolean touchpadInput) {
+	protected static void applyViewerInputs(InputEngine inputEngine, GraphicsEngine graphicsEngine, boolean touchpadInput) {
 
 		// Key event handler
-		graphicsEngine.on(KeyEvent) { event ->
+		inputEngine.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
 				case GLFW_KEY_ESCAPE:
 					graphicsEngine.stop()
+					inputEngine.stop()
 					break
 				}
 			}
@@ -55,12 +58,12 @@ abstract class Viewer extends Application {
 
 		if (touchpadInput) {
 			def ctrl = false
-			graphicsEngine.on(KeyEvent) { event ->
+			inputEngine.on(KeyEvent) { event ->
 				if (event.key == GLFW_KEY_LEFT_CONTROL) {
 					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
 				}
 			}
-			graphicsEngine.on(ScrollEvent) { event ->
+			inputEngine.on(ScrollEvent) { event ->
 
 				// Zoom in/out using CTRL + scroll up/down
 				if (ctrl) {
@@ -76,7 +79,7 @@ abstract class Viewer extends Application {
 					graphicsEngine.camera.translate(3 * event.xOffset as float, 3 * -event.yOffset as float)
 				}
 			}
-			graphicsEngine.on(MouseButtonEvent) { event ->
+			inputEngine.on(MouseButtonEvent) { event ->
 				if (ctrl && event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 					graphicsEngine.camera.resetScale()
 				}
@@ -87,7 +90,7 @@ abstract class Viewer extends Application {
 			// Use click-and-drag to move around
 			def cursorPosition = new Vector2f()
 			def dragging = false
-			graphicsEngine.on(CursorPositionEvent) { event ->
+			inputEngine.on(CursorPositionEvent) { event ->
 				if (dragging) {
 					def diffX = cursorPosition.x - event.xPos as float
 					def diffY = cursorPosition.y - event.yPos as float
@@ -95,7 +98,7 @@ abstract class Viewer extends Application {
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)
 			}
-			graphicsEngine.on(MouseButtonEvent) { event ->
+			inputEngine.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
 						dragging = true
@@ -107,7 +110,7 @@ abstract class Viewer extends Application {
 			}
 
 			// Zoom in/out using the scroll wheel
-			graphicsEngine.on(ScrollEvent) { event ->
+			inputEngine.on(ScrollEvent) { event ->
 				if (event.yOffset < 0) {
 					graphicsEngine.camera.scale(0.95)
 				}
@@ -115,7 +118,7 @@ abstract class Viewer extends Application {
 					graphicsEngine.camera.scale(1.05)
 				}
 			}
-			graphicsEngine.on(MouseButtonEvent) { event ->
+			inputEngine.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
 					graphicsEngine.camera.resetScale()
 				}

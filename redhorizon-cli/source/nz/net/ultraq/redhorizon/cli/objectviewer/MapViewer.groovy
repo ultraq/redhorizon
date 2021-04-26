@@ -60,45 +60,47 @@ class MapViewer extends Viewer {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-				graphicsEngine.scene = scene
+				useInputEngine(executorService, graphicsEngine) { inputEngine ->
+					graphicsEngine.scene = scene
 
-				// Add the map
-				MapRA map
-				Vector3f mapInitialPosition
-				graphicsEngine.on(WindowCreatedEvent) { event ->
-					map = new MapRA(resourceManager, mapFile)
-					mapInitialPosition = new Vector3f(map.initialPosition, 0)
-					logger.info('Map details: {}', map)
-					scene << map
-					graphicsEngine.camera.center(mapInitialPosition)
+					// Add the map
+					MapRA map
+					Vector3f mapInitialPosition
+					graphicsEngine.on(WindowCreatedEvent) { event ->
+						map = new MapRA(resourceManager, mapFile)
+						mapInitialPosition = new Vector3f(map.initialPosition, 0)
+						logger.info('Map details: {}', map)
+						scene << map
+						graphicsEngine.camera.center(mapInitialPosition)
 
-					scene << new MapLines(map)
-				}
+						scene << new MapLines(map)
+					}
 
-				logger.info('Displaying the image in another window.  Close the window to exit.')
+					logger.info('Displaying the image in another window.  Close the window to exit.')
 
-				applyViewerInputs(graphicsEngine, touchpadInput)
+					applyViewerInputs(inputEngine, graphicsEngine, touchpadInput)
 
-				// Custom inputs
-				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-						switch (event.key) {
-							// Add options so it's not hard-coded to my weird inverted setup 😅
-							case GLFW_KEY_UP:
-								graphicsEngine.camera.translate(0, -TICK)
-								break
-							case GLFW_KEY_DOWN:
-								graphicsEngine.camera.translate(0, TICK)
-								break
-							case GLFW_KEY_LEFT:
-								graphicsEngine.camera.translate(TICK, 0)
-								break
-							case GLFW_KEY_RIGHT:
-								graphicsEngine.camera.translate(-TICK, 0)
-								break
-							case GLFW_KEY_SPACE:
-								graphicsEngine.camera.center(mapInitialPosition)
-								break
+					// Custom inputs
+					inputEngine.on(KeyEvent) { event ->
+						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+							switch (event.key) {
+								// Add options so it's not hard-coded to my weird inverted setup 😅
+								case GLFW_KEY_UP:
+									graphicsEngine.camera.translate(0, -TICK)
+									break
+								case GLFW_KEY_DOWN:
+									graphicsEngine.camera.translate(0, TICK)
+									break
+								case GLFW_KEY_LEFT:
+									graphicsEngine.camera.translate(TICK, 0)
+									break
+								case GLFW_KEY_RIGHT:
+									graphicsEngine.camera.translate(-TICK, 0)
+									break
+								case GLFW_KEY_SPACE:
+									graphicsEngine.camera.center(mapInitialPosition)
+									break
+							}
 						}
 					}
 				}
