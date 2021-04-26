@@ -106,10 +106,11 @@ class GraphicsEngine extends Engine {
 	void run() {
 
 		Thread.currentThread().name = 'Graphics Engine'
+		logger.debug('Starting graphics engine')
 
 		// Initialization
 		openGlContext = waitForMainThread { ->
-			return new OpenGLContext(config, executorService)
+			return new OpenGLContext(config)
 		}
 		openGlContext.withCloseable { context ->
 			context.relay(InputEvent, this)

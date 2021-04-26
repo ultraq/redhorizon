@@ -63,7 +63,7 @@ class AudioEngine extends Engine {
 		logger.debug('Starting audio engine')
 
 		// Initialization
-		new OpenALContext(executorService).withCloseable { context ->
+		new OpenALContext().withCloseable { context ->
 			context.withCurrent { ->
 				def renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
