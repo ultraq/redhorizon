@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.ImGuiRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
+import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
@@ -39,7 +40,7 @@ import java.util.concurrent.FutureTask
  * 
  * @author Emanuel Rabina
  */
-class GraphicsEngine extends Engine {
+class GraphicsEngine extends Engine implements InputSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 

@@ -23,8 +23,9 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.InputEngine
+import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -153,5 +154,24 @@ abstract class Application {
 		}
 
 		engine.get()
+	}
+
+	/**
+	 * Execute the given closure within the context of having an input engine;
+	 * setting it up, passing it to the closure, and shutting it down when the
+	 * closure is complete.
+	 * 
+	 * @param executorService
+	 * @param inputSource
+	 * @param closure
+	 */
+	protected static void useInputEngine(ExecutorService executorService, InputSource inputSource,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.input.InputEngine')
+		Closure closure) {
+
+		def inputEngine = new InputEngine(inputSource)
+		executorService.submit(inputEngine)
+
+		closure(inputEngine)
 	}
 }
