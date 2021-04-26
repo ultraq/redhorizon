@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
-import java.nio.ByteBuffer
-
 /**
  * An extension to the {@code OpenGLRenderer} to support batch rendering.
  * 
@@ -46,7 +44,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
 	@Delegate(excludes = [
-	  'createSpriteMesh', 'createTexture'
+	  'createSpriteMesh'
 	])
 	private final OpenGLRenderer renderer
 
@@ -128,12 +126,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarge
 			textureCoordinates as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		)
-	}
-
-	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height, boolean filter = renderer.config.filter) {
-
-		return renderer.createTexture(data, format, width, height, filter)
 	}
 
 	@Override
