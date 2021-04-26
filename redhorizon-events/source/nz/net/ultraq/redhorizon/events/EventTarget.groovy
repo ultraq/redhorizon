@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.events
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 /**
  * Inspired by the DOM, an event target is a class that can generate events
  * which can be listened for by the appropriate event listeners.
@@ -24,7 +26,7 @@ package nz.net.ultraq.redhorizon.events
  */
 trait EventTarget {
 
-	private final List<EventAndListenerPair> eventListeners = []
+	private final List<EventAndListenerPair> eventListeners = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Register an event listener on this event target.  When the event is fired
