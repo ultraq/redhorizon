@@ -61,16 +61,16 @@ subprojects {
 
 	dependencies {
 		implementation(
-			'org.codehaus.groovy:groovy:3.0.7:indy',
+			'org.codehaus.groovy:groovy:3.0.8:indy',
 			'org.slf4j:slf4j-api:1.7.30'
 		)
 		implementation('nz.net.ultraq.extensions:groovy-extensions:1.0.0') {
 			exclude module: 'groovy'
 		}
-		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.0') {
+		implementation('nz.net.ultraq.extensions:profiling-extensions:0.7.0-SNAPSHOT') {
 			exclude module: 'groovy'
 		}
-		testImplementation('org.spockframework:spock-core:2.0-M4-groovy-3.0') {
+		testImplementation('org.spockframework:spock-core:2.0-M5-groovy-3.0') {
 			exclude group: 'org.codehaus.groovy'
 		}
 	}

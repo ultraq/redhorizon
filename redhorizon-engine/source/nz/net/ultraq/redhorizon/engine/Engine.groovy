@@ -62,14 +62,9 @@ abstract class Engine implements EventTarget, Runnable {
 
 		try {
 			while (shouldRender()) {
-				def loopStart = System.currentTimeMillis()
-				closure()
-				def loopEnd = System.currentTimeMillis()
-
-				def renderExecutionTime = loopEnd - loopStart
-				if (renderExecutionTime < targetRenderTimeMs) {
-					def waitTime = targetRenderTimeMs - renderExecutionTime
-					Thread.sleep(waitTime)
+				def renderTime = time(closure)
+				if (renderTime < targetRenderTimeMs) {
+					Thread.sleep(targetRenderTimeMs - renderTime)
 				}
 			}
 			triggerOnSeparateThread(new RenderLoopStopEvent())
