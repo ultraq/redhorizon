@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import static Colour.BLACK
 
 import groovy.transform.MapConstructor
+import groovy.transform.ToString
 
 /**
  * Graphics configuration object.
@@ -26,6 +27,7 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor(excludes = ['debug'])
+@ToString(includeNames = true, includePackage = false)
 class GraphicsConfiguration {
 
 	final Colour clearColour = BLACK
