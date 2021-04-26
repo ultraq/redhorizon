@@ -63,8 +63,10 @@ class VideoPlayer extends Application {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useAudioEngine(scene, executorService, audioConfig) { audioEngine ->
-					useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+				useAudioEngine(executorService, audioConfig) { audioEngine ->
+					audioEngine.scene = scene
+					useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+						graphicsEngine.scene = scene
 
 						// Add the video to the engines once we have the window dimensions
 						Video video

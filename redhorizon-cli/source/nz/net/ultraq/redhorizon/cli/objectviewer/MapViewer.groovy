@@ -59,7 +59,8 @@ class MapViewer extends Viewer {
 		def scene = new Scene()
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				graphicsEngine.scene = scene
 
 				// Add the map
 				MapRA map

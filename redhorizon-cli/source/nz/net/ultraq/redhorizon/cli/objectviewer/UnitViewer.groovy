@@ -101,7 +101,8 @@ class UnitViewer extends Viewer {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+					graphicsEngine.scene = scene
 					graphicsEngine.on(WindowCreatedEvent) { event ->
 						graphicsEngine.camera.scale(2)
 					}

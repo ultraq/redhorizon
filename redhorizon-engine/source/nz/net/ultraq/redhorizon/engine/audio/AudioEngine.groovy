@@ -36,19 +36,18 @@ class AudioEngine extends Engine {
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 50
 
-	private final Scene scene
 	private final AudioConfiguration config
+
+	Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
-	 * @param scene
 	 * @param config
 	 */
-	AudioEngine(Scene scene, AudioConfiguration config) {
+	AudioEngine(AudioConfiguration config) {
 
 		super(TARGET_RENDER_TIME_MS)
-		this.scene = scene
 		this.config = config
 	}
 
@@ -74,29 +73,31 @@ class AudioEngine extends Engine {
 				logger.debug('Audio engine in render loop...')
 				renderLoop { ->
 
-					def audibleElements = []
-					scene.accept { element ->
-						if (element instanceof AudioElement) {
-							audibleElements << element
+					if (scene) {
+						def audibleElements = []
+						scene.accept { element ->
+							if (element instanceof AudioElement) {
+								audibleElements << element
+							}
 						}
-					}
-					audibleElements.each { element ->
+						audibleElements.each { element ->
 
-						// Register the audio element
-						if (!audioElementStates[element]) {
-							audioElementStates << [(element): STATE_NEW]
+							// Register the audio element
+							if (!audioElementStates[element]) {
+								audioElementStates << [(element): STATE_NEW]
+							}
+
+							// Initialize the audio element
+							def elementState = audioElementStates[element]
+							if (elementState == STATE_NEW) {
+								element.init(renderer)
+								elementState = STATE_INITIALIZED
+								audioElementStates << [(element): elementState]
+							}
+
+							// Render the audio element
+							element.render(renderer)
 						}
-
-						// Initialize the audio element
-						def elementState = audioElementStates[element]
-						if (elementState == STATE_NEW) {
-							element.init(renderer)
-							elementState = STATE_INITIALIZED
-							audioElementStates << [(element): elementState]
-						}
-
-						// Render the audio element
-						element.render(renderer)
 					}
 				}
 

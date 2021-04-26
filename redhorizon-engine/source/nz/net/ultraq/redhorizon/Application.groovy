@@ -60,17 +60,16 @@ abstract class Application {
 	 * setting it up, passing it along to the closure, and finally shutting it
 	 * down.
 	 * 
-	 * @param scene
 	 * @param executorService
 	 * @param audioConfig
 	 * @param closure
 	 */
-	protected static void useAudioEngine(Scene scene, ExecutorService executorService,
+	protected static void useAudioEngine(ExecutorService executorService,
 		AudioConfiguration audioConfig,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.audio.AudioEngine')
 		Closure closure) {
 
-		def audioEngine = new AudioEngine(scene, audioConfig)
+		def audioEngine = new AudioEngine(audioConfig)
 		def engine = executorService.submit(audioEngine)
 
 		closure(audioEngine)
@@ -102,12 +101,11 @@ abstract class Application {
 	 * setting it up, passing it along to the closure, and finally shutting it
 	 * down.
 	 * 
-	 * @param scene
 	 * @param executorService
 	 * @param config
 	 * @param closure
 	 */
-	protected static void useGraphicsEngine(Scene scene, ExecutorService executorService, GraphicsConfiguration config,
+	protected static void useGraphicsEngine(ExecutorService executorService, GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine')
 		Closure closure) {
 
@@ -117,7 +115,7 @@ abstract class Application {
 
 		// To allow the graphics engine to submit items to execute in this thread
 		FutureTask executable = null
-		def graphicsEngine = new GraphicsEngine(scene, config, { toExecute ->
+		def graphicsEngine = new GraphicsEngine(config, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})

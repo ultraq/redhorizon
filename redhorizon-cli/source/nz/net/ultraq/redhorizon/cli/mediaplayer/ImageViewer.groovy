@@ -55,7 +55,8 @@ class ImageViewer extends Application {
 		def scene = new Scene()
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				graphicsEngine.scene = scene
 
 				// Add the image to the engine once we have the window dimensions
 				graphicsEngine.on(WindowCreatedEvent) { event ->

@@ -62,7 +62,8 @@ class AnimationPlayer extends Application {
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
 			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+					graphicsEngine.scene = scene
 
 					// Add the animation to the engine once we have the window dimensions
 					Animation animation

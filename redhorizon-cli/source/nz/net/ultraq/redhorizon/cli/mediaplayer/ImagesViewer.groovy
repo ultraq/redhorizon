@@ -72,7 +72,8 @@ class ImagesViewer extends Application {
 		}
 
 		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(scene, executorService, graphicsConfig) { graphicsEngine ->
+			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
+				graphicsEngine.scene = scene
 
 				def center = new Vector3f()
 				def tick = imagesFile.width

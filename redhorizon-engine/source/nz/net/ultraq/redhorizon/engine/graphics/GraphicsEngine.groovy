@@ -49,13 +49,11 @@ class GraphicsEngine extends Engine {
 	private OpenGLContext openGlContext
 	private Camera camera
 	private boolean started
-
-	private final Scene scene
+	Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
-	 * @param scene
 	 * @param config
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
@@ -63,10 +61,9 @@ class GraphicsEngine extends Engine {
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(Scene scene, GraphicsConfiguration config,
+	GraphicsEngine(GraphicsConfiguration config,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
-		this.scene = scene
 		this.config = config
 		this.needsMainThreadCallback = needsMainThreadCallback
 	}
@@ -136,35 +133,36 @@ class GraphicsEngine extends Engine {
 							imGuiRenderer.startFrame()
 
 							camera.render(renderer)
-
-							// Reduce the list of renderable items to those just visible in the scene
-							def visibleElements = []
-							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-							averageNanos('objectCulling', 1f, logger) { ->
-								scene.accept { element ->
-									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-										visibleElements << element
+							if (scene) {
+								// Reduce the list of renderable items to those just visible in the scene
+								def visibleElements = []
+								def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+								averageNanos('objectCulling', 1f, logger) { ->
+									scene.accept { element ->
+										if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+											visibleElements << element
+										}
 									}
 								}
-							}
-							visibleElements.each { element ->
+								visibleElements.each { element ->
 
-								// Register the graphics element
-								if (!graphicsElementStates[element]) {
-									graphicsElementStates << [(element): STATE_NEW]
+									// Register the graphics element
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
+									}
+
+									def elementState = graphicsElementStates[element]
+
+									// Initialize the graphics element
+									if (elementState == STATE_NEW) {
+										element.init(renderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+
+									// Render the graphics element
+									element.render(renderer)
 								}
-
-								def elementState = graphicsElementStates[element]
-
-								// Initialize the graphics element
-								if (elementState == STATE_NEW) {
-									element.init(renderer)
-									elementState = STATE_INITIALIZED
-									graphicsElementStates << [(element): elementState]
-								}
-
-								// Render the graphics element
-								element.render(renderer)
 							}
 
 							imGuiRenderer.drawDebugOverlay()
