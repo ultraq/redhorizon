@@ -48,6 +48,7 @@ class SplashScreen {
 		shell = new Shell(display, SWT.ON_TOP)
 
 		// Splash screen frame
+		shell.background = display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND)
 		shell.backgroundMode = SWT.INHERIT_FORCE
 		shell.layout = new GridLayout(2, false).with {
 			marginWidth       = 0
@@ -74,7 +75,7 @@ class SplashScreen {
 		}
 
 		// Text area
-		def textGroup = new Composite(shell, SWT.NO_BACKGROUND).with {
+		def textGroup = new Composite(shell, SWT.NONE).with {
 			layout = new GridLayout(2, false).with {
 				marginWidth       = 0
 				marginHeight      = 0
