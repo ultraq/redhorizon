@@ -18,33 +18,25 @@ import org.gradle.internal.os.OperatingSystem
 
 apply plugin: 'application'
 
-def swtArtifact
+def os = OperatingSystem.current()
+def swtArtifact =
+	os == OperatingSystem.MAC_OS ?  'org.eclipse.swt.cocoa.macosx.x86_64' :
+	os == OperatingSystem.WINDOWS ? 'org.eclipse.swt.win32.win32.x86_64' :
+	os == OperatingSystem.LINUX ?   'org.eclipse.swt.gtk.linux.x86_64' :
+	null
 def swtVersion = '3.116.0'
-
-switch (OperatingSystem.current()) {
-	case OperatingSystem.MAC_OS:
-		swtArtifact = 'org.eclipse.swt.cocoa.macosx.x86_64'
-		break
-	case OperatingSystem.WINDOWS:
-		swtArtifact = 'org.eclipse.swt.win32.win32.x86_64'
-		break
-	case OperatingSystem.LINUX:
-		swtArtifact = 'org.eclipse.swt.gtk.linux.x86_64'
-		break
-}
 
 // Fix up the ${osgi.platform} value inside the SWT Maven files
 configurations.all {
 	resolutionStrategy {
 		dependencySubstitution {
-			def os = System.getProperty("os.name").toLowerCase()
-			if (os.contains("mac")) {
+			if (os == OperatingSystem.MAC_OS) {
 				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.cocoa.macosx.x86_64:${swtVersion}")
 			}
-			else if (os.contains("windows")) {
+			else if (os == OperatingSystem.WINDOWS) {
 				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:${swtVersion}")
 			}
-			else if (os.contains("linux")) {
+			else if (os == OperatingSystem.LINUX) {
 				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.gtk.linux.x86_64:${swtVersion}")
 			}
 		}
