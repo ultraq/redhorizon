@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CLI - MediaPlayer - Images" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="nz.net.ultraq.redhorizon.RedHorizonCLI" />
+    <module name="redhorizon.redhorizon-cli.main" />
+    <option name="PROGRAM_PARAMETERS" value="play mix/red-alert/Images-LoRes.mix e1.shp" />
+    <option name="VM_PARAMETERS" value="-XstartOnFirstThread -Dlogback.configurationFile=logback-development.xml -Dorg.lwjgl.system.stackSize=10240" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

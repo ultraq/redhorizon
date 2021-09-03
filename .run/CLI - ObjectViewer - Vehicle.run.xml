@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CLI - ObjectViewer - Vehicle" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="nz.net.ultraq.redhorizon.RedHorizonCLI" />
+    <module name="redhorizon.redhorizon-cli.main" />
+    <option name="PROGRAM_PARAMETERS" value="view mix/red-alert/Conquer.mix 4tnk.shp" />
+    <option name="VM_PARAMETERS" value="-XstartOnFirstThread -Dlogback.configurationFile=logback-development.xml -Dorg.lwjgl.system.stackSize=10240" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
