@@ -130,7 +130,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
 						started = true
-						renderLoop { ->
+						engineLoop { ->
 							renderer.clear()
 							imGuiRenderer.startFrame()
 
@@ -189,9 +189,9 @@ class GraphicsEngine extends Engine implements InputSource {
 	}
 
 	@Override
-	protected boolean shouldRender() {
+	protected boolean shouldRun() {
 
-		return !openGlContext.windowShouldClose() && super.shouldRender()
+		return !openGlContext.windowShouldClose() && super.shouldRun()
 	}
 
 	@Override

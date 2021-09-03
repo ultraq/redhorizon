@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -88,7 +88,7 @@ class VideoPlayer extends Application {
 							scene << video
 						}
 
-						graphicsEngine.on(RenderLoopStartEvent) { event ->
+						graphicsEngine.on(EngineLoopStartEvent) { event ->
 							video.play()
 							logger.debug('Video started')
 						}

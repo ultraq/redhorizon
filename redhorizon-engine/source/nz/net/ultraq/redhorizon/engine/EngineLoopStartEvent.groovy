@@ -19,9 +19,9 @@ package nz.net.ultraq.redhorizon.engine
 import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Event for when the render loop of an engine has begun.
+ * Event for when the main loop of an engine has begun.
  * 
  * @author Emanuel Rabina
  */
-class RenderLoopStartEvent extends Event {
+class EngineLoopStartEvent extends Event {
 }

@@ -65,7 +65,7 @@ class InputEngine extends Engine {
 		logger.debug('Starting input engine')
 
 		logger.debug('Input engine in render loop...')
-		renderLoop { ->
+		engineLoop { ->
 			inputQueue.size().times { i ->
 				trigger(inputQueue.poll())
 			}

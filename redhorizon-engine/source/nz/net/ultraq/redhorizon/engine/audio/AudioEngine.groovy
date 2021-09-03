@@ -71,7 +71,7 @@ class AudioEngine extends Engine {
 
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
-				renderLoop { ->
+				engineLoop { ->
 
 					if (scene) {
 						def audibleElements = []

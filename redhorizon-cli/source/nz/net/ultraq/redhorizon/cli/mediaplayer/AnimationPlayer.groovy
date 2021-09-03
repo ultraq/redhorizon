@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.engine.RenderLoopStartEvent
+import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 
@@ -84,7 +84,7 @@ class AnimationPlayer extends Application {
 						scene << animation
 					}
 
-					graphicsEngine.on(RenderLoopStartEvent) { event ->
+					graphicsEngine.on(EngineLoopStartEvent) { event ->
 						animation.play()
 						logger.debug('Animation started')
 					}

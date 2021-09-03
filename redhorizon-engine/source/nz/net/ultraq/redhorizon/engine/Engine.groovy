@@ -34,7 +34,7 @@ abstract class Engine implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	protected final ExecutorService executorService = Executors.newSingleThreadExecutor()
+	protected final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final int targetRenderTimeMs
 
 	protected boolean running
@@ -50,28 +50,28 @@ abstract class Engine implements EventTarget, Runnable {
 	}
 
 	/**
-	 * Perform the render loop within a certain render budget, sleeping the thread
-	 * if necessary to not exceed it.
+	 * Perform the main engine loop within a certain time budget, sleeping the
+	 * thread if necessary to not overdo it.
 	 * 
 	 * @param closure
 	 */
-	protected void renderLoop(Closure closure) {
+	protected void engineLoop(Closure closure) {
 
 		running = true
-		triggerOnSeparateThread(new RenderLoopStartEvent())
+		triggerOnSeparateThread(new EngineLoopStartEvent())
 
 		try {
-			while (shouldRender()) {
+			while (shouldRun()) {
 				def renderTime = time(closure)
 				if (renderTime < targetRenderTimeMs) {
 					Thread.sleep(targetRenderTimeMs - renderTime)
 				}
 			}
-			triggerOnSeparateThread(new RenderLoopStopEvent())
+			triggerOnSeparateThread(new EngineLoopStopEvent())
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
-			triggerOnSeparateThread(new RenderLoopStopEvent(ex))
+			triggerOnSeparateThread(new EngineLoopStopEvent(ex))
 		}
 		finally {
 			stop()
@@ -79,13 +79,13 @@ abstract class Engine implements EventTarget, Runnable {
 	}
 
 	/**
-	 * Return whether or not the render loop should be executed.  Used for
+	 * Return whether or not the engine loop should be executed.  Used for
 	 * checking if the engine is in a state to continue or if it should be
 	 * shutting down for exiting.
 	 * 
 	 * @return
 	 */
-	protected boolean shouldRender() {
+	protected boolean shouldRun() {
 
 		return running
 	}

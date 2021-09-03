@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.GameClock
-import nz.net.ultraq.redhorizon.engine.RenderLoopStopEvent
+import nz.net.ultraq.redhorizon.engine.EngineLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -125,7 +125,7 @@ abstract class Application {
 			exception = event.exception
 			executionBarrier.await()
 		}
-		graphicsEngine.on(RenderLoopStopEvent) { event ->
+		graphicsEngine.on(EngineLoopStopEvent) { event ->
 			finishBarrier.countDown()
 			if (event.exception) {
 				exception = event.exception
