@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.flag.ImGuiWindowFlags
@@ -54,16 +55,16 @@ class ImGuiDebugOverlay implements AutoCloseable {
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
 	 * renderer.
 	 * 
-	 * @param context
+	 * @param window
 	 * @param renderer
 	 */
-	ImGuiDebugOverlay(OpenGLContext context, OpenGLRenderer renderer) {
+	ImGuiDebugOverlay(long window, EventTarget renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3.init('#version 330 core')
-		imGuiGlfw.init(context.window, true)
+		imGuiGlfw.init(window, true)
 
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
