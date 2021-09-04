@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import ch.qos.logback.core.encoder.Encoder
 
@@ -25,22 +27,35 @@ import ch.qos.logback.core.encoder.Encoder
  * 
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> {
+class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> implements EventTarget {
+
+	static ImGuiDebugOverlayAppender instance
 
 	Encoder<E> encoder
+
+	/**
+	 * Constructor, saves this instance to the singleton value so it can be
+	 * referenced by the overlay.
+	 */
+	ImGuiDebugOverlayAppender() {
+
+		instance = this
+	}
 
 	@Override
 	protected void append(E eventObject) {
 
-		def imGuiRenderer = ImGuiRenderer.instance
-		if (imGuiRenderer) {
-			def message = new String(encoder.encode(eventObject))
-			if (eventObject.message.contains('average time')) {
-				imGuiRenderer.setPersistentLine(eventObject.argumentArray[0], message)
-			}
-			else {
-				imGuiRenderer.addDebugLine(message)
-			}
+		def message = new String(encoder.encode(eventObject))
+		if (eventObject.message.contains('average time')) {
+			trigger(new ImGuiLogEvent(
+				message: message,
+				persistentKey: eventObject.argumentArray[0]
+			))
+		}
+		else {
+			trigger(new ImGuiLogEvent(
+				message: message
+			))
 		}
 	}
 }

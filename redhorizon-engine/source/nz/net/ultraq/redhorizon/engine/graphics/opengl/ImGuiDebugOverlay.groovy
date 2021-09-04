@@ -29,7 +29,6 @@ import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 
-import groovy.transform.PackageScope
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 
@@ -39,10 +38,9 @@ import java.util.concurrent.BlockingQueue
  * 
  * @author Emanuel Rabina
  */
-class ImGuiRenderer implements AutoCloseable {
+class ImGuiDebugOverlay implements AutoCloseable {
 
-	static final int MAX_DEBUG_LINES = 10
-	private static ImGuiRenderer rendererInstance
+	private static final int MAX_DEBUG_LINES = 10
 
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
@@ -59,7 +57,7 @@ class ImGuiRenderer implements AutoCloseable {
 	 * @param context
 	 * @param renderer
 	 */
-	ImGuiRenderer(OpenGLContext context, OpenGLRenderer renderer) {
+	ImGuiDebugOverlay(OpenGLContext context, OpenGLRenderer renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -85,21 +83,15 @@ class ImGuiRenderer implements AutoCloseable {
 			}
 		}
 
-		rendererInstance = this
-	}
-
-	/**
-	 * Add a line to be displayed in the debug overlay.  A maximum of
-	 * {@link ImGuiRenderer#MAX_DEBUG_LINES} are allowed in the overlay, with old
-	 * lines being pushed out.
-	 * 
-	 * @param line
-	 */
-	@PackageScope
-	void addDebugLine(String line) {
-
-		while (!debugLines.offer(line)) {
-			debugLines.poll()
+		ImGuiDebugOverlayAppender.instance.on(ImGuiLogEvent) { event ->
+			if (event.persistentKey) {
+				persistentLines[event.persistentKey] = event.message
+			}
+			else {
+				while (!debugLines.offer(event.message)) {
+					debugLines.poll()
+				}
+			}
 		}
 	}
 
@@ -153,29 +145,6 @@ class ImGuiRenderer implements AutoCloseable {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
-	}
-
-	/**
-	 * Return the running instance of the ImGui renderer.
-	 * 
-	 * @return
-	 */
-	static ImGuiRenderer getInstance() {
-
-		return rendererInstance
-	}
-
-	/**
-	 * Set a line that appears with the other persistent debug lines in the
-	 * overlay.
-	 * 
-	 * @param key
-	 * @param line
-	 */
-	@PackageScope
-	void setPersistentLine(String key, String line) {
-
-		persistentLines[key] = line
 	}
 
 	/**
