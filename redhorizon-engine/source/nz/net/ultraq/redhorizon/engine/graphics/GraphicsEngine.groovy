@@ -117,7 +117,7 @@ class GraphicsEngine extends Engine implements InputSource {
 			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
-				camera = new Camera(context.windowSize, config.fixAspectRatio)
+				camera = new Camera(context.windowSize)
 				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, camera.size))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
@@ -130,7 +130,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Post-processing
 						// TODO: Make this configurable for the number of rendering passes
 						//       needed to achieve all configured post-processing effects.
-						def sceneRenderTarget = renderer.createRenderTarget(camera.size)
+						def sceneRenderTarget = renderer.createRenderTarget()
 						if (config.scanlines) {
 							def scanlineShader = renderer.createShader('Scanlines')
 							sceneRenderTarget.material.shader = scanlineShader

@@ -122,7 +122,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
-		viewportSize = context.framebufferSize
+		viewportSize = context.windowSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
 		glViewport(0, 0, viewportSize.width, viewportSize.height)
 //		context.on(FramebufferSizeEvent) { event ->
@@ -331,7 +331,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLRenderTarget createRenderTarget(Dimension size) {
+	OpenGLRenderTarget createRenderTarget() {
+
+		def width = viewportSize.width
+		def height = viewportSize.height
 
 		def colourTexture = glGenTextures()
 		glBindTexture(GL_TEXTURE_2D, colourTexture)
@@ -339,7 +342,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.width, size.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
 
 //		depthTexture = glGenTextures()
 //		glBindTexture(GL_TEXTURE_2D, depthTexture)
@@ -357,20 +360,20 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 		def frameBuffer = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
-		glViewport(0, 0, viewportSize.width, viewportSize.height)
+//		glViewport(0, 0, viewportSize.width, viewportSize.height)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
 //		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0)
 //		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
 		def screenMaterial = createMaterial(
-			createSpriteMesh(new Rectanglef(0, 0, size.width, size.height)),
+			createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			new OpenGLTexture(
 				textureId: colourTexture,
-				width: 640,
-				height: 400
+				width: width,
+				height: height
 			),
-			new Matrix4f().translate(-size.width >> 1, -size.height >> 1, 0)
+			new Matrix4f().translate(-width >> 1, -height >> 1, 0)
 		) as OpenGLMaterial
 
 		return new OpenGLRenderTarget(

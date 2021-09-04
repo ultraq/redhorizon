@@ -43,12 +43,9 @@ class Camera implements GraphicsElement {
 	 * @param windowSize
 	 * @param fixAspectRatio
 	 */
-	Camera(Dimension windowSize, boolean fixAspectRatio) {
+	Camera(Dimension windowSize) {
 
-		size = new Dimension(
-			windowSize.width,
-			(fixAspectRatio ? windowSize.height / 1.2 : windowSize.height) as int
-		)
+		size = new Dimension(windowSize.width, windowSize.height)
 		projection = new Matrix4f()
 			.ortho2D(-size.width / 2, size.width / 2, -size.height / 2, size.height / 2)
 			.lookAt(
