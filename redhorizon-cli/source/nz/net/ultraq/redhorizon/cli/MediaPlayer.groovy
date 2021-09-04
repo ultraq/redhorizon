@@ -103,7 +103,8 @@ class MediaPlayer implements Callable<Integer> {
 			def graphicsConfig = new GraphicsConfiguration(
 				filter: filter,
 				fixAspectRatio: fixAspectRatio,
-				fullScreen: fullScreen
+				fullScreen: fullScreen,
+				scanlines: scanlines
 			)
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100
@@ -111,11 +112,11 @@ class MediaPlayer implements Callable<Integer> {
 
 			switch (mediaFile) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig, scanlines)
+				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scanlines)
+				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig)
 				animationPlayer.play()
 				break
 			case SoundFile:

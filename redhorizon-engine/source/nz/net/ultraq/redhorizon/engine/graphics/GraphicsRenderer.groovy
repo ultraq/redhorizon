@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLShader
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Matrix4f
@@ -100,6 +101,14 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	RenderTarget createRenderTarget(Dimension size)
 
 	/**
+	 * Create a new shader program for the shader sources of the given name.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	OpenGLShader createShader(String name)
+
+		/**
 	 * Create a mesh to represent a surface onto which a texture will go, using
 	 * the default texture coordinates.
 	 * 

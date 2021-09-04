@@ -50,7 +50,6 @@ class VideoPlayer extends Application {
 	final VideoFile videoFile
 	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
-	final boolean scanlines
 
 	/**
 	 * Play the video file.

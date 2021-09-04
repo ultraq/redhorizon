@@ -48,17 +48,16 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	 * 
 	 * @param videoFile
 	 *   Video source.
-	 * @param scanlines
 	 * @param gameTime
 	 * @param executorService
 	 */
-	Video(VideoFile videoFile, boolean scanlines, GameTime gameTime, ExecutorService executorService) {
+	Video(VideoFile videoFile, GameTime gameTime, ExecutorService executorService) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
-				scanlines, videoFile.frameRate * 2 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}

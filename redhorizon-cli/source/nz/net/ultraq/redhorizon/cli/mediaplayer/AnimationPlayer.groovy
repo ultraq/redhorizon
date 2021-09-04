@@ -49,7 +49,6 @@ class AnimationPlayer extends Application {
 
 	final AnimationFile animationFile
 	final GraphicsConfiguration graphicsConfig
-	final boolean scanlines
 
 	/**
 	 * Play the configured animation file.
@@ -73,7 +72,7 @@ class AnimationPlayer extends Application {
 						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
 						def offset = new Vector2f(-width / 2, -height / 2)
 
-						animation = new Animation(animationFile, scanlines, gameClock, executorService)
+						animation = new Animation(animationFile, gameClock, executorService)
 							.scaleXY(scale)
 							.translate(offset)
 						animation.on(StopEvent) { stopEvent ->

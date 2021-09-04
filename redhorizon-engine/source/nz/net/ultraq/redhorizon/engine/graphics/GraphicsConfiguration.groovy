@@ -39,19 +39,24 @@ class GraphicsConfiguration {
 	final boolean debug = true
 
 	/**
-	 * Whether to use nearest-neighbour filtering on textures.
+	 * Use nearest-neighbour filtering on textures.
 	 */
 	final boolean filter
 
 	/**
-	 * Whether to adjust the aspect ratio of visual elements for today's displays,
-	 * given that a lot of the graphics of the time were on CRT displays using
-	 * resolutions that resulted in tall pixels.
+	 * Adjust the aspect ratio of visual elements for today's displays, given that
+	 * a lot of the graphics of the time were on CRT displays using resolutions
+	 * that resulted in tall pixels.
 	 */
 	final boolean fixAspectRatio
 
 	/**
-	 * Set to use the entire screen instead of a floating window.
+	 * Use the entire screen instead of a floating window.
 	 */
 	final boolean fullScreen
+
+	/**
+	 * Include a scanline effect in what's rendered to the screen.
+	 */
+	final boolean scanlines
 }

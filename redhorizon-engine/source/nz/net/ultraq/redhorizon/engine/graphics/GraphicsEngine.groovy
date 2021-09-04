@@ -126,7 +126,15 @@ class GraphicsEngine extends Engine implements InputSource {
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
+
+						// Post-processing
+						// TODO: Make this configurable for the number of rendering passes
+						//       needed to achieve all configured post-processing effects.
 						def sceneRenderTarget = renderer.createRenderTarget(camera.size)
+						if (config.scanlines) {
+							def scanlineShader = renderer.createShader('Scanlines')
+							sceneRenderTarget.material.shader = scanlineShader
+						}
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
@@ -168,6 +176,10 @@ class GraphicsEngine extends Engine implements InputSource {
 									element.render(renderer)
 								}
 							}
+
+							// Post-processing
+							// TODO: Make this configurable for the number of rendering passes
+							//       needed to achieve all configured post-processing effects.
 							renderer.setRenderTarget(null)
 							renderer.drawMaterial(sceneRenderTarget.material)
 

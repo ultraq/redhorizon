@@ -33,7 +33,6 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -368,8 +367,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			createSpriteMesh(new Rectanglef(0, 0, size.width, size.height)),
 			new OpenGLTexture(
 				textureId: colourTexture,
-				width: viewportSize.width,
-				height: viewportSize.height
+				width: 640,
+				height: 400
 			),
 			new Matrix4f().translate(-size.width >> 1, -size.height >> 1, 0)
 		) as OpenGLMaterial
@@ -380,13 +379,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		)
 	}
 
-	/**
-	 * Create a new shader program for the shader sources of the given name.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private OpenGLShader createShader(String name) {
+	@Override
+	OpenGLShader createShader(String name) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
@@ -548,15 +542,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
+				// TODO: Make it so that these shader-specific variables can be provided
+				//       as closures when creating the shader.  Otherwise this happens
+				//       for all shaders when they don't even need this info.
 				glUniform2fv(getUniformLocation(shader, 'textureSourceSize'), stack.floats(texture.width, texture.height))
-
-				// TODO: Store mesh dimensions somewhere?  Currently just a series of
-				//       points but no way to get the original size from the Rectanglef
-				//       that it was built with 🤔
-				def textureTargetSize = mesh.vertices[2].mul(material.transform.getScale(new Vector3f()).x, new Vector2f())
+				def textureTargetSize = new Vector2f(viewportSize.width, viewportSize.height)
 				glUniform2fv(getUniformLocation(shader, 'textureTargetSize'), textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS)))
-
-				glUniform1i(getUniformLocation(shader, 'useScanlines'), material.scanlines ? 1 : 0)
 
 				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')
