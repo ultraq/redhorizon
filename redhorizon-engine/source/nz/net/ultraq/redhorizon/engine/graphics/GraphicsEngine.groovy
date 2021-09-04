@@ -134,36 +134,38 @@ class GraphicsEngine extends Engine implements InputSource {
 							renderer.clear()
 							imGuiRenderer.startFrame()
 
-							camera.render(renderer)
-							if (scene) {
-								// Reduce the list of renderable items to those just visible in the scene
-								def visibleElements = []
-								def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-								averageNanos('objectCulling', 1f, logger) { ->
-									scene.accept { element ->
-										if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-											visibleElements << element
+							renderer.renderScene { ->
+								camera.render(renderer)
+								if (scene) {
+									// Reduce the list of renderable items to those just visible in the scene
+									def visibleElements = []
+									def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+									averageNanos('objectCulling', 1f, logger) { ->
+										scene.accept { element ->
+											if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+												visibleElements << element
+											}
 										}
 									}
-								}
-								visibleElements.each { element ->
+									visibleElements.each { element ->
 
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
+										// Register the graphics element
+										if (!graphicsElementStates[element]) {
+											graphicsElementStates << [(element): STATE_NEW]
+										}
+
+										def elementState = graphicsElementStates[element]
+
+										// Initialize the graphics element
+										if (elementState == STATE_NEW) {
+											element.init(renderer)
+											elementState = STATE_INITIALIZED
+											graphicsElementStates << [(element): elementState]
+										}
+
+										// Render the graphics element
+										element.render(renderer)
 									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
 								}
 							}
 

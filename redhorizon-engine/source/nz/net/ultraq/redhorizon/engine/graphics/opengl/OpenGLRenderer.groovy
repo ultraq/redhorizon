@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
+import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.Memoized
 import groovy.transform.stc.ClosureParams
@@ -76,6 +77,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
 	protected OpenGLTexture currentPalette
+
+	private int colourTexture
+	private int depthTexture
+	private int depthBuffer
+	private int frameBuffer
+	private Material screenMaterial
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -139,6 +146,48 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 				.flip()
 			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
 		}
+
+		// Experimental: framebuffer stuffs
+
+		colourTexture = glGenTextures()
+		glBindTexture(GL_TEXTURE_2D, colourTexture)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportSize.width, viewportSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+
+//		depthTexture = glGenTextures()
+//		glBindTexture(GL_TEXTURE_2D, depthTexture)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+//		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewportSize.width, viewportSize.height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL)
+
+		glBindTexture(GL_TEXTURE_2D, 0)
+
+//		depthBuffer = glGenRenderbuffers()
+//		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
+//		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewportSize.width, viewportSize.height)
+
+		frameBuffer = glGenFramebuffers()
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+		glViewport(0, 0, viewportSize.width, viewportSize.height)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
+//		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0)
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+
+		screenMaterial = createMaterial(
+			createSpriteMesh(new Rectanglef(0, 0, viewportSize.width, viewportSize.height)),
+			new OpenGLTexture(
+				textureId: colourTexture,
+				width: viewportSize.width,
+				height: viewportSize.height
+			),
+			new Matrix4f().scale(0.5).translate(-viewportSize.width >> 1, -viewportSize.height >> 1, 0)
+		)
 	}
 
 	@Override
@@ -200,6 +249,11 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			batchRenderer.close()
 		}
 		glDeleteTextures(*paletteTextureIds)
+
+		glDeleteTextures(colourTexture, depthTexture)
+		glDeleteRenderbuffers(depthBuffer)
+		glDeleteFramebuffers(frameBuffer)
+
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)
@@ -543,6 +597,17 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected static int getUniformLocation(OpenGLShader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
+	}
+
+	@Override
+	void renderScene(Closure closure) {
+
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+		closure()
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+
+		// Draw scene out to screen for now
+		drawMaterial(screenMaterial)
 	}
 
 	/**

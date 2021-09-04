@@ -147,6 +147,16 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	void drawMaterial(TMaterial material)
 
 	/**
+	 * Prepare the renderer for rendering the scene using the given closure by
+	 * using a framebuffer object as the target of rendering operations.  This is
+	 * so that post-processing effects can be applied to the scene in a later
+	 * step.
+	 * 
+	 * @param closure
+	 */
+	void renderScene(Closure closure)
+
+	/**
 	 * Update the camera's view matrix.
 	 * 
 	 * @param view

@@ -61,7 +61,8 @@ vec4 insertScanlines(vec2 uv) {
  */
 void main() {
 
-	fragmentColour = textureScale(textures[int(v_textureUnit)], v_textureUVs);
-	fragmentColour *= useScanlines ? insertScanlines(v_textureUVs) : vec4(1.0, 1.0, 1.0, 1.0);
-	fragmentColour *= v_vertexColour;
+//	fragmentColour = textureScale(textures[int(v_textureUnit)], v_textureUVs);
+//	fragmentColour *= useScanlines ? insertScanlines(v_textureUVs) : vec4(1.0, 1.0, 1.0, 1.0);
+//	fragmentColour *= v_vertexColour;
+	fragmentColour = texture(textures[int(v_textureUnit)], v_textureUVs);
 }
