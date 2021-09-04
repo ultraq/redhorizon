@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer {
+interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TTexture extends Texture> {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -66,7 +66,7 @@ interface GraphicsRenderer {
 	 * @param transform
 	 * @return
 	 */
-	Material createMaterial(Mesh mesh, Texture texture, Matrix4f transform)
+	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
 
 	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
@@ -77,7 +77,7 @@ interface GraphicsRenderer {
 	 * @param vertices
 	 * @return
 	 */
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices)
+	TMesh createLineLoopMesh(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Create a mesh representing disjoint lines.
@@ -87,7 +87,7 @@ interface GraphicsRenderer {
 	 *                 of a line to be drawn.
 	 * @return New lines mesh.
 	 */
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
+	TMesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using
@@ -96,7 +96,7 @@ interface GraphicsRenderer {
 	 * @param surface
 	 * @return
 	 */
-	Mesh createSpriteMesh(Rectanglef surface)
+	TMesh createSpriteMesh(Rectanglef surface)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
@@ -105,7 +105,7 @@ interface GraphicsRenderer {
 	 * @param textureUVs
 	 * @return
 	 */
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
+	TMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**
 	 * Create and fill a texture with the given image data.
@@ -116,35 +116,35 @@ interface GraphicsRenderer {
 	 * @param height
 	 * @return New texture object.
 	 */
-	Texture createTexture(ByteBuffer data, int format, int width, int height)
+	TTexture createTexture(ByteBuffer data, int format, int width, int height)
 
 	/**
 	 * Delete all of the items tied to the material.
 	 * 
 	 * @param material
 	 */
-	void deleteMaterial(Material material)
+	void deleteMaterial(TMaterial material)
 
 	/**
 	 * Delete mesh data.
 	 * 
 	 * @param mesh
 	 */
-	void deleteMesh(Mesh mesh)
+	void deleteMesh(TMesh mesh)
 
 	/**
 	 * Delete texture data.
 	 * 
 	 * @param texture
 	 */
-	void deleteTexture(Texture texture)
+	void deleteTexture(TTexture texture)
 
 	/**
 	 * Render a material.
 	 * 
 	 * @param material
 	 */
-	void drawMaterial(Material material)
+	void drawMaterial(TMaterial material)
 
 	/**
 	 * Update the camera's view matrix.
@@ -164,7 +164,7 @@ interface GraphicsRenderer {
 	 *   closure.  This material can then be rendered as normal to render all of
 	 *   the created materials at once.
 	 */
-	Material withMaterialBundler(
+	TMaterial withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
 		Closure closure)
 }

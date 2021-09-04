@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
  * 
  * @author Emanuel Rabina
  */
-class OpenGLMaterial extends Material {
+class OpenGLMaterial extends Material<OpenGLMesh, OpenGLShader, OpenGLTexture> {
 
 	/**
 	 * Configure the material with a map argument.

@@ -20,12 +20,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -55,7 +52,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLTexture>, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -75,10 +72,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final Dimension viewportSize
 	protected final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
-	protected Texture whiteTexture
+	protected OpenGLTexture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
-	protected Texture currentPalette
+	protected OpenGLTexture currentPalette
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -229,19 +226,19 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINE_LOOP, colour, vertices))
 	}
 
 	@Override
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
+	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture, Matrix4f transform) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform) {
 
 		return new OpenGLMaterial(
 			mesh: mesh,
@@ -401,7 +398,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,
@@ -413,7 +410,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Texture createTexture(ByteBuffer data, int format, int width, int height) {
+	OpenGLTexture createTexture(ByteBuffer data, int format, int width, int height) {
 
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
@@ -449,19 +446,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void deleteMaterial(Material material) {
+	void deleteMaterial(OpenGLMaterial material) {
 
 		deleteMesh(material.mesh)
-		def texture = material.texture as OpenGLTexture
+		def texture = material.texture
 		if (texture && !paletteTextureIds.contains(texture.textureId)) {
-			deleteTexture(material.texture)
+			deleteTexture(texture)
 		}
 	}
 
 	@Override
-	void deleteMesh(Mesh mesh) {
+	void deleteMesh(OpenGLMesh mesh) {
 
-		mesh = mesh as OpenGLMesh
 		if (mesh.elementBufferId) {
 			glDeleteBuffers(mesh.elementBufferId)
 		}
@@ -471,21 +467,20 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	void deleteTexture(Texture texture) {
+	void deleteTexture(OpenGLTexture texture) {
 
-		texture = texture as OpenGLTexture
 		glDeleteTextures(texture.textureId)
 		trigger(new TextureDeletedEvent(texture))
 	}
 
 	@Override
-	void drawMaterial(Material material) {
+	void drawMaterial(OpenGLMaterial material) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
-				def mesh = material.mesh as OpenGLMesh
-				def texture = material.texture as OpenGLTexture
-				def shader = material.shader as OpenGLShader
+				def mesh = material.mesh
+				def texture = material.texture
+				def shader = material.shader
 
 				glUseProgram(shader.programId)
 
@@ -576,7 +571,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material withMaterialBundler(
+	OpenGLMaterial withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
 		Closure closure) {
 

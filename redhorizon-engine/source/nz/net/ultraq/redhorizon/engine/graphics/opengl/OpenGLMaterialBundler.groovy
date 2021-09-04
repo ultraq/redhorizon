@@ -17,11 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Matrix4f
@@ -41,17 +37,17 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventTarget {
+class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMesh, OpenGLTexture>, EventTarget {
 
 	@Delegate(excludes = [
 		'createSpriteMesh'
 	])
 	final OpenGLRenderer renderer
 
-	private final List<Material> materials = []
+	private final List<OpenGLMaterial> materials = []
 
 	@Override
-	Material bundle() {
+	OpenGLMaterial bundle() {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -122,19 +118,19 @@ class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventT
 	}
 
 	@Override
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
+	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINES, colour, vertices)
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,
@@ -146,7 +142,7 @@ class OpenGLMaterialBundler implements MaterialBundler, GraphicsRenderer, EventT
 	}
 
 	@Override
-	Material createMaterial(Mesh mesh, Texture texture, Matrix4f transform) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform) {
 
 		def material = renderer.createMaterial(mesh, texture, transform)
 		materials << material
