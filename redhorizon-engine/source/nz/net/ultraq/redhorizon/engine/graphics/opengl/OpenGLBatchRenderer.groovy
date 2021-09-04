@@ -36,7 +36,8 @@ import static org.lwjgl.system.MemoryStack.stackPush
  * 
  * @author Emanuel Rabina
  */
-class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLTexture>, BatchRenderer, EventTarget {
+class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
+	BatchRenderer, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 

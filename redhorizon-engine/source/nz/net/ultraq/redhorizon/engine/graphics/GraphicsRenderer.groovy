@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TTexture extends Texture> {
+interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TShader extends Shader, TTexture extends Texture> {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -102,7 +102,7 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	 * @param name
 	 * @return
 	 */
-	Shader createShader(String name)
+	TShader createShader(String name)
 
 		/**
 	 * Create a mesh to represent a surface onto which a texture will go, using

@@ -53,7 +53,8 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLTexture>, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
+	AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
