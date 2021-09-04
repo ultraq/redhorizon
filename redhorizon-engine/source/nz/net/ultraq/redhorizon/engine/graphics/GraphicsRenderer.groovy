@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -59,16 +61,6 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	void createCamera(Matrix4f projection, Matrix4f view)
 
 	/**
-	 * Create a material out of the given component parts.
-	 * 
-	 * @param mesh
-	 * @param texture
-	 * @param transform
-	 * @return
-	 */
-	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
-
-	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
 	 * are drawn between them and then a final one is used to close the last and
 	 * first points.
@@ -88,6 +80,24 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	 * @return New lines mesh.
 	 */
 	TMesh createLinesMesh(Colour colour, Vector2f... vertices)
+
+	/**
+	 * Create a material out of the given component parts.
+	 *
+	 * @param mesh
+	 * @param texture
+	 * @param transform
+	 * @return
+	 */
+	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
+
+	/**
+	 * Create a render target that can be drawn to.
+	 * 
+	 * @param size
+	 * @return
+	 */
+	RenderTarget createRenderTarget(Dimension size)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using
@@ -133,6 +143,13 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	void deleteMesh(TMesh mesh)
 
 	/**
+	 * Delete render target data.
+	 * 
+	 * @param renderTarget
+	 */
+	void deleteRenderTarget(RenderTarget renderTarget)
+
+	/**
 	 * Delete texture data.
 	 * 
 	 * @param texture
@@ -147,14 +164,12 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	void drawMaterial(TMaterial material)
 
 	/**
-	 * Prepare the renderer for rendering the scene using the given closure by
-	 * using a framebuffer object as the target of rendering operations.  This is
-	 * so that post-processing effects can be applied to the scene in a later
-	 * step.
+	 * Set a render target to be used by subsequent draw calls.  Use {@code null}
+	 * to set the render target as the screen.
 	 * 
-	 * @param closure
+	 * @param renderTarget
 	 */
-	void renderScene(Closure closure)
+	void setRenderTarget(RenderTarget renderTarget)
 
 	/**
 	 * Update the camera's view matrix.
