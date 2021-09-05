@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Matrix4f
+import org.joml.Rectanglef
 import org.joml.Vector3f
 import static OpenGLRenderer.*
 
@@ -40,7 +41,7 @@ import groovy.transform.TupleConstructor
 class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMesh, OpenGLRenderTarget, OpenGLShader, OpenGLTexture>,
 	EventTarget {
 
-	@Delegate
+	@Delegate(excludes = ['createSpriteMesh'])
 	final OpenGLRenderer renderer
 
 	private final List<OpenGLMaterial> materials = []
@@ -140,5 +141,17 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMes
 		)
 		materials << material
 		return material
+	}
+
+	@Override
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+
+		return renderer.createMesh(
+			GL_TRIANGLES,
+			Colour.WHITE,
+			surface as Vector2f[],
+			textureUVs as Vector2f[],
+			new int[]{ 0, 1, 3, 1, 2, 3 }
+		)
 	}
 }

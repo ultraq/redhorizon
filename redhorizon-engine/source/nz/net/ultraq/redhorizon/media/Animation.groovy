@@ -142,9 +142,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	void init(GraphicsRenderer renderer) {
 
 		lastFrame = -1
-		mesh = renderer.createSpriteMesh(
-			surface: new Rectanglef(0, 0, width, height)
-		)
+		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
 		textures = []
 		material = renderer.createMaterial(
 			mesh: mesh,

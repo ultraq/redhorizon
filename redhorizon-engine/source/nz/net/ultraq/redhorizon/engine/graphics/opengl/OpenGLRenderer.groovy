@@ -452,15 +452,14 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return shader
 	}
 
-	@NamedVariant
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = null) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
-			(textureUVs ?: new Rectanglef(0, 0, 1, 1)) as Vector2f[],
+			textureUVs as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		))
 	}

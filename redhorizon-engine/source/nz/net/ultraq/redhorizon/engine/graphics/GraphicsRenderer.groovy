@@ -112,15 +112,21 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	TShader createShader(String name)
 
 	/**
+	 * Create a mesh to represent a surface onto which a texture will go, using
+	 * the default texture coordinates.
+	 * 
+	 * @param surface
+	 * @return
+	 */
+	TMesh createSpriteMesh(Rectanglef surface)
+
+	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
 	 * 
 	 * @param surface
 	 * @param textureUVs
-	 *   If not specified, the default texture coordinates will be used:
-	 *   ((0,0), (1,1)).
 	 * @return
 	 */
-	@NamedVariant
 	TMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**
