@@ -53,7 +53,7 @@ class OpenGLContext extends Context implements EventTarget {
 	private final GraphicsConfiguration config
 	final long window
 	final Dimension windowSize
-//	final Dimension framebufferSize
+	final Dimension framebufferSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -99,10 +99,10 @@ class OpenGLContext extends Context implements EventTarget {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
-//		def widthPointer = new int[1]
-//		def heightPointer = new int[1]
-//		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-//		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
+		def widthPointer = new int[1]
+		def heightPointer = new int[1]
+		glfwGetFramebufferSize(window, widthPointer, heightPointer)
+		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
 
 //		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
 //			framebufferSize = new Dimension(width, height)

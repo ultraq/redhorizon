@@ -135,7 +135,8 @@ class GraphicsEngine extends Engine implements InputSource {
 						if (config.scanlines) {
 							renderPasses << new RenderPass<OpenGLRenderTarget>(
 								renderTarget: renderer.createRenderTarget(
-									shader: renderer.createShader('Scanlines')
+									shader: renderer.createShader('Scanlines'),
+									transform: new Matrix4f()
 								)
 							)
 						}

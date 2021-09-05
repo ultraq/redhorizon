@@ -72,6 +72,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected final int maxTransforms
 
 	protected final Dimension viewportSize
+	protected final Dimension windowSize
 	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
 	private final OpenGLTexture whiteTexture
@@ -123,13 +124,14 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
-		viewportSize = context.windowSize
+		viewportSize = context.framebufferSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
 		glViewport(0, 0, viewportSize.width, viewportSize.height)
 //		context.on(FramebufferSizeEvent) { event ->
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
+		windowSize = context.windowSize
 
 		// Create the shader programs used by this renderer
 		standardShader = createShader('Standard')
@@ -330,7 +332,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		}
 	}
 
-	@NamedVariant
+	@NamedVariant(coerce = true)
 	@Override
 	OpenGLRenderTarget createRenderTarget(boolean filter, OpenGLShader shader, Matrix4f transform) {
 
@@ -380,7 +382,9 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			mesh: createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			texture: colourTexture,
 			shader: shader,
-			transform: transform.translate(-width >> 1, -height >> 1, 0, new Matrix4f())
+			transform: new Matrix4f(transform)
+				.scale(windowSize.width / viewportSize.width, windowSize.height / viewportSize.height, 1)
+				.translate(-width >> 1, -height >> 1, 0)
 		) as OpenGLMaterial
 
 		return new OpenGLRenderTarget(
