@@ -43,6 +43,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.Memoized
+import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
@@ -71,9 +72,9 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected final int maxTransforms
 
 	protected final Dimension viewportSize
-	protected final OpenGLShader standardShader
+	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
-	protected OpenGLTexture whiteTexture
+	private final OpenGLTexture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
 	protected OpenGLTexture currentPalette
@@ -134,12 +135,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		standardShader = createShader('Standard')
 
 		// The white texture used as a fallback when no texture is bound
-		stackPush().withCloseable { stack ->
-			def textureBytes = ByteBuffer.allocateNative(4)
-				.putInt(0xffffffff as int)
-				.flip()
-			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
-		}
+		def textureBytes = ByteBuffer.allocateNative(4)
+			.putInt(0xffffffff as int)
+			.flip()
+		whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
 	}
 
 	@Override
@@ -238,13 +237,14 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
+	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform, OpenGLShader shader = standardShader) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, OpenGLShader shader, Matrix4f transform) {
 
 		return new OpenGLMaterial(
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
-			shader: shader,
+			shader: shader ?: standardShader,
 			transform: transform
 		)
 	}
@@ -369,16 +369,16 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
 		def screenMaterial = createMaterial(
-			createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			new OpenGLTexture(
+			mesh: createSpriteMesh(new Rectanglef(0, 0, width, height)),
+			texture: new OpenGLTexture(
 				textureId: colourTexture,
 				// TODO: Find some way to set this (used for the post-processing
 				//       shaders?) instead of baking it in here
 				width: 640,
 				height: 400
 			),
-			new Matrix4f().translate(-width >> 1, -height >> 1, 0),
-			shader
+			shader: shader,
+			transform: new Matrix4f().translate(-width >> 1, -height >> 1, 0)
 		) as OpenGLMaterial
 
 		return new OpenGLRenderTarget(
@@ -450,14 +450,15 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return shader
 	}
 
+	@NamedVariant
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = null) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,
 			Colour.WHITE,
 			surface as Vector2f[],
-			textureUVs as Vector2f[],
+			(textureUVs ?: new Rectanglef(0, 0, 1, 1)) as Vector2f[],
 			new int[]{ 0, 1, 3, 1, 2, 3 }
 		))
 	}

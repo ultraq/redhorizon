@@ -20,6 +20,7 @@ import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 
+import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
@@ -84,22 +85,12 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 *
 	 * @param mesh
 	 * @param texture
-	 * @param transform
-	 * @return
-	 */
-	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
-
-	/**
-	 * Create a material out of the given component parts and the specified
-	 * shader.
-	 * 
-	 * @param mesh
-	 * @param texture
-	 * @param transform
 	 * @param shader
+	 * @param transform
 	 * @return
 	 */
-	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform, TShader shader)
+	@NamedVariant
+	TMaterial createMaterial(TMesh mesh, TTexture texture, TShader shader, Matrix4f transform)
 
 	/**
 	 * Create a render target that can be drawn to.
@@ -117,22 +108,16 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 */
 	TShader createShader(String name)
 
-		/**
-	 * Create a mesh to represent a surface onto which a texture will go, using
-	 * the default texture coordinates.
-	 * 
-	 * @param surface
-	 * @return
-	 */
-	TMesh createSpriteMesh(Rectanglef surface)
-
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
 	 * 
 	 * @param surface
 	 * @param textureUVs
+	 *   If not specified, the default texture coordinates will be used:
+	 *   ((0,0), (1,1)).
 	 * @return
 	 */
+	@NamedVariant
 	TMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**

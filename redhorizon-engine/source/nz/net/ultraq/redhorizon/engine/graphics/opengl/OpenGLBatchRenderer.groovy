@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import static OpenGLRenderer.*
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +40,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
-	@Delegate(excludes = ['createMaterial', 'createSpriteMesh'])
+	@Delegate
 	private final OpenGLRenderer renderer
 
 	private final int maxQuads
@@ -110,24 +109,6 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh
 	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINES, colour, vertices)
-	}
-
-	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform, OpenGLShader shader = renderer.standardShader) {
-
-		return renderer.createMaterial(mesh, texture, transform, shader)
-	}
-
-	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureCoordinates = new Rectanglef(0, 0, 1, 1)) {
-
-		return renderer.createMesh(
-			GL_TRIANGLES,
-			Colour.WHITE,
-			surface as Vector2f[],
-			textureCoordinates as Vector2f[],
-			new int[]{ 0, 1, 3, 1, 2, 3 }
-		)
 	}
 
 	@Override

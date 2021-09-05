@@ -24,11 +24,11 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import static OpenGLRenderer.*
 
-import org.joml.Rectanglef
 import org.joml.Vector2f
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
+import groovy.transform.NamedVariant
 import groovy.transform.TupleConstructor
 
 /**
@@ -40,7 +40,7 @@ import groovy.transform.TupleConstructor
 class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMesh, OpenGLRenderTarget, OpenGLShader, OpenGLTexture>,
 	EventTarget {
 
-	@Delegate(excludes = ['createMaterial', 'createSpriteMesh'])
+	@Delegate
 	final OpenGLRenderer renderer
 
 	private final List<OpenGLMaterial> materials = []
@@ -128,23 +128,17 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMes
 		return renderer.createMesh(GL_LINES, colour, vertices)
 	}
 
+	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform, OpenGLShader shader = renderer.standardShader) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, OpenGLShader shader, Matrix4f transform) {
 
-		def material = renderer.createMaterial(mesh, texture, transform, shader)
+		def material = renderer.createMaterial(
+			mesh: mesh,
+			texture: texture,
+			shader: shader,
+			transform: transform
+		)
 		materials << material
 		return material
-	}
-
-	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
-
-		return renderer.createMesh(
-			GL_TRIANGLES,
-			Colour.WHITE,
-			surface as Vector2f[],
-			textureUVs as Vector2f[],
-			new int[]{ 0, 1, 3, 1, 2, 3 }
-		)
 	}
 }
