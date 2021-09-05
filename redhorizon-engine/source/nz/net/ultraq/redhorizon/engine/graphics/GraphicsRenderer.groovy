@@ -90,11 +90,24 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
 
 	/**
-	 * Create a render target that can be drawn to.
+	 * Create a material out of the given component parts and the specified
+	 * shader.
 	 * 
+	 * @param mesh
+	 * @param texture
+	 * @param transform
+	 * @param shader
 	 * @return
 	 */
-	RenderTarget createRenderTarget()
+	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform, TShader shader)
+
+	/**
+	 * Create a render target that can be drawn to.
+	 * 
+	 * @param shader
+	 * @return
+	 */
+	RenderTarget createRenderTarget(TShader shader)
 
 	/**
 	 * Create a new shader program for the shader sources of the given name.
@@ -152,7 +165,7 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 * 
 	 * @param renderTarget
 	 */
-	void deleteRenderTarget(RenderTarget renderTarget)
+	void deleteRenderTarget(TRenderTarget renderTarget)
 
 	/**
 	 * Delete texture data.

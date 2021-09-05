@@ -41,9 +41,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
-	@Delegate(excludes = [
-	  'createSpriteMesh'
-	])
+	@Delegate(excludes = ['createMaterial', 'createSpriteMesh'])
 	private final OpenGLRenderer renderer
 
 	private final int maxQuads
@@ -112,6 +110,12 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh
 	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINES, colour, vertices)
+	}
+
+	@Override
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform, OpenGLShader shader = renderer.standardShader) {
+
+		return renderer.createMaterial(mesh, texture, transform, shader)
 	}
 
 	@Override

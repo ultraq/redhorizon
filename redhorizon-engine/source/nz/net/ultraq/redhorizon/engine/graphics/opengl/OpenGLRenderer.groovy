@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.RenderTarget
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -240,12 +239,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform, OpenGLShader shader = standardShader) {
 
 		return new OpenGLMaterial(
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
-			shader: standardShader,
+			shader: shader,
 			transform: transform
 		)
 	}
@@ -332,15 +331,17 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLRenderTarget createRenderTarget() {
+	OpenGLRenderTarget createRenderTarget(OpenGLShader shader) {
 
 		def width = viewportSize.width
 		def height = viewportSize.height
 
 		def colourTexture = glGenTextures()
 		glBindTexture(GL_TEXTURE_2D, colourTexture)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
@@ -361,7 +362,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 		def frameBuffer = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
-//		glViewport(0, 0, viewportSize.width, viewportSize.height)
+//		glViewport(0, 0, width, height)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
 //		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0)
 //		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
@@ -371,10 +372,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			new OpenGLTexture(
 				textureId: colourTexture,
-				width: width,
-				height: height
+				// TODO: Find some way to set this (used for the post-processing
+				//       shaders?) instead of baking it in here
+				width: 640,
+				height: 400
 			),
-			new Matrix4f().translate(-width >> 1, -height >> 1, 0)
+			new Matrix4f().translate(-width >> 1, -height >> 1, 0),
+			shader
 		) as OpenGLMaterial
 
 		return new OpenGLRenderTarget(
@@ -464,8 +468,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
 			glBindTexture(GL_TEXTURE_2D, textureId)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+//			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+//			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
 			def colourFormat =
 				format == 1 ? GL_RED :
@@ -516,9 +522,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	void deleteRenderTarget(RenderTarget renderTarget) {
+	void deleteRenderTarget(OpenGLRenderTarget renderTarget) {
 
-		renderTarget = renderTarget as OpenGLRenderTarget
 		deleteMaterial(renderTarget.material)
 		glDeleteFramebuffers(renderTarget.frameBuffer)
 	}

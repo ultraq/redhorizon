@@ -132,11 +132,13 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Set up the rendering pipeline for any post-processing steps
 						// TODO: Represent this all with a "rendering pipeline" object
 						if (config.scanlines) {
-							def renderTarget = renderer.createRenderTarget()
-							def scanlineShader = renderer.createShader('Scanlines')
-							renderTarget.material.shader = scanlineShader
 							renderPasses << new RenderPass<OpenGLRenderTarget>(
-								renderTarget: renderTarget
+								renderTarget: renderer.createRenderTarget(renderer.createShader('Scanlines'))
+							)
+						}
+						if (config.filter) {
+							renderPasses << new RenderPass<OpenGLRenderTarget>(
+								renderTarget: renderer.createRenderTarget(renderer.createShader('SharpBilinear'))
 							)
 						}
 						renderPasses << new RenderPass<OpenGLRenderTarget>(
