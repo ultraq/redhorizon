@@ -69,9 +69,6 @@ class MediaPlayer implements Callable<Integer> {
 	@Mixin
 	FileOptions fileOptions
 
-	@Option(names = ['--filter'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
-	boolean filter
-
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays')
 	boolean fixAspectRatio
 
@@ -101,7 +98,6 @@ class MediaPlayer implements Callable<Integer> {
 
 		fileOptions.useFile(logger) { mediaFile ->
 			def graphicsConfig = new GraphicsConfiguration(
-				filter: filter,
 				fixAspectRatio: fixAspectRatio,
 				fullScreen: fullScreen,
 				scanlines: scanlines

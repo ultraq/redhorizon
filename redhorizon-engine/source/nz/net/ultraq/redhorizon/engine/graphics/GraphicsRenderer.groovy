@@ -96,9 +96,11 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 * Create a render target that can be drawn to.
 	 * 
 	 * @param shader
+	 * @param transform
 	 * @return
 	 */
-	RenderTarget createRenderTarget(TShader shader)
+	@NamedVariant
+	RenderTarget createRenderTarget(TShader shader, Matrix4f transform)
 
 	/**
 	 * Create a new shader program for the shader sources of the given name.

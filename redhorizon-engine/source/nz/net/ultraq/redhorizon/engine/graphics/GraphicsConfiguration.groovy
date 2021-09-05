@@ -39,11 +39,6 @@ class GraphicsConfiguration {
 	final boolean debug = true
 
 	/**
-	 * Use nearest-neighbour filtering on textures.
-	 */
-	final boolean filter
-
-	/**
 	 * Adjust the aspect ratio of visual elements for today's displays, given that
 	 * a lot of the graphics of the time were on CRT displays using resolutions
 	 * that resulted in tall pixels.

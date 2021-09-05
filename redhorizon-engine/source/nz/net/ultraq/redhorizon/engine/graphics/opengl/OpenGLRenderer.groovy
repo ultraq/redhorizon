@@ -330,22 +330,26 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		}
 	}
 
+	@NamedVariant
 	@Override
-	OpenGLRenderTarget createRenderTarget(OpenGLShader shader) {
+	OpenGLRenderTarget createRenderTarget(OpenGLShader shader, Matrix4f transform) {
+
+		def frameBuffer = glGenFramebuffers()
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
 
 		def width = viewportSize.width
 		def height = viewportSize.height
 
 		def colourTexture = glGenTextures()
 		glBindTexture(GL_TEXTURE_2D, colourTexture)
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
 
+		// To create a depth texture attachment
 //		depthTexture = glGenTextures()
 //		glBindTexture(GL_TEXTURE_2D, depthTexture)
 //		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
@@ -353,32 +357,27 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 //		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
 //		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 //		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewportSize.width, viewportSize.height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL)
+//		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0)
 
 		glBindTexture(GL_TEXTURE_2D, 0)
 
+		// To create a depth buffer attachment
 //		def depthBuffer = glGenRenderbuffers()
 //		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
 //		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, viewportSize.width, viewportSize.height)
-
-		def frameBuffer = glGenFramebuffers()
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
-//		glViewport(0, 0, width, height)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
-//		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0)
 //		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
 		def screenMaterial = createMaterial(
 			mesh: createSpriteMesh(new Rectanglef(0, 0, width, height)),
 			texture: new OpenGLTexture(
 				textureId: colourTexture,
-				// TODO: Find some way to set this (used for the post-processing
-				//       shaders?) instead of baking it in here
-				width: 640,
-				height: 400
+				width: width,
+				height: height
 			),
 			shader: shader,
-			transform: new Matrix4f().translate(-width >> 1, -height >> 1, 0)
+			transform: transform.translate(-width >> 1, -height >> 1, 0, new Matrix4f())
 		) as OpenGLMaterial
 
 		return new OpenGLRenderTarget(
@@ -469,8 +468,6 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
 			glBindTexture(GL_TEXTURE_2D, textureId)
-//			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
-//			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 

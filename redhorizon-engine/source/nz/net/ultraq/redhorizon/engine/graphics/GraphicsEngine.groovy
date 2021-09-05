@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
+import org.joml.Matrix4f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -133,14 +134,17 @@ class GraphicsEngine extends Engine implements InputSource {
 						// TODO: Represent this all with a "rendering pipeline" object
 						if (config.scanlines) {
 							renderPasses << new RenderPass<OpenGLRenderTarget>(
-								renderTarget: renderer.createRenderTarget(renderer.createShader('Scanlines'))
+								renderTarget: renderer.createRenderTarget(
+									shader: renderer.createShader('Scanlines')
+								)
 							)
 						}
-						if (config.filter) {
-							renderPasses << new RenderPass<OpenGLRenderTarget>(
-								renderTarget: renderer.createRenderTarget(renderer.createShader('SharpBilinear'))
+						renderPasses << new RenderPass<OpenGLRenderTarget>(
+							renderTarget: renderer.createRenderTarget(
+								shader: renderer.createShader('SharpBilinear'),
+								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
 							)
-						}
+						)
 						renderPasses << new RenderPass<OpenGLRenderTarget>(
 							renderTarget: null
 						)
