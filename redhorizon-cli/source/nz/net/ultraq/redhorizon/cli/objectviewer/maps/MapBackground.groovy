@@ -78,7 +78,7 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 			renderer.createSpriteMesh(
 				new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
 				new Rectanglef(0, 0, repeatX, repeatY)),
-			renderer.createTexture(imageData, format.value, width, height),
+			renderer.createTexture(width, height, format.value, imageData),
 			transform
 		)
 		imageData = null

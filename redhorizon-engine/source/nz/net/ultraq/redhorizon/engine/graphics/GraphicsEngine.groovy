@@ -141,6 +141,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						}
 						renderPasses << new RenderPass<OpenGLRenderTarget>(
 							renderTarget: renderer.createRenderTarget(
+								filter: true,
 								shader: renderer.createShader('SharpBilinear'),
 								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
 							)

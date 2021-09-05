@@ -82,7 +82,7 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 
 	/**
 	 * Create a material out of the given component parts.
-	 *
+	 * 
 	 * @param mesh
 	 * @param texture
 	 * @param shader
@@ -95,12 +95,13 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	/**
 	 * Create a render target that can be drawn to.
 	 * 
+	 * @param filter
 	 * @param shader
 	 * @param transform
 	 * @return
 	 */
 	@NamedVariant
-	RenderTarget createRenderTarget(TShader shader, Matrix4f transform)
+	RenderTarget createRenderTarget(boolean filter, TShader shader, Matrix4f transform)
 
 	/**
 	 * Create a new shader program for the shader sources of the given name.
@@ -125,13 +126,13 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	/**
 	 * Create and fill a texture with the given image data.
 	 * 
-	 * @param data
-	 * @param format
 	 * @param width
 	 * @param height
+	 * @param format
+	 * @param data
 	 * @return New texture object.
 	 */
-	TTexture createTexture(ByteBuffer data, int format, int width, int height)
+	TTexture createTexture(int width, int height, int format, ByteBuffer data)
 
 	/**
 	 * Delete all of the items tied to the material.

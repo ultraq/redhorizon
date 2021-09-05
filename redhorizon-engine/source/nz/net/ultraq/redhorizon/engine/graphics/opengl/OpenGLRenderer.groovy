@@ -138,7 +138,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		def textureBytes = ByteBuffer.allocateNative(4)
 			.putInt(0xffffffff as int)
 			.flip()
-		whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
+		whiteTexture = createTexture(1, 1, FORMAT_RGBA.value, textureBytes)
 	}
 
 	@Override
@@ -332,7 +332,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 	@NamedVariant
 	@Override
-	OpenGLRenderTarget createRenderTarget(OpenGLShader shader, Matrix4f transform) {
+	OpenGLRenderTarget createRenderTarget(boolean filter, OpenGLShader shader, Matrix4f transform) {
 
 		def frameBuffer = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
@@ -466,7 +466,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLTexture createTexture(ByteBuffer data, int format, int width, int height) {
+	OpenGLTexture createTexture(int width, int height, int format, ByteBuffer data) {
 
 		return stackPush().withCloseable { stack ->
 			int textureId = glGenTextures()
