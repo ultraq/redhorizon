@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TShader extends Shader, TTexture extends Texture> {
+interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRenderTarget extends RenderTarget, TShader extends Shader, TTexture extends Texture> {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -174,7 +174,7 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TShad
 	 * 
 	 * @param renderTarget
 	 */
-	void setRenderTarget(RenderTarget renderTarget)
+	void setRenderTarget(TRenderTarget renderTarget)
 
 	/**
 	 * Update the camera's view matrix.

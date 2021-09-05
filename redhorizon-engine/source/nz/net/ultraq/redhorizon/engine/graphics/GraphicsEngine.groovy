@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderTarget
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
@@ -126,24 +127,32 @@ class GraphicsEngine extends Engine implements InputSource {
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
+						def renderPasses = []
 
-						// Post-processing
-						// TODO: Make this configurable for the number of rendering passes
-						//       needed to achieve all configured post-processing effects.
-						def sceneRenderTarget = renderer.createRenderTarget()
+						// Set up the rendering pipeline for any post-processing steps
+						// TODO: Represent this all with a "rendering pipeline" object
 						if (config.scanlines) {
+							def renderTarget = renderer.createRenderTarget()
 							def scanlineShader = renderer.createShader('Scanlines')
-							sceneRenderTarget.material.shader = scanlineShader
+							renderTarget.material.shader = scanlineShader
+							renderPasses << new RenderPass<OpenGLRenderTarget>(
+								renderTarget: renderTarget
+							)
 						}
+						renderPasses << new RenderPass<OpenGLRenderTarget>(
+							renderTarget: null
+						)
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
 						started = true
+						def prevRenderPass
 						engineLoop { ->
 							renderer.clear()
 							imGuiRenderer.startFrame()
 
-							renderer.setRenderTarget(sceneRenderTarget)
+							prevRenderPass = renderPasses.first()
+							renderer.setRenderTarget(prevRenderPass.renderTarget)
 							camera.render(renderer)
 							if (scene) {
 								// Reduce the list of renderable items to those just visible in the scene
@@ -178,11 +187,14 @@ class GraphicsEngine extends Engine implements InputSource {
 							}
 
 							// Post-processing
-							// TODO: Make this configurable for the number of rendering passes
-							//       needed to achieve all configured post-processing effects.
-							renderer.setRenderTarget(null)
-							renderer.drawMaterial(sceneRenderTarget.material)
+							for (def i = 1; i < renderPasses.size(); i++) {
+								def renderPass = renderPasses[i]
+								renderer.setRenderTarget(renderPass.renderTarget)
+								renderer.drawMaterial(prevRenderPass.renderTarget.material)
+								prevRenderPass = renderPass
+							}
 
+							// GUI/Overlays
 							imGuiRenderer.drawDebugOverlay()
 							imGuiRenderer.endFrame()
 
@@ -194,7 +206,12 @@ class GraphicsEngine extends Engine implements InputSource {
 
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
-						renderer.deleteRenderTarget(sceneRenderTarget)
+						renderPasses.each { renderPass ->
+							def renderTarget = renderPass.renderTarget
+							if (renderTarget) {
+								renderer.deleteRenderTarget(renderTarget)
+							}
+						}
 						camera.delete(renderer)
 						graphicsElementStates.keySet().each { graphicsElement ->
 							graphicsElement.delete(renderer)

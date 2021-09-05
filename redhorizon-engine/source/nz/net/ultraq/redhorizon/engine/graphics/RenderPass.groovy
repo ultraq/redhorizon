@@ -16,20 +16,16 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import groovy.transform.MapConstructor
+
 /**
- * A builder for batching together several similar materials into a single one,
- * which can then be used for rendering them all out with a single draw call.
+ * All of the things needed to represent and perform a single rendering pass
+ * with the renderer.
  * 
  * @author Emanuel Rabina
  */
-interface MaterialBundler<TMaterial extends Material, TMesh extends Mesh, TRenderTarget extends RenderTarget, TShader extends Shader, TTexture extends Texture>
-	extends GraphicsRenderer<TMaterial, TMesh, TRenderTarget, TShader, TTexture> {
+@MapConstructor
+class RenderPass<T extends RenderTarget> {
 
-	/**
-	 * Build a batched material that represents all of the materials created
-	 * using {@link #createMaterial}.
-	 * 
-	 * @return
-	 */
-	TMaterial bundle()
+	final T renderTarget
 }

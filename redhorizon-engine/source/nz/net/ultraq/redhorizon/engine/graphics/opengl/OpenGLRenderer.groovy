@@ -53,7 +53,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
+class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLRenderTarget, OpenGLShader, OpenGLTexture>,
 	AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
@@ -600,9 +600,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	void setRenderTarget(RenderTarget renderTarget) {
+	void setRenderTarget(OpenGLRenderTarget renderTarget) {
 
-		renderTarget = renderTarget as OpenGLRenderTarget
 		glBindFramebuffer(GL_FRAMEBUFFER, renderTarget?.frameBuffer ?: 0)
 	}
 
