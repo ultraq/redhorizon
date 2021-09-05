@@ -340,14 +340,21 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		def width = viewportSize.width
 		def height = viewportSize.height
 
-		def colourTexture = glGenTextures()
-		glBindTexture(GL_TEXTURE_2D, colourTexture)
+		def colourTextureId = glGenTextures()
+		glBindTexture(GL_TEXTURE_2D, colourTextureId)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture, 0)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
+
+		def colourTexture = new OpenGLTexture(
+			textureId: colourTextureId,
+			width: width,
+			height: height
+		)
+		trigger(new TextureCreatedEvent(colourTexture))
 
 		// To create a depth texture attachment
 //		depthTexture = glGenTextures()
@@ -371,11 +378,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 		def screenMaterial = createMaterial(
 			mesh: createSpriteMesh(new Rectanglef(0, 0, width, height)),
-			texture: new OpenGLTexture(
-				textureId: colourTexture,
-				width: width,
-				height: height
-			),
+			texture: colourTexture,
 			shader: shader,
 			transform: transform.translate(-width >> 1, -height >> 1, 0, new Matrix4f())
 		) as OpenGLMaterial
