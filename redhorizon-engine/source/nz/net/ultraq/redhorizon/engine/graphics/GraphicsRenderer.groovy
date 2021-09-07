@@ -107,9 +107,10 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 * Create a new shader program for the shader sources of the given name.
 	 * 
 	 * @param name
+	 * @param parameters
 	 * @return
 	 */
-	TShader createShader(String name)
+	TShader createShader(String name, Map<String,Closure> parameters)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using

@@ -346,8 +346,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glBindTexture(GL_TEXTURE_2D, colourTextureId)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
 
@@ -394,7 +394,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLShader createShader(String name) {
+	OpenGLShader createShader(String name, Map<String,Closure> parameters = null) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
@@ -450,7 +450,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 		def shader = new OpenGLShader(
 			name: name,
-			programId: programId
+			programId: programId,
+			parameters: parameters
 		)
 		shaders << shader
 		return shader
@@ -555,12 +556,9 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
-				// TODO: Make it so that these shader-specific variables can be provided
-				//       as closures when creating the shader.  Otherwise this happens
-				//       for all shaders when they don't even need this info.
-				glUniform2fv(getUniformLocation(shader, 'textureSourceSize'), stack.floats(texture.width, texture.height))
-				def textureTargetSize = new Vector2f(viewportSize.width, viewportSize.height)
-				glUniform2fv(getUniformLocation(shader, 'textureTargetSize'), textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS)))
+				shader.parameters.each { parameter, closure ->
+					glUniform2fv(getUniformLocation(shader, parameter), closure(material, stack))
+				}
 
 				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
 				def modelsLocation = getUniformLocation(shader, 'models')

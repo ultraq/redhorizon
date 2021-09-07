@@ -29,6 +29,7 @@ import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -135,7 +136,11 @@ class GraphicsEngine extends Engine implements InputSource {
 						if (config.scanlines) {
 							renderPasses << new RenderPass<OpenGLRenderTarget>(
 								renderTarget: renderer.createRenderTarget(
-									shader: renderer.createShader('Scanlines'),
+									shader: renderer.createShader('Scanlines', [
+										textureSourceSize: { material, stack ->
+											return stack.floats(material.texture.width, material.texture.height)
+										}
+									]),
 									transform: new Matrix4f()
 								)
 							)
@@ -143,7 +148,15 @@ class GraphicsEngine extends Engine implements InputSource {
 						renderPasses << new RenderPass<OpenGLRenderTarget>(
 							renderTarget: renderer.createRenderTarget(
 								filter: true,
-								shader: renderer.createShader('SharpBilinear'),
+								shader: renderer.createShader('SharpBilinear', [
+									textureSourceSize: { material, stack ->
+										return stack.floats(material.texture.width, material.texture.height)
+									},
+									textureTargetSize: { material, stack ->
+										def textureTargetSize = new Vector2f(640, 400)
+										return textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS))
+									}
+								]),
 								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
 							)
 						)

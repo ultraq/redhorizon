@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import groovy.transform.MapConstructor
+import java.nio.FloatBuffer
 
 /**
  * A shader is a small program that runs on the GPU.
@@ -27,6 +28,7 @@ import groovy.transform.MapConstructor
 abstract class Shader {
 
 	final String name
+	final Map<String,Closure<FloatBuffer>> parameters
 
 	/**
 	 * Return the name of this shader program.
@@ -36,6 +38,10 @@ abstract class Shader {
 	@Override
 	String toString() {
 
-		return "${name} shader program"
+		def string = "${name} shader program"
+		if (parameters) {
+			string += ", parameter functions: ${parameters.keySet().join(', ')}"
+		}
+		return string
 	}
 }
