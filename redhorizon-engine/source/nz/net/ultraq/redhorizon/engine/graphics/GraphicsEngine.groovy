@@ -29,7 +29,6 @@ import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
-import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -153,8 +152,7 @@ class GraphicsEngine extends Engine implements InputSource {
 										return stack.floats(material.texture.width, material.texture.height)
 									},
 									textureTargetSize: { material, stack ->
-										def textureTargetSize = new Vector2f(640, 400)
-										return textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS))
+										return stack.floats(context.framebufferSize.width, context.framebufferSize.height)
 									}
 								]),
 								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
@@ -169,11 +167,11 @@ class GraphicsEngine extends Engine implements InputSource {
 						started = true
 						def prevRenderPass
 						engineLoop { ->
-							renderer.clear()
 							imGuiRenderer.startFrame()
 
 							prevRenderPass = renderPasses.first()
 							renderer.setRenderTarget(prevRenderPass.renderTarget)
+							renderer.clear()
 							camera.render(renderer)
 							if (scene) {
 								// Reduce the list of renderable items to those just visible in the scene
@@ -211,6 +209,7 @@ class GraphicsEngine extends Engine implements InputSource {
 							for (def i = 1; i < renderPasses.size(); i++) {
 								def renderPass = renderPasses[i]
 								renderer.setRenderTarget(renderPass.renderTarget)
+								renderer.clear()
 								renderer.drawMaterial(prevRenderPass.renderTarget.material)
 								prevRenderPass = renderPass
 							}

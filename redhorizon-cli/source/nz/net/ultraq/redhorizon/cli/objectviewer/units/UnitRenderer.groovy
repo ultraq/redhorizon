@@ -84,7 +84,10 @@ class UnitRenderer implements GraphicsElement {
 				data.applyPalette(palette).flipVertical(unit.width, unit.height, palette.format)
 			)
 		}
-		material = renderer.createMaterial(mesh, null, unit.transform)
+		material = renderer.createMaterial(
+			mesh: mesh,
+			transform:  unit.transform
+		)
 	}
 
 	@Override
