@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
+import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 
 /**
@@ -24,6 +25,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
+@ToString(includeNames = true, includePackage = false)
 class KeyEvent extends InputEvent {
 
 	final int key
