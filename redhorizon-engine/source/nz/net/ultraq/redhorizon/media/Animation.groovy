@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * An animation that plays a series of images at a certain speed.
@@ -76,16 +76,15 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * @param animationFile
 	 *   Animation source.
 	 * @param gameTime
-	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, GameTime gameTime, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, GameTime gameTime) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
 			animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
-		executorService.execute(animationDataWorker)
+		Executors.newSingleThreadExecutor().execute(animationDataWorker)
 	}
 
 	/**
