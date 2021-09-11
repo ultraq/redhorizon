@@ -122,6 +122,8 @@ abstract class Application implements Runnable {
 				break
 			}
 		}
+
+		stop()
 		graphicsEngineTask.get()
 		audioEngineTask.get()
 	}
