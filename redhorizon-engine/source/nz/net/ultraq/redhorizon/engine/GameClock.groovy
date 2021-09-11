@@ -19,15 +19,13 @@ package nz.net.ultraq.redhorizon.engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.ExecutorService
-
 /**
  * An implementation of the separate time source of game time that can be
  * controlled to affect it.
  * 
  * @author Emanuel Rabina
  */
-class GameClock implements GameTime {
+class GameClock implements GameTime, Runnable {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
@@ -35,40 +33,6 @@ class GameClock implements GameTime {
 	private float lastSpeed
 	private boolean running = true
 	long currentTimeMillis
-
-	/**
-	 * Create a new game clock which will automatically update itself taking into
-	 * account elapsed system time and the speed at which game time is flowing.
-	 * 
-	 * @param executorService
-	 */
-	GameClock(ExecutorService executorService) {
-
-		def lastSystemTimeMillis = System.currentTimeMillis()
-		currentTimeMillis = lastSystemTimeMillis
-
-		executorService.execute { ->
-			Thread.currentThread().name = 'Game clock'
-			while (running) {
-				sleep(1) { ex ->
-					running = false
-					return true
-				}
-				def currentSystemTimeMillis = System.currentTimeMillis()
-				def diff = currentSystemTimeMillis - lastSystemTimeMillis
-
-				// Normal flow of time, accumulate ticks at the same rate as system time
-				if (speed == 1.0f) {
-					currentTimeMillis += diff
-				}
-				// Modified flow, accumulate ticks at system time * flow speed
-				else {
-					currentTimeMillis += (diff * speed)
-				}
-				lastSystemTimeMillis = currentSystemTimeMillis
-			}
-		}
-	}
 
 	@Override
 	boolean isPaused() {
@@ -93,6 +57,33 @@ class GameClock implements GameTime {
 
 		logger.debug('Resuming game clock')
 		speed = lastSpeed
+	}
+
+	@Override
+	void run() {
+
+		def lastSystemTimeMillis = System.currentTimeMillis()
+		currentTimeMillis = lastSystemTimeMillis
+
+		Thread.currentThread().name = 'Game clock'
+		while (running) {
+			sleep(1) { ex ->
+				running = false
+				return true
+			}
+			def currentSystemTimeMillis = System.currentTimeMillis()
+			def diff = currentSystemTimeMillis - lastSystemTimeMillis
+
+			// Normal flow of time, accumulate ticks at the same rate as system time
+			if (speed == 1.0f) {
+				currentTimeMillis += diff
+			}
+			// Modified flow, accumulate ticks at system time * flow speed
+			else {
+				currentTimeMillis += (diff * speed)
+			}
+			lastSystemTimeMillis = currentSystemTimeMillis
+		}
 	}
 
 	/**
