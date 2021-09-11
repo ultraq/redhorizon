@@ -1,7 +1,6 @@
 #version 410 core
 
 in vec4 v_vertexColour;
-in float v_textureUnit;
 in vec2 v_texelPosition;
 in vec2 v_textureScale;
 
@@ -31,6 +30,6 @@ void main() {
 	vec2 texelOffset = (centerDist - clamp(centerDist, -regionRange, regionRange)) * scale + 0.5;
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
-	fragmentColour = texture(textures[int(v_textureUnit)], targetUVs);
+	fragmentColour = texture(textures[0], targetUVs);
 	fragmentColour *= v_vertexColour;
 }

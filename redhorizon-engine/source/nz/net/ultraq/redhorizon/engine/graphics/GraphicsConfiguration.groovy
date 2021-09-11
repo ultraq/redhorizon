@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import static Colour.BLACK
 
 import groovy.transform.MapConstructor
@@ -49,6 +51,11 @@ class GraphicsConfiguration {
 	 * Use the entire screen instead of a floating window.
 	 */
 	final boolean fullScreen
+
+	/**
+	 * The rendering resolution to target, before post-processing effects.
+	 */
+	final Dimension renderResolution
 
 	/**
 	 * Include a scanline effect in what's rendered to the screen.

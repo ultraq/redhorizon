@@ -1,6 +1,5 @@
 #version 410 core
 
-#define outputSize vec2(OUTPUT_RESOLUTION_WIDTH, OUTPUT_RESOLUTION_HEIGHT)
 #define pi 3.141592654
 
 layout (location = 0) in vec4 colour;
@@ -11,15 +10,11 @@ layout (location = 4) in float modelIndex;
 
 out vec4 v_vertexColour;
 out vec2 v_textureUVs;
-out float v_textureUnit;
 out vec2 v_omega;
 
-layout (std140) uniform Camera {
-	mat4 projection;
-	mat4 view;
-};
-uniform mat4 models[MAX_TRANSFORMS];
+uniform mat4 model;
 uniform vec2 textureSourceSize;
+uniform vec2 textureTargetSize;
 
 /**
  * Vertex shader main function, mostly passes geometry information along to the
@@ -27,10 +22,9 @@ uniform vec2 textureSourceSize;
  */
 void main() {
 
-	gl_Position = projection * view * models[int(modelIndex)] * position;
+	gl_Position = model * position;
 	v_vertexColour = colour;
 	v_textureUVs = textureUVs;
-	v_textureUnit = textureUnit;
 
-	v_omega = vec2(pi * outputSize.x, 2.0 * pi * textureSourceSize.y);
+	v_omega = vec2(pi * textureTargetSize.x, 2.0 * pi * textureSourceSize.y);
 }

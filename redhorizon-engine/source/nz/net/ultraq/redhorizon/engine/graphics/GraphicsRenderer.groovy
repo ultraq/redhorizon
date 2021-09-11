@@ -104,13 +104,14 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	RenderTarget createRenderTarget(boolean filter, TShader shader, Matrix4f transform)
 
 	/**
-	 * Create a new shader program for the shader sources of the given name.
+	 * Create a new shader program for the shader source files with the given
+	 * name.
 	 * 
 	 * @param name
-	 * @param parameters
+	 * @param uniforms
 	 * @return
 	 */
-	TShader createShader(String name, Map<String,Closure> parameters)
+	TShader createShader(String name, Uniform ...uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using

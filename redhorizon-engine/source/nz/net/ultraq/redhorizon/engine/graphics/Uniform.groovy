@@ -16,31 +16,17 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
- * A shader is a small program that runs on the GPU.
+ * Class detailing a uniform value in a shader and how to obtain values for it
+ * during rendering.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor
-abstract class Shader {
+@TupleConstructor(defaults = false)
+class Uniform<T> {
 
 	final String name
-	final Uniform[] uniforms
-
-	/**
-	 * Return the name of this shader program.
-	 * 
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		def string = "${name} shader program"
-		if (uniforms) {
-			string += ", uniforms: ${uniforms.collect { it.name }}"
-		}
-		return string
-	}
+	final Closure<T[]> function
 }

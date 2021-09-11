@@ -7,7 +7,6 @@
 
 in vec4 v_vertexColour;
 in vec2 v_textureUVs;
-in float v_textureUnit;
 in vec2 v_omega;
 
 out vec4 fragmentColour;
@@ -23,7 +22,7 @@ uniform sampler2D textures[MAX_TEXTURE_UNITS];
  */
 void main() {
 
-	fragmentColour = texture(textures[int(v_textureUnit)], v_textureUVs);
+	fragmentColour = texture(textures[0], v_textureUVs);
 	fragmentColour *= vec4(scanlineBaseBrightness + dot(sineComp * sin(v_textureUVs * v_omega - 1), vec2(1.0, 1.0)));
 	fragmentColour *= v_vertexColour;
 }

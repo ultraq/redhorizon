@@ -132,16 +132,22 @@ class GraphicsEngine extends Engine implements InputSource {
 						def graphicsElementStates = [:]
 						def renderPasses = []
 
+						def modelUniform = new Uniform('model', { material ->
+							return material.transform.get(new float[16])
+						})
+						def textureSourceSizeUniform = new Uniform<float>('textureSourceSize', { material ->
+							return [material.texture.width, material.texture.height] as float[]
+						})
+						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
+							return context.framebufferSize as float[]
+						})
+
 						// Set up the rendering pipeline for any post-processing steps
 						// TODO: Represent this all with a "rendering pipeline" object
 						if (config.scanlines) {
 							renderPasses << new RenderPass<OpenGLRenderTarget>(
 								renderTarget: renderer.createRenderTarget(
-									shader: renderer.createShader('Scanlines', [
-										textureSourceSize: { material, stack ->
-											return stack.floats(material.texture.width, material.texture.height)
-										}
-									]),
+									shader: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
 									transform: new Matrix4f()
 								)
 							)
@@ -149,14 +155,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						renderPasses << new RenderPass<OpenGLRenderTarget>(
 							renderTarget: renderer.createRenderTarget(
 								filter: true,
-								shader: renderer.createShader('SharpBilinear', [
-									textureSourceSize: { material, stack ->
-										return stack.floats(material.texture.width, material.texture.height)
-									},
-									textureTargetSize: { material, stack ->
-										return stack.floats(context.framebufferSize.width, context.framebufferSize.height)
-									}
-								]),
+								shader: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
 								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
 							)
 						)

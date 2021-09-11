@@ -7,15 +7,10 @@ layout (location = 3) in float textureUnit;
 layout (location = 4) in float modelIndex;
 
 out vec4 v_vertexColour;
-out float v_textureUnit;
 out vec2 v_texelPosition;
 out vec2 v_textureScale;
 
-layout (std140) uniform Camera {
-	mat4 projection;
-	mat4 view;
-};
-uniform mat4 models[MAX_TRANSFORMS];
+uniform mat4 model;
 uniform vec2 textureSourceSize;
 uniform vec2 textureTargetSize;
 
@@ -25,9 +20,8 @@ uniform vec2 textureTargetSize;
  */
 void main() {
 
-	gl_Position = projection * view * models[int(modelIndex)] * position;
+	gl_Position = model * position;
 	v_vertexColour = colour;
-	v_textureUnit = textureUnit;
 
 	v_texelPosition = textureUVs * textureSourceSize;
 	v_textureScale = max(floor(textureTargetSize / textureSourceSize), vec2(1.0, 1.0));
