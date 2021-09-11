@@ -19,29 +19,19 @@ package nz.net.ultraq.redhorizon.geometry
 import org.joml.Vector3f
 
 /**
- * The orientation of an object, consisting of a pair of 3-tuples: an 'up' and
+ * The orientation of an object, consisting of a pair of vectors: an 'up' and
  * an 'at'.
  * 
  * @author Emanuel Rabina
  */
 class Orientation {
 
-	Vector3f at
-	Vector3f up
+	Vector3f at = new Vector3f(0, 0, -1)
+	Vector3f up = new Vector3f(0, 1, 0)
 
 	/**
-	 * Default constructor, creates an orientation looking down (0, 0, -1) with
-	 * up being (0, 1, 0).
-	 */
-	Orientation() {
-
-		at = new Vector3f(0, 0, -1)
-		up = new Vector3f(0, 1, 0)
-	}
-
-	/**
-	 * Use Groovy's type conversion for returning orientation as an array.  Useful
-	 * for OpenGL/AL array functions.
+	 * Use Groovy's type conversion for returning the orientation as an array.
+	 * Useful for OpenGL/AL array functions.
 	 * 
 	 * @return [at.x, at.y, at.z, up.x, up.y, up.z]
 	 */
