@@ -47,27 +47,29 @@ class GraphicsEngine extends Engine implements InputSource {
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
 	private final GraphicsConfiguration config
+	private final Scene scene
 	private final Closure needsMainThreadCallback
 
 	private OpenGLContext openGlContext
 	private Camera camera
 	private boolean started
-	Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
 	 * @param config
+	 * @param scene
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(GraphicsConfiguration config,
+	GraphicsEngine(GraphicsConfiguration config, Scene scene,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
-		this.config = config
+		this.config = config ?: new GraphicsConfiguration()
+		this.scene = scene
 		this.needsMainThreadCallback = needsMainThreadCallback
 	}
 
@@ -173,36 +175,28 @@ class GraphicsEngine extends Engine implements InputSource {
 							renderer.setRenderTarget(prevRenderPass.renderTarget)
 							renderer.clear()
 							camera.render(renderer)
-							if (scene) {
-								// Reduce the list of renderable items to those just visible in the scene
-								def visibleElements = []
-								def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-								averageNanos('objectCulling', 1f, logger) { ->
-									scene.accept { element ->
-										if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-											visibleElements << element
-										}
+
+							// Reduce the list of renderable items to those just visible in the scene
+							def visibleElements = []
+							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+							averageNanos('objectCulling', 1f, logger) { ->
+								scene.accept { element ->
+									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+										visibleElements << element
 									}
 								}
-								visibleElements.each { element ->
-
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
-									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
+							}
+							visibleElements.each { element ->
+								if (!graphicsElementStates[element]) {
+									graphicsElementStates << [(element): STATE_NEW]
 								}
+								def elementState = graphicsElementStates[element]
+								if (elementState == STATE_NEW) {
+									element.init(renderer)
+									elementState = STATE_INITIALIZED
+									graphicsElementStates << [(element): elementState]
+								}
+								element.render(renderer)
 							}
 
 							// Post-processing
