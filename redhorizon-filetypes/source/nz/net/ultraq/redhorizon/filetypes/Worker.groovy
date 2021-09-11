@@ -34,16 +34,6 @@ abstract class Worker implements EventTarget, Runnable {
 	protected boolean running
 	protected boolean stopped
 
-	/**
-	 * Return whether the work is all done.
-	 * 
-	 * @return
-	 */
-	boolean isComplete() {
-
-		return complete
-	}
-
 	@Override
 	final void run() {
 
