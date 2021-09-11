@@ -26,7 +26,7 @@ import groovy.transform.ToString
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(excludes = ['debug'])
+@MapConstructor(excludes = ['debug'], noArg = true)
 @ToString(includeNames = true, includePackage = false)
 class GraphicsConfiguration {
 
