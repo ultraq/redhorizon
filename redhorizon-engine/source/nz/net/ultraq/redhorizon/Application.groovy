@@ -100,7 +100,7 @@ abstract class Application implements Runnable {
 		gameClock = new GameClock()
 
 		executorService.submit(gameClock)
-		executorService.submit(audioEngine)
+		def audioEngineTask = executorService.submit(audioEngine)
 		def graphicsEngineTask = executorService.submit(graphicsEngine)
 
 		// Start the application
@@ -122,8 +122,8 @@ abstract class Application implements Runnable {
 				break
 			}
 		}
-
-		stop()
+		graphicsEngineTask.get()
+		audioEngineTask.get()
 	}
 
 	/**
