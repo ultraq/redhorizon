@@ -47,7 +47,8 @@ class SoundPlayer extends Application {
 	/**
 	 * Play the configured audio file.
 	 */
-	void play() {
+	@Override
+	void run() {
 
 		logger.info('File details: {}', soundFile)
 

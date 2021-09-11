@@ -52,7 +52,8 @@ class MapViewer extends Viewer {
 	/**
 	 * Display the map.
 	 */
-	void view() {
+	@Override
+	void run() {
 
 		logger.info('File details: {}', mapFile)
 

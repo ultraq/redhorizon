@@ -112,16 +112,14 @@ class MediaPlayer implements Callable<Integer> {
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig)
-				animationPlayer.play()
+				new AnimationPlayer(mediaFile, graphicsConfig).start()
 				break
 			case SoundFile:
 				def soundPlayer = new SoundPlayer(mediaFile, audioConfig)
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(mediaFile, graphicsConfig)
-				imageViewer.view()
+				new ImageViewer(mediaFile, graphicsConfig).start()
 				break
 			case ImagesFile:
 				def imagesViewer = new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType)

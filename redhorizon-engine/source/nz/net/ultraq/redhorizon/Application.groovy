@@ -23,25 +23,37 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
-import nz.net.ultraq.redhorizon.engine.input.InputEngine
-import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
+import groovy.transform.MapConstructor
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.FutureTask
 
 /**
- * An abstract class for developing an application, this class provides
- * closure-style helper methods to combine the Red Horizon engine components
- * into a program of any kind.
+ * A base for developing an application that uses the Red Horizon engine, this
+ * class sets up the engine components and provides access to those and the
+ * scene the engine was created to render.
  * 
  * @author Emanuel Rabina
  */
-abstract class Application {
+@MapConstructor(includes = ['audioConfig', 'graphicsConfig'])
+abstract class Application implements Runnable {
+
+	final AudioConfiguration audioConfig
+	final GraphicsConfiguration graphicsConfig
+
+	protected AudioEngine audioEngine
+	protected GameClock gameClock
+	protected GraphicsEngine graphicsEngine
+	protected InputEventStream inputEventStream
+	protected Scene scene = new Scene()
+
+	private final ExecutorService executorService = Executors.newCachedThreadPool()
 
 	/**
 	 * Calculate how much to scale an image by to fit the full screen.
@@ -57,66 +69,18 @@ abstract class Application {
 	}
 
 	/**
-	 * Execute the given closure within the context of having an audio engine;
-	 * setting it up, passing it along to the closure, and finally shutting it
-	 * down.
-	 * 
-	 * @param executorService
-	 * @param audioConfig
-	 * @param closure
+	 * Begin the application.
 	 */
-	protected static void useAudioEngine(ExecutorService executorService,
-		AudioConfiguration audioConfig,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.audio.AudioEngine')
-		Closure closure) {
+	void start() {
 
-		def audioEngine = new AudioEngine(audioConfig)
-		def engine = executorService.submit(audioEngine)
-
-		closure(audioEngine)
-
-		engine.get()
-	}
-
-	/**
-	 * Execute the given closure within the context of having a game clock;
-	 * setting it up, passing it to the closure, and shutting it down when the
-	 * closure is complete.
-	 * 
-	 * @param executorService
-	 * @param closure
-	 */
-	protected static void useGameClock(ExecutorService executorService,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.GameClock')
-		Closure closure) {
-
-		def gameClock = new GameClock(executorService)
-
-		closure(gameClock)
-
-		gameClock.stop()
-	}
-
-	/**
-	 * Execute the given closure within the context of having a graphics engine;
-	 * setting it up, passing it along to the closure, and finally shutting it
-	 * down.
-	 * 
-	 * @param executorService
-	 * @param config
-	 * @param closure
-	 */
-	protected static void useGraphicsEngine(ExecutorService executorService, GraphicsConfiguration config,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine')
-		Closure closure) {
-
+		// Start the engines
+		FutureTask<?> executable
 		def executionBarrier = new CyclicBarrier(2)
 		def finishBarrier = new CountDownLatch(1)
 		def exception
 
-		// To allow the graphics engine to submit items to execute in this thread
-		FutureTask executable = null
-		def graphicsEngine = new GraphicsEngine(config, { toExecute ->
+		audioEngine = new AudioEngine(audioConfig, scene)
+		graphicsEngine = new GraphicsEngine(graphicsConfig, scene, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})
@@ -132,12 +96,18 @@ abstract class Application {
 				executionBarrier.await()
 			}
 		}
-		def engine = executorService.submit(graphicsEngine)
+		inputEventStream = new InputEventStream(graphicsEngine)
+		gameClock = new GameClock()
 
-		closure(graphicsEngine)
+		executorService.submit(gameClock)
+		executorService.submit(audioEngine)
+		def graphicsEngineTask = executorService.submit(graphicsEngine)
 
-		// Execute things from this thread when needed
-		while (!engine.done) {
+		// Start the application
+		executorService.submit(this)
+
+		// For the graphics engine that needs to execute things from the main thread
+		while (!graphicsEngineTask.done) {
 			executionBarrier.await()
 			if (executable) {
 				executionBarrier.reset()
@@ -153,25 +123,16 @@ abstract class Application {
 			}
 		}
 
-		engine.get()
+		stop()
 	}
 
 	/**
-	 * Execute the given closure within the context of having an input engine;
-	 * setting it up, passing it to the closure, and shutting it down when the
-	 * closure is complete.
-	 * 
-	 * @param executorService
-	 * @param inputSource
-	 * @param closure
+	 * End the application.
 	 */
-	protected static void useInputEngine(ExecutorService executorService, InputSource inputSource,
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.input.InputEngine')
-		Closure closure) {
+	void stop() {
 
-		def inputEngine = new InputEngine(inputSource)
-		executorService.submit(inputEngine)
-
-		closure(inputEngine)
+		graphicsEngine.stop()
+		audioEngine.stop()
+		gameClock.stop()
 	}
 }

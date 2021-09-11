@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEngine
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
@@ -42,7 +42,7 @@ abstract class Viewer extends Application {
 	 * @param graphicsEngine
 	 * @param touchpadInput
 	 */
-	protected static void applyViewerInputs(InputEngine inputEngine, GraphicsEngine graphicsEngine, boolean touchpadInput) {
+	protected static void applyViewerInputs(InputEventStream inputEngine, GraphicsEngine graphicsEngine, boolean touchpadInput) {
 
 		// Key event handler
 		inputEngine.on(KeyEvent) { event ->
