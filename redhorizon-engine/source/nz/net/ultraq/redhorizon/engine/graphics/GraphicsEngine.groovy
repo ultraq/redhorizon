@@ -125,7 +125,7 @@ class GraphicsEngine extends Engine implements InputSource {
 				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, camera.size))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
-					new ImGuiDebugOverlay(context.window, renderer).withCloseable { imGuiRenderer ->
+					new ImGuiDebugOverlay(context.window, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
@@ -136,7 +136,7 @@ class GraphicsEngine extends Engine implements InputSource {
 							return material.transform.get(new float[16])
 						})
 						def textureSourceSizeUniform = new Uniform<float>('textureSourceSize', { material ->
-							return [material.texture.width, material.texture.height] as float[]
+							return new float[] { material.texture.width, material.texture.height }
 						})
 						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
 							return context.framebufferSize as float[]
@@ -168,7 +168,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						started = true
 						def prevRenderPass
 						engineLoop { ->
-							imGuiRenderer.startFrame()
+							debugOverlay.startFrame()
 
 							prevRenderPass = renderPasses.first()
 							renderer.setRenderTarget(prevRenderPass.renderTarget)
@@ -208,8 +208,8 @@ class GraphicsEngine extends Engine implements InputSource {
 							}
 
 							// GUI/Overlays
-							imGuiRenderer.drawDebugOverlay()
-							imGuiRenderer.endFrame()
+							debugOverlay.drawDebugOverlay()
+							debugOverlay.endFrame()
 
 							context.swapBuffers()
 							waitForMainThread { ->
