@@ -45,9 +45,3 @@ dependencies {
 		'org.lwjgl:lwjgl-opengl::natives-windows'
 	)
 }
-
-processResources {
-	expand([
-		moduleVersion: version
-	])
-}

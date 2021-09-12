@@ -17,7 +17,7 @@
 apply plugin: 'application'
 
 dependencies {
-	implementation('org.codehaus.groovy:groovy-json:3.0.8:indy') {
+	implementation('org.codehaus.groovy:groovy-json:3.0.9:indy') {
 		exclude module: 'groovy'
 	}
 	implementation(

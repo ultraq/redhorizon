@@ -22,9 +22,3 @@ dependencies {
 		project(':redhorizon-extensions')
 	)
 }
-
-processResources {
-	expand([
-		moduleVersion: version
-	])
-}

@@ -15,9 +15,3 @@
  */
 
 description = 'Groovy extension module for the Red Horizon project'
-
-processResources {
-	expand([
-		moduleVersion: version
-	])
-}

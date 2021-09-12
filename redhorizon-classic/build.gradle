@@ -23,9 +23,3 @@ dependencies {
 		project(':redhorizon-filetypes')
 	)
 }
-
-processResources {
-	expand([
-		moduleVersion: version
-	])
-}
