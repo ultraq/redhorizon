@@ -16,23 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
- * A single rendering pass performed by the renderer, includes the target
- * framebuffer to render to and if any special shader is used for the pass.
+ * Event for the creation of a framebuffer.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(post = {
-	if (material) {
-		material.texture = framebuffer.texture
-		material.shader = shader
-	}
-})
-class RenderPass {
+@TupleConstructor(defaults = false)
+class FramebufferCreatedEvent extends RendererEvent {
 
 	final Framebuffer framebuffer
-	final Shader shader
-	final Material material
 }

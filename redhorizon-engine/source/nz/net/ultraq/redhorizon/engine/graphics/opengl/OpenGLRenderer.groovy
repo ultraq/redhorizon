@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
@@ -54,7 +56,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLRenderTarget, OpenGLShader, OpenGLTexture>,
+class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
 	AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
@@ -250,7 +252,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
 			shader: shader ?: standardShader,
-			transform: transform
+			transform: transform ?: new Matrix4f()
 		)
 	}
 
@@ -335,12 +337,11 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		}
 	}
 
-	@NamedVariant(coerce = true)
 	@Override
-	OpenGLRenderTarget createRenderTarget(boolean filter, OpenGLShader shader, Matrix4f transform) {
+	OpenGLFramebuffer createFramebuffer(boolean filter) {
 
-		def frameBuffer = glGenFramebuffers()
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+		def frameBufferId = glGenFramebuffers()
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
 
 		def width = viewportSize.width
 		def height = viewportSize.height
@@ -370,15 +371,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
-		return new OpenGLRenderTarget(
-			frameBuffer: frameBuffer,
-			material: createMaterial(
-				mesh: createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				texture: colourTexture,
-				shader: shader,
-				transform: transform
-			)
+		def framebuffer = new OpenGLFramebuffer(
+			framebufferId: frameBufferId,
+			texture: colourTexture
 		)
+		trigger(new FramebufferCreatedEvent(framebuffer))
+		return framebuffer
 	}
 
 	@Override
@@ -456,7 +454,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	OpenGLTexture createTexture(int width, int height, int format, ByteBuffer data) {
 
 		return stackPush().withCloseable { stack ->
-			int textureId = glGenTextures()
+			def textureId = glGenTextures()
 			glBindTexture(GL_TEXTURE_2D, textureId)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -489,6 +487,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
+	void deleteFramebuffer(OpenGLFramebuffer framebuffer) {
+
+		glDeleteFramebuffers(framebuffer.framebufferId)
+		trigger(new FramebufferDeletedEvent(framebuffer))
+	}
+
+	@Override
 	void deleteMaterial(OpenGLMaterial material) {
 
 		deleteMesh(material.mesh)
@@ -507,13 +512,6 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		glDeleteBuffers(mesh.vertexBufferId)
 		glDeleteVertexArrays(mesh.vertexArrayId)
 		trigger(new MeshDeletedEvent(mesh))
-	}
-
-	@Override
-	void deleteRenderTarget(OpenGLRenderTarget renderTarget) {
-
-		deleteMaterial(renderTarget.material)
-		glDeleteFramebuffers(renderTarget.frameBuffer)
 	}
 
 	@Override
@@ -597,11 +595,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	void setRenderTarget(OpenGLRenderTarget renderTarget) {
+	void setRenderTarget(OpenGLFramebuffer framebuffer) {
 
-		def frameBuffer = renderTarget?.frameBuffer
-		if (frameBuffer) {
-			glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer)
+		if (framebuffer) {
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
 			glDisable(GL_DEPTH_TEST)
 		}
 		else {

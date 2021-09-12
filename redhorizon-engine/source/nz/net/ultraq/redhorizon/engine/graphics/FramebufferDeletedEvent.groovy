@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.graphics.RenderTarget
-
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
+ * Event for the deletion of a framebuffer.
+ *  
  * @author Emanuel Rabina
  */
-@MapConstructor
-class OpenGLRenderTarget extends RenderTarget {
+@TupleConstructor(defaults = false)
+class FramebufferDeletedEvent extends RendererEvent {
 
-	final int frameBuffer
-	final OpenGLMaterial material
+	final Framebuffer framebuffer
 }

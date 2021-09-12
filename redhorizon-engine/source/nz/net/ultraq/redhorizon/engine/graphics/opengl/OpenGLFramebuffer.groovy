@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
+
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 
 /**
- * An object which can be drawn to by setting it as the render target in the
- * renderer.
+ * OpenGL implementation of a framebuffer.
  * 
  * @author Emanuel Rabina
  */
-abstract class RenderTarget {
+class OpenGLFramebuffer extends Framebuffer {
+
+	final int framebufferId
+
+	OpenGLFramebuffer(Map args) {
+		super(args)
+		framebufferId = args.framebufferId as int
+	}
 }

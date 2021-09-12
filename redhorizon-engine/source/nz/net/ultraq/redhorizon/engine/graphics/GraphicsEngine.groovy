@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderTarget
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
@@ -29,6 +28,7 @@ import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -130,7 +130,7 @@ class GraphicsEngine extends Engine implements InputSource {
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
-						def renderPasses = []
+						List<RenderPass> renderPasses = []
 
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
@@ -145,33 +145,36 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Set up the rendering pipeline for any post-processing steps
 						// TODO: Represent this all with a "rendering pipeline" object
 						if (config.scanlines) {
-							renderPasses << new RenderPass<OpenGLRenderTarget>(
-								renderTarget: renderer.createRenderTarget(
-									shader: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
-									transform: new Matrix4f()
+							renderPasses << new RenderPass(
+								framebuffer: renderer.createFramebuffer(false),
+								shader: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+								material: renderer.createMaterial(
+									mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 								)
 							)
 						}
-						renderPasses << new RenderPass<OpenGLRenderTarget>(
-							renderTarget: renderer.createRenderTarget(
-								filter: true,
-								shader: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+
+						renderPasses << new RenderPass(
+							framebuffer: renderer.createFramebuffer(true),
+							shader: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+							material: renderer.createMaterial(
+								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
 							)
 						)
-						renderPasses << new RenderPass<OpenGLRenderTarget>(
-							renderTarget: null
+
+						renderPasses << new RenderPass(
+							framebuffer: null
 						)
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
 						started = true
-						def prevRenderPass
 						engineLoop { ->
 							debugOverlay.startFrame()
 
-							prevRenderPass = renderPasses.first()
-							renderer.setRenderTarget(prevRenderPass.renderTarget)
+							def scenePass = renderPasses.head()
+							renderer.setRenderTarget(scenePass.framebuffer)
 							renderer.clear()
 							camera.render(renderer)
 
@@ -199,12 +202,11 @@ class GraphicsEngine extends Engine implements InputSource {
 							}
 
 							// Post-processing
-							for (def i = 1; i < renderPasses.size(); i++) {
-								def renderPass = renderPasses[i]
-								renderer.setRenderTarget(renderPass.renderTarget)
+							renderPasses.tail().inject(scenePass) { lastPass, nextPass ->
+								renderer.setRenderTarget(nextPass.framebuffer)
 								renderer.clear()
-								renderer.drawMaterial(prevRenderPass.renderTarget.material)
-								prevRenderPass = renderPass
+								renderer.drawMaterial(lastPass.material)
+								return nextPass
 							}
 
 							// GUI/Overlays
@@ -220,9 +222,13 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
 						renderPasses.each { renderPass ->
-							def renderTarget = renderPass.renderTarget
-							if (renderTarget) {
-								renderer.deleteRenderTarget(renderTarget)
+							def framebuffer = renderPass.framebuffer
+							if (framebuffer) {
+								renderer.deleteFramebuffer(framebuffer)
+							}
+							def material = renderPass.material
+							if (material) {
+								renderer.deleteMaterial(material)
 							}
 						}
 						camera.delete(renderer)

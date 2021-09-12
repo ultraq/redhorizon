@@ -38,7 +38,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class OpenGLMaterialBundler implements MaterialBundler<OpenGLMaterial, OpenGLMesh, OpenGLRenderTarget, OpenGLShader, OpenGLTexture>,
+class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
 	EventTarget {
 
 	@Delegate(excludes = ['createSpriteMesh'])

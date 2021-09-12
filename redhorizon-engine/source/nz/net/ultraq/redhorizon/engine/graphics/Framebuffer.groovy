@@ -19,20 +19,13 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import groovy.transform.MapConstructor
 
 /**
- * A single rendering pass performed by the renderer, includes the target
- * framebuffer to render to and if any special shader is used for the pass.
+ * A section of memory that can be drawn to like a screen, but that can then be
+ * used as input for further rendering steps.
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(post = {
-	if (material) {
-		material.texture = framebuffer.texture
-		material.shader = shader
-	}
-})
-class RenderPass {
+@MapConstructor
+abstract class Framebuffer<TTexture extends Texture> {
 
-	final Framebuffer framebuffer
-	final Shader shader
-	final Material material
+	final TTexture texture
 }

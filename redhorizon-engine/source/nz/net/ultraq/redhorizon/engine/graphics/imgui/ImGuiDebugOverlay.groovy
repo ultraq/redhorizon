@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
@@ -48,6 +50,7 @@ class ImGuiDebugOverlay implements AutoCloseable {
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
 	private int drawCalls = 0
+	private int activeFramebuffers = 0
 	private int activeMeshes = 0
 	private int activeTextures = 0
 
@@ -69,6 +72,12 @@ class ImGuiDebugOverlay implements AutoCloseable {
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
 				drawCalls++
+			}
+			else if (event instanceof FramebufferCreatedEvent) {
+				activeFramebuffers++
+			}
+			else if (event instanceof FramebufferDeletedEvent) {
+				activeFramebuffers--
 			}
 			else if (event instanceof MeshCreatedEvent) {
 				activeMeshes++
@@ -121,6 +130,7 @@ class ImGuiDebugOverlay implements AutoCloseable {
 		ImGui.text("Draw calls: ${drawCalls}")
 		ImGui.text("Active meshes: ${activeMeshes}")
 		ImGui.text("Active textures: ${activeTextures}")
+		ImGui.text("Active framebuffers: ${activeFramebuffers}")
 		drawCalls = 0
 
 		ImGui.separator()

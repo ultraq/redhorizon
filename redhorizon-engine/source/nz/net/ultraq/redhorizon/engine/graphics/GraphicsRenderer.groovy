@@ -31,7 +31,8 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRenderTarget extends RenderTarget, TShader extends Shader, TTexture extends Texture> {
+interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh,
+	TShader extends Shader, TTexture extends Texture> {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -93,15 +94,12 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	TMaterial createMaterial(TMesh mesh, TTexture texture, TShader shader, Matrix4f transform)
 
 	/**
-	 * Create a render target that can be drawn to.
+	 * Create a framebuffer that can be rendered to.
 	 * 
 	 * @param filter
-	 * @param shader
-	 * @param transform
 	 * @return
 	 */
-	@NamedVariant
-	RenderTarget createRenderTarget(boolean filter, TShader shader, Matrix4f transform)
+	TFramebuffer createFramebuffer(boolean filter)
 
 	/**
 	 * Create a new shader program for the shader source files with the given
@@ -143,6 +141,13 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	TTexture createTexture(int width, int height, int format, ByteBuffer data)
 
 	/**
+	 * Delete framebuffer data.
+	 * 
+	 * @param framebuffer
+	 */
+	void deleteFramebuffer(TFramebuffer framebuffer)
+
+	/**
 	 * Delete all of the items tied to the material.
 	 * 
 	 * @param material
@@ -155,13 +160,6 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	 * @param mesh
 	 */
 	void deleteMesh(TMesh mesh)
-
-	/**
-	 * Delete render target data.
-	 * 
-	 * @param renderTarget
-	 */
-	void deleteRenderTarget(TRenderTarget renderTarget)
 
 	/**
 	 * Delete texture data.
@@ -178,12 +176,12 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TRend
 	void drawMaterial(TMaterial material)
 
 	/**
-	 * Set a render target to be used by subsequent draw calls.  Use {@code null}
-	 * to set the render target as the screen.
+	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
+	 * {@code null} to set the render target as the screen.
 	 * 
-	 * @param renderTarget
+	 * @param framebuffer
 	 */
-	void setRenderTarget(TRenderTarget renderTarget)
+	void setRenderTarget(TFramebuffer framebuffer)
 
 	/**
 	 * Update the camera's view matrix.
