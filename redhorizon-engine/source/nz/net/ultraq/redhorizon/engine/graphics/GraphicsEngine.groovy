@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
-import org.joml.FrustumIntersection
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.slf4j.Logger
@@ -129,8 +128,26 @@ class GraphicsEngine extends Engine implements InputSource {
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
+						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera)
+
+						// Scene render pass
 						def graphicsElementStates = [:]
-						List<RenderPass> renderPasses = []
+						pipeline << new RenderPass(
+							operation: { List<GraphicsElement> visibleElements ->
+								visibleElements.each { element ->
+									if (!graphicsElementStates[element]) {
+										graphicsElementStates << [(element): STATE_NEW]
+									}
+									def elementState = graphicsElementStates[element]
+									if (elementState == STATE_NEW) {
+										element.init(renderer)
+										elementState = STATE_INITIALIZED
+										graphicsElementStates << [(element): elementState]
+									}
+									element.render(renderer)
+								}
+							}
+						)
 
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
@@ -142,77 +159,34 @@ class GraphicsEngine extends Engine implements InputSource {
 							return context.framebufferSize as float[]
 						})
 
-						// Set up the rendering pipeline for any post-processing steps
-						// TODO: Represent this all with a "rendering pipeline" object
+						// Scanline post-processing steps
 						if (config.scanlines) {
-							renderPasses << new RenderPass(
+							pipeline << new RenderPass(
 								framebuffer: renderer.createFramebuffer(false),
-								shader: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
-								material: renderer.createMaterial(
-									mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
-								)
+								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+								effect: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+								operation: { Material material ->
+									renderer.drawMaterial(material)
+								}
 							)
 						}
 
-						renderPasses << new RenderPass(
+						// Sharp bilinear upscale post-processing pass
+						pipeline << new RenderPass(
 							framebuffer: renderer.createFramebuffer(true),
-							shader: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
-							material: renderer.createMaterial(
-								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
-							)
-						)
-
-						renderPasses << new RenderPass(
-							framebuffer: null
+							mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+							effect: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+							transform:  new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1),
+							operation: { Material material ->
+								renderer.drawMaterial(material)
+							}
 						)
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
 						started = true
 						engineLoop { ->
-							debugOverlay.startFrame()
-
-							def scenePass = renderPasses.head()
-							renderer.setRenderTarget(scenePass.framebuffer)
-							renderer.clear()
-							camera.render(renderer)
-
-							// Reduce the list of renderable items to those just visible in the scene
-							def visibleElements = []
-							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-							averageNanos('objectCulling', 1f, logger) { ->
-								scene.accept { element ->
-									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-										visibleElements << element
-									}
-								}
-							}
-							visibleElements.each { element ->
-								if (!graphicsElementStates[element]) {
-									graphicsElementStates << [(element): STATE_NEW]
-								}
-								def elementState = graphicsElementStates[element]
-								if (elementState == STATE_NEW) {
-									element.init(renderer)
-									elementState = STATE_INITIALIZED
-									graphicsElementStates << [(element): elementState]
-								}
-								element.render(renderer)
-							}
-
-							// Post-processing
-							renderPasses.tail().inject(scenePass) { lastPass, nextPass ->
-								renderer.setRenderTarget(nextPass.framebuffer)
-								renderer.clear()
-								renderer.drawMaterial(lastPass.material)
-								return nextPass
-							}
-
-							// GUI/Overlays
-							debugOverlay.drawDebugOverlay()
-							debugOverlay.endFrame()
-
+							pipeline.render()
 							context.swapBuffers()
 							waitForMainThread { ->
 								context.pollEvents()
@@ -221,20 +195,11 @@ class GraphicsEngine extends Engine implements InputSource {
 
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
-						renderPasses.each { renderPass ->
-							def framebuffer = renderPass.framebuffer
-							if (framebuffer) {
-								renderer.deleteFramebuffer(framebuffer)
-							}
-							def material = renderPass.material
-							if (material) {
-								renderer.deleteMaterial(material)
-							}
-						}
 						camera.delete(renderer)
 						graphicsElementStates.keySet().each { graphicsElement ->
 							graphicsElement.delete(renderer)
 						}
+						pipeline.close() // TODO: withCloseable
 					}
 				}
 			}

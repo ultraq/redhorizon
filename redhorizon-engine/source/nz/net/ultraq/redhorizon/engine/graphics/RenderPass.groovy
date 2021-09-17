@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
+
 import groovy.transform.MapConstructor
 
 /**
@@ -24,15 +26,12 @@ import groovy.transform.MapConstructor
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(post = {
-	if (material) {
-		material.texture = framebuffer.texture
-		material.shader = shader
-	}
-})
+@MapConstructor
 class RenderPass {
 
 	final Framebuffer framebuffer
-	final Shader shader
-	final Material material
+	final Mesh mesh
+	final Shader effect
+	final Matrix4f transform
+	final Closure operation
 }

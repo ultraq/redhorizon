@@ -1,0 +1,129 @@
+/* 
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.engine.graphics
+
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.scenegraph.Scene
+
+import org.joml.FrustumIntersection
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import groovy.transform.TupleConstructor
+
+/**
+ * A render pipeline contains all of the configured rendering passes and
+ * executes them so that objects are drawn to a screen.  These passes can be
+ * added/removed dynamically, but usually consist of: culling the scene to
+ * exclude off-screen objects, rendering the scene, post-processing effects, and
+ * overlays.
+ * 
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class RenderPipeline implements AutoCloseable {
+
+	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
+
+	final GraphicsRenderer renderer
+	final ImGuiDebugOverlay debugOverlay
+	final Scene scene
+	final Camera camera
+
+	private final List<RenderPass> renderPasses = []
+	private final List<Material> materialPasses = []
+
+	/**
+	 * Add a rendering pass to this pipeline.
+	 * 
+	 * @param renderPass
+	 */
+	void addRenderPass(RenderPass renderPass) {
+
+		// For post-processing passes, create the material to pass to the
+		// post-processing pass that will contain the texture of the previous
+		// framebuffer
+		if (renderPasses) {
+			materialPasses << renderer.createMaterial(
+				mesh: renderPass.mesh,
+				texture: renderPass.framebuffer.texture,
+				shader: renderPass.effect,
+				transform: renderPass.transform
+			)
+		}
+		renderPasses << renderPass
+	}
+
+	@Override
+	void close() {
+
+		renderPasses.each { renderPass ->
+			if (renderPass.framebuffer) {
+				renderer.deleteFramebuffer(renderPass.framebuffer)
+			}
+		}
+		materialPasses.each { materialPass ->
+			renderer.deleteMaterial(materialPass)
+		}
+	}
+
+	/**
+	 * An alias for {@link #addRenderPass(RenderPass)}
+	 * 
+	 * @param renderPass
+	 */
+	void leftShift(RenderPass renderPass) {
+
+		addRenderPass(renderPass)
+	}
+
+	/**
+	 * Run through each of the rendering passes configured in the pipeline.
+	 */
+	void render() {
+
+		// Start a new frame
+		debugOverlay.startFrame()
+		renderer.clear()
+		camera.render(renderer)
+
+		// Reduce the list of renderable items to those just visible in the scene
+		def visibleElements = []
+		def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+		averageNanos('objectCulling', 1f, logger) { ->
+			scene.accept { element ->
+				if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+					visibleElements << element
+				}
+			}
+		}
+
+		// Perform configured rendering passes
+		def previousData = visibleElements
+		for (def i = 0; i < renderPasses.size(); i++) {
+			def renderPass = renderPasses[i]
+			def nextPass = renderPasses[i + 1]
+			renderer.setRenderTarget(nextPass?.framebuffer)
+			renderPass.operation(previousData)
+			previousData = materialPasses[i]
+		}
+
+		// Draw overlays
+		debugOverlay.drawDebugOverlay()
+		debugOverlay.endFrame()
+	}
+}
