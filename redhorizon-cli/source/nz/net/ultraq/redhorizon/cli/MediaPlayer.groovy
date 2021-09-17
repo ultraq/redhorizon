@@ -69,9 +69,6 @@ class MediaPlayer implements Callable<Integer> {
 	@Mixin
 	FileOptions fileOptions
 
-	@Option(names = ['--filter'], description = 'Use nearest-neighbour filtering to smooth the appearance of images')
-	boolean filter
-
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays')
 	boolean fixAspectRatio
 
@@ -101,9 +98,9 @@ class MediaPlayer implements Callable<Integer> {
 
 		fileOptions.useFile(logger) { mediaFile ->
 			def graphicsConfig = new GraphicsConfiguration(
-				filter: filter,
 				fixAspectRatio: fixAspectRatio,
-				fullScreen: fullScreen
+				fullScreen: fullScreen,
+				scanlines: scanlines
 			)
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100
@@ -111,20 +108,18 @@ class MediaPlayer implements Callable<Integer> {
 
 			switch (mediaFile) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig, scanlines)
+				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig)
 				videoPlayer.play()
 				break
 			case AnimationFile:
-				def animationPlayer = new AnimationPlayer(mediaFile, graphicsConfig, scanlines)
-				animationPlayer.play()
+				new AnimationPlayer(mediaFile, graphicsConfig).start()
 				break
 			case SoundFile:
 				def soundPlayer = new SoundPlayer(mediaFile, audioConfig)
 				soundPlayer.play()
 				break
 			case ImageFile:
-				def imageViewer = new ImageViewer(mediaFile, graphicsConfig)
-				imageViewer.view()
+				new ImageViewer(mediaFile, graphicsConfig).start()
 				break
 			case ImagesFile:
 				def imagesViewer = new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType)

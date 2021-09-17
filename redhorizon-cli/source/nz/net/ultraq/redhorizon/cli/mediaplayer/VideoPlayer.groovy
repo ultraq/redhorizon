@@ -50,12 +50,12 @@ class VideoPlayer extends Application {
 	final VideoFile videoFile
 	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
-	final boolean scanlines
 
 	/**
 	 * Play the video file.
 	 */
-	void play() {
+	@Override
+	void run() {
 
 		logger.info('File details: {}', videoFile)
 
@@ -76,7 +76,7 @@ class VideoPlayer extends Application {
 							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
 							def offset = new Vector2f(-width / 2, -height / 2)
 
-							video = new Video(videoFile, scanlines, gameClock, executorService)
+							video = new Video(videoFile, gameClock)
 							video.scaleXY(scale)
 							video.translate(offset)
 

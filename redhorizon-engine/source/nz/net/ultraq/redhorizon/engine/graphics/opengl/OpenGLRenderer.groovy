@@ -18,11 +18,14 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -32,7 +35,6 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -41,8 +43,10 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
+import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.Memoized
+import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
@@ -52,7 +56,8 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, OpenGLTexture>, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
+	AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -70,9 +75,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected final int maxTransforms
 
 	protected final Dimension viewportSize
-	protected final OpenGLShader standardShader
+	protected final Dimension windowSize
+	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
-	protected OpenGLTexture whiteTexture
+	private final OpenGLTexture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
 	protected OpenGLTexture currentPalette
@@ -128,17 +134,18 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 //			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
 //			glViewport(0, 0, event.width, event.height)
 //		}
+		windowSize = context.windowSize
 
 		// Create the shader programs used by this renderer
-		standardShader = createShader('Standard')
+		standardShader = createShader('Standard', new Uniform('models', { material ->
+			return material.transform.get(new float[16])
+		}))
 
 		// The white texture used as a fallback when no texture is bound
-		stackPush().withCloseable { stack ->
-			def textureBytes = ByteBuffer.allocateNative(4)
-				.putInt(0xffffffff as int)
-				.flip()
-			whiteTexture = createTexture(textureBytes, FORMAT_RGBA.value, 1, 1)
-		}
+		def textureBytes = ByteBuffer.allocateNative(4)
+			.putInt(0xffffffff as int)
+			.flip()
+		whiteTexture = createTexture(1, 1, FORMAT_RGBA.value, textureBytes)
 	}
 
 	@Override
@@ -237,14 +244,15 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
+	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, Matrix4f transform) {
+	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, OpenGLShader shader, Matrix4f transform) {
 
 		return new OpenGLMaterial(
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
-			shader: standardShader,
-			transform: transform
+			shader: shader ?: standardShader,
+			transform: transform ?: new Matrix4f()
 		)
 	}
 
@@ -329,22 +337,61 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 		}
 	}
 
-	/**
-	 * Create a new shader program for the shader sources of the given name.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private OpenGLShader createShader(String name) {
+	@Override
+	OpenGLFramebuffer createFramebuffer(boolean filter) {
+
+		def frameBufferId = glGenFramebuffers()
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
+
+		def width = viewportSize.width
+		def height = viewportSize.height
+
+		// Colour texture attachment
+		def colourTextureId = glGenTextures()
+		glBindTexture(GL_TEXTURE_2D, colourTextureId)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
+		glBindTexture(GL_TEXTURE_2D, 0)
+
+		def colourTexture = new OpenGLTexture(
+			textureId: colourTextureId,
+			width: width,
+			height: height
+		)
+		trigger(new TextureCreatedEvent(colourTexture))
+
+		// Depth buffer attachment
+		def depthBuffer = glGenRenderbuffers()
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
+		glBindRenderbuffer(GL_RENDERBUFFER, 0)
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+
+		def framebuffer = new OpenGLFramebuffer(
+			framebufferId: frameBufferId,
+			texture: colourTexture
+		)
+		trigger(new FramebufferCreatedEvent(framebuffer))
+		return framebuffer
+	}
+
+	@Override
+	OpenGLShader createShader(String name, Uniform ...uniforms) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
 		 * check to make sure it all went OK.
 		 */
-		def createShader = { int type, Closure<String> mod = null ->
+		def createShader = { int type ->
 			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/opengl/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
 			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
-				return mod ? mod(stream.text) : stream.text
+				return stream.text
+					.replace('MAX_TEXTURE_UNITS', "${maxTextureUnits}")
+					.replace('MAX_TRANSFORMS', "${maxTransforms}")
 			}
 			def shaderId = glCreateShader(type)
 			glShaderSource(shaderId, shaderSource)
@@ -376,22 +423,16 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			return programId
 		}
 
-		def capTextureUnits = { source ->
-			return source
-				.replace('MAX_TEXTURE_UNITS', "${maxTextureUnits}")
-				.replace('MAX_TRANSFORMS', "${maxTransforms}")
-				.replace('OUTPUT_RESOLUTION_WIDTH', "${viewportSize.width}")
-				.replace('OUTPUT_RESOLUTION_HEIGHT', "${viewportSize.height}")
-		}
-		def vertexShaderId = createShader(GL_VERTEX_SHADER, capTextureUnits)
-		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER, capTextureUnits)
+		def vertexShaderId = createShader(GL_VERTEX_SHADER)
+		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
 		def programId = createProgram(vertexShaderId, fragmentShaderId)
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
 
 		def shader = new OpenGLShader(
+			programId: programId,
 			name: name,
-			programId: programId
+			uniforms: uniforms
 		)
 		shaders << shader
 		return shader
@@ -410,13 +451,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	}
 
 	@Override
-	OpenGLTexture createTexture(ByteBuffer data, int format, int width, int height) {
+	OpenGLTexture createTexture(int width, int height, int format, ByteBuffer data) {
 
 		return stackPush().withCloseable { stack ->
-			int textureId = glGenTextures()
+			def textureId = glGenTextures()
 			glBindTexture(GL_TEXTURE_2D, textureId)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, config.filter ? GL_LINEAR : GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
 			def colourFormat =
 				format == 1 ? GL_RED :
@@ -428,11 +469,11 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 				.flip()
 			def matchesAlignment = (width * format) % 4 == 0
 			if (!matchesAlignment) {
-				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 1) }
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 			}
 			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
 			if (!matchesAlignment) {
-				checkForError { -> glPixelStorei(GL_UNPACK_ALIGNMENT, 4) }
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
 			}
 
 			def texture = new OpenGLTexture(
@@ -443,6 +484,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 			trigger(new TextureCreatedEvent(texture))
 			return texture
 		}
+	}
+
+	@Override
+	void deleteFramebuffer(OpenGLFramebuffer framebuffer) {
+
+		glDeleteFramebuffers(framebuffer.framebufferId)
+		trigger(new FramebufferDeletedEvent(framebuffer))
 	}
 
 	@Override
@@ -489,19 +537,20 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 				glActiveTexture(GL_TEXTURE0)
 				glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
-				glUniform2fv(getUniformLocation(shader, 'textureSourceSize'), stack.floats(texture.width, texture.height))
-
-				// TODO: Store mesh dimensions somewhere?  Currently just a series of
-				//       points but no way to get the original size from the Rectanglef
-				//       that it was built with 🤔
-				def textureTargetSize = mesh.vertices[2].mul(material.transform.getScale(new Vector3f()).x, new Vector2f())
-				glUniform2fv(getUniformLocation(shader, 'textureTargetSize'), textureTargetSize.get(stack.mallocFloat(Vector2f.FLOATS)))
-
-				glUniform1i(getUniformLocation(shader, 'useScanlines'), material.scanlines ? 1 : 0)
-
-				def modelsBuffer = material.transform.get(stack.mallocFloat(Matrix4f.FLOATS))
-				def modelsLocation = getUniformLocation(shader, 'models')
-				glUniformMatrix4fv(modelsLocation, false, modelsBuffer)
+				shader.uniforms.each { uniform ->
+					def uniformLocation = getUniformLocation(shader, uniform.name)
+					def uniformData = stack.floats(uniform.function(material))
+					switch (uniformData.capacity()) {
+						case 2:
+							glUniform2fv(uniformLocation, uniformData)
+							break
+						case 16:
+							glUniformMatrix4fv(uniformLocation, false, uniformData)
+							break
+						default:
+							throw new UnsupportedOperationException("Uniform data of size ${uniformData.capacity()} is not supported")
+					}
+				}
 
 				glBindVertexArray(mesh.vertexArrayId)
 				if (mesh.indices) {
@@ -543,6 +592,19 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLMaterial, OpenGLMesh, Ope
 	protected static int getUniformLocation(OpenGLShader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
+	}
+
+	@Override
+	void setRenderTarget(OpenGLFramebuffer framebuffer) {
+
+		if (framebuffer) {
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
+			glDisable(GL_DEPTH_TEST)
+		}
+		else {
+			glBindFramebuffer(GL_FRAMEBUFFER, 0)
+			glEnable(GL_DEPTH_TEST)
+		}
 	}
 
 	/**

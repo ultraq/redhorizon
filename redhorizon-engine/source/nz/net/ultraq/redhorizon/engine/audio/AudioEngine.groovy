@@ -36,19 +36,20 @@ class AudioEngine extends Engine {
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
 	private static final int TARGET_RENDER_TIME_MS = 50
 
-	private final AudioConfiguration config
-
-	Scene scene
+	final AudioConfiguration config
+	final Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
 	 * @param config
+	 * @param scene
 	 */
-	AudioEngine(AudioConfiguration config) {
+	AudioEngine(AudioConfiguration config, Scene scene) {
 
 		super(TARGET_RENDER_TIME_MS)
-		this.config = config
+		this.config = config ?: new AudioConfiguration()
+		this.scene = scene
 	}
 
 	/**
@@ -72,32 +73,23 @@ class AudioEngine extends Engine {
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
 				engineLoop { ->
-
-					if (scene) {
-						def audibleElements = []
-						scene.accept { element ->
-							if (element instanceof AudioElement) {
-								audibleElements << element
-							}
+					def audibleElements = []
+					scene.accept { element ->
+						if (element instanceof AudioElement) {
+							audibleElements << element
 						}
-						audibleElements.each { element ->
-
-							// Register the audio element
-							if (!audioElementStates[element]) {
-								audioElementStates << [(element): STATE_NEW]
-							}
-
-							// Initialize the audio element
-							def elementState = audioElementStates[element]
-							if (elementState == STATE_NEW) {
-								element.init(renderer)
-								elementState = STATE_INITIALIZED
-								audioElementStates << [(element): elementState]
-							}
-
-							// Render the audio element
-							element.render(renderer)
+					}
+					audibleElements.each { element ->
+						if (!audioElementStates[element]) {
+							audioElementStates << [(element): STATE_NEW]
 						}
+						def elementState = audioElementStates[element]
+						if (elementState == STATE_NEW) {
+							element.init(renderer)
+							elementState = STATE_INITIALIZED
+							audioElementStates << [(element): elementState]
+						}
+						element.render(renderer)
 					}
 				}
 

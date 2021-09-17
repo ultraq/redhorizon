@@ -22,7 +22,8 @@ package nz.net.ultraq.redhorizon.engine.graphics
  * 
  * @author Emanuel Rabina
  */
-interface MaterialBundler<TMaterial extends Material, TMesh extends Mesh, TTexture extends Texture> extends GraphicsRenderer<TMaterial, TMesh, TTexture> {
+interface MaterialBundler<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh, TShader extends Shader, TTexture extends Texture>
+	extends GraphicsRenderer<TFramebuffer, TMaterial, TMesh, TShader, TTexture> {
 
 	/**
 	 * Build a batched material that represents all of the materials created

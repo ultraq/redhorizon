@@ -181,7 +181,7 @@ class OpenGLContext extends Context implements EventTarget {
 	/**
 	 * Communicate with the window so we're not locking up.
 	 */
-	static void pollEvents() {
+	void pollEvents() {
 
 		glfwPollEvents()
 	}

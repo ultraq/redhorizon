@@ -22,60 +22,58 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.media.Image
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
-
 /**
  * A basic image viewer, used primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class ImageViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageViewer)
 
 	final ImageFile imageFile
-	final GraphicsConfiguration graphicsConfig
 
 	/**
-	 * View the configured file.
+	 * Constructor, set the image to be displayed.
+	 * 
+	 * @param imageFile
+	 * @param graphicsConfig
 	 */
-	void view() {
+	ImageViewer(ImageFile imageFile, GraphicsConfiguration graphicsConfig) {
+
+		super(
+			graphicsConfig: graphicsConfig
+		)
+		this.imageFile = imageFile
+	}
+
+	@Override
+	void run() {
 
 		logger.info('File details: {}', imageFile)
 
-		def scene = new Scene()
+		// Add the image to the engine once we have the window dimensions
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			scene << new Image(imageFile)
+				.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize))
+				.translate(-imageFile.width / 2, -imageFile.height / 2, 0)
+		}
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-				graphicsEngine.scene = scene
+		logger.info('Displaying the image in another window.  Close the window to exit.')
 
-				// Add the image to the engine once we have the window dimensions
-				graphicsEngine.on(WindowCreatedEvent) { event ->
-					scene << new Image(imageFile)
-						.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.cameraSize))
-						.translate(-imageFile.width / 2, -imageFile.height / 2, 0)
-				}
-
-				logger.info('Displaying the image in another window.  Close the window to exit.')
-
-				// Key event handler
-				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS) {
-						switch (event.key) {
-						case GLFW_KEY_ESCAPE:
-							graphicsEngine.stop()
-							break
-						}
-					}
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				switch (event.key) {
+				case GLFW_KEY_ESCAPE:
+					stop()
+					break
 				}
 			}
 		}

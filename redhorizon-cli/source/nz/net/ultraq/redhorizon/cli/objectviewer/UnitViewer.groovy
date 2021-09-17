@@ -59,7 +59,8 @@ class UnitViewer extends Viewer {
 	/**
 	 * Display the unit.
 	 */
-	void view() {
+	@Override
+	void run() {
 
 		logger.info('File details: {}', shpFile)
 

@@ -1,0 +1,76 @@
+/* 
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import org.gradle.internal.os.OperatingSystem
+
+apply plugin: 'application'
+
+def os = OperatingSystem.current()
+def swtArtifact =
+	os == OperatingSystem.MAC_OS ?  'org.eclipse.swt.cocoa.macosx.x86_64' :
+	os == OperatingSystem.WINDOWS ? 'org.eclipse.swt.win32.win32.x86_64' :
+	os == OperatingSystem.LINUX ?   'org.eclipse.swt.gtk.linux.x86_64' :
+	null
+def swtVersion = '3.116.0'
+
+// Fix up the ${osgi.platform} value inside the SWT Maven files
+configurations.all {
+	resolutionStrategy {
+		dependencySubstitution {
+			if (os == OperatingSystem.MAC_OS) {
+				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.cocoa.macosx.x86_64:${swtVersion}")
+			}
+			else if (os == OperatingSystem.WINDOWS) {
+				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:${swtVersion}")
+			}
+			else if (os == OperatingSystem.LINUX) {
+				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.gtk.linux.x86_64:${swtVersion}")
+			}
+		}
+	}
+}
+
+dependencies {
+	implementation(
+		project(':redhorizon-engine'),
+		project(':redhorizon-extensions'),
+		'ch.qos.logback:logback-classic:1.2.3',
+		'info.picocli:picocli:4.6.1',
+		"org.eclipse.platform:${swtArtifact}:${swtVersion}"
+	)
+}
+
+application {
+	mainClass = 'nz.net.ultraq.redhorizon.explorer.Explorer'
+	applicationName = 'explorer'
+	applicationDefaultJvmArgs = [
+		"-Dredhorizon.version=${version}"
+	]
+}
+
+startScripts {
+	unixStartScriptGenerator = new CustomUnixStartScriptGenerator(generator: unixStartScriptGenerator)
+}
+
+class CustomUnixStartScriptGenerator implements ScriptGenerator {
+	@Delegate
+	ScriptGenerator generator
+	@Override
+	void generateScript(JavaAppStartScriptGenerationDetails details, Writer writer) {
+		details.defaultJvmOpts.add(0, '-XstartOnFirstThread')
+		generator.generateScript(details, writer)
+	}
+}

@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.flag.ImGuiWindowFlags
@@ -29,7 +32,6 @@ import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 
-import groovy.transform.PackageScope
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 
@@ -39,16 +41,16 @@ import java.util.concurrent.BlockingQueue
  * 
  * @author Emanuel Rabina
  */
-class ImGuiRenderer implements AutoCloseable {
+class ImGuiDebugOverlay implements AutoCloseable {
 
-	static final int MAX_DEBUG_LINES = 10
-	private static ImGuiRenderer rendererInstance
+	private static final int MAX_DEBUG_LINES = 10
 
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
 	private int drawCalls = 0
+	private int activeFramebuffers = 0
 	private int activeMeshes = 0
 	private int activeTextures = 0
 
@@ -56,20 +58,26 @@ class ImGuiRenderer implements AutoCloseable {
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
 	 * renderer.
 	 * 
-	 * @param context
+	 * @param window
 	 * @param renderer
 	 */
-	ImGuiRenderer(OpenGLContext context, OpenGLRenderer renderer) {
+	ImGuiDebugOverlay(long window, EventTarget renderer) {
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3.init('#version 330 core')
-		imGuiGlfw.init(context.window, true)
+		imGuiGlfw.init(window, true)
 
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
 				drawCalls++
+			}
+			else if (event instanceof FramebufferCreatedEvent) {
+				activeFramebuffers++
+			}
+			else if (event instanceof FramebufferDeletedEvent) {
+				activeFramebuffers--
 			}
 			else if (event instanceof MeshCreatedEvent) {
 				activeMeshes++
@@ -85,21 +93,15 @@ class ImGuiRenderer implements AutoCloseable {
 			}
 		}
 
-		rendererInstance = this
-	}
-
-	/**
-	 * Add a line to be displayed in the debug overlay.  A maximum of
-	 * {@link ImGuiRenderer#MAX_DEBUG_LINES} are allowed in the overlay, with old
-	 * lines being pushed out.
-	 * 
-	 * @param line
-	 */
-	@PackageScope
-	void addDebugLine(String line) {
-
-		while (!debugLines.offer(line)) {
-			debugLines.poll()
+		ImGuiDebugOverlayAppender.instance.on(ImGuiLogEvent) { event ->
+			if (event.persistentKey) {
+				persistentLines[event.persistentKey] = event.message
+			}
+			else {
+				while (!debugLines.offer(event.message)) {
+					debugLines.poll()
+				}
+			}
 		}
 	}
 
@@ -128,6 +130,7 @@ class ImGuiRenderer implements AutoCloseable {
 		ImGui.text("Draw calls: ${drawCalls}")
 		ImGui.text("Active meshes: ${activeMeshes}")
 		ImGui.text("Active textures: ${activeTextures}")
+		ImGui.text("Active framebuffers: ${activeFramebuffers}")
 		drawCalls = 0
 
 		ImGui.separator()
@@ -153,29 +156,6 @@ class ImGuiRenderer implements AutoCloseable {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
-	}
-
-	/**
-	 * Return the running instance of the ImGui renderer.
-	 * 
-	 * @return
-	 */
-	static ImGuiRenderer getInstance() {
-
-		return rendererInstance
-	}
-
-	/**
-	 * Set a line that appears with the other persistent debug lines in the
-	 * overlay.
-	 * 
-	 * @param key
-	 * @param line
-	 */
-	@PackageScope
-	void setPersistentLine(String key, String line) {
-
-		persistentLines[key] = line
 	}
 
 	/**

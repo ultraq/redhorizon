@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.ImGuiRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
@@ -27,6 +27,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
+import org.joml.Matrix4f
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -45,27 +47,29 @@ class GraphicsEngine extends Engine implements InputSource {
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
 	private final GraphicsConfiguration config
+	private final Scene scene
 	private final Closure needsMainThreadCallback
 
 	private OpenGLContext openGlContext
 	private Camera camera
 	private boolean started
-	Scene scene
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
 	 * @param config
+	 * @param scene
 	 * @param needsMainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(GraphicsConfiguration config,
+	GraphicsEngine(GraphicsConfiguration config, Scene scene,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
 
-		this.config = config
+		this.config = config ?: new GraphicsConfiguration()
+		this.scene = scene
 		this.needsMainThreadCallback = needsMainThreadCallback
 	}
 
@@ -117,58 +121,97 @@ class GraphicsEngine extends Engine implements InputSource {
 			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
-				camera = new Camera(context.windowSize, config.fixAspectRatio)
+				camera = new Camera(context.windowSize)
 				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, camera.size))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
-					new ImGuiRenderer(context, renderer).withCloseable { imGuiRenderer ->
+					new ImGuiDebugOverlay(context.window, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
 						def graphicsElementStates = [:]
+						List<RenderPass> renderPasses = []
+
+						def modelUniform = new Uniform('model', { material ->
+							return material.transform.get(new float[16])
+						})
+						def textureSourceSizeUniform = new Uniform<float>('textureSourceSize', { material ->
+							return new float[] { material.texture.width, material.texture.height }
+						})
+						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
+							return context.framebufferSize as float[]
+						})
+
+						// Set up the rendering pipeline for any post-processing steps
+						// TODO: Represent this all with a "rendering pipeline" object
+						if (config.scanlines) {
+							renderPasses << new RenderPass(
+								framebuffer: renderer.createFramebuffer(false),
+								shader: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+								material: renderer.createMaterial(
+									mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
+								)
+							)
+						}
+
+						renderPasses << new RenderPass(
+							framebuffer: renderer.createFramebuffer(true),
+							shader: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+							material: renderer.createMaterial(
+								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+								transform: new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1)
+							)
+						)
+
+						renderPasses << new RenderPass(
+							framebuffer: null
+						)
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')
 						started = true
 						engineLoop { ->
+							debugOverlay.startFrame()
+
+							def scenePass = renderPasses.head()
+							renderer.setRenderTarget(scenePass.framebuffer)
 							renderer.clear()
-							imGuiRenderer.startFrame()
-
 							camera.render(renderer)
-							if (scene) {
-								// Reduce the list of renderable items to those just visible in the scene
-								def visibleElements = []
-								def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-								averageNanos('objectCulling', 1f, logger) { ->
-									scene.accept { element ->
-										if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-											visibleElements << element
-										}
+
+							// Reduce the list of renderable items to those just visible in the scene
+							def visibleElements = []
+							def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+							averageNanos('objectCulling', 1f, logger) { ->
+								scene.accept { element ->
+									if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+										visibleElements << element
 									}
-								}
-								visibleElements.each { element ->
-
-									// Register the graphics element
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
-									}
-
-									def elementState = graphicsElementStates[element]
-
-									// Initialize the graphics element
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-
-									// Render the graphics element
-									element.render(renderer)
 								}
 							}
+							visibleElements.each { element ->
+								if (!graphicsElementStates[element]) {
+									graphicsElementStates << [(element): STATE_NEW]
+								}
+								def elementState = graphicsElementStates[element]
+								if (elementState == STATE_NEW) {
+									element.init(renderer)
+									elementState = STATE_INITIALIZED
+									graphicsElementStates << [(element): elementState]
+								}
+								element.render(renderer)
+							}
 
-							imGuiRenderer.drawDebugOverlay()
-							imGuiRenderer.endFrame()
+							// Post-processing
+							renderPasses.tail().inject(scenePass) { lastPass, nextPass ->
+								renderer.setRenderTarget(nextPass.framebuffer)
+								renderer.clear()
+								renderer.drawMaterial(lastPass.material)
+								return nextPass
+							}
+
+							// GUI/Overlays
+							debugOverlay.drawDebugOverlay()
+							debugOverlay.endFrame()
 
 							context.swapBuffers()
 							waitForMainThread { ->
@@ -178,6 +221,16 @@ class GraphicsEngine extends Engine implements InputSource {
 
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
+						renderPasses.each { renderPass ->
+							def framebuffer = renderPass.framebuffer
+							if (framebuffer) {
+								renderer.deleteFramebuffer(framebuffer)
+							}
+							def material = renderPass.material
+							if (material) {
+								renderer.deleteMaterial(material)
+							}
+						}
 						camera.delete(renderer)
 						graphicsElementStates.keySet().each { graphicsElement ->
 							graphicsElement.delete(renderer)

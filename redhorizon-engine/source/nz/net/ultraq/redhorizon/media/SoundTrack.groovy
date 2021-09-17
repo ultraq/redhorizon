@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * A long piece of audio that is streamed from its source.
@@ -60,14 +60,13 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 	 * 
 	 * @param soundFile
 	 * @param gameTime
-	 * @param executorService
 	 */
-	SoundTrack(SoundFile soundFile, GameTime gameTime, ExecutorService executorService) {
+	SoundTrack(SoundFile soundFile, GameTime gameTime) {
 
 		this(soundFile.bits, soundFile.channels, soundFile.frequency,
 			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null, gameTime)
 
-		executorService.execute(soundDataWorker)
+		Executors.newSingleThreadExecutor().execute(soundDataWorker)
 	}
 
 	/**

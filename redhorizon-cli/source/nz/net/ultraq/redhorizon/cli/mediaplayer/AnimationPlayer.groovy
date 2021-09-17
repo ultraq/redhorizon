@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.StopEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -34,76 +33,71 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
-
 /**
  * A basic animation player, used primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class AnimationPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnimationPlayer)
 
 	final AnimationFile animationFile
-	final GraphicsConfiguration graphicsConfig
-	final boolean scanlines
 
 	/**
-	 * Play the configured animation file.
+	 * Constructor, sets the animation file to be played.
+	 * 
+	 * @param animationFile
+	 * @param graphicsConfig
 	 */
-	void play() {
+	AnimationPlayer(AnimationFile animationFile, GraphicsConfiguration graphicsConfig) {
+
+		super(
+			graphicsConfig: graphicsConfig
+		)
+		this.animationFile = animationFile
+	}
+
+	@Override
+	void run() {
 
 		logger.info('File details: {}', animationFile)
 
-		def scene = new Scene()
+		// Add the animation to the engine once we have the window dimensions
+		Animation animation
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			def width = animationFile.width
+			def height = animationFile.height
+			def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
+			def offset = new Vector2f(-width / 2, -height / 2)
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-					graphicsEngine.scene = scene
+			animation = new Animation(animationFile, gameClock)
+				.scaleXY(scale)
+				.translate(offset)
+			animation.on(StopEvent) { stopEvent ->
+				stop()
+				logger.debug('Animation stopped')
+			}
+			scene << animation
+		}
 
-					// Add the animation to the engine once we have the window dimensions
-					Animation animation
-					graphicsEngine.on(WindowCreatedEvent) { event ->
-						def width = animationFile.width
-						def height = animationFile.height
-						def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-						def offset = new Vector2f(-width / 2, -height / 2)
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			animation.play()
+			logger.debug('Animation started')
+		}
 
-						animation = new Animation(animationFile, scanlines, gameClock, executorService)
-							.scaleXY(scale)
-							.translate(offset)
-						animation.on(StopEvent) { stopEvent ->
-							logger.debug('Animation stopped')
-							graphicsEngine.stop()
-							gameClock.stop()
-						}
-						scene << animation
-					}
+		logger.info('Waiting for animation to finish.  Close the window to exit.')
 
-					graphicsEngine.on(EngineLoopStartEvent) { event ->
-						animation.play()
-						logger.debug('Animation started')
-					}
-
-					logger.info('Waiting for animation to finish.  Close the window to exit.')
-
-					// Key event handler
-					graphicsEngine.on(KeyEvent) { event ->
-						if (event.action == GLFW_PRESS) {
-							switch (event.key) {
-							case GLFW_KEY_SPACE:
-								gameClock.togglePause()
-								break
-							case GLFW_KEY_ESCAPE:
-								animation.stop()
-								break
-							}
-						}
-					}
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				switch (event.key) {
+				case GLFW_KEY_SPACE:
+					gameClock.togglePause()
+					break
+				case GLFW_KEY_ESCAPE:
+					animation.stop()
+					break
 				}
 			}
 		}

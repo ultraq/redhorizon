@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * An animation that plays a series of images at a certain speed.
@@ -55,7 +55,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	final ColourFormat format
 	final int numFrames
 	final float frameRate
-	final boolean scanlines
 
 	private final Worker animationDataWorker
 	private final BlockingQueue<ByteBuffer> frames
@@ -76,18 +75,16 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * 
 	 * @param animationFile
 	 *   Animation source.
-	 * @param scanlines
 	 * @param gameTime
-	 * @param executorService
 	 */
-	Animation(AnimationFile animationFile, boolean scanlines, GameTime gameTime, ExecutorService executorService) {
+	Animation(AnimationFile animationFile, GameTime gameTime) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
-			scanlines, animationFile.frameRate as int,
+			animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
 			gameTime)
 
-		executorService.execute(animationDataWorker)
+		Executors.newSingleThreadExecutor().execute(animationDataWorker)
 	}
 
 	/**
@@ -98,14 +95,13 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * @param format
 	 * @param numFrames
 	 * @param frameRate
-	 * @param scanlines
 	 * @param bufferSize
 	 * @param animationDataWorker
 	 * @param gameTime
 	 */
 	@PackageScope
 	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
-		boolean scanlines, int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
+		int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
@@ -116,7 +112,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		this.format    = format
 		this.numFrames = numFrames
 		this.frameRate = frameRate
-		this.scanlines = scanlines
 
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
@@ -149,11 +144,9 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, width, height))
 		textures = []
 		material = renderer.createMaterial(
-			mesh,
-			null,
-			transform
+			mesh: mesh,
+			transform: transform
 		)
-		material.scanlines = scanlines
 		framesQueued = 0
 	}
 
@@ -179,7 +172,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
 						frames.drain(Math.max(numFramesToRead, 5)).each { frame ->
-							textures << renderer.createTexture(frame, format.value, width, height)
+							textures << renderer.createTexture(width, height, format.value, frame)
 							framesQueued++
 						}
 					}

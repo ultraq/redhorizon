@@ -80,11 +80,14 @@ class UnitRenderer implements GraphicsElement {
 
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
 		textures = imagesData.collect { data ->
-			return renderer.createTexture(
-				data.applyPalette(palette).flipVertical(unit.width, unit.height, palette.format),
-				palette.format.value, unit.width, unit.height)
+			return renderer.createTexture(unit.width, unit.height, palette.format.value,
+				data.applyPalette(palette).flipVertical(unit.width, unit.height, palette.format)
+			)
 		}
-		material = renderer.createMaterial(mesh, null, unit.transform)
+		material = renderer.createMaterial(
+			mesh: mesh,
+			transform:  unit.transform
+		)
 	}
 
 	@Override

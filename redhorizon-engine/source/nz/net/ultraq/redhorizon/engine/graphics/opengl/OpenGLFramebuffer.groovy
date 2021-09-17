@@ -16,31 +16,19 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import ch.qos.logback.core.UnsynchronizedAppenderBase
-import ch.qos.logback.core.encoder.Encoder
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 
 /**
- * A custom logback appender made for moving logged events to the debug overlay
- * created using ImGui.
+ * OpenGL implementation of a framebuffer.
  * 
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> {
+class OpenGLFramebuffer extends Framebuffer {
 
-	Encoder<E> encoder
+	final int framebufferId
 
-	@Override
-	protected void append(E eventObject) {
-
-		def imGuiRenderer = ImGuiRenderer.instance
-		if (imGuiRenderer) {
-			def message = new String(encoder.encode(eventObject))
-			if (eventObject.message.contains('average time')) {
-				imGuiRenderer.setPersistentLine(eventObject.argumentArray[0], message)
-			}
-			else {
-				imGuiRenderer.addDebugLine(message)
-			}
-		}
+	OpenGLFramebuffer(Map args) {
+		super(args)
+		framebufferId = args.framebufferId as int
 	}
 }

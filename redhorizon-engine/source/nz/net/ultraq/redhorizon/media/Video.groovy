@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 
-import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * The combination of an animation and sound track, a video is a stream from a
@@ -48,17 +48,15 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	 * 
 	 * @param videoFile
 	 *   Video source.
-	 * @param scanlines
 	 * @param gameTime
-	 * @param executorService
 	 */
-	Video(VideoFile videoFile, boolean scanlines, GameTime gameTime, ExecutorService executorService) {
+	Video(VideoFile videoFile, GameTime gameTime) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
-				scanlines, videoFile.frameRate * 2 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 as int, videoWorker, gameTime)
 			animation.on(StopEvent) { event ->
 				stop()
 			}
@@ -69,7 +67,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 				stop()
 			}
 
-			executorService.execute(videoWorker)
+			Executors.newSingleThreadExecutor().execute(videoWorker)
 		}
 		else {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')

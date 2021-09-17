@@ -43,6 +43,9 @@ class Dimension {
 		if (clazz == Rectanglef) {
 			return new Rectanglef(0, 0, width, height)
 		}
+		else if (clazz == float[]) {
+			return new float[] { width, height }
+		}
 		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
 	}
 

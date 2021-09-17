@@ -16,25 +16,20 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import groovy.transform.MapConstructor
+import groovy.transform.ToString
+
 /**
  * Audio configuration object.
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor(noArg = true)
+@ToString(includeNames = true, includePackage = false)
 class AudioConfiguration {
 
 	/**
 	 * The master gain level to set in the audio engine.
 	 */
-	final float volume
-
-	/**
-	 * Constructor, build this configuration object from a map parameter.
-	 * 
-	 * @param args
-	 */
-	AudioConfiguration(Map args) {
-
-		this.volume = Math.clamp(args.volume as float, 0, 1)
-	}
+	final float volume = 100
 }

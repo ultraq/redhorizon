@@ -33,6 +33,4 @@ abstract class Material<TMesh extends Mesh, TShader extends Shader, TTexture ext
 	TTexture texture
 	TShader shader
 	Matrix4f transform
-
-	boolean scanlines
 }

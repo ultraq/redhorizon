@@ -20,6 +20,7 @@ import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
 
+import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
@@ -30,7 +31,8 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TTexture extends Texture> {
+interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh,
+	TShader extends Shader, TTexture extends Texture> {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -59,16 +61,6 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	void createCamera(Matrix4f projection, Matrix4f view)
 
 	/**
-	 * Create a material out of the given component parts.
-	 * 
-	 * @param mesh
-	 * @param texture
-	 * @param transform
-	 * @return
-	 */
-	TMaterial createMaterial(TMesh mesh, TTexture texture, Matrix4f transform)
-
-	/**
 	 * Create a mesh that represents a line loop - a series of points where lines
 	 * are drawn between them and then a final one is used to close the last and
 	 * first points.
@@ -88,6 +80,36 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	 * @return New lines mesh.
 	 */
 	TMesh createLinesMesh(Colour colour, Vector2f... vertices)
+
+	/**
+	 * Create a material out of the given component parts.
+	 * 
+	 * @param mesh
+	 * @param texture
+	 * @param shader
+	 * @param transform
+	 * @return
+	 */
+	@NamedVariant
+	TMaterial createMaterial(TMesh mesh, TTexture texture, TShader shader, Matrix4f transform)
+
+	/**
+	 * Create a framebuffer that can be rendered to.
+	 * 
+	 * @param filter
+	 * @return
+	 */
+	TFramebuffer createFramebuffer(boolean filter)
+
+	/**
+	 * Create a new shader program for the shader source files with the given
+	 * name.
+	 * 
+	 * @param name
+	 * @param uniforms
+	 * @return
+	 */
+	TShader createShader(String name, Uniform ...uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using
@@ -110,13 +132,20 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	/**
 	 * Create and fill a texture with the given image data.
 	 * 
-	 * @param data
-	 * @param format
 	 * @param width
 	 * @param height
+	 * @param format
+	 * @param data
 	 * @return New texture object.
 	 */
-	TTexture createTexture(ByteBuffer data, int format, int width, int height)
+	TTexture createTexture(int width, int height, int format, ByteBuffer data)
+
+	/**
+	 * Delete framebuffer data.
+	 * 
+	 * @param framebuffer
+	 */
+	void deleteFramebuffer(TFramebuffer framebuffer)
 
 	/**
 	 * Delete all of the items tied to the material.
@@ -145,6 +174,14 @@ interface GraphicsRenderer<TMaterial extends Material, TMesh extends Mesh, TText
 	 * @param material
 	 */
 	void drawMaterial(TMaterial material)
+
+	/**
+	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
+	 * {@code null} to set the render target as the screen.
+	 * 
+	 * @param framebuffer
+	 */
+	void setRenderTarget(TFramebuffer framebuffer)
 
 	/**
 	 * Update the camera's view matrix.

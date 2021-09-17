@@ -27,6 +27,7 @@ import groovy.transform.MapConstructor
 abstract class Shader {
 
 	final String name
+	final Uniform[] uniforms
 
 	/**
 	 * Return the name of this shader program.
@@ -36,6 +37,10 @@ abstract class Shader {
 	@Override
 	String toString() {
 
-		return "${name} shader program"
+		def string = "${name} shader program"
+		if (uniforms) {
+			string += ", uniforms: ${uniforms.collect { it.name }}"
+		}
+		return string
 	}
 }

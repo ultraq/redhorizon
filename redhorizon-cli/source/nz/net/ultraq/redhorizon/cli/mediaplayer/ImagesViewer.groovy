@@ -58,7 +58,8 @@ class ImagesViewer extends Application {
 	/**
 	 * View the configured file.
 	 */
-	void view() {
+	@Override
+	void run() {
 
 		logger.info('File details: {}', imagesFile)
 
