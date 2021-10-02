@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,28 +36,41 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
 
 /**
  * A unit viewer for testing rendering and unit configuration.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class UnitViewer extends Viewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
 
 	final ShpFile shpFile
 	final String unitId
-	final GraphicsConfiguration graphicsConfig
 	final PaletteTypes paletteType
 	final boolean touchpadInput
 
 	/**
-	 * Display the unit.
+	 * Constructor, set the unit to be displayed.
+	 * 
+	 * @param shpFile
+	 * @param unitId
+	 * @param graphicsConfig
+	 * @param paletteType
+	 * @param touchpadInput
 	 */
+	UnitViewer(ShpFile shpFile, String unitId, GraphicsConfiguration graphicsConfig, PaletteTypes paletteType, boolean touchpadInput) {
+
+		super(
+			graphicsConfig: graphicsConfig
+		)
+		this.shpFile = shpFile
+		this.unitId = unitId
+		this.paletteType = paletteType
+		this.touchpadInput = touchpadInput
+	}
+
 	@Override
 	void run() {
 
@@ -98,51 +110,40 @@ class UnitViewer extends Viewer {
 			return new PalFile(inputStream).withAlphaMask()
 		}
 
-		def scene = new Scene()
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			graphicsEngine.camera.scale(2)
+		}
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGameClock(executorService) { gameClock ->
-				useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-					useInputEngine(executorService, graphicsEngine) { inputEngine ->
-						graphicsEngine.scene = scene
-						graphicsEngine.on(WindowCreatedEvent) { event ->
-							graphicsEngine.camera.scale(2)
-						}
+		// Add the unit to the engine
+		def unit = targetClass
+			.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
+			.newInstance(unitData, shpFile, palette, gameClock)
+			.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
+		scene << unit
 
-						// Add the unit to the engine
-						def unit = targetClass
-							.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
-							.newInstance(unitData, shpFile, palette, gameClock)
-							.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
-						scene << unit
+		logger.info('Displaying the image in another window.  Close the window to exit.')
 
-						logger.info('Displaying the image in another window.  Close the window to exit.')
+		applyViewerInputs(inputEventStream, graphicsEngine, touchpadInput)
 
-						applyViewerInputs(inputEngine, graphicsEngine, touchpadInput)
-
-						// Custom inputs
-						graphicsEngine.on(KeyEvent) { event ->
-							if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-								switch (event.key) {
-									case GLFW_KEY_LEFT:
-										unit.rotateLeft()
-										break
-									case GLFW_KEY_RIGHT:
-										unit.rotateRight()
-										break
-									case GLFW_KEY_UP:
-										unit.previousAnimation()
-										break
-									case GLFW_KEY_DOWN:
-										unit.nextAnimation()
-										break
-									case GLFW_KEY_SPACE:
-										gameClock.togglePause()
-										break
-								}
-							}
-						}
-					}
+		// Custom inputs
+		graphicsEngine.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+				switch (event.key) {
+					case GLFW_KEY_LEFT:
+						unit.rotateLeft()
+						break
+					case GLFW_KEY_RIGHT:
+						unit.rotateRight()
+						break
+					case GLFW_KEY_UP:
+						unit.previousAnimation()
+						break
+					case GLFW_KEY_DOWN:
+						unit.nextAnimation()
+						break
+					case GLFW_KEY_SPACE:
+						gameClock.togglePause()
+						break
 				}
 			}
 		}

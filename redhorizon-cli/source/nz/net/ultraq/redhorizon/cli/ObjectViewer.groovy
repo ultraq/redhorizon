@@ -89,7 +89,7 @@ class ObjectViewer implements Callable<Integer> {
 					clearColour: Colour.GREY,
 					fullScreen: fullScreen
 				)
-				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType, touchpadInput).view()
+				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType, touchpadInput).start()
 				break
 			case IniFile:
 				def graphicsConfig = new GraphicsConfiguration(
