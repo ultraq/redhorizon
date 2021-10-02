@@ -73,7 +73,7 @@ class VideoPlayer extends Application {
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			def width = videoFile.width
 			def height = videoFile.height
-			def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
+			def scale = calculateScaleForFullScreen(width, height, event.renderSize)
 			def offset = new Vector2f(-width / 2, -height / 2)
 
 			video = new Video(videoFile, gameClock)

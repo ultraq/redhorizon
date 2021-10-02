@@ -31,5 +31,5 @@ import groovy.transform.TupleConstructor
 class WindowCreatedEvent extends Event {
 
 	final Dimension windowSize
-	final Dimension cameraSize
+	final Dimension renderSize
 }

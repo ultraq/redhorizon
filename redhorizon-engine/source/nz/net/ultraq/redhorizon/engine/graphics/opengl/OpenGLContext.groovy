@@ -54,6 +54,7 @@ class OpenGLContext extends Context implements EventTarget {
 	final long window
 	final Dimension windowSize
 	final Dimension framebufferSize
+	final Dimension renderSize
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -81,6 +82,7 @@ class OpenGLContext extends Context implements EventTarget {
 		windowSize = config.fullScreen ?
 			new Dimension(videoMode.width(), videoMode.height()) :
 			calculateWindowSize(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
+		renderSize = new Dimension(640, config.fixAspectRatio ? 480 : 400)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())

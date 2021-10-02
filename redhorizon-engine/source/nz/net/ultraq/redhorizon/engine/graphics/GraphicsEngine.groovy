@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.Matrix4f
 import org.joml.Rectanglef
@@ -120,34 +119,15 @@ class GraphicsEngine extends Engine implements InputSource {
 			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
-				camera = new Camera(context.windowSize)
-				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, camera.size))
+				camera = new Camera(context.renderSize)
+				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, context.renderSize))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
 					new ImGuiDebugOverlay(context.window, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera)
-
-						// Scene render pass
-						def graphicsElementStates = [:]
-						pipeline << new RenderPass(
-							operation: { List<GraphicsElement> visibleElements ->
-								visibleElements.each { element ->
-									if (!graphicsElementStates[element]) {
-										graphicsElementStates << [(element): STATE_NEW]
-									}
-									def elementState = graphicsElementStates[element]
-									if (elementState == STATE_NEW) {
-										element.init(renderer)
-										elementState = STATE_INITIALIZED
-										graphicsElementStates << [(element): elementState]
-									}
-									element.render(renderer)
-								}
-							}
-						)
+						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera, context.windowSize, context.renderSize)
 
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
@@ -196,9 +176,6 @@ class GraphicsEngine extends Engine implements InputSource {
 						// Shutdown
 						logger.debug('Shutting down graphics engine')
 						camera.delete(renderer)
-						graphicsElementStates.keySet().each { graphicsElement ->
-							graphicsElement.delete(renderer)
-						}
 						pipeline.close() // TODO: withCloseable
 					}
 				}

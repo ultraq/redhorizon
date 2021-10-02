@@ -127,7 +127,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
-		viewportSize = context.framebufferSize
+		viewportSize = context.renderSize
 		logger.debug('Establishing a viewport of size {}', viewportSize)
 		glViewport(0, 0, viewportSize.width, viewportSize.height)
 //		context.on(FramebufferSizeEvent) { event ->

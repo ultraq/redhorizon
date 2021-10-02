@@ -16,12 +16,16 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.opengl.GL11C.glViewport
 
 import groovy.transform.TupleConstructor
 
@@ -43,9 +47,12 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiDebugOverlay debugOverlay
 	final Scene scene
 	final Camera camera
+	final Dimension windowSize
+	final Dimension renderSize
 
 	private final List<RenderPass> renderPasses = []
 	private final List<Material> materialPasses = []
+	private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 	/**
 	 * Add a rendering pass to this pipeline.
@@ -57,20 +64,21 @@ class RenderPipeline implements AutoCloseable {
 		// For post-processing passes, create the material to pass to the
 		// post-processing pass that will contain the texture of the previous
 		// framebuffer
-		if (renderPasses) {
-			materialPasses << renderer.createMaterial(
-				mesh: renderPass.mesh,
-				texture: renderPass.framebuffer.texture,
-				shader: renderPass.effect,
-				transform: renderPass.transform
-			)
-		}
+		materialPasses << renderer.createMaterial(
+			mesh: renderPass.mesh,
+			texture: renderPass.framebuffer.texture,
+			shader: renderPass.effect,
+			transform: renderPass.transform
+		)
 		renderPasses << renderPass
 	}
 
 	@Override
 	void close() {
 
+		graphicsElementStates.keySet().each { graphicsElement ->
+			graphicsElement.delete(renderer)
+		}
 		renderPasses.each { renderPass ->
 			if (renderPass.framebuffer) {
 				renderer.deleteFramebuffer(renderPass.framebuffer)
@@ -99,6 +107,7 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		debugOverlay.startFrame()
 		renderer.clear()
+		glViewport(0, 0, renderSize.width, renderSize.height)
 		camera.render(renderer)
 
 		// Reduce the list of renderable items to those just visible in the scene
@@ -112,8 +121,26 @@ class RenderPipeline implements AutoCloseable {
 			}
 		}
 
-		// Perform configured rendering passes
-		def previousData = visibleElements
+		// Scene render pass
+		def nextRenderPass = renderPasses[0]
+		renderer.setRenderTarget(nextRenderPass?.framebuffer)
+		renderer.clear()
+		visibleElements.each { element ->
+			if (!graphicsElementStates[element]) {
+				graphicsElementStates << [(element): STATE_NEW]
+			}
+			def elementState = graphicsElementStates[element]
+			if (elementState == STATE_NEW) {
+				element.init(renderer)
+				elementState = STATE_INITIALIZED
+				graphicsElementStates << [(element): elementState]
+			}
+			element.render(renderer)
+		}
+
+		// Post-processing rendering passes
+		glViewport(0, 0, windowSize.width, windowSize.height)
+		def previousData = materialPasses[0]
 		for (def i = 0; i < renderPasses.size(); i++) {
 			def renderPass = renderPasses[i]
 			def nextPass = renderPasses[i + 1]
