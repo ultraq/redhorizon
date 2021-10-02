@@ -25,7 +25,6 @@ import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 import org.joml.FrustumIntersection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11C.glViewport
 
 /**
  * A render pipeline contains all of the configured rendering passes and
@@ -44,7 +43,6 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiDebugOverlay debugOverlay
 	final Scene scene
 	final Camera camera
-	final Dimension renderResolution
 	private Dimension targetResolution
 
 	private final List<RenderPass> renderPasses = []
@@ -67,7 +65,6 @@ class RenderPipeline implements AutoCloseable {
 		this.scene = scene
 		this.camera = camera
 
-		renderResolution = context.renderResolution
 		targetResolution = context.targetResolution
 		context.on(FramebufferSizeEvent) { event ->
 			targetResolution = new Dimension(event.width, event.height)
@@ -127,8 +124,6 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		debugOverlay.startFrame()
 		renderer.clear()
-		// TODO: Don't have a gl command here!
-		glViewport(0, 0, renderResolution.width, renderResolution.height)
 		camera.render(renderer)
 
 		// Reduce the list of renderable items to those just visible in the scene
@@ -160,7 +155,6 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Post-processing rendering passes
-		glViewport(0, 0, targetResolution.width, targetResolution.height)
 		def previousData = materialPasses[0]
 		for (def i = 0; i < renderPasses.size(); i++) {
 			def renderPass = renderPasses[i]

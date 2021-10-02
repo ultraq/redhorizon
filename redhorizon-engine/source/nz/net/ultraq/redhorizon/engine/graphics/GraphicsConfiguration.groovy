@@ -53,9 +53,9 @@ class GraphicsConfiguration {
 	final boolean fullScreen
 
 	/**
-	 * The rendering resolution to target, before post-processing effects.
+	 * The rendering resolution to use, before post-processing effects.
 	 */
-	final Dimension renderResolution
+	final Dimension renderResolution = new Dimension(640, 400)
 
 	/**
 	 * Include a scanline effect in what's rendered to the screen.

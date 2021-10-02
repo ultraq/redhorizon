@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
@@ -74,7 +75,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
-	protected final Dimension renderResolution
+	private Dimension targetResolution
 	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
 	private final OpenGLTexture whiteTexture
@@ -125,10 +126,11 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-		// Set up the viewport
-		renderResolution = context.renderResolution
-		logger.debug('Establishing a viewport of size {}', renderResolution)
-		glViewport(0, 0, renderResolution.width, renderResolution.height)
+		// Track output resolution changes
+		targetResolution = context.targetResolution
+		context.on(FramebufferSizeEvent) { event ->
+			targetResolution = new Dimension(event.width, event.height)
+		}
 
 		// Create the shader programs used by this renderer
 		standardShader = createShader('Standard', new Uniform('models', { material ->
@@ -594,10 +596,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		if (framebuffer) {
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
 			glDisable(GL_DEPTH_TEST)
+			glViewport(0, 0, framebuffer.texture.width, framebuffer.texture.height)
 		}
 		else {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
 			glEnable(GL_DEPTH_TEST)
+			glViewport(0, 0, targetResolution.width, targetResolution.height)
 		}
 	}
 

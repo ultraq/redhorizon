@@ -80,7 +80,8 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		windowSize = config.fullScreen ?
 			new Dimension(videoMode.width(), videoMode.height()) :
 			calculateWindowSize(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
-		renderResolution = new Dimension(640, 400)
+		renderResolution = config.renderResolution
+		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
@@ -103,6 +104,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
 		targetResolution = new Dimension(widthPointer[0], heightPointer[0])
+		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
 
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
 			logger.debug('Framebuffer changed to {}x{}', width, height)
