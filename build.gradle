@@ -58,7 +58,7 @@ subprojects {
 
 	dependencies {
 		implementation(
-			'org.codehaus.groovy:groovy:3.0.8:indy',
+			'org.codehaus.groovy:groovy:3.0.9:indy',
 			'org.slf4j:slf4j-api:1.7.30'
 		)
 		implementation('nz.net.ultraq.extensions:groovy-extensions:1.1.0') {
