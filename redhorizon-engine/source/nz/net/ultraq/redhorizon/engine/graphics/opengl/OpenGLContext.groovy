@@ -16,8 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.Context
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -37,7 +38,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
  * 
  * @author Emanuel Rabina
  */
-class OpenGLContext extends Context implements EventTarget {
+class OpenGLContext extends GraphicsContext implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
 
@@ -50,11 +51,10 @@ class OpenGLContext extends Context implements EventTarget {
 	// The aspect ratio of a 320x200 image on modern displays
 	private static final float ASPECT_RATIO_MODERN = 16 / 10
 
-	private final GraphicsConfiguration config
 	final long window
 	final Dimension windowSize
-	final Dimension framebufferSize
-	final Dimension renderSize
+	final Dimension renderResolution
+	Dimension targetResolution
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -62,8 +62,6 @@ class OpenGLContext extends Context implements EventTarget {
 	 * @param config
 	 */
 	OpenGLContext(GraphicsConfiguration config) {
-
-		this.config = config
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -82,7 +80,7 @@ class OpenGLContext extends Context implements EventTarget {
 		windowSize = config.fullScreen ?
 			new Dimension(videoMode.width(), videoMode.height()) :
 			calculateWindowSize(config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN)
-		renderSize = new Dimension(640, config.fixAspectRatio ? 480 : 400)
+		renderResolution = new Dimension(640, 400)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
@@ -104,12 +102,13 @@ class OpenGLContext extends Context implements EventTarget {
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
+		targetResolution = new Dimension(widthPointer[0], heightPointer[0])
 
-//		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
-//			framebufferSize = new Dimension(width, height)
-//			trigger(new FramebufferSizeEvent(width, height))
-//		}
+		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
+			logger.debug('Framebuffer changed to {}x{}', width, height)
+			targetResolution = new Dimension(width, height)
+			trigger(new FramebufferSizeEvent(width, height))
+		}
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
@@ -203,21 +202,13 @@ class OpenGLContext extends Context implements EventTarget {
 		glfwSwapBuffers(window)
 	}
 
-	/**
-	 * Return whether or not the underlying window has signalled to be closed.
-	 * 
-	 * @return
-	 */
+	@Override
 	boolean windowShouldClose() {
 
 		return glfwWindowShouldClose(window)
 	}
 
-	/**
-	 * Manually set whether or not the underlying window should close.
-	 * 
-	 * @param close
-	 */
+	@Override
 	void windowShouldClose(boolean close) {
 
 		glfwSetWindowShouldClose(window, close)

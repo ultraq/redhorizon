@@ -74,8 +74,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
-	protected final Dimension viewportSize
-	protected final Dimension windowSize
+	protected final Dimension renderResolution
 	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
 	private final OpenGLTexture whiteTexture
@@ -127,14 +126,9 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Set up the viewport
-		viewportSize = context.renderSize
-		logger.debug('Establishing a viewport of size {}', viewportSize)
-		glViewport(0, 0, viewportSize.width, viewportSize.height)
-//		context.on(FramebufferSizeEvent) { event ->
-//			logger.debug('Updating viewport to size {}x{}', event.width, event.height)
-//			glViewport(0, 0, event.width, event.height)
-//		}
-		windowSize = context.windowSize
+		renderResolution = context.renderResolution
+		logger.debug('Establishing a viewport of size {}', renderResolution)
+		glViewport(0, 0, renderResolution.width, renderResolution.height)
 
 		// Create the shader programs used by this renderer
 		standardShader = createShader('Standard', new Uniform('models', { material ->
@@ -238,8 +232,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		def frameBufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
 
-		def width = viewportSize.width
-		def height = viewportSize.height
+		def width = renderResolution.width
+		def height = renderResolution.height
 
 		// Colour texture attachment
 		def colourTextureId = glGenTextures()

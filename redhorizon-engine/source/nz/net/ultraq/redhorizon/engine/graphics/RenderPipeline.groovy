@@ -27,8 +27,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.glViewport
 
-import groovy.transform.TupleConstructor
-
 /**
  * A render pipeline contains all of the configured rendering passes and
  * executes them so that objects are drawn to a screen.  These passes can be
@@ -38,7 +36,6 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class RenderPipeline implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
@@ -47,12 +44,35 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiDebugOverlay debugOverlay
 	final Scene scene
 	final Camera camera
-	final Dimension windowSize
-	final Dimension renderSize
+	final Dimension renderResolution
+	private Dimension targetResolution
 
 	private final List<RenderPass> renderPasses = []
 	private final List<Material> materialPasses = []
 	private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
+
+	/**
+	 * Constructor, configure the rendering pipeline.
+	 * 
+	 * @param context
+	 * @param renderer
+	 * @param debugOverlay
+	 * @param scene
+	 * @param camera
+	 */
+	RenderPipeline(GraphicsContext context, GraphicsRenderer renderer, ImGuiDebugOverlay debugOverlay, Scene scene, Camera camera) {
+
+		this.renderer = renderer
+		this.debugOverlay = debugOverlay
+		this.scene = scene
+		this.camera = camera
+
+		renderResolution = context.renderResolution
+		targetResolution = context.targetResolution
+		context.on(FramebufferSizeEvent) { event ->
+			targetResolution = new Dimension(event.width, event.height)
+		}
+	}
 
 	/**
 	 * Add a rendering pass to this pipeline.
@@ -107,7 +127,7 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		debugOverlay.startFrame()
 		renderer.clear()
-		glViewport(0, 0, renderSize.width, renderSize.height)
+		glViewport(0, 0, renderResolution.width, renderResolution.height)
 		camera.render(renderer)
 
 		// Reduce the list of renderable items to those just visible in the scene
@@ -139,7 +159,7 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Post-processing rendering passes
-		glViewport(0, 0, windowSize.width, windowSize.height)
+		glViewport(0, 0, targetResolution.width, targetResolution.height)
 		def previousData = materialPasses[0]
 		for (def i = 0; i < renderPasses.size(); i++) {
 			def renderPass = renderPasses[i]

@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,7 +47,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	private final Scene scene
 	private final Closure needsMainThreadCallback
 
-	private OpenGLContext openGlContext
+	private GraphicsContext graphicsContext
 	private Camera camera
 	private boolean started
 
@@ -98,7 +97,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	 */
 	boolean isStopped() {
 
-		return !running || openGlContext.windowShouldClose()
+		return !running || graphicsContext.windowShouldClose()
 	}
 
 	/**
@@ -112,23 +111,22 @@ class GraphicsEngine extends Engine implements InputSource {
 		logger.debug('Starting graphics engine')
 
 		// Initialization
-		openGlContext = waitForMainThread { ->
+		graphicsContext = waitForMainThread { ->
 			return new OpenGLContext(config)
 		}
-		openGlContext.withCloseable { context ->
+		graphicsContext.withCloseable { context ->
 			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
-				camera = new Camera(context.renderSize)
-				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, context.renderSize))
+				camera = new Camera(context.renderResolution)
+				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
 				new OpenGLRenderer(context, config).withCloseable { renderer ->
 					new ImGuiDebugOverlay(context.window, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera,
-							context.framebufferSize, context.renderSize)
+						def pipeline = new RenderPipeline(context, renderer, debugOverlay, scene, camera)
 
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
@@ -137,7 +135,7 @@ class GraphicsEngine extends Engine implements InputSource {
 							return new float[] { material.texture.width, material.texture.height }
 						})
 						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
-							return context.framebufferSize as float[]
+							return context.targetResolution as float[]
 						})
 
 						// Scanline post-processing steps
@@ -157,7 +155,7 @@ class GraphicsEngine extends Engine implements InputSource {
 							framebuffer: renderer.createFramebuffer(true),
 							mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 							effect: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
-							transform:  new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1),
+//							transform:  new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1),
 							operation: { Material material ->
 								renderer.drawMaterial(material)
 							}
@@ -187,14 +185,14 @@ class GraphicsEngine extends Engine implements InputSource {
 	@Override
 	protected boolean shouldRun() {
 
-		return !openGlContext.windowShouldClose() && super.shouldRun()
+		return !graphicsContext.windowShouldClose() && super.shouldRun()
 	}
 
 	@Override
 	void stop() {
 
 		if (running) {
-			openGlContext.windowShouldClose(true)
+			graphicsContext.windowShouldClose(true)
 		}
 		super.stop()
 	}
