@@ -108,8 +108,7 @@ class MediaPlayer implements Callable<Integer> {
 
 			switch (mediaFile) {
 			case VideoFile:
-				def videoPlayer = new VideoPlayer(mediaFile, audioConfig, graphicsConfig)
-				videoPlayer.play()
+				new VideoPlayer(mediaFile, audioConfig, graphicsConfig).start()
 				break
 			case AnimationFile:
 				new AnimationPlayer(mediaFile, graphicsConfig).start()

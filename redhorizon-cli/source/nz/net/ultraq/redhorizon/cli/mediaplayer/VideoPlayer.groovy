@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.Video
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -34,22 +33,32 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
-
 /**
  * A basic video player, used primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class VideoPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayer)
 
 	final VideoFile videoFile
-	final AudioConfiguration audioConfig
-	final GraphicsConfiguration graphicsConfig
+
+	/**
+	 * Constructor, set the video to be played.
+	 * 
+	 * @param videoFile
+	 * @param audioConfig
+	 * @param graphicsConfig
+	 */
+	VideoPlayer(VideoFile videoFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
+
+		super(
+			audioConfig: audioConfig,
+			graphicsConfig: graphicsConfig
+		)
+		this.videoFile = videoFile
+	}
 
 	/**
 	 * Play the video file.
@@ -59,56 +68,43 @@ class VideoPlayer extends Application {
 
 		logger.info('File details: {}', videoFile)
 
-		def scene = new Scene()
+		// Add the video to the engines once we have the window dimensions
+		Video video
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			def width = videoFile.width
+			def height = videoFile.height
+			def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
+			def offset = new Vector2f(-width / 2, -height / 2)
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGameClock(executorService) { gameClock ->
-				useAudioEngine(executorService, audioConfig) { audioEngine ->
-					audioEngine.scene = scene
-					useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-						graphicsEngine.scene = scene
+			video = new Video(videoFile, gameClock)
+			video.scaleXY(scale)
+			video.translate(offset)
 
-						// Add the video to the engines once we have the window dimensions
-						Video video
-						graphicsEngine.on(WindowCreatedEvent) { event ->
-							def width = videoFile.width
-							def height = videoFile.height
-							def scale = calculateScaleForFullScreen(width, height, event.cameraSize)
-							def offset = new Vector2f(-width / 2, -height / 2)
+			video.on(StopEvent) { stopEvent ->
+				logger.debug('Video stopped')
+				audioEngine.stop()
+				graphicsEngine.stop()
+			}
+			scene << video
+		}
 
-							video = new Video(videoFile, gameClock)
-							video.scaleXY(scale)
-							video.translate(offset)
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			video.play()
+			logger.debug('Video started')
+		}
 
-							video.on(StopEvent) { stopEvent ->
-								logger.debug('Video stopped')
-								audioEngine.stop()
-								graphicsEngine.stop()
-							}
-							scene << video
-						}
+		logger.info('Waiting for video to finish.  Close the window to exit.')
 
-						graphicsEngine.on(EngineLoopStartEvent) { event ->
-							video.play()
-							logger.debug('Video started')
-						}
-
-						logger.info('Waiting for video to finish.  Close the window to exit.')
-
-						// Key event handler
-						graphicsEngine.on(KeyEvent) { event ->
-							if (event.action == GLFW_PRESS) {
-								switch (event.key) {
-								case GLFW_KEY_SPACE:
-									gameClock.togglePause()
-									break
-								case GLFW_KEY_ESCAPE:
-									video.stop()
-									break
-								}
-							}
-						}
-					}
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				switch (event.key) {
+				case GLFW_KEY_SPACE:
+					gameClock.togglePause()
+					break
+				case GLFW_KEY_ESCAPE:
+					video.stop()
+					break
 				}
 			}
 		}
