@@ -127,7 +127,8 @@ class GraphicsEngine extends Engine implements InputSource {
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera, context.windowSize, context.renderSize)
+						def pipeline = new RenderPipeline(renderer, debugOverlay, scene, camera,
+							context.framebufferSize, context.renderSize)
 
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
