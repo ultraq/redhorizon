@@ -72,11 +72,8 @@ class MediaPlayer implements Callable<Integer> {
 	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays')
 	boolean fixAspectRatio
 
-	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
-	boolean fullScreen
-
-	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
-	boolean scanlines
+	@Mixin
+	GraphicsOptions graphicsOptions
 
 	@Option(names = ['--volume'], defaultValue = '100', description = 'The volume level, as a number from 0-100')
 	int volume
@@ -99,8 +96,8 @@ class MediaPlayer implements Callable<Integer> {
 		fileOptions.useFile(logger) { mediaFile ->
 			def graphicsConfig = new GraphicsConfiguration(
 				fixAspectRatio: fixAspectRatio,
-				fullScreen: fullScreen,
-				scanlines: scanlines
+				fullScreen: graphicsOptions.fullScreen,
+				scanlines: graphicsOptions.scanlines
 			)
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100

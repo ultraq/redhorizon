@@ -61,8 +61,8 @@ class ObjectViewer implements Callable<Integer> {
 	@Mixin
 	FileOptions fileOptions
 
-	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
-	boolean fullScreen
+	@Mixin
+	GraphicsOptions graphicsOptions
 
 	@Mixin
 	PaletteOptions paletteOptions
@@ -87,7 +87,8 @@ class ObjectViewer implements Callable<Integer> {
 				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
 				def graphicsConfig = new GraphicsConfiguration(
 					clearColour: Colour.GREY,
-					fullScreen: fullScreen
+					fullScreen: graphicsOptions.fullScreen,
+					scanlines: graphicsOptions.scanlines
 				)
 				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType, touchpadInput).start()
 				break
