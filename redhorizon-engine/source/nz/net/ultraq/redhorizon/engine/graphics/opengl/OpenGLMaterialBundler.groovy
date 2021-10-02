@@ -41,7 +41,7 @@ import groovy.transform.TupleConstructor
 class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
 	EventTarget {
 
-	@Delegate(excludes = ['createSpriteMesh'])
+	@Delegate
 	final OpenGLRenderer renderer
 
 	private final List<OpenGLMaterial> materials = []
@@ -144,7 +144,7 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,

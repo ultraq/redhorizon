@@ -233,6 +233,48 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
+	OpenGLFramebuffer createFramebuffer(boolean filter) {
+
+		def frameBufferId = glGenFramebuffers()
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
+
+		def width = viewportSize.width
+		def height = viewportSize.height
+
+		// Colour texture attachment
+		def colourTextureId = glGenTextures()
+		glBindTexture(GL_TEXTURE_2D, colourTextureId)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
+		glBindTexture(GL_TEXTURE_2D, 0)
+
+		def colourTexture = new OpenGLTexture(
+			textureId: colourTextureId,
+			width: width,
+			height: height
+		)
+		trigger(new TextureCreatedEvent(colourTexture))
+
+		// Depth buffer attachment
+		def depthBuffer = glGenRenderbuffers()
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
+		glBindRenderbuffer(GL_RENDERBUFFER, 0)
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+
+		def framebuffer = new OpenGLFramebuffer(
+			framebufferId: frameBufferId,
+			texture: colourTexture
+		)
+		trigger(new FramebufferCreatedEvent(framebuffer))
+		return framebuffer
+	}
+
+	@Override
 	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINE_LOOP, colour, vertices))
@@ -338,48 +380,6 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLFramebuffer createFramebuffer(boolean filter) {
-
-		def frameBufferId = glGenFramebuffers()
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
-
-		def width = viewportSize.width
-		def height = viewportSize.height
-
-		// Colour texture attachment
-		def colourTextureId = glGenTextures()
-		glBindTexture(GL_TEXTURE_2D, colourTextureId)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
-		glBindTexture(GL_TEXTURE_2D, 0)
-
-		def colourTexture = new OpenGLTexture(
-			textureId: colourTextureId,
-			width: width,
-			height: height
-		)
-		trigger(new TextureCreatedEvent(colourTexture))
-
-		// Depth buffer attachment
-		def depthBuffer = glGenRenderbuffers()
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
-		glBindRenderbuffer(GL_RENDERBUFFER, 0)
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0)
-
-		def framebuffer = new OpenGLFramebuffer(
-			framebufferId: frameBufferId,
-			texture: colourTexture
-		)
-		trigger(new FramebufferCreatedEvent(framebuffer))
-		return framebuffer
-	}
-
-	@Override
 	OpenGLShader createShader(String name, Uniform ...uniforms) {
 
 		/* 
@@ -439,7 +439,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,

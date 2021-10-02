@@ -38,11 +38,11 @@ import static org.lwjgl.system.MemoryStack.stackPush
  * @author Emanuel Rabina
  */
 class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
-	BatchRenderer, EventTarget {
+	BatchRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
-	@Delegate(excludes = ['createSpriteMesh'])
+	@Delegate
 	private final OpenGLRenderer renderer
 
 	private final int maxQuads
@@ -114,7 +114,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLM
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,

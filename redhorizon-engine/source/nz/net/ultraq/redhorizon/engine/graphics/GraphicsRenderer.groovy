@@ -118,7 +118,10 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param surface
 	 * @return
 	 */
-	TMesh createSpriteMesh(Rectanglef surface)
+	default TMesh createSpriteMesh(Rectanglef surface) {
+
+		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
+	}
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.
