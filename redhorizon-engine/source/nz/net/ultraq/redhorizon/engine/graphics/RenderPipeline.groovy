@@ -118,6 +118,7 @@ class RenderPipeline implements AutoCloseable {
 			def renderPass = renderPasses[i]
 			def nextPass = renderPasses[i + 1]
 			renderer.setRenderTarget(nextPass?.framebuffer)
+			renderer.clear()
 			renderPass.operation(previousData)
 			previousData = materialPasses[i]
 		}
