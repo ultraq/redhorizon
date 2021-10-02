@@ -227,13 +227,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLFramebuffer createFramebuffer(boolean filter) {
+	OpenGLFramebuffer createFramebuffer(Dimension resolution, boolean filter) {
 
 		def frameBufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
 
-		def width = renderResolution.width
-		def height = renderResolution.height
+		def width = resolution.width
+		def height = resolution.height
 
 		// Colour texture attachment
 		def colourTextureId = glGenTextures()

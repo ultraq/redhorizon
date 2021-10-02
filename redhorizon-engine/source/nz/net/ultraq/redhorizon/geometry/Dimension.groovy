@@ -18,14 +18,14 @@ package nz.net.ultraq.redhorizon.geometry
 
 import org.joml.Rectanglef
 
-import groovy.transform.TupleConstructor
+import groovy.transform.Immutable
 
 /**
  * A width/height value.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
+@Immutable
 class Dimension {
 
 	final int width
@@ -47,6 +47,18 @@ class Dimension {
 			return new float[] { width, height }
 		}
 		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
+	}
+
+	/**
+	 * Return a new {@code Dimension} whose width/height values are multiplied by
+	 * the given value.
+	 * 
+	 * @param right
+	 * @return
+	 */
+	Dimension multiply(float right) {
+
+		return new Dimension(width * right as int, height * right as int)
 	}
 
 	/**

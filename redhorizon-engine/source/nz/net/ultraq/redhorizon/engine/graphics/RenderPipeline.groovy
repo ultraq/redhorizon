@@ -127,6 +127,7 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		debugOverlay.startFrame()
 		renderer.clear()
+		// TODO: Don't have a gl command here!
 		glViewport(0, 0, renderResolution.width, renderResolution.height)
 		camera.render(renderer)
 
@@ -167,7 +168,7 @@ class RenderPipeline implements AutoCloseable {
 			renderer.setRenderTarget(nextPass?.framebuffer)
 			renderer.clear()
 			renderPass.operation(previousData)
-			previousData = materialPasses[i]
+			previousData = materialPasses[i + 1]
 		}
 
 		// Draw overlays

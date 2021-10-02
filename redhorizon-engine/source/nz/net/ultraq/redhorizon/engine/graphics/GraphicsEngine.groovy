@@ -131,35 +131,44 @@ class GraphicsEngine extends Engine implements InputSource {
 						def modelUniform = new Uniform('model', { material ->
 							return material.transform.get(new float[16])
 						})
-						def textureSourceSizeUniform = new Uniform<float>('textureSourceSize', { material ->
-							return new float[] { material.texture.width, material.texture.height }
-						})
 						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
 							return context.targetResolution as float[]
 						})
 
+						// TODO: Each rendering pass needs to specify its own target framebuffer 
+						// Sharp bilinear upscale post-processing pass
+						pipeline << new RenderPass(
+							framebuffer: renderer.createFramebuffer(context.renderResolution, true),
+							mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+							effect: renderer.createShader('SharpBilinear',
+								modelUniform,
+								new Uniform<float>('textureSourceSize', { material ->
+									return context.renderResolution as float[]
+								}),
+								textureTargetSizeUniform
+							),
+							operation: { Material material ->
+								renderer.drawMaterial(material)
+							}
+						)
+
 						// Scanline post-processing steps
 						if (config.scanlines) {
 							pipeline << new RenderPass(
-								framebuffer: renderer.createFramebuffer(false),
+								framebuffer: renderer.createFramebuffer(context.targetResolution, false),
 								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-								effect: renderer.createShader('Scanlines', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
+								effect: renderer.createShader('Scanlines',
+									modelUniform,
+									new Uniform<float>('textureSourceSize', { material ->
+										return context.renderResolution * 0.5 as float[]
+									}),
+									textureTargetSizeUniform
+								),
 								operation: { Material material ->
 									renderer.drawMaterial(material)
 								}
 							)
 						}
-
-						// Sharp bilinear upscale post-processing pass
-						pipeline << new RenderPass(
-							framebuffer: renderer.createFramebuffer(true),
-							mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-							effect: renderer.createShader('SharpBilinear', modelUniform, textureSourceSizeUniform, textureTargetSizeUniform),
-//							transform:  new Matrix4f().scale(1, (config.fixAspectRatio ? 1.2 : 1) as float, 1),
-							operation: { Material material ->
-								renderer.drawMaterial(material)
-							}
-						)
 
 						// Rendering loop
 						logger.debug('Graphics engine in render loop...')

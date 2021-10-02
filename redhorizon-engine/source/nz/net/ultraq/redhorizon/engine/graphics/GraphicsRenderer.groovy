@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import org.joml.Matrix4f
 import org.joml.Rectanglef
 import org.joml.Vector2f
@@ -96,10 +98,11 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	/**
 	 * Create a framebuffer that can be rendered to.
 	 * 
+	 * @param resolution
 	 * @param filter
 	 * @return
 	 */
-	TFramebuffer createFramebuffer(boolean filter)
+	TFramebuffer createFramebuffer(Dimension resolution, boolean filter)
 
 	/**
 	 * Create a new shader program for the shader source files with the given

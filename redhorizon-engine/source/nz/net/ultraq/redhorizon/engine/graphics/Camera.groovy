@@ -41,7 +41,6 @@ class Camera implements GraphicsElement {
 	 * Constructor, build a camera to work with the given dimensions.
 	 * 
 	 * @param windowSize
-	 * @param fixAspectRatio
 	 */
 	Camera(Dimension windowSize) {
 
