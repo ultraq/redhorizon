@@ -94,7 +94,8 @@ class ObjectViewer implements Callable<Integer> {
 				break
 			case IniFile:
 				def graphicsConfig = new GraphicsConfiguration(
-					fullScreen: graphicsOptions.fullScreen
+					fullScreen: graphicsOptions.fullScreen,
+					scanlines: graphicsOptions.scanlines
 				)
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(fileOptions.file.parentFile,
