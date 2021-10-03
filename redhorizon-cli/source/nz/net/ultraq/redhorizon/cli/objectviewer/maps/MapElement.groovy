@@ -64,11 +64,11 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			renderer.createSpriteMesh(
+			mesh: renderer.createSpriteMesh(
 				new Rectanglef(0, 0, tileFile.width, tileFile.height),
 				tileSet.getCoordinates(tileFile, frame)),
-			tileSet.texture,
-			transform
+			texture: tileSet.texture,
+			transform: transform
 		)
 	}
 

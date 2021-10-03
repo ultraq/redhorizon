@@ -94,13 +94,13 @@ class ObjectViewer implements Callable<Integer> {
 				break
 			case IniFile:
 				def graphicsConfig = new GraphicsConfiguration(
-					fullScreen: fullScreen
+					fullScreen: graphicsOptions.fullScreen
 				)
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(fileOptions.file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, graphicsConfig, touchpadInput).view()
+					new MapViewer(resourceManager, objectFile, graphicsConfig, touchpadInput).start()
 				}
 				break
 			default:

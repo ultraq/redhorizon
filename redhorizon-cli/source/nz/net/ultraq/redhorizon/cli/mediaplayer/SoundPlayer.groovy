@@ -65,8 +65,8 @@ class SoundPlayer extends Application {
 		scene << sound
 
 		sound.on(StopEvent) { event ->
-			logger.debug('Sound stopped')
 			stop()
+			logger.debug('Sound stopped')
 		}
 
 		audioEngine.on(EngineLoopStartEvent) { event ->

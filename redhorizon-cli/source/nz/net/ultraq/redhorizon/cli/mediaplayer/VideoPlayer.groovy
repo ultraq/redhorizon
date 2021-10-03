@@ -81,9 +81,8 @@ class VideoPlayer extends Application {
 			video.translate(offset)
 
 			video.on(StopEvent) { stopEvent ->
+				stop()
 				logger.debug('Video stopped')
-				audioEngine.stop()
-				graphicsEngine.stop()
 			}
 			scene << video
 		}

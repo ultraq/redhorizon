@@ -58,6 +58,7 @@ abstract class Viewer extends Application {
 			}
 		}
 
+		// Add options so it's not hard-coded to my weird inverted setup 😅
 		if (touchpadInput) {
 			def ctrl = false
 			inputEventStream.on(KeyEvent) { event ->

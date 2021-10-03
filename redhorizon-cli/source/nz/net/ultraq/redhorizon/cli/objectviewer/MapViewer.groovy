@@ -23,22 +23,17 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.resources.ResourceManager
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
-
 /**
  * A map viewer for testing map building.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class MapViewer extends Viewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapViewer)
@@ -46,64 +41,67 @@ class MapViewer extends Viewer {
 
 	final ResourceManager resourceManager
 	final IniFile mapFile
-	final GraphicsConfiguration graphicsConfig
 	final boolean touchpadInput
 
 	/**
-	 * Display the map.
+	 * Constructor, set the map and resource manager to use for displaying a map.
+	 * 
+	 * @param resourceManager
+	 * @param mapFile
+	 * @param graphicsConfig
+	 * @param touchpadInput
 	 */
+	MapViewer(ResourceManager resourceManager, IniFile mapFile, GraphicsConfiguration graphicsConfig, boolean touchpadInput) {
+
+		super(
+			graphicsConfig: graphicsConfig
+		)
+		this.resourceManager = resourceManager
+		this.mapFile = mapFile
+		this.touchpadInput = touchpadInput
+	}
+
 	@Override
 	void run() {
 
 		logger.info('File details: {}', mapFile)
 
-		def scene = new Scene()
+		// Add the map
+		MapRA map
+		Vector3f mapInitialPosition
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			map = new MapRA(resourceManager, mapFile)
+			mapInitialPosition = new Vector3f(map.initialPosition, 0)
+			logger.info('Map details: {}', map)
+			scene << map
+			graphicsEngine.camera.center(mapInitialPosition)
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-				useInputEngine(executorService, graphicsEngine) { inputEngine ->
-					graphicsEngine.scene = scene
+			scene << new MapLines(map)
+		}
 
-					// Add the map
-					MapRA map
-					Vector3f mapInitialPosition
-					graphicsEngine.on(WindowCreatedEvent) { event ->
-						map = new MapRA(resourceManager, mapFile)
-						mapInitialPosition = new Vector3f(map.initialPosition, 0)
-						logger.info('Map details: {}', map)
-						scene << map
+		logger.info('Displaying the image in another window.  Close the window to exit.')
+
+		applyViewerInputs(inputEventStream, graphicsEngine, touchpadInput)
+
+		// Custom inputs
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+				switch (event.key) {
+					case GLFW_KEY_UP:
+						graphicsEngine.camera.translate(0, -TICK)
+						break
+					case GLFW_KEY_DOWN:
+						graphicsEngine.camera.translate(0, TICK)
+						break
+					case GLFW_KEY_LEFT:
+						graphicsEngine.camera.translate(TICK, 0)
+						break
+					case GLFW_KEY_RIGHT:
+						graphicsEngine.camera.translate(-TICK, 0)
+						break
+					case GLFW_KEY_SPACE:
 						graphicsEngine.camera.center(mapInitialPosition)
-
-						scene << new MapLines(map)
-					}
-
-					logger.info('Displaying the image in another window.  Close the window to exit.')
-
-					applyViewerInputs(inputEngine, graphicsEngine, touchpadInput)
-
-					// Custom inputs
-					inputEngine.on(KeyEvent) { event ->
-						if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-							switch (event.key) {
-								// Add options so it's not hard-coded to my weird inverted setup 😅
-								case GLFW_KEY_UP:
-									graphicsEngine.camera.translate(0, -TICK)
-									break
-								case GLFW_KEY_DOWN:
-									graphicsEngine.camera.translate(0, TICK)
-									break
-								case GLFW_KEY_LEFT:
-									graphicsEngine.camera.translate(TICK, 0)
-									break
-								case GLFW_KEY_RIGHT:
-									graphicsEngine.camera.translate(-TICK, 0)
-									break
-								case GLFW_KEY_SPACE:
-									graphicsEngine.camera.center(mapInitialPosition)
-									break
-							}
-						}
-					}
+						break
 				}
 			}
 		}
