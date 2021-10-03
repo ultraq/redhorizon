@@ -18,71 +18,67 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
+import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
 import nz.net.ultraq.redhorizon.media.StopEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
 
 /**
  * A basic audio player, used primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class SoundPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundPlayer)
 
 	final SoundFile soundFile
-	final AudioConfiguration audioConfig
 
 	/**
-	 * Play the configured audio file.
+	 * Constructor, set the sound file to play.
+	 * 
+	 * @param soundFile
+	 * @param audioConfig
 	 */
+	SoundPlayer(SoundFile soundFile, AudioConfiguration audioConfig) {
+
+		super(
+			audioConfig: audioConfig
+		)
+		this.soundFile = soundFile
+	}
+
 	@Override
 	void run() {
 
 		logger.info('File details: {}', soundFile)
 
-		def scene = new Scene()
+		// Try determine the appropriate media for the sound file
+		def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
+			new SoundTrack(soundFile, gameClock) :
+			new SoundEffect(soundFile)
+		scene << sound
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGameClock(executorService) { gameClock ->
-				useAudioEngine(scene, executorService, audioConfig) { audioEngine ->
+		sound.on(StopEvent) { event ->
+			logger.debug('Sound stopped')
+			stop()
+		}
 
-					// Try determine the appropriate media for the sound file
-					def sound = soundFile instanceof AudFile && soundFile.uncompressedSize > 1048576 ? // 1MB
-						new SoundTrack(soundFile, gameClock, executorService) :
-						new SoundEffect(soundFile)
-					scene << sound
+		audioEngine.on(EngineLoopStartEvent) { event ->
+			sound.play()
+			logger.debug('Sound started')
+		}
 
-					sound.on(StopEvent) { event ->
-						logger.debug('Sound stopped')
-						audioEngine.stop()
-					}
-					sound.play()
+		logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
 
-					logger.info('Waiting for sound to stop playing.  Press [Enter] to exit.')
-
-					// TODO: I think this is what's holding up execution - see if I can't kill it on program end
-					executorService.submit({ ->
-						Thread.currentThread().name = 'Input receiver'
-						def reader = new InputStreamReader(System.in)
-						if (reader.read()) {
-							logger.debug('Keyboard input received')
-							audioEngine.stop()
-						}
-					})
-				}
-			}
+		def reader = new InputStreamReader(System.in)
+		if (reader.read()) {
+			sound.stop()
 		}
 	}
 }

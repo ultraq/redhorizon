@@ -31,5 +31,5 @@ class AudioConfiguration {
 	/**
 	 * The master gain level to set in the audio engine.
 	 */
-	final float volume = 100
+	final float volume = 50
 }

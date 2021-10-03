@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.Vector3f
@@ -37,33 +36,39 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
-import groovy.transform.TupleConstructor
-import java.util.concurrent.Executors
-
 /**
  * A basic image viewer for viewing a file that contains multiple images, used
  * primarily for testing purposes.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class ImagesViewer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 
 	final ImagesFile imagesFile
-	final GraphicsConfiguration graphicsConfig
 	final PaletteTypes paletteType
 
 	/**
-	 * View the configured file.
+	 * Constructor, set the multi-image file to display.
+	 * 
+	 * @param imagesFile
+	 * @param graphicsConfig
+	 * @param paletteType
 	 */
+	ImagesViewer(ImagesFile imagesFile, GraphicsConfiguration graphicsConfig, PaletteTypes paletteType) {
+
+		super(
+			graphicsConfig: graphicsConfig
+		)
+		this.imagesFile = imagesFile
+		this.paletteType = paletteType
+	}
+
 	@Override
 	void run() {
 
 		logger.info('File details: {}', imagesFile)
-
-		def scene = new Scene()
 
 		Palette palette
 		if (imagesFile.format == FORMAT_INDEXED) {
@@ -72,39 +77,32 @@ class ImagesViewer extends Application {
 			}
 		}
 
-		Executors.newCachedThreadPool().executeAndShutdown { executorService ->
-			useGraphicsEngine(executorService, graphicsConfig) { graphicsEngine ->
-				graphicsEngine.scene = scene
+		def center = new Vector3f()
+		def tick = imagesFile.width
 
-				def center = new Vector3f()
-				def tick = imagesFile.width
+		// Represent each frame of the image in a long strip
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			scene << new ImageStrip(imagesFile, palette)
+		}
 
-				// Represent each frame of the image in a long strip
-				graphicsEngine.on(WindowCreatedEvent) { event ->
-					scene << new ImageStrip(imagesFile, palette)
-				}
+		logger.info('Displaying the image in another window.  Close the window to exit.')
 
-				logger.info('Displaying the image in another window.  Close the window to exit.')
-
-				// Key event handler
-				graphicsEngine.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-						switch (event.key) {
-						// Add options so it's not hard-coded to my weird inverted setup 😅
-						case GLFW_KEY_LEFT:
-							graphicsEngine.camera.translate(tick, 0)
-							break
-						case GLFW_KEY_RIGHT:
-							graphicsEngine.camera.translate(-tick, 0)
-							break
-						case GLFW_KEY_SPACE:
-							graphicsEngine.camera.center(center)
-							break
-						case GLFW_KEY_ESCAPE:
-							graphicsEngine.stop()
-							break
-						}
-					}
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+				switch (event.key) {
+					case GLFW_KEY_LEFT:
+						graphicsEngine.camera.translate(tick, 0)
+						break
+					case GLFW_KEY_RIGHT:
+						graphicsEngine.camera.translate(-tick, 0)
+						break
+					case GLFW_KEY_SPACE:
+						graphicsEngine.camera.center(center)
+						break
+					case GLFW_KEY_ESCAPE:
+						graphicsEngine.stop()
+						break
 				}
 			}
 		}

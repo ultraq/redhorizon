@@ -75,7 +75,7 @@ class MediaPlayer implements Callable<Integer> {
 	@Mixin
 	GraphicsOptions graphicsOptions
 
-	@Option(names = ['--volume'], defaultValue = '100', description = 'The volume level, as a number from 0-100')
+	@Option(names = ['--volume'], defaultValue = '50', description = 'The volume level, as a number from 0-100')
 	int volume
 
 	@Mixin
@@ -111,15 +111,13 @@ class MediaPlayer implements Callable<Integer> {
 				new AnimationPlayer(mediaFile, graphicsConfig).start()
 				break
 			case SoundFile:
-				def soundPlayer = new SoundPlayer(mediaFile, audioConfig)
-				soundPlayer.play()
+				new SoundPlayer(mediaFile, audioConfig).start()
 				break
 			case ImageFile:
 				new ImageViewer(mediaFile, graphicsConfig).start()
 				break
 			case ImagesFile:
-				def imagesViewer = new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType)
-				imagesViewer.view()
+				new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType).start()
 				break
 			default:
 				logger.error('No media player for the associated file class of {}', mediaFile)
