@@ -47,22 +47,16 @@ class VideoPlayer extends Application {
 	/**
 	 * Constructor, set the video to be played.
 	 * 
-	 * @param videoFile
 	 * @param audioConfig
 	 * @param graphicsConfig
+	 * @param videoFile
 	 */
-	VideoPlayer(VideoFile videoFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
+	VideoPlayer(AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, VideoFile videoFile) {
 
-		super(
-			audioConfig: audioConfig,
-			graphicsConfig: graphicsConfig
-		)
+		super(audioConfig, graphicsConfig)
 		this.videoFile = videoFile
 	}
 
-	/**
-	 * Play the video file.
-	 */
 	@Override
 	void run() {
 

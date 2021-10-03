@@ -52,15 +52,13 @@ class ImagesViewer extends Application {
 	/**
 	 * Constructor, set the multi-image file to display.
 	 * 
-	 * @param imagesFile
 	 * @param graphicsConfig
+	 * @param imagesFile
 	 * @param paletteType
 	 */
-	ImagesViewer(ImagesFile imagesFile, GraphicsConfiguration graphicsConfig, PaletteTypes paletteType) {
+	ImagesViewer(GraphicsConfiguration graphicsConfig, ImagesFile imagesFile, PaletteTypes paletteType) {
 
-		super(
-			graphicsConfig: graphicsConfig
-		)
+		super(null, graphicsConfig)
 		this.imagesFile = imagesFile
 		this.paletteType = paletteType
 	}

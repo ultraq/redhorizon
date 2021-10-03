@@ -105,19 +105,19 @@ class MediaPlayer implements Callable<Integer> {
 
 			switch (mediaFile) {
 			case VideoFile:
-				new VideoPlayer(mediaFile, audioConfig, graphicsConfig).start()
+				new VideoPlayer(audioConfig, graphicsConfig, mediaFile).start()
 				break
 			case AnimationFile:
-				new AnimationPlayer(mediaFile, graphicsConfig).start()
+				new AnimationPlayer(graphicsConfig, mediaFile).start()
 				break
 			case SoundFile:
-				new SoundPlayer(mediaFile, audioConfig).start()
+				new SoundPlayer(audioConfig, mediaFile).start()
 				break
 			case ImageFile:
-				new ImageViewer(mediaFile, graphicsConfig).start()
+				new ImageViewer(graphicsConfig, mediaFile).start()
 				break
 			case ImagesFile:
-				new ImagesViewer(mediaFile, graphicsConfig, paletteOptions.paletteType).start()
+				new ImagesViewer(graphicsConfig, mediaFile, paletteOptions.paletteType).start()
 				break
 			default:
 				logger.error('No media player for the associated file class of {}', mediaFile)

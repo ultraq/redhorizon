@@ -42,14 +42,12 @@ class ImageViewer extends Application {
 	/**
 	 * Constructor, set the image to be displayed.
 	 * 
-	 * @param imageFile
 	 * @param graphicsConfig
+	 * @param imageFile
 	 */
-	ImageViewer(ImageFile imageFile, GraphicsConfiguration graphicsConfig) {
+	ImageViewer(GraphicsConfiguration graphicsConfig, ImageFile imageFile) {
 
-		super(
-			graphicsConfig: graphicsConfig
-		)
+		super(null, graphicsConfig)
 		this.imageFile = imageFile
 	}
 

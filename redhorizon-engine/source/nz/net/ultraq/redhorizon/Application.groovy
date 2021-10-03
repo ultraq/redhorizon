@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.ExecutorService
@@ -41,7 +41,7 @@ import java.util.concurrent.FutureTask
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(includes = ['audioConfig', 'graphicsConfig'])
+@TupleConstructor
 abstract class Application implements Runnable {
 
 	final AudioConfiguration audioConfig

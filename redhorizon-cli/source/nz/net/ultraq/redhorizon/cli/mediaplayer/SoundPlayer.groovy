@@ -42,14 +42,12 @@ class SoundPlayer extends Application {
 	/**
 	 * Constructor, set the sound file to play.
 	 * 
-	 * @param soundFile
 	 * @param audioConfig
+	 * @param soundFile
 	 */
-	SoundPlayer(SoundFile soundFile, AudioConfiguration audioConfig) {
+	SoundPlayer(AudioConfiguration audioConfig, SoundFile soundFile) {
 
-		super(
-			audioConfig: audioConfig
-		)
+		super(audioConfig)
 		this.soundFile = soundFile
 	}
 

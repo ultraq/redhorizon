@@ -54,17 +54,15 @@ class UnitViewer extends Viewer {
 	/**
 	 * Constructor, set the unit to be displayed.
 	 * 
+	 * @param graphicsConfig
 	 * @param shpFile
 	 * @param unitId
-	 * @param graphicsConfig
 	 * @param paletteType
 	 * @param touchpadInput
 	 */
-	UnitViewer(ShpFile shpFile, String unitId, GraphicsConfiguration graphicsConfig, PaletteTypes paletteType, boolean touchpadInput) {
+	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, PaletteTypes paletteType, boolean touchpadInput) {
 
-		super(
-			graphicsConfig: graphicsConfig
-		)
+		super(null, graphicsConfig)
 		this.shpFile = shpFile
 		this.unitId = unitId
 		this.paletteType = paletteType

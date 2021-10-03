@@ -46,16 +46,14 @@ class MapViewer extends Viewer {
 	/**
 	 * Constructor, set the map and resource manager to use for displaying a map.
 	 * 
+	 * @param graphicsConfig
 	 * @param resourceManager
 	 * @param mapFile
-	 * @param graphicsConfig
 	 * @param touchpadInput
 	 */
-	MapViewer(ResourceManager resourceManager, IniFile mapFile, GraphicsConfiguration graphicsConfig, boolean touchpadInput) {
+	MapViewer(GraphicsConfiguration graphicsConfig, ResourceManager resourceManager, IniFile mapFile, boolean touchpadInput) {
 
-		super(
-			graphicsConfig: graphicsConfig
-		)
+		super(null, graphicsConfig)
 		this.resourceManager = resourceManager
 		this.mapFile = mapFile
 		this.touchpadInput = touchpadInput

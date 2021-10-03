@@ -90,7 +90,7 @@ class ObjectViewer implements Callable<Integer> {
 					fullScreen: graphicsOptions.fullScreen,
 					scanlines: graphicsOptions.scanlines
 				)
-				new UnitViewer(objectFile, objectId, graphicsConfig, paletteOptions.paletteType, touchpadInput).start()
+				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.paletteType, touchpadInput).start()
 				break
 			case IniFile:
 				def graphicsConfig = new GraphicsConfiguration(
@@ -101,7 +101,7 @@ class ObjectViewer implements Callable<Integer> {
 				new ResourceManager(fileOptions.file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
 					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(resourceManager, objectFile, graphicsConfig, touchpadInput).start()
+					new MapViewer(graphicsConfig, resourceManager, objectFile, touchpadInput).start()
 				}
 				break
 			default:

@@ -47,14 +47,12 @@ class AnimationPlayer extends Application {
 	/**
 	 * Constructor, sets the animation file to be played.
 	 * 
-	 * @param animationFile
 	 * @param graphicsConfig
+	 * @param animationFile
 	 */
-	AnimationPlayer(AnimationFile animationFile, GraphicsConfiguration graphicsConfig) {
+	AnimationPlayer(GraphicsConfiguration graphicsConfig, AnimationFile animationFile) {
 
-		super(
-			graphicsConfig: graphicsConfig
-		)
+		super(null, graphicsConfig)
 		this.animationFile = animationFile
 	}
 
