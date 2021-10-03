@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
+import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -46,19 +47,20 @@ class RenderPipeline implements AutoCloseable {
 	private Dimension targetResolution
 
 	private final List<RenderPass> renderPasses = []
-	private final List<Material> materialPasses = []
 	private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 	/**
 	 * Constructor, configure the rendering pipeline.
 	 * 
+	 * @param config
 	 * @param context
 	 * @param renderer
 	 * @param debugOverlay
 	 * @param scene
 	 * @param camera
 	 */
-	RenderPipeline(GraphicsContext context, GraphicsRenderer renderer, ImGuiDebugOverlay debugOverlay, Scene scene, Camera camera) {
+	RenderPipeline(GraphicsConfiguration config, GraphicsContext context, GraphicsRenderer renderer,
+		ImGuiDebugOverlay debugOverlay, Scene scene, Camera camera) {
 
 		this.renderer = renderer
 		this.debugOverlay = debugOverlay
@@ -69,25 +71,85 @@ class RenderPipeline implements AutoCloseable {
 		context.on(FramebufferSizeEvent) { event ->
 			targetResolution = new Dimension(event.width, event.height)
 		}
-	}
 
-	/**
-	 * Add a rendering pass to this pipeline.
-	 * 
-	 * @param renderPass
-	 */
-	void addRenderPass(RenderPass renderPass) {
-
-		// For post-processing passes, create the material to pass to the
-		// post-processing pass that will contain the texture of the previous
-		// framebuffer
-		materialPasses << renderer.createMaterial(
-			mesh: renderPass.mesh,
-			texture: renderPass.framebuffer.texture,
-			shader: renderPass.effect,
-			transform: renderPass.transform
+		// Scene render pass
+		def sceneFramebuffer = renderer.createFramebuffer(context.renderResolution, true)
+		renderPasses << new RenderPass(
+			framebuffer: sceneFramebuffer,
+			operation: { Material material, List<GraphicsElement> visibleElements ->
+				visibleElements.each { element ->
+					if (!graphicsElementStates[element]) {
+						graphicsElementStates << [(element): STATE_NEW]
+					}
+					def elementState = graphicsElementStates[element]
+					if (elementState == STATE_NEW) {
+						element.init(renderer)
+						elementState = STATE_INITIALIZED
+						graphicsElementStates << [(element): elementState]
+					}
+					element.render(renderer)
+				}
+			}
 		)
-		renderPasses << renderPass
+
+		def modelUniform = new Uniform('model', { material ->
+			return material.transform.get(new float[16])
+		})
+		def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
+			return context.targetResolution as float[]
+		})
+
+		// Sharp bilinear upscale post-processing pass
+		renderPasses << new RenderPass(
+			framebuffer: renderer.createFramebuffer(context.targetResolution, false),
+			material: renderer.createMaterial(
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				shader: renderer.createShader('SharpBilinear',
+					modelUniform,
+					new Uniform<float>('textureSourceSize', { material ->
+						return context.renderResolution as float[]
+					}),
+					textureTargetSizeUniform
+				)
+			),
+			operation: { Material material, Framebuffer framebuffer ->
+				material.texture = framebuffer.texture
+				renderer.drawMaterial(material)
+			}
+		)
+
+		// Scanline post-processing pass
+		if (config.scanlines) {
+			renderPasses << new RenderPass(
+				framebuffer: renderer.createFramebuffer(context.targetResolution, false),
+				material: renderer.createMaterial(
+					mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+					shader: renderer.createShader('Scanlines',
+						modelUniform,
+						new Uniform<float>('textureSourceSize', { material ->
+							return context.renderResolution * 0.5 as float[]
+						}),
+						textureTargetSizeUniform
+					)
+				),
+				operation: { Material material, Framebuffer framebuffer ->
+					material.texture = framebuffer.texture
+					renderer.drawMaterial(material)
+				}
+			)
+		}
+
+		// Final pass to emit the result to the screen
+		renderPasses << new RenderPass(
+			material: renderer.createMaterial(
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				shader: renderer.createShader('Screen', modelUniform)
+			),
+			operation: { Material material, Framebuffer framebuffer ->
+				material.texture = framebuffer.texture
+				renderer.drawMaterial(material)
+			}
+		)
 	}
 
 	@Override
@@ -100,20 +162,10 @@ class RenderPipeline implements AutoCloseable {
 			if (renderPass.framebuffer) {
 				renderer.deleteFramebuffer(renderPass.framebuffer)
 			}
+			if (renderPass.material) {
+				renderer.deleteMaterial(renderPass.material)
+			}
 		}
-		materialPasses.each { materialPass ->
-			renderer.deleteMaterial(materialPass)
-		}
-	}
-
-	/**
-	 * An alias for {@link #addRenderPass(RenderPass)}
-	 * 
-	 * @param renderPass
-	 */
-	void leftShift(RenderPass renderPass) {
-
-		addRenderPass(renderPass)
 	}
 
 	/**
@@ -137,32 +189,12 @@ class RenderPipeline implements AutoCloseable {
 			}
 		}
 
-		// Scene render pass
-		def nextRenderPass = renderPasses[0]
-		renderer.setRenderTarget(nextRenderPass?.framebuffer)
-		renderer.clear()
-		visibleElements.each { element ->
-			if (!graphicsElementStates[element]) {
-				graphicsElementStates << [(element): STATE_NEW]
-			}
-			def elementState = graphicsElementStates[element]
-			if (elementState == STATE_NEW) {
-				element.init(renderer)
-				elementState = STATE_INITIALIZED
-				graphicsElementStates << [(element): elementState]
-			}
-			element.render(renderer)
-		}
-
-		// Post-processing rendering passes
-		def previousData = materialPasses[0]
-		for (def i = 0; i < renderPasses.size(); i++) {
-			def renderPass = renderPasses[i]
-			def nextPass = renderPasses[i + 1]
-			renderer.setRenderTarget(nextPass?.framebuffer)
+		// Perform all rendering passes
+		renderPasses.inject(visibleElements) { lastResult, renderPass ->
+			renderer.setRenderTarget(renderPass.framebuffer)
 			renderer.clear()
-			renderPass.operation(previousData)
-			previousData = materialPasses[i + 1]
+			renderPass.operation(renderPass.material, lastResult)
+			return renderPass.framebuffer
 		}
 
 		// Draw overlays

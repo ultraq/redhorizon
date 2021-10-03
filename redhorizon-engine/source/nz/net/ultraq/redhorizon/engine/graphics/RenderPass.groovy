@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Matrix4f
-
 import groovy.transform.MapConstructor
 
 /**
@@ -30,8 +28,6 @@ import groovy.transform.MapConstructor
 class RenderPass {
 
 	final Framebuffer framebuffer
-	final Mesh mesh
-	final Shader effect
-	final Matrix4f transform
+	final Material material
 	final Closure operation
 }

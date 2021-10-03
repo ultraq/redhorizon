@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -126,65 +125,24 @@ class GraphicsEngine extends Engine implements InputSource {
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						def pipeline = new RenderPipeline(context, renderer, debugOverlay, scene, camera)
+						new RenderPipeline(config, context, renderer, debugOverlay, scene, camera).withCloseable { pipeline ->
 
-						def modelUniform = new Uniform('model', { material ->
-							return material.transform.get(new float[16])
-						})
-						def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
-							return context.targetResolution as float[]
-						})
-
-						// TODO: Each rendering pass needs to specify its own target framebuffer 
-						// Sharp bilinear upscale post-processing pass
-						pipeline << new RenderPass(
-							framebuffer: renderer.createFramebuffer(context.renderResolution, true),
-							mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-							effect: renderer.createShader('SharpBilinear',
-								modelUniform,
-								new Uniform<float>('textureSourceSize', { material ->
-									return context.renderResolution as float[]
-								}),
-								textureTargetSizeUniform
-							),
-							operation: { Material material ->
-								renderer.drawMaterial(material)
-							}
-						)
-
-						// Scanline post-processing steps
-						if (config.scanlines) {
-							pipeline << new RenderPass(
-								framebuffer: renderer.createFramebuffer(context.targetResolution, false),
-								mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-								effect: renderer.createShader('Scanlines',
-									modelUniform,
-									new Uniform<float>('textureSourceSize', { material ->
-										return context.renderResolution * 0.5 as float[]
-									}),
-									textureTargetSizeUniform
-								),
-								operation: { Material material ->
-									renderer.drawMaterial(material)
+							// Rendering loop
+							logger.debug('Graphics engine in render loop...')
+							started = true
+							engineLoop { ->
+								pipeline.render()
+								context.swapBuffers()
+								waitForMainThread { ->
+									context.pollEvents()
 								}
-							)
-						}
-
-						// Rendering loop
-						logger.debug('Graphics engine in render loop...')
-						started = true
-						engineLoop { ->
-							pipeline.render()
-							context.swapBuffers()
-							waitForMainThread { ->
-								context.pollEvents()
 							}
-						}
 
-						// Shutdown
-						logger.debug('Shutting down graphics engine')
-						camera.delete(renderer)
-						pipeline.close() // TODO: withCloseable
+							// Shutdown
+							logger.debug('Shutting down graphics engine')
+							camera.delete(renderer)
+							pipeline.close()
+						}
 					}
 				}
 			}
