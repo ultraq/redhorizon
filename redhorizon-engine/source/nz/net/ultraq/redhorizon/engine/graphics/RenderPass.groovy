@@ -16,18 +16,35 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
-
 /**
- * A single rendering pass performed by the renderer, includes the target
- * framebuffer to render to and if any special shader is used for the pass.
+ * A single rendering pass with a specific framebuffer as the rendering target.
  * 
+ * @param <T>
+ *   The expected type of input data from a prior rendering pass.
  * @author Emanuel Rabina
  */
-@MapConstructor
-class RenderPass {
+interface RenderPass<T> {
 
-	final Framebuffer framebuffer
-	final Material material
-	final Closure operation
+	/**
+	 * Perform any cleanup for this render pass.
+	 * 
+	 * @param renderer
+	 */
+	void delete(GraphicsRenderer renderer)
+
+	/**
+	 * Return the target framebuffer for this rendering pass.
+	 * 
+	 * @return
+	 */
+	Framebuffer getFramebuffer()
+
+	/**
+	 * Perform the render pass, using the expected result of any previous render
+	 * pass.
+	 * 
+	 * @param renderer
+	 * @param previous
+	 */
+	void render(GraphicsRenderer renderer, T previous)
 }

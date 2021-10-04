@@ -27,6 +27,8 @@ import org.joml.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
+
 /**
  * A render pipeline contains all of the configured rendering passes and
  * executes them so that objects are drawn to a screen.  These passes can be
@@ -47,7 +49,6 @@ class RenderPipeline implements AutoCloseable {
 	private Dimension targetResolution
 
 	private final List<RenderPass> renderPasses = []
-	private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -73,24 +74,7 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Scene render pass
-		def sceneFramebuffer = renderer.createFramebuffer(context.renderResolution, true)
-		renderPasses << new RenderPass(
-			framebuffer: sceneFramebuffer,
-			operation: { Material material, List<GraphicsElement> visibleElements ->
-				visibleElements.each { element ->
-					if (!graphicsElementStates[element]) {
-						graphicsElementStates << [(element): STATE_NEW]
-					}
-					def elementState = graphicsElementStates[element]
-					if (elementState == STATE_NEW) {
-						element.init(renderer)
-						elementState = STATE_INITIALIZED
-						graphicsElementStates << [(element): elementState]
-					}
-					element.render(renderer)
-				}
-			}
-		)
+		renderPasses << new SceneRenderPass(renderer.createFramebuffer(context.renderResolution, true))
 
 		def modelUniform = new Uniform('model', { material ->
 			return material.transform.get(new float[16])
@@ -100,9 +84,9 @@ class RenderPipeline implements AutoCloseable {
 		})
 
 		// Sharp bilinear upscale post-processing pass
-		renderPasses << new RenderPass(
-			framebuffer: renderer.createFramebuffer(context.targetResolution, false),
-			material: renderer.createMaterial(
+		renderPasses << new PostProcessingRenderPass(
+			renderer.createFramebuffer(context.targetResolution, false),
+			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('SharpBilinear',
 					modelUniform,
@@ -111,18 +95,14 @@ class RenderPipeline implements AutoCloseable {
 					}),
 					textureTargetSizeUniform
 				)
-			),
-			operation: { Material material, Framebuffer framebuffer ->
-				material.texture = framebuffer.texture
-				renderer.drawMaterial(material)
-			}
+			)
 		)
 
 		// Scanline post-processing pass
 		if (config.scanlines) {
-			renderPasses << new RenderPass(
-				framebuffer: renderer.createFramebuffer(context.targetResolution, false),
-				material: renderer.createMaterial(
+			renderPasses << new PostProcessingRenderPass(
+				renderer.createFramebuffer(context.targetResolution, false),
+				renderer.createMaterial(
 					mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 					shader: renderer.createShader('Scanlines',
 						modelUniform,
@@ -131,41 +111,23 @@ class RenderPipeline implements AutoCloseable {
 						}),
 						textureTargetSizeUniform
 					)
-				),
-				operation: { Material material, Framebuffer framebuffer ->
-					material.texture = framebuffer.texture
-					renderer.drawMaterial(material)
-				}
+				)
 			)
 		}
 
 		// Final pass to emit the result to the screen
-		renderPasses << new RenderPass(
-			material: renderer.createMaterial(
+		renderPasses << new ScreenRenderPass(
+			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Screen', modelUniform)
-			),
-			operation: { Material material, Framebuffer framebuffer ->
-				material.texture = framebuffer.texture
-				renderer.drawMaterial(material)
-			}
+			)
 		)
 	}
 
 	@Override
 	void close() {
 
-		graphicsElementStates.keySet().each { graphicsElement ->
-			graphicsElement.delete(renderer)
-		}
-		renderPasses.each { renderPass ->
-			if (renderPass.framebuffer) {
-				renderer.deleteFramebuffer(renderPass.framebuffer)
-			}
-			if (renderPass.material) {
-				renderer.deleteMaterial(renderPass.material)
-			}
-		}
+		renderPasses*.delete(renderer)
 	}
 
 	/**
@@ -193,12 +155,97 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses.inject(visibleElements) { lastResult, renderPass ->
 			renderer.setRenderTarget(renderPass.framebuffer)
 			renderer.clear()
-			renderPass.operation(renderPass.material, lastResult)
+			renderPass.render(renderer, lastResult)
 			return renderPass.framebuffer
 		}
 
 		// Draw overlays
 		debugOverlay.drawDebugOverlay()
 		debugOverlay.endFrame()
+	}
+
+	/**
+	 * The render pass for drawing the scene to a framebuffer at the rendering
+	 * resolution.
+	 */
+	@TupleConstructor(defaults = false)
+	class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
+
+		final Framebuffer framebuffer
+		private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			graphicsElementStates.keySet().each { graphicsElement ->
+				graphicsElement.delete(renderer)
+			}
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer, List<GraphicsElement> visibleElements) {
+
+			visibleElements.each { element ->
+				if (!graphicsElementStates[element]) {
+					graphicsElementStates << [(element): STATE_NEW]
+				}
+				def elementState = graphicsElementStates[element]
+				if (elementState == STATE_NEW) {
+					element.init(renderer)
+					elementState = STATE_INITIALIZED
+					graphicsElementStates << [(element): elementState]
+				}
+				element.render(renderer)
+			}
+		}
+	}
+
+	/**
+	 * A post-processing render pass for taking a previous framebuffer and
+	 * applying some effect to it for the next post-processing pass.
+	 */
+	@TupleConstructor(defaults = false)
+	class PostProcessingRenderPass implements RenderPass<Framebuffer> {
+
+		final Framebuffer framebuffer
+		final Material material
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			renderer.deleteFramebuffer(framebuffer)
+			renderer.deleteMaterial(material)
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer, Framebuffer previous) {
+
+			material.texture = previous.texture
+			renderer.drawMaterial(material)
+		}
+	}
+
+	/**
+	 * The final render pass for taking the result of the post-processing chain
+	 * and drawing it to the screen.
+	 */
+	@TupleConstructor(includes = ['material'])
+	class ScreenRenderPass implements RenderPass<Framebuffer> {
+
+		final Framebuffer framebuffer = null
+		final Material material
+
+		@Override
+		void delete(GraphicsRenderer renderer) {
+
+			renderer.deleteMaterial(material)
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer, Framebuffer previous) {
+
+			material.texture = previous.texture
+			renderer.drawMaterial(material)
+		}
 	}
 }
