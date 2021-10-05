@@ -41,7 +41,7 @@ class InputEventStream implements EventTarget {
 
 		inputSource.on(InputEvent) { event ->
 			if (event instanceof KeyEvent && event.action == GLFW_PRESS) {
-				logger.info("Key pressed: {}", event)
+				logger.info("Key: {}, mods: {}", event.key, event.mods)
 			}
 			trigger(event)
 		}
