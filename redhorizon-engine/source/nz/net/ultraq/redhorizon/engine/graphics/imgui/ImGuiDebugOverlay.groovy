@@ -66,8 +66,8 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	// Options overlay
 	private ImBoolean shaderScanlines
 	private boolean lastShaderScanlinesState
-	private ImBoolean shaderFilteredUpscale
-	private boolean lastShaderFilteredUpscaleState
+	private ImBoolean shaderSharpUpscaling
+	private boolean lastShaderSharpUpscalingState
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
@@ -83,9 +83,8 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 		shaderScanlines = new ImBoolean(config.scanlines)
 		lastShaderScanlinesState = shaderScanlines.get()
-		// TODO: Derive from config?  Need a replacement shader if not enabled
-		shaderFilteredUpscale = new ImBoolean(true)
-		lastShaderFilteredUpscaleState = shaderFilteredUpscale.get()
+		shaderSharpUpscaling = new ImBoolean(true)
+		lastShaderSharpUpscalingState = shaderSharpUpscaling.get()
 
 		ImGui.createContext()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -144,8 +143,8 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	 */
 	private void drawDebugOverlay() {
 
-		ImGui.setNextWindowPos(10, 10)
 		ImGui.setNextWindowBgAlpha(0.4f)
+		ImGui.setNextWindowPos(10, 10)
 
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			NoNav | NoDecoration | AlwaysAutoResize | NoSavedSettings | NoFocusOnAppearing | NoMove)
@@ -179,7 +178,7 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.setNextWindowPos(context.windowSize.width - 210, 10)
-		ImGui.setNextWindowSize(200, 200)
+		ImGui.setNextWindowSize(200, 100)
 
 		ImGui.begin('Options', new ImBoolean(true),
 			NoNav | NoDecoration | NoResize | NoSavedSettings | NoFocusOnAppearing | NoMove)
@@ -187,7 +186,7 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		ImGui.text('Post-processing effects')
 		ImGui.separator()
 		ImGui.checkbox('Scanlines', shaderScanlines)
-//		ImGui.checkbox('Filtered upscaling', shaderFilteredUpscale)
+		ImGui.checkbox('Sharp upscaling', shaderSharpUpscaling)
 
 		ImGui.end()
 	}
@@ -225,10 +224,10 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 			lastShaderScanlinesState = currentShaderScanlinesState
 		}
 
-		def currentShaderFilteredUpscaleState = shaderFilteredUpscale.get()
-		if (currentShaderFilteredUpscaleState != lastShaderFilteredUpscaleState) {
-			triggerOnSeparateThread(new ChangeEvent('SharpBilinear', currentShaderFilteredUpscaleState))
-			lastShaderFilteredUpscaleState = currentShaderFilteredUpscaleState
+		def currentShaderSharpUpscalingState = shaderSharpUpscaling.get()
+		if (currentShaderSharpUpscalingState != lastShaderSharpUpscalingState) {
+			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', currentShaderSharpUpscalingState))
+			lastShaderSharpUpscalingState = currentShaderSharpUpscalingState
 		}
 	}
 

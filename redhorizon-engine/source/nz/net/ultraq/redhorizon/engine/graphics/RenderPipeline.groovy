@@ -78,16 +78,10 @@ class RenderPipeline implements AutoCloseable {
 
 		// Connect to the debug overlay to configure the pipeline at runtime
 		debugOverlay.on(ChangeEvent) { event ->
-			switch (event.name) {
-				case 'Scanlines': {
-					def scanlineShaderRenderPass = renderPasses.find { renderPass ->
-						return renderPass instanceof PostProcessingRenderPass &&
-							renderPass.material.shader.name == event.name
-					}
-					scanlineShaderRenderPass.enabled = event.value
-					break
-				}
+			def postProcessingRenderPass = renderPasses.find { renderPass ->
+				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
 			}
+			postProcessingRenderPass.enabled = event.value
 		}
 	}
 
@@ -115,12 +109,12 @@ class RenderPipeline implements AutoCloseable {
 			return context.targetResolution as float[]
 		})
 
-		// Sharp bilinear upscale post-processing pass
+		// Sharp upscaling post-processing pass
 		renderPasses << new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('SharpBilinear',
+				shader: renderer.createShader('SharpUpscaling',
 					modelUniform,
 					new Uniform<float>('textureSourceSize', { material ->
 						return context.renderResolution as float[]
