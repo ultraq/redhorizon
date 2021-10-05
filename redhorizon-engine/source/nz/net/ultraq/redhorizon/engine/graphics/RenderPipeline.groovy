@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -73,6 +74,37 @@ class RenderPipeline implements AutoCloseable {
 			targetResolution = new Dimension(event.width, event.height)
 		}
 
+		configurePipeline(config, context)
+
+		// Connect to the debug overlay to configure the pipeline at runtime
+		debugOverlay.on(ChangeEvent) { event ->
+			switch (event.name) {
+				case 'Scanlines': {
+					def scanlineShaderRenderPass = renderPasses.find { renderPass ->
+						return renderPass instanceof PostProcessingRenderPass &&
+							renderPass.material.shader.name == event.name
+					}
+					scanlineShaderRenderPass.enabled = event.value
+					break
+				}
+			}
+		}
+	}
+
+	@Override
+	void close() {
+
+		renderPasses*.delete(renderer)
+	}
+
+	/**
+	 * Build out the rendering pipeline.
+	 * 
+	 * @param config
+	 * @param context
+	 */
+	private void configurePipeline(GraphicsConfiguration config, GraphicsContext context) {
+
 		// Scene render pass
 		renderPasses << new SceneRenderPass(renderer.createFramebuffer(context.renderResolution, true))
 
@@ -95,25 +127,25 @@ class RenderPipeline implements AutoCloseable {
 					}),
 					textureTargetSizeUniform
 				)
-			)
+			),
+			true
 		)
 
 		// Scanline post-processing pass
-		if (config.scanlines) {
-			renderPasses << new PostProcessingRenderPass(
-				renderer.createFramebuffer(context.targetResolution, false),
-				renderer.createMaterial(
-					mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-					shader: renderer.createShader('Scanlines',
-						modelUniform,
-						new Uniform<float>('textureSourceSize', { material ->
-							return context.renderResolution * 0.5 as float[]
-						}),
-						textureTargetSizeUniform
-					)
+		renderPasses << new PostProcessingRenderPass(
+			renderer.createFramebuffer(context.targetResolution, false),
+			renderer.createMaterial(
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				shader: renderer.createShader('Scanlines',
+					modelUniform,
+					new Uniform<float>('textureSourceSize', { material ->
+						return context.renderResolution * 0.5 as float[]
+					}),
+					textureTargetSizeUniform
 				)
-			)
-		}
+			),
+			config.scanlines
+		)
 
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
@@ -122,12 +154,6 @@ class RenderPipeline implements AutoCloseable {
 				shader: renderer.createShader('Screen', modelUniform)
 			)
 		)
-	}
-
-	@Override
-	void close() {
-
-		renderPasses*.delete(renderer)
 	}
 
 	/**
@@ -153,14 +179,17 @@ class RenderPipeline implements AutoCloseable {
 
 		// Perform all rendering passes
 		renderPasses.inject(visibleElements) { lastResult, renderPass ->
-			renderer.setRenderTarget(renderPass.framebuffer)
-			renderer.clear()
-			renderPass.render(renderer, lastResult)
-			return renderPass.framebuffer
+			if (renderPass.enabled) {
+				renderer.setRenderTarget(renderPass.framebuffer)
+				renderer.clear()
+				renderPass.render(renderer, lastResult)
+				return renderPass.framebuffer
+			}
+			return lastResult
 		}
 
 		// Draw overlays
-		debugOverlay.drawDebugOverlay()
+		debugOverlay.render()
 		debugOverlay.endFrame()
 	}
 
@@ -168,10 +197,11 @@ class RenderPipeline implements AutoCloseable {
 	 * The render pass for drawing the scene to a framebuffer at the rendering
 	 * resolution.
 	 */
-	@TupleConstructor(defaults = false)
+	@TupleConstructor(defaults = false, includes = ['framebuffer'])
 	class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
 
 		final Framebuffer framebuffer
+		final boolean enabled = true
 		private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 		@Override
@@ -204,11 +234,12 @@ class RenderPipeline implements AutoCloseable {
 	 * A post-processing render pass for taking a previous framebuffer and
 	 * applying some effect to it for the next post-processing pass.
 	 */
-	@TupleConstructor(defaults = false)
+	@TupleConstructor
 	class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer
 		final Material material
+		boolean enabled
 
 		@Override
 		void delete(GraphicsRenderer renderer) {
@@ -234,6 +265,7 @@ class RenderPipeline implements AutoCloseable {
 
 		final Framebuffer framebuffer = null
 		final Material material
+		final boolean enabled = true
 
 		@Override
 		void delete(GraphicsRenderer renderer) {

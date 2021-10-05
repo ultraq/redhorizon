@@ -89,10 +89,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
 	 * 
-	 * @param context
 	 * @param config
+	 * @param context
 	 */
-	OpenGLRenderer(OpenGLContext context, GraphicsConfiguration config) {
+	OpenGLRenderer(GraphicsConfiguration config, OpenGLContext context) {
 
 		this.config = config
 

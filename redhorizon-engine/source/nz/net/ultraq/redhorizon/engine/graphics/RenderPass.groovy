@@ -40,6 +40,13 @@ interface RenderPass<T> {
 	Framebuffer getFramebuffer()
 
 	/**
+	 * Return whether or not this render pass should run.
+	 * 
+	 * @return
+	 */
+	boolean isEnabled()
+
+	/**
 	 * Perform the render pass, using the expected result of any previous render
 	 * pass.
 	 * 

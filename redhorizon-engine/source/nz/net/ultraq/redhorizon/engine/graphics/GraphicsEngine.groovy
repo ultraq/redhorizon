@@ -120,8 +120,8 @@ class GraphicsEngine extends Engine implements InputSource {
 				camera = new Camera(context.renderResolution)
 				triggerOnSeparateThread(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
-				new OpenGLRenderer(context, config).withCloseable { renderer ->
-					new ImGuiDebugOverlay(context.window, renderer).withCloseable { debugOverlay ->
+				new OpenGLRenderer(config, context).withCloseable { renderer ->
+					new ImGuiDebugOverlay(config, context, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 

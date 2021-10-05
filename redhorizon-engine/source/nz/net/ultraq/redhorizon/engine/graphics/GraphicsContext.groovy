@@ -42,6 +42,20 @@ abstract class GraphicsContext extends Context {
 	abstract Dimension getTargetResolution()
 
 	/**
+	 * Return the current window handle.
+	 * 
+	 * @return
+	 */
+	abstract long getWindow()
+
+	/**
+	 * Return the current window dimensions.
+	 * 
+	 * @return
+	 */
+	abstract Dimension getWindowSize()
+
+	/**
 	 * Return whether or not the underlying window has signalled to be closed.
 	 * 
 	 * @return
