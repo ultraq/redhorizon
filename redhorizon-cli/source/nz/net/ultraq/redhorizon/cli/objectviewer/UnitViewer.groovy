@@ -49,7 +49,6 @@ class UnitViewer extends Viewer {
 	final ShpFile shpFile
 	final String unitId
 	final PaletteTypes paletteType
-	final boolean touchpadInput
 
 	/**
 	 * Constructor, set the unit to be displayed.
@@ -62,16 +61,16 @@ class UnitViewer extends Viewer {
 	 */
 	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, PaletteTypes paletteType, boolean touchpadInput) {
 
-		super(null, graphicsConfig)
+		super(null, graphicsConfig, touchpadInput)
 		this.shpFile = shpFile
 		this.unitId = unitId
 		this.paletteType = paletteType
-		this.touchpadInput = touchpadInput
 	}
 
 	@Override
 	void run() {
 
+		super.run()
 		logger.info('File details: {}', shpFile)
 
 		def unitConfig
@@ -120,8 +119,6 @@ class UnitViewer extends Viewer {
 		scene << unit
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')
-
-		applyViewerInputs(inputEventStream, graphicsEngine, touchpadInput)
 
 		// Custom inputs
 		graphicsEngine.on(KeyEvent) { event ->

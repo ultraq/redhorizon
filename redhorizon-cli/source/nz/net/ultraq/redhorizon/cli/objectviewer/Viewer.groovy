@@ -17,9 +17,10 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
@@ -27,33 +28,45 @@ import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.InheritConstructors
-
 /**
  * Common viewer application code.
  * 
  * @author Emanuel Rabina
  */
-@InheritConstructors
 abstract class Viewer extends Application {
 
+	final boolean touchpadInput
+
 	/**
-	 * Listen on the input engine to apply the same controls in all viewer
-	 * applications.
+	 * Constructor, set viewer-specific configuration.
 	 * 
-	 * @param inputEventStream
-	 * @param graphicsEngine
+	 * @param audioConfig
+	 * @param graphicsConfig
 	 * @param touchpadInput
 	 */
-	protected static void applyViewerInputs(InputEventStream inputEventStream, GraphicsEngine graphicsEngine, boolean touchpadInput) {
+	protected Viewer(AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, boolean touchpadInput) {
+
+		super(audioConfig, graphicsConfig)
+		this.touchpadInput = touchpadInput
+	}
+
+	@Override
+	void run() {
+
+		def mouseMovementModifier = 1f
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			def renderResolution = graphicsEngine.graphicsContext.renderResolution
+			def targetResolution = graphicsEngine.graphicsContext.targetResolution
+			mouseMovementModifier = renderResolution.width / targetResolution.width
+		}
 
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
-				case GLFW_KEY_ESCAPE:
-					graphicsEngine.stop()
-					break
+					case GLFW_KEY_ESCAPE:
+						graphicsEngine.stop()
+						break
 				}
 			}
 		}
@@ -95,8 +108,8 @@ abstract class Viewer extends Application {
 			def dragging = false
 			inputEventStream.on(CursorPositionEvent) { event ->
 				if (dragging) {
-					def diffX = cursorPosition.x - event.xPos as float
-					def diffY = cursorPosition.y - event.yPos as float
+					def diffX = (cursorPosition.x - event.xPos) * mouseMovementModifier as float
+					def diffY = (cursorPosition.y - event.yPos) * mouseMovementModifier as float
 					graphicsEngine.camera.translate(-diffX, diffY)
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)

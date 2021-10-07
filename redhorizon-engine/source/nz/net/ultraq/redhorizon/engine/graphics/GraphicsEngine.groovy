@@ -80,6 +80,16 @@ class GraphicsEngine extends Engine implements InputSource {
 	}
 
 	/**
+	 * Return this engine's graphics context.
+	 * 
+	 * @return
+	 */
+	GraphicsContext getGraphicsContext() {
+
+		return graphicsContext
+	}
+
+	/**
 	 * Return whether or not the graphics engine has been started.
 	 * 
 	 * @return

@@ -41,7 +41,6 @@ class MapViewer extends Viewer {
 
 	final ResourceManager resourceManager
 	final IniFile mapFile
-	final boolean touchpadInput
 
 	/**
 	 * Constructor, set the map and resource manager to use for displaying a map.
@@ -53,15 +52,15 @@ class MapViewer extends Viewer {
 	 */
 	MapViewer(GraphicsConfiguration graphicsConfig, ResourceManager resourceManager, IniFile mapFile, boolean touchpadInput) {
 
-		super(null, graphicsConfig)
+		super(null, graphicsConfig, touchpadInput)
 		this.resourceManager = resourceManager
 		this.mapFile = mapFile
-		this.touchpadInput = touchpadInput
 	}
 
 	@Override
 	void run() {
 
+		super.run()
 		logger.info('File details: {}', mapFile)
 
 		// Add the map
@@ -78,8 +77,6 @@ class MapViewer extends Viewer {
 		}
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')
-
-		applyViewerInputs(inputEventStream, graphicsEngine, touchpadInput)
 
 		// Custom inputs
 		inputEventStream.on(KeyEvent) { event ->
