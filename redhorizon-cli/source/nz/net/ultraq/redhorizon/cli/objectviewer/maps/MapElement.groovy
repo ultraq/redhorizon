@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 /**
  * The graphical form of a map tile.

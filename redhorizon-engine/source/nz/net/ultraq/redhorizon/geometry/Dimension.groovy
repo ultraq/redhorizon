@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.geometry
 
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 import groovy.transform.Immutable
 

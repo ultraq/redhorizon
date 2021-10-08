@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 
 /**
  * Interface for an element that can be a part of a scene.

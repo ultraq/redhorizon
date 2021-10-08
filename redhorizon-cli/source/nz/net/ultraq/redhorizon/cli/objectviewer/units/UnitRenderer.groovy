@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 import java.nio.ByteBuffer
 

@@ -34,8 +34,8 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback

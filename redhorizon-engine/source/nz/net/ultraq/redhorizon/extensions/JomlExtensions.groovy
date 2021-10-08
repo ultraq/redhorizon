@@ -18,9 +18,9 @@ package nz.net.ultraq.redhorizon.extensions
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 
 /**
  * Extensions to JOMLs objects to work with Red Horizon.

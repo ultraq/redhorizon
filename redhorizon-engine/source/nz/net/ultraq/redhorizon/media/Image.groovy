@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 import java.nio.ByteBuffer
 

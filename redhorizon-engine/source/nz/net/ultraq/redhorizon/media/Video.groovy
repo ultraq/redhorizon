@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 import java.util.concurrent.Executors
 

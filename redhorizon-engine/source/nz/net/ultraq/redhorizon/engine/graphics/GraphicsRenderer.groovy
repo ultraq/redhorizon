@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams

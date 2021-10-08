@@ -21,7 +21,7 @@ plugins {
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
-	version = '0.33.1'
+	version = '0.34.0-SNAPSHOT'
 }
 
 // Root project configuration
@@ -59,7 +59,7 @@ subprojects {
 	dependencies {
 		implementation(
 			'org.codehaus.groovy:groovy:3.0.9:indy',
-			'org.slf4j:slf4j-api:1.7.30'
+			'org.slf4j:slf4j-api:1.7.32'
 		)
 		implementation('nz.net.ultraq.extensions:groovy-extensions:1.1.0') {
 			exclude module: 'groovy'

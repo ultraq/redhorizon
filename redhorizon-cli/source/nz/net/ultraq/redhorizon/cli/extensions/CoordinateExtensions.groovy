@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.extensions
 
-import org.joml.Rectanglef
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 
 /**
  * A collection of extension methods to JOML classes to help translating between

@@ -21,12 +21,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.events.EventTarget
-
-import org.joml.Rectanglef
-import static OpenGLRenderer.*
+import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL41C.*

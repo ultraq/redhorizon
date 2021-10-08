@@ -19,13 +19,12 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.events.EventTarget
+import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
 
 import org.joml.Matrix4f
-import org.joml.Rectanglef
-import org.joml.Vector3f
-import static OpenGLRenderer.*
-
 import org.joml.Vector2f
+import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 

@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
-import org.joml.Rectanglef
+import org.joml.primitives.Rectanglef
 
 import java.nio.ByteBuffer
 
