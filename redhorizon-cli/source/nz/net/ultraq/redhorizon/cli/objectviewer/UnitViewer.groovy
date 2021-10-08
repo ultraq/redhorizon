@@ -121,7 +121,7 @@ class UnitViewer extends Viewer {
 		logger.info('Displaying the image in another window.  Close the window to exit.')
 
 		// Custom inputs
-		graphicsEngine.on(KeyEvent) { event ->
+		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
 					case GLFW_KEY_LEFT:
