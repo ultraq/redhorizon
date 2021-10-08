@@ -32,12 +32,11 @@ class InputEventStream implements EventTarget {
 	private static final Logger logger = LoggerFactory.getLogger(InputEventStream)
 
 	/**
-	 * Constructor, set the source for input events that will end up on the input
-	 * queue and actioned at set intervals.
+	 * Add a source for input events that can be listened to using this object.
 	 * 
 	 * @param inputSource
 	 */
-	InputEventStream(InputSource inputSource) {
+	void addInputSource(InputSource inputSource) {
 
 		inputSource.on(InputEvent) { event ->
 			if (event instanceof KeyEvent && event.action == GLFW_PRESS) {

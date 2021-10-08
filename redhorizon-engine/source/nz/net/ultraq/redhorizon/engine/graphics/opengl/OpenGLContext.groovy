@@ -84,6 +84,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
@@ -99,6 +100,10 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
+		glfwSetWindowPos(window,
+			(videoMode.width() / 2) - (windowSize.width / 2) as int,
+			(videoMode.height() / 2) - (windowSize.height / 2) as int)
+		glfwShowWindow(window)
 
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
@@ -122,7 +127,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
-		glfwSetCursorPosCallback(window) { window, double xpos, double ypos ->
+		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos, ypos))
 		}
 

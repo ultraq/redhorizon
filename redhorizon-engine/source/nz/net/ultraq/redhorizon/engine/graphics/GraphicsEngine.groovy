@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
-import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -120,11 +119,10 @@ class GraphicsEngine extends Engine implements InputSource {
 		logger.debug('Starting graphics engine')
 
 		// Initialization
-		graphicsContext = waitForMainThread { ->
-			return new OpenGLContext(config)
-		}
+		graphicsContext = /*waitForMainThread { ->
+			return*/ new OpenGLContext(config)
+//		}
 		graphicsContext.withCloseable { context ->
-			context.relay(InputEvent, this)
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
 				camera = new Camera(context.renderResolution)
@@ -143,9 +141,9 @@ class GraphicsEngine extends Engine implements InputSource {
 							engineLoop { ->
 								pipeline.render()
 								context.swapBuffers()
-								waitForMainThread { ->
+//								waitForMainThread { ->
 									context.pollEvents()
-								}
+//								}
 							}
 
 							// Shutdown

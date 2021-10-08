@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -93,10 +94,13 @@ abstract class Application implements Runnable {
 			finishBarrier.countDown()
 			if (event.exception) {
 				exception = event.exception
-				executionBarrier.await()
 			}
+			executionBarrier.await()
 		}
-		inputEventStream = new InputEventStream(graphicsEngine)
+		inputEventStream = new InputEventStream()
+		graphicsEngine.on(WindowCreatedEvent) { event ->
+			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+		}
 		gameClock = new GameClock()
 
 		executorService.submit(gameClock)

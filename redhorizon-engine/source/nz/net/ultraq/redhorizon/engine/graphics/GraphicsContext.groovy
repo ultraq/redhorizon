@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.Context
+import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 /**
@@ -25,7 +26,7 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
  * 
  * @author Emanuel Rabina
  */
-abstract class GraphicsContext extends Context {
+abstract class GraphicsContext extends Context implements InputSource {
 
 	/**
 	 * Returns the current internal rendering resolution.

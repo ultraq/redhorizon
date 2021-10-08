@@ -86,11 +86,11 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		shaderSharpUpscaling = new ImBoolean(true)
 		lastShaderSharpUpscalingState = shaderSharpUpscaling.get()
 
-		ImGui.createContext()
-		imGuiGl3 = new ImGuiImplGl3()
 		imGuiGlfw = new ImGuiImplGlfw()
-		imGuiGl3.init('#version 330 core')
+		imGuiGl3 = new ImGuiImplGl3()
+		ImGui.createContext()
 		imGuiGlfw.init(context.window, true)
+		imGuiGl3.init('#version 410 core')
 
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
@@ -132,8 +132,8 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	void close() {
 
 		executorService.shutdownAwaitTermination()
-		imGuiGlfw.dispose()
 		imGuiGl3.dispose()
+		imGuiGlfw.dispose()
 		ImGui.destroyContext()
 	}
 
