@@ -43,7 +43,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	private final GraphicsConfiguration config
 	private final Scene scene
-	private final Closure needsMainThreadCallback
+	private final Closure mainThreadCallback
 
 	private GraphicsContext graphicsContext
 	private Camera camera
@@ -54,18 +54,20 @@ class GraphicsEngine extends Engine implements InputSource {
 	 * 
 	 * @param config
 	 * @param scene
-	 * @param needsMainThreadCallback
+	 * @param mainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
 	GraphicsEngine(GraphicsConfiguration config, Scene scene,
-		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure needsMainThreadCallback) {
+		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure mainThreadCallback) {
 
-		this.config = config ?: new GraphicsConfiguration()
+		this.config = config
 		this.scene = scene
-		this.needsMainThreadCallback = needsMainThreadCallback
+		this.mainThreadCallback = System.getProperty('os.name').contains('Mac OS') ?
+			mainThreadCallback :
+			{ FutureTask<?> executable -> executable.run() }
 	}
 
 	/**
@@ -119,9 +121,9 @@ class GraphicsEngine extends Engine implements InputSource {
 		logger.debug('Starting graphics engine')
 
 		// Initialization
-		graphicsContext = /*waitForMainThread { ->
-			return*/ new OpenGLContext(config)
-//		}
+		graphicsContext = waitForMainThread { ->
+			return new OpenGLContext(config)
+		}
 		graphicsContext.withCloseable { context ->
 			context.relay(ContextErrorEvent, this)
 			context.withCurrent { ->
@@ -141,9 +143,9 @@ class GraphicsEngine extends Engine implements InputSource {
 							engineLoop { ->
 								pipeline.render()
 								context.swapBuffers()
-//								waitForMainThread { ->
+								waitForMainThread { ->
 									context.pollEvents()
-//								}
+								}
 							}
 
 							// Shutdown
@@ -183,7 +185,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	private <T> T waitForMainThread(Closure<T> closure) {
 
 		def future = new FutureTask<T>(closure)
-		needsMainThreadCallback(future)
+		mainThreadCallback(future)
 		return future.get()
 	}
 }
