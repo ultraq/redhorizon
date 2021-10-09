@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
@@ -135,8 +136,26 @@ class RenderPipeline implements AutoCloseable {
 			config.scanlines
 		)
 
+		def calculateScreenModelMatrix = { Dimension windowSize, Dimension targetResolution ->
+			def matrix = new Matrix4f()
+			def widthDifference = windowSize.width - targetResolution.width
+			def heightDifference = windowSize.height - targetResolution.height
+			logger.debug('widthDifference: {}, heightDifference: {}', widthDifference, heightDifference)
+
+			// Window is wider
+			if (windowSize.aspectRatio > targetResolution.aspectRatio) {
+				matrix.scale(1 - (widthDifference / windowSize.width) as float, 1, 1)
+			}
+			// Window is taller
+			else if (windowSize.aspectRatio < targetResolution.aspectRatio) {
+				matrix.scale(1, 1 - (heightDifference / windowSize.height) as float, 1)
+			}
+
+			return matrix
+		}
+
 		// Final pass to emit the result to the screen
-		def screenModelMatrix = new Matrix4f()
+		def screenModelMatrix = calculateScreenModelMatrix(context.windowSize, context.targetResolution);
 		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
@@ -144,21 +163,9 @@ class RenderPipeline implements AutoCloseable {
 				shader: renderer.createShader('Screen', modelUniform)
 			)
 		)
+
 		context.on(FramebufferSizeEvent) { event ->
-			def matrix = new Matrix4f()
-			def widthDifference = context.windowSize.width - context.targetResolution.width
-			def heightDifference = context.windowSize.height - context.targetResolution.height
-
-			// Window is wider
-			if (context.windowSize.aspectRatio > context.targetResolution.aspectRatio) {
-				matrix.scale(1 - (widthDifference / context.windowSize.width) as float, 1, 1)
-			}
-			// Window is taller
-			else if (context.windowSize.aspectRatio < context.targetResolution.aspectRatio) {
-				matrix.scale(1, 1 - (heightDifference / context.windowSize.height) as float, 1)
-			}
-
-			screenModelMatrix.set(matrix)
+			screenModelMatrix.set(calculateScreenModelMatrix(context.windowSize, context.targetResolution))
 		}
 	}
 

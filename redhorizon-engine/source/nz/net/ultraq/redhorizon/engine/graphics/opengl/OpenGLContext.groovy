@@ -85,7 +85,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
-//		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
@@ -110,7 +109,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		targetResolution = new Dimension(widthPointer[0], heightPointer[0])
+		targetResolution = calculateTargetResolution(widthPointer[0], heightPointer[0], targetAspectRatio)
 		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
 
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
@@ -154,9 +153,9 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * @param targetAspectRatio
 	 * @return
 	 */
-	private Dimension calculateTargetResolution(int framebufferWidth, int framebufferHeight, float targetAspectRatio) {
+	private static Dimension calculateTargetResolution(int framebufferWidth, int framebufferHeight, float targetAspectRatio) {
 
-		def windowAspectRatio = framebufferWidth / framebufferHeight
+		def windowAspectRatio = framebufferWidth / framebufferHeight as float
 
 		// Window is wider
 		if (windowAspectRatio > targetAspectRatio) {
@@ -167,7 +166,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			return new Dimension(framebufferWidth, framebufferWidth / targetAspectRatio as int)
 		}
 		// No change
-		return targetResolution
+		return new Dimension(framebufferWidth, framebufferHeight)
 	}
 
 	/**
