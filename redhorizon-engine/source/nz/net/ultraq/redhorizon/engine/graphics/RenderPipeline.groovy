@@ -136,26 +136,26 @@ class RenderPipeline implements AutoCloseable {
 			config.scanlines
 		)
 
-		def calculateScreenModelMatrix = { Dimension windowSize, Dimension targetResolution ->
+		def calculateScreenModelMatrix = { Dimension framebufferSize, Dimension targetResolution ->
 			def matrix = new Matrix4f()
-			def widthDifference = windowSize.width - targetResolution.width
-			def heightDifference = windowSize.height - targetResolution.height
+			def widthDifference = framebufferSize.width - targetResolution.width
+			def heightDifference = framebufferSize.height - targetResolution.height
 			logger.debug('widthDifference: {}, heightDifference: {}', widthDifference, heightDifference)
 
 			// Window is wider
-			if (windowSize.aspectRatio > targetResolution.aspectRatio) {
-				matrix.scale(1 - (widthDifference / windowSize.width) as float, 1, 1)
+			if (framebufferSize.aspectRatio > targetResolution.aspectRatio) {
+				matrix.scale(1 - (widthDifference / framebufferSize.width) as float, 1, 1)
 			}
 			// Window is taller
-			else if (windowSize.aspectRatio < targetResolution.aspectRatio) {
-				matrix.scale(1, 1 - (heightDifference / windowSize.height) as float, 1)
+			else if (framebufferSize.aspectRatio < targetResolution.aspectRatio) {
+				matrix.scale(1, 1 - (heightDifference / framebufferSize.height) as float, 1)
 			}
 
 			return matrix
 		}
 
 		// Final pass to emit the result to the screen
-		def screenModelMatrix = calculateScreenModelMatrix(context.windowSize, context.targetResolution);
+		def screenModelMatrix = calculateScreenModelMatrix(context.framebufferSize, context.targetResolution);
 		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
@@ -165,7 +165,7 @@ class RenderPipeline implements AutoCloseable {
 		)
 
 		context.on(FramebufferSizeEvent) { event ->
-			screenModelMatrix.set(calculateScreenModelMatrix(context.windowSize, context.targetResolution))
+			screenModelMatrix.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
 		}
 	}
 

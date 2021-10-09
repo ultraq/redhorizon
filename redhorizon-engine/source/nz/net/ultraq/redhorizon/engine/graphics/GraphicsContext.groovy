@@ -29,6 +29,13 @@ import nz.net.ultraq.redhorizon.geometry.Dimension
 abstract class GraphicsContext extends Context implements InputSource {
 
 	/**
+	 * Return the current framebuffer dimensions.
+	 * 
+	 * @return
+	 */
+	abstract Dimension getFramebufferSize()
+
+	/**
 	 * Returns the current internal rendering resolution.
 	 * 
 	 * @return

@@ -52,6 +52,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	private static final float ASPECT_RATIO_MODERN = 16 / 10
 
 	final long window
+	Dimension framebufferSize
 	Dimension windowSize
 	Dimension renderResolution
 	Dimension targetResolution
@@ -109,11 +110,13 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
+		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
 		targetResolution = calculateTargetResolution(widthPointer[0], heightPointer[0], targetAspectRatio)
 		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
 
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
 			logger.debug('Framebuffer changed to {}x{}', width, height)
+			framebufferSize = new Dimension(width, height)
 
 			def windowWidthPointer = new int[1]
 			def windowHeightPointer = new int[1]
