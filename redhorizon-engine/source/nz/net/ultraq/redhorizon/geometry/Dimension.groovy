@@ -50,6 +50,16 @@ class Dimension {
 	}
 
 	/**
+	 * Return the aspect ratio of these dimensions.
+	 * 
+	 * @return
+	 */
+	float getAspectRatio() {
+
+		return width / height
+	}
+
+	/**
 	 * Return a new {@code Dimension} whose width/height values are multiplied by
 	 * the given value.
 	 * 
