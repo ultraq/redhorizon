@@ -136,37 +136,14 @@ class RenderPipeline implements AutoCloseable {
 			config.scanlines
 		)
 
-		def calculateScreenModelMatrix = { Dimension framebufferSize, Dimension targetResolution ->
-			def matrix = new Matrix4f()
-			def widthDifference = framebufferSize.width - targetResolution.width
-			def heightDifference = framebufferSize.height - targetResolution.height
-			logger.debug('widthDifference: {}, heightDifference: {}', widthDifference, heightDifference)
-
-			// Window is wider
-			if (framebufferSize.aspectRatio > targetResolution.aspectRatio) {
-				matrix.scale(1 - (widthDifference / framebufferSize.width) as float, 1, 1)
-			}
-			// Window is taller
-			else if (framebufferSize.aspectRatio < targetResolution.aspectRatio) {
-				matrix.scale(1, 1 - (heightDifference / framebufferSize.height) as float, 1)
-			}
-
-			return matrix
-		}
-
 		// Final pass to emit the result to the screen
-		def screenModelMatrix = calculateScreenModelMatrix(context.framebufferSize, context.targetResolution);
 		renderPasses << new ScreenRenderPass(
+			context,
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				transform: screenModelMatrix,
 				shader: renderer.createShader('Screen', modelUniform)
 			)
 		)
-
-		context.on(FramebufferSizeEvent) { event ->
-			screenModelMatrix.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
-		}
 	}
 
 	/**
@@ -273,12 +250,52 @@ class RenderPipeline implements AutoCloseable {
 	 * The final render pass for taking the result of the post-processing chain
 	 * and drawing it to the screen.
 	 */
-	@TupleConstructor(includes = ['material'])
 	class ScreenRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer = null
 		final Material material
 		final boolean enabled = true
+
+		/**
+		 * Constructor, create a basic material that covers the screen yet responds
+		 * to changes in output/window resolution.
+		 * 
+		 * @param context
+		 * @param material
+		 */
+		ScreenRenderPass(GraphicsContext context, Material material) {
+
+			this.material = material
+
+			material.transform.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
+
+			context.on(FramebufferSizeEvent) { event ->
+				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
+			}
+		}
+
+		/**
+		 * Return a matrix for adjusting the final texture drawn to screen to
+		 * accomodate the various screen/window sizes while respecting the target
+		 * resolution's aspect ratio.
+		 * 
+		 * @param framebufferSize
+		 * @param targetResolution
+		 * @return
+		 */
+		private Matrix4f calculateScreenModelMatrix(Dimension framebufferSize, Dimension targetResolution) {
+
+			return new Matrix4f()
+				.scale(
+					framebufferSize.aspectRatio > targetResolution.aspectRatio ?
+						1 - ((framebufferSize.width - targetResolution.width) / framebufferSize.width) as float : // Window is wider
+						1,
+					framebufferSize.aspectRatio < targetResolution.aspectRatio ?
+						1 - ((framebufferSize.height - targetResolution.height) / framebufferSize.height) as float : // Window is taller
+						1,
+					1
+				)
+		}
 
 		@Override
 		void delete(GraphicsRenderer renderer) {

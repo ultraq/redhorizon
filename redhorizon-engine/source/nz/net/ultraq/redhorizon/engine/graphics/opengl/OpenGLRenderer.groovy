@@ -75,7 +75,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	protected final int maxTextureUnits
 	protected final int maxTransforms
 
-	private Dimension targetResolution
+	private Dimension framebufferSize
 	private final OpenGLShader standardShader
 	protected final List<OpenGLShader> shaders = []
 	private final OpenGLTexture whiteTexture
@@ -126,10 +126,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-		// Track output resolution changes
-		targetResolution = context.targetResolution
+		// Track framebuffer size changes
+		framebufferSize = context.framebufferSize
 		context.on(FramebufferSizeEvent) { event ->
-			targetResolution = new Dimension(event.width, event.height)
+			framebufferSize = event.framebufferSize
 		}
 
 		// Create the shader programs used by this renderer
@@ -601,7 +601,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		else {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
 			glEnable(GL_DEPTH_TEST)
-			glViewport(0, 0, targetResolution.width, targetResolution.height)
+			glViewport(0, 0, framebufferSize.width, framebufferSize.height)
 		}
 	}
 

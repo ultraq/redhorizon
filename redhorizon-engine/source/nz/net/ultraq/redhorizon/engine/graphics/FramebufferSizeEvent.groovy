@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import groovy.transform.TupleConstructor
 
@@ -29,6 +30,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class FramebufferSizeEvent extends Event {
 
-	int width
-	int height
+	final Dimension framebufferSize
+	final Dimension windowSize
+	final Dimension targetResolution
 }

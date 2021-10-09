@@ -125,7 +125,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			targetResolution = calculateTargetResolution(width, height, targetAspectRatio)
 			logger.debug('Target resolution changed to {}', targetResolution)
 
-			trigger(new FramebufferSizeEvent(width, height))
+			trigger(new FramebufferSizeEvent(framebufferSize, windowSize, targetResolution))
 		}
 
 		// Input callbacks
@@ -158,18 +158,17 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 */
 	private static Dimension calculateTargetResolution(int framebufferWidth, int framebufferHeight, float targetAspectRatio) {
 
-		def windowAspectRatio = framebufferWidth / framebufferHeight as float
-
-		// Window is wider
-		if (windowAspectRatio > targetAspectRatio) {
-			return new Dimension(framebufferHeight * targetAspectRatio as int, framebufferHeight)
-		}
-		// Window is taller
-		else if (windowAspectRatio < targetAspectRatio) {
-			return new Dimension(framebufferWidth, framebufferWidth / targetAspectRatio as int)
-		}
-		// No change
-		return new Dimension(framebufferWidth, framebufferHeight)
+		def framebufferAspectRatio = framebufferWidth / framebufferHeight as float
+		def targetResolution = new Dimension(
+			framebufferAspectRatio > targetAspectRatio ?
+				framebufferHeight * targetAspectRatio as int : // Window is wider
+				framebufferWidth,
+			framebufferAspectRatio < targetAspectRatio ?
+				framebufferWidth / targetAspectRatio as int : // Window is taller
+				framebufferHeight
+		)
+		logger.debug('New target resolution: {}', targetResolution)
+		return targetResolution
 	}
 
 	/**

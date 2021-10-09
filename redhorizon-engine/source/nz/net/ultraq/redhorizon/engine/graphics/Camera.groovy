@@ -40,11 +40,11 @@ class Camera implements GraphicsElement {
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
 	 * 
-	 * @param windowSize
+	 * @param renderResolution
 	 */
-	Camera(Dimension windowSize) {
+	Camera(Dimension renderResolution) {
 
-		size = new Dimension(windowSize.width, windowSize.height)
+		size = new Dimension(renderResolution.width, renderResolution.height)
 		projection = new Matrix4f()
 			.ortho2D(-size.width / 2, size.width / 2, -size.height / 2, size.height / 2)
 			.lookAt(
