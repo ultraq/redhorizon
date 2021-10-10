@@ -595,12 +595,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 
 		if (framebuffer) {
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
-			glDisable(GL_DEPTH_TEST)
 			glViewport(0, 0, framebuffer.texture.width, framebuffer.texture.height)
 		}
 		else {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
-			glEnable(GL_DEPTH_TEST)
 			glViewport(0, 0, framebufferSize.width, framebufferSize.height)
 		}
 	}
