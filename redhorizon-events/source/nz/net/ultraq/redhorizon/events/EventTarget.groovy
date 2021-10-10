@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.events
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -25,6 +28,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author Emanuel Rabina
  */
 trait EventTarget {
+
+	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
 
 	private final List<EventAndListenerPair> eventListeners = new CopyOnWriteArrayList<>()
 
@@ -64,7 +69,12 @@ trait EventTarget {
 
 		eventListeners.each { pair ->
 			if (pair.event.isInstance(event)) {
-				pair.listener.handleEvent(event)
+				try {
+					pair.listener.handleEvent(event)
+				}
+				catch (Exception ex) {
+					logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
+				}
 			}
 		}
 	}

@@ -31,14 +31,11 @@ class EventTargetTests extends Specification {
 	private class TestSubclassEvent extends TestEvent {}
 
 	def target = new TestEventTarget()
-	def listener = Mock(EventListener)
-
-	def setup() {
-		target.on(TestEvent, listener)
-	}
 
 	def 'Handler invoked for exact event class matches'() {
 		given:
+			def listener = Mock(EventListener)
+			target.on(TestEvent, listener)
 			def event = new TestEvent()
 		when:
 			target.trigger(event)
@@ -48,10 +45,28 @@ class EventTargetTests extends Specification {
 
 	def 'Handler invoked for subclass event matches'() {
 		given:
+			def listener = Mock(EventListener)
+			target.on(TestEvent, listener)
 			def event = new TestSubclassEvent()
 		when:
 			target.trigger(event)
 		then:
 			1 * listener.handleEvent(event)
+	}
+
+	def 'Exceptions in handlers do not prevent execution of further handlers'() {
+		given:
+			def target = new TestEventTarget()
+			def event = new TestEvent()
+			def listener2 = Mock(EventListener)
+			target.on(TestEvent) { e ->
+				throw new Exception()
+			}
+			target.on(TestEvent, listener2)
+		when:
+			target.trigger(event)
+		then:
+			notThrown(Exception)
+			1 * listener2.handleEvent(event)
 	}
 }
