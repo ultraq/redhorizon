@@ -31,7 +31,7 @@ trait EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
 
-	private final List<EventAndListenerPair> eventListeners = new CopyOnWriteArrayList<>()
+	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Register an event listener on this event target.  When the event is fired
@@ -42,7 +42,7 @@ trait EventTarget {
 	 */
 	public <E extends Event> void on(Class<E> eventClass, EventListener<E> eventListener) {
 
-		eventListeners << new EventAndListenerPair(eventClass, eventListener)
+		eventListeners << new Tuple2<>(eventClass, eventListener)
 	}
 
 	/**
@@ -67,10 +67,11 @@ trait EventTarget {
 	 */
 	public <E extends Event> void trigger(E event) {
 
-		eventListeners.each { pair ->
-			if (pair.event.isInstance(event)) {
+		eventListeners.each { tuple ->
+			def (eventClass, listener) = tuple
+			if (eventClass.isInstance(event)) {
 				try {
-					pair.listener.handleEvent(event)
+					listener.handleEvent(event)
 				}
 				catch (Exception ex) {
 					logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
