@@ -30,6 +30,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * A basic image viewer, used primarily for testing purposes.
+ * <p>
+ * List of hi-res PCX images used: aftr_hi, aly1, apc_hi, aphi0049, bnhi0020,
+ * dchi0040, frhi0166, lab, landsbrg, mahi0107, mig_hi, mtfacthi, needle, sov2,
+ * spy, stalin, tent.
  * 
  * @author Emanuel Rabina
  */

@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory
 
 /**
  * A basic audio player, used primarily for testing purposes.
+ * <p>
+ * List of soundtrack files available: intro, map, await, bigf226m, crus226m,
+ * dense_r,  fac1226m, fac2226m, fogger1a, hell226m, mud1a, radio2, rollout,
+ * run1226m, smsh226m, snake, tren226m, terminat, twin, vector1a, work226m.
  * 
  * @author Emanuel Rabina
  */
