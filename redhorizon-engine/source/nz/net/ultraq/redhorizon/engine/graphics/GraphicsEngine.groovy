@@ -63,7 +63,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	GraphicsEngine(GraphicsConfiguration config, Scene scene,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure mainThreadCallback) {
 
-		this.config = config
+		this.config = config ?: new GraphicsConfiguration()
 		this.scene = scene
 		this.mainThreadCallback = System.getProperty('os.name').contains('Mac OS') ?
 			mainThreadCallback :
