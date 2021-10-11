@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
+import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -47,7 +47,7 @@ class ImagesViewer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(ImagesViewer)
 
 	final ImagesFile imagesFile
-	final PaletteTypes paletteType
+	final PaletteType paletteType
 
 	/**
 	 * Constructor, set the multi-image file to display.
@@ -56,7 +56,7 @@ class ImagesViewer extends Application {
 	 * @param imagesFile
 	 * @param paletteType
 	 */
-	ImagesViewer(GraphicsConfiguration graphicsConfig, ImagesFile imagesFile, PaletteTypes paletteType) {
+	ImagesViewer(GraphicsConfiguration graphicsConfig, ImagesFile imagesFile, PaletteType paletteType) {
 
 		super(null, graphicsConfig)
 		this.imagesFile = imagesFile

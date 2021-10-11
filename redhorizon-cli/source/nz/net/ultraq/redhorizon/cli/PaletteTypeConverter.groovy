@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
+import nz.net.ultraq.redhorizon.classic.PaletteType
 
 import picocli.CommandLine.ITypeConverter
 
@@ -25,16 +25,16 @@ import picocli.CommandLine.ITypeConverter
  * 
  * @author Emanuel Rabina
  */
-class PaletteTypesConverter implements ITypeConverter<PaletteTypes> {
+class PaletteTypeConverter implements ITypeConverter<PaletteType> {
 
-	static final List<String> COMPLETION_CANDIDATES = PaletteTypes.collect { paletteType ->
+	static final List<String> COMPLETION_CANDIDATES = PaletteType.collect { paletteType ->
 		return paletteType.file.dropRight(4)
 	}
 
 	@Override
-	PaletteTypes convert(String value) throws Exception {
+	PaletteType convert(String value) throws Exception {
 
-		return PaletteTypes.find { paletteType ->
+		return PaletteType.find { paletteType ->
 			return value == paletteType.file.dropRight(4)
 		}
 	}

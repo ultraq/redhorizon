@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
+import nz.net.ultraq.redhorizon.classic.PaletteType
 
 import picocli.CommandLine.Option
 
@@ -31,8 +31,8 @@ class PaletteOptions {
 		names = ['--palette'],
 		defaultValue = 'ra-temperate',
 		description = 'Which game palette to apply to a paletted image.  One of ${COMPLETION-CANDIDATES}.  Defaults to ra-temperate',
-		converter = PaletteTypesConverter,
-		completionCandidates = { PaletteTypesConverter.COMPLETION_CANDIDATES }
+		converter = PaletteTypeConverter,
+		completionCandidates = { PaletteTypeConverter.COMPLETION_CANDIDATES }
 	)
-	PaletteTypes paletteType
+	PaletteType paletteType
 }

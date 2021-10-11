@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.classic.PaletteTypes
+import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
@@ -48,7 +48,7 @@ class UnitViewer extends Viewer {
 
 	final ShpFile shpFile
 	final String unitId
-	final PaletteTypes paletteType
+	final PaletteType paletteType
 
 	/**
 	 * Constructor, set the unit to be displayed.
@@ -59,7 +59,7 @@ class UnitViewer extends Viewer {
 	 * @param paletteType
 	 * @param touchpadInput
 	 */
-	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, PaletteTypes paletteType, boolean touchpadInput) {
+	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, PaletteType paletteType, boolean touchpadInput) {
 
 		super(null, graphicsConfig, touchpadInput)
 		this.shpFile = shpFile
