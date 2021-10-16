@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-enum MapRAOverlayPackTiles {
+enum MapRAOverlayPackTile {
 
 	// Walls
 	WALL_SANDBAGS    ('SBAG', 0x00, true, false),

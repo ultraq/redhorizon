@@ -1,5 +1,5 @@
 /* 
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
-
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
-
-import org.joml.Vector2f
+package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 
 import groovy.transform.TupleConstructor
 
 /**
- * A description of the data comprising a section of a vertex buffer layout.
+ * Contains a list of the available theaters used in Red Horizon.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-enum VertexBufferLayoutParts {
+@TupleConstructor
+enum Theater {
 
-	COLOUR       ('colour',      0, Colour.FLOATS),
-	POSITION     ('position',    1, Vector2f.FLOATS),
-	TEXTURE_UVS  ('textureUVs',  2, Vector2f.FLOATS),
-	TEXTURE_UNIT ('textureUnit', 3, 1),
-	MODEL_INDEX  ('modelIndex',  4, 1)
+	// Available theater types
+	DESERT    ('Desert',    '.des'),
+	INTERIOR  ('Interior',  '.int'),
+	SNOW      ('Snow',      '.sno', 5, 4),
+	TEMPERATE ('Temperate', '.tem', 4, 4),
+	WINTER    ('Winter',    '.win')
 
-	final String name
-	final int location
-	final int size
+	final String label
+	final String ext
+	final int clearX
+	final int clearY
 }

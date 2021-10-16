@@ -56,7 +56,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	)
 
 	final String name
-	final Theaters theater
+	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
@@ -76,9 +76,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 		def mapSection = mapFile['Map']
 		def theaterString = mapSection['Theater']
-		theater = Theaters.find { theater ->
-			return theater.label.equalsIgnoreCase(theaterString)
-		}
+		theater = Theater.valueOf(theaterString)
 		palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
@@ -185,7 +183,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		 */
 		private BackgroundLayer(ResourceManager resourceManager) {
 
-			def clearTileName = MapRAMapPackTiles.DEFAULT.name + theater.ext
+			def clearTileName = MapRAMapPackTile.DEFAULT.name + theater.ext
 			def tileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
 
 			// Use the background tile to create a 5x4 repeating image
@@ -250,7 +248,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 					// Retrieve the appropriate tile, skip empty tiles
 					if (tileVal != 0xff && tileVal != -1) {
-						def tile = MapRAMapPackTiles.find { tile ->
+						def tile = MapRAMapPackTile.find { tile ->
 							return tile.value == tileVal
 						}
 						// Some unknown tile types still coming through?
@@ -313,7 +311,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		 */
 		MapRAOverlayPack(ResourceManager resourceManager, ByteBuffer tileData) {
 
-			Map<Vector2f, MapRAOverlayPackTiles> tileTypes = [:]
+			Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
 
 			TILES_X.times { y ->
 				TILES_Y.times { x ->
@@ -323,7 +321,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 					// Retrieve the appropriate tile, skip empty tiles
 					if (tileVal != -1) {
-						def tile = MapRAOverlayPackTiles.find { tile ->
+						def tile = MapRAOverlayPackTile.find { tile ->
 							return tile.value == tileVal
 						}
 						// Some unknown tile types still coming through?

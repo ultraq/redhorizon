@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-enum MapRAMapPackTiles {
+enum MapRAMapPackTile {
 
 	// Standard tiles
 	DEFAULT    ('Clear1', 0xff),

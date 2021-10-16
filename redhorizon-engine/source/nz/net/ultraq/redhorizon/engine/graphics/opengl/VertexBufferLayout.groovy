@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class VertexBufferLayout {
 
-	final VertexBufferLayoutParts[] parts
+	final VertexBufferLayoutPart[] parts
 
 	/**
 	 * Return the offset value of the given layout part, in floats.
@@ -34,7 +34,7 @@ class VertexBufferLayout {
 	 * @param layoutPart
 	 * @return
 	 */
-	int offsetOf(VertexBufferLayoutParts layoutPart) {
+	int offsetOf(VertexBufferLayoutPart layoutPart) {
 
 		def offset = 0
 		for (def i = 0; i < parts.size(); i++) {
@@ -53,7 +53,7 @@ class VertexBufferLayout {
 	 * @param layoutPart
 	 * @return
 	 */
-	int offsetOfInBytes(VertexBufferLayoutParts layoutPart) {
+	int offsetOfInBytes(VertexBufferLayoutPart layoutPart) {
 
 		def offset = offsetOf(layoutPart)
 		return offset != -1 ? offset * Float.BYTES : -1

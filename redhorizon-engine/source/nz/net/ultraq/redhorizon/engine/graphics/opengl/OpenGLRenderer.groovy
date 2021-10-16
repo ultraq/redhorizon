@@ -63,11 +63,11 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
 	protected static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
-		VertexBufferLayoutParts.COLOUR,
-		VertexBufferLayoutParts.POSITION,
-		VertexBufferLayoutParts.TEXTURE_UVS,
-		VertexBufferLayoutParts.TEXTURE_UNIT,
-		VertexBufferLayoutParts.MODEL_INDEX
+		VertexBufferLayoutPart.COLOUR,
+		VertexBufferLayoutPart.POSITION,
+		VertexBufferLayoutPart.TEXTURE_UVS,
+		VertexBufferLayoutPart.TEXTURE_UNIT,
+		VertexBufferLayoutPart.MODEL_INDEX
 	)
 
 	protected final GraphicsConfiguration config
