@@ -16,16 +16,15 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
-import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.GC
 import org.eclipse.swt.graphics.Image
-import org.eclipse.swt.graphics.Rectangle
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Label
 import org.eclipse.swt.widgets.Shell
+import static org.eclipse.swt.SWT.*
 
 /**
  * Main splash screen window.
@@ -34,22 +33,21 @@ import org.eclipse.swt.widgets.Shell
  */
 class SplashScreen {
 
-	private final Display display
 	private final Shell shell
 
 	/**
 	 * Constructor, create a new splash screen with the default image and text.
 	 * 
+	 * @param display
 	 * @param version
 	 */
-	SplashScreen(String version) {
+	SplashScreen(Display display, String version) {
 
-		display = new Display()
-		shell = new Shell(display, SWT.ON_TOP)
+		shell = new Shell(display, ON_TOP)
 
 		// Splash screen frame
-		shell.background = display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND)
-		shell.backgroundMode = SWT.INHERIT_FORCE
+		shell.background = display.getSystemColor(COLOR_WIDGET_BACKGROUND)
+		shell.backgroundMode = INHERIT_FORCE
 		shell.layout = new GridLayout(2, false).with {
 			marginWidth       = 0
 			marginHeight      = 0
@@ -68,14 +66,14 @@ class SplashScreen {
 			def gc = new GC(splashScreenImage)
 			gc.drawImage(new Image(display, imageInputStream), 0, 0, 600, 350, 0, 0, 600, 350)
 			gc.dispose()
-			new Label(shell, SWT.NONE).with {
+			new Label(shell, NONE).with {
 				image = splashScreenImage
-				layoutData = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1)
+				layoutData = new GridData(FILL, FILL, true, true, 2, 1)
 			}
 		}
 
 		// Text area
-		def textGroup = new Composite(shell, SWT.NONE).with {
+		def textGroup = new Composite(shell, NONE).with {
 			layout = new GridLayout(2, false).with {
 				marginWidth       = 0
 				marginHeight      = 0
@@ -87,27 +85,29 @@ class SplashScreen {
 				verticalSpacing   = 0
 				return it
 			}
-			layoutData = new GridData(SWT.FILL, SWT.FILL, true, true)
+			layoutData = new GridData(FILL, FILL, true, true)
 			return it
 		}
 
 		// Task text area
-		new Label(textGroup, SWT.SHADOW_OUT).with {
+		new Label(textGroup, SHADOW_OUT).with {
 			text = 'Red Horizon Explorer 🔎'
-			layoutData = new GridData(SWT.FILL, SWT.CENTER, true, false)
+			layoutData = new GridData(FILL, CENTER, true, false)
 		}
 
 		// Version text area
-		new Label(textGroup, SWT.NONE).with {
+		new Label(textGroup, NONE).with {
 			text = version
-			layoutData = new GridData(SWT.RIGHT, SWT.CENTER, false, false)
+			layoutData = new GridData(RIGHT, CENTER, false, false)
 		}
 	}
 
 	/**
 	 * Close the splash screen.
+	 * 
+	 * @param display
 	 */
-	void close() {
+	void close(Display display) {
 
 		display.syncExec { ->
 			shell.dispose()
@@ -116,19 +116,13 @@ class SplashScreen {
 
 	/**
 	 * Opens the splash screen.  This method will then block until some action
-	 * closes this screen via the {@link #close()} method.
+	 * closes this screen via the {@link #close(Display)} method.
+	 * 
+	 * @param display
 	 */
-	void open() {
+	void open(Display display) {
 
-		// Center on screen and open
-		shell.pack()
-		def resolution = display.primaryMonitor.bounds
-		def window = shell.bounds
-		shell.bounds = new Rectangle(
-			(resolution.width >> 1)  - (window.width >> 1),
-			(resolution.height >> 1) - (window.height >> 1),
-			window.width, window.height)
-		shell.open()
+		shell.openCentered(display)
 
 		// Wait until closed
 		while (!shell.isDisposed()) {
@@ -136,6 +130,5 @@ class SplashScreen {
 				display.sleep()
 			}
 		}
-		display.dispose()
 	}
 }
