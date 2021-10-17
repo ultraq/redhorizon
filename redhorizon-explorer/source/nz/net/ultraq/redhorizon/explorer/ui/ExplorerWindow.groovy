@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
+import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 
 import org.eclipse.swt.graphics.Point
@@ -101,16 +102,30 @@ class ExplorerWindow {
 
 		fileList = new List(pathGroup, BORDER | SINGLE | V_SCROLL).with {
 			layoutData = new GridData(FILL, FILL, true, true)
+
+			// Selection handler for updating the preview pane
 			addListener(Selection) { event ->
+
+				// Close the previous file
+				if (selectedFile instanceof Closeable) {
+					selectedFile.close()
+				}
+
 				def selectedItem = new File(currentDirectory, getItem(selectionIndex))
 				if (selectedItem.isFile()) {
 					def fileClass = getFileClass(selectedItem.name)
 					if (fileClass) {
-						selectedItem.withInputStream { inputStream ->
-							selectedFile = fileClass.newInstance(inputStream)
-							selectedItemLabel.text = selectedFile.toString()
-							selectedItemButton.enabled = true
+						if (fileClass == MixFile) {
+							selectedFile = fileClass.newInstance(selectedItem)
+							selectedItemButton.enabled = false
 						}
+						else {
+							selectedItem.withInputStream { inputStream ->
+								selectedFile = fileClass.newInstance(inputStream)
+								selectedItemButton.enabled = true
+							}
+						}
+						selectedItemLabel.text = selectedFile.toString()
 					}
 					else {
 						selectedItemLabel.text = '(unknown file type)'
@@ -118,6 +133,8 @@ class ExplorerWindow {
 					}
 				}
 			}
+
+			// Double-click handler for changing directories
 			addListener(MouseDoubleClick) { event ->
 				if (selectionIndex == 0) {
 					currentDirectory = currentDirectory.parentFile
@@ -148,7 +165,7 @@ class ExplorerWindow {
 
 		selectedItemLabel = new Label(previewGroup, CENTER | WRAP).with {
 			layoutData = new GridData(FILL, BOTTOM, true, true).with {
-				minimumHeight = 30
+				minimumHeight = 35
 				return it
 			}
 			text = '(item preview)'

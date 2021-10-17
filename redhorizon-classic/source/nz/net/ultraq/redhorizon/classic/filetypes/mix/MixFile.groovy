@@ -44,6 +44,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 	private final NativeRandomAccessFile input
 	private final Semaphore inputSemaphore = new Semaphore(1, true)
 
+	private final boolean encrypted
 	@Delegate
 	private final MixFileDelegate delegate
 
@@ -59,7 +60,8 @@ class MixFile implements ArchiveFile<MixEntry> {
 		// Find out if this file has a checksum/encryption
 		def bufferBits = input.readShort()
 		def flag = input.readShort()
-		if ((bufferBits == 0) && (flag & FLAG_ENCRYPTED)) {
+		encrypted = (bufferBits == 0) && (flag & FLAG_ENCRYPTED)
+		if (encrypted) {
 			delegate = new MixFileDelegateEncrypted(input)
 		}
 		else {
@@ -123,12 +125,15 @@ class MixFile implements ArchiveFile<MixEntry> {
 		return null
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	InputStream getEntryData(MixEntry entry) {
 
 		return new MixEntryInputStream(input, inputSemaphore, baseEntryOffset, entry)
+	}
+
+	@Override
+	String toString() {
+
+		return "MIX file, ${encrypted ? 'encrypted' : 'unencrypted'} header, contains ${entries.size()} item(s)"
 	}
 }
