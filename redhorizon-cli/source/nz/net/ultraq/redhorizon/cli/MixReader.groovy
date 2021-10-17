@@ -84,6 +84,8 @@ class MixReader implements Callable<Integer> {
 				throw new IllegalArgumentException()
 			}
 		}
+
+		return 0
 	}
 
 	/**
