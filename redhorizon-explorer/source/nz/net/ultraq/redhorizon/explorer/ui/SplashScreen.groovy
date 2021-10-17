@@ -122,7 +122,7 @@ class SplashScreen {
 	 */
 	void open(Display display) {
 
-		shell.openCentered(display)
+		shell.openCentered(display, true)
 
 		// Wait until closed
 		while (!shell.isDisposed()) {

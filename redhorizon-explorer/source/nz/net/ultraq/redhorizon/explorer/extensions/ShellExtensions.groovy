@@ -32,11 +32,14 @@ class ShellExtensions {
 	 * 
 	 * @param self
 	 * @param display
+	 * @param pack
 	 */
-	static void openCentered(Shell self, Display display) {
+	static void openCentered(Shell self, Display display, boolean pack = false) {
 
 		// Center on screen and open
-		self.pack()
+		if (pack) {
+			self.pack()
+		}
 		def resolution = display.primaryMonitor.bounds
 		def window = self.bounds
 		self.bounds = new Rectangle(
