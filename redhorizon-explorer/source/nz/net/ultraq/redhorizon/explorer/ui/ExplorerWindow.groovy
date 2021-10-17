@@ -16,9 +16,12 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+
 import org.eclipse.swt.graphics.Point
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
+import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Group
 import org.eclipse.swt.widgets.Label
@@ -26,6 +29,9 @@ import org.eclipse.swt.widgets.List
 import org.eclipse.swt.widgets.Menu
 import org.eclipse.swt.widgets.MenuItem
 import org.eclipse.swt.widgets.Shell
+import org.reflections.Reflections
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.eclipse.swt.SWT.*
 
 /**
@@ -36,12 +42,15 @@ import static org.eclipse.swt.SWT.*
  */
 class ExplorerWindow {
 
+	private static final Logger logger = LoggerFactory.getLogger(ExplorerWindow)
 	private static final String TITLE = 'Red Horizon Explorer 🔎'
 
 	private final Shell shell
 	private final List fileList
 	private final Label selectedItemLabel
+	private final Button selectedItemButton
 	private File currentDirectory
+	private Object selectedFile
 
 	/**
 	 * Build the application window UI.
@@ -77,11 +86,11 @@ class ExplorerWindow {
 			marginWidth = 10
 			return it
 		}
-		shell.size = new Point(900, 600)
+		shell.size = new Point(600, 600)
 
 		// File/folder explorer
 		def pathGroup = new Group(shell, SHADOW_ETCHED_IN).with {
-			text = 'Current path'
+			text = 'Files'
 			layout = new GridLayout()
 			layoutData = new GridData(LEFT, FILL, false, true).with {
 				widthHint = 250
@@ -95,7 +104,18 @@ class ExplorerWindow {
 			addListener(Selection) { event ->
 				def selectedItem = new File(currentDirectory, getItem(selectionIndex))
 				if (selectedItem.isFile()) {
-					selectedItemLabel.text = selectedItem
+					def fileClass = getFileClass(selectedItem.name)
+					if (fileClass) {
+						selectedItem.withInputStream { inputStream ->
+							selectedFile = fileClass.newInstance(inputStream)
+							selectedItemLabel.text = selectedFile.toString()
+							selectedItemButton.enabled = true
+						}
+					}
+					else {
+						selectedItemLabel.text = '(unknown file type)'
+						selectedItemButton.enabled = false
+					}
 				}
 			}
 			addListener(MouseDoubleClick) { event ->
@@ -119,19 +139,26 @@ class ExplorerWindow {
 
 		// Selected file preview
 		def previewGroup = new Group(shell, DEFAULT).with {
-			text = 'Preview'
+			text = 'Details'
 			layout = new GridLayout()
 			layoutData = new GridData(FILL, FILL, true, true)
-			size = new Point(640, 400)
+			size = new Point(400, 400)
 			return it
 		}
 
-		selectedItemLabel = new Label(previewGroup, CENTER).with {
-			text = '(item preview here?)'
-			layoutData = new GridData(CENTER, CENTER, true, true).with {
-				minimumWidth = 500
+		selectedItemLabel = new Label(previewGroup, CENTER | WRAP).with {
+			layoutData = new GridData(FILL, BOTTOM, true, true).with {
+				minimumHeight = 30
 				return it
 			}
+			text = '(item preview)'
+			return it
+		}
+
+		selectedItemButton = new Button(previewGroup, CENTER | PUSH).with {
+			enabled = false
+			layoutData = new GridData(CENTER, TOP, true, true)
+			text = 'Open'
 			return it
 		}
 	}
@@ -143,9 +170,17 @@ class ExplorerWindow {
 
 		fileList.removeAll()
 		fileList.add('..')
-		currentDirectory.list().each { fileOrDirectory ->
-			fileList.add(fileOrDirectory)
-		}
+		currentDirectory.listFiles()
+			.sort { file1, file2 ->
+				return file1.directory && !file2.directory ? -1 :
+					!file1.directory && file2.directory ? 1 :
+					file1.name <=> file2.name
+			}
+			.each { fileOrDirectory ->
+				fileList.add(fileOrDirectory.isDirectory() ?
+					"/${fileOrDirectory.name}" :
+					fileOrDirectory.name)
+			}
 	}
 
 	/**
@@ -158,6 +193,32 @@ class ExplorerWindow {
 		display.syncExec { ->
 			shell.dispose()
 		}
+	}
+
+	/**
+	 * Find the appropriate class for reading a file with the given name.
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	private static Class<?> getFileClass(String filename) {
+
+		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
+		def fileClass = new Reflections(
+			'nz.net.ultraq.redhorizon.filetypes',
+			'nz.net.ultraq.redhorizon.classic.filetypes'
+		)
+			.getTypesAnnotatedWith(FileExtensions)
+			.find { type ->
+				def annotation = type.getAnnotation(FileExtensions)
+				return annotation.value().any { extension ->
+					return extension.equalsIgnoreCase(suffix)
+				}
+			}
+		if (!fileClass) {
+			logger.debug('No implementation for {} filetype', suffix)
+		}
+		return fileClass
 	}
 
 	/**

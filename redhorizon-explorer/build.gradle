@@ -45,11 +45,14 @@ configurations.all {
 
 dependencies {
 	implementation(
+		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
 		project(':redhorizon-extensions'),
+		project(':redhorizon-filetypes'),
 		'ch.qos.logback:logback-classic:1.2.6',
 		'info.picocli:picocli:4.6.1',
-		"org.eclipse.platform:${swtArtifact}:${swtVersion}"
+		"org.eclipse.platform:${swtArtifact}:${swtVersion}",
+		'org.reflections:reflections:0.9.12'
 	)
 }
 
