@@ -65,7 +65,7 @@ class Explorer implements Callable<Integer> {
 		def splashScreen = new SplashScreen(display, commandSpec.version()[0] ?: '(development)')
 		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
 			executorService.execute { ->
-				Thread.sleep(3000)
+				Thread.sleep(commandSpec.version()[0] != null ? 3000 : 1000)
 				splashScreen.close(display)
 			}
 			splashScreen.open(display)

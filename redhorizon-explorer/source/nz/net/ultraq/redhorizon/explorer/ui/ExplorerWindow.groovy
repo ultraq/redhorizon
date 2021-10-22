@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 
 import org.eclipse.swt.graphics.Point
+import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.Button
@@ -82,26 +83,31 @@ class ExplorerWindow {
 			return menuBar
 		}
 
-		shell.layout = new GridLayout(2, false).with {
+		shell.layout = new GridLayout(6, false).with {
+			horizontalSpacing = 10
 			marginHeight = 10
 			marginWidth = 10
+			verticalSpacing = 10
 			return it
 		}
-		shell.size = new Point(600, 600)
+		shell.size = new Point(800, 600)
 
 		// File/folder explorer
 		def pathGroup = new Group(shell, SHADOW_ETCHED_IN).with {
-			text = 'Files'
-			layout = new GridLayout()
-			layoutData = new GridData(LEFT, FILL, false, true).with {
-				widthHint = 250
+			text = 'Current directory'
+			layout = new FillLayout().with {
+				marginHeight = 10
+				marginWidth = 10
+				return it
+			}
+			layoutData = new GridData(FILL, FILL, true, true, 2, 3).with {
+				widthHint = 200
 				return it
 			}
 			return it
 		}
 
 		fileList = new List(pathGroup, BORDER | SINGLE | V_SCROLL).with {
-			layoutData = new GridData(FILL, FILL, true, true)
 
 			// Selection handler for updating the preview pane
 			addListener(Selection) { event ->
@@ -156,14 +162,27 @@ class ExplorerWindow {
 
 		// Selected file preview
 		def previewGroup = new Group(shell, DEFAULT).with {
-			text = 'Details'
+			text = 'Preview'
 			layout = new GridLayout()
-			layoutData = new GridData(FILL, FILL, true, true)
-			size = new Point(400, 400)
+			layoutData = new GridData(FILL, FILL, true, true, 3, 3).with {
+				widthHint = 300
+				return it
+			}
 			return it
 		}
 
-		selectedItemLabel = new Label(previewGroup, CENTER | WRAP).with {
+		// Selected file info
+		def infoGroup = new Group(shell, DEFAULT).with {
+			text = 'Details'
+			layout = new GridLayout()
+			layoutData = new GridData(FILL, FILL, true, false, 1, 1).with {
+				widthHint = 100
+				return it
+			}
+			return it
+		}
+
+		selectedItemLabel = new Label(infoGroup, CENTER | WRAP).with {
 			layoutData = new GridData(FILL, BOTTOM, true, true).with {
 				minimumHeight = 35
 				return it
@@ -172,7 +191,7 @@ class ExplorerWindow {
 			return it
 		}
 
-		selectedItemButton = new Button(previewGroup, CENTER | PUSH).with {
+		selectedItemButton = new Button(infoGroup, CENTER | PUSH).with {
 			enabled = false
 			layoutData = new GridData(CENTER, TOP, true, true)
 			text = 'Open'
@@ -186,7 +205,10 @@ class ExplorerWindow {
 	private void buildList() {
 
 		fileList.removeAll()
-		fileList.add('..')
+
+		if (currentDirectory.parent) {
+			fileList.add('/..')
+		}
 		currentDirectory.listFiles()
 			.sort { file1, file2 ->
 				return file1.directory && !file2.directory ? -1 :
