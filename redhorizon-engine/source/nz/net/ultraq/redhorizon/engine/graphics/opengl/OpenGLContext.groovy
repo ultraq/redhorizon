@@ -235,10 +235,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		glfwMakeContextCurrent(NULL)
 	}
 
-	/**
-	 * Swap between the front and back buffers, pushing the new frame to the
-	 * display.
-	 */
+	@Override
 	void swapBuffers() {
 
 		glfwSwapBuffers(window)

@@ -17,7 +17,13 @@
 package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.engine.graphics.Camera
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.RenderPipeline
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.eclipse.swt.graphics.Point
 import org.eclipse.swt.layout.FillLayout
@@ -49,6 +55,7 @@ class ExplorerWindow {
 
 	private final Shell shell
 	private final List fileList
+	private final Group previewGroup
 	private final Label selectedItemLabel
 	private final Button selectedItemButton
 	private File currentDirectory
@@ -66,48 +73,41 @@ class ExplorerWindow {
 		shell = new Shell(display, SHELL_TRIM)
 		updateTitle(currentDirectory.toString())
 
-		shell.menuBar = new Menu(shell, BAR).with { menuBar ->
-			new MenuItem(menuBar, CASCADE).with { fileMenuItem ->
+		shell.menuBar = new Menu(shell, BAR).tap { menuBar ->
+			new MenuItem(menuBar, CASCADE).tap { fileMenuItem ->
 				text = '&File'
-				menu = new Menu(shell, DROP_DOWN).with { fileMenu ->
-					new MenuItem(fileMenu, PUSH).with { exitMenuItem ->
+				menu = new Menu(shell, DROP_DOWN).tap { fileMenu ->
+					new MenuItem(fileMenu, PUSH).tap { exitMenuItem ->
 						text = "E&xit"
 						addListener(Selection) { event ->
 							close(display)
 						}
 					}
-					return fileMenu
 				}
-				return fileMenuItem
 			}
-			return menuBar
 		}
 
-		shell.layout = new GridLayout(6, false).with {
+		shell.layout = new GridLayout(6, false).tap {
 			horizontalSpacing = 10
 			marginHeight = 10
 			marginWidth = 10
 			verticalSpacing = 10
-			return it
 		}
 		shell.size = new Point(800, 600)
 
 		// File/folder explorer
-		def pathGroup = new Group(shell, SHADOW_ETCHED_IN).with {
+		def pathGroup = new Group(shell, SHADOW_ETCHED_IN).tap {
 			text = 'Current directory'
-			layout = new FillLayout().with {
+			layout = new FillLayout().tap {
 				marginHeight = 10
 				marginWidth = 10
-				return it
 			}
-			layoutData = new GridData(FILL, FILL, true, true, 2, 3).with {
+			layoutData = new GridData(FILL, FILL, true, true, 2, 3).tap {
 				widthHint = 200
-				return it
 			}
-			return it
 		}
 
-		fileList = new List(pathGroup, BORDER | SINGLE | V_SCROLL).with {
+		fileList = new List(pathGroup, BORDER | SINGLE | V_SCROLL).tap {
 
 			// Selection handler for updating the preview pane
 			addListener(Selection) { event ->
@@ -156,46 +156,38 @@ class ExplorerWindow {
 					}
 				}
 			}
-			return it
 		}
 		buildList()
 
 		// Selected file preview
-		def previewGroup = new Group(shell, DEFAULT).with {
+		previewGroup = new Group(shell, DEFAULT).tap {
 			text = 'Preview'
 			layout = new GridLayout()
-			layoutData = new GridData(FILL, FILL, true, true, 3, 3).with {
+			layoutData = new GridData(FILL, FILL, true, true, 3, 3).tap {
 				widthHint = 300
-				return it
 			}
-			return it
 		}
 
 		// Selected file info
-		def infoGroup = new Group(shell, DEFAULT).with {
+		def infoGroup = new Group(shell, DEFAULT).tap {
 			text = 'Details'
 			layout = new GridLayout()
-			layoutData = new GridData(FILL, FILL, true, false, 1, 1).with {
+			layoutData = new GridData(FILL, FILL, true, false, 1, 1).tap {
 				widthHint = 100
-				return it
 			}
-			return it
 		}
 
-		selectedItemLabel = new Label(infoGroup, CENTER | WRAP).with {
-			layoutData = new GridData(FILL, BOTTOM, true, true).with {
-				minimumHeight = 35
-				return it
-			}
+		selectedItemLabel = new Label(infoGroup, CENTER | WRAP).tap {
 			text = '(item preview)'
-			return it
+			layoutData = new GridData(FILL, BOTTOM, true, true).tap {
+				minimumHeight = 35
+			}
 		}
 
-		selectedItemButton = new Button(infoGroup, CENTER | PUSH).with {
+		selectedItemButton = new Button(infoGroup, CENTER | PUSH).tap {
 			enabled = false
-			layoutData = new GridData(CENTER, TOP, true, true)
 			text = 'Open'
-			return it
+			layoutData = new GridData(CENTER, TOP, true, true)
 		}
 	}
 
@@ -269,10 +261,51 @@ class ExplorerWindow {
 
 		shell.openCentered(display, false)
 
-		// Wait until closed
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep()
+		def config = new GraphicsConfiguration()
+		def scene = new Scene()
+
+		def context = new SwtGLContext(previewGroup)
+		def camera = new Camera(new Dimension(640, 480))
+		OpenGLRenderer openGlRenderer
+		context.withCurrent { ->
+			openGlRenderer = new OpenGLRenderer(config, context)
+		}
+		openGlRenderer.withCloseable { renderer ->
+			camera.init(renderer)
+
+			new RenderPipeline(config, context, renderer, null, scene, camera).withCloseable { pipeline ->
+
+				// Rendering loop
+				logger.debug('Graphics engine in render loop...')
+
+				def runnable = new Runnable() {
+					@Override
+					void run() {
+						if (!context.windowShouldClose()) {
+							context.withCurrent { ->
+//								pipeline.render()
+								context.swapBuffers()
+								display.asyncExec(this)
+							}
+						}
+					}
+				}
+
+				display.asyncExec(runnable)
+
+				// Wait until closed
+				context.withCurrent { ->
+					while (!shell.isDisposed()) {
+						if (!display.readAndDispatch()) {
+							display.sleep()
+						}
+					}
+				}
+
+				// Shutdown
+				logger.debug('Shutting down graphics engine')
+				camera.delete(renderer)
+				pipeline.close()
 			}
 		}
 	}

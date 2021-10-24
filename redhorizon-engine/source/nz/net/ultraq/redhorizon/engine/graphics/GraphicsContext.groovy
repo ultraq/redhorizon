@@ -64,6 +64,12 @@ abstract class GraphicsContext extends Context implements InputSource {
 	abstract Dimension getWindowSize()
 
 	/**
+	 * Swap between the front and back buffers, pushing the new frame to the
+	 * display.
+	 */
+	abstract void swapBuffers()
+
+	/**
 	 * Return whether or not the underlying window has signalled to be closed.
 	 * 
 	 * @return

@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
@@ -92,7 +93,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	 * @param config
 	 * @param context
 	 */
-	OpenGLRenderer(GraphicsConfiguration config, OpenGLContext context) {
+	OpenGLRenderer(GraphicsConfiguration config, GraphicsContext context) {
 
 		this.config = config
 

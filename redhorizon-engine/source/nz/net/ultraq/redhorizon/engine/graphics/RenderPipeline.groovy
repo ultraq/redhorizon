@@ -72,7 +72,7 @@ class RenderPipeline implements AutoCloseable {
 		configurePipeline(config, context)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
-		debugOverlay.on(ChangeEvent) { event ->
+		debugOverlay?.on(ChangeEvent) { event ->
 			def postProcessingRenderPass = renderPasses.find { renderPass ->
 				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
 			}
@@ -152,7 +152,7 @@ class RenderPipeline implements AutoCloseable {
 	void render() {
 
 		// Start a new frame
-		debugOverlay.startFrame()
+		debugOverlay?.startFrame()
 		renderer.clear()
 		camera.render(renderer)
 
@@ -179,8 +179,8 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Draw overlays
-		debugOverlay.render()
-		debugOverlay.endFrame()
+		debugOverlay?.render()
+		debugOverlay?.endFrame()
 	}
 
 	/**

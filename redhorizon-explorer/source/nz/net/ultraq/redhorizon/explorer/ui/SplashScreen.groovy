@@ -48,7 +48,7 @@ class SplashScreen {
 		// Splash screen frame
 		shell.background = display.getSystemColor(COLOR_WIDGET_BACKGROUND)
 		shell.backgroundMode = INHERIT_FORCE
-		shell.layout = new GridLayout(2, false).with {
+		shell.layout = new GridLayout(2, false).tap {
 			marginWidth       = 0
 			marginHeight      = 0
 			marginTop         = 0
@@ -57,7 +57,6 @@ class SplashScreen {
 			marginBottom      = 0
 			horizontalSpacing = 0
 			verticalSpacing   = 0
-			return it
 		}
 
 		// Splash screen image
@@ -73,8 +72,8 @@ class SplashScreen {
 		}
 
 		// Text area
-		def textGroup = new Composite(shell, NONE).with {
-			layout = new GridLayout(2, false).with {
+		def textGroup = new Composite(shell, NONE).tap {
+			layout = new GridLayout(2, false).tap {
 				marginWidth       = 0
 				marginHeight      = 0
 				marginTop         = 5
@@ -83,10 +82,8 @@ class SplashScreen {
 				marginBottom      = 5
 				horizontalSpacing = 0
 				verticalSpacing   = 0
-				return it
 			}
 			layoutData = new GridData(FILL, FILL, true, true)
-			return it
 		}
 
 		// Task text area
