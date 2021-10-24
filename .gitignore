@@ -10,4 +10,5 @@ build
 *.log
 *.mix
 *.pcx
+*.shp
 *.v00
