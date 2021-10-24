@@ -162,7 +162,7 @@ class ExplorerWindow {
 		// Selected file preview
 		previewGroup = new Group(shell, DEFAULT).tap {
 			text = 'Preview'
-			layout = new GridLayout()
+			layout = new FillLayout()
 			layoutData = new GridData(FILL, FILL, true, true, 3, 3).tap {
 				widthHint = 300
 			}
@@ -283,7 +283,7 @@ class ExplorerWindow {
 					void run() {
 						if (!context.windowShouldClose()) {
 							context.withCurrent { ->
-//								pipeline.render()
+								pipeline.render()
 								context.swapBuffers()
 								display.asyncExec(this)
 							}

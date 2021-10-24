@@ -19,8 +19,11 @@ package nz.net.ultraq.redhorizon.explorer.ui
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
+import org.eclipse.swt.events.ControlAdapter
+import org.eclipse.swt.events.ControlEvent
 import org.eclipse.swt.graphics.Point
 import org.eclipse.swt.widgets.Composite
+import org.eclipse.swt.widgets.Group
 import org.lwjgl.opengl.swt.GLCanvas
 import org.lwjgl.opengl.swt.GLData
 import static org.eclipse.swt.SWT.*
@@ -60,6 +63,15 @@ class SwtGLContext extends GraphicsContext {
 
 		framebufferSize = new Dimension(glCanvas.size.x, glCanvas.size.y)
 		targetResolution = new Dimension(glCanvas.size.x, glCanvas.size.y)
+
+		composite.addControlListener(new ControlAdapter() {
+			@Override
+			void controlResized(ControlEvent event) {
+				def newSize = ((Group)event.widget).size
+				framebufferSize = new Dimension(newSize.x, newSize.y)
+				targetResolution = new Dimension(newSize.x, newSize.y)
+			}
+		})
 	}
 
 	@Override
