@@ -65,9 +65,7 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 	// Options overlay
 	private ImBoolean shaderScanlines
-	private boolean lastShaderScanlinesState
 	private ImBoolean shaderSharpUpscaling
-	private boolean lastShaderSharpUpscalingState
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
@@ -82,9 +80,7 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		this.context = context
 
 		shaderScanlines = new ImBoolean(config.scanlines)
-		lastShaderScanlinesState = shaderScanlines.get()
 		shaderSharpUpscaling = new ImBoolean(true)
-		lastShaderSharpUpscalingState = shaderSharpUpscaling.get()
 
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -185,8 +181,12 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 		ImGui.text('Post-processing effects')
 		ImGui.separator()
-		ImGui.checkbox('Scanlines', shaderScanlines)
-		ImGui.checkbox('Sharp upscaling', shaderSharpUpscaling)
+		if (ImGui.checkbox('Scanlines', shaderScanlines)) {
+			triggerOnSeparateThread(new ChangeEvent('Scanlines', shaderScanlines.get()))
+		}
+		if (ImGui.checkbox('Sharp upscaling', shaderSharpUpscaling)) {
+			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling.get()))
+		}
 
 		ImGui.end()
 	}
