@@ -28,15 +28,14 @@ import groovy.transform.ToString
  * 
  * @author Emanuel Rabina
  */
-@MapConstructor(excludes = ['debug'], noArg = true)
+@MapConstructor(noArg = true)
 @ToString(includeNames = true, includePackage = false)
 class GraphicsConfiguration {
 
 	final Colour clearColour = BLACK
 
 	/**
-	 * Enable debugging checks and logging.  Is always {@code true} during
-	 * development.
+	 * Enable debugging checks and logging.
 	 */
 	final boolean debug = true
 

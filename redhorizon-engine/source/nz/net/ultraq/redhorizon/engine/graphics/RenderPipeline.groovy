@@ -50,6 +50,7 @@ class RenderPipeline implements AutoCloseable {
 	final Camera camera
 
 	private final List<RenderPass> renderPasses = []
+	private final List<OverlayRenderPass> overlayPasses = []
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -70,6 +71,7 @@ class RenderPipeline implements AutoCloseable {
 		this.camera = camera
 
 		configurePipeline(config, context)
+		overlayPasses << new DebugOverlayRenderPass(config.debug)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
 		debugOverlay.on(ChangeEvent) { event ->
@@ -78,6 +80,17 @@ class RenderPipeline implements AutoCloseable {
 			}
 			postProcessingRenderPass.enabled = event.value
 		}
+	}
+
+	/**
+	 * Register an overlay rendering pass with the rendering pipeline.  Overlays
+	 * are drawn after the scene and use the target resolution of the window.
+	 * 
+	 * @param overlayPass
+	 */
+	void addOverlayPass(OverlayRenderPass overlayPass) {
+
+		overlayPasses.add(overlayPasses.size() - 1, overlayPass)
 	}
 
 	@Override
@@ -137,13 +150,13 @@ class RenderPipeline implements AutoCloseable {
 		)
 
 		// Final pass to emit the result to the screen
-		renderPasses << new ScreenRenderPass(
-			context,
-			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('Screen', modelUniform)
-			)
-		)
+//		renderPasses << new ScreenRenderPass(
+//			context,
+//			renderer.createMaterial(
+//				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+//				shader: renderer.createShader('Screen', modelUniform)
+//			)
+//		)
 	}
 
 	/**
@@ -168,7 +181,7 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Perform all rendering passes
-		renderPasses.inject(visibleElements) { lastResult, renderPass ->
+		def sceneResult = renderPasses.inject(visibleElements) { lastResult, renderPass ->
 			if (renderPass.enabled) {
 				renderer.setRenderTarget(renderPass.framebuffer)
 				renderer.clear()
@@ -177,9 +190,14 @@ class RenderPipeline implements AutoCloseable {
 			}
 			return lastResult
 		}
+		renderer.setRenderTarget(null)
 
 		// Draw overlays
-		debugOverlay.render()
+		overlayPasses.each { overlayPass ->
+			if (overlayPass.enabled) {
+				overlayPass.render(renderer, sceneResult)
+			}
+		}
 		debugOverlay.endFrame()
 	}
 
@@ -188,7 +206,7 @@ class RenderPipeline implements AutoCloseable {
 	 * resolution.
 	 */
 	@TupleConstructor(defaults = false, includes = ['framebuffer'])
-	class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
+	private class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
 
 		final Framebuffer framebuffer
 		final boolean enabled = true
@@ -225,7 +243,7 @@ class RenderPipeline implements AutoCloseable {
 	 * applying some effect to it for the next post-processing pass.
 	 */
 	@TupleConstructor
-	class PostProcessingRenderPass implements RenderPass<Framebuffer> {
+	private class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer
 		final Material material
@@ -250,7 +268,7 @@ class RenderPipeline implements AutoCloseable {
 	 * The final render pass for taking the result of the post-processing chain
 	 * and drawing it to the screen.
 	 */
-	class ScreenRenderPass implements RenderPass<Framebuffer> {
+	private class ScreenRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer = null
 		final Material material
@@ -308,6 +326,21 @@ class RenderPipeline implements AutoCloseable {
 
 			material.texture = previous.texture
 			renderer.drawMaterial(material)
+		}
+	}
+
+	/**
+	 * An overlay render pass that runs the debugging overlay.
+	 */
+	@TupleConstructor(defaults = false)
+	private class DebugOverlayRenderPass implements OverlayRenderPass {
+
+		final boolean enabled
+
+		@Override
+		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
+
+			debugOverlay.render(sceneFramebufferResult)
 		}
 	}
 }

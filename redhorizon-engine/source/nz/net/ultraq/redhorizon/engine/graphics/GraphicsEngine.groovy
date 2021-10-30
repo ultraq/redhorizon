@@ -47,6 +47,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	private GraphicsContext graphicsContext
 	private Camera camera
+	private RenderPipeline renderPipeline
 	private boolean started
 
 	/**
@@ -88,6 +89,16 @@ class GraphicsEngine extends Engine implements InputSource {
 	GraphicsContext getGraphicsContext() {
 
 		return graphicsContext
+	}
+
+	/**
+	 * Return the rendering pipeline.
+	 * 
+	 * @return
+	 */
+	RenderPipeline getRenderPipeline() {
+
+		return renderPipeline
 	}
 
 	/**
@@ -135,7 +146,8 @@ class GraphicsEngine extends Engine implements InputSource {
 						logger.debug(renderer.toString())
 						camera.init(renderer)
 
-						new RenderPipeline(config, context, renderer, debugOverlay, scene, camera).withCloseable { pipeline ->
+						renderPipeline = new RenderPipeline(config, context, renderer, debugOverlay, scene, camera)
+						renderPipeline.withCloseable { pipeline ->
 
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')

@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
-
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
-
-import groovy.transform.EqualsAndHashCode
+package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * OpenGL implementation of a texture.
+ * A rendering pass for drawing overlay content to the game viewport.
  * 
  * @author Emanuel Rabina
  */
-@EqualsAndHashCode
-class OpenGLTexture extends Texture {
-
-	final int textureId
+interface OverlayRenderPass {
 
 	/**
-	 * Configure the texture with a map argument.
+	 * Return whether or not this render pass should run.
 	 * 
-	 * @param args
+	 * @return
 	 */
-	OpenGLTexture(Map args) {
+	boolean isEnabled()
 
-		super(args.width, args.height)
-		textureId = args.textureId ?: 0
-	}
+	/**
+	 * Render the overlay.
+	 * 
+	 * @param renderer
+	 * @param sceneFramebufferResult
+	 */
+	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
 }

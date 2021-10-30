@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.redhorizon.explorer.ui.ExplorerWindow
 import nz.net.ultraq.redhorizon.explorer.ui.SplashScreen
 
 import picocli.CommandLine
@@ -58,14 +59,16 @@ class Explorer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		def splashScreen = new SplashScreen(commandSpec.version()[0] ?: '(development)')
-		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-			executorService.execute { ->
-				Thread.sleep(5000)
-				splashScreen.close()
-			}
-			splashScreen.open()
-		}
+//		def splashScreen = new SplashScreen(commandSpec.version()[0] ?: '(development)')
+//		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+//			executorService.execute { ->
+//				Thread.sleep(commandSpec.version()[0] != null ? 3000 : 1000)
+//				splashScreen.close()
+//			}
+//			splashScreen.open()
+//		}
+
+		new ExplorerWindow().start()
 
 		return 0
 	}

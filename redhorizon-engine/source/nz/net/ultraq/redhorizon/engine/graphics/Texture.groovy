@@ -16,8 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.geometry.Dimension
+
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.MapConstructor
 
 /**
  * Representation of a single texture to render.
@@ -25,9 +26,22 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @EqualsAndHashCode
-@MapConstructor
 abstract class Texture {
 
 	final int width
 	final int height
+	final Dimension size
+
+	/**
+	 * Constructor, create a new texture of the given dimensions.
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	protected Texture(int width, int height) {
+
+		this.width = width
+		this.height = height
+		size = new Dimension(width, height)
+	}
 }

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -26,13 +27,20 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.geometry.Dimension
+import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
+import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiConfigFlags.*
+import static imgui.flag.ImGuiDockNodeFlags.*
+import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 
 import java.util.concurrent.ArrayBlockingQueue
@@ -82,9 +90,15 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		shaderScanlines = new ImBoolean(config.scanlines)
 		shaderSharpUpscaling = new ImBoolean(true)
 
+		// TODO: Split the ImGui setup from the debug overlay
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
 		ImGui.createContext()
+
+		def io = ImGui.getIO()
+		io.setConfigFlags(DockingEnable)
+		io.fonts.addFontFromFileTTF('Roboto-Medium.ttf', 16)
+
 		imGuiGlfw.init(context.window, true)
 		imGuiGl3.init('#version 410 core')
 
@@ -140,10 +154,9 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	private void drawDebugOverlay() {
 
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(10, 10)
+		ImGui.setNextWindowPos(10, 30, FirstUseEver)
 
-		ImGui.begin('Debug overlay', new ImBoolean(true),
-			NoNav | NoDecoration | AlwaysAutoResize | NoSavedSettings | NoFocusOnAppearing | NoMove)
+		ImGui.begin('Debug overlay', new ImBoolean(true), NoFocusOnAppearing)
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Draw calls: ${drawCalls}")
@@ -173,11 +186,10 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	private void drawGameOptions() {
 
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(context.windowSize.width - 210, 10)
-		ImGui.setNextWindowSize(200, 100)
+		ImGui.setNextWindowPos(context.windowSize.width - 210, 30, FirstUseEver)
+		ImGui.setNextWindowSize(200, 100, FirstUseEver)
 
-		ImGui.begin('Options', new ImBoolean(true),
-			NoNav | NoDecoration | NoResize | NoSavedSettings | NoFocusOnAppearing | NoMove)
+		ImGui.begin('Options', new ImBoolean(true), NoFocusOnAppearing)
 
 		ImGui.text('Post-processing effects')
 		ImGui.separator()
@@ -187,6 +199,51 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		if (ImGui.checkbox('Sharp upscaling', shaderSharpUpscaling)) {
 			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling.get()))
 		}
+
+		ImGui.end()
+	}
+
+	/**
+	 * Draw the scene from the given framebuffer into an ImGui window that will
+	 * take up the whole screen by default.
+	 * 
+	 * @param sceneFramebufferResult
+	 */
+	private void drawScene(Framebuffer<OpenGLTexture> sceneFramebufferResult) {
+
+		ImGui.setNextWindowPos(100, 100, FirstUseEver)
+		ImGui.setNextWindowSize(640, 400, FirstUseEver)
+		ImGui.pushStyleVar(WindowPadding, 0, 0)
+
+		ImGui.begin("Scene", new ImBoolean(true), NoScrollbar)
+		ImGui.popStyleVar()
+
+		def framebufferSize = sceneFramebufferResult.texture.size
+		def windowSize = new Dimension(ImGui.getContentRegionAvailX() as int, ImGui.getContentRegionAvailY() as int)
+		def imageSizeX = windowSize.width
+		def imageSizeY = windowSize.height
+		def uvX = 0f
+		def uvY = 0f
+		def cursorX = 0
+		def cursorY = ImGui.getCursorPosY()
+
+		// Window is wider
+		if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
+			uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
+			imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
+			cursorX = (windowSize.width - imageSizeX) * 0.5f as float
+		}
+		// Window is taller
+		else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
+			uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
+			imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
+			cursorY = cursorY +(windowSize.height - imageSizeY) * 0.5f as float
+		}
+
+		ImGui.setCursorPos(cursorX, cursorY)
+//		logger.debug('cursorX: {}, cursorY: {}', cursorX, cursorY)
+		ImGui.image(sceneFramebufferResult.texture.textureId, imageSizeX, imageSizeY,
+			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
 		ImGui.end()
 	}
@@ -203,11 +260,46 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 	/**
 	 * Draw all of the ImGui elements to the screen.
+	 * 
+	 * @param sceneFramebufferResult
 	 */
-	void render() {
+	void render(Framebuffer sceneFramebufferResult) {
 
+		setUpDockspace()
+		drawScene(sceneFramebufferResult)
 		drawDebugOverlay()
 		drawGameOptions()
+	}
+
+	/**
+	 * Build the docking window into which the app will be rendered.
+	 */
+	private void setUpDockspace() {
+
+		def viewport = ImGui.getMainViewport()
+		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY)
+		ImGui.setNextWindowSize(viewport.workSizeX, viewport.workSizeY)
+		ImGui.pushStyleVar(WindowBorderSize, 0)
+		ImGui.pushStyleVar(WindowPadding, 0, 0)
+		ImGui.pushStyleVar(WindowRounding, 0)
+
+		ImGui.begin('Dockspace', new ImBoolean(true),
+			NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
+		ImGui.popStyleVar(3)
+
+		ImGui.dockSpace(ImGui.getID('MyDockspace'), viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
+
+		if (ImGui.beginMenuBar()) {
+			if (ImGui.beginMenu('File')) {
+				if (ImGui.menuItem('Exit')) {
+					triggerOnSeparateThread(new GuiEvent(EVENT_TYPE_STOP))
+				}
+				ImGui.endMenu()
+			}
+			ImGui.endMenuBar()
+		}
+
+		ImGui.end()
 	}
 
 	/**
@@ -217,18 +309,6 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
-
-		def currentShaderScanlinesState = shaderScanlines.get()
-		if (currentShaderScanlinesState != lastShaderScanlinesState) {
-			triggerOnSeparateThread(new ChangeEvent('Scanlines', currentShaderScanlinesState))
-			lastShaderScanlinesState = currentShaderScanlinesState
-		}
-
-		def currentShaderSharpUpscalingState = shaderSharpUpscaling.get()
-		if (currentShaderSharpUpscalingState != lastShaderSharpUpscalingState) {
-			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', currentShaderSharpUpscalingState))
-			lastShaderSharpUpscalingState = currentShaderSharpUpscalingState
-		}
 	}
 
 	/**

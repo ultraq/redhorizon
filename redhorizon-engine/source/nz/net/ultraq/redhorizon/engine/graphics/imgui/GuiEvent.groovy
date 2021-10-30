@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.events.Event
 
-import groovy.transform.EqualsAndHashCode
+import groovy.transform.TupleConstructor
 
 /**
- * OpenGL implementation of a texture.
+ * Any event triggered by the GUI.
  * 
  * @author Emanuel Rabina
  */
-@EqualsAndHashCode
-class OpenGLTexture extends Texture {
+@TupleConstructor(defaults = false)
+class GuiEvent extends Event {
 
-	final int textureId
+	static final String EVENT_TYPE_STOP = "Stop"
 
-	/**
-	 * Configure the texture with a map argument.
-	 * 
-	 * @param args
-	 */
-	OpenGLTexture(Map args) {
-
-		super(args.width, args.height)
-		textureId = args.textureId ?: 0
-	}
+	final String type
 }
