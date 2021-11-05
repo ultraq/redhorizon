@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
@@ -28,6 +29,7 @@ import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 
@@ -71,7 +73,7 @@ class RenderPipeline implements AutoCloseable {
 		this.camera = camera
 
 		configurePipeline(config, context)
-		overlayPasses << new DebugOverlayRenderPass(config.debug)
+		overlayPasses << new DebugOverlayRenderPass(config.debug, context)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
 		debugOverlay.on(ChangeEvent) { event ->
@@ -150,13 +152,14 @@ class RenderPipeline implements AutoCloseable {
 		)
 
 		// Final pass to emit the result to the screen
-//		renderPasses << new ScreenRenderPass(
-//			context,
-//			renderer.createMaterial(
-//				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-//				shader: renderer.createShader('Screen', modelUniform)
-//			)
-//		)
+		renderPasses << new ScreenRenderPass(
+			renderer.createMaterial(
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				shader: renderer.createShader('Screen', modelUniform)
+			),
+			!config.debug,
+			context
+		)
 	}
 
 	/**
@@ -272,23 +275,32 @@ class RenderPipeline implements AutoCloseable {
 
 		final Framebuffer framebuffer = null
 		final Material material
-		final boolean enabled = true
+		boolean enabled
 
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
 		 * to changes in output/window resolution.
 		 * 
-		 * @param context
 		 * @param material
+		 * @param enabled
+		 * @param context
 		 */
-		ScreenRenderPass(GraphicsContext context, Material material) {
+		ScreenRenderPass(Material material, boolean enabled, GraphicsContext context) {
 
 			this.material = material
+			this.enabled = enabled
 
 			material.transform.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
-
 			context.on(FramebufferSizeEvent) { event ->
 				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
+			}
+
+			context.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS) {
+					if (event.key == GLFW_KEY_O) {
+						this.enabled = !this.enabled
+					}
+				}
 			}
 		}
 
@@ -332,10 +344,29 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * An overlay render pass that runs the debugging overlay.
 	 */
-	@TupleConstructor(defaults = false)
 	private class DebugOverlayRenderPass implements OverlayRenderPass {
 
-		final boolean enabled
+		boolean enabled
+
+		/**
+		 * Constructor, tie the use of this rendering pass to whether debugging is
+		 * on or off.
+		 * 
+		 * @param enabled
+		 * @param context
+		 */
+		DebugOverlayRenderPass(boolean enabled, GraphicsContext context) {
+
+			this.enabled = enabled
+
+			context.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS) {
+					if (event.key == GLFW_KEY_O) {
+						this.enabled = !this.enabled
+					}
+				}
+			}
+		}
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {

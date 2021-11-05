@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -209,7 +208,7 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	 * 
 	 * @param sceneFramebufferResult
 	 */
-	private void drawScene(Framebuffer<OpenGLTexture> sceneFramebufferResult) {
+	private void drawScene(Framebuffer sceneFramebufferResult) {
 
 		ImGui.setNextWindowPos(100, 100, FirstUseEver)
 		ImGui.setNextWindowSize(640, 400, FirstUseEver)
