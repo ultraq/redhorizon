@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.engine.input.InputEvent
 
 import groovy.transform.TupleConstructor
 
@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class GuiEvent extends Event {
+class GuiEvent extends InputEvent {
 
 	static final String EVENT_TYPE_STOP = "Stop"
 

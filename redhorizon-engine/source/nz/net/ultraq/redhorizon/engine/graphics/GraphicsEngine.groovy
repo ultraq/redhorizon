@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -43,6 +44,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	private final GraphicsConfiguration config
 	private final Scene scene
+	private final InputEventStream inputEventStream
 	private final Closure mainThreadCallback
 
 	private GraphicsContext graphicsContext
@@ -55,17 +57,19 @@ class GraphicsEngine extends Engine implements InputSource {
 	 * 
 	 * @param config
 	 * @param scene
+	 * @param inputEventStream
 	 * @param mainThreadCallback
 	 *   Closure for notifying the caller that a given method (passed as the first
 	 *   parameter of the closure) needs invoking.  Some GLFW operations can only
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(GraphicsConfiguration config, Scene scene,
+	GraphicsEngine(GraphicsConfiguration config, Scene scene, InputEventStream inputEventStream,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure mainThreadCallback) {
 
 		this.config = config ?: new GraphicsConfiguration()
 		this.scene = scene
+		this.inputEventStream = inputEventStream
 		this.mainThreadCallback = System.getProperty('os.name').contains('Mac OS') ?
 			mainThreadCallback :
 			{ FutureTask<?> executable -> executable.run() }
@@ -144,6 +148,7 @@ class GraphicsEngine extends Engine implements InputSource {
 				new OpenGLRenderer(config, context).withCloseable { renderer ->
 					new ImGuiDebugOverlay(config, context, renderer).withCloseable { debugOverlay ->
 						logger.debug(renderer.toString())
+						inputEventStream.addInputSource(debugOverlay)
 						camera.init(renderer)
 
 						renderPipeline = new RenderPipeline(config, context, renderer, debugOverlay, scene, camera)
