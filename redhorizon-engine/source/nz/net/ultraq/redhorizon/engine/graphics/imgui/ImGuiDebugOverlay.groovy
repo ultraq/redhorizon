@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -53,11 +54,10 @@ import java.util.concurrent.Executors
  * 
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
+class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 	private static final int MAX_DEBUG_LINES = 10
 
-	private final GraphicsContext context
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
@@ -69,10 +69,13 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	private int activeFramebuffers = 0
 	private int activeMeshes = 0
 	private int activeTextures = 0
+	private int debugWindowSizeX = 350
+	private int debugWindowSizeY = 200
 
-	// Options overlay
-	private ImBoolean shaderScanlines
-	private ImBoolean shaderSharpUpscaling
+	// Options
+	private boolean debugOverlay
+	private boolean shaderScanlines
+	private boolean shaderSharpUpscaling
 
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
@@ -84,10 +87,9 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	 */
 	ImGuiDebugOverlay(GraphicsConfiguration config, GraphicsContext context, EventTarget renderer) {
 
-		this.context = context
-
-		shaderScanlines = new ImBoolean(config.scanlines)
-		shaderSharpUpscaling = new ImBoolean(true)
+		debugOverlay = config.debug
+		shaderScanlines = config.scanlines
+		shaderSharpUpscaling = true
 
 		// TODO: Split the ImGui setup from the debug overlay
 		imGuiGlfw = new ImGuiImplGlfw()
@@ -152,10 +154,14 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	 */
 	private void drawDebugOverlay() {
 
+		def viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(10, 30, FirstUseEver)
+		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, 30)
 
-		ImGui.begin('Debug overlay', new ImBoolean(true), NoFocusOnAppearing)
+		ImGui.begin('Debug overlay', new ImBoolean(true),
+			NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+		debugWindowSizeX = ImGui.getWindowSizeX() as int
+		debugWindowSizeY = ImGui.getWindowSizeY() as int
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Draw calls: ${drawCalls}")
@@ -174,29 +180,6 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 			debugLines.each { line ->
 				ImGui.text(line)
 			}
-		}
-
-		ImGui.end()
-	}
-
-	/**
-	 * Draw a small overlay of options that can be modified while running.
-	 */
-	private void drawGameOptions() {
-
-		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(context.windowSize.width - 210, 30, FirstUseEver)
-		ImGui.setNextWindowSize(200, 100, FirstUseEver)
-
-		ImGui.begin('Options', new ImBoolean(true), NoFocusOnAppearing)
-
-		ImGui.text('Post-processing effects')
-		ImGui.separator()
-		if (ImGui.checkbox('Scanlines', shaderScanlines)) {
-			triggerOnSeparateThread(new ChangeEvent('Scanlines', shaderScanlines.get()))
-		}
-		if (ImGui.checkbox('Sharp upscaling', shaderSharpUpscaling)) {
-			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling.get()))
 		}
 
 		ImGui.end()
@@ -240,7 +223,6 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 		}
 
 		ImGui.setCursorPos(cursorX, cursorY)
-//		logger.debug('cursorX: {}, cursorY: {}', cursorX, cursorY)
 		ImGui.image(sceneFramebufferResult.texture.textureId, imageSizeX, imageSizeY,
 			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
@@ -265,9 +247,12 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	void render(Framebuffer sceneFramebufferResult) {
 
 		setUpDockspace()
+
 		drawScene(sceneFramebufferResult)
-		drawDebugOverlay()
-		drawGameOptions()
+
+		if (debugOverlay) {
+			drawDebugOverlay()
+		}
 	}
 
 	/**
@@ -276,8 +261,8 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	private void setUpDockspace() {
 
 		def viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY)
-		ImGui.setNextWindowSize(viewport.workSizeX, viewport.workSizeY)
+		ImGui.setNextWindowPos(0, 0)
+		ImGui.setNextWindowSize(viewport.workSizeX, viewport.workSizeY + 2 as float)
 		ImGui.pushStyleVar(WindowBorderSize, 0)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.pushStyleVar(WindowRounding, 0)
@@ -286,15 +271,32 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 			NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
 		ImGui.popStyleVar(3)
 
-		ImGui.dockSpace(ImGui.getID('MyDockspace'), viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
+		ImGui.dockSpace(ImGui.getID('MyDockspace'), viewport.workSizeX, viewport.workSizeY - 20 as float, PassthruCentralNode)
 
 		if (ImGui.beginMenuBar()) {
+
 			if (ImGui.beginMenu('File')) {
 				if (ImGui.menuItem('Exit')) {
 					triggerOnSeparateThread(new GuiEvent(EVENT_TYPE_STOP))
 				}
 				ImGui.endMenu()
 			}
+
+			if (ImGui.beginMenu('Options')) {
+				if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
+					debugOverlay = !debugOverlay
+				}
+				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
+					shaderScanlines = !shaderScanlines
+					triggerOnSeparateThread(new ChangeEvent('Scanlines', shaderScanlines))
+				}
+				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
+					shaderSharpUpscaling = !shaderSharpUpscaling
+					triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
+				}
+				ImGui.endMenu()
+			}
+
 			ImGui.endMenuBar()
 		}
 
