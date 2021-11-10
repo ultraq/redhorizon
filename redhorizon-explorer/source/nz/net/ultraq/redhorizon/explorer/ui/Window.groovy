@@ -38,12 +38,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
  * 
  * @author Emanuel Rabina
  */
-class ExplorerWindow extends Application {
+class Window extends Application {
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
-	ExplorerWindow() {
+	Window() {
 
 		super(new AudioConfiguration(), new GraphicsConfiguration(
 			renderResolution: new Dimension(800, 500)

@@ -16,8 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.explorer.ui.ExplorerWindow
-import nz.net.ultraq.redhorizon.explorer.ui.SplashScreen
+import nz.net.ultraq.redhorizon.explorer.ui.Window
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -25,7 +24,6 @@ import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
-import java.util.concurrent.Executors
 
 /**
  * Red Horizon Explorer 🔎
@@ -68,7 +66,7 @@ class Explorer implements Callable<Integer> {
 //			splashScreen.open()
 //		}
 
-		new ExplorerWindow().start()
+		new Window().start()
 
 		return 0
 	}
