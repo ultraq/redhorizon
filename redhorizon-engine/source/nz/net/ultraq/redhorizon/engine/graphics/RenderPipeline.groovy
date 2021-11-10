@@ -92,7 +92,7 @@ class RenderPipeline implements AutoCloseable {
 	 */
 	void addOverlayPass(OverlayRenderPass overlayPass) {
 
-		overlayPasses.add(overlayPasses.size() - 1, overlayPass)
+		overlayPasses << overlayPass
 	}
 
 	@Override

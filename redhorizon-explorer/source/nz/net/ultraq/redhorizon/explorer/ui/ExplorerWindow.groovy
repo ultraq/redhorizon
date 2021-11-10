@@ -24,16 +24,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import imgui.ImGui
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiStyleVar.*
-import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_X
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
@@ -50,7 +46,6 @@ class ExplorerWindow extends Application {
 	ExplorerWindow() {
 
 		super(new AudioConfiguration(), new GraphicsConfiguration(
-			debug: false,
 			renderResolution: new Dimension(800, 500)
 		))
 	}
@@ -83,30 +78,6 @@ class ExplorerWindow extends Application {
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
-
-			def viewport = ImGui.getMainViewport()
-			ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY)
-			ImGui.setNextWindowSize(viewport.workSizeX, viewport.workSizeY)
-			ImGui.pushStyleVar(WindowRounding, 0)
-			ImGui.pushStyleVar(WindowBorderSize, 0)
-
-			ImGui.begin('Dockspace', new ImBoolean(true),
-				NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking)
-			ImGui.popStyleVar(2)
-
-			ImGui.dockSpace(ImGui.getID('MyDockspace'))
-
-			if (ImGui.beginMenuBar()) {
-				if (ImGui.beginMenu('File')) {
-					if (ImGui.menuItem('Exit')) {
-						stop()
-					}
-					ImGui.endMenu()
-				}
-				ImGui.endMenuBar()
-			}
-
-			ImGui.end()
 
 			ImGui.begin('Current directory', new ImBoolean(true))
 			ImGui.text('Hello!')
