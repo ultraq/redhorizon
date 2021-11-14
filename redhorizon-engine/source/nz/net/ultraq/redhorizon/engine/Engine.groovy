@@ -16,14 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Common code for any of the specific engine systems.
@@ -34,7 +30,6 @@ abstract class Engine implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	protected final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final int targetRenderTimeMs
 
 	protected boolean running
@@ -58,7 +53,7 @@ abstract class Engine implements EventTarget, Runnable {
 	protected void engineLoop(Closure closure) {
 
 		running = true
-		triggerOnSeparateThread(new EngineLoopStartEvent())
+		trigger(new EngineLoopStartEvent())
 
 		try {
 			while (shouldRun()) {
@@ -67,11 +62,11 @@ abstract class Engine implements EventTarget, Runnable {
 					Thread.sleep(targetRenderTimeMs - renderTime)
 				}
 			}
-			triggerOnSeparateThread(new EngineLoopStopEvent())
+			trigger(new EngineLoopStopEvent())
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
-			triggerOnSeparateThread(new EngineLoopStopEvent(ex))
+			trigger(new EngineLoopStopEvent(ex))
 		}
 		finally {
 			stop()
@@ -97,17 +92,5 @@ abstract class Engine implements EventTarget, Runnable {
 	void stop() {
 
 		running = false
-	}
-
-	/**
-	 * Fire an event on a separate thread using the built-in executor.
-	 * 
-	 * @param event
-	 */
-	protected void triggerOnSeparateThread(Event event) {
-
-		executorService.execute { ->
-			trigger(event)
-		}
 	}
 }

@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
-import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
@@ -37,8 +36,6 @@ import static imgui.flag.ImGuiWindowFlags.*
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
@@ -53,7 +50,6 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	private final GraphicsContext context
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
 
 	// Debug overlay
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
@@ -131,7 +127,6 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
-		executorService.shutdownAwaitTermination()
 		imGuiGl3.dispose()
 		imGuiGlfw.dispose()
 		ImGui.destroyContext()
@@ -220,26 +215,14 @@ class ImGuiDebugOverlay implements AutoCloseable, EventTarget {
 
 		def currentShaderScanlinesState = shaderScanlines.get()
 		if (currentShaderScanlinesState != lastShaderScanlinesState) {
-			triggerOnSeparateThread(new ChangeEvent('Scanlines', currentShaderScanlinesState))
+			trigger(new ChangeEvent('Scanlines', currentShaderScanlinesState))
 			lastShaderScanlinesState = currentShaderScanlinesState
 		}
 
 		def currentShaderSharpUpscalingState = shaderSharpUpscaling.get()
 		if (currentShaderSharpUpscalingState != lastShaderSharpUpscalingState) {
-			triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', currentShaderSharpUpscalingState))
+			trigger(new ChangeEvent('SharpUpscaling', currentShaderSharpUpscalingState))
 			lastShaderSharpUpscalingState = currentShaderSharpUpscalingState
-		}
-	}
-
-	/**
-	 * Fire an event on a separate thread using the built-in executor.
-	 * 
-	 * @param event
-	 */
-	private void triggerOnSeparateThread(Event event) {
-
-		executorService.execute { ->
-			trigger(event)
 		}
 	}
 }

@@ -20,6 +20,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Inspired by the DOM, an event target is a class that can generate events
@@ -30,19 +32,37 @@ import java.util.concurrent.CopyOnWriteArrayList
 trait EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
+	private static final ExecutorService executorService = Executors.newCachedThreadPool()
 
-	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners = new CopyOnWriteArrayList<>()
+	private final List<Tuple3<Class<? extends Event>, EventListener<? extends Event>, Boolean>> eventListeners =
+		new CopyOnWriteArrayList<>()
 
 	/**
-	 * Register an event listener on this event target.  When the event is fired
-	 * by the target, then the listener will be invoked with that event.
+	 * Register an event listener on this event target.  When the event is
+	 * triggered by the target, then the listener will be invoked with that event
+	 * on a separate thread from what triggered the event.
 	 * 
 	 * @param eventClass
 	 * @param eventListener
 	 */
 	public <E extends Event> void on(Class<E> eventClass, EventListener<E> eventListener) {
 
-		eventListeners << new Tuple2<>(eventClass, eventListener)
+		on(eventClass, false, eventListener)
+	}
+
+	/**
+	 * Register an event listener on this event target, with the configured
+	 * threading behaviour.  When the event is triggered by the target, then the
+	 * listener will be invoked with that event, either on a separate thread from
+	 * what triggered the event or the same thread.
+	 * 
+	 * @param eventClass
+	 * @param eventListener
+	 * @param useTriggeringThread
+	 */
+	public <E extends Event> void on(Class<E> eventClass, boolean useTriggeringThread, EventListener<E> eventListener) {
+
+		eventListeners << new Tuple3<>(eventClass, eventListener, useTriggeringThread)
 	}
 
 	/**
@@ -68,10 +88,17 @@ trait EventTarget {
 	public <E extends Event> void trigger(E event) {
 
 		eventListeners.each { tuple ->
-			def (eventClass, listener) = tuple
+			def (eventClass, listener, useTriggeringThread) = tuple
 			if (eventClass.isInstance(event)) {
 				try {
-					listener.handleEvent(event)
+					if (useTriggeringThread) {
+						listener.handleEvent(event)
+					}
+					else {
+						executorService.execute { ->
+							listener.handleEvent(event)
+						}
+					}
 				}
 				catch (Exception ex) {
 					logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
