@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
-import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
@@ -45,8 +44,6 @@ import static imgui.flag.ImGuiWindowFlags.*
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
@@ -60,7 +57,6 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
 
 	// Debug overlay
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
@@ -142,7 +138,6 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 	@Override
 	void close() {
 
-		executorService.shutdownAwaitTermination()
 		imGuiGl3.dispose()
 		imGuiGlfw.dispose()
 		ImGui.destroyContext()
@@ -277,7 +272,7 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 			if (ImGui.beginMenu('File')) {
 				if (ImGui.menuItem('Exit')) {
-					triggerOnSeparateThread(new GuiEvent(EVENT_TYPE_STOP))
+					trigger(new GuiEvent(EVENT_TYPE_STOP))
 				}
 				ImGui.endMenu()
 			}
@@ -288,11 +283,11 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 				}
 				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
 					shaderScanlines = !shaderScanlines
-					triggerOnSeparateThread(new ChangeEvent('Scanlines', shaderScanlines))
+					trigger(new ChangeEvent('Scanlines', shaderScanlines))
 				}
 				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
 					shaderSharpUpscaling = !shaderSharpUpscaling
-					triggerOnSeparateThread(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
+					trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
 				}
 				ImGui.endMenu()
 			}
@@ -310,17 +305,5 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
-	}
-
-	/**
-	 * Fire an event on a separate thread using the built-in executor.
-	 * 
-	 * @param event
-	 */
-	private void triggerOnSeparateThread(Event event) {
-
-		executorService.execute { ->
-			trigger(event)
-		}
 	}
 }
