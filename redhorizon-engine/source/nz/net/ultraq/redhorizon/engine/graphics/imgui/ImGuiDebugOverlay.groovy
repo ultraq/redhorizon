@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
@@ -41,6 +42,8 @@ import static imgui.flag.ImGuiConfigFlags.*
 import static imgui.flag.ImGuiDockNodeFlags.*
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -57,6 +60,7 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
+	private boolean drawChrome = true
 
 	// Debug overlay
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
@@ -133,6 +137,14 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 				}
 			}
 		}
+
+		context.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				if (event.key == GLFW_KEY_O) {
+					drawChrome = !drawChrome
+				}
+			}
+		}
 	}
 
 	@Override
@@ -151,7 +163,7 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 
 		def viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, 30)
+		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, drawChrome ? 55 : 10)
 
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
@@ -241,9 +253,10 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 	 */
 	void render(Framebuffer sceneFramebufferResult) {
 
-		setUpDockspace()
-
-		drawScene(sceneFramebufferResult)
+		if (drawChrome) {
+			setUpDockspace()
+			drawScene(sceneFramebufferResult)
+		}
 
 		if (debugOverlay) {
 			drawDebugOverlay()

@@ -73,7 +73,7 @@ class RenderPipeline implements AutoCloseable {
 		this.camera = camera
 
 		configurePipeline(config, context)
-		overlayPasses << new DebugOverlayRenderPass(config.debug, context)
+		overlayPasses << new DebugOverlayRenderPass(config.debug)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
 		debugOverlay.on(ChangeEvent) { event ->
@@ -353,19 +353,10 @@ class RenderPipeline implements AutoCloseable {
 		 * on or off.
 		 * 
 		 * @param enabled
-		 * @param context
 		 */
-		DebugOverlayRenderPass(boolean enabled, GraphicsContext context) {
+		DebugOverlayRenderPass(boolean enabled) {
 
 			this.enabled = enabled
-
-			context.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS) {
-					if (event.key == GLFW_KEY_O) {
-						this.enabled = !this.enabled
-					}
-				}
-			}
 		}
 
 		@Override
