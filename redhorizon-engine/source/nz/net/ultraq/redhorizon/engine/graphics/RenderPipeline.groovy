@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -47,7 +47,7 @@ class RenderPipeline implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 
 	final GraphicsRenderer renderer
-	final ImGuiDebugOverlay debugOverlay
+	final ImGuiLayer imGuiLayer
 	final Scene scene
 	final Camera camera
 
@@ -60,15 +60,15 @@ class RenderPipeline implements AutoCloseable {
 	 * @param config
 	 * @param context
 	 * @param renderer
-	 * @param debugOverlay
+	 * @param imGuiLayer
 	 * @param scene
 	 * @param camera
 	 */
 	RenderPipeline(GraphicsConfiguration config, GraphicsContext context, GraphicsRenderer renderer,
-		ImGuiDebugOverlay debugOverlay, Scene scene, Camera camera) {
+		ImGuiLayer imGuiLayer, Scene scene, Camera camera) {
 
 		this.renderer = renderer
-		this.debugOverlay = debugOverlay
+		this.imGuiLayer = imGuiLayer
 		this.scene = scene
 		this.camera = camera
 
@@ -76,7 +76,7 @@ class RenderPipeline implements AutoCloseable {
 		overlayPasses << new DebugOverlayRenderPass(config.debug)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
-		debugOverlay.on(ChangeEvent) { event ->
+		imGuiLayer.on(ChangeEvent) { event ->
 			def postProcessingRenderPass = renderPasses.find { renderPass ->
 				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
 			}
@@ -168,7 +168,7 @@ class RenderPipeline implements AutoCloseable {
 	void render() {
 
 		// Start a new frame
-		debugOverlay.startFrame()
+		imGuiLayer.startFrame()
 		renderer.clear()
 		camera.render(renderer)
 
@@ -201,7 +201,7 @@ class RenderPipeline implements AutoCloseable {
 				overlayPass.render(renderer, sceneResult)
 			}
 		}
-		debugOverlay.endFrame()
+		imGuiLayer.endFrame()
 	}
 
 	/**
@@ -362,7 +362,7 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
 
-			debugOverlay.render(sceneFramebufferResult)
+			imGuiLayer.render(sceneFramebufferResult)
 		}
 	}
 }

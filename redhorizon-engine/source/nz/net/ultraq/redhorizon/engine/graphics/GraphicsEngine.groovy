@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
@@ -146,12 +146,12 @@ class GraphicsEngine extends Engine implements InputSource {
 				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
 				new OpenGLRenderer(config, context).withCloseable { renderer ->
-					new ImGuiDebugOverlay(config, context, renderer).withCloseable { debugOverlay ->
+					new ImGuiLayer(config, context, renderer).withCloseable { imGuiLayer ->
 						logger.debug(renderer.toString())
-						inputEventStream.addInputSource(debugOverlay)
+						inputEventStream.addInputSource(imGuiLayer)
 						camera.init(renderer)
 
-						renderPipeline = new RenderPipeline(config, context, renderer, debugOverlay, scene, camera)
+						renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, scene, camera)
 						renderPipeline.withCloseable { pipeline ->
 
 							// Rendering loop

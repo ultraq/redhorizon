@@ -54,7 +54,7 @@ import java.util.concurrent.BlockingQueue
  * 
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlay implements AutoCloseable, InputSource {
+class ImGuiLayer implements AutoCloseable, InputSource {
 
 	private static final int MAX_DEBUG_LINES = 10
 
@@ -85,7 +85,7 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 	 * @param context
 	 * @param renderer
 	 */
-	ImGuiDebugOverlay(GraphicsConfiguration config, GraphicsContext context, EventTarget renderer) {
+	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context, EventTarget renderer) {
 
 		debugOverlay = config.debug
 		shaderScanlines = config.scanlines
@@ -127,7 +127,7 @@ class ImGuiDebugOverlay implements AutoCloseable, InputSource {
 			}
 		}
 
-		ImGuiDebugOverlayAppender.instance.on(ImGuiLogEvent) { event ->
+		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
 				persistentLines[event.persistentKey] = event.message
 			}

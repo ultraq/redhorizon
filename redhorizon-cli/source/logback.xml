@@ -33,7 +33,7 @@
 		</encoder>
 	</appender>
 
-	<appender name="gui" class="nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlayAppender">
+	<appender name="gui" class="nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLoggingAppender">
 		<encoder>
 			<pattern>%logger{0} - %msg%n</pattern>
 		</encoder>
