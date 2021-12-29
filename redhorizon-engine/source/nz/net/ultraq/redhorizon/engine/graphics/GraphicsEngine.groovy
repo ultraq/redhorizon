@@ -141,6 +141,7 @@ class GraphicsEngine extends Engine implements InputSource {
 		}
 		graphicsContext.withCloseable { context ->
 			context.relay(ContextErrorEvent, this)
+			context.relay(WindowMaximizedEvent, this)
 			context.withCurrent { ->
 				camera = new Camera(context.renderResolution)
 				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))

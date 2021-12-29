@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
+import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -97,6 +98,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 		}
 
+		// Create a centered window
 		logger.debug('Creating a window of size {}', windowSize)
 		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', config.fullScreen ? monitor : NULL, NULL)
 		if (window == NULL) {
@@ -105,8 +107,12 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		glfwSetWindowPos(window,
 			(videoMode.width() / 2) - (windowSize.width / 2) as int,
 			(videoMode.height() / 2) - (windowSize.height / 2) as int)
+		if (config.maximized) {
+			glfwMaximizeWindow(window)
+		}
 		glfwShowWindow(window)
 
+		// Get the initial framebuffer size
 		def widthPointer = new int[1]
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
@@ -114,6 +120,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		targetResolution = calculateTargetResolution(widthPointer[0], heightPointer[0], targetAspectRatio)
 		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
 
+		// Track framebuffer size changes from window size changes
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
 			logger.debug('Framebuffer changed to {}x{}', width, height)
 			framebufferSize = new Dimension(width, height)
@@ -126,6 +133,11 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			logger.debug('Target resolution changed to {}', targetResolution)
 
 			trigger(new FramebufferSizeEvent(framebufferSize, windowSize, targetResolution))
+		}
+
+		// Track window minimize/maximize
+		glfwSetWindowMaximizeCallback(window) { long window, boolean maximized ->
+			trigger(new WindowMaximizedEvent(maximized))
 		}
 
 		// Input callbacks

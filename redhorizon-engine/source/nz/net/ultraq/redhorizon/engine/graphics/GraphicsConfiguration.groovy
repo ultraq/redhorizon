@@ -52,6 +52,11 @@ class GraphicsConfiguration {
 	final boolean fullScreen
 
 	/**
+	 * Have the window take up the entire screen.
+	 */
+	final boolean maximized
+
+	/**
 	 * The rendering resolution to use, before post-processing effects.
 	 */
 	final Dimension renderResolution = new Dimension(640, 400)

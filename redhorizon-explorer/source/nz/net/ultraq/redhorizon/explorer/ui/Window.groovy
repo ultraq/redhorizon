@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -37,6 +38,8 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
+import java.util.prefs.Preferences
+
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
  * classic C&C files using a file explorer-like interface.
@@ -46,6 +49,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 class Window extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Window)
+	private static final Preferences userPreferences = Preferences.userNodeForPackage(Window)
+
+	private static final String WINDOW_MAXIMIZED = "WINDOW_MAXIMIZED"
 
 	private File currentDirectory
 	private final List<String> fileList = []
@@ -58,9 +64,13 @@ class Window extends Application {
 	 */
 	Window() {
 
-		super(new AudioConfiguration(), new GraphicsConfiguration(
-			renderResolution: new Dimension(800, 500)
-		))
+		super(
+			new AudioConfiguration(),
+			new GraphicsConfiguration(
+				maximized: userPreferences.getBoolean(WINDOW_MAXIMIZED, false),
+				renderResolution: new Dimension(800, 500)
+			)
+		)
 
 		currentDirectory = new File(System.getProperty("user.dir"))
 		buildList()
@@ -118,6 +128,9 @@ class Window extends Application {
 
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			graphicsEngine.renderPipeline.addOverlayPass(new ExplorerGuiRenderPass(inputEventStream))
+		}
+		graphicsEngine.on(WindowMaximizedEvent) { event ->
+			userPreferences.putBoolean(WINDOW_MAXIMIZED, event.maximized)
 		}
 	}
 
