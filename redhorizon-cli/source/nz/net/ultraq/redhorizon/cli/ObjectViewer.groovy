@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.MapViewer
 import nz.net.ultraq.redhorizon.cli.objectviewer.UnitViewer
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 
 import org.slf4j.Logger
@@ -85,18 +84,13 @@ class ObjectViewer implements Callable<Integer> {
 			switch (objectFile) {
 			case ShpFile:
 				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
-				def graphicsConfig = new GraphicsConfiguration(
-					clearColour: Colour.GREY,
-					fullScreen: graphicsOptions.fullScreen,
-					scanlines: graphicsOptions.scanlines
+				def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+					clearColour: Colour.GREY
 				)
 				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.paletteType, touchpadInput).start()
 				break
 			case IniFile:
-				def graphicsConfig = new GraphicsConfiguration(
-					fullScreen: graphicsOptions.fullScreen,
-					scanlines: graphicsOptions.scanlines
-				)
+				def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(fileOptions.file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',

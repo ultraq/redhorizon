@@ -94,10 +94,8 @@ class MediaPlayer implements Callable<Integer> {
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
 		fileOptions.useFile(logger) { mediaFile ->
-			def graphicsConfig = new GraphicsConfiguration(
-				fixAspectRatio: fixAspectRatio,
-				fullScreen: graphicsOptions.fullScreen,
-				scanlines: graphicsOptions.scanlines
+			def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+				fixAspectRatio: fixAspectRatio
 			)
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100
