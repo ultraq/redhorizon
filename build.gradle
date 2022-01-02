@@ -56,10 +56,18 @@ subprojects {
 //		resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 //	}
 
+	ext {
+		groovyVersion = '3.0.9'
+		imguiVersion = '1.86.0'
+		logbackVersion = '1.2.10'
+		reflectionsVersion = '0.10.2'
+		slf4jVersion = '1.7.32'
+	}
+
 	dependencies {
 		implementation(
-			'org.codehaus.groovy:groovy:3.0.9:indy',
-			'org.slf4j:slf4j-api:1.7.32'
+			"org.codehaus.groovy:groovy:${groovyVersion}:indy",
+			"org.slf4j:slf4j-api:${slf4jVersion}"
 		)
 		implementation('nz.net.ultraq.extensions:groovy-extensions:1.1.0') {
 			exclude module: 'groovy'
@@ -71,7 +79,7 @@ subprojects {
 			exclude group: 'org.codehaus.groovy'
 		}
 		testRuntimeOnly(
-			'org.slf4j:slf4j-nop:1.7.32'
+			"org.slf4j:slf4j-nop:${slf4jVersion}"
 		)
 	}
 
