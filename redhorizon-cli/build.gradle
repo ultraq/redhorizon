@@ -28,7 +28,7 @@ dependencies {
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
-		'info.picocli:picocli:4.6.1',
+		'info.picocli:picocli:4.6.2',
 		'org.joml:joml:1.10.2',
 		'org.joml:joml-primitives:1.10.0',
 		'org.lwjgl:lwjgl-glfw',
