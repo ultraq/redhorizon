@@ -58,6 +58,17 @@ class Window extends Application {
 	private Object selectedFile
 
 	/**
+	 * Open the explorer.
+	 * 
+	 * @param args
+	 */
+	static void main(String[] args) {
+
+		new Window().start()
+		System.exit(0)
+	}
+
+	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
 	Window() {
