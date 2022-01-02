@@ -61,6 +61,9 @@ dependencies {
 		'org.lwjgl:lwjgl-glfw',
 		'org.reflections:reflections:0.9.12'
 	)
+	implementation('nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT') {
+		exclude module: 'groovy'
+	}
 	runtimeOnly(
 		"io.github.spair:imgui-java-natives-macos:${imGuiVersion}",
 		"io.github.spair:imgui-java-natives-macos-ft:${imGuiVersion}",

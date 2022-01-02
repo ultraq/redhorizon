@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
+import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
@@ -27,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.explorer.ExplorerPreferences
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
@@ -38,8 +40,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
-import java.util.prefs.Preferences
-
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
  * classic C&C files using a file explorer-like interface.
@@ -49,9 +49,7 @@ import java.util.prefs.Preferences
 class Window extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Window)
-	private static final Preferences userPreferences = Preferences.userNodeForPackage(Window)
-
-	private static final String WINDOW_MAXIMIZED = "WINDOW_MAXIMIZED"
+	private static final Preferences userPreferences = new Preferences()
 
 	private File currentDirectory
 	private final List<String> fileList = []
@@ -67,7 +65,7 @@ class Window extends Application {
 		super(
 			new AudioConfiguration(),
 			new GraphicsConfiguration(
-				maximized: userPreferences.getBoolean(WINDOW_MAXIMIZED, false),
+				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
 				renderResolution: new Dimension(800, 500)
 			)
 		)
@@ -130,7 +128,7 @@ class Window extends Application {
 			graphicsEngine.renderPipeline.addOverlayPass(new ExplorerGuiRenderPass(inputEventStream))
 		}
 		graphicsEngine.on(WindowMaximizedEvent) { event ->
-			userPreferences.putBoolean(WINDOW_MAXIMIZED, event.maximized)
+			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}
 	}
 
