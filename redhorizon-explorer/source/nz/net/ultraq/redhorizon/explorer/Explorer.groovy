@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui
+package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.explorer.ExplorerPreferences
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
@@ -46,9 +45,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
  * 
  * @author Emanuel Rabina
  */
-class Window extends Application {
+class Explorer extends Application {
 
-	private static final Logger logger = LoggerFactory.getLogger(Window)
+	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 
 	private File currentDirectory
@@ -64,14 +63,22 @@ class Window extends Application {
 	 */
 	static void main(String[] args) {
 
-		new Window().start()
+//		def splashScreen = new SplashScreen(commandSpec.version()[0] ?: '(development)')
+//		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+//			executorService.execute { ->
+//				Thread.sleep(commandSpec.version()[0] != null ? 3000 : 1000)
+//				splashScreen.close()
+//			}
+//			splashScreen.open()
+//		}
+		new Explorer().start()
 		System.exit(0)
 	}
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
-	Window() {
+	Explorer() {
 
 		super(
 			new AudioConfiguration(),
@@ -203,7 +210,7 @@ class Window extends Application {
 				if (ImGui.selectable(fileItem, isSelected)) {
 					selectedFileIndex = index
 					if (lastSelectedFileIndex != selectedFileIndex) {
-						Window.this.updatePreviewFile(selectedFileIndex)
+						Explorer.this.updatePreviewFile(selectedFileIndex)
 					}
 				}
 				if (isSelected) {
