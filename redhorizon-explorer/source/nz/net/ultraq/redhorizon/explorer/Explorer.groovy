@@ -26,8 +26,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
@@ -51,9 +51,7 @@ class Explorer extends Application {
 	private static final Preferences userPreferences = new Preferences()
 
 	private File currentDirectory
-	private final List<String> fileList = []
-	private int selectedFileIndex
-	private int lastSelectedFileIndex
+	private final List<String> fileNames = []
 	private Object selectedFile
 
 	/**
@@ -97,19 +95,19 @@ class Explorer extends Application {
 	 */
 	private void buildList() {
 
-		fileList.clear()
+		fileNames.clear()
 
 		if (currentDirectory.parent) {
-			fileList << '/..'
+			fileNames << '/..'
 		}
 		currentDirectory.listFiles()
 			.sort { file1, file2 ->
-				return file1.directory && !file2.directory ? -1 :
+				file1.directory && !file2.directory ? -1 :
 					!file1.directory && file2.directory ? 1 :
-						file1.name <=> file2.name
+					file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
-				fileList << (fileOrDirectory.isDirectory() ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
+				fileNames << (fileOrDirectory.isDirectory() ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
 			}
 	}
 
@@ -142,22 +140,42 @@ class Explorer extends Application {
 	@Override
 	void run() {
 
+		def explorerGuiRenderPass = new ExplorerGuiRenderPass()
+
+		// Include the explorer GUI in the render pipeline
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			graphicsEngine.renderPipeline.addOverlayPass(new ExplorerGuiRenderPass(inputEventStream))
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					if (keyEvent.key == GLFW_KEY_O) {
+						explorerGuiRenderPass.enabled = !explorerGuiRenderPass.enabled
+					}
+				}
+			}
+			graphicsEngine.renderPipeline.addOverlayPass(explorerGuiRenderPass)
 		}
 		graphicsEngine.on(WindowMaximizedEvent) { event ->
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}
+
+		// Handle events from the explorer GUI
+		explorerGuiRenderPass.on(FileSelectedEvent) { event ->
+			updatePreviewFile(event.selectedFile)
+		}
 	}
 
-	private void updatePreviewFile(int selectionIndex) {
+	/**
+	 * Update the preview area using the selected item.
+	 * 
+	 * @param selectedFileName
+	 */
+	private void updatePreviewFile(String selectedFileName) {
 
 		// Close the previous file
 		if (selectedFile instanceof Closeable) {
 			selectedFile.close()
 		}
 
-		def selectedItem = new File(currentDirectory, fileList[selectionIndex])
+		def selectedItem = new File(currentDirectory, selectedFileName)
 		if (selectedItem.isFile()) {
 			def fileClass = getFileClass(selectedItem.name)
 			if (fileClass) {
@@ -183,20 +201,11 @@ class Explorer extends Application {
 	/**
 	 * A render pass for drawing the ImGui explorer elements.
 	 */
-	private class ExplorerGuiRenderPass implements OverlayRenderPass {
+	private class ExplorerGuiRenderPass implements EventTarget, OverlayRenderPass {
 
 		boolean enabled = true
 
-		ExplorerGuiRenderPass(InputEventStream inputEventStream) {
-
-			inputEventStream.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS) {
-					if (event.key == GLFW_KEY_O) {
-						this.enabled = !this.enabled
-					}
-				}
-			}
-		}
+		private String selectedFileName
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
@@ -205,16 +214,12 @@ class Explorer extends Application {
 
 			// File list
 			ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)
-			fileList.eachWithIndex { fileItem, index ->
-				def isSelected = selectedFileIndex == index
-				if (ImGui.selectable(fileItem, isSelected)) {
-					selectedFileIndex = index
-					if (lastSelectedFileIndex != selectedFileIndex) {
-						Explorer.this.updatePreviewFile(selectedFileIndex)
-					}
-				}
-				if (isSelected) {
+			fileNames.each { fileName ->
+				def isSelected = this.selectedFileName == fileName
+				if (ImGui.selectable(fileName, isSelected)) {
 					ImGui.setItemDefaultFocus()
+					this.selectedFileName = fileName
+					trigger(new FileSelectedEvent(fileName))
 				}
 			}
 			ImGui.endListBox()
