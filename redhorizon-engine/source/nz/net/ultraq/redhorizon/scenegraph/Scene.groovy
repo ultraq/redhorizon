@@ -54,6 +54,14 @@ class Scene implements Visitable {
 	}
 
 	/**
+	 * Clear this scene's existing elements.
+	 */
+	void clear() {
+
+		elements.clear()
+	}
+
+	/**
 	 * Overloads the {@code <<} operator to add elements to this scene.
 	 * 
 	 * @param element

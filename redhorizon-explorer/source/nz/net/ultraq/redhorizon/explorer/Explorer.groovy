@@ -30,11 +30,13 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.media.Image
 
 import imgui.ImGui
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
@@ -134,6 +136,17 @@ class Explorer extends Application {
 		explorerGuiRenderPass.on(FileSelectedEvent) { event ->
 			updatePreviewFile(event.selectedFile)
 		}
+
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				switch (event.key) {
+					case GLFW_KEY_ESCAPE:
+						stop()
+						break
+				}
+			}
+		}
 	}
 
 	/**
@@ -143,31 +156,35 @@ class Explorer extends Application {
 	 */
 	private void updatePreviewFile(String selectedFileName) {
 
-		// Close the previous file
-		if (selectedFile instanceof Closeable) {
-			selectedFile.close()
+		// Clear the previous file
+		if (selectedFile) {
 			selectedFile = null
+			scene.clear()
 		}
 
 		def selectedItem = new File(currentDirectory, selectedFileName)
-		if (selectedItem.isFile()) {
+		if (selectedItem.file) {
 			def fileClass = selectedItem.name.getFileClass()
-			if (fileClass) {
-				if (fileClass == MixFile) {
-					selectedFile = fileClass.newInstance(selectedItem)
-//					selectedItemButton.enabled = false
-				}
-				else {
-					selectedItem.withInputStream { inputStream ->
-						selectedFile = fileClass.newInstance(inputStream)
-//						selectedItemButton.enabled = true
-					}
-				}
-//				selectedItemLabel.text = selectedFile.toString()
+			if (!fileClass) {
+				logger.info('No filetype implementation for {}', selectedItem.name)
+				return
+			}
+
+			if (fileClass == MixFile) {
+				selectedFile = fileClass.newInstance(selectedItem)
 			}
 			else {
-//				selectedItemLabel.text = '(unknown file type)'
-//				selectedItemButton.enabled = false
+				selectedItem.withInputStream { inputStream ->
+					selectedFile = fileClass.newInstance(inputStream)
+					switch (selectedFile) {
+						case ImageFile:
+							scene << new Image(selectedFile)
+								.translate(-selectedFile.width / 2, -selectedFile.height / 2)
+							break
+						default:
+							logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
+					}
+				}
 			}
 		}
 	}
