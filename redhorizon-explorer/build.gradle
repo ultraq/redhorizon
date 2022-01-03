@@ -56,8 +56,7 @@ dependencies {
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
 		"org.eclipse.platform:${swtArtifact}:${swtVersion}",
 		'org.lwjgl:lwjgl',
-		'org.lwjgl:lwjgl-glfw',
-		"org.reflections:reflections:${reflectionsVersion}"
+		'org.lwjgl:lwjgl-glfw'
 	)
 	implementation('nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT') {
 		exclude module: 'groovy'

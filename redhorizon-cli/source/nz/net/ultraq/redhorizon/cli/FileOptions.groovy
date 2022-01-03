@@ -17,9 +17,7 @@
 package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 
-import org.reflections.Reflections
 import org.slf4j.Logger
 import picocli.CommandLine.Parameters
 
@@ -37,34 +35,6 @@ class FileOptions {
 	File entryName
 
 	/**
-	 * Find the appropriate class for reading a file with the given name.
-	 * 
-	 * @param filename
-	 * @param logger
-	 * @return
-	 */
-	protected static Class<?> getFileClass(String filename, Logger logger) {
-
-		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
-		def fileClass = new Reflections(
-			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes'
-		)
-			.getTypesAnnotatedWith(FileExtensions)
-			.find { type ->
-				def annotation = type.getAnnotation(FileExtensions)
-				return annotation.value().any { extension ->
-					return extension.equalsIgnoreCase(suffix)
-				}
-			}
-		if (!fileClass) {
-			logger.error('No implementation for {} filetype', suffix)
-			throw new IllegalArgumentException()
-		}
-		return fileClass
-	}
-
-	/**
 	 * Load the file indicated by the {@code file} and {@code entryName}
 	 * parameters, passing it along to the given closure.
 	 * 
@@ -74,14 +44,23 @@ class FileOptions {
 	protected void useFile(Logger logger, Closure closure) {
 
 		logger.info('Loading {}...', file)
+
+		def fileClassForFileName = { String name, InputStream inputStream ->
+			def fileClass = name.getFileClass().newInstance(inputStream)
+			if (!fileClass) {
+				logger.error('No implementation for {}', file.name)
+				throw new IllegalArgumentException()
+			}
+			closure(fileClass)
+		}
+
 		if (file.name.endsWith('.mix')) {
 			new MixFile(file).withCloseable { mix ->
 				def entry = mix.getEntry(entryName.name)
 				if (entry) {
 					logger.info('Loading {}...', entryName)
 					mix.getEntryData(entry).withBufferedStream { inputStream ->
-						def fileClass = getFileClass(entryName.name, logger).newInstance(inputStream)
-						closure(fileClass)
+						fileClassForFileName(entryName.name, inputStream)
 					}
 				}
 				else {
@@ -92,8 +71,7 @@ class FileOptions {
 		}
 		else {
 			file.withInputStream { inputStream ->
-				def fileClass = getFileClass(file.name, logger).newInstance(inputStream)
-				closure(fileClass)
+				fileClassForFileName(file.name, inputStream)
 			}
 		}
 	}

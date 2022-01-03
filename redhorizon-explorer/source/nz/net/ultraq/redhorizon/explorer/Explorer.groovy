@@ -28,12 +28,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import imgui.ImGui
 import imgui.type.ImBoolean
-import org.reflections.Reflections
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
@@ -111,32 +110,6 @@ class Explorer extends Application {
 			}
 	}
 
-	/**
-	 * Find the appropriate class for reading a file with the given name.
-	 *
-	 * @param filename
-	 * @return
-	 */
-	private static Class<?> getFileClass(String filename) {
-
-		def suffix = filename.substring(filename.lastIndexOf('.') + 1)
-		def fileClass = new Reflections(
-			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes'
-		)
-			.getTypesAnnotatedWith(FileExtensions)
-			.find { type ->
-				def annotation = type.getAnnotation(FileExtensions)
-				return annotation.value().any { extension ->
-					return extension.equalsIgnoreCase(suffix)
-				}
-			}
-		if (!fileClass) {
-			logger.debug('No implementation for {} filetype', suffix)
-		}
-		return fileClass
-	}
-
 	@Override
 	void run() {
 
@@ -173,11 +146,12 @@ class Explorer extends Application {
 		// Close the previous file
 		if (selectedFile instanceof Closeable) {
 			selectedFile.close()
+			selectedFile = null
 		}
 
 		def selectedItem = new File(currentDirectory, selectedFileName)
 		if (selectedItem.isFile()) {
-			def fileClass = getFileClass(selectedItem.name)
+			def fileClass = selectedItem.name.getFileClass()
 			if (fileClass) {
 				if (fileClass == MixFile) {
 					selectedFile = fileClass.newInstance(selectedItem)

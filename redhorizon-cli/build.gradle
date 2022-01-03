@@ -31,8 +31,7 @@ dependencies {
 		'info.picocli:picocli:4.6.2',
 		'org.joml:joml:1.10.2',
 		'org.joml:joml-primitives:1.10.0',
-		'org.lwjgl:lwjgl-glfw',
-		"org.reflections:reflections:${reflectionsVersion}"
+		'org.lwjgl:lwjgl-glfw'
 	)
 }
 
