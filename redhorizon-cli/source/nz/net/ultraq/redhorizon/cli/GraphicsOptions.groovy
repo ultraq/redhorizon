@@ -16,7 +16,12 @@
 
 package nz.net.ultraq.redhorizon.cli
 
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+
 import picocli.CommandLine.Option
+
+import groovy.transform.NamedVariant
 
 /**
  * Common graphical options.
@@ -28,6 +33,28 @@ class GraphicsOptions {
 	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
 	boolean fullScreen
 
+	@Option(names = ['--maximized'], description = 'Use a maximized window')
+	boolean maximized
+
 	@Option(names = ['--scanlines'], description = 'Add scanlines to the image, emulating the look of images on CRT displays')
 	boolean scanlines
+
+	/**
+	 * Create a <tt>GraphicsConfiguration</tt> object from the current settings.
+	 * 
+	 * @param clearColour
+	 * @param fixAspectRatio
+	 * @return
+	 */
+	@NamedVariant
+	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour, boolean fixAspectRatio) {
+
+		return new GraphicsConfiguration(
+			clearColour: clearColour ?: Colour.BLACK,
+			fixAspectRatio: fixAspectRatio ?: false,
+			fullScreen: fullScreen,
+			maximized: maximized,
+			scanlines: scanlines
+		)
+	}
 }

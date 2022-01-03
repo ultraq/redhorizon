@@ -31,9 +31,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 /**
  * A basic image viewer, used primarily for testing purposes.
  * <p>
- * List of hi-res PCX images used: aftr_hi, aly1, apc_hi, aphi0049, bnhi0020,
- * dchi0040, frhi0166, lab, landsbrg, mahi0107, mig_hi, mtfacthi, needle, sov2,
- * spy, stalin, tent.
+ * List of hi-res PCX images used: aftr_hi, alipaper, aly1, apc_hi, aphi0049,
+ * bnhi0020, dchi0040, frhi0166, lab, landsbrg, mahi0107, mig_hi, mtfacthi,
+ * needle, sov2, spy, stalin, tent.
  * 
  * @author Emanuel Rabina
  */
@@ -64,7 +64,7 @@ class ImageViewer extends Application {
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			scene << new Image(imageFile)
 				.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.renderSize))
-				.translate(-imageFile.width / 2, -imageFile.height / 2, 0)
+				.translate(-imageFile.width / 2, -imageFile.height / 2)
 		}
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')
@@ -73,10 +73,10 @@ class ImageViewer extends Application {
 		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				switch (event.key) {
-				case GLFW_KEY_ESCAPE:
-					stop()
-					break
-				}
+					case GLFW_KEY_ESCAPE:
+						stop()
+						break
+					}
 			}
 		}
 	}

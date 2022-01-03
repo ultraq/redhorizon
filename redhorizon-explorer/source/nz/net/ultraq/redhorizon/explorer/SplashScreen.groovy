@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui
+package nz.net.ultraq.redhorizon.explorer
 
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.GC
@@ -63,7 +63,7 @@ class SplashScreen {
 		}
 
 		// Splash screen image
-		getResourceAsStream('nz/net/ultraq/redhorizon/explorer/ui/SplashScreen.png').withBufferedStream { imageInputStream ->
+		getResourceAsStream('nz/net/ultraq/redhorizon/explorer/SplashScreen.png').withBufferedStream { imageInputStream ->
 			def splashScreenImage = new Image(display, 600, 350)
 			def gc = new GC(splashScreenImage)
 			gc.drawImage(new Image(display, imageInputStream), 0, 0, 600, 350, 0, 0, 600, 350)

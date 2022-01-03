@@ -36,7 +36,8 @@ class OpenGLTexture extends Texture {
 	 * @param args
 	 */
 	OpenGLTexture(Map args) {
-		super(args)
+
+		super(args.width, args.height)
 		textureId = args.textureId ?: 0
 	}
 }

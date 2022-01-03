@@ -94,34 +94,32 @@ class MediaPlayer implements Callable<Integer> {
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
 		fileOptions.useFile(logger) { mediaFile ->
-			def graphicsConfig = new GraphicsConfiguration(
-				fixAspectRatio: fixAspectRatio,
-				fullScreen: graphicsOptions.fullScreen,
-				scanlines: graphicsOptions.scanlines
+			def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+				fixAspectRatio: fixAspectRatio
 			)
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100
 			)
 
 			switch (mediaFile) {
-			case VideoFile:
-				new VideoPlayer(audioConfig, graphicsConfig, mediaFile).start()
-				break
-			case AnimationFile:
-				new AnimationPlayer(graphicsConfig, mediaFile).start()
-				break
-			case SoundFile:
-				new SoundPlayer(audioConfig, mediaFile).start()
-				break
-			case ImageFile:
-				new ImageViewer(graphicsConfig, mediaFile).start()
-				break
-			case ImagesFile:
-				new ImagesViewer(graphicsConfig, mediaFile, paletteOptions.paletteType).start()
-				break
-			default:
-				logger.error('No media player for the associated file class of {}', mediaFile)
-				throw new UnsupportedOperationException()
+				case VideoFile:
+					new VideoPlayer(audioConfig, graphicsConfig, mediaFile).start()
+					break
+				case AnimationFile:
+					new AnimationPlayer(graphicsConfig, mediaFile).start()
+					break
+				case SoundFile:
+					new SoundPlayer(audioConfig, mediaFile).start()
+					break
+				case ImageFile:
+					new ImageViewer(graphicsConfig, mediaFile).start()
+					break
+				case ImagesFile:
+					new ImagesViewer(graphicsConfig, mediaFile, paletteOptions.paletteType).start()
+					break
+				default:
+					logger.error('No media player for the associated file class of {}', mediaFile)
+					throw new UnsupportedOperationException()
 			}
 		}
 

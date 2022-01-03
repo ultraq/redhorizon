@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-description = 'Filetypes module for the Red Horizon project'
+package nz.net.ultraq.redhorizon.explorer
 
-dependencies {
-	implementation(
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		"org.reflections:reflections:${reflectionsVersion}"
-	)
+import nz.net.ultraq.preferences.UserPreference
+
+import groovy.transform.TupleConstructor
+
+/**
+ * Preferences for the explorer.
+ * 
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+enum ExplorerPreferences implements UserPreference {
+
+	WINDOW_MAXIMIZED(false)
+
+	final Object defaultValue
 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-description = 'Filetypes module for the Red Horizon project'
+package nz.net.ultraq.redhorizon.engine.graphics
 
-dependencies {
-	implementation(
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		"org.reflections:reflections:${reflectionsVersion}"
-	)
+/**
+ * A rendering pass for drawing overlay content to the game viewport.
+ * 
+ * @author Emanuel Rabina
+ */
+interface OverlayRenderPass {
+
+	/**
+	 * Return whether or not this render pass should run.
+	 * 
+	 * @return
+	 */
+	boolean isEnabled()
+
+	/**
+	 * Render the overlay.
+	 * 
+	 * @param renderer
+	 * @param sceneFramebufferResult
+	 */
+	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
 }

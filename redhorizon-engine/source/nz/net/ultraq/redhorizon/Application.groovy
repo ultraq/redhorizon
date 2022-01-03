@@ -24,9 +24,11 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CountDownLatch
@@ -80,8 +82,15 @@ abstract class Application implements Runnable {
 		def finishBarrier = new CountDownLatch(1)
 		def exception
 
+		inputEventStream = new InputEventStream()
+		inputEventStream.on(GuiEvent) { event ->
+			if (event.type == EVENT_TYPE_STOP) {
+				stop()
+			}
+		}
+
 		audioEngine = new AudioEngine(audioConfig, scene)
-		graphicsEngine = new GraphicsEngine(graphicsConfig, scene, { toExecute ->
+		graphicsEngine = new GraphicsEngine(graphicsConfig, scene, inputEventStream, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})
@@ -97,7 +106,6 @@ abstract class Application implements Runnable {
 			}
 			executionBarrier.await()
 		}
-		inputEventStream = new InputEventStream()
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
 		}

@@ -18,7 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugOverlay
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
@@ -28,6 +29,7 @@ import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 
@@ -45,11 +47,12 @@ class RenderPipeline implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 
 	final GraphicsRenderer renderer
-	final ImGuiDebugOverlay debugOverlay
+	final ImGuiLayer imGuiLayer
 	final Scene scene
 	final Camera camera
 
 	private final List<RenderPass> renderPasses = []
+	private final List<OverlayRenderPass> overlayPasses = []
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -57,27 +60,39 @@ class RenderPipeline implements AutoCloseable {
 	 * @param config
 	 * @param context
 	 * @param renderer
-	 * @param debugOverlay
+	 * @param imGuiLayer
 	 * @param scene
 	 * @param camera
 	 */
 	RenderPipeline(GraphicsConfiguration config, GraphicsContext context, GraphicsRenderer renderer,
-		ImGuiDebugOverlay debugOverlay, Scene scene, Camera camera) {
+		ImGuiLayer imGuiLayer, Scene scene, Camera camera) {
 
 		this.renderer = renderer
-		this.debugOverlay = debugOverlay
+		this.imGuiLayer = imGuiLayer
 		this.scene = scene
 		this.camera = camera
 
 		configurePipeline(config, context)
+		overlayPasses << new DebugOverlayRenderPass(config.debug)
 
 		// Connect to the debug overlay to configure the pipeline at runtime
-		debugOverlay.on(ChangeEvent) { event ->
+		imGuiLayer.on(ChangeEvent) { event ->
 			def postProcessingRenderPass = renderPasses.find { renderPass ->
 				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
 			}
 			postProcessingRenderPass.enabled = event.value
 		}
+	}
+
+	/**
+	 * Register an overlay rendering pass with the rendering pipeline.  Overlays
+	 * are drawn after the scene and use the target resolution of the window.
+	 * 
+	 * @param overlayPass
+	 */
+	void addOverlayPass(OverlayRenderPass overlayPass) {
+
+		overlayPasses << overlayPass
 	}
 
 	@Override
@@ -138,11 +153,12 @@ class RenderPipeline implements AutoCloseable {
 
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
-			context,
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Screen', modelUniform)
-			)
+			),
+			!config.debug,
+			context
 		)
 	}
 
@@ -152,7 +168,7 @@ class RenderPipeline implements AutoCloseable {
 	void render() {
 
 		// Start a new frame
-		debugOverlay.startFrame()
+		imGuiLayer.startFrame()
 		renderer.clear()
 		camera.render(renderer)
 
@@ -168,7 +184,7 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		// Perform all rendering passes
-		renderPasses.inject(visibleElements) { lastResult, renderPass ->
+		def sceneResult = renderPasses.inject(visibleElements) { lastResult, renderPass ->
 			if (renderPass.enabled) {
 				renderer.setRenderTarget(renderPass.framebuffer)
 				renderer.clear()
@@ -177,10 +193,15 @@ class RenderPipeline implements AutoCloseable {
 			}
 			return lastResult
 		}
+		renderer.setRenderTarget(null)
 
 		// Draw overlays
-		debugOverlay.render()
-		debugOverlay.endFrame()
+		overlayPasses.each { overlayPass ->
+			if (overlayPass.enabled) {
+				overlayPass.render(renderer, sceneResult)
+			}
+		}
+		imGuiLayer.endFrame()
 	}
 
 	/**
@@ -188,7 +209,7 @@ class RenderPipeline implements AutoCloseable {
 	 * resolution.
 	 */
 	@TupleConstructor(defaults = false, includes = ['framebuffer'])
-	class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
+	private class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
 
 		final Framebuffer framebuffer
 		final boolean enabled = true
@@ -225,7 +246,7 @@ class RenderPipeline implements AutoCloseable {
 	 * applying some effect to it for the next post-processing pass.
 	 */
 	@TupleConstructor
-	class PostProcessingRenderPass implements RenderPass<Framebuffer> {
+	private class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer
 		final Material material
@@ -250,27 +271,36 @@ class RenderPipeline implements AutoCloseable {
 	 * The final render pass for taking the result of the post-processing chain
 	 * and drawing it to the screen.
 	 */
-	class ScreenRenderPass implements RenderPass<Framebuffer> {
+	private class ScreenRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer = null
 		final Material material
-		final boolean enabled = true
+		boolean enabled
 
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
 		 * to changes in output/window resolution.
 		 * 
-		 * @param context
 		 * @param material
+		 * @param enabled
+		 * @param context
 		 */
-		ScreenRenderPass(GraphicsContext context, Material material) {
+		ScreenRenderPass(Material material, boolean enabled, GraphicsContext context) {
 
 			this.material = material
+			this.enabled = enabled
 
 			material.transform.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
-
 			context.on(FramebufferSizeEvent) { event ->
 				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
+			}
+
+			context.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS) {
+					if (event.key == GLFW_KEY_O) {
+						this.enabled = !this.enabled
+					}
+				}
 			}
 		}
 
@@ -308,6 +338,31 @@ class RenderPipeline implements AutoCloseable {
 
 			material.texture = previous.texture
 			renderer.drawMaterial(material)
+		}
+	}
+
+	/**
+	 * An overlay render pass that runs the debugging overlay.
+	 */
+	private class DebugOverlayRenderPass implements OverlayRenderPass {
+
+		boolean enabled
+
+		/**
+		 * Constructor, tie the use of this rendering pass to whether debugging is
+		 * on or off.
+		 * 
+		 * @param enabled
+		 */
+		DebugOverlayRenderPass(boolean enabled) {
+
+			this.enabled = enabled
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
+
+			imGuiLayer.render(sceneFramebufferResult)
 		}
 	}
 }

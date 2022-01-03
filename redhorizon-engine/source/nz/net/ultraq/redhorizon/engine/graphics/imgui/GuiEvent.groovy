@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-description = 'Filetypes module for the Red Horizon project'
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-dependencies {
-	implementation(
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		"org.reflections:reflections:${reflectionsVersion}"
-	)
+import nz.net.ultraq.redhorizon.engine.input.InputEvent
+
+import groovy.transform.TupleConstructor
+
+/**
+ * Any event triggered by the GUI.
+ * 
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class GuiEvent extends InputEvent {
+
+	static final String EVENT_TYPE_STOP = "Stop"
+
+	final String type
 }

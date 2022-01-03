@@ -27,9 +27,9 @@ import ch.qos.logback.core.encoder.Encoder
  * 
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> implements EventTarget {
+class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements EventTarget {
 
-	static ImGuiDebugOverlayAppender instance
+	static ImGuiLoggingAppender instance
 
 	Encoder<E> encoder
 
@@ -37,7 +37,7 @@ class ImGuiDebugOverlayAppender<E> extends UnsynchronizedAppenderBase<E> impleme
 	 * Constructor, saves this instance to the singleton value so it can be
 	 * referenced by the overlay.
 	 */
-	ImGuiDebugOverlayAppender() {
+	ImGuiLoggingAppender() {
 
 		instance = this
 	}
