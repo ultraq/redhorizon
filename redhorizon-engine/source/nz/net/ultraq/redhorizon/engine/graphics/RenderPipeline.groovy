@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scenegraph.SceneChangedEvent
 import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
 
 import org.joml.FrustumIntersection
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A render pipeline contains all of the configured rendering passes and
@@ -51,6 +53,11 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiLayer imGuiLayer
 	final Scene scene
 	final Camera camera
+
+	// For object culling
+	private final List<GraphicsElement> visibleElements = []
+	private final Matrix4f lastCameraView = new Matrix4f()
+	private final AtomicBoolean sceneChanged = new AtomicBoolean(true)
 
 	private final List<RenderPass> renderPasses = []
 	private final List<OverlayRenderPass> overlayPasses = []
@@ -71,6 +78,9 @@ class RenderPipeline implements AutoCloseable {
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
 		this.scene = scene
+		this.scene.on(SceneChangedEvent) { event ->
+			sceneChanged.set(true)
+		}
 		this.camera = camera
 
 		// Build the standard rendering pipeline, including the debug overlay as
@@ -184,13 +194,18 @@ class RenderPipeline implements AutoCloseable {
 			camera.render(renderer)
 
 			// Reduce the list of renderable items to those just visible in the scene
-			def visibleElements = []
-			def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 			averageNanos('objectCulling', 1f, logger) { ->
-				scene.accept { element ->
-					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-						visibleElements << element
+				def currentCameraView = camera.view
+				if (sceneChanged.get() || !currentCameraView.equals(lastCameraView)) {
+					visibleElements.clear()
+					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
+					scene.accept { element ->
+						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+							visibleElements << element
+						}
 					}
+					sceneChanged.compareAndSet(true, false)
+					lastCameraView.set(currentCameraView)
 				}
 			}
 

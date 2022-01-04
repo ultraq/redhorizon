@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -24,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * 
  * @author Emanuel Rabina
  */
-class Scene implements Visitable {
+class Scene implements EventTarget, Visitable {
 
 	private final List<SceneElement> elements = new CopyOnWriteArrayList<>()
 
@@ -50,6 +52,7 @@ class Scene implements Visitable {
 	Scene addSceneElement(SceneElement element) {
 
 		elements << element
+		trigger(new SceneChangedEvent())
 		return this
 	}
 
