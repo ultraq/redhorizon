@@ -29,8 +29,8 @@ dependencies {
 		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
 		"info.picocli:picocli:${picocliVersion}",
-		'org.joml:joml:1.10.2',
-		'org.joml:joml-primitives:1.10.0',
+		"org.joml:joml:${jomlVersion}",
+		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl-glfw'
 	)
 }
