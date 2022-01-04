@@ -26,7 +26,7 @@ dependencies {
 		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
 		project(':redhorizon-filetypes'),
-		platform('org.lwjgl:lwjgl-bom:3.2.3'),
+		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
 		"info.picocli:picocli:${picocliVersion}",
 		'org.joml:joml:1.10.2',
