@@ -52,6 +52,7 @@ dependencies {
 		project(':redhorizon-filetypes'),
 		platform('org.lwjgl:lwjgl-bom:3.2.3'),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
+		"info.picocli:picocli:${picocliVersion}",
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
 		"org.eclipse.platform:${swtArtifact}:${swtVersion}",
@@ -72,10 +73,11 @@ dependencies {
 }
 
 application {
-	mainClass = 'nz.net.ultraq.redhorizon.explorer.Explorer'
+	mainClass = 'nz.net.ultraq.redhorizon.explorer.ExplorerCli'
 	applicationName = 'explorer'
 	applicationDefaultJvmArgs = [
-		"-Dredhorizon.version=${version}"
+		"-Dredhorizon.version=${version}",
+		'-Dorg.lwjgl.system.stackSize=10240'
 	]
 }
 

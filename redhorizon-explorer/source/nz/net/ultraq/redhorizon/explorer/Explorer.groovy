@@ -56,25 +56,6 @@ class Explorer extends Application {
 	private Object selectedFile
 
 	/**
-	 * Open the explorer.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-
-//		def splashScreen = new SplashScreen(commandSpec.version()[0] ?: '(development)')
-//		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-//			executorService.execute { ->
-//				Thread.sleep(commandSpec.version()[0] != null ? 3000 : 1000)
-//				splashScreen.close()
-//			}
-//			splashScreen.open()
-//		}
-		new Explorer().start()
-		System.exit(0)
-	}
-
-	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
 	Explorer() {

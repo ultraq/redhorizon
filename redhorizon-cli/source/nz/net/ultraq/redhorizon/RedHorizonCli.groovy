@@ -47,7 +47,7 @@ import picocli.CommandLine.Command
 	],
 	version = '${sys:redhorizon.version}'
 )
-class RedHorizonCLI {
+class RedHorizonCli {
 
 	/**
 	 * Bootstrap the application using Picocli.
@@ -55,6 +55,6 @@ class RedHorizonCLI {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new RedHorizonCLI()).execute(args))
+		System.exit(new CommandLine(new RedHorizonCli()).execute(args))
 	}
 }

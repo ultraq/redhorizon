@@ -60,6 +60,7 @@ subprojects {
 		groovyVersion = '3.0.9'
 		imguiVersion = '1.86.0'
 		logbackVersion = '1.2.10'
+		picocliVersion = '4.6.2'
 		reflectionsVersion = '0.10.2'
 		slf4jVersion = '1.7.32'
 	}
