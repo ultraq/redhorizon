@@ -58,11 +58,11 @@ subprojects {
 
 	ext {
 		groovyVersion = '3.0.9'
-		imguiVersion = '1.86.0'
+		imguiVersion = '1.84.1.3'
 		jomlVersion = '1.10.2'
 		jomlPrimitivesVersion = '1.10.0'
 		logbackVersion = '1.2.10'
-		lwjglVersion = '3.3.0'
+		lwjglVersion = '3.2.3'
 		picocliVersion = '4.6.2'
 		reflectionsVersion = '0.10.2'
 		slf4jVersion = '1.7.32'
