@@ -169,7 +169,6 @@ class GraphicsEngine extends Engine implements InputSource {
 							// Shutdown
 							logger.debug('Shutting down graphics engine')
 							camera.delete(renderer)
-							pipeline.close()
 						}
 					}
 				}
