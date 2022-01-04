@@ -18,7 +18,9 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
+import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
@@ -29,16 +31,20 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Image
+import nz.net.ultraq.redhorizon.media.ImageStrip
 
 import imgui.ImGui
 import imgui.type.ImBoolean
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.*
+
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
@@ -52,8 +58,10 @@ class Explorer extends Application {
 	private static final Preferences userPreferences = new Preferences()
 
 	private File currentDirectory
-	private final List<String> fileNames = []
+	private final List<String> fileNames = new CopyOnWriteArrayList<>()
 	private Object selectedFile
+	private Palette palette
+	private int tick
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -70,6 +78,11 @@ class Explorer extends Application {
 
 		currentDirectory = new File(System.getProperty("user.dir"))
 		buildList()
+
+		// TODO: Be able to choose which palette to apply to a paletted file
+		palette = getResourceAsStream(PaletteType.RA_TEMPERATE.file).withBufferedStream { inputStream ->
+			return new PalFile(inputStream)
+		}
 	}
 
 	/**
@@ -115,13 +128,29 @@ class Explorer extends Application {
 
 		// Handle events from the explorer GUI
 		explorerGuiRenderPass.on(FileSelectedEvent) { event ->
-			updatePreviewFile(event.selectedFile)
+			def selectedFile = new File(currentDirectory, event.selectedFile)
+			if (selectedFile.directory) {
+				currentDirectory = selectedFile
+				buildList()
+			}
+			else {
+				updatePreviewFile(selectedFile)
+			}
 		}
 
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
+			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
+					case GLFW_KEY_LEFT:
+						graphicsEngine.camera.translate(tick, 0)
+						break
+					case GLFW_KEY_RIGHT:
+						graphicsEngine.camera.translate(-tick, 0)
+						break
+					case GLFW_KEY_SPACE:
+						graphicsEngine.camera.center(new Vector3f())
+						break
 					case GLFW_KEY_ESCAPE:
 						stop()
 						break
@@ -131,38 +160,42 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Update the preview area using the selected item.
+	 * Update the preview area using the selected file.
 	 * 
-	 * @param selectedFileName
+	 * @param newFile
 	 */
-	private void updatePreviewFile(String selectedFileName) {
+	private void updatePreviewFile(File newFile) {
 
 		// Clear the previous file
 		if (selectedFile) {
 			selectedFile = null
 			scene.clear()
+			graphicsEngine.camera.center(new Vector3f())
 		}
 
-		logger.info('Loading {}...', selectedFileName)
+		logger.info('Loading {}...', newFile.name)
 
-		def selectedItem = new File(currentDirectory, selectedFileName)
-		if (selectedItem.file) {
-			def fileClass = selectedItem.name.getFileClass()
+		if (newFile.file) {
+			def fileClass = newFile.name.getFileClass()
 			if (!fileClass) {
-				logger.info('No filetype implementation for {}', selectedItem.name)
+				logger.info('No filetype implementation for {}', newFile.name)
 				return
 			}
 
 			if (fileClass == MixFile) {
-				selectedFile = fileClass.newInstance(selectedItem)
+				selectedFile = fileClass.newInstance(newFile)
 			}
 			else {
-				selectedItem.withInputStream { inputStream ->
+				newFile.withInputStream { inputStream ->
 					selectedFile = fileClass.newInstance(inputStream)
 					switch (selectedFile) {
 						case ImageFile:
 							scene << new Image(selectedFile)
 								.translate(-selectedFile.width / 2, -selectedFile.height / 2)
+							break
+						case ImagesFile:
+							tick = selectedFile.width
+							scene << new ImageStrip(selectedFile, palette)
 							break
 						default:
 							logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)

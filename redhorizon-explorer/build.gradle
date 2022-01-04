@@ -56,6 +56,8 @@ dependencies {
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
 		"org.eclipse.platform:${swtArtifact}:${swtVersion}",
+		"org.joml:joml:${jomlVersion}",
+		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw'
 	)

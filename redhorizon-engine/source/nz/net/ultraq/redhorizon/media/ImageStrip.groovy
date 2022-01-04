@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
@@ -41,11 +40,11 @@ class ImageStrip implements SceneElement<ImageStrip> {
 	ImageStrip(ImagesFile imagesFile, Palette palette) {
 
 		this.bounds.set(0, 0, imagesFile.width * imagesFile.numImages, imagesFile.height)
-		translate(0, -imagesFile.height / 2 as float, 0)
+		translate(0, -imagesFile.height / 2 as float)
 
 		imagesFile.numImages.times { i ->
 			images << new Image(imagesFile, i, palette)
-				.translate(imagesFile.width * i, -imagesFile.height / 2, 0)
+				.translate(imagesFile.width * i, -imagesFile.height / 2)
 		}
 	}
 
