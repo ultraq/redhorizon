@@ -42,8 +42,7 @@ import static imgui.flag.ImGuiConfigFlags.*
 import static imgui.flag.ImGuiDockNodeFlags.*
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -142,6 +141,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_O) {
 					drawChrome = !drawChrome
+				}
+				else if (event.key == GLFW_KEY_D) {
+					debugOverlay = !debugOverlay
 				}
 			}
 		}

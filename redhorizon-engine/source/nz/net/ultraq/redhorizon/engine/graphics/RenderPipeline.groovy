@@ -344,20 +344,10 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * An overlay render pass that runs the debugging overlay.
 	 */
+	@TupleConstructor(defaults = false)
 	private class DebugOverlayRenderPass implements OverlayRenderPass {
 
 		boolean enabled
-
-		/**
-		 * Constructor, tie the use of this rendering pass to whether debugging is
-		 * on or off.
-		 * 
-		 * @param enabled
-		 */
-		DebugOverlayRenderPass(boolean enabled) {
-
-			this.enabled = enabled
-		}
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
