@@ -147,7 +147,7 @@ class GraphicsEngine extends Engine implements InputSource {
 				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
 				new OpenGLRenderer(config, context).withCloseable { renderer ->
-					new ImGuiLayer(config, context, renderer).withCloseable { imGuiLayer ->
+					new ImGuiLayer(config, context).withCloseable { imGuiLayer ->
 						logger.debug(renderer.toString())
 						inputEventStream.addInputSource(imGuiLayer)
 						camera.init(renderer)

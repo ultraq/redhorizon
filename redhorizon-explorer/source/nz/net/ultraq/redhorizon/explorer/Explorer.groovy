@@ -143,6 +143,8 @@ class Explorer extends Application {
 			scene.clear()
 		}
 
+		logger.info('Loading {}...', selectedFileName)
+
 		def selectedItem = new File(currentDirectory, selectedFileName)
 		if (selectedItem.file) {
 			def fileClass = selectedItem.name.getFileClass()

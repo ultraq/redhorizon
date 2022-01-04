@@ -54,4 +54,11 @@ interface RenderPass<T> {
 	 * @param previous
 	 */
 	void render(GraphicsRenderer renderer, T previous)
+
+	/**
+	 * Set whether this render pass should run.
+	 * 
+	 * @param enabled
+	 */
+	void setEnabled(boolean enabled)
 }

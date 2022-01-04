@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.joml.Matrix4f
@@ -34,7 +35,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh,
-	TShader extends Shader, TTexture extends Texture> {
+	TShader extends Shader, TTexture extends Texture> extends EventTarget {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given

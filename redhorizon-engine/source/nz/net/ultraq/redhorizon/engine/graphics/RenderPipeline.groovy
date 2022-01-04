@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
@@ -72,10 +73,20 @@ class RenderPipeline implements AutoCloseable {
 		this.scene = scene
 		this.camera = camera
 
+		// Build the standard rendering pipeline, including the debug overlay as
+		// that'll be standard for as long as this thing is in development
 		configurePipeline(config, context)
-		overlayPasses << new DebugOverlayRenderPass(config.debug)
+		def debugOverlayRenderPass = new DebugOverlayRenderPass(renderer, imGuiLayer, config.debug)
+		context.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				if (event.key == GLFW_KEY_D) {
+					debugOverlayRenderPass.enabled = !debugOverlayRenderPass.enabled
+				}
+			}
+		}
+		overlayPasses << debugOverlayRenderPass
 
-		// Connect to the debug overlay to configure the pipeline at runtime
+		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
 			def postProcessingRenderPass = renderPasses.find { renderPass ->
 				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
@@ -168,40 +179,41 @@ class RenderPipeline implements AutoCloseable {
 	void render() {
 
 		// Start a new frame
-		imGuiLayer.startFrame()
-		renderer.clear()
-		camera.render(renderer)
+		imGuiLayer.frame { ->
+			renderer.clear()
+			camera.render(renderer)
 
-		// Reduce the list of renderable items to those just visible in the scene
-		def visibleElements = []
-		def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-		averageNanos('objectCulling', 1f, logger) { ->
-			scene.accept { element ->
-				if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-					visibleElements << element
+			// Reduce the list of renderable items to those just visible in the scene
+			def visibleElements = []
+			def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+			averageNanos('objectCulling', 1f, logger) { ->
+				scene.accept { element ->
+					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+						visibleElements << element
+					}
+				}
+			}
+
+			// Perform all rendering passes
+			def sceneResult = renderPasses.inject(visibleElements) { lastResult, renderPass ->
+				if (renderPass.enabled) {
+					renderer.setRenderTarget(renderPass.framebuffer)
+					renderer.clear()
+					renderPass.render(renderer, lastResult)
+					return renderPass.framebuffer
+				}
+				return lastResult
+			}
+			renderer.setRenderTarget(null)
+
+			// Draw overlays
+			imGuiLayer.render(sceneResult)
+			overlayPasses.each { overlayPass ->
+				if (overlayPass.enabled) {
+					overlayPass.render(renderer, sceneResult)
 				}
 			}
 		}
-
-		// Perform all rendering passes
-		def sceneResult = renderPasses.inject(visibleElements) { lastResult, renderPass ->
-			if (renderPass.enabled) {
-				renderer.setRenderTarget(renderPass.framebuffer)
-				renderer.clear()
-				renderPass.render(renderer, lastResult)
-				return renderPass.framebuffer
-			}
-			return lastResult
-		}
-		renderer.setRenderTarget(null)
-
-		// Draw overlays
-		overlayPasses.each { overlayPass ->
-			if (overlayPass.enabled) {
-				overlayPass.render(renderer, sceneResult)
-			}
-		}
-		imGuiLayer.endFrame()
 	}
 
 	/**
@@ -238,6 +250,12 @@ class RenderPipeline implements AutoCloseable {
 				}
 				element.render(renderer)
 			}
+		}
+
+		@Override
+		void setEnabled(boolean enabled) {
+
+			// Does nothing, this pass is always used
 		}
 	}
 
@@ -338,21 +356,6 @@ class RenderPipeline implements AutoCloseable {
 
 			material.texture = previous.texture
 			renderer.drawMaterial(material)
-		}
-	}
-
-	/**
-	 * An overlay render pass that runs the debugging overlay.
-	 */
-	@TupleConstructor(defaults = false)
-	private class DebugOverlayRenderPass implements OverlayRenderPass {
-
-		boolean enabled
-
-		@Override
-		void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
-
-			imGuiLayer.render(sceneFramebufferResult)
 		}
 	}
 }

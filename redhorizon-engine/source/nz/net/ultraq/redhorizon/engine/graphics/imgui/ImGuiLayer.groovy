@@ -16,20 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
-import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
-import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
@@ -44,9 +35,6 @@ import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*
 
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
  * setup needed to make it work.
@@ -55,21 +43,11 @@ import java.util.concurrent.BlockingQueue
  */
 class ImGuiLayer implements AutoCloseable, InputSource {
 
-	private static final int MAX_DEBUG_LINES = 10
-
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
-	private boolean drawChrome = true
 
-	// Debug overlay
-	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
-	private final Map<String,String> persistentLines = [:]
-	private int drawCalls = 0
-	private int activeFramebuffers = 0
-	private int activeMeshes = 0
-	private int activeTextures = 0
-	private int debugWindowSizeX = 350
-	private int debugWindowSizeY = 200
+	// TODO: Make it so this doesn't need to be public
+	boolean drawChrome = true
 
 	// Options
 	private boolean debugOverlay
@@ -84,7 +62,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 * @param context
 	 * @param renderer
 	 */
-	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context, EventTarget renderer) {
+	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context) {
 
 		debugOverlay = config.debug
 		shaderScanlines = config.scanlines
@@ -101,41 +79,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		imGuiGlfw.init(context.window, true)
 		imGuiGl3.init('#version 410 core')
-
-		renderer.on(RendererEvent) { event ->
-			if (event instanceof DrawEvent) {
-				drawCalls++
-			}
-			else if (event instanceof FramebufferCreatedEvent) {
-				activeFramebuffers++
-			}
-			else if (event instanceof FramebufferDeletedEvent) {
-				activeFramebuffers--
-			}
-			else if (event instanceof MeshCreatedEvent) {
-				activeMeshes++
-			}
-			else if (event instanceof MeshDeletedEvent) {
-				activeMeshes--
-			}
-			else if (event instanceof TextureCreatedEvent) {
-				activeTextures++
-			}
-			else if (event instanceof TextureDeletedEvent) {
-				activeTextures--
-			}
-		}
-
-		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
-			if (event.persistentKey) {
-				persistentLines[event.persistentKey] = event.message
-			}
-			else {
-				while (!debugLines.offer(event.message)) {
-					debugLines.poll()
-				}
-			}
-		}
 
 		context.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -155,43 +98,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGl3.dispose()
 		imGuiGlfw.dispose()
 		ImGui.destroyContext()
-	}
-
-	/**
-	 * Draws a small overlay containing the current framerate, frametime, and any
-	 * recent log messages.
-	 */
-	private void drawDebugOverlay() {
-
-		def viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, drawChrome ? 55 : 10)
-
-		ImGui.begin('Debug overlay', new ImBoolean(true),
-			NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-		debugWindowSizeX = ImGui.getWindowSizeX() as int
-		debugWindowSizeY = ImGui.getWindowSizeY() as int
-
-		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
-		ImGui.text("Draw calls: ${drawCalls}")
-		ImGui.text("Active meshes: ${activeMeshes}")
-		ImGui.text("Active textures: ${activeTextures}")
-		ImGui.text("Active framebuffers: ${activeFramebuffers}")
-		drawCalls = 0
-
-		ImGui.separator()
-		persistentLines.keySet().sort().each { key ->
-			ImGui.text(persistentLines[key])
-		}
-
-		if (debugLines.size()) {
-			ImGui.separator()
-			debugLines.each { line ->
-				ImGui.text(line)
-			}
-		}
-
-		ImGui.end()
 	}
 
 	/**
@@ -239,10 +145,17 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
-	 * Mark the end of the rendering loop, at which point any ImGui elements will
-	 * be drawn.
+	 * Automatically mark the beginning and end of a frame as before and after the
+	 * execution of the given closure.
+	 * 
+	 * @param closure
 	 */
-	void endFrame() {
+	void frame(Closure closure) {
+
+		imGuiGlfw.newFrame()
+		ImGui.newFrame()
+
+		closure()
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
@@ -258,10 +171,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		if (drawChrome) {
 			setUpDockspace()
 			drawScene(sceneFramebufferResult)
-		}
-
-		if (debugOverlay) {
-			drawDebugOverlay()
 		}
 	}
 
@@ -311,14 +220,5 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		}
 
 		ImGui.end()
-	}
-
-	/**
-	 * Mark the beginning of the rendering loop.
-	 */
-	void startFrame() {
-
-		imGuiGlfw.newFrame()
-		ImGui.newFrame()
 	}
 }
