@@ -113,6 +113,8 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		this.numFrames = numFrames
 		this.frameRate = frameRate
 
+		this.bounds.set(0, 0, width, height)
+
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
 		this.animationDataWorker = animationDataWorker
