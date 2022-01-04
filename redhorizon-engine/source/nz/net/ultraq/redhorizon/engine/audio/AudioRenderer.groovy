@@ -134,6 +134,13 @@ interface AudioRenderer {
 	boolean sourceStopped(int sourceId)
 
 	/**
+	 * Stop playing a source.
+	 * 
+	 * @param sourceId
+	 */
+	void stopSource(int sourceId)
+
+	/**
 	 * Unqueue some buffers from an existing source.
 	 * 
 	 * @param sourceId

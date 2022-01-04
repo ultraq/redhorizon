@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.io.NativeDataInputStream
 
+import groovy.transform.Memoized
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -99,6 +100,7 @@ class AudFile implements SoundFile, Streaming {
 	 * 
 	 * @return Worker for streaming sound data.
 	 */
+	@Memoized
 	@Override
 	Worker getStreamingDataWorker() {
 

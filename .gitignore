@@ -12,3 +12,5 @@ build
 *.pcx
 *.shp
 *.v00
+*.vqa
+*.wsa

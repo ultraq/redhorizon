@@ -162,6 +162,12 @@ class OpenALRenderer implements AudioRenderer {
 		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_STOPPED }
 	}
 
+	@Override
+	void stopSource(int sourceId) {
+
+		checkForError { -> alSourceStop(sourceId) }
+	}
+
 	/**
 	 * Emit some information about the OpenAL rendering device.
 	 * 

@@ -169,7 +169,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 		else {
 			// Sound stopped, but source still playing
 			if (renderer.sourcePlaying(sourceId)) {
-				stop()
+				renderer.stopSource(sourceId)
 			}
 		}
 

@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteType
+import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
@@ -30,12 +31,19 @@ import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.media.ImageStrip
+import nz.net.ultraq.redhorizon.media.Playable
+import nz.net.ultraq.redhorizon.media.SoundEffect
+import nz.net.ultraq.redhorizon.media.SoundTrack
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -59,7 +67,9 @@ class Explorer extends Application {
 
 	private File currentDirectory
 	private final List<String> fileNames = new CopyOnWriteArrayList<>()
-	private Object selectedFile
+	private InputStream selectedFileInputStream
+	private Object selectedFileClass
+	private Object selectedMedia
 	private Palette palette
 	private int tick
 
@@ -106,6 +116,95 @@ class Explorer extends Application {
 			}
 	}
 
+	/**
+	 * Update the preview area with something appropriate for the selected file.
+	 * 
+	 * @param newFile
+	 */
+	private void previewFile(File newFile) {
+
+		// Clear the previous file
+		if (selectedMedia) {
+			if (selectedFileClass instanceof Streaming) {
+				logger.debug('Stopping streaming worker')
+				selectedFileClass.streamingDataWorker.stop()
+			}
+			if (selectedMedia instanceof Playable) {
+				logger.debug('Stopping playable file')
+				selectedMedia.stop()
+			}
+			selectedFileInputStream.close()
+
+			// TODO: Wait for stop event before proceeding.  Need to allow the engines
+			//       to clean up the item before clearing the scene
+			Thread.sleep(100)
+
+			scene.clear()
+			graphicsEngine.camera.center(new Vector3f())
+		}
+
+		logger.info('Loading {}...', newFile.name)
+
+		if (newFile.file) {
+			def fileClass = newFile.name.getFileClass()
+			if (!fileClass) {
+				logger.info('No filetype implementation for {}', newFile.name)
+				return
+			}
+
+			if (fileClass == MixFile) {
+				selectedFileClass = fileClass.newInstance(newFile)
+			}
+			else {
+				selectedFileInputStream = newFile.newInputStream()
+				selectedFileClass = fileClass.newInstance(selectedFileInputStream)
+
+				switch (selectedFileClass) {
+
+					case AnimationFile:
+						def animation = new Animation(selectedFileClass, gameClock)
+							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
+						scene << animation
+						animation.play()
+						selectedMedia = animation
+						break
+
+					case ImageFile:
+						def image = new Image(selectedFileClass)
+						scene << image
+							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
+						selectedMedia = image
+						break
+
+					case ImagesFile:
+						tick = selectedFileClass.width
+						def imageStrip = new ImageStrip(selectedFileClass, palette)
+						scene << imageStrip
+						selectedMedia = imageStrip
+						break
+
+					case SoundFile:
+						// Try determine the appropriate media for the sound file
+						def sound = selectedFileClass instanceof AudFile && selectedFileClass.uncompressedSize > 1048576 ? // 1MB
+							new SoundTrack(selectedFileClass, gameClock) :
+							new SoundEffect(selectedFileClass)
+						scene << sound
+						sound.play()
+						selectedMedia = sound
+						break
+
+					default:
+						logger.info('Filetype of {} not yet configured', selectedFileClass.class.simpleName)
+						selectedMedia = null
+				}
+			}
+
+			// TODO: Display selected file info elsewhere?  Currently these are long
+			//       lines of text 🤔
+//			logger.info('{}', selectedFileClass)
+		}
+	}
+
 	@Override
 	void run() {
 
@@ -128,13 +227,13 @@ class Explorer extends Application {
 
 		// Handle events from the explorer GUI
 		explorerGuiRenderPass.on(FileSelectedEvent) { event ->
-			def selectedFile = new File(currentDirectory, event.selectedFile)
-			if (selectedFile.directory) {
-				currentDirectory = selectedFile
+			def newFile = new File(currentDirectory, event.selectedFile)
+			if (newFile.directory) {
+				currentDirectory = newFile
 				buildList()
 			}
 			else {
-				updatePreviewFile(selectedFile)
+				previewFile(newFile)
 			}
 		}
 
@@ -149,57 +248,16 @@ class Explorer extends Application {
 						graphicsEngine.camera.translate(-tick, 0)
 						break
 					case GLFW_KEY_SPACE:
-						graphicsEngine.camera.center(new Vector3f())
+						if (selectedFileClass instanceof AnimationFile) {
+							gameClock.togglePause()
+						}
+						else if (selectedFileClass instanceof ImagesFile) {
+							graphicsEngine.camera.center(new Vector3f())
+						}
 						break
 					case GLFW_KEY_ESCAPE:
 						stop()
 						break
-				}
-			}
-		}
-	}
-
-	/**
-	 * Update the preview area using the selected file.
-	 * 
-	 * @param newFile
-	 */
-	private void updatePreviewFile(File newFile) {
-
-		// Clear the previous file
-		if (selectedFile) {
-			selectedFile = null
-			scene.clear()
-			graphicsEngine.camera.center(new Vector3f())
-		}
-
-		logger.info('Loading {}...', newFile.name)
-
-		if (newFile.file) {
-			def fileClass = newFile.name.getFileClass()
-			if (!fileClass) {
-				logger.info('No filetype implementation for {}', newFile.name)
-				return
-			}
-
-			if (fileClass == MixFile) {
-				selectedFile = fileClass.newInstance(newFile)
-			}
-			else {
-				newFile.withInputStream { inputStream ->
-					selectedFile = fileClass.newInstance(inputStream)
-					switch (selectedFile) {
-						case ImageFile:
-							scene << new Image(selectedFile)
-								.translate(-selectedFile.width / 2, -selectedFile.height / 2)
-							break
-						case ImagesFile:
-							tick = selectedFile.width
-							scene << new ImageStrip(selectedFile, palette)
-							break
-						default:
-							logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
-					}
 				}
 			}
 		}
