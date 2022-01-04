@@ -47,7 +47,7 @@ class GraphicsOptions {
 	 * @return
 	 */
 	@NamedVariant
-	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour, boolean fixAspectRatio) {
+	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = null, boolean fixAspectRatio = false) {
 
 		return new GraphicsConfiguration(
 			clearColour: clearColour ?: Colour.BLACK,
