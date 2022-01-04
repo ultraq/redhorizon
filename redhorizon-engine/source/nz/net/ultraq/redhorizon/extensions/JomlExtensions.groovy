@@ -51,20 +51,6 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Center the rectangle about the origin.
-	 * 
-	 * @param self
-	 * @return This rectangle.
-	 */
-	static Rectanglef center(Rectanglef self) {
-
-		if (self.minX !== 0 || self.minY !== 0) {
-			self.translate(-self.minX, -self.minY)
-		}
-		return self.translate(-self.maxX / 2 as int, -self.maxY / 2 as int)
-	}
-
-	/**
 	 * Overload the {@code -} operator to perform vector subtraction.  Note that
 	 * this creates a new object to store the result and is returned.
 	 * 
