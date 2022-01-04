@@ -32,7 +32,7 @@ import java.util.concurrent.Executors
 trait EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
-	private static final ExecutorService executorService = Executors.newCachedThreadPool()
+	private static final ExecutorService executorService = Executors.newFixedThreadPool(2)
 
 	private final List<Tuple3<Class<? extends Event>, EventListener<? extends Event>, Boolean>> eventListeners =
 		new CopyOnWriteArrayList<>()
@@ -96,6 +96,7 @@ trait EventTarget {
 					}
 					else {
 						executorService.execute { ->
+							Thread.currentThread().name = 'Non-blocking event execution thread'
 							listener.handleEvent(event)
 						}
 					}

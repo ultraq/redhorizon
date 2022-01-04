@@ -164,8 +164,8 @@ class VqaFile implements Streaming, VideoFile {
 	@Override
 	ByteBuffer[] getFrameData() {
 
-		def frames = []
-		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			def frames = []
 			def worker = streamingDataWorker
 			worker.on(StreamingFrameEvent) { event ->
 				frames << event.frame
@@ -173,24 +173,26 @@ class VqaFile implements Streaming, VideoFile {
 			executorService
 				.submit(worker)
 				.get()
+			return frames
 		}
-		return frames
 	}
 
 	@Override
 	ByteBuffer getSoundData() {
 
-		def samples = []
-		Executors.newSingleThreadExecutor().executeAndShutdown { ExecutorService executorService ->
-			def worker = streamingDataWorker
-			worker.on(StreamingSampleEvent) { event ->
-				samples << event.sample
+		return ByteBuffer.fromBuffers(
+			Executors.newSingleThreadExecutor().executeAndShutdown { ExecutorService executorService ->
+				def samples = []
+				def worker = streamingDataWorker
+				worker.on(StreamingSampleEvent) { event ->
+					samples << event.sample
+				}
+				executorService
+					.submit(worker)
+					.get()
+				return ByteBuffer.fromBuffers(samples as ByteBuffer[])
 			}
-			executorService
-				.submit(worker)
-				.get()
-		}
-		return ByteBuffer.fromBuffers(*samples)
+		)
 	}
 
 	/**

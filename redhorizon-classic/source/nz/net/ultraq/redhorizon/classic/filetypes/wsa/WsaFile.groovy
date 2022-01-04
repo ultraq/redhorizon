@@ -98,8 +98,8 @@ class WsaFile implements AnimationFile, Streaming {
 	@Override
 	ByteBuffer[] getFrameData() {
 
-		def frames = []
-		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+			def frames = []
 			def worker = streamingDataWorker
 			worker.on(StreamingFrameEvent) { event ->
 				frames << event.frame
@@ -107,8 +107,8 @@ class WsaFile implements AnimationFile, Streaming {
 			executorService
 				.submit(worker)
 				.get()
+			return frames
 		}
-		return frames
 	}
 
 	/**

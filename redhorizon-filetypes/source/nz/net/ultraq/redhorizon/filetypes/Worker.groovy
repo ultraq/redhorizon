@@ -37,6 +37,8 @@ abstract class Worker implements EventTarget, Runnable {
 	@Override
 	final void run() {
 
+		Thread.currentThread().priority = Thread.MIN_PRIORITY
+
 		running = true
 		canContinue = true
 		work()

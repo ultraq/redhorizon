@@ -81,17 +81,19 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	ByteBuffer getSoundData() {
 
-		def samples = []
-		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-			def worker = streamingDataWorker
-			worker.on(StreamingSampleEvent) { event ->
-				samples << event.sample
+		return ByteBuffer.fromBuffers(
+			Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
+				def worker = streamingDataWorker
+				def samples = []
+				worker.on(StreamingSampleEvent) { event ->
+					samples << event.sample
+				}
+				executorService
+					.submit(worker)
+					.get()
+				return samples as ByteBuffer[]
 			}
-			executorService
-				.submit(worker)
-				.get()
-		}
-		return ByteBuffer.fromBuffers(*samples)
+		)
 	}
 
 	/**
