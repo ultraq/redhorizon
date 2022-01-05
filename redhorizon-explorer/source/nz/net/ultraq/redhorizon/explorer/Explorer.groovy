@@ -25,13 +25,9 @@ import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -48,14 +44,11 @@ import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
 import nz.net.ultraq.redhorizon.media.Video
 
-import imgui.ImGui
-import imgui.type.ImBoolean
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.json.JsonSlurper
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -69,11 +62,12 @@ class Explorer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 
-	private final List<MixData> mixDatabase
+	private final List<Entry> entries = new CopyOnWriteArrayList<>()
+	private final EntryList entryList
+	private final MixDatabase mixDatabase
 
 	private File currentDirectory
 	private MixFile currentMixFile
-	private final List<Entry> fileEntries = new CopyOnWriteArrayList<>()
 	private InputStream selectedFileInputStream
 	private Object selectedFileClass
 	private Object selectedMedia
@@ -93,8 +87,8 @@ class Explorer extends Application {
 			)
 		)
 
-		def mixJsonData = getResourceAsStream("mix-data.json").withBufferedStream { it.text }
-		mixDatabase = new JsonSlurper().parseText(mixJsonData).collect { data -> data as MixData }
+		entryList = new EntryList(entries)
+		mixDatabase = new MixDatabase()
 
 		buildList(new File(System.getProperty("user.dir")))
 
@@ -111,11 +105,11 @@ class Explorer extends Application {
 	 */
 	private void buildList(File directory) {
 
-		fileEntries.clear()
+		entries.clear()
 		currentMixFile = null
 
 		if (directory.parent) {
-			fileEntries << new Entry('/..')
+			entries << new Entry('/..')
 		}
 		directory.listFiles()
 			.sort { file1, file2 ->
@@ -124,7 +118,7 @@ class Explorer extends Application {
 					file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
-				fileEntries << new Entry(fileOrDirectory.directory ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
+				entries << new Entry(fileOrDirectory.directory ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
 			}
 
 		currentDirectory = directory
@@ -137,15 +131,14 @@ class Explorer extends Application {
 	 */
 	private void buildList(MixFile mixFile) {
 
-		fileEntries.clear()
+		entries.clear()
 
-		fileEntries << new Entry('/..')
+		entries << new Entry('..')
 		mixFile.entries.each { entry ->
-			def hexId = "0x${Integer.toHexString(entry.id)}"
-			def matchingData = mixDatabase.find { it.id == hexId }
-			fileEntries << (matchingData ?
+			def matchingData = mixDatabase.find(entry.id)
+			entries << (matchingData ?
 				new Entry(matchingData.name) :
-				new Entry("(unknown entry, ID: ${hexId}, size: ${entry.size}", entry.id.toString())
+				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)}, size: ${entry.size}", entry.id.toString())
 			)
 		}
 
@@ -249,7 +242,7 @@ class Explorer extends Application {
 		scene.clear()
 		graphicsEngine.camera.center(new Vector3f())
 
-		logger.info('Loading entry from mix file with name: {}, ID: 0x{}...', entry.name ?: '(unknown)', Integer.toHexString(entry.id))
+		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
 		def entryClass = entry.name?.getFileClass()
 		if (!entryClass) {
@@ -288,28 +281,32 @@ class Explorer extends Application {
 	@Override
 	void run() {
 
-		def explorerGuiRenderPass = new ExplorerGuiRenderPass()
-
 		// Include the explorer GUI in the render pipeline
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			inputEventStream.on(KeyEvent) { keyEvent ->
 				if (keyEvent.action == GLFW_PRESS) {
 					if (keyEvent.key == GLFW_KEY_O) {
-						explorerGuiRenderPass.enabled = !explorerGuiRenderPass.enabled
+						entryList.enabled = !entryList.enabled
 					}
 				}
 			}
-			graphicsEngine.renderPipeline.addOverlayPass(explorerGuiRenderPass)
+			graphicsEngine.renderPipeline.addOverlayPass(entryList)
 		}
 		graphicsEngine.on(WindowMaximizedEvent) { event ->
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}
 
 		// Handle events from the explorer GUI
-		explorerGuiRenderPass.on(EntrySelectedEvent) { event ->
+		entryList.on(EntrySelectedEvent) { event ->
+			def entryValue = event.entry.value
 			if (currentMixFile) {
-				def selectedEntry = currentMixFile.getEntry(event.entry.value)
-				previewEntry(selectedEntry)
+				if (entryValue == '..') {
+					buildList(currentDirectory)
+				}
+				else {
+					def selectedEntry = currentMixFile.getEntry(entryValue)
+					previewEntry(selectedEntry)
+				}
 			}
 			else {
 				def selectedFile = new File(currentDirectory, event.entry.value)
@@ -353,36 +350,6 @@ class Explorer extends Application {
 		// Cleanup on exit
 		on(ApplicationStoppingEvent) { event ->
 			clearCurrentFile()
-		}
-	}
-
-	/**
-	 * A render pass for drawing the ImGui explorer elements.
-	 */
-	private class ExplorerGuiRenderPass implements EventTarget, OverlayRenderPass {
-
-		boolean enabled = true
-
-		private Entry selectedEntry
-
-		@Override
-		void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
-
-			ImGui.begin('Current directory', new ImBoolean(true))
-
-			// File list
-			ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)
-			fileEntries.each { entry ->
-				def isSelected = selectedEntry == entry
-				if (ImGui.selectable(entry.name, isSelected)) {
-					ImGui.setItemDefaultFocus()
-					selectedEntry = entry
-					trigger(new EntrySelectedEvent(entry))
-				}
-			}
-			ImGui.endListBox()
-
-			ImGui.end()
 		}
 	}
 }

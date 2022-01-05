@@ -16,14 +16,16 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import groovy.transform.Immutable
+
 /**
  * Model of the classic C&C mix data, for identifying unknown mix entries.
  * 
  * @author Emanuel Rabina
  */
+@Immutable
 class MixData {
 
-	String id
-	int size
+	int id
 	String name
 }
