@@ -20,6 +20,7 @@ import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
+import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
@@ -54,6 +55,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.json.JsonSlurper
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -67,8 +69,11 @@ class Explorer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 
+	private final List<MixData> mixDatabase
+
 	private File currentDirectory
-	private final List<String> fileNames = new CopyOnWriteArrayList<>()
+	private MixFile currentMixFile
+	private final List<Entry> fileEntries = new CopyOnWriteArrayList<>()
 	private InputStream selectedFileInputStream
 	private Object selectedFileClass
 	private Object selectedMedia
@@ -88,8 +93,10 @@ class Explorer extends Application {
 			)
 		)
 
-		currentDirectory = new File(System.getProperty("user.dir"))
-		buildList()
+		def mixJsonData = getResourceAsStream("mix-data.json").withBufferedStream { it.text }
+		mixDatabase = new JsonSlurper().parseText(mixJsonData).collect { data -> data as MixData }
+
+		buildList(new File(System.getProperty("user.dir")))
 
 		// TODO: Be able to choose which palette to apply to a paletted file
 		palette = getResourceAsStream(PaletteType.RA_TEMPERATE.file).withBufferedStream { inputStream ->
@@ -99,23 +106,50 @@ class Explorer extends Application {
 
 	/**
 	 * Update the contents of the list from the current directory.
+	 * 
+	 * @param directory
 	 */
-	private void buildList() {
+	private void buildList(File directory) {
 
-		fileNames.clear()
+		fileEntries.clear()
+		currentMixFile = null
 
-		if (currentDirectory.parent) {
-			fileNames << '/..'
+		if (directory.parent) {
+			fileEntries << new Entry('/..')
 		}
-		currentDirectory.listFiles()
+		directory.listFiles()
 			.sort { file1, file2 ->
 				file1.directory && !file2.directory ? -1 :
 					!file1.directory && file2.directory ? 1 :
 					file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
-				fileNames << (fileOrDirectory.isDirectory() ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
+				fileEntries << new Entry(fileOrDirectory.directory ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
 			}
+
+		currentDirectory = directory
+	}
+
+	/**
+	 * Update the contents of the list from the current mix file.
+	 * 
+	 * @param mixFile
+	 */
+	private void buildList(MixFile mixFile) {
+
+		fileEntries.clear()
+
+		fileEntries << new Entry('/..')
+		mixFile.entries.each { entry ->
+			def hexId = "0x${Integer.toHexString(entry.id)}"
+			def matchingData = mixDatabase.find { it.id == hexId }
+			fileEntries << (matchingData ?
+				new Entry(matchingData.name) :
+				new Entry("(unknown entry, ID: ${hexId}, size: ${entry.size}", entry.id.toString())
+			)
+		}
+
+		currentMixFile = mixFile
 	}
 
 	/**
@@ -142,87 +176,113 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Update the preview area with something appropriate for the selected file.
+	 * Update the preview are for the given file data and type.
 	 * 
-	 * @param newFile
+	 * @param fileType
 	 */
-	private void previewFile(File newFile) {
+	private void preview(Object fileType) {
+
+		switch (fileType) {
+
+			case VideoFile:
+				def video = new Video(fileType, gameClock)
+					.scaleXY(2)
+					.translate(-fileType.width / 2, -fileType.height / 2)
+				scene << video
+				video.play()
+				selectedMedia = video
+				break
+
+			case AnimationFile:
+				def animation = new Animation(fileType, gameClock)
+					.scaleXY(2)
+					.translate(-fileType.width / 2, -fileType.height / 2)
+				scene << animation
+				animation.play()
+				selectedMedia = animation
+				break
+
+			case ImageFile:
+				def image = new Image(fileType)
+				scene << image
+					.translate(-fileType.width / 2, -fileType.height / 2)
+				selectedMedia = image
+				break
+
+			case ImagesFile:
+				tick = fileType.width
+				def imageStrip = new ImageStrip(fileType, palette)
+				scene << imageStrip
+				selectedMedia = imageStrip
+				break
+
+			case SoundFile:
+				// Try determine the appropriate media for the sound file
+				def sound = fileType instanceof AudFile && fileType.uncompressedSize > 1048576 ? // 1MB
+					new SoundTrack(fileType, gameClock) :
+					new SoundEffect(fileType)
+				scene << sound
+				sound.play()
+				selectedMedia = sound
+				break
+
+			default:
+				logger.info('Filetype of {} not yet configured', selectedFileClass.class.simpleName)
+				selectedMedia = null
+		}
+
+		selectedFileClass = fileType
+		// TODO: Display selected file info elsewhere?  Currently these are long
+		//       lines of text 🤔
+//		logger.info('{}', selectedFileClass)
+	}
+
+	/**
+	 * Update the preview area with the media for the selected mix file entry.
+	 * 
+	 * @param entry
+	 */
+	private void previewEntry(MixEntry entry) {
+
+		// Clear the previous entry and reset the preview scene
+		clearCurrentFile()
+		scene.clear()
+		graphicsEngine.camera.center(new Vector3f())
+
+		logger.info('Loading entry from mix file with name: {}, ID: 0x{}...', entry.name ?: '(unknown)', Integer.toHexString(entry.id))
+
+		def entryClass = entry.name?.getFileClass()
+		if (!entryClass) {
+			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
+			return
+		}
+
+		selectedFileInputStream = currentMixFile.getEntryData(entry)
+		preview(entryClass.newInstance(selectedFileInputStream))
+	}
+
+	/**
+	 * Update the preview area with the media for the selected file.
+	 * 
+	 * @param file
+	 */
+	private void previewFile(File file) {
 
 		// Clear the previous file and reset the preview scene
 		clearCurrentFile()
 		scene.clear()
 		graphicsEngine.camera.center(new Vector3f())
 
-		logger.info('Loading {}...', newFile.name)
+		logger.info('Loading {}...', file.name)
 
-		if (newFile.file) {
-			def fileClass = newFile.name.getFileClass()
-			if (!fileClass) {
-				logger.info('No filetype implementation for {}', newFile.name)
-				return
-			}
-
-			if (fileClass == MixFile) {
-				selectedFileClass = fileClass.newInstance(newFile)
-			}
-			else {
-				selectedFileInputStream = newFile.newInputStream()
-				selectedFileClass = fileClass.newInstance(selectedFileInputStream)
-
-				switch (selectedFileClass) {
-
-					case VideoFile:
-						def video = new Video(selectedFileClass, gameClock)
-							.scaleXY(2)
-							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
-						scene << video
-						video.play()
-						selectedMedia = video
-						break
-
-					case AnimationFile:
-						def animation = new Animation(selectedFileClass, gameClock)
-							.scaleXY(2)
-							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
-						scene << animation
-						animation.play()
-						selectedMedia = animation
-						break
-
-					case ImageFile:
-						def image = new Image(selectedFileClass)
-						scene << image
-							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
-						selectedMedia = image
-						break
-
-					case ImagesFile:
-						tick = selectedFileClass.width
-						def imageStrip = new ImageStrip(selectedFileClass, palette)
-						scene << imageStrip
-						selectedMedia = imageStrip
-						break
-
-					case SoundFile:
-						// Try determine the appropriate media for the sound file
-						def sound = selectedFileClass instanceof AudFile && selectedFileClass.uncompressedSize > 1048576 ? // 1MB
-							new SoundTrack(selectedFileClass, gameClock) :
-							new SoundEffect(selectedFileClass)
-						scene << sound
-						sound.play()
-						selectedMedia = sound
-						break
-
-					default:
-						logger.info('Filetype of {} not yet configured', selectedFileClass.class.simpleName)
-						selectedMedia = null
-				}
-			}
-
-			// TODO: Display selected file info elsewhere?  Currently these are long
-			//       lines of text 🤔
-//			logger.info('{}', selectedFileClass)
+		def fileClass = file.name.getFileClass()
+		if (!fileClass) {
+			logger.info('No filetype implementation for {}', file.name)
+			return
 		}
+
+		selectedFileInputStream = file.newInputStream()
+		preview(fileClass.newInstance(selectedFileInputStream))
 	}
 
 	@Override
@@ -246,14 +306,22 @@ class Explorer extends Application {
 		}
 
 		// Handle events from the explorer GUI
-		explorerGuiRenderPass.on(FileSelectedEvent) { event ->
-			def newFile = new File(currentDirectory, event.selectedFile)
-			if (newFile.directory) {
-				currentDirectory = newFile
-				buildList()
+		explorerGuiRenderPass.on(EntrySelectedEvent) { event ->
+			if (currentMixFile) {
+				def selectedEntry = currentMixFile.getEntry(event.entry.value)
+				previewEntry(selectedEntry)
 			}
 			else {
-				previewFile(newFile)
+				def selectedFile = new File(currentDirectory, event.entry.value)
+				if (selectedFile.directory) {
+					buildList(selectedFile)
+				}
+				else if (selectedFile.name.endsWith('.mix')) {
+					buildList(new MixFile(selectedFile))
+				}
+				else {
+					previewFile(selectedFile)
+				}
 			}
 		}
 
@@ -295,7 +363,7 @@ class Explorer extends Application {
 
 		boolean enabled = true
 
-		private String selectedFileName
+		private Entry selectedEntry
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
@@ -304,12 +372,12 @@ class Explorer extends Application {
 
 			// File list
 			ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)
-			fileNames.each { fileName ->
-				def isSelected = this.selectedFileName == fileName
-				if (ImGui.selectable(fileName, isSelected)) {
+			fileEntries.each { entry ->
+				def isSelected = selectedEntry == entry
+				if (ImGui.selectable(entry.name, isSelected)) {
 					ImGui.setItemDefaultFocus()
-					this.selectedFileName = fileName
-					trigger(new FileSelectedEvent(fileName))
+					selectedEntry = entry
+					trigger(new EntrySelectedEvent(entry))
 				}
 			}
 			ImGui.endListBox()

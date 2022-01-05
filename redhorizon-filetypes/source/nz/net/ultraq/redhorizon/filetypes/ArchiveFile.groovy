@@ -32,8 +32,9 @@ interface ArchiveFile<E extends ArchiveEntry> extends Closeable {
 	 *   Name of the entry as it exists within the archive file.  If the archive
 	 *   file supports a directory structure within it, then this name can contain
 	 *   a path structure.
-	 * @return Descriptor of the entry, or {@code null} if the entry cannot be
-	 *         found within the file.
+	 * @return
+	 *   Descriptor of the entry, or {@code null} if the entry cannot be found
+	 *   within the file.
 	 */
 	E getEntry(String name)
 

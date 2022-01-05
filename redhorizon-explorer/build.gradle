@@ -44,6 +44,9 @@ configurations.all {
 }
 
 dependencies {
+	implementation("org.codehaus.groovy:groovy-json:${groovyVersion}:indy") {
+		exclude module: 'groovy'
+	}
 	implementation(
 		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
@@ -64,14 +67,6 @@ dependencies {
 	implementation('nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT') {
 		exclude module: 'groovy'
 	}
-	runtimeOnly(
-		"io.github.spair:imgui-java-natives-macos-ft:${imguiVersion}",
-		"io.github.spair:imgui-java-natives-windows-ft:${imguiVersion}",
-		'org.lwjgl:lwjgl::natives-macos',
-		'org.lwjgl:lwjgl::natives-windows',
-		'org.lwjgl:lwjgl-glfw::natives-macos',
-		'org.lwjgl:lwjgl-glfw::natives-windows'
-	)
 }
 
 application {

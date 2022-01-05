@@ -114,18 +114,23 @@ class MixFile implements ArchiveFile<MixEntry> {
 	@Override
 	MixEntry getEntry(String name) {
 
+		// Name lookup
 		def itemId = calculateId(name)
-		def entry = entries.find { entry -> entry.id == itemId }
-		if (entry) {
-			entry.name = name
-			return entry
+		def entryByName = entries.find { entry -> entry.id == itemId }
+		if (entryByName) {
+			entryByName.name = name
+			return entryByName
 		}
+
+		// ID lookup
+		def entryById = entries.find { entry -> entry.id == Integer.parseInt(name) }
+		if (entryById) {
+			return entryById
+		}
+
 		return null
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	InputStream getEntryData(MixEntry entry) {
 

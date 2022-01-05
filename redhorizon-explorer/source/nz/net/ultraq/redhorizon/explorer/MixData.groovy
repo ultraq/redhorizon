@@ -16,17 +16,14 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.events.Event
-
-import groovy.transform.TupleConstructor
-
 /**
- * Event for explorer file selections.
+ * Model of the classic C&C mix data, for identifying unknown mix entries.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class FileSelectedEvent extends Event {
+class MixData {
 
-	final String selectedFile
+	String id
+	int size
+	String name
 }
