@@ -82,7 +82,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 
 		for (def i = 0; i < name.length(); ) {
 			def a = 0
-			for (def j = 0; j < 4; j++) {
+			4.times { j ->
 				a >>>= 8
 				if (i < name.length()) {
 					a += (short)name.charAt(i) << 24
