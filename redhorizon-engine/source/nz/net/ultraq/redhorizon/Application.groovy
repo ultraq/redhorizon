@@ -26,6 +26,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
@@ -45,7 +47,7 @@ import java.util.concurrent.FutureTask
  * @author Emanuel Rabina
  */
 @TupleConstructor
-abstract class Application implements Runnable {
+abstract class Application implements EventTarget, Runnable {
 
 	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
@@ -145,8 +147,16 @@ abstract class Application implements Runnable {
 	 */
 	void stop() {
 
+		trigger(new ApplicationStoppingEvent(), true)
+
 		graphicsEngine.stop()
 		audioEngine.stop()
 		gameClock.stop()
 	}
+
+	/**
+	 * Event for when the application is about to be stopped, before the engines
+	 * are shut down.  Can be used for performing any cleanup tasks.
+	 */
+	class ApplicationStoppingEvent extends Event {}
 }

@@ -37,6 +37,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.Animation
 import nz.net.ultraq.redhorizon.media.Image
@@ -44,6 +45,7 @@ import nz.net.ultraq.redhorizon.media.ImageStrip
 import nz.net.ultraq.redhorizon.media.Playable
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
+import nz.net.ultraq.redhorizon.media.Video
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -117,13 +119,11 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Update the preview area with something appropriate for the selected file.
-	 * 
-	 * @param newFile
+	 * Finish all tasks associated with the current file so that we can exit the
+	 * application or make way for another file.
 	 */
-	private void previewFile(File newFile) {
+	private void clearCurrentFile() {
 
-		// Clear the previous file
 		if (selectedMedia) {
 			if (selectedFileClass instanceof Streaming) {
 				logger.debug('Stopping streaming worker')
@@ -138,10 +138,20 @@ class Explorer extends Application {
 			// TODO: Wait for stop event before proceeding.  Need to allow the engines
 			//       to clean up the item before clearing the scene
 			Thread.sleep(100)
-
-			scene.clear()
-			graphicsEngine.camera.center(new Vector3f())
 		}
+	}
+
+	/**
+	 * Update the preview area with something appropriate for the selected file.
+	 * 
+	 * @param newFile
+	 */
+	private void previewFile(File newFile) {
+
+		// Clear the previous file and reset the preview scene
+		clearCurrentFile()
+		scene.clear()
+		graphicsEngine.camera.center(new Vector3f())
 
 		logger.info('Loading {}...', newFile.name)
 
@@ -161,8 +171,18 @@ class Explorer extends Application {
 
 				switch (selectedFileClass) {
 
+					case VideoFile:
+						def video = new Video(selectedFileClass, gameClock)
+							.scaleXY(2)
+							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
+						scene << video
+						video.play()
+						selectedMedia = video
+						break
+
 					case AnimationFile:
 						def animation = new Animation(selectedFileClass, gameClock)
+							.scaleXY(2)
 							.translate(-selectedFileClass.width / 2, -selectedFileClass.height / 2)
 						scene << animation
 						animation.play()
@@ -260,6 +280,11 @@ class Explorer extends Application {
 						break
 				}
 			}
+		}
+
+		// Cleanup on exit
+		on(ApplicationStoppingEvent) { event ->
+			clearCurrentFile()
 		}
 	}
 
