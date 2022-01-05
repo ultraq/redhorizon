@@ -55,18 +55,19 @@ class AudFileWorker extends Worker {
 		// Decompress the aud file data by chunks
 		def headerSize = input.bytesRead
 		while (canContinue && input.bytesRead < headerSize + compressedSize) {
+			def sample = average('Decoding sample', 1f, logger) { ->
 
-			// Chunk header
-			def compressedSize = input.readShort()
-			def uncompressedSize = input.readShort()
-			assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
+				// Chunk header
+				def compressedSize = input.readShort()
+				def uncompressedSize = input.readShort()
+				assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
 
-			// Decode
-			def sample = decoder.decode(
-				ByteBuffer.wrapNative(input.readNBytes(compressedSize)),
-				ByteBuffer.allocateNative(uncompressedSize)
-			)
-
+				// Decode
+				return decoder.decode(
+					ByteBuffer.wrapNative(input.readNBytes(compressedSize)),
+					ByteBuffer.allocateNative(uncompressedSize)
+				)
+			}
 			trigger(new StreamingSampleEvent(sample))
 		}
 
