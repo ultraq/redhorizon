@@ -17,9 +17,6 @@
 apply plugin: 'application'
 
 dependencies {
-	implementation("org.codehaus.groovy:groovy-json:${groovyVersion}:indy") {
-		exclude module: 'groovy'
-	}
 	implementation(
 		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
@@ -29,6 +26,7 @@ dependencies {
 		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
 		"info.picocli:picocli:${picocliVersion}",
+		"org.codehaus.groovy:groovy-json:${groovyVersion}:indy",
 		"org.joml:joml:${jomlVersion}",
 		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl-glfw'

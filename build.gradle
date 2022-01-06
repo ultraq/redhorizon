@@ -68,20 +68,23 @@ subprojects {
 		slf4jVersion = '1.7.32'
 	}
 
+	// Replace all uses of the standard Groovy library with the invokedynamic one
+	configurations.all {
+		resolutionStrategy.dependencySubstitution {
+			substitute module("org.codehaus.groovy:groovy") using module("org.codehaus.groovy:groovy:${groovyVersion}") withClassifier('indy')
+		}
+	}
+
 	dependencies {
 		implementation(
+			'nz.net.ultraq.extensions:groovy-extensions:1.1.0',
+			'nz.net.ultraq.extensions:profiling-extensions:0.6.1',
 			"org.codehaus.groovy:groovy:${groovyVersion}:indy",
 			"org.slf4j:slf4j-api:${slf4jVersion}"
 		)
-		implementation('nz.net.ultraq.extensions:groovy-extensions:1.1.0') {
-			exclude module: 'groovy'
-		}
-		implementation('nz.net.ultraq.extensions:profiling-extensions:0.6.1') {
-			exclude module: 'groovy'
-		}
-		testImplementation('org.spockframework:spock-core:2.0-groovy-3.0') {
-			exclude group: 'org.codehaus.groovy'
-		}
+		testImplementation(
+			'org.spockframework:spock-core:2.0-groovy-3.0'
+		)
 		testRuntimeOnly(
 			"org.slf4j:slf4j-nop:${slf4jVersion}"
 		)

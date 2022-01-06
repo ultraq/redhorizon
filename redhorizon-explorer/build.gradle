@@ -44,9 +44,6 @@ configurations.all {
 }
 
 dependencies {
-	implementation("org.codehaus.groovy:groovy-json:${groovyVersion}:indy") {
-		exclude module: 'groovy'
-	}
 	implementation(
 		project(':redhorizon-classic'),
 		project(':redhorizon-engine'),
@@ -58,15 +55,14 @@ dependencies {
 		"info.picocli:picocli:${picocliVersion}",
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
-		"org.eclipse.platform:${swtArtifact}:${swtVersion}",
+		'nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT',
+		"org.codehaus.groovy:groovy-json:${groovyVersion}:indy",
+		"org.eclipse.platform:org.eclipse.swt:${swtVersion}",
 		"org.joml:joml:${jomlVersion}",
 		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw'
 	)
-	implementation('nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT') {
-		exclude module: 'groovy'
-	}
 }
 
 application {
