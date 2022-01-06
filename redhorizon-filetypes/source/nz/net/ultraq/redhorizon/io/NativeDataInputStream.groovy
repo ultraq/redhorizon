@@ -100,6 +100,18 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 		return isLittleEndian ? readLittleEndian(2) : dis.readShort()
 	}
 
+	/**
+	 * Reads an unsigned {@code short} value, returning it as an {@code int} as
+	 * that is the next primitive able to hold the unsigned value.
+	 * 
+	 * @param self
+	 * @return
+	 */
+	int readUnsignedShort() {
+
+		return readShort() & 0xffff
+	}
+
 	@Override
 	synchronized void reset() {
 

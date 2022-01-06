@@ -54,7 +54,7 @@ class WsaFile implements AnimationFile, Streaming {
 	final short y
 	final int width     // Stored in file as short
 	final int height    // stored in file as short
-	final short delta
+	final int delta     // Unsigned short
 	final short flags
 	final int[] frameOffsets
 	final Palette palette
@@ -78,7 +78,7 @@ class WsaFile implements AnimationFile, Streaming {
 		y         = input.readShort()
 		width     = input.readShort()
 		height    = input.readShort()
-		delta     = input.readShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
+		delta     = input.readUnsignedShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
 		flags     = input.readShort()
 
 		// Frame offsets
