@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'application'
+plugins {
+	id 'application'
+}
 
 dependencies {
 	implementation(
