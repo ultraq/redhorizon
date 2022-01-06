@@ -16,31 +16,8 @@
 
 import org.gradle.internal.os.OperatingSystem
 
-apply plugin: 'application'
-
-def os = OperatingSystem.current()
-def swtArtifact =
-	os == OperatingSystem.MAC_OS ?  'org.eclipse.swt.cocoa.macosx.x86_64' :
-	os == OperatingSystem.WINDOWS ? 'org.eclipse.swt.win32.win32.x86_64' :
-	os == OperatingSystem.LINUX ?   'org.eclipse.swt.gtk.linux.x86_64' :
-	null
-def swtVersion = '3.116.0'
-
-// Fix up the ${osgi.platform} value inside the SWT Maven files
-configurations.all {
-	resolutionStrategy {
-		dependencySubstitution {
-			if (os == OperatingSystem.MAC_OS) {
-				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.cocoa.macosx.x86_64:${swtVersion}")
-			}
-			else if (os == OperatingSystem.WINDOWS) {
-				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:${swtVersion}")
-			}
-			else if (os == OperatingSystem.LINUX) {
-				substitute module('org.eclipse.platform:org.eclipse.swt.${osgi.platform}') with module("org.eclipse.platform:org.eclipse.swt.gtk.linux.x86_64:${swtVersion}")
-			}
-		}
-	}
+plugins {
+	id 'application'
 }
 
 dependencies {
@@ -57,7 +34,6 @@ dependencies {
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
 		'nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT',
 		"org.codehaus.groovy:groovy-json:${groovyVersion}:indy",
-		"org.eclipse.platform:org.eclipse.swt:${swtVersion}",
 		"org.joml:joml:${jomlVersion}",
 		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl',

@@ -47,18 +47,7 @@ class ExplorerCli implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		// NOTE: Can't have both the splashscreen and explorer run as they both want
-		//       the main thread 🤔
-//		def splashScreen = new SplashScreen(commandSpec.version()[0] ?: '(development)')
-//		Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-//			executorService.execute { ->
-//				Thread.sleep(commandSpec.version()[0] != null ? 3000 : 1000)
-//				splashScreen.close()
-//			}
-//			splashScreen.open()
-//		}
-		new Explorer().start()
-
+		new Explorer(commandSpec.version()[0] ?: '(development)').start()
 		return 0
 	}
 

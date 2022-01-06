@@ -76,8 +76,10 @@ class Explorer extends Application {
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
+	 * 
+	 * @param version
 	 */
-	Explorer() {
+	Explorer(String version) {
 
 		super(
 			new AudioConfiguration(),
@@ -139,7 +141,7 @@ class Explorer extends Application {
 			def matchingData = mixDatabase.find(entry.id)
 			entries << (matchingData ?
 				new Entry(matchingData.name) :
-				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)}", entry.id.toString())
+				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", entry.id.toString())
 			)
 		}
 
