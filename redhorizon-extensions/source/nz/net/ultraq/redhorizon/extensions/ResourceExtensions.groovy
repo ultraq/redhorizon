@@ -43,16 +43,30 @@ class ResourceExtensions {
 	}
 
 	/**
-	 * Wrap an input stream with a buffered one and invoke the usual
-	 * {@code withStream} method over it.
+	 * Wrap an input stream with a buffered reader and invoke the usual
+	 * {@code withReader} method over it.
 	 * 
-	 * @param stream
+	 * @param self
 	 * @param closure
 	 * @return
 	 */
-	static <T> T withBufferedStream(InputStream stream,
+	static <T> T withBufferedReader(InputStream self,
+		@ClosureParams(value = SimpleType, options = 'java.io.BufferedReader') Closure<T> closure) {
+
+		return new BufferedInputStream(self).withReader(closure)
+	}
+
+	/**
+	 * Wrap an input stream with a buffered one and invoke the usual
+	 * {@code withStream} method over it.
+	 * 
+	 * @param self
+	 * @param closure
+	 * @return
+	 */
+	static <T> T withBufferedStream(InputStream self,
 		@ClosureParams(value = SimpleType, options = 'java.io.BufferedInputStream') Closure<T> closure) {
 
-		return new BufferedInputStream(stream).withStream(closure)
+		return new BufferedInputStream(self).withStream(closure)
 	}
 }

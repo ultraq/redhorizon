@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import groovy.json.JsonSlurper
-
 /**
  * A list of known classic C&C mix file entries so that names can be displayed
  * in the explorer.
@@ -26,7 +24,7 @@ import groovy.json.JsonSlurper
  */
 class MixDatabase {
 
-	private static final String[] sources = ['ra-conquer.json']
+	private static final String[] sources = ['ra-conquer.csv']
 
 	private final List<MixData> data = []
 
@@ -35,17 +33,19 @@ class MixDatabase {
 	 */
 	MixDatabase() {
 
-		def jsonSlurper = new JsonSlurper()
 		sources
 			.collect { source -> "${MixDatabase.packageName.replace('.', '/')}/mixdata/${source}" }
 			.each { source ->
-				def jsonData = getResourceAsStream(source).text
-				jsonSlurper.parseText(jsonData).each { entry ->
-					def entryId = entry['id']
-					data << new MixData(
-						id: (entryId instanceof String ? Long.decode(entryId) : entryId) as int,
-						name: entry['name']
-					)
+				// Very basic CSV parsing, might want to use a library if it gets any more complicated
+				getResourceAsStream(source).withBufferedReader { reader ->
+					reader.readLine() // First line assumed to be CSV headers
+					reader.eachLine { line ->
+						def (id, name) = line.split(',')
+						data << new MixData(
+							id: Long.decode(id) as int,
+							name: name
+						)
+					}
 				}
 			}
 	}

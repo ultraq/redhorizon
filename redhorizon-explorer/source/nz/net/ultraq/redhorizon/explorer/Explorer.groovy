@@ -135,10 +135,11 @@ class Explorer extends Application {
 
 		entries << new Entry('..')
 		mixFile.entries.each { entry ->
+//			println("0x${Integer.toHexString(entry.id)}")
 			def matchingData = mixDatabase.find(entry.id)
 			entries << (matchingData ?
 				new Entry(matchingData.name) :
-				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)}, size: ${entry.size}", entry.id.toString())
+				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)}", entry.id.toString())
 			)
 		}
 
@@ -305,7 +306,12 @@ class Explorer extends Application {
 				}
 				else {
 					def selectedEntry = currentMixFile.getEntry(entryValue)
-					previewEntry(selectedEntry)
+					if (selectedEntry) {
+						previewEntry(selectedEntry)
+					}
+					else {
+						logger.error('No entry named {} was found in the mix file', entryValue)
+					}
 				}
 			}
 			else {
