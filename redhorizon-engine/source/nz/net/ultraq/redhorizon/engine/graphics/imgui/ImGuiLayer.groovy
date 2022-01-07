@@ -28,7 +28,6 @@ import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.*
 import static imgui.flag.ImGuiConfigFlags.*
 import static imgui.flag.ImGuiDockNodeFlags.*
 import static imgui.flag.ImGuiStyleVar.*
@@ -48,6 +47,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	// TODO: Make it so this doesn't need to be public
 	boolean drawChrome = true
+	private int dockspaceId
+	private boolean docked
 
 	// Options
 	private boolean debugOverlay
@@ -108,15 +109,18 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	private void drawScene(Framebuffer sceneFramebufferResult) {
 
-		ImGui.setNextWindowPos(100, 100, FirstUseEver)
-		ImGui.setNextWindowSize(640, 400, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
-
-		ImGui.begin("Scene", new ImBoolean(true), NoScrollbar)
+		ImGui.begin("Scene", new ImBoolean(true), NoCollapse | NoScrollbar)
 		ImGui.popStyleVar()
 
+		if (!docked) {
+			imgui.internal.ImGui.dockBuilderDockWindow('Scene', dockspaceId)
+			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
+			docked = true
+		}
+
 		def framebufferSize = sceneFramebufferResult.texture.size
-		def windowSize = new Dimension(ImGui.getContentRegionAvailX() as int, ImGui.getContentRegionAvailY() as int)
+		def windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
 		def imageSizeX = windowSize.width
 		def imageSizeY = windowSize.height
 		def uvX = 0f
@@ -186,11 +190,12 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.pushStyleVar(WindowRounding, 0)
 
-		ImGui.begin('Dockspace', new ImBoolean(true),
+		ImGui.begin('DockingWindow', new ImBoolean(true),
 			NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
 		ImGui.popStyleVar(3)
 
-		ImGui.dockSpace(ImGui.getID('MyDockspace'), viewport.workSizeX, viewport.workSizeY - 20 as float, PassthruCentralNode)
+		dockspaceId = ImGui.getID('MyDockspace')
+		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY - 20 as float, PassthruCentralNode)
 
 		if (ImGui.beginMenuBar()) {
 
