@@ -23,6 +23,8 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.type.ImBoolean
+import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiStyleVar.WindowPadding
 
 import groovy.transform.TupleConstructor
 
@@ -42,19 +44,23 @@ class EntryList implements EventTarget, OverlayRenderPass {
 	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
 
+		ImGui.setNextWindowSize(300, 500, FirstUseEver)
+		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.begin('Current directory', new ImBoolean(true))
+		ImGui.popStyleVar()
 
 		// File list
-		ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)
-		entries.each { entry ->
-			def isSelected = selectedEntry == entry
-			if (ImGui.selectable(entry.name, isSelected)) {
-				ImGui.setItemDefaultFocus()
-				selectedEntry = entry
-				trigger(new EntrySelectedEvent(entry))
+		if (ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
+			entries.each { entry ->
+				def isSelected = selectedEntry == entry
+				if (ImGui.selectable(entry.name, isSelected)) {
+					ImGui.setItemDefaultFocus()
+					selectedEntry = entry
+					trigger(new EntrySelectedEvent(entry))
+				}
 			}
+			ImGui.endListBox()
 		}
-		ImGui.endListBox()
 
 		ImGui.end()
 	}
