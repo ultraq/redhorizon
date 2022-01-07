@@ -17,15 +17,6 @@
 <configuration>
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 
-	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
-		<encoder>
-			<pattern>[%thread] %-5level %logger{0} - %msg%n</pattern>
-		</encoder>
-	</appender>
-
 	<appender name="file" class="ch.qos.logback.core.FileAppender">
 		<file>.logs/redhorizon-explorer-${timestamp}.log</file>
 		<encoder>
@@ -43,7 +34,6 @@
 	<logger name="org.reflections" level="WARN"/>
 
 	<root level="INFO">
-		<appender-ref ref="console"/>
 		<appender-ref ref="file"/>
 		<appender-ref ref="gui"/>
 	</root>
