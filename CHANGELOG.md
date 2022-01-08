@@ -2,6 +2,27 @@
 Changelog
 =========
 
+### 0.34.0
+
+Been a good while since I did a release, but thought I should make one to mark
+some progress.  This release has a new CLI tool, what I've dubbed the "Red
+Horizon Explorer" (run `./bin/explorer` or `./bin/explorer.bat`) whose goal is
+to be able to browse your file system and C&C's mix files like you would a
+normal file explorer.  I got tired of having to extract files from mix files, or
+having to know the name of a file in advance inside the mix file just to look at
+them, so this is something I've wanted to make for a while.
+
+<img width="1072" alt="Screen Shot 2022-01-08 at 8 10 51 PM" src="https://user-images.githubusercontent.com/1686920/148635404-7989f54c-d46b-42ef-b316-7e1acd3107ef.png">
+
+It's OK at browsing the file system, and can currently only peek into Red
+Alert's `Conquer.mix` file (mostly contained unit/structure graphics).  This is
+because the metadata in mix files on what is inside them is rather sparse, so
+you have to manually build these lookup tables and writing ones for every mix
+file is quite tedious!
+
+So it's pretty rough for now, but I'm hoping to make lots of improvements in
+future releases.
+
 ### 0.33.1
  - Another rendering performance improvement by bundling several materials into
    a single one such that it all lives in GPU memory and is rendered in a single
