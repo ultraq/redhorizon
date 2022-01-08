@@ -16,17 +16,22 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import groovy.transform.TupleConstructor
+
 /**
- * Representation of an entry in the explorer's file list.
+ * Metadata about a file or directory item.
  * 
  * @author Emanuel Rabina
  */
-interface Entry {
+@TupleConstructor
+class FileEntry implements Entry {
 
-	/**
-	 * Return the name this entry will use for display in the file list.
-	 * 
-	 * @return
-	 */
-	String getName()
+	final File file
+	final String name
+
+	@Override
+	String getName() {
+
+		return name ?: file.directory ? "/${file.name}" : file.name
+	}
 }

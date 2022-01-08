@@ -20,7 +20,6 @@ import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
@@ -50,6 +49,8 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
@@ -65,9 +66,9 @@ class Explorer extends Application {
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList
 	private final MixDatabase mixDatabase
+	private final ExecutorService mixFileClassExecutor = Executors.newFixedThreadPool(2)
 
 	private File currentDirectory
-	private MixFile currentMixFile
 	private InputStream selectedFileInputStream
 	private Object selectedFileClass
 	private Object selectedMedia
@@ -108,10 +109,9 @@ class Explorer extends Application {
 	private void buildList(File directory) {
 
 		entries.clear()
-		currentMixFile = null
 
 		if (directory.parent) {
-			entries << new Entry('/..')
+			entries << new FileEntry(directory.parentFile, '/..')
 		}
 		directory.listFiles()
 			.sort { file1, file2 ->
@@ -120,7 +120,7 @@ class Explorer extends Application {
 					file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
-				entries << new Entry(fileOrDirectory.directory ? "/${fileOrDirectory.name}" : fileOrDirectory.name)
+				entries << new FileEntry(fileOrDirectory)
 			}
 
 		currentDirectory = directory
@@ -135,17 +135,27 @@ class Explorer extends Application {
 
 		entries.clear()
 
-		entries << new Entry('..')
+		entries << new MixEntry(mixFile, null, '..')
 		mixFile.entries.each { entry ->
 //			println("0x${Integer.toHexString(entry.id)}")
 			def matchingData = mixDatabase.find(entry.id)
-			entries << (matchingData ?
-				new Entry(matchingData.name) :
-				new Entry("(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", entry.id.toString())
-			)
-		}
 
-		currentMixFile = mixFile
+			MixEntry mixEntry = null
+			if (matchingData) {
+				mixEntry = new MixEntry(mixFile, entry, matchingData.name)
+
+				// Load file class off-thread so it doesn't hold up the list
+				mixFileClassExecutor.execute { ->
+					mixEntry.fileClass = matchingData.name.fileClass
+				}
+			}
+			else {
+				// TODO: Determine file class off-thread for unknown entries
+				new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})")
+			}
+
+			entries << mixEntry
+		}
 	}
 
 	/**
@@ -169,6 +179,16 @@ class Explorer extends Application {
 			//       to clean up the item before clearing the scene
 			Thread.sleep(100)
 		}
+	}
+
+	/**
+	 * Clear the current entry in preview and reset the preview scene.
+	 */
+	private void clearPreview() {
+
+		clearCurrentFile()
+		scene.clear()
+		graphicsEngine.camera.center(new Vector3f())
 	}
 
 	/**
@@ -240,20 +260,16 @@ class Explorer extends Application {
 	 */
 	private void previewEntry(MixEntry entry) {
 
-		// Clear the previous entry and reset the preview scene
-		clearCurrentFile()
-		scene.clear()
-		graphicsEngine.camera.center(new Vector3f())
-
+		clearPreview()
 		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
-		def entryClass = entry.name?.getFileClass()
+		def entryClass = entry.fileClass
 		if (!entryClass) {
 			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
 			return
 		}
 
-		selectedFileInputStream = currentMixFile.getEntryData(entry)
+		selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
 		preview(entryClass.newInstance(selectedFileInputStream))
 	}
 
@@ -264,14 +280,10 @@ class Explorer extends Application {
 	 */
 	private void previewFile(File file) {
 
-		// Clear the previous file and reset the preview scene
-		clearCurrentFile()
-		scene.clear()
-		graphicsEngine.camera.center(new Vector3f())
-
+		clearPreview()
 		logger.info('Loading {}...', file.name)
 
-		def fileClass = file.name.getFileClass()
+		def fileClass = file.name.fileClass
 		if (!fileClass) {
 			logger.info('No filetype implementation for {}', file.name)
 			return
@@ -301,31 +313,25 @@ class Explorer extends Application {
 
 		// Handle events from the explorer GUI
 		entryList.on(EntrySelectedEvent) { event ->
-			def entryValue = event.entry.value
-			if (currentMixFile) {
-				if (entryValue == '..') {
+			def entry = event.entry
+			if (entry instanceof MixEntry) {
+				if (entry.name == '..') {
 					buildList(currentDirectory)
 				}
 				else {
-					def selectedEntry = currentMixFile.getEntry(entryValue)
-					if (selectedEntry) {
-						previewEntry(selectedEntry)
-					}
-					else {
-						logger.error('No entry named {} was found in the mix file', entryValue)
-					}
+					previewEntry(entry)
 				}
 			}
-			else {
-				def selectedFile = new File(currentDirectory, event.entry.value)
-				if (selectedFile.directory) {
-					buildList(selectedFile)
+			else if (entry instanceof FileEntry) {
+				def file = entry.file
+				if (file.directory) {
+					buildList(file)
 				}
-				else if (selectedFile.name.endsWith('.mix')) {
-					buildList(new MixFile(selectedFile))
+				else if (file.name.endsWith('.mix')) {
+					buildList(new MixFile(file))
 				}
 				else {
-					previewFile(selectedFile)
+					previewFile(file)
 				}
 			}
 		}
@@ -358,6 +364,7 @@ class Explorer extends Application {
 		// Cleanup on exit
 		on(ApplicationStoppingEvent) { event ->
 			clearCurrentFile()
+			mixFileClassExecutor.shutdownAwaitTermination()
 		}
 	}
 }
