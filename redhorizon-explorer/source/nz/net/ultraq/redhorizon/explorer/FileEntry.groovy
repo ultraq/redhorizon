@@ -24,7 +24,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-class FileEntry implements Entry {
+class FileEntry implements Entry<FileEntry> {
 
 	final File file
 	final String name
@@ -33,5 +33,13 @@ class FileEntry implements Entry {
 	String getName() {
 
 		return name ?: file.directory ? "/${file.name}" : file.name
+	}
+
+	@Override
+	int compareTo(FileEntry other) {
+
+		return name == '/..' || (file.directory && !other.file.directory) ? -1 :
+			other.name == '/..' || (!file.directory && other.file.directory) ? 1 :
+			file.name.toLowerCase() <=> other.file.name.toLowerCase()
 	}
 }

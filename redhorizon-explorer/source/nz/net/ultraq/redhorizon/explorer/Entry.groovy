@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.explorer
  * 
  * @author Emanuel Rabina
  */
-interface Entry {
+interface Entry<T extends Entry> extends Comparable<T> {
 
 	/**
 	 * Return the name this entry will use for display in the file list.

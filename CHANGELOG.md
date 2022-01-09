@@ -2,6 +2,9 @@
 Changelog
 =========
 
+### 0.34.1
+ - Explorer - sort files by name when browsing a mix file
+
 ### 0.34.0
 
 Been a good while since I did a release, but thought I should make one to mark

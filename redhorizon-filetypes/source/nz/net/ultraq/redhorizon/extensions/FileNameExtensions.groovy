@@ -27,6 +27,12 @@ import org.reflections.Reflections
  */
 class FileNameExtensions {
 
+	private static final Set<Class<?>> fileExtensionClasses = new Reflections(
+		'nz.net.ultraq.redhorizon.filetypes',
+		'nz.net.ultraq.redhorizon.classic.filetypes'
+	)
+		.getTypesAnnotatedWith(FileExtensions)
+
 	/**
 	 * Find the appropriate class for reading a file with the given name.
 	 *
@@ -36,16 +42,11 @@ class FileNameExtensions {
 	static Class<?> getFileClass(String self) {
 
 		def suffix = self.substring(self.lastIndexOf('.') + 1)
-		return new Reflections(
-			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes'
-		)
-			.getTypesAnnotatedWith(FileExtensions)
-			.find { type ->
-				def annotation = type.getAnnotation(FileExtensions)
-				return annotation.value().any { extension ->
-					return extension.equalsIgnoreCase(suffix)
-				}
+		return fileExtensionClasses.find { type ->
+			def annotation = type.getAnnotation(FileExtensions)
+			return annotation.value().any { extension ->
+				return extension.equalsIgnoreCase(suffix)
 			}
+		}
 	}
 }

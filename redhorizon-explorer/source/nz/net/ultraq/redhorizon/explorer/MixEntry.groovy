@@ -26,10 +26,16 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-class MixEntry implements Entry {
+class MixEntry implements Entry<MixEntry> {
 
 	final MixFile mixFile
 	final nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry mixEntry
 	String name
 	Class<?> fileClass
+
+	@Override
+	int compareTo(MixEntry other) {
+
+		return name <=> other.name
+	}
 }

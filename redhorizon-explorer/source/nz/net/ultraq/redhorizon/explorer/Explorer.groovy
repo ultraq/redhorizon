@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
@@ -66,7 +64,6 @@ class Explorer extends Application {
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList
 	private final MixDatabase mixDatabase
-	private final ExecutorService mixFileClassExecutor = Executors.newFixedThreadPool(2)
 
 	private File currentDirectory
 	private InputStream selectedFileInputStream
@@ -142,12 +139,7 @@ class Explorer extends Application {
 
 			MixEntry mixEntry = null
 			if (matchingData) {
-				mixEntry = new MixEntry(mixFile, entry, matchingData.name)
-
-				// Load file class off-thread so it doesn't hold up the list
-				mixFileClassExecutor.execute { ->
-					mixEntry.fileClass = matchingData.name.fileClass
-				}
+				mixEntry = new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass)
 			}
 			else {
 				// TODO: Determine file class off-thread for unknown entries
@@ -156,6 +148,8 @@ class Explorer extends Application {
 
 			entries << mixEntry
 		}
+
+		entries.sort()
 	}
 
 	/**
@@ -364,7 +358,6 @@ class Explorer extends Application {
 		// Cleanup on exit
 		on(ApplicationStoppingEvent) { event ->
 			clearCurrentFile()
-			mixFileClassExecutor.shutdownAwaitTermination()
 		}
 	}
 }
