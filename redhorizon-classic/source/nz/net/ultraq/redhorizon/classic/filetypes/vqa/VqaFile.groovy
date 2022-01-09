@@ -221,30 +221,22 @@ class VqaFile implements Streaming, VideoFile {
 			def input = new NativeDataInputStream(inputStream)
 
 			def form = new String(input.readNBytes(4))
-			if (form != 'FORM') {
-				return false
-			}
+			assert form == 'FORM'
 			input.readInt() // formLength
 
 			def wvqa = new String(input.readNBytes(4))
-			if (wvqa != 'WVQA') {
-				return false
-			}
+			assert wvqa == 'WVQA'
 
 			def vqhd = new String(input.readNBytes(4))
-			if (vqhd != 'VQHD') {
-				return false
-			}
+			assert vqhd == 'VQHD'
 			input.readInt() // vqhdLength
 
 			def version = input.readShort()
-			if (version != 2) {
-				return false;
-			}
+			assert version == 2
 
 			return true
 		}
-		catch (Exception ignored) {
+		catch (Throwable ignored) {
 			return false
 		}
 	}

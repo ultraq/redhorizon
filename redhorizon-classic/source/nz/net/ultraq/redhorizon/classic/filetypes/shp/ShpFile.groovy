@@ -50,6 +50,7 @@ class ShpFile implements ImagesFile, Writable {
 	private static final byte FORMAT_LCW       = (byte)0x80
 	private static final byte FORMAT_XOR_BASE  = (byte)0x40
 	private static final byte FORMAT_XOR_CHAIN = (byte)0x20
+	private static final byte[] FORMATS = [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 
 	// File header
 	final int numImages // Stored in file as short
@@ -162,6 +163,49 @@ class ShpFile implements ImagesFile, Writable {
 		}
 		imagesData*.rewind()
 		sourceData.rewind()
+	}
+
+	/**
+	 * Return whether or not the data at the input stream could be a SHP file.
+	 * 
+	 * @param inputStream
+	 * @return
+	 */
+	static boolean test(InputStream inputStream) {
+
+		try {
+			// Check file headers and see if they make sense
+			def input = new NativeDataInputStream(inputStream)
+
+			def numImages = input.readShort()
+			assert numImages > 0
+
+			input.readShort() // x
+			input.readShort() // y
+
+			def width = input.readShort()
+			assert width > 0
+
+			def height = input.readShort()
+			assert height > 0
+
+			def delta = input.readShort()
+			assert delta >= 0
+
+			input.readShort() // Flags
+
+			def totalImageOffsets = numImages + 2
+			totalImageOffsets.times { i ->
+				def offsetInfo = new ShpImageInfo(input)
+				def offsetFormat = offsetInfo.offsetFormat
+				assert offsetFormat == 0 || offsetFormat in FORMATS
+			}
+
+			return true
+		}
+		catch (Throwable ignored) {
+			return false
+		}
 	}
 
 	/**

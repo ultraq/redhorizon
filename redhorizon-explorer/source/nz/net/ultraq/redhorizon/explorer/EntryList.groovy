@@ -52,6 +52,7 @@ class EntryList implements EventTarget, OverlayRenderPass {
 		// File list
 		if (ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
 			entries.each { entry ->
+				// noinspection ChangeToOperator
 				def isSelected = selectedEntry.equals(entry)
 				if (ImGui.selectable(entry.name, isSelected)) {
 					selectedEntry = entry

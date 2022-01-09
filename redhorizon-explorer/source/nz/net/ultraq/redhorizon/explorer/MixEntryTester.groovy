@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.vqa.VqaFile
 
 import org.slf4j.Logger
@@ -47,14 +48,24 @@ class MixEntryTester {
 	 */
 	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry mixEntry) {
 
+		def hexId = Integer.toHexString(mixEntry.id)
+		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)
+
 		// Try a VQA file
-		logger.debug('Testing VQA file...')
 		def isVqaFile = VqaFile.test(mixFile.getEntryData(mixEntry))
 		if (isVqaFile) {
-			return new MixEntryTesterResult(VqaFile, "(unknown VQA file, ID: 0x${Integer.toHexString(mixEntry.id)})")
+			logger.debug('Guessing VQA file')
+			return new MixEntryTesterResult(VqaFile, "(unknown VQA file, ID: 0x${hexId})")
 		}
-		logger.debug('Entry is not a VQA file')
 
+		// Try a SHP file
+		def isShpFile = ShpFile.test(mixFile.getEntryData(mixEntry))
+		if (isShpFile) {
+			logger.debug('Guessing SHP file')
+			return new MixEntryTesterResult(ShpFile, "(unknown SHP file, ID: 0x${hexId})")
+		}
+
+		logger.debug('Could not determine type')
 		return null
 	}
 }
