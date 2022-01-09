@@ -1,12 +1,12 @@
-/*
+/* 
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,34 +16,16 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.TupleConstructor
+import groovy.transform.Immutable
 
 /**
- * Metadata for entries in a mix file.
+ * Data about the result of a {@link MixEntryTester} test.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor
-@EqualsAndHashCode
-class MixEntry implements Entry<MixEntry> {
+@Immutable
+class MixEntryTesterResult {
 
-	final MixFile mixFile
-	final nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry mixEntry
-	String name
-	Class<?> fileClass
-	boolean unknown
-
-	@Override
-	int compareTo(MixEntry other) {
-
-		return name == '..' ? -1 :
-			other.name == '..' ? 1 :
-			!unknown && other.unknown ? -1 :
-			unknown && !other.unknown ? 1 :
-			unknown && other.unknown ? 0 :
-			name <=> other.name			
-	}
+	final Class fileClass
+	final String name
 }

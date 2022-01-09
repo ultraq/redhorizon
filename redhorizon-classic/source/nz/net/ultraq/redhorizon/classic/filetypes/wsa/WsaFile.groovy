@@ -54,7 +54,7 @@ class WsaFile implements AnimationFile, Streaming {
 	final short y
 	final int width     // Stored in file as short
 	final int height    // stored in file as short
-	final int delta     // Unsigned short
+	final int delta
 	final short flags
 	final int[] frameOffsets
 	final Palette palette

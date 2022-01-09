@@ -209,6 +209,47 @@ class VqaFile implements Streaming, VideoFile {
 	}
 
 	/**
+	 * Return whether or not the data at the input stream could be a VQA file.
+	 * 
+	 * @param inputStream
+	 * @return
+	 */
+	static boolean test(InputStream inputStream) {
+
+		try {
+			// Check file headers for certain expected values
+			def input = new NativeDataInputStream(inputStream)
+
+			def form = new String(input.readNBytes(4))
+			if (form != 'FORM') {
+				return false
+			}
+			input.readInt() // formLength
+
+			def wvqa = new String(input.readNBytes(4))
+			if (wvqa != 'WVQA') {
+				return false
+			}
+
+			def vqhd = new String(input.readNBytes(4))
+			if (vqhd != 'VQHD') {
+				return false
+			}
+			input.readInt() // vqhdLength
+
+			def version = input.readShort()
+			if (version != 2) {
+				return false;
+			}
+
+			return true
+		}
+		catch (Exception ignored) {
+			return false
+		}
+	}
+
+	/**
 	 * Return some information on this VQA file.
 	 * 
 	 * @return VQA file info.

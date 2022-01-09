@@ -52,11 +52,13 @@ class EntryList implements EventTarget, OverlayRenderPass {
 		// File list
 		if (ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
 			entries.each { entry ->
-				def isSelected = selectedEntry == entry
+				def isSelected = selectedEntry.equals(entry)
 				if (ImGui.selectable(entry.name, isSelected)) {
-					ImGui.setItemDefaultFocus()
 					selectedEntry = entry
 					trigger(new EntrySelectedEvent(entry))
+				}
+				if (isSelected) {
+					ImGui.setItemDefaultFocus()
 				}
 			}
 			ImGui.endListBox()

@@ -131,22 +131,28 @@ class Explorer extends Application {
 	private void buildList(MixFile mixFile) {
 
 		entries.clear()
-
 		entries << new MixEntry(mixFile, null, '..')
+
+		def mixEntryTester = new MixEntryTester(mixFile)
 		mixFile.entries.each { entry ->
 //			println("0x${Integer.toHexString(entry.id)}")
+
+			// Perform a lookup to see if we know about this file already, getting both a name and class
 			def matchingData = mixDatabase.find(entry.id)
-
-			MixEntry mixEntry = null
 			if (matchingData) {
-				mixEntry = new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass)
-			}
-			else {
-				// TODO: Determine file class off-thread for unknown entries
-				new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})")
+				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass)
 			}
 
-			entries << mixEntry
+			// Otherwise try determine what kind of file this is, getting only a class
+			else {
+				def testerResult = mixEntryTester.test(entry)
+				if (testerResult) {
+					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, true)
+				}
+				else {
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, true)
+				}
+			}
 		}
 
 		entries.sort()

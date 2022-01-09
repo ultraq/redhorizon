@@ -4,6 +4,8 @@ Changelog
 
 ### 0.34.1
  - Explorer - sort files by name when browsing a mix file
+ - Explorer - attempt to determine the type of a file in a mix file, allowing it
+   to be previewed
 
 ### 0.34.0
 
