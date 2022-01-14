@@ -31,13 +31,6 @@ graphics hardware that supports OpenGL 4.1+.
 Download the distribution bundle from the [project releases](https://github.com/ultraq/redhorizon/releases)
 page, then unzip it to somewhere on your computer.
 
-### macOS
-
-On newer versions of macOS (I'm running Catalina, 10.15, but I hear it happens
-on Big Sur, 11, as well), you'll need to install the FreeType library as well.
-This can be done with [Homebrew](https://brew.sh/) by running `brew install
-freeetype`.
-
 
 CLI Tools
 ---------

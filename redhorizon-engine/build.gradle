@@ -34,8 +34,8 @@ dependencies {
 		"org.reflections:reflections:${reflectionsVersion}"
 	)
 	runtimeOnly(
-		"io.github.spair:imgui-java-natives-macos-ft:${imguiVersion}",
-		"io.github.spair:imgui-java-natives-windows-ft:${imguiVersion}",
+		"io.github.spair:imgui-java-natives-macos:${imguiVersion}",
+		"io.github.spair:imgui-java-natives-windows:${imguiVersion}",
 		'org.lwjgl:lwjgl::natives-macos',
 		'org.lwjgl:lwjgl::natives-windows',
 		'org.lwjgl:lwjgl-glfw::natives-macos',
