@@ -6,7 +6,7 @@ Red Horizon
 [![GitHub Release](https://img.shields.io/github/release/ultraq/redhorizon.svg?maxAge=3600)](https://github.com/ultraq/redhorizon/releases/latest)
 
 This repository is an archive of work I started several years ago to attempt to
-recreate the orignal 2D Command & Conquer (C&C) games.  The most useful outcome
+recreate the original 2D Command & Conquer (C&C) games.  The most useful outcome
 of this project has been a set of file conversion tools and working code
 examples of how to decode/encode various file formats from those games.
 
