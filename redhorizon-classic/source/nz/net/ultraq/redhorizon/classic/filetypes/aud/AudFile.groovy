@@ -110,6 +110,39 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	/**
+	 * Return whether or not the data at the input stream could be an AUD file.
+	 * 
+	 * @param inputStream
+	 * @return
+	 */
+	static boolean test(InputStream inputStream) {
+
+		try {
+			// Check file headers and see if they make sense
+			def input = new NativeDataInputStream(inputStream)
+
+			def frequency = input.readShort()
+			assert 0 < frequency && frequency <= 48000
+
+			def compressedSize = input.readInt()
+			assert compressedSize > 0
+			def uncompressedSize = input.readInt()
+			assert uncompressedSize > 0
+			assert compressedSize < uncompressedSize
+
+			input.readByte() // Flags
+
+			def type = input.readByte()
+			assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
+
+			return true
+		}
+		catch (Throwable ignored) {
+			return false
+		}
+	}
+
+	/**
 	 * Return a summary of this file.
 	 * 
 	 * @return

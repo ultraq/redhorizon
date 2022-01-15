@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.vqa.VqaFile
@@ -63,6 +64,13 @@ class MixEntryTester {
 		if (isShpFile) {
 			logger.debug('Guessing SHP file')
 			return new MixEntryTesterResult(ShpFile, "(unknown SHP file, ID: 0x${hexId})")
+		}
+
+		// Try an AUD file
+		def isAudFile = AudFile.test(mixFile.getEntryData(mixEntry))
+		if (isAudFile) {
+			logger.debug('Guessing AUD file')
+			return new MixEntryTesterResult(AudFile, "(unknown AUD file, ID: 0x${hexId})")
 		}
 
 		logger.debug('Could not determine type')
