@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.internal.os.OperatingSystem
-
 plugins {
 	id 'application'
 }
@@ -32,7 +30,7 @@ dependencies {
 		"info.picocli:picocli:${picocliVersion}",
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
-		'nz.net.ultraq.preferences:preferences:3.0.0-SNAPSHOT',
+		'nz.net.ultraq.preferences:preferences:3.0.0',
 		"org.codehaus.groovy:groovy-json:${groovyVersion}:indy",
 		"org.joml:joml:${jomlVersion}",
 		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
