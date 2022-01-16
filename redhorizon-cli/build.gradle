@@ -39,22 +39,9 @@ dependencies {
 application {
 	mainClass = 'nz.net.ultraq.redhorizon.RedHorizonCli'
 	applicationName = 'redhorizon'
-	applicationDefaultJvmArgs = [
-		"-Dredhorizon.version=${version}",
-		'-Dorg.lwjgl.system.stackSize=10240'
-	]
-}
-
-startScripts {
-	unixStartScriptGenerator = new CustomUnixStartScriptGenerator(generator: unixStartScriptGenerator)
-}
-
-class CustomUnixStartScriptGenerator implements ScriptGenerator {
-	@Delegate
-	ScriptGenerator generator
-	@Override
-	void generateScript(JavaAppStartScriptGenerationDetails details, Writer writer) {
-		details.defaultJvmOpts.add(0, '-XstartOnFirstThread')
-		generator.generateScript(details, writer)
-	}
+	applicationDefaultJvmArgs =
+		(targetPlatform.startsWith('macos') ? [ '-XstartOnFirstThread' ] : []) + [
+			"-Dredhorizon.version=${version}",
+			'-Dorg.lwjgl.system.stackSize=10240'
+		]
 }

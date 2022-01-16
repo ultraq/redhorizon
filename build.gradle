@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
 	id 'distribution'
 }
+
+def os = OperatingSystem.current()
+def targetPlatform = findProperty('targetPlatform') ?:
+	os == OperatingSystem.MAC_OS ? 'macos' :
+	os == OperatingSystem.WINDOWS ? 'windows' :
+	System.getProperty('CI') as boolean ? 'linux' :
+	null
 
 // Global configuration
 allprojects {
@@ -31,8 +40,22 @@ distributions {
 	main {
 		contents {
 			duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-			from 'redhorizon-cli/build/install/redhorizon'
-			from 'redhorizon-explorer/build/install/explorer'
+			from('redhorizon-cli/build/install/redhorizon') {
+				if (targetPlatform == 'windows') {
+					exclude 'bin/redhorizon'
+				}
+				else {
+					exclude 'bin/redhorizon.bat'
+				}
+			}
+			from('redhorizon-explorer/build/install/explorer') {
+				if (targetPlatform == 'windows') {
+					exclude 'bin/explorer'
+				}
+				else {
+					exclude 'bin/explorer.bat'
+				}
+			}
 			from('.') {
 				include 'CHANGELOG.md'
 				include 'LICENSE.txt'
@@ -42,8 +65,13 @@ distributions {
 	}
 }
 
+distTar {
+	enabled = false
+}
+
 distZip {
 	dependsOn ':redhorizon-cli:installDist', ':redhorizon-explorer:installDist'
+	archiveClassifier = targetPlatform
 }
 
 // Subproject configuration
@@ -69,6 +97,7 @@ subprojects {
 		reflectionsVersion = '0.10.2'
 		slf4jVersion = '1.7.32'
 	}
+	ext.targetPlatform = targetPlatform
 
 	// Replace all uses of the standard Groovy library with the invokedynamic one
 	configurations.all {
