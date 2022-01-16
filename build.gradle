@@ -24,7 +24,7 @@ def os = OperatingSystem.current()
 def targetPlatform = findProperty('targetPlatform') ?:
 	os == OperatingSystem.MAC_OS ? 'macos' :
 	os == OperatingSystem.WINDOWS ? 'windows' :
-	System.getProperty('CI') as boolean ? 'linux' :
+	System.getenv('CI') as boolean ? 'linux' :
 	null
 
 // Global configuration
