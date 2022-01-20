@@ -46,12 +46,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	// The width of most full-screen graphics in C&C
 	private static final int BASE_WIDTH = 320
 
-	// The aspect ratio of a 320x200 image on VGA screens with non-square pixels
-	private static final float ASPECT_RATIO_VGA = 4 / 3
-
-	// The aspect ratio of a 320x200 image on modern displays
-	private static final float ASPECT_RATIO_MODERN = 16 / 10
-
 	final long window
 	Dimension framebufferSize
 	Dimension windowSize
@@ -77,13 +71,11 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
-		def targetAspectRatio = config.fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN
-
 		def monitor = glfwGetPrimaryMonitor()
 		def videoMode = glfwGetVideoMode(monitor)
 		windowSize = config.fullScreen ?
 			new Dimension(videoMode.width(), videoMode.height()) :
-			calculateWindowSize(targetAspectRatio)
+			calculateWindowSize(config.targetAspectRatio)
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
@@ -117,7 +109,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
 		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
-		targetResolution = calculateTargetResolution(widthPointer[0], heightPointer[0], targetAspectRatio)
+		targetResolution = framebufferSize.calculateFit(config.targetAspectRatio)
 		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
 
 		// Track framebuffer size changes from window size changes
@@ -129,7 +121,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			def windowHeightPointer = new int[1]
 			glfwGetWindowSize(window, windowWidthPointer, windowHeightPointer)
 			windowSize = new Dimension(windowWidthPointer[0], windowHeightPointer[0])
-			targetResolution = calculateTargetResolution(width, height, targetAspectRatio)
+			targetResolution = framebufferSize.calculateFit(config.targetAspectRatio)
 			logger.debug('Target resolution changed to {}', targetResolution)
 
 			trigger(new FramebufferSizeEvent(framebufferSize, windowSize, targetResolution))
@@ -157,30 +149,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		withCurrent { ->
 			glfwSwapInterval(1)
 		}
-	}
-
-	/**
-	 * Calculate dimensions for a rendering resolution that fits the given
-	 * framebuffer size, while respecting the target aspect ratio.
-	 * 
-	 * @param framebufferWidth
-	 * @param framebufferHeight
-	 * @param targetAspectRatio
-	 * @return
-	 */
-	private static Dimension calculateTargetResolution(int framebufferWidth, int framebufferHeight, float targetAspectRatio) {
-
-		def framebufferAspectRatio = framebufferWidth / framebufferHeight as float
-		def targetResolution = new Dimension(
-			framebufferAspectRatio > targetAspectRatio ?
-				framebufferHeight * targetAspectRatio as int : // Window is wider
-				framebufferWidth,
-			framebufferAspectRatio < targetAspectRatio ?
-				framebufferWidth / targetAspectRatio as int : // Window is taller
-				framebufferHeight
-		)
-		logger.debug('New target resolution: {}', targetResolution)
-		return targetResolution
 	}
 
 	/**

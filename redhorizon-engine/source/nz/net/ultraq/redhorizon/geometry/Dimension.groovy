@@ -50,6 +50,27 @@ class Dimension {
 	}
 
 	/**
+	 * Calculate and return a {@code Dimension} which fits into this current
+	 * dimension while respecting the given aspect ratio.
+	 * 
+	 * @param fitAspectRatio
+	 * @return
+	 */
+	Dimension calculateFit(float fitAspectRatio) {
+
+		def thisAspectRatio = getAspectRatio()
+		def targetResolution = new Dimension(
+			thisAspectRatio > fitAspectRatio ?
+				height * fitAspectRatio as int : // This is wider
+				width,
+			thisAspectRatio < fitAspectRatio ?
+				width / fitAspectRatio as int : // This is taller
+				height
+		)
+		return targetResolution
+	}
+
+	/**
 	 * Return the aspect ratio of these dimensions.
 	 * 
 	 * @return

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
 import nz.net.ultraq.redhorizon.engine.input.InputSource
@@ -28,6 +29,8 @@ import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static imgui.flag.ImGuiConfigFlags.*
 import static imgui.flag.ImGuiDockNodeFlags.*
 import static imgui.flag.ImGuiStyleVar.*
@@ -42,11 +45,15 @@ import static org.lwjgl.glfw.GLFW.*
  */
 class ImGuiLayer implements AutoCloseable, InputSource {
 
+	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
+
+	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 
 	// TODO: Make it so this doesn't need to be public
 	boolean drawChrome = true
+	private Dimension lastWindowSize
 	private int dockspaceId
 	private boolean docked
 
@@ -65,6 +72,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context) {
 
+		this.config = config
 		debugOverlay = config.debug
 		shaderScanlines = config.scanlines
 		shaderSharpUpscaling = true
@@ -113,7 +121,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		ImGui.begin("Scene", new ImBoolean(true), NoCollapse | NoScrollbar)
 		ImGui.popStyleVar()
 
-		if (!docked) {
+		if (!docked && drawChrome) {
 			imgui.internal.ImGui.dockBuilderDockWindow('Scene', dockspaceId)
 			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
 			docked = true
@@ -146,6 +154,14 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
 		ImGui.end()
+
+		if (windowSize != lastWindowSize) {
+			logger.debug('Scene window changed to {}', windowSize)
+			def targetResolution = windowSize.calculateFit(config.targetAspectRatio)
+			logger.debug('Target resolution changed to {}', targetResolution)
+			trigger(new FramebufferSizeEvent(windowSize, windowSize, targetResolution))
+			lastWindowSize = windowSize
+		}
 	}
 
 	/**
