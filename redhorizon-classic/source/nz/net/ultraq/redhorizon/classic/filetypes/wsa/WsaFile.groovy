@@ -62,6 +62,7 @@ class WsaFile implements AnimationFile, Streaming {
 	final ColourFormat format = ColourFormat.FORMAT_RGB
 	final float frameRate = 10f
 	final boolean looping
+	final boolean forVgaMonitors = true
 
 	/**
 	 * Constructor, creates a new WSA file from the data in the input stream.

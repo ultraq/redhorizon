@@ -39,6 +39,16 @@ trait SceneElement<T extends SceneElement> implements Visitable {
 	}
 
 	/**
+	 * Scale this element by the given values.
+	 */
+	T scale(float x, float y, float z) {
+
+		transform.scale(x, y, z)
+		bounds.scale(x, y, z)
+		return this
+	}
+
+	/**
 	 * Scale the X and Y values of this element.
 	 * 
 	 * @param factor
@@ -46,9 +56,7 @@ trait SceneElement<T extends SceneElement> implements Visitable {
 	 */
 	T scaleXY(float factor) {
 
-		transform.scaleXY(factor, factor)
-		bounds.scale(factor)
-		return this
+		return scale(factor, factor, 1)
 	}
 
 	/**

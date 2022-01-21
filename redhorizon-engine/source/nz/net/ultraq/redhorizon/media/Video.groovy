@@ -107,10 +107,10 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	}
 
 	@Override
-	Video scaleXY(float factor) {
+	Video scale(float x, float y, float z) {
 
-		[animation, soundTrack]*.scaleXY(factor)
-		SceneElement.super.scaleXY(factor)
+		[animation, soundTrack]*.scale(x, y, z)
+		SceneElement.super.scale(x, y, z)
 		return this
 	}
 

@@ -48,4 +48,15 @@ interface ImageBase {
 	 * @return Width of the image.
 	 */
 	int getWidth()
+
+	/**
+	 * Returns whether this visual format was developed for VGA monitors, and so
+	 * needs an aspect ratio adjustment to look 'right' on modern screens.
+	 * 
+	 * @return
+	 */
+	default boolean isForVgaMonitors() {
+
+		return false
+	}
 }

@@ -201,8 +201,9 @@ class Explorer extends Application {
 		switch (fileType) {
 
 			case VideoFile:
+				def scaleY = fileType.forVgaMonitors ? 2.4f : 2f
 				def video = new Video(fileType, gameClock)
-					.scaleXY(2)
+					.scale(2, scaleY, 1)
 					.translate(-fileType.width / 2, -fileType.height / 2)
 				scene << video
 				video.play()
@@ -210,8 +211,9 @@ class Explorer extends Application {
 				break
 
 			case AnimationFile:
+				def scaleY = fileType.forVgaMonitors ? 2.4f : 2f
 				def animation = new Animation(fileType, gameClock)
-					.scaleXY(2)
+					.scale(2, scaleY, 1)
 					.translate(-fileType.width / 2, -fileType.height / 2)
 				scene << animation
 				animation.play()

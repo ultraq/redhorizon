@@ -90,6 +90,7 @@ class VqaFile implements Streaming, VideoFile {
 	final int[] offsets
 
 	final ColourFormat format = FORMAT_RGB
+	final boolean forVgaMonitors = true
 
 	/**
 	 * Constructor, creates a VQA file from the data in the input stream.
