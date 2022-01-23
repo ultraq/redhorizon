@@ -53,7 +53,7 @@ class VideoPlayer extends Application {
 	 */
 	VideoPlayer(AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, VideoFile videoFile) {
 
-		super(audioConfig, graphicsConfig)
+		super(null, audioConfig, graphicsConfig)
 		this.videoFile = videoFile
 	}
 

@@ -51,7 +51,7 @@ class SoundPlayer extends Application {
 	 */
 	SoundPlayer(AudioConfiguration audioConfig, SoundFile soundFile) {
 
-		super(audioConfig)
+		super(null, audioConfig)
 		this.soundFile = soundFile
 	}
 

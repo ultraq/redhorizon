@@ -46,7 +46,7 @@ abstract class Viewer extends Application {
 	 */
 	protected Viewer(AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, boolean touchpadInput) {
 
-		super(audioConfig, graphicsConfig)
+		super(null, audioConfig, graphicsConfig)
 		this.touchpadInput = touchpadInput
 	}
 

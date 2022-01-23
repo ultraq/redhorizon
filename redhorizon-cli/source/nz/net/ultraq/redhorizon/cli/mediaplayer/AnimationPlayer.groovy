@@ -52,7 +52,7 @@ class AnimationPlayer extends Application {
 	 */
 	AnimationPlayer(GraphicsConfiguration graphicsConfig, AnimationFile animationFile) {
 
-		super(null, graphicsConfig)
+		super(null, null, graphicsConfig)
 		this.animationFile = animationFile
 	}
 

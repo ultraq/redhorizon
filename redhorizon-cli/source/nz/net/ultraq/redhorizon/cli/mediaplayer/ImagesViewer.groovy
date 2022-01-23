@@ -59,7 +59,7 @@ class ImagesViewer extends Application {
 	 */
 	ImagesViewer(GraphicsConfiguration graphicsConfig, ImagesFile imagesFile, PaletteType paletteType) {
 
-		super(null, graphicsConfig)
+		super(null, null, graphicsConfig)
 		this.imagesFile = imagesFile
 		this.paletteType = paletteType
 	}

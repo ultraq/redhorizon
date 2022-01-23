@@ -75,5 +75,8 @@ class GraphicsConfiguration {
 	/**
 	 * The target aspect ratio for rendering given the current settings.
 	 */
-	final float targetAspectRatio = fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN
+	final float getTargetAspectRatio() {
+
+		return fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN
+	}
 }

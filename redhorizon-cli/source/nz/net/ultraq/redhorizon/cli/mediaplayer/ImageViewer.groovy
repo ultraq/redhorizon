@@ -51,7 +51,7 @@ class ImageViewer extends Application {
 	 */
 	ImageViewer(GraphicsConfiguration graphicsConfig, ImageFile imageFile) {
 
-		super(null, graphicsConfig)
+		super(null, null, graphicsConfig)
 		this.imageFile = imageFile
 	}
 
