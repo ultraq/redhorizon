@@ -55,9 +55,10 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
 	 * 
+	 * @param windowTitle
 	 * @param config
 	 */
-	OpenGLContext(GraphicsConfiguration config) {
+	OpenGLContext(String windowTitle, GraphicsConfiguration config) {
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -92,7 +93,8 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 
 		// Create a centered window
 		logger.debug('Creating a window of size {}', windowSize)
-		window = glfwCreateWindow(windowSize.width, windowSize.height, 'Red Horizon', config.fullScreen ? monitor : NULL, NULL)
+		window = glfwCreateWindow(windowSize.width, windowSize.height, windowTitle ?: 'Red Horizon',
+			config.fullScreen ? monitor : NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}

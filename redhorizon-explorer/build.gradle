@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-plugins {
-	id 'application'
-}
+description = 'A file and media explorer application for viewing classic Command & Conquer game assets'
 
 dependencies {
 	implementation(
@@ -27,7 +25,6 @@ dependencies {
 		project(':redhorizon-filetypes'),
 		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
 		"ch.qos.logback:logback-classic:${logbackVersion}",
-		"info.picocli:picocli:${picocliVersion}",
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
 		'nz.net.ultraq.preferences:preferences:3.0.0',
@@ -37,27 +34,4 @@ dependencies {
 		'org.lwjgl:lwjgl',
 		'org.lwjgl:lwjgl-glfw'
 	)
-}
-
-application {
-	mainClass = 'nz.net.ultraq.redhorizon.explorer.ExplorerCli'
-	applicationName = 'explorer'
-	applicationDefaultJvmArgs = [
-		"-Dredhorizon.version=${version}",
-		'-Dorg.lwjgl.system.stackSize=10240'
-	]
-}
-
-startScripts {
-	unixStartScriptGenerator = new CustomUnixStartScriptGenerator(generator: unixStartScriptGenerator)
-}
-
-class CustomUnixStartScriptGenerator implements ScriptGenerator {
-	@Delegate
-	ScriptGenerator generator
-	@Override
-	void generateScript(JavaAppStartScriptGenerationDetails details, Writer writer) {
-		details.defaultJvmOpts.add(0, '-XstartOnFirstThread')
-		generator.generateScript(details, writer)
-	}
 }

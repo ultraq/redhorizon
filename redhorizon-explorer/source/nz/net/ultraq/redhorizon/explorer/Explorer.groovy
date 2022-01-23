@@ -79,7 +79,7 @@ class Explorer extends Application {
 	 */
 	Explorer(String version) {
 
-		super(
+		super("Red Horizon Explorer ${version}",
 			new AudioConfiguration(),
 			new GraphicsConfiguration(
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),

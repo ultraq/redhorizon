@@ -42,6 +42,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
+	private final String windowTitle
 	private final GraphicsConfiguration config
 	private final Scene scene
 	private final InputEventStream inputEventStream
@@ -55,6 +56,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
+	 * @param windowTitle
 	 * @param config
 	 * @param scene
 	 * @param inputEventStream
@@ -64,9 +66,10 @@ class GraphicsEngine extends Engine implements InputSource {
 	 *   be done on the main thread, so this indicates to the caller (which is
 	 *   often the main thread) to initiate the method call.
 	 */
-	GraphicsEngine(GraphicsConfiguration config, Scene scene, InputEventStream inputEventStream,
+	GraphicsEngine(String windowTitle, GraphicsConfiguration config, Scene scene, InputEventStream inputEventStream,
 		@ClosureParams(value = SimpleType, options = 'java.util.concurrent.FutureTask') Closure mainThreadCallback) {
 
+		this.windowTitle = windowTitle
 		this.config = config ?: new GraphicsConfiguration()
 		this.scene = scene
 		this.inputEventStream = inputEventStream
@@ -137,7 +140,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 		// Initialization
 		graphicsContext = waitForMainThread { ->
-			return new OpenGLContext(config)
+			return new OpenGLContext(windowTitle, config)
 		}
 		graphicsContext.withCloseable { context ->
 			context.relay(ContextErrorEvent, this)

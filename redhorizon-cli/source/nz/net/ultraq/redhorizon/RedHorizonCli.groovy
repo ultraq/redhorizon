@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon
 
 import nz.net.ultraq.redhorizon.cli.Converter
+import nz.net.ultraq.redhorizon.cli.Explorer
 import nz.net.ultraq.redhorizon.cli.MediaPlayer
 import nz.net.ultraq.redhorizon.cli.MixReader
 import nz.net.ultraq.redhorizon.cli.ObjectViewer
@@ -41,6 +42,7 @@ import picocli.CommandLine.Command
 	mixinStandardHelpOptions = true,
 	subcommands = [
 		Converter,
+		Explorer,
 	  MediaPlayer,
 		MixReader,
 		ObjectViewer

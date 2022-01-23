@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.cli
 
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
@@ -30,16 +29,9 @@ import java.util.concurrent.Callable
  */
 @Command(
 	name = "explorer",
-	header = [
-		'',
-		'Red Horizon Explorer 🔎',
-		'======================',
-		''
-	],
-	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class ExplorerCli implements Callable<Integer> {
+class Explorer implements Callable<Integer> {
 
 	@Spec
 	CommandSpec commandSpec
@@ -47,16 +39,7 @@ class ExplorerCli implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		new Explorer(commandSpec.version()[0] ?: '(development)').start()
+		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.version()[0] ?: '(development)').start()
 		return 0
-	}
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new ExplorerCli()).execute(args))
 	}
 }

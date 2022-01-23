@@ -24,6 +24,7 @@ dependencies {
 		project(':redhorizon-engine'),
 		project(':redhorizon-events'),
 		project(':redhorizon-extensions'),
+		project(':redhorizon-explorer'),
 		project(':redhorizon-filetypes'),
 		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
 		"ch.qos.logback:logback-classic:${logbackVersion}",

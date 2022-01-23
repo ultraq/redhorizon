@@ -49,6 +49,7 @@ import java.util.concurrent.FutureTask
 @TupleConstructor
 abstract class Application implements EventTarget, Runnable {
 
+	final String windowTitle
 	final AudioConfiguration audioConfig
 	final GraphicsConfiguration graphicsConfig
 
@@ -92,7 +93,7 @@ abstract class Application implements EventTarget, Runnable {
 		}
 
 		audioEngine = new AudioEngine(audioConfig, scene)
-		graphicsEngine = new GraphicsEngine(graphicsConfig, scene, inputEventStream, { toExecute ->
+		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})
