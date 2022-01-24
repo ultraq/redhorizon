@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
+import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.EngineLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
@@ -31,6 +32,9 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CountDownLatch
@@ -48,6 +52,8 @@ import java.util.concurrent.FutureTask
  */
 @TupleConstructor
 abstract class Application implements EventTarget, Runnable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Application)
 
 	final String windowTitle
 	final AudioConfiguration audioConfig
@@ -93,6 +99,7 @@ abstract class Application implements EventTarget, Runnable {
 		}
 
 		audioEngine = new AudioEngine(audioConfig, scene)
+
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
@@ -109,9 +116,13 @@ abstract class Application implements EventTarget, Runnable {
 			}
 			executionBarrier.await()
 		}
+		graphicsEngine.on(EngineStoppedEvent) { event ->
+			executionBarrier.await()
+		}
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
 		}
+
 		gameClock = new GameClock()
 
 		executorService.submit(gameClock)
@@ -121,9 +132,12 @@ abstract class Application implements EventTarget, Runnable {
 		// Start the application
 		executorService.submit(this)
 
-		// For the graphics engine that needs to execute things from the main thread
-		while (!graphicsEngineTask.done) {
+		// Maintain a loop in this (main) thread for whenever the graphics engine
+		// needs to execute something using it
+		while (!graphicsEngine.stopped) {
+			logger.debug('Waiting at execution barrier')
 			executionBarrier.await()
+			logger.debug('Proceeding from execution barrier')
 			if (executable) {
 				executionBarrier.reset()
 				def executableRef = executable
@@ -138,9 +152,11 @@ abstract class Application implements EventTarget, Runnable {
 			}
 		}
 
+		logger.debug('Stopping application')
 		stop()
 		graphicsEngineTask.get()
 		audioEngineTask.get()
+		logger.debug('Application stopped')
 	}
 
 	/**

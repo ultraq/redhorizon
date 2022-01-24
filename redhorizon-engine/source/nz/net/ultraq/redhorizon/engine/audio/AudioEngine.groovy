@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -39,6 +40,9 @@ class AudioEngine extends Engine {
 	final AudioConfiguration config
 	final Scene scene
 
+	private boolean running
+	private boolean stopped
+
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
@@ -52,6 +56,12 @@ class AudioEngine extends Engine {
 		this.scene = scene
 	}
 
+	@Override
+	boolean isStopped() {
+
+		return stopped
+	}
+
 	/**
 	 * Starts the audio engine loop: builds a connection to the OpenAL device,
 	 * renders audio items found within the current scene, cleaning it all up when
@@ -62,6 +72,7 @@ class AudioEngine extends Engine {
 
 		Thread.currentThread().name = 'Audio Engine'
 		logger.debug('Starting audio engine')
+		running = true
 
 		// Initialization
 		new OpenALContext().withCloseable { context ->
@@ -94,9 +105,25 @@ class AudioEngine extends Engine {
 				}
 
 				// Shutdown
+				running = false
 				logger.debug('Shutting down audio engine')
 				audioElementStates.keySet()*.delete(renderer)
 			}
 		}
+		stopped = true
+		logger.debug('Audio engine stopped')
+		trigger(new EngineStoppedEvent())
+	}
+
+	@Override
+	boolean shouldRun() {
+
+		return running
+	}
+
+	@Override
+	void stop() {
+
+		running = false
 	}
 }

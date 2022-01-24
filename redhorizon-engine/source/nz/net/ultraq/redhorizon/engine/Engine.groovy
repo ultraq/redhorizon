@@ -31,8 +31,7 @@ abstract class Engine implements EventTarget, Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
 	private final int targetRenderTimeMs
-
-	protected boolean running
+	private boolean started
 
 	/**
 	 * Constructor, set the target render time.
@@ -52,7 +51,7 @@ abstract class Engine implements EventTarget, Runnable {
 	 */
 	protected void engineLoop(Closure closure) {
 
-		running = true
+		started = true
 		trigger(new EngineLoopStartEvent())
 
 		try {
@@ -74,23 +73,34 @@ abstract class Engine implements EventTarget, Runnable {
 	}
 
 	/**
+	 * Return whether or not this engine has started.
+	 * 
+	 * @return
+	 */
+	boolean isStarted() {
+
+		return started
+	}
+
+	/**
+	 * Return whether or not this engine has stopped.
+	 * 
+	 * @return
+	 */
+	abstract boolean isStopped()
+
+	/**
 	 * Return whether or not the engine loop should be executed.  Used for
 	 * checking if the engine is in a state to continue or if it should be
 	 * shutting down for exiting.
 	 * 
 	 * @return
 	 */
-	protected boolean shouldRun() {
-
-		return running
-	}
+	protected abstract boolean shouldRun()
 
 	/**
 	 * Stop this subsystem.  Signals to the subsystem to attempt a clean shutdown
 	 * at the next available opportunity.
 	 */
-	void stop() {
-
-		running = false
-	}
+	abstract void stop()
 }

@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
@@ -48,10 +49,11 @@ class GraphicsEngine extends Engine implements InputSource {
 	private final InputEventStream inputEventStream
 	private final Closure mainThreadCallback
 
-	private GraphicsContext graphicsContext
+	private OpenGLContext context
 	private Camera camera
 	private RenderPipeline renderPipeline
-	private boolean started
+	private boolean running
+	private boolean stopped
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
@@ -95,7 +97,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	 */
 	GraphicsContext getGraphicsContext() {
 
-		return graphicsContext
+		return context
 	}
 
 	/**
@@ -108,24 +110,10 @@ class GraphicsEngine extends Engine implements InputSource {
 		return renderPipeline
 	}
 
-	/**
-	 * Return whether or not the graphics engine has been started.
-	 * 
-	 * @return
-	 */
-	boolean isStarted() {
-
-		return started
-	}
-
-	/**
-	 * Return whether or not the graphics engine has been stopped.
-	 * 
-	 * @return
-	 */
+	@Override
 	boolean isStopped() {
 
-		return !running || graphicsContext.windowShouldClose()
+		return stopped
 	}
 
 	/**
@@ -137,61 +125,67 @@ class GraphicsEngine extends Engine implements InputSource {
 
 		Thread.currentThread().name = 'Graphics Engine'
 		logger.debug('Starting graphics engine')
+		running = true
 
 		// Initialization
-		graphicsContext = waitForMainThread { ->
+		context = waitForMainThread { ->
 			return new OpenGLContext(windowTitle, config)
 		}
-		graphicsContext.withCloseable { context ->
-			context.relay(ContextErrorEvent, this)
-			context.relay(WindowMaximizedEvent, this)
-			context.withCurrent { ->
-				camera = new Camera(context.renderResolution)
-				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
+		context.relay(ContextErrorEvent, this)
+		context.relay(WindowMaximizedEvent, this)
+		context.withCurrent { ->
+			camera = new Camera(graphicsContext.renderResolution)
+			trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
-				new OpenGLRenderer(config, context).withCloseable { renderer ->
-					new ImGuiLayer(config, context).withCloseable { imGuiLayer ->
-						logger.debug(renderer.toString())
-						inputEventStream.addInputSource(imGuiLayer)
-						camera.init(renderer)
+			new OpenGLRenderer(config, context).withCloseable { renderer ->
+				new ImGuiLayer(config, context).withCloseable { imGuiLayer ->
+					logger.debug(renderer.toString())
+					inputEventStream.addInputSource(imGuiLayer)
+					camera.init(renderer)
 
-						renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, scene, camera)
-						renderPipeline.withCloseable { pipeline ->
+					renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, scene, camera)
+					renderPipeline.withCloseable { pipeline ->
 
-							// Rendering loop
-							logger.debug('Graphics engine in render loop...')
-							started = true
-							engineLoop { ->
-								pipeline.render()
-								context.swapBuffers()
-								waitForMainThread { ->
-									context.pollEvents()
-								}
+						// Rendering loop
+						logger.debug('Graphics engine in render loop...')
+						engineLoop { ->
+							pipeline.render()
+							context.swapBuffers()
+							waitForMainThread { ->
+								context.pollEvents()
 							}
-
-							// Shutdown
-							logger.debug('Shutting down graphics engine')
-							camera.delete(renderer)
 						}
+
+						// Shutdown
+						running = false
+						logger.debug('Shutting down graphics engine')
+						camera.delete(renderer)
 					}
 				}
 			}
 		}
+		waitForMainThread { ->
+			logger.debug('Closing OpenGL context on main thread')
+			context.close()
+		}
+		stopped = true
+		logger.debug('Graphics engine stopped')
+		trigger(new EngineStoppedEvent())
 	}
 
 	@Override
 	protected boolean shouldRun() {
 
-		return !graphicsContext.windowShouldClose() && super.shouldRun()
+		return !context.windowShouldClose()
 	}
 
 	@Override
 	void stop() {
 
 		if (running) {
-			graphicsContext.windowShouldClose(true)
+			context.windowShouldClose(true)
 		}
-		super.stop()
+		running = false
 	}
 
 	/**
