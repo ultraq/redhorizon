@@ -53,7 +53,6 @@ class GraphicsEngine extends Engine implements InputSource {
 	private Camera camera
 	private RenderPipeline renderPipeline
 	private boolean running
-	private boolean stopped
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
@@ -110,12 +109,6 @@ class GraphicsEngine extends Engine implements InputSource {
 		return renderPipeline
 	}
 
-	@Override
-	boolean isStopped() {
-
-		return stopped
-	}
-
 	/**
 	 * Start the graphics engine loop: creates a new window in which to render the
 	 * elements in the current scene, cleaning it all up when made to shut down.
@@ -165,10 +158,8 @@ class GraphicsEngine extends Engine implements InputSource {
 			}
 		}
 		waitForMainThread { ->
-			logger.debug('Closing OpenGL context on main thread')
 			context.close()
 		}
-		stopped = true
 		logger.debug('Graphics engine stopped')
 		trigger(new EngineStoppedEvent())
 	}

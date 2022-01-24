@@ -37,7 +37,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -85,10 +84,11 @@ abstract class Application implements EventTarget, Runnable {
 	 */
 	void start() {
 
+		logger.debug('Starting application')
+
 		// Start the engines
 		FutureTask<?> executable
 		def executionBarrier = new CyclicBarrier(2)
-		def finishBarrier = new CountDownLatch(1)
 		def exception
 
 		inputEventStream = new InputEventStream()
@@ -100,23 +100,23 @@ abstract class Application implements EventTarget, Runnable {
 
 		audioEngine = new AudioEngine(audioConfig, scene)
 
+		def graphicsEngineStopped = false
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream, { toExecute ->
 			executable = toExecute
 			executionBarrier.await()
 		})
 		graphicsEngine.on(ContextErrorEvent) { event ->
-			finishBarrier.countDown()
 			exception = event.exception
 			executionBarrier.await()
 		}
 		graphicsEngine.on(EngineLoopStopEvent) { event ->
-			finishBarrier.countDown()
 			if (event.exception) {
 				exception = event.exception
 			}
 			executionBarrier.await()
 		}
 		graphicsEngine.on(EngineStoppedEvent) { event ->
+			graphicsEngineStopped = true
 			executionBarrier.await()
 		}
 		graphicsEngine.on(WindowCreatedEvent) { event ->
@@ -125,7 +125,7 @@ abstract class Application implements EventTarget, Runnable {
 
 		gameClock = new GameClock()
 
-		executorService.submit(gameClock)
+		def gameClockTask = executorService.submit(gameClock)
 		def audioEngineTask = executorService.submit(audioEngine)
 		def graphicsEngineTask = executorService.submit(graphicsEngine)
 
@@ -134,21 +134,13 @@ abstract class Application implements EventTarget, Runnable {
 
 		// Maintain a loop in this (main) thread for whenever the graphics engine
 		// needs to execute something using it
-		while (!graphicsEngine.stopped) {
-			logger.debug('Waiting at execution barrier')
+		while (!graphicsEngineStopped) {
 			executionBarrier.await()
-			logger.debug('Proceeding from execution barrier')
 			if (executable) {
 				executionBarrier.reset()
 				def executableRef = executable
 				executable = null
 				executableRef.run()
-			}
-
-			// Shutdown phase
-			if (exception || (graphicsEngine.started && graphicsEngine.stopped)) {
-				finishBarrier.await()
-				break
 			}
 		}
 
@@ -156,6 +148,7 @@ abstract class Application implements EventTarget, Runnable {
 		stop()
 		graphicsEngineTask.get()
 		audioEngineTask.get()
+		gameClockTask.get()
 		logger.debug('Application stopped')
 	}
 

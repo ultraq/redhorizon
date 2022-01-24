@@ -41,7 +41,6 @@ class AudioEngine extends Engine {
 	final Scene scene
 
 	private boolean running
-	private boolean stopped
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -54,12 +53,6 @@ class AudioEngine extends Engine {
 		super(TARGET_RENDER_TIME_MS)
 		this.config = config ?: new AudioConfiguration()
 		this.scene = scene
-	}
-
-	@Override
-	boolean isStopped() {
-
-		return stopped
 	}
 
 	/**
@@ -110,7 +103,6 @@ class AudioEngine extends Engine {
 				audioElementStates.keySet()*.delete(renderer)
 			}
 		}
-		stopped = true
 		logger.debug('Audio engine stopped')
 		trigger(new EngineStoppedEvent())
 	}
