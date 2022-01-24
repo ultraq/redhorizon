@@ -3,9 +3,11 @@ Changelog
 =========
 
 ### 0.34.1
- - Explorer - sort files by name when browsing a mix file
- - Explorer - attempt to determine the type of a file in a mix file, allowing it
-   to be previewed
+ - Sort files by name in the explorer when browsing a mix file
+ - Attempt to determine the type of a file when browsing a mix file in the
+   explorer, allowing it to be previewed
+ - Update LWJGL to 3.3.0 and ImGui to 1.86.0 for better support of M1 macs
+ - Create platform-specific bundles to keep download size down
 
 ### 0.34.0
 
