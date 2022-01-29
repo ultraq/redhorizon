@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.classic.PaletteType
+import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import picocli.CommandLine.Option
 
@@ -35,4 +37,17 @@ class PaletteOptions {
 		completionCandidates = { PaletteTypeConverter.COMPLETION_CANDIDATES }
 	)
 	PaletteType paletteType
+
+	/**
+	 * Load the palette indicated by the {@link #paletteType} CLI options.
+	 * 
+	 * @param withAlphaMask
+	 */
+	Palette loadPalette(boolean withAlphaMask = false) {
+
+		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+			def palette = new PalFile(inputStream)
+			return withAlphaMask ? palette.withAlphaMask() : palette
+		}
+	}
 }

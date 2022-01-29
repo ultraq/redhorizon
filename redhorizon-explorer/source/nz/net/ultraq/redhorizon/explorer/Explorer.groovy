@@ -18,10 +18,8 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -76,8 +74,9 @@ class Explorer extends Application {
 	 * Constructor, sets up an application with the default configurations.
 	 * 
 	 * @param version
+	 * @param palette
 	 */
-	Explorer(String version) {
+	Explorer(String version, Palette palette) {
 
 		super("Red Horizon Explorer ${version}",
 			new AudioConfiguration(),
@@ -93,9 +92,7 @@ class Explorer extends Application {
 		buildList(new File(System.getProperty("user.dir")))
 
 		// TODO: Be able to choose which palette to apply to a paletted file
-		palette = getResourceAsStream(PaletteType.RA_TEMPERATE.file).withBufferedStream { inputStream ->
-			return new PalFile(inputStream)
-		}
+		this.palette = palette
 	}
 
 	/**

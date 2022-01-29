@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.cli
 
 import picocli.CommandLine.Command
+import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Spec
 
@@ -36,10 +37,14 @@ class Explorer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
+	@Mixin
+	PaletteOptions paletteOptions
+
 	@Override
 	Integer call() {
 
-		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.version()[0] ?: '(development)').start()
+		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.version()[0] ?: '(development)',
+			paletteOptions.loadPalette()).start()
 		return 0
 	}
 }

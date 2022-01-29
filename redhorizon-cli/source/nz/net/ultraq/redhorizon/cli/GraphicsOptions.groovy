@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 
 import picocli.CommandLine.Option
 
+import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 
 /**
@@ -47,10 +48,10 @@ class GraphicsOptions {
 	 * @return
 	 */
 	@NamedVariant
-	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = null, boolean fixAspectRatio = false) {
+	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = Colour.BLACK, boolean fixAspectRatio = false) {
 
 		return new GraphicsConfiguration(
-			clearColour: clearColour ?: Colour.BLACK,
+			clearColour: clearColour,
 			fixAspectRatio: fixAspectRatio ?: false,
 			fullScreen: fullScreen,
 			maximized: maximized,

@@ -85,9 +85,10 @@ class ObjectViewer implements Callable<Integer> {
 			case ShpFile:
 				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
 				def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
-					clearColour: Colour.GREY
+					clearColour: Colour.GREY,
+					fixAspectRatio: false
 				)
-				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.paletteType, touchpadInput).start()
+				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.loadPalette(true), touchpadInput).start()
 				break
 			case IniFile:
 				def graphicsConfig = graphicsOptions.asGraphicsConfiguration()

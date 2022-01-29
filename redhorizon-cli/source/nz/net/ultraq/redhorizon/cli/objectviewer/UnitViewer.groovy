@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.classic.PaletteType
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
@@ -48,7 +46,7 @@ class UnitViewer extends Viewer {
 
 	final ShpFile shpFile
 	final String unitId
-	final PaletteType paletteType
+	final Palette palette
 
 	/**
 	 * Constructor, set the unit to be displayed.
@@ -56,15 +54,15 @@ class UnitViewer extends Viewer {
 	 * @param graphicsConfig
 	 * @param shpFile
 	 * @param unitId
-	 * @param paletteType
+	 * @param palette
 	 * @param touchpadInput
 	 */
-	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, PaletteType paletteType, boolean touchpadInput) {
+	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, Palette palette, boolean touchpadInput) {
 
 		super(null, graphicsConfig, touchpadInput)
 		this.shpFile = shpFile
 		this.unitId = unitId
-		this.paletteType = paletteType
+		this.palette = palette
 	}
 
 	@Override
@@ -101,10 +99,6 @@ class UnitViewer extends Viewer {
 				break
 			default:
 				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
-		}
-
-		def palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
 		}
 
 		graphicsEngine.on(WindowCreatedEvent) { event ->
