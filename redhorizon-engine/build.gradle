@@ -17,6 +17,7 @@
 description = 'Core rendering engine for Red Horizon'
 
 def lwjglNatives = "natives-${targetPlatform}"
+def imguiNatives = "imgui-java-natives-${targetPlatform}"
 
 dependencies {
 	implementation(
@@ -36,8 +37,8 @@ dependencies {
 		"org.reflections:reflections:${reflectionsVersion}"
 	)
 	runtimeOnly(
-		"io.github.spair:imgui-java-natives-macos:${imguiVersion}",
-		"io.github.spair:imgui-java-natives-windows:${imguiVersion}",
+		"io.github.spair:${imguiNatives}:${imguiVersion}",
+		"io.github.spair:${imguiNatives}:${imguiVersion}",
 		"org.lwjgl:lwjgl::${lwjglNatives}",
 		"org.lwjgl:lwjgl-glfw::${lwjglNatives}",
 		"org.lwjgl:lwjgl-openal::${lwjglNatives}",
