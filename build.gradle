@@ -78,7 +78,7 @@ subprojects {
 //	}
 
 	ext {
-		groovyVersion = '3.0.9'
+		groovyVersion = '4.0.0'
 		imguiVersion = '1.86.0'
 		jomlVersion = '1.10.2'
 		jomlPrimitivesVersion = '1.10.0'
@@ -90,30 +90,19 @@ subprojects {
 	}
 	ext.targetPlatform = targetPlatform
 
-	// Replace all uses of the standard Groovy library with the invokedynamic one
-	configurations.all {
-		resolutionStrategy.dependencySubstitution {
-			substitute module("org.codehaus.groovy:groovy") using module("org.codehaus.groovy:groovy:${groovyVersion}") withClassifier('indy')
-		}
-	}
-
 	dependencies {
 		implementation(
-			'nz.net.ultraq.extensions:groovy-extensions:1.1.0',
-			'nz.net.ultraq.extensions:profiling-extensions:0.6.1',
-			"org.codehaus.groovy:groovy:${groovyVersion}:indy",
+			'nz.net.ultraq.extensions:groovy-extensions:2.0.0-SNAPSHOT',
+			'nz.net.ultraq.extensions:profiling-extensions:0.7.0-SNAPSHOT',
+			"org.apache.groovy:groovy:${groovyVersion}",
 			"org.slf4j:slf4j-api:${slf4jVersion}"
 		)
-		testImplementation(
-			'org.spockframework:spock-core:2.0-groovy-3.0'
-		)
+		testImplementation('org.spockframework:spock-core:2.1-groovy-3.0-SNAPSHOT') {
+			exclude module: 'groovy'
+		}
 		testRuntimeOnly(
 			"org.slf4j:slf4j-nop:${slf4jVersion}"
 		)
-	}
-
-	compileGroovy {
-		groovyOptions.optimizationOptions.indy = true
 	}
 
 	test {

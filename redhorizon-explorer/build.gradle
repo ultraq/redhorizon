@@ -27,7 +27,7 @@ dependencies {
 		"ch.qos.logback:logback-classic:${logbackVersion}",
 		"io.github.spair:imgui-java-binding:${imguiVersion}",
 		"io.github.spair:imgui-java-lwjgl3:${imguiVersion}",
-		'nz.net.ultraq.preferences:preferences:3.0.0',
+		'nz.net.ultraq.preferences:preferences:3.1.0-SNAPSHOT',
 		"org.joml:joml:${jomlVersion}",
 		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
 		'org.lwjgl:lwjgl',

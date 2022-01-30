@@ -16,14 +16,11 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import groovy.transform.PackageScope
-
 /**
  * Common properties of all image-based file formats.
  * 
  * @author Emanuel Rabina
  */
-@PackageScope
 interface ImageBase {
 
 	/**

@@ -16,14 +16,11 @@
 
 package nz.net.ultraq.redhorizon.io
 
-import groovy.transform.PackageScope
-
 /**
  * Trait of IO classes that can read data in little-endian order if necessary.
  * 
  * @author Emanuel Rabina
  */
-@PackageScope
 trait NativeReader {
 
 	abstract int read()
