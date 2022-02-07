@@ -71,6 +71,19 @@ class Dimension {
 	}
 
 	/**
+	 * Calculate the scale factor for an object of the given width and height to
+	 * fit into this current dimension.
+	 * 
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	float calculateScaleToFit(int width, int height) {
+
+		return Math.min(this.width / width, this.height / height)
+	}
+
+	/**
 	 * Return the aspect ratio of these dimensions.
 	 * 
 	 * @return

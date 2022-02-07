@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
-import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
@@ -65,19 +64,6 @@ abstract class Application implements EventTarget, Runnable {
 	protected Scene scene = new Scene()
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
-
-	/**
-	 * Calculate how much to scale an image by to fit the target resolution.
-	 * 
-	 * @param imageWidth
-	 * @param imageHeight
-	 * @param target
-	 * @return A factor of how much to scale the image by.
-	 */
-	protected static float calculateScaleForTarget(int imageWidth, int imageHeight, Dimension target) {
-
-		return Math.min(target.width / imageWidth, target.height / imageHeight)
-	}
 
 	/**
 	 * Begin the application.
