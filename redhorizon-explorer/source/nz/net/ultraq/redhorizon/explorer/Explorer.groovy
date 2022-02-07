@@ -58,6 +58,7 @@ class Explorer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
+	private static final Dimension renderResolution = new Dimension(640, 400)
 
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList
@@ -82,7 +83,8 @@ class Explorer extends Application {
 			new AudioConfiguration(),
 			new GraphicsConfiguration(
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
-				renderResolution: new Dimension(800, 500)
+				renderResolution: renderResolution,
+				startWithChrome: true
 			)
 		)
 
@@ -198,9 +200,10 @@ class Explorer extends Application {
 		switch (fileType) {
 
 			case VideoFile:
-				def scaleY = fileType.forVgaMonitors ? 2.4f : 2f
+				def scaleY = fileType.forVgaMonitors ? 1.2f : 1f
+				def scale = renderResolution.calculateScaleToFit(fileType.width, fileType.height * scaleY as int)
 				def video = new Video(fileType, gameClock)
-					.scale(2, scaleY, 1)
+					.scale(scale, scale * scaleY as float, 1)
 					.translate(-fileType.width / 2, -fileType.height / 2)
 				scene << video
 				video.play()
@@ -208,9 +211,10 @@ class Explorer extends Application {
 				break
 
 			case AnimationFile:
-				def scaleY = fileType.forVgaMonitors ? 2.4f : 2f
+				def scaleY = fileType.forVgaMonitors ? 1.2f : 1f
+				def scale = renderResolution.calculateScaleToFit(fileType.width, fileType.height * scaleY as int)
 				def animation = new Animation(fileType, gameClock)
-					.scale(2, scaleY, 1)
+					.scale(scale, scale * scaleY as float, 1)
 					.translate(-fileType.width / 2, -fileType.height / 2)
 				scene << animation
 				animation.play()
