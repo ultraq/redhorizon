@@ -111,7 +111,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 
 		def viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, imGuiLayer.drawChrome ? 55 : 10)
+		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, 10)
 
 		ImGui.begin('Debug overlay', new ImBoolean(true),
 			NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)

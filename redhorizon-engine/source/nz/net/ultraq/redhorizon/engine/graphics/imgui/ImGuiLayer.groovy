@@ -51,8 +51,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 
-	// TODO: Make it so this doesn't need to be public
-	boolean drawChrome = true
+	private boolean drawChrome
 	private Dimension lastWindowSize
 	private int dockspaceId
 	private boolean docked
@@ -74,6 +73,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		this.config = config
 		debugOverlay = config.debug
+		drawChrome = config.startWithChrome
 		shaderScanlines = config.scanlines
 		shaderSharpUpscaling = true
 

@@ -46,13 +46,14 @@ class GraphicsOptions {
 	 * @return
 	 */
 	@NamedVariant
-	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = Colour.BLACK) {
+	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = Colour.BLACK, boolean startWithChrome = false) {
 
 		return new GraphicsConfiguration(
 			clearColour: clearColour ?: Colour.BLACK,
 			fullScreen: fullScreen,
 			maximized: maximized,
-			scanlines: scanlines
+			scanlines: scanlines,
+			startWithChrome: startWithChrome ?: false
 		)
 	}
 }

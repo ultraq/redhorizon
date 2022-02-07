@@ -178,7 +178,7 @@ class RenderPipeline implements AutoCloseable {
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Screen', modelUniform)
 			),
-			!config.debug,
+			!config.startWithChrome,
 			context
 		)
 	}

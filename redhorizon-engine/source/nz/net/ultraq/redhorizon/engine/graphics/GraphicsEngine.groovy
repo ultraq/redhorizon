@@ -125,6 +125,7 @@ class GraphicsEngine extends Engine implements InputSource {
 			return new OpenGLContext(windowTitle, config)
 		}
 		context.relay(ContextErrorEvent, this)
+		context.relay(FramebufferSizeEvent, this)
 		context.relay(WindowMaximizedEvent, this)
 		context.withCurrent { ->
 			camera = new Camera(graphicsContext.renderResolution)
@@ -133,6 +134,7 @@ class GraphicsEngine extends Engine implements InputSource {
 			new OpenGLRenderer(config, context).withCloseable { renderer ->
 				new ImGuiLayer(config, context).withCloseable { imGuiLayer ->
 					logger.debug(renderer.toString())
+					imGuiLayer.relay(FramebufferSizeEvent, this)
 					inputEventStream.addInputSource(imGuiLayer)
 					camera.init(renderer)
 
