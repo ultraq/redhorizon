@@ -66,7 +66,7 @@ class AnimationPlayer extends Application {
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			def width = animationFile.width
 			def height = animationFile.height
-			def scale = calculateScaleForFullScreen(width, height, event.renderSize)
+			def scale = calculateScaleForTarget(width, height, event.renderSize)
 			def offset = new Vector2f(-width / 2, -height / 2)
 
 			animation = new Animation(animationFile, gameClock)

@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.cli.mediaplayer.ImageViewer
 import nz.net.ultraq.redhorizon.cli.mediaplayer.ImagesViewer
 import nz.net.ultraq.redhorizon.cli.mediaplayer.VideoPlayer
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -69,9 +68,6 @@ class MediaPlayer implements Callable<Integer> {
 	@Mixin
 	FileOptions fileOptions
 
-	@Option(names = ['--fix-aspect-ratio'], description = 'Adjust the aspect ratio for modern displays')
-	boolean fixAspectRatio
-
 	@Mixin
 	GraphicsOptions graphicsOptions
 
@@ -94,9 +90,7 @@ class MediaPlayer implements Callable<Integer> {
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
 		fileOptions.useFile(logger) { mediaFile ->
-			def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
-				fixAspectRatio: fixAspectRatio
-			)
+			def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
 			def audioConfig = new AudioConfiguration(
 				volume: volume / 100
 			)

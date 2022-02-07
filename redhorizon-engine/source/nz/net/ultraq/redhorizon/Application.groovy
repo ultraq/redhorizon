@@ -67,16 +67,16 @@ abstract class Application implements EventTarget, Runnable {
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
 
 	/**
-	 * Calculate how much to scale an image by to fit the full screen.
+	 * Calculate how much to scale an image by to fit the target resolution.
 	 * 
 	 * @param imageWidth
 	 * @param imageHeight
-	 * @param screen
+	 * @param target
 	 * @return A factor of how much to scale the image by.
 	 */
-	protected static float calculateScaleForFullScreen(int imageWidth, int imageHeight, Dimension screen) {
+	protected static float calculateScaleForTarget(int imageWidth, int imageHeight, Dimension target) {
 
-		return Math.min(screen.width / imageWidth, screen.height / imageHeight)
+		return Math.min(target.width / imageWidth, target.height / imageHeight)
 	}
 
 	/**

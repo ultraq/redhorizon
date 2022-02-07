@@ -40,13 +40,6 @@ class GraphicsConfiguration {
 	final boolean debug = true
 
 	/**
-	 * Adjust the aspect ratio of visual elements for today's displays, given that
-	 * a lot of the graphics of the time were on CRT displays using resolutions
-	 * that resulted in tall pixels.
-	 */
-	final boolean fixAspectRatio
-
-	/**
 	 * Use the entire screen instead of a floating window.
 	 */
 	final boolean fullScreen
@@ -65,18 +58,4 @@ class GraphicsConfiguration {
 	 * Include a scanline effect in what's rendered to the screen.
 	 */
 	final boolean scanlines
-
-	// The aspect ratio of a 320x200 image on VGA screens with non-square pixels
-	private static final float ASPECT_RATIO_VGA = 4 / 3
-
-	// The aspect ratio of a 320x200 image on modern displays
-	private static final float ASPECT_RATIO_MODERN = 16 / 10
-
-	/**
-	 * The target aspect ratio for rendering given the current settings.
-	 */
-	final float getTargetAspectRatio() {
-
-		return fixAspectRatio ? ASPECT_RATIO_VGA : ASPECT_RATIO_MODERN
-	}
 }

@@ -63,7 +63,7 @@ class ImageViewer extends Application {
 		// Add the image to the engine once we have the window dimensions
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			scene << new Image(imageFile)
-				.scaleXY(calculateScaleForFullScreen(imageFile.width, imageFile.height, event.renderSize))
+				.scaleXY(calculateScaleForTarget(imageFile.width, imageFile.height, event.renderSize))
 				.translate(-imageFile.width / 2, -imageFile.height / 2)
 		}
 
