@@ -33,8 +33,8 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
 import nz.net.ultraq.redhorizon.media.AnimationLoader
-import nz.net.ultraq.redhorizon.media.Image
-import nz.net.ultraq.redhorizon.media.ImageStrip
+import nz.net.ultraq.redhorizon.media.ImageLoader
+import nz.net.ultraq.redhorizon.media.ImagesLoader
 import nz.net.ultraq.redhorizon.media.Playable
 import nz.net.ultraq.redhorizon.media.SoundLoader
 import nz.net.ultraq.redhorizon.media.VideoLoader
@@ -210,17 +210,14 @@ class Explorer extends Application {
 				break
 
 			case ImageFile:
-				def image = new Image(fileType)
-				scene << image
-					.translate(-fileType.width / 2, -fileType.height / 2)
-				selectedMedia = image
+				def imageLoader = new ImageLoader(scene, graphicsEngine)
+				selectedMedia = imageLoader.load(fileType)
 				break
 
 			case ImagesFile:
+				def imagesLoader = new ImagesLoader(palette, scene, graphicsEngine, inputEventStream)
+				selectedMedia = imagesLoader.load(fileType)
 				tick = fileType.width
-				def imageStrip = new ImageStrip(fileType, palette)
-				scene << imageStrip
-				selectedMedia = imageStrip
 				break
 
 			case SoundFile:
