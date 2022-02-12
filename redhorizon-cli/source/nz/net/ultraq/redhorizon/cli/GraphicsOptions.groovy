@@ -40,7 +40,7 @@ class GraphicsOptions {
 	boolean scanlines
 
 	/**
-	 * Create a <tt>GraphicsConfiguration</tt> object from the current settings.
+	 * Create a {@code GraphicsConfiguration} object from the current settings.
 	 * 
 	 * @param clearColour
 	 * @return

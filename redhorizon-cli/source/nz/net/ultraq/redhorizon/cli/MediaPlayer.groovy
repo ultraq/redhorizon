@@ -35,7 +35,6 @@ import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
-import picocli.CommandLine.Option
 import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
@@ -71,8 +70,8 @@ class MediaPlayer implements Callable<Integer> {
 	@Mixin
 	GraphicsOptions graphicsOptions
 
-	@Option(names = ['--volume'], defaultValue = '50', description = 'The volume level, as a number from 0-100')
-	int volume
+	@Mixin
+	AudioOptions audioOptions
 
 	@Mixin
 	PaletteOptions paletteOptions
@@ -89,11 +88,11 @@ class MediaPlayer implements Callable<Integer> {
 		Thread.currentThread().name = 'Media Player [main]'
 		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
 
+		def audioConfig = audioOptions.asAudioConfiguration()
+		def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
+
 		fileOptions.useFile(logger) { mediaFile ->
-			def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
-			def audioConfig = new AudioConfiguration(
-				volume: volume / 100
-			)
+			logger.info('File details: {}', mediaFile)
 
 			switch (mediaFile) {
 				case VideoFile:
