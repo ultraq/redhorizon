@@ -39,7 +39,7 @@ import nz.net.ultraq.redhorizon.media.ImageStrip
 import nz.net.ultraq.redhorizon.media.Playable
 import nz.net.ultraq.redhorizon.media.SoundEffect
 import nz.net.ultraq.redhorizon.media.SoundTrack
-import nz.net.ultraq.redhorizon.media.Video
+import nz.net.ultraq.redhorizon.media.VideoLoader
 
 import org.joml.Vector3f
 import org.slf4j.Logger
@@ -200,14 +200,9 @@ class Explorer extends Application {
 		switch (fileType) {
 
 			case VideoFile:
-				def scaleY = fileType.forVgaMonitors ? 1.2f : 1f
-				def scale = renderResolution.calculateScaleToFit(fileType.width, fileType.height * scaleY as int)
-				def video = new Video(fileType, gameClock)
-					.scale(scale, scale * scaleY as float, 1)
-					.translate(-fileType.width / 2, -fileType.height / 2)
-				scene << video
-				video.play()
-				selectedMedia = video
+				def videoLoader = new VideoLoader(scene, graphicsEngine, inputEventStream, gameClock)
+				selectedMedia = videoLoader.load(fileType)
+				selectedMedia.play()
 				break
 
 			case AnimationFile:

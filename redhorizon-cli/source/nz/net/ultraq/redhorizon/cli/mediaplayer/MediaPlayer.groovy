@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.Application
+import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -27,6 +28,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.media.AnimationLoader
 import nz.net.ultraq.redhorizon.media.StopEvent
+import nz.net.ultraq.redhorizon.media.VideoLoader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,6 +43,7 @@ class MediaPlayer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
 	private final Object mediaFile
+	private final PaletteType paletteType
 
 	/**
 	 * Constructor, create a new application around the given media file.
@@ -48,15 +51,17 @@ class MediaPlayer extends Application {
 	 * @param mediaFile
 	 * @param audioConfig
 	 * @param graphicsConfig
+	 * @param paletteType
 	 */
-	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
+	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, PaletteType paletteType) {
 
 		super(null, audioConfig, graphicsConfig)
 		this.mediaFile = mediaFile
+		this.paletteType = paletteType
 	}
 
 	/**
-	 * Load up an animation in the current engine.
+	 * Load up an animation for playing.
 	 * 
 	 * @param animationFile
 	 */
@@ -65,19 +70,46 @@ class MediaPlayer extends Application {
 		def animationLoader = new AnimationLoader(scene, graphicsEngine, inputEventStream, gameClock)
 		animationLoader.on(StopEvent) { stopEvent ->
 			stop()
+			logger.debug('Animation stopped')
 		}
 
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			animationLoader.load(animationFile).play()
+			logger.debug('Animation started')
 		}
+
+		logger.info('Waiting for animation to finish.  Close the window to exit.')
+	}
+
+	/**
+	 * Load a video for playing.
+	 * 
+	 * @param videoFile
+	 */
+	private void loadVideo(VideoFile videoFile) {
+
+		def videoLoader = new VideoLoader(scene, graphicsEngine, inputEventStream, gameClock)
+		videoLoader.on(StopEvent) { event ->
+			stop()
+			logger.debug('Video stopped')
+		}
+
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			videoLoader.load(videoFile).play()
+			logger.debug('Video started')
+		}
+
+		logger.info('Waiting for video to finish.  Close the window to exit.')
 	}
 
 	@Override
 	void run() {
 
+		logger.info('File details: {}', mediaFile)
+
 		switch (mediaFile) {
 			case VideoFile:
-				new VideoPlayer(audioConfig, graphicsConfig, mediaFile).start()
+				loadVideo(mediaFile)
 				break
 			case AnimationFile:
 				loadAnimation(mediaFile)
@@ -89,7 +121,7 @@ class MediaPlayer extends Application {
 				new ImageViewer(graphicsConfig, mediaFile).start()
 				break
 			case ImagesFile:
-				new ImagesViewer(graphicsConfig, mediaFile, paletteOptions.paletteType).start()
+				new ImagesViewer(graphicsConfig, mediaFile, paletteType).start()
 				break
 			default:
 				logger.error('No media player for the associated file class of {}', mediaFile)

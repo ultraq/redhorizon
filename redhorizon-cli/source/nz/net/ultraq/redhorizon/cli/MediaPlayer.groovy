@@ -81,7 +81,7 @@ class MediaPlayer implements Callable<Integer> {
 		fileOptions.useFile(logger) { mediaFile ->
 			logger.info('File details: {}', mediaFile)
 
-			new nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer(mediaFile, audioConfig, graphicsConfig).start()
+			new nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer(mediaFile, audioConfig, graphicsConfig, paletteOptions.paletteType).start()
 		}
 
 		return 0
