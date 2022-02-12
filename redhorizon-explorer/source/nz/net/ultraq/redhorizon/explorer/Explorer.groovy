@@ -33,7 +33,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.media.Animation
+import nz.net.ultraq.redhorizon.media.AnimationLoader
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.media.ImageStrip
 import nz.net.ultraq.redhorizon.media.Playable
@@ -211,14 +211,9 @@ class Explorer extends Application {
 				break
 
 			case AnimationFile:
-				def scaleY = fileType.forVgaMonitors ? 1.2f : 1f
-				def scale = renderResolution.calculateScaleToFit(fileType.width, fileType.height * scaleY as int)
-				def animation = new Animation(fileType, gameClock)
-					.scale(scale, scale * scaleY as float, 1)
-					.translate(-fileType.width / 2, -fileType.height / 2)
-				scene << animation
-				animation.play()
-				selectedMedia = animation
+				def animationLoader = new AnimationLoader(scene, graphicsEngine, inputEventStream, gameClock)
+				selectedMedia = animationLoader.load(fileType)
+				selectedMedia.play()
 				break
 
 			case ImageFile:

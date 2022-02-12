@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.Video
 
-import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -67,12 +66,12 @@ class VideoPlayer extends Application {
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			def width = videoFile.width
 			def height = videoFile.height
-			def scale = event.renderSize.calculateScaleToFit(width, height)
-			def offset = new Vector2f(-width / 2, -height / 2)
+			def scaleY = videoFile.forVgaMonitors ? 1.2f : 1f
+			def scale = event.renderSize.calculateScaleToFit(width, height * scaleY as int)
 
 			video = new Video(videoFile, gameClock)
-			video.scaleXY(scale)
-			video.translate(offset)
+				.scale(scale, scale * scaleY as float, 1)
+				.translate(-width / 2, -height / 2)
 
 			video.on(StopEvent) { stopEvent ->
 				stop()

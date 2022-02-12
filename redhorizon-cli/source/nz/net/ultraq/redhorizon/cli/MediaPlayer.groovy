@@ -16,19 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-
-import nz.net.ultraq.redhorizon.cli.mediaplayer.AnimationPlayer
-import nz.net.ultraq.redhorizon.cli.mediaplayer.SoundPlayer
-import nz.net.ultraq.redhorizon.cli.mediaplayer.ImageViewer
-import nz.net.ultraq.redhorizon.cli.mediaplayer.ImagesViewer
-import nz.net.ultraq.redhorizon.cli.mediaplayer.VideoPlayer
-import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile
-import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.VideoFile
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
@@ -94,26 +81,7 @@ class MediaPlayer implements Callable<Integer> {
 		fileOptions.useFile(logger) { mediaFile ->
 			logger.info('File details: {}', mediaFile)
 
-			switch (mediaFile) {
-				case VideoFile:
-					new VideoPlayer(audioConfig, graphicsConfig, mediaFile).start()
-					break
-				case AnimationFile:
-					new AnimationPlayer(graphicsConfig, mediaFile).start()
-					break
-				case SoundFile:
-					new SoundPlayer(audioConfig, mediaFile).start()
-					break
-				case ImageFile:
-					new ImageViewer(graphicsConfig, mediaFile).start()
-					break
-				case ImagesFile:
-					new ImagesViewer(graphicsConfig, mediaFile, paletteOptions.paletteType).start()
-					break
-				default:
-					logger.error('No media player for the associated file class of {}', mediaFile)
-					throw new UnsupportedOperationException()
-			}
+			new nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer(mediaFile, audioConfig, graphicsConfig).start()
 		}
 
 		return 0
