@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli
 
+import nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
@@ -44,9 +46,9 @@ import java.util.concurrent.Callable
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class MediaPlayer implements Callable<Integer> {
+class MediaPlayerCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
+	private static final Logger logger = LoggerFactory.getLogger(MediaPlayerCli)
 
 	@Spec
 	CommandSpec commandSpec
@@ -79,9 +81,7 @@ class MediaPlayer implements Callable<Integer> {
 		def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
 
 		fileOptions.useFile(logger) { mediaFile ->
-			logger.info('File details: {}', mediaFile)
-
-			new nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer(mediaFile, audioConfig, graphicsConfig, paletteOptions.paletteType).start()
+			new MediaPlayer(mediaFile, audioConfig, graphicsConfig, paletteOptions.paletteType).start()
 		}
 
 		return 0
@@ -93,6 +93,6 @@ class MediaPlayer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new MediaPlayer()).execute(args))
+		System.exit(new CommandLine(new MediaPlayerCli()).execute(args))
 	}
 }

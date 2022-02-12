@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.media.AnimationLoader
+import nz.net.ultraq.redhorizon.media.SoundLoader
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.VideoLoader
 
@@ -39,6 +40,10 @@ import org.slf4j.LoggerFactory
  * @author Emanuel Rabina
  */
 class MediaPlayer extends Application {
+
+	// List of soundtrack files available: intro, map, await, bigf226m, crus226m,
+	// dense_r, fac1226m, fac2226m, fogger1a, hell226m, mud1a, radio2, rollout,
+	// run1226m, smsh226m, snake, tren226m, terminat, twin, vector1a, work226m.
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
@@ -76,9 +81,30 @@ class MediaPlayer extends Application {
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			animationLoader.load(animationFile).play()
 			logger.debug('Animation started')
+
+			logger.info('Waiting for animation to finish.  Close the window to exit.')
+		}
+	}
+
+	/**
+	 * Load a sound effect or music track for playing.
+	 * 
+	 * @param soundFile
+	 */
+	private void loadSound(SoundFile soundFile) {
+
+		def soundLoader = new SoundLoader(scene, inputEventStream, gameClock)
+		soundLoader.on(StopEvent) { event ->
+			stop()
+			logger.debug('Sound stopped')
 		}
 
-		logger.info('Waiting for animation to finish.  Close the window to exit.')
+		audioEngine.on(EngineLoopStartEvent) { event ->
+			soundLoader.load(soundFile).play()
+			logger.debug('Sound started')
+
+			logger.info('Waiting for sound to stop playing.  Close the window to exit.')
+		}
 	}
 
 	/**
@@ -115,7 +141,7 @@ class MediaPlayer extends Application {
 				loadAnimation(mediaFile)
 				break
 			case SoundFile:
-				new SoundPlayer(audioConfig, mediaFile).start()
+				loadSound(mediaFile)
 				break
 			case ImageFile:
 				new ImageViewer(graphicsConfig, mediaFile).start()

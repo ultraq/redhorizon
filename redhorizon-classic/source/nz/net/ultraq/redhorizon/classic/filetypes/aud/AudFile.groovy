@@ -109,6 +109,12 @@ class AudFile implements SoundFile, Streaming {
 		return new AudFileWorker(this, input)
 	}
 
+	@Override
+	boolean isForStreaming() {
+
+		return uncompressedSize > 1048576 // 1MB
+	}
+
 	/**
 	 * Return whether or not the data at the input stream could be an AUD file.
 	 * 

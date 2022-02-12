@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.Application
-import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
@@ -37,8 +36,7 @@ import nz.net.ultraq.redhorizon.media.AnimationLoader
 import nz.net.ultraq.redhorizon.media.Image
 import nz.net.ultraq.redhorizon.media.ImageStrip
 import nz.net.ultraq.redhorizon.media.Playable
-import nz.net.ultraq.redhorizon.media.SoundEffect
-import nz.net.ultraq.redhorizon.media.SoundTrack
+import nz.net.ultraq.redhorizon.media.SoundLoader
 import nz.net.ultraq.redhorizon.media.VideoLoader
 
 import org.joml.Vector3f
@@ -226,13 +224,9 @@ class Explorer extends Application {
 				break
 
 			case SoundFile:
-				// Try determine the appropriate media for the sound file
-				def sound = fileType instanceof AudFile && fileType.uncompressedSize > 1048576 ? // 1MB
-					new SoundTrack(fileType, gameClock) :
-					new SoundEffect(fileType)
-				scene << sound
-				sound.play()
-				selectedMedia = sound
+				def soundLoader = new SoundLoader(scene, inputEventStream, gameClock)
+				selectedMedia = soundLoader.load(fileType)
+				selectedMedia.play()
 				break
 
 			default:
