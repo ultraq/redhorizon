@@ -52,6 +52,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
  */
 class MediaPlayer extends Application {
 
+	// List of hi-res PCX images used: aftr_hi, alipaper, aly1, apc_hi, aphi0049,
+	// bnhi0020, dchi0040, frhi0166, lab, landsbrg, mahi0107, mig_hi, mtfacthi,
+	// needle, sov2, spy, stalin, tent.
+
 	// List of soundtrack files available: intro, map, await, bigf226m, crus226m,
 	// dense_r, fac1226m, fac2226m, fogger1a, hell226m, mud1a, radio2, rollout,
 	// run1226m, smsh226m, snake, tren226m, terminat, twin, vector1a, work226m.
