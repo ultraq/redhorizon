@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
-import nz.net.ultraq.redhorizon.cli.objectviewer.MapViewer
-import nz.net.ultraq.redhorizon.cli.objectviewer.UnitViewer
+import nz.net.ultraq.redhorizon.cli.FileOptions
+import nz.net.ultraq.redhorizon.cli.GraphicsOptions
+import nz.net.ultraq.redhorizon.cli.PaletteOptions
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 
@@ -50,9 +51,9 @@ import java.util.concurrent.Callable
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class ObjectViewer implements Callable<Integer> {
+class ObjectViewerCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ObjectViewer)
+	private static final Logger logger = LoggerFactory.getLogger(ObjectViewerCli)
 
 	@Spec
 	CommandSpec commandSpec
@@ -113,6 +114,6 @@ class ObjectViewer implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new ObjectViewer()).execute(args))
+		System.exit(new CommandLine(new ObjectViewerCli()).execute(args))
 	}
 }

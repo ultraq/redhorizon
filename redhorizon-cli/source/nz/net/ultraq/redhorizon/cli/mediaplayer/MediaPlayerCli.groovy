@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.cli.mediaplayer
 
-import nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayer
+import nz.net.ultraq.redhorizon.cli.AudioOptions
+import nz.net.ultraq.redhorizon.cli.FileOptions
+import nz.net.ultraq.redhorizon.cli.GraphicsOptions
+import nz.net.ultraq.redhorizon.cli.PaletteOptions
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

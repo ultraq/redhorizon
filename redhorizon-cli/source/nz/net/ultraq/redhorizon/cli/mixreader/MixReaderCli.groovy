@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.cli.mixreader
 
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 
@@ -46,9 +46,9 @@ import java.util.concurrent.Callable
 	mixinStandardHelpOptions = true,
 	version = '${sys:redhorizon.version}'
 )
-class MixReader implements Callable<Integer> {
+class MixReaderCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(MixReader)
+	private static final Logger logger = LoggerFactory.getLogger(MixReaderCli)
 
 	@Spec
 	CommandSpec commandSpec
@@ -94,6 +94,6 @@ class MixReader implements Callable<Integer> {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new MixReader()).execute(args))
+		System.exit(new CommandLine(new MixReaderCli()).execute(args))
 	}
 }

@@ -41,7 +41,7 @@ class FileOptions {
 	 * @param logger
 	 * @param closure
 	 */
-	protected void useFile(Logger logger, Closure closure) {
+	void useFile(Logger logger, Closure closure) {
 
 		logger.info('Loading {}...', file)
 

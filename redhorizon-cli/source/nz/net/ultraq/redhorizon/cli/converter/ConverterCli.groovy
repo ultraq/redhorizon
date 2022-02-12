@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
-
-import nz.net.ultraq.redhorizon.cli.converter.Pcx2CpsConverter
-import nz.net.ultraq.redhorizon.cli.converter.Png2ShpConverter
+package nz.net.ultraq.redhorizon.cli.converter
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -43,7 +40,7 @@ import picocli.CommandLine.Command
 	synopsisSubcommandLabel = 'COMMAND',
 	version = '${sys:redhorizon.version}'
 )
-class Converter {
+class ConverterCli {
 
 	/**
 	 * Bootstrap the application using Picocli.
@@ -51,6 +48,6 @@ class Converter {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new Converter()).execute(args))
+		System.exit(new CommandLine(new ConverterCli()).execute(args))
 	}
 }

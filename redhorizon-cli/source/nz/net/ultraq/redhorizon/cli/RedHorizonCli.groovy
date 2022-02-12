@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon
+package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.cli.Converter
-import nz.net.ultraq.redhorizon.cli.Explorer
-import nz.net.ultraq.redhorizon.cli.MediaPlayerCli
-import nz.net.ultraq.redhorizon.cli.MixReader
-import nz.net.ultraq.redhorizon.cli.ObjectViewer
+import nz.net.ultraq.redhorizon.cli.converter.ConverterCli
+import nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayerCli
+import nz.net.ultraq.redhorizon.cli.mixreader.MixReaderCli
+import nz.net.ultraq.redhorizon.cli.objectviewer.ObjectViewerCli
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -41,11 +40,11 @@ import picocli.CommandLine.Command
 	description = 'The Red Horizon command-line interface',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-		Converter,
-		Explorer,
+		ConverterCli,
+		ExplorerCli,
 	  MediaPlayerCli,
-		MixReader,
-		ObjectViewer
+		MixReaderCli,
+		ObjectViewerCli
 	],
 	version = '${sys:redhorizon.version}'
 )

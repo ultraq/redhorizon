@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli
 
+import nz.net.ultraq.redhorizon.explorer.Explorer
+
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
@@ -32,7 +34,7 @@ import java.util.concurrent.Callable
 	name = "explorer",
 	version = '${sys:redhorizon.version}'
 )
-class Explorer implements Callable<Integer> {
+class ExplorerCli implements Callable<Integer> {
 
 	@Spec
 	CommandSpec commandSpec
@@ -43,8 +45,7 @@ class Explorer implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.version()[0] ?: '(development)',
-			paletteOptions.loadPalette()).start()
+		new Explorer(commandSpec.version()[0] ?: '(development)', paletteOptions.loadPalette()).start()
 		return 0
 	}
 }
