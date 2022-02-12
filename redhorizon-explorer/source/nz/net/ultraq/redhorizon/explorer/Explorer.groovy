@@ -198,13 +198,13 @@ class Explorer extends Application {
 		switch (fileType) {
 
 			case VideoFile:
-				def videoLoader = new VideoLoader(scene, graphicsEngine, inputEventStream, gameClock)
+				def videoLoader = new VideoLoader(scene, graphicsEngine, gameClock)
 				selectedMedia = videoLoader.load(fileType)
 				selectedMedia.play()
 				break
 
 			case AnimationFile:
-				def animationLoader = new AnimationLoader(scene, graphicsEngine, inputEventStream, gameClock)
+				def animationLoader = new AnimationLoader(scene, graphicsEngine, gameClock)
 				selectedMedia = animationLoader.load(fileType)
 				selectedMedia.play()
 				break
@@ -215,13 +215,13 @@ class Explorer extends Application {
 				break
 
 			case ImagesFile:
-				def imagesLoader = new ImagesLoader(palette, scene, graphicsEngine, inputEventStream)
+				def imagesLoader = new ImagesLoader(palette, scene)
 				selectedMedia = imagesLoader.load(fileType)
 				tick = fileType.width
 				break
 
 			case SoundFile:
-				def soundLoader = new SoundLoader(scene, inputEventStream, gameClock)
+				def soundLoader = new SoundLoader(scene, gameClock)
 				selectedMedia = soundLoader.load(fileType)
 				selectedMedia.play()
 				break

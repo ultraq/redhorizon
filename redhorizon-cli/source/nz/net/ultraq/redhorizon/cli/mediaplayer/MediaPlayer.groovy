@@ -35,10 +35,15 @@ import nz.net.ultraq.redhorizon.media.SoundLoader
 import nz.net.ultraq.redhorizon.media.StopEvent
 import nz.net.ultraq.redhorizon.media.VideoLoader
 
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
 
 /**
  * Media player application for watching media files.
@@ -78,17 +83,33 @@ class MediaPlayer extends Application {
 	 */
 	private void loadAnimation(AnimationFile animationFile) {
 
-		def animationLoader = new AnimationLoader(scene, graphicsEngine, inputEventStream, gameClock)
-		animationLoader.on(StopEvent) { stopEvent ->
-			stop()
-			logger.debug('Animation stopped')
-		}
+		def animationLoader = new AnimationLoader(scene, graphicsEngine, gameClock)
 
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			animationLoader.load(animationFile).play()
+		graphicsEngine.on(EngineLoopStartEvent) { engineLoopStartEvent ->
+			def animation = animationLoader.load(animationFile)
+			animation.play()
 			logger.debug('Animation started')
 
+			animation.on(StopEvent) { stopEvent ->
+				stop()
+				logger.debug('Animation stopped')
+			}
+
 			logger.info('Waiting for animation to finish.  Close the window to exit.')
+
+			// Key event handler
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					switch (keyEvent.key) {
+						case GLFW_KEY_SPACE:
+							gameClock.togglePause()
+							break
+						case GLFW_KEY_ESCAPE:
+							animation.stop()
+							break
+					}
+				}
+			}
 		}
 	}
 
@@ -104,14 +125,14 @@ class MediaPlayer extends Application {
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			imageLoader.load(imageFile)
 			logger.info('Displaying the image.  Close the window to exit.')
-		}
 
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				switch (event.key) {
-					case GLFW_KEY_ESCAPE:
-						stop()
-						break
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					switch (keyEvent.key) {
+						case GLFW_KEY_ESCAPE:
+							stop()
+							break
+					}
 				}
 			}
 		}
@@ -126,19 +147,32 @@ class MediaPlayer extends Application {
 
 		getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
 			def palette = new PalFile(inputStream)
-			def imagesLoader = new ImagesLoader(palette, scene, graphicsEngine, inputEventStream)
+			def imagesLoader = new ImagesLoader(palette, scene)
 
 			graphicsEngine.on(EngineLoopStartEvent) { event ->
 				imagesLoader.load(imagesFile)
 				logger.info('Displaying the image.  Close the window to exit.')
-			}
 
-			inputEventStream.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS) {
-					switch (event.key) {
-						case GLFW_KEY_ESCAPE:
-							stop()
-							break
+				def center = new Vector3f()
+				def tick = imagesFile.width
+
+				// Key event handler
+				inputEventStream.on(KeyEvent) { keyEvent ->
+					if (keyEvent.action == GLFW_PRESS || keyEvent.action == GLFW_REPEAT) {
+						switch (keyEvent.key) {
+							case GLFW_KEY_LEFT:
+								graphicsEngine.camera.translate(tick, 0)
+								break
+							case GLFW_KEY_RIGHT:
+								graphicsEngine.camera.translate(-tick, 0)
+								break
+							case GLFW_KEY_SPACE:
+								graphicsEngine.camera.center(center)
+								break
+							case GLFW_KEY_ESCAPE:
+								stop()
+								break
+						}
 					}
 				}
 			}
@@ -152,17 +186,33 @@ class MediaPlayer extends Application {
 	 */
 	private void loadSound(SoundFile soundFile) {
 
-		def soundLoader = new SoundLoader(scene, inputEventStream, gameClock)
-		soundLoader.on(StopEvent) { event ->
-			stop()
-			logger.debug('Sound stopped')
-		}
+		def soundLoader = new SoundLoader(scene, gameClock)
 
 		audioEngine.on(EngineLoopStartEvent) { event ->
-			soundLoader.load(soundFile).play()
+			def sound = soundLoader.load(soundFile)
+			sound.play()
 			logger.debug('Sound started')
 
+			sound.on(StopEvent) { stopEvent ->
+				stop()
+				logger.debug('Sound stopped')
+			}
+
 			logger.info('Waiting for sound to stop playing.  Close the window to exit.')
+
+			// Key event handler
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					switch (keyEvent.key) {
+						case GLFW_KEY_SPACE:
+							gameClock.togglePause()
+							break
+						case GLFW_KEY_ESCAPE:
+							sound.stop()
+							break
+					}
+				}
+			}
 		}
 	}
 
@@ -173,18 +223,34 @@ class MediaPlayer extends Application {
 	 */
 	private void loadVideo(VideoFile videoFile) {
 
-		def videoLoader = new VideoLoader(scene, graphicsEngine, inputEventStream, gameClock)
-		videoLoader.on(StopEvent) { event ->
-			stop()
-			logger.debug('Video stopped')
-		}
+		def videoLoader = new VideoLoader(scene, graphicsEngine, gameClock)
 
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			videoLoader.load(videoFile).play()
+			def video = videoLoader.load(videoFile)
+			video.play()
 			logger.debug('Video started')
-		}
 
-		logger.info('Waiting for video to finish.  Close the window to exit.')
+			video.on(StopEvent) { stopEvent ->
+				stop()
+				logger.debug('Video stopped')
+			}
+
+			logger.info('Waiting for video to finish.  Close the window to exit.')
+
+			// Key event handler
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					switch (keyEvent.key) {
+						case GLFW_KEY_SPACE:
+							gameClock.togglePause()
+							break
+						case GLFW_KEY_ESCAPE:
+							video.stop()
+							break
+					}
+				}
+			}
+		}
 	}
 
 	@Override

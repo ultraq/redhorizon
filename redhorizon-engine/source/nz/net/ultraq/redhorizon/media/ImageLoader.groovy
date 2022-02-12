@@ -38,12 +38,11 @@ class ImageLoader implements MediaLoader<ImageFile, Image> {
 
 		def width = imageFile.width
 		def height = imageFile.height
+
 		def image = new Image(imageFile)
 			.scaleXY(graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height))
 			.translate(-width / 2, -height / 2)
-
 		scene << image
-
 		return image
 	}
 }

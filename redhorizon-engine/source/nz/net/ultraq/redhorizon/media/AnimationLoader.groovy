@@ -18,15 +18,8 @@ package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 
@@ -36,11 +29,10 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationLoader implements MediaLoader<AnimationFile, Animation>, EventTarget {
+class AnimationLoader implements MediaLoader<AnimationFile, Animation> {
 
 	final Scene scene
 	final GraphicsEngine graphicsEngine
-	final InputEventStream inputEventStream
 	final GameClock gameClock
 
 	@Override
@@ -55,26 +47,7 @@ class AnimationLoader implements MediaLoader<AnimationFile, Animation>, EventTar
 		def animation = new Animation(animationFile, gameClock)
 			.scale(scale, scale * scaleY as float, 1)
 			.translate(-width / 2, -height / 2)
-
-		// Key event handler
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				switch (event.key) {
-					case GLFW_KEY_SPACE:
-						gameClock.togglePause()
-						break
-					case GLFW_KEY_ESCAPE:
-						animation.stop()
-						break
-				}
-			}
-		}
-
 		scene << animation
-
-		animation.relay(StartEvent, this)
-		animation.relay(StopEvent, this)
-
 		return animation
 	}
 }

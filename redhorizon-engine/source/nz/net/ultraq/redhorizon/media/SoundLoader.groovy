@@ -17,14 +17,8 @@
 package nz.net.ultraq.redhorizon.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 
@@ -34,34 +28,16 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class SoundLoader implements MediaLoader<SoundFile, Playable>, EventTarget {
+class SoundLoader implements MediaLoader<SoundFile, Playable> {
 
 	final Scene scene
-	final InputEventStream inputEventStream
 	final GameClock gameClock
 
 	@Override
 	Playable load(SoundFile soundFile) {
 
-		// Try determine the appropriate media for the sound file
 		def sound = soundFile.forStreaming ? new SoundTrack(soundFile, gameClock) : new SoundEffect(soundFile)
-
-		// Key event handler
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				switch (event.key) {
-					case GLFW_KEY_ESCAPE:
-						sound.stop()
-						break
-				}
-			}
-		}
-
 		scene << sound
-
-		sound.relay(StartEvent, this)
-		sound.relay(StopEvent, this)
-
 		return sound
 	}
 }
