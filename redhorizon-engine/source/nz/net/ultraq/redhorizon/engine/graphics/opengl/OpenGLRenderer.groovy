@@ -632,7 +632,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 
 	@Override
 	OpenGLMaterial withMaterialBundler(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBuilder')
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
 		Closure closure) {
 
 		def materialBuilder = new OpenGLMaterialBundler(this)

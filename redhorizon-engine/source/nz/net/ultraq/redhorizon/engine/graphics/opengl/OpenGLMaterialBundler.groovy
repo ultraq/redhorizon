@@ -28,6 +28,7 @@ import org.joml.primitives.Rectanglef
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
+import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.TupleConstructor
 
@@ -64,7 +65,7 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 			def indexBuffer = stack.mallocInt(allIndices.size())
 			def indexOffset = 0
 
-			materials.eachWithIndex { material, materialIndex ->
+			materials.each { material ->
 				def mesh = material.mesh
 				def colour = mesh.colour
 				def textureUVs = mesh.textureUVs
@@ -130,7 +131,8 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 
 	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, OpenGLShader shader, Matrix4f transform) {
+	OpenGLMaterial createMaterial(@NamedParam(required = true) OpenGLMesh mesh,
+		@NamedParam OpenGLTexture texture, @NamedParam OpenGLShader shader, @NamedParam Matrix4f transform) {
 
 		def material = renderer.createMaterial(
 			mesh: mesh,
