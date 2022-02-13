@@ -45,3 +45,30 @@ application {
 			'-Dorg.lwjgl.system.stackSize=10240'
 		]
 }
+
+distributions {
+	main {
+		contents {
+			if (targetPlatform == 'windows') {
+				exclude 'bin/redhorizon'
+			}
+			else {
+				exclude 'bin/redhorizon.bat'
+			}
+			// Have to mention explicitly because of the subproject layout
+			from('..') {
+				include 'CHANGELOG.md'
+				include 'LICENSE.txt'
+				include 'README.md'
+			}
+		}
+	}
+}
+
+distTar {
+	enabled = false
+}
+
+distZip {
+	archiveClassifier = targetPlatform
+}

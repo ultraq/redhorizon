@@ -16,10 +16,6 @@
 
 import org.gradle.internal.os.OperatingSystem
 
-plugins {
-	id 'distribution'
-}
-
 def os = OperatingSystem.current()
 def targetPlatform = findProperty('targetPlatform') ?:
 	os == OperatingSystem.MAC_OS ? 'macos' :
@@ -35,35 +31,6 @@ allprojects {
 
 // Root project configuration
 description = 'Recreating the original 2D Command & Conquer games'
-
-distributions {
-	main {
-		contents {
-			from('redhorizon-cli/build/install/redhorizon') {
-				if (targetPlatform == 'windows') {
-					exclude 'bin/redhorizon'
-				}
-				else {
-					exclude 'bin/redhorizon.bat'
-				}
-			}
-			from('.') {
-				include 'CHANGELOG.md'
-				include 'LICENSE.txt'
-				include 'README.md'
-			}
-		}
-	}
-}
-
-distTar {
-	enabled = false
-}
-
-distZip {
-	dependsOn ':redhorizon-cli:installDist'
-	archiveClassifier = targetPlatform
-}
 
 // Subproject configuration
 subprojects {
