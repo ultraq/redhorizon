@@ -47,6 +47,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.Memoized
+import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -284,7 +285,8 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 
 	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(OpenGLMesh mesh, OpenGLTexture texture, OpenGLShader shader, Matrix4f transform) {
+	OpenGLMaterial createMaterial(@NamedParam(required = true) OpenGLMesh mesh,
+		@NamedParam OpenGLTexture texture, @NamedParam OpenGLShader shader, @NamedParam Matrix4f transform) {
 
 		return new OpenGLMaterial(
 			mesh: mesh,

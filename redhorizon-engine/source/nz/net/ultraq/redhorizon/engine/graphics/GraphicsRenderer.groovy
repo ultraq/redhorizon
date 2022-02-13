@@ -23,6 +23,7 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
+import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -94,7 +95,8 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @return
 	 */
 	@NamedVariant
-	TMaterial createMaterial(TMesh mesh, TTexture texture, TShader shader, Matrix4f transform)
+	TMaterial createMaterial(@NamedParam(required = true) TMesh mesh,
+		@NamedParam TTexture texture, @NamedParam TShader shader, @NamedParam Matrix4f transform)
 
 	/**
 	 * Create a framebuffer that can be rendered to.
