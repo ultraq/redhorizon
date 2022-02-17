@@ -58,18 +58,13 @@ subprojects {
 	ext.targetPlatform = targetPlatform
 
 	dependencies {
-		implementation(
-			'nz.net.ultraq.extensions:groovy-extensions:2.0.0-SNAPSHOT',
-			'nz.net.ultraq.extensions:profiling-extensions:0.7.0-SNAPSHOT',
-			"org.apache.groovy:groovy:${groovyVersion}",
-			"org.slf4j:slf4j-api:${slf4jVersion}"
-		)
-		testImplementation('org.spockframework:spock-core:2.1-groovy-3.0-SNAPSHOT') {
-			exclude module: 'groovy'
-		}
-		testRuntimeOnly(
-			"org.slf4j:slf4j-nop:${slf4jVersion}"
-		)
+		implementation 'nz.net.ultraq.extensions:groovy-extensions:2.0.0-SNAPSHOT'
+		implementation 'nz.net.ultraq.extensions:profiling-extensions:0.7.0-SNAPSHOT'
+		implementation "org.apache.groovy:groovy:${groovyVersion}"
+		implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+
+		testImplementation 'org.spockframework:spock-core:2.2-M1-groovy-4.0'
+		testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
 	}
 
 	test {

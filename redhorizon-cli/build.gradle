@@ -19,21 +19,19 @@ plugins {
 }
 
 dependencies {
-	implementation(
-		project(':redhorizon-classic'),
-		project(':redhorizon-engine'),
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-explorer'),
-		project(':redhorizon-filetypes'),
-		platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"),
-		"ch.qos.logback:logback-classic:${logbackVersion}",
-		"info.picocli:picocli:${picocliVersion}",
-		"org.apache.groovy:groovy-json:${groovyVersion}",
-		"org.joml:joml:${jomlVersion}",
-		"org.joml:joml-primitives:${jomlPrimitivesVersion}",
-		'org.lwjgl:lwjgl-glfw'
-	)
+	implementation project(':redhorizon-classic')
+	implementation project(':redhorizon-engine')
+	implementation project(':redhorizon-events')
+	implementation project(':redhorizon-extensions')
+	implementation project(':redhorizon-explorer')
+	implementation project(':redhorizon-filetypes')
+	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+	implementation "info.picocli:picocli:${picocliVersion}"
+	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+	implementation "org.joml:joml:${jomlVersion}"
+	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+	implementation 'org.lwjgl:lwjgl-glfw'
 }
 
 application {

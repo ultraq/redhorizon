@@ -17,9 +17,7 @@
 description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
-	implementation(
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		"org.reflections:reflections:${reflectionsVersion}"
-	)
+	implementation project(':redhorizon-events')
+	implementation project(':redhorizon-extensions')
+	implementation "org.reflections:reflections:${reflectionsVersion}"
 }

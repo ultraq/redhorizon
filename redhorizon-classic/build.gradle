@@ -17,9 +17,7 @@
 description = 'A collection of encoders/decoders for C&C file data'
 
 dependencies {
-	implementation(
-		project(':redhorizon-events'),
-		project(':redhorizon-extensions'),
-		project(':redhorizon-filetypes')
-	)
+	implementation project(':redhorizon-events')
+	implementation project(':redhorizon-extensions')
+	implementation project(':redhorizon-filetypes')
 }
