@@ -22,6 +22,5 @@ include(
 	'redhorizon-engine',
 	'redhorizon-events',
 	'redhorizon-explorer',
-	'redhorizon-extensions',
 	'redhorizon-filetypes'
 )

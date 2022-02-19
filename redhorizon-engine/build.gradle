@@ -21,7 +21,6 @@ def imguiNatives = "imgui-java-natives-${targetPlatform}"
 
 dependencies {
 	implementation project(':redhorizon-events')
-	implementation project(':redhorizon-extensions')
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
