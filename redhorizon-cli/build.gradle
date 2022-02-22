@@ -37,9 +37,9 @@ application {
 	mainClass = 'nz.net.ultraq.redhorizon.RedHorizonCli'
 	applicationName = 'redhorizon'
 	applicationDefaultJvmArgs =
-		(targetPlatform == 'macos' ? [ '-XstartOnFirstThread' ] : []) + [
-			"-Dredhorizon.version=${version}",
-			'-Dorg.lwjgl.system.stackSize=10240'
+		(targetPlatform == 'macos' ? [ '-Dorg.lwjgl.glfw.libname=glfw_async' ] : []) + [
+			'-Dorg.lwjgl.system.stackSize=10240',
+			"-Dredhorizon.version=${version}"
 		]
 }
 
