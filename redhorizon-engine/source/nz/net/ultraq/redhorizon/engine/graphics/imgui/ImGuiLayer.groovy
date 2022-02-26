@@ -110,6 +110,39 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
+	 * Draw the main menubar which will reduce available content space a bit.
+	 */
+	private void drawMenu() {
+
+		if (ImGui.beginMainMenuBar()) {
+
+			if (ImGui.beginMenu('File')) {
+				if (ImGui.menuItem('Exit')) {
+					trigger(new GuiEvent(EVENT_TYPE_STOP))
+				}
+				ImGui.endMenu()
+			}
+
+			if (ImGui.beginMenu('Options')) {
+				if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
+					debugOverlay = !debugOverlay
+				}
+				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
+					shaderScanlines = !shaderScanlines
+					trigger(new ChangeEvent('Scanlines', shaderScanlines))
+				}
+				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
+					shaderSharpUpscaling = !shaderSharpUpscaling
+					trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
+				}
+				ImGui.endMenu()
+			}
+
+			ImGui.endMainMenuBar()
+		}
+	}
+
+	/**
 	 * Draw the scene from the given framebuffer into an ImGui window that will
 	 * take up the whole screen by default.
 	 * 
@@ -189,6 +222,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	void render(Framebuffer sceneFramebufferResult) {
 
 		if (drawChrome) {
+			drawMenu()
 			setUpDockspace()
 			drawScene(sceneFramebufferResult)
 		}
@@ -201,7 +235,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		def viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowPos(0, 0)
-		ImGui.setNextWindowSize(viewport.workSizeX, viewport.workSizeY + 2 as float)
+		ImGui.setNextWindowSize(viewport.sizeX, viewport.sizeY)
 		ImGui.pushStyleVar(WindowBorderSize, 0)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.pushStyleVar(WindowRounding, 0)
@@ -211,34 +245,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		ImGui.popStyleVar(3)
 
 		dockspaceId = ImGui.getID('MyDockspace')
-		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY - 20 as float, PassthruCentralNode)
-
-		if (ImGui.beginMenuBar()) {
-
-			if (ImGui.beginMenu('File')) {
-				if (ImGui.menuItem('Exit')) {
-					trigger(new GuiEvent(EVENT_TYPE_STOP))
-				}
-				ImGui.endMenu()
-			}
-
-			if (ImGui.beginMenu('Options')) {
-				if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
-					debugOverlay = !debugOverlay
-				}
-				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
-					shaderScanlines = !shaderScanlines
-					trigger(new ChangeEvent('Scanlines', shaderScanlines))
-				}
-				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
-					shaderSharpUpscaling = !shaderSharpUpscaling
-					trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
-				}
-				ImGui.endMenu()
-			}
-
-			ImGui.endMenuBar()
-		}
+		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
 
 		ImGui.end()
 	}
