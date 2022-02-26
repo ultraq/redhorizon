@@ -84,7 +84,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		def io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
-		io.fonts.addFontFromFileTTF('Roboto-Medium.ttf', 16)
+		io.fonts.addFontFromFileTTF('Roboto-Medium.ttf', 16 * context.monitorScale as float)
 
 		imGuiGlfw.init(context.window, true)
 		imGuiGl3.init('#version 410 core')

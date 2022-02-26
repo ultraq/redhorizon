@@ -36,6 +36,13 @@ abstract class GraphicsContext extends Context implements InputSource {
 	abstract Dimension getFramebufferSize()
 
 	/**
+	 * Returns the DPI scaling value of the current monitor.
+	 * 
+	 * @return
+	 */
+	abstract float getMonitorScale()
+
+	/**
 	 * Returns the current internal rendering resolution.
 	 * 
 	 * @return

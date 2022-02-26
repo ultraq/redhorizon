@@ -49,6 +49,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	private final GraphicsConfiguration config
 	final long window
 	Dimension framebufferSize
+	float monitorScale
 	Dimension windowSize
 	Dimension renderResolution
 	Dimension targetResolution
@@ -75,12 +76,19 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			throw new IllegalStateException('Unable to initialize GLFW')
 		}
 
+		// Get the monitor to render to and any information about it
 		def monitor = glfwGetPrimaryMonitor()
+
+		def monitorScaleX = new float[1]
+		glfwGetMonitorContentScale(monitor, monitorScaleX, new float[1])
+		monitorScale = monitorScaleX[0]
+
 		def videoMode = glfwGetVideoMode(monitor)
 		windowSize = config.fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : calculateWindowSize()
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
+		// Set OpenGL config for the window we want
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
 
