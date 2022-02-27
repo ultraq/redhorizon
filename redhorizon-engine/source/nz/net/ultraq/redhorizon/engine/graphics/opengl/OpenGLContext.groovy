@@ -79,9 +79,15 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		// Get the monitor to render to and any information about it
 		def monitor = glfwGetPrimaryMonitor()
 
-		def monitorScaleX = new float[1]
-		glfwGetMonitorContentScale(monitor, monitorScaleX, new float[1])
-		monitorScale = monitorScaleX[0]
+		def os = System.getProperty('os.name')
+		if (os.startsWith('Windows')) {
+			def monitorScaleX = new float[1]
+			glfwGetMonitorContentScale(monitor, monitorScaleX, new float[1])
+			monitorScale = monitorScaleX[0] // To work with Windows desktop scaling
+		}
+		else {
+			monitorScale = 1f
+		}
 
 		def videoMode = glfwGetVideoMode(monitor)
 		windowSize = config.fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : calculateWindowSize()
