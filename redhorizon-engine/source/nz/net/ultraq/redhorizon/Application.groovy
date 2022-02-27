@@ -16,10 +16,8 @@
 
 package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.GameClock
-import nz.net.ultraq.redhorizon.engine.EngineLoopStopEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -36,10 +34,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 /**
  * A base for developing an application that uses the Red Horizon engine, this
@@ -73,10 +69,6 @@ abstract class Application implements EventTarget, Runnable {
 		logger.debug('Starting application')
 
 		// Start the engines
-		FutureTask<?> executable
-		def executionBarrier = new CyclicBarrier(2)
-		def exception
-
 		inputEventStream = new InputEventStream()
 		inputEventStream.on(GuiEvent) { event ->
 			if (event.type == EVENT_TYPE_STOP) {
@@ -85,28 +77,16 @@ abstract class Application implements EventTarget, Runnable {
 		}
 
 		audioEngine = new AudioEngine(audioConfig, scene)
+		audioEngine.on(EngineStoppedEvent) { event ->
+			stop()
+		}
 
-		def graphicsEngineStopped = false
-		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream, { toExecute ->
-			executable = toExecute
-			executionBarrier.await()
-		})
-		graphicsEngine.on(ContextErrorEvent) { event ->
-			exception = event.exception
-			executionBarrier.await()
-		}
-		graphicsEngine.on(EngineLoopStopEvent) { event ->
-			if (event.exception) {
-				exception = event.exception
-			}
-			executionBarrier.await()
-		}
-		graphicsEngine.on(EngineStoppedEvent) { event ->
-			graphicsEngineStopped = true
-			executionBarrier.await()
-		}
+		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+		}
+		graphicsEngine.on(EngineStoppedEvent) { event ->
+			stop()
 		}
 
 		gameClock = new GameClock()
@@ -118,20 +98,6 @@ abstract class Application implements EventTarget, Runnable {
 		// Start the application
 		executorService.submit(this)
 
-		// Maintain a loop in this (main) thread for whenever the graphics engine
-		// needs to execute something using it
-		while (!graphicsEngineStopped) {
-			executionBarrier.await()
-			if (executable) {
-				executionBarrier.reset()
-				def executableRef = executable
-				executable = null
-				executableRef.run()
-			}
-		}
-
-		logger.debug('Stopping application')
-		stop()
 		graphicsEngineTask.get()
 		audioEngineTask.get()
 		gameClockTask.get()
