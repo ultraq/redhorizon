@@ -141,7 +141,7 @@ class RenderPipeline implements AutoCloseable {
 		})
 
 		// Sharp upscaling post-processing pass
-		renderPasses << new PostProcessingRenderPass(
+		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
@@ -155,22 +155,25 @@ class RenderPipeline implements AutoCloseable {
 			),
 			true
 		)
+		renderPasses << sharpUpscalingPostProcessingRenderPass
 
 		// Scanline post-processing pass
-		renderPasses << new PostProcessingRenderPass(
+		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Scanlines',
 					modelUniform,
 					new Uniform<float>('textureSourceSize', { material ->
-						return context.renderResolution * 0.5 as float[]
+						def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
+						return context.renderResolution * scale as float[]
 					}),
 					textureTargetSizeUniform
 				)
 			),
 			config.scanlines
 		)
+		renderPasses << scanlinePostProcessingRenderPass
 
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
@@ -181,6 +184,18 @@ class RenderPipeline implements AutoCloseable {
 			!config.startWithChrome,
 			context
 		)
+
+		// Control these passes with the keyboard
+		context.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				if (event.key == GLFW_KEY_S) {
+					scanlinePostProcessingRenderPass.enabled = !scanlinePostProcessingRenderPass.enabled
+				}
+				else if (event.key == GLFW_KEY_U) {
+					sharpUpscalingPostProcessingRenderPass.enabled = !sharpUpscalingPostProcessingRenderPass.enabled
+				}
+			}
+		}
 	}
 
 	/**

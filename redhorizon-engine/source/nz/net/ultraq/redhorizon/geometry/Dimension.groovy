@@ -106,6 +106,18 @@ class Dimension {
 	}
 
 	/**
+	 * Return a new {@code Dimension} whose width/height values are multiplied by
+	 * the first/second values of the given array.
+	 * 
+	 * @param right
+	 * @return
+	 */
+	Dimension multiply(float[] right) {
+
+		return new Dimension(width * right[0] as int, height * right[1] as int)
+	}
+
+	/**
 	 * Return the width & height dimensions.
 	 * 
 	 * @return "(width)x(height)"

@@ -56,7 +56,7 @@ class Explorer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
-	private static final Dimension renderResolution = new Dimension(640, 400)
+	private static final Dimension renderResolution = new Dimension(1280, 800)
 
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList
