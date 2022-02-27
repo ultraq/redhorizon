@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon
 
+import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
@@ -76,10 +77,16 @@ abstract class Application implements EventTarget, Runnable {
 		}
 
 		audioEngine = new AudioEngine(audioConfig, scene)
+		audioEngine.on(EngineStoppedEvent) { event ->
+			stop()
+		}
 
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+		}
+		graphicsEngine.on(EngineStoppedEvent) { event ->
+			stop()
 		}
 
 		gameClock = new GameClock()
