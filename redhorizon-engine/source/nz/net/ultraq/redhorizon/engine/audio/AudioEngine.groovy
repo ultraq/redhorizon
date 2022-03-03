@@ -20,11 +20,15 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
+import nz.net.ultraq.redhorizon.scenegraph.ElementAddedEvent
+import nz.net.ultraq.redhorizon.scenegraph.ElementRemovedEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Audio subsystem, manages the connection to the audio hardware and playback
@@ -40,6 +44,10 @@ class AudioEngine extends Engine {
 	final AudioConfiguration config
 	final Scene scene
 
+	// For object lifecycles
+	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
+	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+
 	private boolean running
 
 	/**
@@ -53,6 +61,12 @@ class AudioEngine extends Engine {
 		super(TARGET_RENDER_TIME_MS)
 		this.config = config ?: new AudioConfiguration()
 		this.scene = scene
+		this.scene.on(ElementAddedEvent) { event ->
+			addedElements << event.element
+		}
+		this.scene.on(ElementRemovedEvent) { event ->
+			removedElements << event.element
+		}
 	}
 
 	/**
@@ -72,35 +86,42 @@ class AudioEngine extends Engine {
 			context.withCurrent { ->
 				def renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
-				def audioElementStates = [:]
 
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
 				engineLoop { ->
-					def audibleElements = []
+
+					// Initialize or delete objects which have been added/removed to/from the scene
+					if (addedElements) {
+						def elementsToInit = new ArrayList(addedElements)
+						elementsToInit.each { element ->
+							if (element instanceof AudioElement) {
+								element.init(renderer)
+							}
+						}
+						addedElements.removeAll(elementsToInit)
+					}
+					if (removedElements) {
+						def elementsToDelete = new ArrayList(removedElements)
+						elementsToDelete.each { element ->
+							if (element instanceof AudioElement) {
+								element.delete(renderer)
+							}
+						}
+						removedElements.removeAll(elementsToDelete)
+					}
+
+					// Run the audio elements
 					scene.accept { element ->
 						if (element instanceof AudioElement) {
-							audibleElements << element
+							element.render(renderer)
 						}
-					}
-					audibleElements.each { element ->
-						if (!audioElementStates[element]) {
-							audioElementStates << [(element): STATE_NEW]
-						}
-						def elementState = audioElementStates[element]
-						if (elementState == STATE_NEW) {
-							element.init(renderer)
-							elementState = STATE_INITIALIZED
-							audioElementStates << [(element): elementState]
-						}
-						element.render(renderer)
 					}
 				}
 
 				// Shutdown
 				running = false
 				logger.debug('Shutting down audio engine')
-				audioElementStates.keySet()*.delete(renderer)
 			}
 		}
 		logger.debug('Audio engine stopped')

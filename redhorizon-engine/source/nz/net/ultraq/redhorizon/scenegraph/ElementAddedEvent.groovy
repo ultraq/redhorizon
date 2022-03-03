@@ -1,12 +1,12 @@
-/*
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- *
+/* 
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.scenegraph
+
+import nz.net.ultraq.redhorizon.events.Event
+
+import groovy.transform.TupleConstructor
 
 /**
- * Represents at which point in a lifecycle that a render target is currently
- * in.
- * <p>
- * TODO: Any lifecycle Java libraries out there?
+ * Event for when something has been added to the scene.
  * 
  * @author Emanuel Rabina
  */
-enum ElementLifecycleState {
+@TupleConstructor(defaults = false)
+class ElementAddedEvent extends Event {
 
-	STATE_NEW,
-	STATE_INITIALIZED,
-	STATE_RENDERING,
-	STATE_DELETED
+	final SceneElement element
 }

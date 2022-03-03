@@ -16,15 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.ElementLifecycleState
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.geometry.Dimension
+import nz.net.ultraq.redhorizon.scenegraph.ElementRemovedEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import nz.net.ultraq.redhorizon.scenegraph.SceneChangedEvent
-import static nz.net.ultraq.redhorizon.engine.ElementLifecycleState.*
+import nz.net.ultraq.redhorizon.scenegraph.ElementAddedEvent
+import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -53,6 +54,10 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiLayer imGuiLayer
 	final Scene scene
 	final Camera camera
+
+	// For object lifecycles
+	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
+	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
 
 	// For object culling
 	private final List<GraphicsElement> visibleElements = []
@@ -78,7 +83,12 @@ class RenderPipeline implements AutoCloseable {
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
 		this.scene = scene
-		this.scene.on(SceneChangedEvent) { event ->
+		this.scene.on(ElementAddedEvent) { event ->
+			addedElements << event.element
+			sceneChanged.set(true)
+		}
+		this.scene.on(ElementRemovedEvent) { event ->
+			removedElements << event.element
 			sceneChanged.set(true)
 		}
 		this.camera = camera
@@ -208,24 +218,8 @@ class RenderPipeline implements AutoCloseable {
 			renderer.clear()
 			camera.render(renderer)
 
-			// Reduce the list of renderable items to those just visible in the scene
-			averageNanos('objectCulling', 1f, logger) { ->
-				def currentCameraView = camera.view
-				if (sceneChanged.get() || !currentCameraView.equals(lastCameraView)) {
-					visibleElements.clear()
-					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
-					scene.accept { element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-							visibleElements << element
-						}
-					}
-					sceneChanged.compareAndSet(true, false)
-					lastCameraView.set(currentCameraView)
-				}
-			}
-
 			// Perform all rendering passes
-			def sceneResult = renderPasses.inject(visibleElements) { lastResult, renderPass ->
+			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
 				if (renderPass.enabled) {
 					renderer.setRenderTarget(renderPass.framebuffer)
 					renderer.clear()
@@ -251,33 +245,55 @@ class RenderPipeline implements AutoCloseable {
 	 * resolution.
 	 */
 	@TupleConstructor(defaults = false, includes = ['framebuffer'])
-	private class SceneRenderPass implements RenderPass<List<GraphicsElement>> {
+	private class SceneRenderPass implements RenderPass<Object> {
 
 		final Framebuffer framebuffer
 		final boolean enabled = true
-		private final Map<GraphicsElement, ElementLifecycleState> graphicsElementStates = [:]
 
 		@Override
 		void delete(GraphicsRenderer renderer) {
-
-			graphicsElementStates.keySet().each { graphicsElement ->
-				graphicsElement.delete(renderer)
-			}
 		}
 
 		@Override
-		void render(GraphicsRenderer renderer, List<GraphicsElement> visibleElements) {
+		void render(GraphicsRenderer renderer, Object nothing) {
+
+			// Initialize or delete objects which have been added/removed to/from the scene
+			if (addedElements) {
+				def elementsToInit = new ArrayList(addedElements)
+				elementsToInit.each { element ->
+					if (element instanceof GraphicsElement) {
+						element.init(renderer)
+					}
+				}
+				addedElements.removeAll(elementsToInit)
+			}
+			if (removedElements) {
+				def elementsToDelete = new ArrayList(removedElements)
+				elementsToDelete.each { element ->
+					if (element instanceof GraphicsElement) {
+						element.delete(renderer)
+					}
+				}
+				removedElements.removeAll(elementsToDelete)
+			}
+
+			// Reduce the list of renderable items to those just visible in the scene
+			averageNanos('objectCulling', 1f, logger) { ->
+				def currentCameraView = camera.view
+				if (sceneChanged.get() || !currentCameraView.equals(lastCameraView)) {
+					visibleElements.clear()
+					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
+					scene.accept { element ->
+						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+							visibleElements << element
+						}
+					}
+					sceneChanged.compareAndSet(true, false)
+					lastCameraView.set(currentCameraView)
+				}
+			}
 
 			visibleElements.each { element ->
-				if (!graphicsElementStates[element]) {
-					graphicsElementStates << [(element): STATE_NEW]
-				}
-				def elementState = graphicsElementStates[element]
-				if (elementState == STATE_NEW) {
-					element.init(renderer)
-					elementState = STATE_INITIALIZED
-					graphicsElementStates << [(element): elementState]
-				}
 				element.render(renderer)
 			}
 		}

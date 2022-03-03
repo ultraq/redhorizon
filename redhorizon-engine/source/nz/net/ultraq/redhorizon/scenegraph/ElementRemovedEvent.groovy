@@ -18,10 +18,15 @@ package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.redhorizon.events.Event
 
+import groovy.transform.TupleConstructor
+
 /**
- * Event for when the scene has changed in some way.
+ * Event for when something has been removed from the scene.
  * 
  * @author Emanuel Rabina
  */
-class SceneChangedEvent extends Event {
+@TupleConstructor(defaults = false)
+class ElementRemovedEvent extends Event {
+
+	final SceneElement element
 }

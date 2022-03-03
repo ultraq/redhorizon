@@ -52,7 +52,7 @@ class Scene implements EventTarget, Visitable {
 	Scene addSceneElement(SceneElement element) {
 
 		elements << element
-		trigger(new SceneChangedEvent())
+		trigger(new ElementAddedEvent(element))
 		return this
 	}
 
@@ -61,7 +61,9 @@ class Scene implements EventTarget, Visitable {
 	 */
 	void clear() {
 
-		elements.clear()
+		elements.each { element ->
+			removeSceneElement(element)
+		}
 	}
 
 	/**
@@ -108,4 +110,17 @@ class Scene implements EventTarget, Visitable {
 //			}
 //		}
 //	}
+
+	/**
+	 * Removes an element from the scene.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	Scene removeSceneElement(SceneElement element) {
+
+		elements.remove(element)
+		trigger(new ElementRemovedEvent(element))
+		return this
+	}
 }
