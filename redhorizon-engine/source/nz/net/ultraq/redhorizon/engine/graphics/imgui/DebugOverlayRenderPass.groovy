@@ -34,6 +34,7 @@ import static imgui.flag.ImGuiWindowFlags.*
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * An overlay rendering pass for displaying debug information about the game.
@@ -50,10 +51,10 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	// Debug information
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String,String> persistentLines = [:]
-	private int drawCalls = 0
-	private int activeFramebuffers = 0
-	private int activeMeshes = 0
-	private int activeTextures = 0
+	private AtomicInteger drawCalls = new AtomicInteger()
+	private AtomicInteger activeFramebuffers = new AtomicInteger()
+	private AtomicInteger activeMeshes = new AtomicInteger()
+	private AtomicInteger activeTextures = new AtomicInteger()
 	private int debugWindowSizeX = 350
 	private int debugWindowSizeY = 200
 
@@ -69,25 +70,25 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
-				drawCalls++
+				drawCalls.incrementAndGet()
 			}
 			else if (event instanceof FramebufferCreatedEvent) {
-				activeFramebuffers++
+				activeFramebuffers.incrementAndGet()
 			}
 			else if (event instanceof FramebufferDeletedEvent) {
-				activeFramebuffers--
+				activeFramebuffers.decrementAndGet()
 			}
 			else if (event instanceof MeshCreatedEvent) {
-				activeMeshes++
+				activeMeshes.incrementAndGet()
 			}
 			else if (event instanceof MeshDeletedEvent) {
-				activeMeshes--
+				activeMeshes.decrementAndGet()
 			}
 			else if (event instanceof TextureCreatedEvent) {
-				activeTextures++
+				activeTextures.incrementAndGet()
 			}
 			else if (event instanceof TextureDeletedEvent) {
-				activeTextures--
+				activeTextures.decrementAndGet()
 			}
 		}
 
@@ -123,7 +124,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 		ImGui.text("Active meshes: ${activeMeshes}")
 		ImGui.text("Active textures: ${activeTextures}")
 		ImGui.text("Active framebuffers: ${activeFramebuffers}")
-		drawCalls = 0
+		drawCalls.set(0)
 
 		ImGui.separator()
 		persistentLines.keySet().sort().each { key ->

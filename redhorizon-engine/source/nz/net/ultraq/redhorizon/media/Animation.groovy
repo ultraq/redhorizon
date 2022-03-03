@@ -135,7 +135,9 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		frames.drain()
 		renderer.deleteMesh(mesh)
 		textures.each { texture ->
-			renderer.deleteTexture(texture)
+			if (texture) {
+				renderer.deleteTexture(texture)
+			}
 		}
 	}
 
@@ -200,12 +202,11 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 			// Delete used frames as the animation progresses to free up memory
 			if (lastFrame != -1 && lastFrame != currentFrame) {
-				def usedTextures = textures[lastFrame..<currentFrame]
-				usedTextures.each { texture ->
-					renderer.deleteTexture(texture)
+				for (def i = lastFrame; i < currentFrame; i++) {
+					renderer.deleteTexture(textures[i])
+					textures[i] = null
 				}
-				usedTextures.clear()
-				framesQueued -= usedTextures.size()
+				framesQueued -= (currentFrame - lastFrame)
 			}
 			lastFrame = currentFrame
 		}
