@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 interface Selectable {
 
 	/**
-	 * Called when this element has been deselected by soem action.
+	 * Called when this element has been deselected by some action.
 	 */
 	void deselect()
 
