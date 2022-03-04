@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.filetypes.pcx
 
-import nz.net.ultraq.redhorizon.codecs.RunLengthEncoding
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.codecs.RunLengthEncoding
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import java.nio.ByteBuffer

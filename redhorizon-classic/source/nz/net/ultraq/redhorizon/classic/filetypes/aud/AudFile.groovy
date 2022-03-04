@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import groovy.transform.Memoized
 import java.nio.ByteBuffer

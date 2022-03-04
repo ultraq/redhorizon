@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
 import imgui.ImGui

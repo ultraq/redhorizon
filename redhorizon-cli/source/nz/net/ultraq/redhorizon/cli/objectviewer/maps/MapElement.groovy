@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
 
 import org.joml.primitives.Rectanglef
 

@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 
 import org.joml.Vector3f
 import org.slf4j.Logger

@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
 import nz.net.ultraq.redhorizon.cli.PaletteOptions
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

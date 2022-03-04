@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.filetypes.Worker
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import org.slf4j.Logger

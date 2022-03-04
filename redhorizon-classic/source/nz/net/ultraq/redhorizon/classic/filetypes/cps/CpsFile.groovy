@@ -23,8 +23,8 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
-import nz.net.ultraq.redhorizon.io.NativeDataOutputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import java.nio.ByteBuffer

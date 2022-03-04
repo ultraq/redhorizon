@@ -20,10 +20,10 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
-import nz.net.ultraq.redhorizon.scenegraph.ElementAddedEvent
-import nz.net.ultraq.redhorizon.scenegraph.ElementRemovedEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -24,10 +24,10 @@ import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.resources.ResourceManager
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.events.Event
-import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import groovy.transform.TupleConstructor
 

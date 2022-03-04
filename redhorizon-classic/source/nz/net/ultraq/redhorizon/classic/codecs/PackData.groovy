@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.codecs
 
-import nz.net.ultraq.redhorizon.codecs.Decoder
+import nz.net.ultraq.redhorizon.filetypes.codecs.Decoder
 
 import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor

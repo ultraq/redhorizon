@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes.mix
 
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.io.NativeRandomAccessFile
+import nz.net.ultraq.redhorizon.filetypes.io.NativeRandomAccessFile
 
 import java.util.concurrent.Semaphore
 

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.Application
+import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent

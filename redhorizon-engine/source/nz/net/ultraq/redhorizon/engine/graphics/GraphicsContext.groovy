@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.Context
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.input.InputSource
-import nz.net.ultraq.redhorizon.geometry.Dimension
 
 /**
  * The graphics execution context, contains information about the target

@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio.openal
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-import nz.net.ultraq.redhorizon.geometry.Orientation
+import nz.net.ultraq.redhorizon.engine.geometry.Orientation
 
 import org.joml.Vector3f
 import static org.lwjgl.openal.AL10.*

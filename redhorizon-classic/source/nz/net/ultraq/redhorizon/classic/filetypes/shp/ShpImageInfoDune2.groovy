@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.shp
 
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 /**
  * Representation of the Dune 2 SHP image header (different from the file

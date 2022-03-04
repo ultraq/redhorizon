@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.vqa
 
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import groovy.transform.PackageScope
 

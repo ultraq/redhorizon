@@ -16,15 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.scenegraph.ElementRemovedEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
-import nz.net.ultraq.redhorizon.scenegraph.ElementAddedEvent
-import nz.net.ultraq.redhorizon.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
@@ -30,7 +31,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
-import nz.net.ultraq.redhorizon.geometry.Dimension
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
 
 import org.joml.Matrix4f

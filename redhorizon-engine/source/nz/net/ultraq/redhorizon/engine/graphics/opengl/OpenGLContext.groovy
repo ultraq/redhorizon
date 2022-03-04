@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
@@ -25,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
-import nz.net.ultraq.redhorizon.geometry.Dimension
 
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.slf4j.Logger

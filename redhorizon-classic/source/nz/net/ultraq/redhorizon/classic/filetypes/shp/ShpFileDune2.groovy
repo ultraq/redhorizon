@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes.shp
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.RLEZero
-import nz.net.ultraq.redhorizon.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import java.nio.ByteBuffer
 

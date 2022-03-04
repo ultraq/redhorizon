@@ -17,13 +17,20 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
-import nz.net.ultraq.redhorizon.Application
 import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
+import nz.net.ultraq.redhorizon.engine.media.ImageLoader
+import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
+import nz.net.ultraq.redhorizon.engine.media.Playable
+import nz.net.ultraq.redhorizon.engine.media.SoundLoader
+import nz.net.ultraq.redhorizon.engine.media.VideoLoader
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -31,13 +38,6 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.geometry.Dimension
-import nz.net.ultraq.redhorizon.media.AnimationLoader
-import nz.net.ultraq.redhorizon.media.ImageLoader
-import nz.net.ultraq.redhorizon.media.ImagesLoader
-import nz.net.ultraq.redhorizon.media.Playable
-import nz.net.ultraq.redhorizon.media.SoundLoader
-import nz.net.ultraq.redhorizon.media.VideoLoader
 
 import org.joml.Vector3f
 import org.slf4j.Logger

@@ -16,5 +16,5 @@
 
 moduleName = redhorizon-engine
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.extensions.JomlExtensions
-staticExtensionClasses = nz.net.ultraq.redhorizon.extensions.JomlStaticExtensions
+extensionClasses = nz.net.ultraq.redhorizon.engine.extensions.JomlExtensions
+staticExtensionClasses = nz.net.ultraq.redhorizon.engine.extensions.JomlStaticExtensions
