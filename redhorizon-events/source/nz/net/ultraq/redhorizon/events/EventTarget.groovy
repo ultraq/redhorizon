@@ -39,6 +39,18 @@ trait EventTarget {
 		new CopyOnWriteArrayList<>()
 
 	/**
+	 * Unregister an event listener from this event target.  The listener will no
+	 * longer be notified of events triggered by the target.
+	 * 
+	 * @param eventClass
+	 * @param eventListener
+	 */
+	public <E extends Event> void off(Class<E> eventClass, EventListener<E> eventListener) {
+
+		eventListeners.remove(new Tuple2<>(eventClass, eventListener))
+	}
+
+	/**
 	 * Register an event listener on this event target.
 	 * 
 	 * @param eventClass
