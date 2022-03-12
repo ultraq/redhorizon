@@ -34,7 +34,7 @@ dependencies {
 }
 
 application {
-	mainClass = 'nz.net.ultraq.redhorizon.RedHorizonCli'
+	mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizonCli'
 	applicationName = 'redhorizon'
 	applicationDefaultJvmArgs =
 		(targetPlatform == 'macos' ? [ '-Dorg.lwjgl.glfw.libname=glfw_async' ] : []) + [
