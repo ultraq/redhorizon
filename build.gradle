@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.internal.os.OperatingSystem
-
-def os = OperatingSystem.current()
-def targetPlatform = findProperty('targetPlatform') ?:
-	os == OperatingSystem.MAC_OS ? 'macos' :
-	os == OperatingSystem.WINDOWS ? 'windows' :
-	System.getenv('CI') as boolean ? 'linux' :
-	null
-
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
@@ -55,7 +46,6 @@ subprojects {
 		reflectionsVersion = '0.10.2'
 		slf4jVersion = '1.7.32'
 	}
-	ext.targetPlatform = targetPlatform
 
 	dependencies {
 		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.0.0'

@@ -18,6 +18,15 @@ plugins {
 	id 'application'
 }
 
+import org.gradle.internal.os.OperatingSystem
+
+def os = OperatingSystem.current()
+def targetPlatform = findProperty('targetPlatform') ?:
+	os == OperatingSystem.MAC_OS ? 'macos' :
+	os == OperatingSystem.WINDOWS ? 'windows' :
+	System.getenv('CI') as boolean ? 'linux' :
+	null
+
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
@@ -46,12 +55,6 @@ application {
 distributions {
 	main {
 		contents {
-			if (targetPlatform == 'windows') {
-				exclude 'bin/redhorizon'
-			}
-			else {
-				exclude 'bin/redhorizon.bat'
-			}
 			// Have to mention explicitly because of the subproject layout
 			from('..') {
 				include 'CHANGELOG.md'
@@ -64,8 +67,4 @@ distributions {
 
 distTar {
 	enabled = false
-}
-
-distZip {
-	archiveClassifier = targetPlatform
 }

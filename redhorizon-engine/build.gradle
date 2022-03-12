@@ -16,9 +16,6 @@
 
 description = 'Core rendering engine for Red Horizon'
 
-def lwjglNatives = "natives-${targetPlatform}"
-def imguiNatives = "imgui-java-natives-${targetPlatform}"
-
 dependencies {
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-filetypes')
@@ -34,10 +31,11 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-opengl'
 	implementation "org.reflections:reflections:${reflectionsVersion}"
 
-	runtimeOnly "io.github.spair:${imguiNatives}:${imguiVersion}"
-	runtimeOnly "io.github.spair:${imguiNatives}:${imguiVersion}"
-	runtimeOnly "org.lwjgl:lwjgl::${lwjglNatives}"
-	runtimeOnly "org.lwjgl:lwjgl-glfw::${lwjglNatives}"
-	runtimeOnly "org.lwjgl:lwjgl-openal::${lwjglNatives}"
-	runtimeOnly "org.lwjgl:lwjgl-opengl::${lwjglNatives}"
+	['natives-macos', 'natives-windows'].each { natives ->
+		runtimeOnly "io.github.spair:imgui-java-${natives}:${imguiVersion}"
+		runtimeOnly "org.lwjgl:lwjgl::${natives}"
+		runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
+		runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"
+		runtimeOnly "org.lwjgl:lwjgl-opengl::${natives}"
+	}
 }
