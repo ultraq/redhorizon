@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
+import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
@@ -84,7 +85,12 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		def io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
-		io.fonts.addFontFromFileTTF('Roboto-Medium.ttf', 16 * context.monitorScale as float)
+
+		getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
+			def fontConfig = new ImFontConfig()
+			io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * context.monitorScale as float, fontConfig)
+			fontConfig.destroy()
+		}
 
 		imGuiGlfw.init(context.window, true)
 		imGuiGl3.init('#version 410 core')
