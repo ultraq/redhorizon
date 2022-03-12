@@ -26,7 +26,7 @@ def targetPlatform = findProperty('targetPlatform') ?:
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
-	version = '0.34.1-SNAPSHOT'
+	version = '0.34.1'
 }
 
 // Root project configuration

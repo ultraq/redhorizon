@@ -6,8 +6,14 @@ Changelog
  - Sort files by name in the explorer when browsing a mix file
  - Attempt to determine the type of a file when browsing a mix file in the
    explorer, allowing it to be previewed
- - Update LWJGL to 3.3.0 and ImGui to 1.86.0 for better support of M1 macs
+ - Added Red Alert video names for when viewing those mix files
+ - The Red Horizon Explorer is now a subcommand of the Red Horizon CLI, so to
+   use it you now run `./bin/redhorizon explorer` on Mac, or `./bin/explorer.bat
+   explorer` on Windows
+ - Project and dependencies now running on Groovy 4.0.0
+ - Update LWJGL to 3.3.0+ and ImGui to 1.86.0+ for better support of M1 macs
  - Create platform-specific bundles to keep download size down
+ - Improve UI scaling to go with any OS display scaling settings
 
 ### 0.34.0
 
