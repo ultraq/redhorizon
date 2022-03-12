@@ -37,7 +37,7 @@ subprojects {
 
 	ext {
 		groovyVersion = '4.0.0'
-		imguiVersion = '1.86.3'
+		imguiVersion = '1.86.4'
 		jomlVersion = '1.10.4'
 		jomlPrimitivesVersion = '1.10.0'
 		logbackVersion = '1.2.11'
