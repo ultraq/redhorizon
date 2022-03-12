@@ -18,15 +18,6 @@ plugins {
 	id 'application'
 }
 
-import org.gradle.internal.os.OperatingSystem
-
-def os = OperatingSystem.current()
-def targetPlatform = findProperty('targetPlatform') ?:
-	os == OperatingSystem.MAC_OS ? 'macos' :
-	os == OperatingSystem.WINDOWS ? 'windows' :
-	System.getenv('CI') as boolean ? 'linux' :
-	null
-
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
@@ -42,14 +33,21 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-glfw'
 }
 
+def args = [
+	'-Dorg.lwjgl.system.stackSize=10240',
+	"-Dredhorizon.version=${version}"
+]
+if (targetPlatform == 'macos-arm64') {
+	args << '-Dimgui.library.name=libimgui-javaarm64.dylib'
+}
+if (targetPlatform.startsWith('macos')) {
+	args << '-Dorg.lwjgl.glfw.libname=glfw_async'
+}
+
 application {
 	mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizonCli'
 	applicationName = 'redhorizon'
-	applicationDefaultJvmArgs =
-		(targetPlatform == 'macos' ? [ '-Dorg.lwjgl.glfw.libname=glfw_async' ] : []) + [
-			'-Dorg.lwjgl.system.stackSize=10240',
-			"-Dredhorizon.version=${version}"
-		]
+	applicationDefaultJvmArgs = args
 }
 
 distributions {

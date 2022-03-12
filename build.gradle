@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import org.gradle.internal.os.OperatingSystem
+
+def os = OperatingSystem.current()
+def targetPlatform = findProperty('targetPlatform') ?:
+	os == OperatingSystem.MAC_OS ? System.getProperty('os.arch').startsWith('aarch64') ? 'macos-arm64' : 'macos' :
+	'windows'
+
 // Global configuration
 allprojects {
 	group = 'nz.net.ultraq.redhorizon'
-	version = '0.34.1'
+	version = '0.34.2-SNAPSHOT'
 }
 
 // Root project configuration
@@ -29,14 +36,14 @@ subprojects {
 	apply plugin: 'idea'
 	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.0.1/gradle-support.gradle'
 
-	sourceCompatibility = 11
+	sourceCompatibility = 17
 //	configurations.all {
 //		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 //		resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 //	}
 
 	ext {
-		groovyVersion = '4.0.0'
+		groovyVersion = '4.0.1'
 		imguiVersion = '1.86.4'
 		jomlVersion = '1.10.4'
 		jomlPrimitivesVersion = '1.10.0'
@@ -45,6 +52,7 @@ subprojects {
 		reflectionsVersion = '0.10.2'
 		slf4jVersion = '1.7.32'
 	}
+	ext.targetPlatform = targetPlatform
 
 	dependencies {
 		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.0.0'
