@@ -12,6 +12,8 @@ Changelog
    explorer` on Windows
  - Project and dependencies now running on Groovy 4.0.0
  - Update LWJGL to 3.3.0+ and ImGui to 1.86.0+ for better support of M1 macs
+   (note that this is using Java 11 which only has an x86 release, so will be
+   running using Rosetta)
  - Create platform-specific bundles to keep download size down
  - Improve UI scaling to go with any OS display scaling settings
 
