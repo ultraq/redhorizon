@@ -3,6 +3,7 @@
 /.logs
 /bin
 /lib
+/libraries
 /mix
 build
 *.aud
