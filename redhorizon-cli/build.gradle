@@ -35,7 +35,7 @@ dependencies {
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
-	implementation "info.picocli:picocli:${picocliVersion}"
+	implementation 'info.picocli:picocli:4.6.3'
 	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
