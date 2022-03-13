@@ -45,7 +45,8 @@ import picocli.CommandLine.IVersionProvider
 		ExplorerCli,
 	  MediaPlayerCli,
 		MixReaderCli,
-		ObjectViewerCli
+		ObjectViewerCli,
+		ScenarioEditorCli
 	],
 	versionProvider = VersionProvider
 )

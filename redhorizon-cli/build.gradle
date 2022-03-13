@@ -24,6 +24,7 @@ dependencies {
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-filetypes')
+	implementation project(':redhorizon-scenarioeditor')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation 'info.picocli:picocli:4.6.3'
