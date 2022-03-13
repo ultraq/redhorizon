@@ -85,6 +85,8 @@ Usage: redhorizon explorer [--palette=<paletteType>]
            ra-temperate, td-temperate.  Defaults to ra-temperate
 ```
 
+![Screenshot of the Explorer interface](screenshot-of-explorer-demo.png)
+
 ### mix
 
 A MIX file reader for extracting files from them.
