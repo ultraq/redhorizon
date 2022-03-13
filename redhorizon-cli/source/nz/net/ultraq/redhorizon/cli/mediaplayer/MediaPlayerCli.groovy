@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.cli.PaletteOptions
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
@@ -77,7 +76,7 @@ class MediaPlayerCli implements Callable<Integer> {
 	Integer call() {
 
 		Thread.currentThread().name = 'Media Player [main]'
-		logger.info('Red Horizon Media Player {}', commandSpec.version()[0] ?: '(development)')
+		logger.info('Red Horizon Media Player {}', commandSpec.parent().version()[0])
 
 		def audioConfig = audioOptions.asAudioConfiguration()
 		def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
@@ -87,14 +86,5 @@ class MediaPlayerCli implements Callable<Integer> {
 		}
 
 		return 0
-	}
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new MediaPlayerCli()).execute(args))
 	}
 }

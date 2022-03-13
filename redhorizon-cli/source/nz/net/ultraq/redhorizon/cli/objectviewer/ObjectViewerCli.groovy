@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Mixin
 import picocli.CommandLine.Model.CommandSpec
@@ -78,7 +77,7 @@ class ObjectViewerCli implements Callable<Integer> {
 	Integer call() {
 
 		Thread.currentThread().name = 'Object Viewer [main]'
-		logger.info('Red Horizon Object Viewer {}', commandSpec.version()[0] ?: '(development)')
+		logger.info('Red Horizon Object Viewer {}', commandSpec.parent().version()[0])
 
 		fileOptions.useFile(logger) { objectFile ->
 			switch (objectFile) {
@@ -105,14 +104,5 @@ class ObjectViewerCli implements Callable<Integer> {
 		}
 
 		return 0
-	}
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new ObjectViewerCli()).execute(args))
 	}
 }

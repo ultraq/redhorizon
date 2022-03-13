@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters
@@ -65,7 +64,7 @@ class MixReaderCli implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		logger.info('Red Horizon Mix Reader {}', commandSpec.version()[0] ?: '(development)')
+		logger.info('Red Horizon Mix Reader {}', commandSpec.parent().version()[0])
 
 		logger.info('Loading {}...', mixFile)
 		new MixFile(new File(mixFile)).withCloseable { mix ->
@@ -85,14 +84,5 @@ class MixReaderCli implements Callable<Integer> {
 		}
 
 		return 0
-	}
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new MixReaderCli()).execute(args))
 	}
 }

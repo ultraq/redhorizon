@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import picocli.CommandLine
 import picocli.CommandLine.Command
 
 /**
@@ -40,13 +39,4 @@ import picocli.CommandLine.Command
 	synopsisSubcommandLabel = 'COMMAND'
 )
 class ConverterCli {
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 * 
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new ConverterCli()).execute(args))
-	}
 }
