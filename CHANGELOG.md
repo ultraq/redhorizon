@@ -2,6 +2,12 @@
 Changelog
 =========
 
+### 0.34.2
+ - Add native support for M1 macs.  This is through Java 17 (the first Java LTS
+   release with native support for the M1 processors) and a custom-built
+   version of the ImGui binaries.  As such, Java 17 is now required for this
+   project.
+
 ### 0.34.1
  - Sort files by name in the explorer when browsing a mix file
  - Attempt to determine the type of a file when browsing a mix file in the
