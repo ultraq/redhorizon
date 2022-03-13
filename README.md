@@ -73,6 +73,18 @@ Convert a paletted PNG file to a Command & Conquer SHP file
   -w, --width=<width>     Width of each SHP image
 ```
 
+### explorer
+
+A file explorer-like interface for viewing classic C&C file formats, including
+peeking inside MIX files.
+
+```
+Usage: redhorizon explorer [--palette=<paletteType>]
+      --palette=<paletteType>
+         Which game palette to apply to a paletted image.  One of ra-snow,
+           ra-temperate, td-temperate.  Defaults to ra-temperate
+```
+
 ### mix
 
 A MIX file reader for extracting files from them.
