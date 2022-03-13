@@ -15,6 +15,7 @@
   -->
 
 <configuration>
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
