@@ -30,10 +30,7 @@ import java.util.concurrent.Callable
  * 
  * @author Emanuel Rabina
  */
-@Command(
-	name = "explorer",
-	version = '${sys:redhorizon.version}'
-)
+@Command(name = 'explorer')
 class ExplorerCli implements Callable<Integer> {
 
 	@Spec

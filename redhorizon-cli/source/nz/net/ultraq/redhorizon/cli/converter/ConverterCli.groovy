@@ -37,8 +37,7 @@ import picocli.CommandLine.Command
 	  Pcx2CpsConverter,
 		Png2ShpConverter
 	],
-	synopsisSubcommandLabel = 'COMMAND',
-	version = '${sys:redhorizon.version}'
+	synopsisSubcommandLabel = 'COMMAND'
 )
 class ConverterCli {
 

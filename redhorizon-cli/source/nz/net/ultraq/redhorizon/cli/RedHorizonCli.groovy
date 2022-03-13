@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.cli.objectviewer.ObjectViewerCli
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.IVersionProvider
 
 /**
  * The top-level CLI program, hosting all the other programs as subcommands.
@@ -46,9 +47,26 @@ import picocli.CommandLine.Command
 		MixReaderCli,
 		ObjectViewerCli
 	],
-	version = '${sys:redhorizon.version}'
+	versionProvider = VersionProvider
 )
 class RedHorizonCli {
+
+	/**
+	 * Read the version number from the `cli.properties` file.
+	 */
+	static class VersionProvider implements IVersionProvider {
+
+		@Override
+		String[] getVersion() {
+
+			return getResourceAsStream('cli.properties').withBufferedReader { reader ->
+				def cliProperties = new Properties()
+				cliProperties.load(reader)
+				def version = cliProperties.getProperty('version')
+				return new String[] { version == '${version}' ? '(development)' : version }
+			}
+		}
+	}
 
 	/**
 	 * Bootstrap the application using Picocli.

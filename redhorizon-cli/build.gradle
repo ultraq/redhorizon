@@ -33,9 +33,14 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-glfw'
 }
 
+processResources {
+	filesMatching('**/cli.properties') {
+		expand version: version
+	}
+}
+
 def args = [
-	'-Dorg.lwjgl.system.stackSize=10240',
-	"-Dredhorizon.version=${version}"
+	'-Dorg.lwjgl.system.stackSize=10240'
 ]
 if (targetPlatform == 'macos-arm64') {
 	args << '-Dimgui.library.name=libimgui-javaarm64.dylib'

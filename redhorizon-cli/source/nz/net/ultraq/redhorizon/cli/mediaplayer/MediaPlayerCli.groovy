@@ -46,8 +46,7 @@ import java.util.concurrent.Callable
 		''
 	],
 	description = 'Play/View a variety of supported media formats',
-	mixinStandardHelpOptions = true,
-	version = '${sys:redhorizon.version}'
+	mixinStandardHelpOptions = true
 )
 class MediaPlayerCli implements Callable<Integer> {
 

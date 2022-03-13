@@ -48,8 +48,7 @@ import java.util.concurrent.Callable
 		'=========================',
 		''
 	],
-	mixinStandardHelpOptions = true,
-	version = '${sys:redhorizon.version}'
+	mixinStandardHelpOptions = true
 )
 class ObjectViewerCli implements Callable<Integer> {
 

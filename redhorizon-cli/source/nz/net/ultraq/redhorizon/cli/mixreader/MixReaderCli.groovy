@@ -43,8 +43,7 @@ import java.util.concurrent.Callable
 		''
 	],
 	description = 'Extract an entry from a mix file, saving it to disk with the same name.',
-	mixinStandardHelpOptions = true,
-	version = '${sys:redhorizon.version}'
+	mixinStandardHelpOptions = true
 )
 class MixReaderCli implements Callable<Integer> {
 
