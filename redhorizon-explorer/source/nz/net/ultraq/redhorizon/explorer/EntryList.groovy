@@ -44,27 +44,29 @@ class EntryList implements EventTarget, OverlayRenderPass {
 	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
 
-		ImGui.setNextWindowSize(300, 500, FirstUseEver)
-		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.begin('Current directory', new ImBoolean(true))
-		ImGui.popStyleVar()
+		with(ImGui) {
+			setNextWindowSize(300, 500, FirstUseEver)
+			pushStyleVar(WindowPadding, 0, 0)
+			begin('Current directory', new ImBoolean(true))
+			popStyleVar()
 
-		// File list
-		if (ImGui.beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
-			entries.each { entry ->
-				// noinspection ChangeToOperator
-				def isSelected = selectedEntry.equals(entry)
-				if (ImGui.selectable(entry.name, isSelected)) {
-					selectedEntry = entry
-					trigger(new EntrySelectedEvent(entry))
+			// File list
+			if (beginListBox('##FileList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
+				entries.each { entry ->
+					// noinspection ChangeToOperator
+					def isSelected = selectedEntry.equals(entry)
+					if (selectable(entry.name, isSelected)) {
+						selectedEntry = entry
+						trigger(new EntrySelectedEvent(entry))
+					}
+					if (isSelected) {
+						setItemDefaultFocus()
+					}
 				}
-				if (isSelected) {
-					ImGui.setItemDefaultFocus()
-				}
+				endListBox()
 			}
-			ImGui.endListBox()
-		}
 
-		ImGui.end()
+			end()
+		}
 	}
 }

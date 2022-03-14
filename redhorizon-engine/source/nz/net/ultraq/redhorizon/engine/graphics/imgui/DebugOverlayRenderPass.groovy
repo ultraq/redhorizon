@@ -110,34 +110,37 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
 
-		def viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, viewport.workPosY + 10 as float)
+		with(ImGui) {
+			def viewport = getMainViewport()
+			setNextWindowBgAlpha(0.4f)
+			setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, viewport.workPosY + 10 as float)
 
-		ImGui.begin('Debug overlay', new ImBoolean(true),
-			NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-		debugWindowSizeX = ImGui.getWindowSizeX() as int
-		debugWindowSizeY = ImGui.getWindowSizeY() as int
+			begin('Debug overlay', new ImBoolean(true),
+				NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+			debugWindowSizeX = getWindowSizeX() as int
+			debugWindowSizeY = getWindowSizeY() as int
 
-		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
-		ImGui.text("Draw calls: ${drawCalls}")
-		ImGui.text("Active meshes: ${activeMeshes}")
-		ImGui.text("Active textures: ${activeTextures}")
-		ImGui.text("Active framebuffers: ${activeFramebuffers}")
-		drawCalls.set(0)
+			def framerate = getIO().framerate
+			text("Framerate: ${sprintf('%.1f', framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / framerate)}ms")
+			text("Draw calls: ${drawCalls}")
+			text("Active meshes: ${activeMeshes}")
+			text("Active textures: ${activeTextures}")
+			text("Active framebuffers: ${activeFramebuffers}")
+			drawCalls.set(0)
 
-		ImGui.separator()
-		persistentLines.keySet().sort().each { key ->
-			ImGui.text(persistentLines[key])
-		}
-
-		if (debugLines.size()) {
-			ImGui.separator()
-			debugLines.each { line ->
-				ImGui.text(line)
+			separator()
+			persistentLines.keySet().sort().each { key ->
+				text(persistentLines[key])
 			}
-		}
 
-		ImGui.end()
+			if (debugLines.size()) {
+				separator()
+				debugLines.each { line ->
+					text(line)
+				}
+			}
+
+			end()
+		}
 	}
 }

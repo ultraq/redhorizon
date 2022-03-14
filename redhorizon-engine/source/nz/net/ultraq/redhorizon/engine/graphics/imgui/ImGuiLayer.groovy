@@ -120,31 +120,33 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	private void drawMenu() {
 
-		if (ImGui.beginMainMenuBar()) {
+		with(ImGui) {
+			if (beginMainMenuBar()) {
 
-			if (ImGui.beginMenu('File')) {
-				if (ImGui.menuItem('Exit')) {
-					trigger(new GuiEvent(EVENT_TYPE_STOP))
+				if (beginMenu('File')) {
+					if (menuItem('Exit')) {
+						trigger(new GuiEvent(EVENT_TYPE_STOP))
+					}
+					endMenu()
 				}
-				ImGui.endMenu()
+
+				if (beginMenu('Options')) {
+					if (menuItem('Debug overlay', null, debugOverlay)) {
+						debugOverlay = !debugOverlay
+					}
+					if (menuItem('Scanlines', null, shaderScanlines)) {
+						shaderScanlines = !shaderScanlines
+						trigger(new ChangeEvent('Scanlines', shaderScanlines))
+					}
+					if (menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
+						shaderSharpUpscaling = !shaderSharpUpscaling
+						trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
+					}
+					endMenu()
+				}
+
+				endMainMenuBar()
 			}
-
-			if (ImGui.beginMenu('Options')) {
-				if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
-					debugOverlay = !debugOverlay
-				}
-				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
-					shaderScanlines = !shaderScanlines
-					trigger(new ChangeEvent('Scanlines', shaderScanlines))
-				}
-				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
-					shaderSharpUpscaling = !shaderSharpUpscaling
-					trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
-				}
-				ImGui.endMenu()
-			}
-
-			ImGui.endMainMenuBar()
 		}
 	}
 
@@ -156,50 +158,51 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	private void drawScene(Framebuffer sceneFramebufferResult) {
 
-		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.begin("Scene", new ImBoolean(true), NoCollapse | NoScrollbar)
-		ImGui.popStyleVar()
+		with(ImGui) {
+			pushStyleVar(WindowPadding, 0, 0)
+			begin("Scene", new ImBoolean(true), NoCollapse | NoScrollbar)
+			popStyleVar()
 
-		if (!docked && drawChrome) {
-			imgui.internal.ImGui.dockBuilderDockWindow('Scene', dockspaceId)
-			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
-			docked = true
-		}
+			if (!docked && drawChrome) {
+				imgui.internal.ImGui.dockBuilderDockWindow('Scene', dockspaceId)
+				imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
+				docked = true
+			}
 
-		def framebufferSize = sceneFramebufferResult.texture.size
-		def windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
-		def imageSizeX = windowSize.width
-		def imageSizeY = windowSize.height
-		def uvX = 0f
-		def uvY = 0f
-		def cursorX = 0
-		def cursorY = ImGui.getCursorPosY()
+			def framebufferSize = sceneFramebufferResult.texture.size
+			def windowSize = new Dimension(contentRegionMaxX as int, contentRegionMaxY as int)
+			def imageSizeX = windowSize.width
+			def imageSizeY = windowSize.height
+			def uvX = 0f
+			def uvY = 0f
+			def cursorX = 0
+			def cursorY = getCursorPosY()
 
-		// Window is wider
-		if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
-			uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
-			imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
-			cursorX = (windowSize.width - imageSizeX) * 0.5f as float
-		}
-		// Window is taller
-		else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
-			uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
-			imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
-			cursorY = cursorY +(windowSize.height - imageSizeY) * 0.5f as float
-		}
+			// Window is wider
+			if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
+				uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
+				imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
+				cursorX = (windowSize.width - imageSizeX) * 0.5f as float
+			}
+			// Window is taller
+			else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
+				uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
+				imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
+				cursorY = cursorY +(windowSize.height - imageSizeY) * 0.5f as float
+			}
 
-		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(sceneFramebufferResult.texture.textureId, imageSizeX, imageSizeY,
-			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
+			setCursorPos(cursorX, cursorY)
+			image(sceneFramebufferResult.texture.textureId, imageSizeX, imageSizeY, uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
-		ImGui.end()
+			end()
 
-		if (windowSize != lastWindowSize) {
-			logger.debug('Scene window changed to {}', windowSize)
-			def targetResolution = windowSize.calculateFit(config.targetAspectRatio)
-			logger.debug('Target resolution changed to {}', targetResolution)
-			trigger(new FramebufferSizeEvent(windowSize, windowSize, targetResolution))
-			lastWindowSize = windowSize
+			if (windowSize != lastWindowSize) {
+				logger.debug('Scene window changed to {}', windowSize)
+				def targetResolution = windowSize.calculateFit(config.targetAspectRatio)
+				logger.debug('Target resolution changed to {}', targetResolution)
+				trigger(new FramebufferSizeEvent(windowSize, windowSize, targetResolution))
+				lastWindowSize = windowSize
+			}
 		}
 	}
 
@@ -239,20 +242,22 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	private void setUpDockspace() {
 
-		def viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowPos(0, 0)
-		ImGui.setNextWindowSize(viewport.sizeX, viewport.sizeY)
-		ImGui.pushStyleVar(WindowBorderSize, 0)
-		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.pushStyleVar(WindowRounding, 0)
+		with(ImGui) {
+			def viewport = getMainViewport()
+			setNextWindowPos(0, 0)
+			setNextWindowSize(viewport.sizeX, viewport.sizeY)
+			pushStyleVar(WindowBorderSize, 0)
+			pushStyleVar(WindowPadding, 0, 0)
+			pushStyleVar(WindowRounding, 0)
 
-		ImGui.begin('DockingWindow', new ImBoolean(true),
-			NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
-		ImGui.popStyleVar(3)
+			begin('DockingWindow', new ImBoolean(true),
+				NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
+			popStyleVar(3)
 
-		dockspaceId = ImGui.getID('MyDockspace')
-		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
+			dockspaceId = getID('MyDockspace')
+			dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
 
-		ImGui.end()
+			end()
+		}
 	}
 }
