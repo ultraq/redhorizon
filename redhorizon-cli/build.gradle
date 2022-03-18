@@ -42,9 +42,6 @@ processResources {
 def args = [
 	'-Dorg.lwjgl.system.stackSize=10240'
 ]
-if (targetPlatform == 'macos-arm64') {
-	args << '-Dimgui.library.name=libimgui-javaarm64.dylib'
-}
 if (targetPlatform.startsWith('macos')) {
 	args << '-Dorg.lwjgl.glfw.libname=glfw_async'
 }
