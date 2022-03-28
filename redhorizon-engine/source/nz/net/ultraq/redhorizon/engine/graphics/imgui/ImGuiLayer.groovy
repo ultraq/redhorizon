@@ -38,6 +38,9 @@ import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*
 
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
  * setup needed to make it work.
@@ -47,6 +50,20 @@ import static org.lwjgl.glfw.GLFW.*
 class ImGuiLayer implements AutoCloseable, InputSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
+
+	static {
+
+		// Extract and use the locally built natives for macOS running M1 processors
+		if (System.getProperty('os.name').toLowerCase().contains('mac') && System.getProperty('os.arch').contains('aarch64')) {
+			ImGuiLayer.classLoader.getResourceAsStream('io/imgui/java/native-bin/libimgui-javaarm64.dylib').withStream { inputStream ->
+				def tmpDir = File.createTempDir('imgui-java-natives-macos-arm64')
+				tmpDir.deleteOnExit()
+				def libFile = new File(tmpDir, 'libimgui-javaarm64.dylib')
+				Files.copy(inputStream, libFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+				System.load(libFile.absolutePath)
+			}
+		}
+	}
 
 	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
