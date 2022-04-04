@@ -259,19 +259,23 @@ class RenderPipeline implements AutoCloseable {
 
 			// Initialize or delete objects which have been added/removed to/from the scene
 			if (addedElements) {
-				def elementsToInit = new ArrayList(addedElements)
-				elementsToInit.each { element ->
-					if (element instanceof GraphicsElement) {
-						element.init(renderer)
+				def elementsToInit = new ArrayList<SceneElement>(addedElements)
+				elementsToInit.each { elementToInit ->
+					elementToInit.accept { element ->
+						if (element instanceof GraphicsElement) {
+							element.init(renderer)
+						}
 					}
 				}
 				addedElements.removeAll(elementsToInit)
 			}
 			if (removedElements) {
-				def elementsToDelete = new ArrayList(removedElements)
-				elementsToDelete.each { element ->
-					if (element instanceof GraphicsElement) {
-						element.delete(renderer)
+				def elementsToDelete = new ArrayList<SceneElement>(removedElements)
+				elementsToDelete.each { elementToDelete ->
+					elementToDelete.accept { element ->
+						if (element instanceof GraphicsElement) {
+							element.delete(renderer)
+						}
 					}
 				}
 				removedElements.removeAll(elementsToDelete)
