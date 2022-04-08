@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFileWriter
 import nz.net.ultraq.redhorizon.filetypes.png.PngFile
 
 import org.slf4j.Logger
@@ -65,12 +65,16 @@ class Png2ShpConverter implements Callable<Integer> {
 
 		logger.info('Loading {}...', sourceFile)
 		if (sourceFile.exists()) {
-			def pngFile = sourceFile.withInputStream { inputStream ->
-				return new PngFile(inputStream)
-			}
 			if (!destFile.exists()) {
-				destFile.withOutputStream { outputStream ->
-					new ShpFile(pngFile, width, height, numImages).write(outputStream)
+				sourceFile.withInputStream { inputStream ->
+					destFile.withOutputStream { outputStream ->
+						def pngFile = new PngFile(inputStream)
+						new ShpFileWriter(outputStream).write(pngFile, [
+						  width: width,
+							height: height,
+							numImages: numImages
+						])
+					}
 				}
 				return 0
 			}

@@ -16,16 +16,16 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import groovy.transform.Immutable
+import groovy.transform.TupleConstructor
 
 /**
  * Data about the result of a {@link MixEntryTester} test.
  * 
  * @author Emanuel Rabina
  */
-@Immutable
+@TupleConstructor(defaults = false)
 class MixEntryTesterResult {
 
-	final Class fileClass
+	final Object file
 	final String name
 }

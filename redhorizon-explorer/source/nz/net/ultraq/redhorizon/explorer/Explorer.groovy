@@ -144,10 +144,10 @@ class Explorer extends Application {
 			else {
 				def testerResult = mixEntryTester.test(entry)
 				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, true)
+					entries << new MixEntry(mixFile, entry, testerResult.name, null, testerResult.file, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, true)
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, true)
 				}
 			}
 		}
@@ -244,17 +244,22 @@ class Explorer extends Application {
 	 */
 	private void previewEntry(MixEntry entry) {
 
-		clearPreview()
 		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
-		def entryClass = entry.fileClass
-		if (!entryClass) {
-			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
-			return
-		}
+		def file = entry.file
+		def fileClass = entry.fileClass
 
-		selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
-		preview(entryClass.newInstance(selectedFileInputStream))
+		if (file) {
+			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			preview(file)
+		}
+		else if (fileClass) {
+			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			preview(fileClass.newInstance(selectedFileInputStream))
+		}
+		else {
+			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
+		}
 	}
 
 	/**
@@ -264,17 +269,16 @@ class Explorer extends Application {
 	 */
 	private void previewFile(File file) {
 
-		clearPreview()
 		logger.info('Loading {}...', file.name)
 
 		def fileClass = file.name.fileClass
-		if (!fileClass) {
-			logger.info('No filetype implementation for {}', file.name)
-			return
+		if (fileClass) {
+			selectedFileInputStream = file.newInputStream()
+			preview(fileClass.newInstance(selectedFileInputStream))
 		}
-
-		selectedFileInputStream = file.newInputStream()
-		preview(fileClass.newInstance(selectedFileInputStream))
+		else {
+			logger.info('No filetype implementation for {}', file.name)
+		}
 	}
 
 	@Override
@@ -297,6 +301,7 @@ class Explorer extends Application {
 
 		// Handle events from the explorer GUI
 		entryList.on(EntrySelectedEvent) { event ->
+			clearPreview()
 			def entry = event.entry
 			if (entry instanceof MixEntry) {
 				if (entry.name == '..') {

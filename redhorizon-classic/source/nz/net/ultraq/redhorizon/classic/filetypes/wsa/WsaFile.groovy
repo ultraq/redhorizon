@@ -42,9 +42,10 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @FileExtensions('wsa')
+@SuppressWarnings('GrFinalVariableAccess')
 class WsaFile implements AnimationFile, Streaming {
 
-	private static final short FLAG_HAS_PALETTE = 0x01
+	static final short FLAG_HAS_PALETTE = 0x01
 
 	private final NativeDataInputStream input
 
@@ -75,12 +76,19 @@ class WsaFile implements AnimationFile, Streaming {
 
 		// File header
 		numFrames = input.readShort()
-		x         = input.readShort()
-		y         = input.readShort()
+		assert numFrames > 0
+
+		x = input.readShort()
+		y = input.readShort()
+
 		width     = input.readShort()
-		height    = input.readShort()
-		delta     = input.readUnsignedShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
-		flags     = input.readShort()
+		assert width > 0
+
+		height = input.readShort()
+		assert height > 0
+
+		delta = input.readUnsignedShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
+		flags = input.readShort()
 
 		// Frame offsets
 		frameOffsets = new int[numFrames + 2]

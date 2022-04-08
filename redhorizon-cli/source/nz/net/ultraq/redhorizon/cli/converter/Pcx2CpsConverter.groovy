@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.cps.CpsFile
+import nz.net.ultraq.redhorizon.classic.filetypes.cps.CpsFileWriter
 import nz.net.ultraq.redhorizon.filetypes.pcx.PcxFile
 
 import org.slf4j.Logger
@@ -55,12 +55,12 @@ class Pcx2CpsConverter implements Callable<Integer> {
 
 		logger.info('Loading {}...', sourceFile)
 		if (sourceFile.exists()) {
-			def pcxFile = sourceFile.withInputStream { inputStream ->
-				return new PcxFile(inputStream)
-			}
 			if (!destFile.exists()) {
-				destFile.withOutputStream { outputStream ->
-					new CpsFile(pcxFile).write(outputStream)
+				sourceFile.withInputStream { inputStream ->
+					destFile.withOutputStream { outputStream ->
+						def pcxFile = new PcxFile(inputStream)
+						new CpsFileWriter(outputStream).write(pcxFile)
+					}
 				}
 				return 0
 			}

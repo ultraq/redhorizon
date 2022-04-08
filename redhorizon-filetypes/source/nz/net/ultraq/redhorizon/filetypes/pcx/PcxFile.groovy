@@ -39,22 +39,23 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina.
  */
 @FileExtensions('pcx')
+@SuppressWarnings('GrFinalVariableAccess')
 class PcxFile implements ImageFile, InternalPalette {
 
 	// Header constants
-	private static final int  HEADER_PALETTE_SIZE  = 48
-	private static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
-	private static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
-	private static final byte VERSION_PCP28_PAL    = 2 // PC Paintbrush 2.8 w/ palette
-	private static final byte VERSION_PCP28_NO_PAL = 3 // PC Paintbrush 2.8 w/o palette
-	private static final byte VERSION_PCP4WIN      = 4 // PC Paintbrush for Windows
-	private static final byte VERSION_PCPPLUS      = 5 // PC Paintbrush+
-	private static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
-	private static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
+	static final int  HEADER_PALETTE_SIZE  = 48
+	static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
+	static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
+	static final byte VERSION_PCP28_PAL    = 2 // PC Paintbrush 2.8 w/ palette
+	static final byte VERSION_PCP28_NO_PAL = 3 // PC Paintbrush 2.8 w/o palette
+	static final byte VERSION_PCP4WIN      = 4 // PC Paintbrush for Windows
+	static final byte VERSION_PCPPLUS      = 5 // PC Paintbrush+
+	static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
+	static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
 
-	private static final int PALETTE_COLOURS      = 256
-	private static final int PALETTE_SIZE         = PALETTE_COLOURS * FORMAT_RGB.value
-	private static final int PALETTE_PADDING_SIZE = 1
+	static final int PALETTE_COLOURS      = 256
+	static final int PALETTE_SIZE         = PALETTE_COLOURS * FORMAT_RGB.value
+	static final int PALETTE_PADDING_SIZE = 1
 
 	// Header data
 	final byte manufacturer

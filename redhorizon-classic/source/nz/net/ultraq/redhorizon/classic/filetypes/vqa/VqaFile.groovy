@@ -51,6 +51,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @FileExtensions('vqa')
+@SuppressWarnings('GrFinalVariableAccess')
 class VqaFile implements Streaming, VideoFile {
 
 	private static final Logger logger = LoggerFactory.getLogger(VqaFile)
@@ -207,39 +208,6 @@ class VqaFile implements Streaming, VideoFile {
 	Worker getStreamingDataWorker() {
 
 		return new VqaFileWorker(this, input)
-	}
-
-	/**
-	 * Return whether or not the data at the input stream could be a VQA file.
-	 * 
-	 * @param inputStream
-	 * @return
-	 */
-	static boolean test(InputStream inputStream) {
-
-		try {
-			// Check file headers for certain expected values
-			def input = new NativeDataInputStream(inputStream)
-
-			def form = new String(input.readNBytes(4))
-			assert form == 'FORM'
-			input.readInt() // formLength
-
-			def wvqa = new String(input.readNBytes(4))
-			assert wvqa == 'WVQA'
-
-			def vqhd = new String(input.readNBytes(4))
-			assert vqhd == 'VQHD'
-			input.readInt() // vqhdLength
-
-			def version = input.readShort()
-			assert version == 2
-
-			return true
-		}
-		catch (Throwable ignored) {
-			return false
-		}
 	}
 
 	/**
