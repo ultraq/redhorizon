@@ -95,6 +95,81 @@ class Explorer extends Application {
 		this.palette = palette
 	}
 
+	@Override
+	protected void applicationStart() {
+
+		// Include the explorer GUI in the render pipeline
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			inputEventStream.on(KeyEvent) { keyEvent ->
+				if (keyEvent.action == GLFW_PRESS) {
+					if (keyEvent.key == GLFW_KEY_O) {
+						entryList.enabled = !entryList.enabled
+					}
+				}
+			}
+			graphicsEngine.renderPipeline.addOverlayPass(entryList)
+		}
+		graphicsEngine.on(WindowMaximizedEvent) { event ->
+			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
+		}
+
+		// Handle events from the explorer GUI
+		entryList.on(EntrySelectedEvent) { event ->
+			def entry = event.entry
+			if (entry instanceof MixEntry) {
+				if (entry.name == '..') {
+					buildList(currentDirectory)
+				}
+				else {
+					previewEntry(entry)
+				}
+			}
+			else if (entry instanceof FileEntry) {
+				def file = entry.file
+				if (file.directory) {
+					buildList(file)
+				}
+				else if (file.name.endsWith('.mix')) {
+					buildList(new MixFile(file))
+				}
+				else {
+					previewFile(file)
+				}
+			}
+		}
+
+		// Key event handler
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+				switch (event.key) {
+					case GLFW_KEY_LEFT:
+						graphicsEngine.camera.translate(tick, 0)
+						break
+					case GLFW_KEY_RIGHT:
+						graphicsEngine.camera.translate(-tick, 0)
+						break
+					case GLFW_KEY_SPACE:
+						if (selectedFileClass instanceof AnimationFile) {
+							gameClock.togglePause()
+						}
+						else if (selectedFileClass instanceof ImagesFile) {
+							graphicsEngine.camera.center(new Vector3f())
+						}
+						break
+					case GLFW_KEY_ESCAPE:
+						stop()
+						break
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void applicationStop() {
+
+		clearCurrentFile()
+	}
+
 	/**
 	 * Update the contents of the list from the current directory.
 	 * 
@@ -275,79 +350,5 @@ class Explorer extends Application {
 
 		selectedFileInputStream = file.newInputStream()
 		preview(fileClass.newInstance(selectedFileInputStream))
-	}
-
-	@Override
-	void run() {
-
-		// Include the explorer GUI in the render pipeline
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					if (keyEvent.key == GLFW_KEY_O) {
-						entryList.enabled = !entryList.enabled
-					}
-				}
-			}
-			graphicsEngine.renderPipeline.addOverlayPass(entryList)
-		}
-		graphicsEngine.on(WindowMaximizedEvent) { event ->
-			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
-		}
-
-		// Handle events from the explorer GUI
-		entryList.on(EntrySelectedEvent) { event ->
-			def entry = event.entry
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
-				}
-				else {
-					previewEntry(entry)
-				}
-			}
-			else if (entry instanceof FileEntry) {
-				def file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				else {
-					previewFile(file)
-				}
-			}
-		}
-
-		// Key event handler
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-				switch (event.key) {
-					case GLFW_KEY_LEFT:
-						graphicsEngine.camera.translate(tick, 0)
-						break
-					case GLFW_KEY_RIGHT:
-						graphicsEngine.camera.translate(-tick, 0)
-						break
-					case GLFW_KEY_SPACE:
-						if (selectedFileClass instanceof AnimationFile) {
-							gameClock.togglePause()
-						}
-						else if (selectedFileClass instanceof ImagesFile) {
-							graphicsEngine.camera.center(new Vector3f())
-						}
-						break
-					case GLFW_KEY_ESCAPE:
-						stop()
-						break
-				}
-			}
-		}
-
-		// Cleanup on exit
-		on(ApplicationStoppingEvent) { event ->
-			clearCurrentFile()
-		}
 	}
 }

@@ -80,6 +80,33 @@ class MediaPlayer extends Application {
 		this.paletteType = paletteType
 	}
 
+	@Override
+	protected void applicationStart() {
+
+		logger.info('File details: {}', mediaFile)
+
+		switch (mediaFile) {
+			case VideoFile:
+				loadVideo(mediaFile)
+				break
+			case AnimationFile:
+				loadAnimation(mediaFile)
+				break
+			case SoundFile:
+				loadSound(mediaFile)
+				break
+			case ImageFile:
+				loadImage(mediaFile)
+				break
+			case ImagesFile:
+				loadImages(mediaFile)
+				break
+			default:
+				logger.error('No media player for the associated file class of {}', mediaFile)
+				throw new UnsupportedOperationException()
+		}
+	}
+
 	/**
 	 * Load up an animation for playing.
 	 * 
@@ -254,33 +281,6 @@ class MediaPlayer extends Application {
 					}
 				}
 			}
-		}
-	}
-
-	@Override
-	void run() {
-
-		logger.info('File details: {}', mediaFile)
-
-		switch (mediaFile) {
-			case VideoFile:
-				loadVideo(mediaFile)
-				break
-			case AnimationFile:
-				loadAnimation(mediaFile)
-				break
-			case SoundFile:
-				loadSound(mediaFile)
-				break
-			case ImageFile:
-				loadImage(mediaFile)
-				break
-			case ImagesFile:
-				loadImages(mediaFile)
-				break
-			default:
-				logger.error('No media player for the associated file class of {}', mediaFile)
-				throw new UnsupportedOperationException()
 		}
 	}
 }

@@ -66,9 +66,9 @@ class UnitViewer extends Viewer {
 	}
 
 	@Override
-	void run() {
+	protected void applicationStart() {
 
-		super.run()
+		super.applicationStart()
 		logger.info('File details: {}', shpFile)
 
 		def unitConfig

@@ -83,18 +83,15 @@ trait EventTarget {
 	 * Fire the event, invoking all listeners registered for that event.
 	 * 
 	 * @param event
-	 * @param forceUseTriggeringThread
-	 *   Set to {@code true} if all handlers for this event <strong>must</strong>
-	 *   be called synchronously.
 	 * @return This object.
 	 */
-	public <E extends Event> void trigger(E event, boolean forceUseTriggeringThread = false) {
+	public <E extends Event> void trigger(E event) {
 
 		eventListeners.each { tuple ->
 			def (eventClass, listener, useTriggeringThread) = tuple
 			if (eventClass.isInstance(event)) {
 				try {
-					if (useTriggeringThread || forceUseTriggeringThread) {
+					if (useTriggeringThread) {
 						listener.handleEvent(event)
 					}
 					else {
