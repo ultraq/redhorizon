@@ -284,25 +284,22 @@ class XORDelta implements Encoder, Decoder {
 	 */
 	private static int isCandidateForSkipCommand(ByteBuffer source, ByteBuffer base) {
 
-		// Retain current position
-		source.mark()
-		base.mark()
+		return source.markAndReset {
+			return base.markAndReset {
 
-		// Find out how many bytes there are in common to skip
-		int candidatelength = 0
-		while (source.hasRemaining() && candidatelength < CMD_SKIP_L_MAX) {
-			if (source.get() != base.get()) {
-				break
+				// Find out how many bytes there are in common to skip
+				int candidatelength = 0
+				while (source.hasRemaining() && candidatelength < CMD_SKIP_L_MAX) {
+					if (source.get() != base.get()) {
+						break
+					}
+					candidatelength++
+				}
+
+				// Evaluate skip command candidacy
+				return candidatelength > CMD_SKIP_S_THRESHOLD ? candidatelength : 0
 			}
-			candidatelength++
 		}
-
-		// Reset prior position
-		source.reset()
-		base.reset()
-
-		// Evaluate skip command candidacy
-		return candidatelength > CMD_SKIP_S_THRESHOLD ? candidatelength : 0
 	}
 
 	/**
@@ -323,28 +320,25 @@ class XORDelta implements Encoder, Decoder {
 	 */
 	private static int isCandidateForFillCommand(ByteBuffer source, ByteBuffer base) {
 
-		// Retain current position
-		source.mark()
-		base.mark()
+		return source.markAndReset {
+			return base.markAndReset {
 
-		// Find out how many similar bytes can be XOR'ed over contiguous base data
-		int candidatelength = 1
-		byte sourcebyte = source.get()
-		byte basebyte   = base.get()
+				// Find out how many similar bytes can be XOR'ed over contiguous base data
+				int candidatelength = 1
+				byte sourcebyte = source.get()
+				byte basebyte   = base.get()
 
-		while (source.hasRemaining() && candidatelength < CMD_FILL_L_MAX) {
-			if (source.get() != sourcebyte || base.get() != basebyte) {
-				break
+				while (source.hasRemaining() && candidatelength < CMD_FILL_L_MAX) {
+					if (source.get() != sourcebyte || base.get() != basebyte) {
+						break
+					}
+					candidatelength++
+				}
+
+				// Evaluate skip command candidacy
+				return candidatelength > CMD_FILL_S_THRESHOLD ? candidatelength : 0
 			}
-			candidatelength++
 		}
-
-		// Reset prior position
-		source.reset()
-		base.reset()
-
-		// Evaluate skip command candidacy
-		return candidatelength > CMD_FILL_S_THRESHOLD ? candidatelength : 0
 	}
 
 	/**
@@ -365,40 +359,37 @@ class XORDelta implements Encoder, Decoder {
 	 */
 	private static int isCandidateForXORCommand(ByteBuffer source, ByteBuffer base) {
 
-		// Retain current position
-		source.mark()
-		base.mark()
+		return source.markAndReset {
+			return base.markAndReset {
 
-		// Find out how many dissimilar bytes can be encoded with the XOR command
-		int candidatelength = 1
-		int runlength = 1
-		byte lastsourcebyte = source.get()
-		byte lastbasebyte   = base.get()
+				// Find out how many dissimilar bytes can be encoded with the XOR command
+				int candidatelength = 1
+				int runlength = 1
+				byte lastsourcebyte = source.get()
+				byte lastbasebyte   = base.get()
 
-		while (source.hasRemaining() && candidatelength < CMD_XOR_L_MAX) {
-			byte nextsourcebyte = source.get()
-			byte nextbasebyte   = base.get()
+				while (source.hasRemaining() && candidatelength < CMD_XOR_L_MAX) {
+					byte nextsourcebyte = source.get()
+					byte nextbasebyte   = base.get()
 
-			if (nextsourcebyte == lastsourcebyte && nextbasebyte == lastbasebyte) {
-				runlength++
-				if (runlength == 2) {
-					candidatelength -= runlength - 2
-					break
+					if (nextsourcebyte == lastsourcebyte && nextbasebyte == lastbasebyte) {
+						runlength++
+						if (runlength == 2) {
+							candidatelength -= runlength - 2
+							break
+						}
+					}
+					else {
+						runlength = 1
+					}
+					candidatelength++
+					lastsourcebyte = nextsourcebyte
+					lastbasebyte   = nextbasebyte
 				}
+
+				// Evaluate skip command candidacy
+				return candidatelength
 			}
-			else {
-				runlength = 1
-			}
-			candidatelength++
-			lastsourcebyte = nextsourcebyte
-			lastbasebyte   = nextbasebyte
 		}
-
-		// Reset prior position
-		source.reset()
-		base.reset()
-
-		// Evaluate skip command candidacy
-		return candidatelength
 	}
 }

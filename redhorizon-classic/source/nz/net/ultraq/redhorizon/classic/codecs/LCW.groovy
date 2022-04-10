@@ -229,52 +229,49 @@ class LCW implements Encoder, Decoder {
 	 */
 	private static int[] isCandidateForOffsetCopyCommand(ByteBuffer source) {
 
-		// Retain current position
-		source.mark()
+		return source.markAndReset {
 
-		// Copy of the bytes read thus far and within the offset range limit
-		ByteBuffer sourcecopy = source.duplicate()
-		sourcecopy.limit(source.position())
-		sourcecopy.position(Math.max(0, source.position() - CMD_OFFSET_RANGE))
+			// Copy of the bytes read thus far and within the offset range limit
+			ByteBuffer sourcecopy = source.duplicate()
+			sourcecopy.limit(source.position())
+			sourcecopy.position(Math.max(0, source.position() - CMD_OFFSET_RANGE))
 
-		int candidatelength   = 0
-		int candidateposition = -1
+			int candidatelength   = 0
+			int candidateposition = -1
 
-		// Search for instances of the remaining bytes in the source range
-		int copypos = sourcecopy.position()
-		while (source.hasRemaining() && sourcecopy.hasRemaining()) {
-			sourcecopy.mark()
+			// Search for instances of the remaining bytes in the source range
+			int copypos = sourcecopy.position()
+			while (source.hasRemaining() && sourcecopy.hasRemaining()) {
+				sourcecopy.mark()
 
-			// Potential match
-			int runlength = 0
-			while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_OFFSET_MAX) {
-				if (source.get() == sourcecopy.get()) {
-					runlength++
+				// Potential match
+				int runlength = 0
+				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_OFFSET_MAX) {
+					if (source.get() == sourcecopy.get()) {
+						runlength++
+					}
+					else {
+						break
+					}
 				}
-				else {
-					break
+				source.reset()
+				sourcecopy.reset()
+
+				// Update candidate length and position?
+				if (runlength > candidatelength) {
+					candidatelength = runlength
+					candidateposition = source.position() - copypos
 				}
-			}
-			source.reset()
-			sourcecopy.reset()
 
-			// Update candidate length and position?
-			if (runlength > candidatelength) {
-				candidatelength = runlength
-				candidateposition = source.position() - copypos
+				sourcecopy.position(++copypos)
 			}
 
-			sourcecopy.position(++copypos)
+			// Evaluate offset copy command candidacy
+			return [
+				candidatelength > CMD_OFFSET_THRESHOLD ? candidatelength : 0,
+				candidateposition
+			] as int[]
 		}
-
-		// Reset prior position
-		source.reset()
-
-		// Evaluate offset copy command candidacy
-		return [
-			candidatelength > CMD_OFFSET_THRESHOLD ? candidatelength : 0,
-			candidateposition
-		] as int[]
 	}
 
 	/**
@@ -296,52 +293,49 @@ class LCW implements Encoder, Decoder {
 	 */
 	private static int[] isCandidateForCopyCommand(ByteBuffer source) {
 
-		// Retain current position
-		source.mark()
+		return source.markAndReset {
 
-		// Copy of the bytes read thus far
-		ByteBuffer sourcecopy = source.duplicate()
-		sourcecopy.limit(Math.min(source.position(), CMD_COPY_L_MAX * 2))
-		sourcecopy.position(0)
+			// Copy of the bytes read thus far
+			ByteBuffer sourcecopy = source.duplicate()
+			sourcecopy.limit(Math.min(source.position(), CMD_COPY_L_MAX * 2))
+			sourcecopy.position(0)
 
-		int candidatelength   = 0
-		int candidateposition = -1
+			int candidatelength   = 0
+			int candidateposition = -1
 
-		// Search for instances of the remaining bytes in the source so far
-		int copypos = 0
-		while (source.hasRemaining() && sourcecopy.hasRemaining() && copypos < CMD_COPY_L_MAX) {
-			sourcecopy.mark()
+			// Search for instances of the remaining bytes in the source so far
+			int copypos = 0
+			while (source.hasRemaining() && sourcecopy.hasRemaining() && copypos < CMD_COPY_L_MAX) {
+				sourcecopy.mark()
 
-			// Potential match
-			int runlength = 0
-			while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_COPY_L_MAX) {
-				if (source.get() == sourcecopy.get()) {
-					runlength++
+				// Potential match
+				int runlength = 0
+				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_COPY_L_MAX) {
+					if (source.get() == sourcecopy.get()) {
+						runlength++
+					}
+					else {
+						break
+					}
 				}
-				else {
-					break
+				source.reset()
+				sourcecopy.reset()
+
+				// Update candidate length and position?
+				if (runlength > candidatelength) {
+					candidatelength = runlength
+					candidateposition = copypos
 				}
-			}
-			source.reset()
-			sourcecopy.reset()
 
-			// Update candidate length and position?
-			if (runlength > candidatelength) {
-				candidatelength = runlength
-				candidateposition = copypos
+				sourcecopy.position(++copypos)
 			}
 
-			sourcecopy.position(++copypos)
+			// Evaluate copy command candidacy
+			return [
+				candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0,
+				candidateposition
+			] as int[]
 		}
-
-		// Reset prior position
-		source.reset()
-
-		// Evaluate copy command candidacy
-		return [
-		  candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0,
-			candidateposition
-		] as int[]
 	}
 
 	/**
@@ -360,25 +354,22 @@ class LCW implements Encoder, Decoder {
 	 */
 	private static int isCandidateForFillCommand(ByteBuffer source) {
 
-		// Retain current position
-		source.mark()
+		return source.markAndReset {
 
-		// Find out how many bytes ahead have the same value as the starting byte
-		int candidatelength = 1
-		byte fillbyte = source.get()
+			// Find out how many bytes ahead have the same value as the starting byte
+			int candidatelength = 1
+			byte fillbyte = source.get()
 
-		while (source.hasRemaining() && candidatelength < CMD_FILL_MAX) {
-			if (fillbyte != source.get()) {
-				break
+			while (source.hasRemaining() && candidatelength < CMD_FILL_MAX) {
+				if (fillbyte != source.get()) {
+					break
+				}
+				candidatelength++
 			}
-			candidatelength++
+
+			// Evaluate fill command candidacy
+			return candidatelength > CMD_FILL_THRESHOLD ? candidatelength : 0
 		}
-
-		// Reset prior position
-		source.reset()
-
-		// Evaluate fill command candidacy
-		return candidatelength > CMD_FILL_THRESHOLD ? candidatelength : 0
 	}
 
 	/**
@@ -397,34 +388,31 @@ class LCW implements Encoder, Decoder {
 	 */
 	private static int isCandidateForTransferCommand(ByteBuffer source) {
 
-		// Retain current position
-		source.mark()
+		return source.markAndReset {
 
-		// Find out the longest stretch of dissimilar bytes
-		int candidatelength = 1
-		int runlength = 1
-		byte lastbyte = source.get()
+			// Find out the longest stretch of dissimilar bytes
+			int candidatelength = 1
+			int runlength = 1
+			byte lastbyte = source.get()
 
-		while (source.hasRemaining() && candidatelength < CMD_TRANSFER_MAX) {
-			byte nextbyte = source.get()
-			if (nextbyte == lastbyte) {
-				runlength++
-				if (runlength > CMD_FILL_THRESHOLD) {
-					candidatelength -= runlength - 2
-					break
+			while (source.hasRemaining() && candidatelength < CMD_TRANSFER_MAX) {
+				byte nextbyte = source.get()
+				if (nextbyte == lastbyte) {
+					runlength++
+					if (runlength > CMD_FILL_THRESHOLD) {
+						candidatelength -= runlength - 2
+						break
+					}
 				}
+				else {
+					runlength = 1
+				}
+				candidatelength++
+				lastbyte = nextbyte
 			}
-			else {
-				runlength = 1
-			}
-			candidatelength++
-			lastbyte = nextbyte
+
+			// Transfer command candidacy is always valid
+			return candidatelength
 		}
-
-		// Reset prior position
-		source.reset()
-
-		// Transfer command candidacy is always valid
-		return candidatelength
 	}
 }

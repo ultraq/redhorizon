@@ -104,10 +104,10 @@ class ShpFileDune2 {
 
 		// File header (read ahead for offset check)
 		numImages = input.readShort()
-		input.mark(4)
-		def readAhead = input.readNBytes(4)
-		def offsetSize = readAhead[2] ? 2 : 4
-		input.reset()
+		def offsetSize = input.markAndReset(4) {
+			def readAhead = input.readNBytes(4)
+			return readAhead[2] ? 2 : 4
+		}
 
 		// Image offset table
 		imageOffsets = new int[numImages + 1]
