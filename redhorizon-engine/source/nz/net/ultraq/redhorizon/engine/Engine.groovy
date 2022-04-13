@@ -30,18 +30,6 @@ abstract class Engine implements EventTarget, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	private final int targetRenderTimeMs
-
-	/**
-	 * Constructor, set the target render time.
-	 * 
-	 * @param targetRenderTimeMs
-	 */
-	protected Engine(int targetRenderTimeMs = 0) {
-
-		this.targetRenderTimeMs = targetRenderTimeMs
-	}
-
 	/**
 	 * Perform the main engine loop within a certain time budget, sleeping the
 	 * thread if necessary to not overdo it.
@@ -54,10 +42,7 @@ abstract class Engine implements EventTarget, Runnable {
 
 		try {
 			while (shouldRun()) {
-				def renderTime = time(closure)
-				if (renderTime < targetRenderTimeMs) {
-					Thread.sleep(targetRenderTimeMs - renderTime)
-				}
+				closure()
 			}
 			trigger(new EngineLoopStopEvent())
 		}

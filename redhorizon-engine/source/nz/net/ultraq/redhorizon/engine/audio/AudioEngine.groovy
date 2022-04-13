@@ -39,7 +39,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 class AudioEngine extends Engine {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
-	private static final int TARGET_RENDER_TIME_MS = 50
 
 	final AudioConfiguration config
 	final Scene scene
@@ -58,7 +57,6 @@ class AudioEngine extends Engine {
 	 */
 	AudioEngine(AudioConfiguration config, Scene scene) {
 
-		super(TARGET_RENDER_TIME_MS)
 		this.config = config ?: new AudioConfiguration()
 		this.scene = scene
 		this.scene.on(ElementAddedEvent) { event ->
@@ -121,6 +119,8 @@ class AudioEngine extends Engine {
 							element.render(renderer)
 						}
 					}
+
+					Thread.sleep(20)
 				}
 
 				// Shutdown
