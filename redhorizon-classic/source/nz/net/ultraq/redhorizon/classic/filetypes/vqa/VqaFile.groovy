@@ -51,6 +51,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @FileExtensions('vqa')
+@SuppressWarnings('GrFinalVariableAccess')
 class VqaFile implements Streaming, VideoFile {
 
 	private static final Logger logger = LoggerFactory.getLogger(VqaFile)

@@ -25,6 +25,9 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.PackageScope
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -37,7 +40,10 @@ import java.util.concurrent.Executors
  * 
  * @author Emanuel Rabina
  */
+@SuppressWarnings('GrFinalVariableAccess')
 class SoundTrack implements AudioElement, Playable, SceneElement {
+
+	private static final Logger logger = LoggerFactory.getLogger(SoundTrack)
 
 	// Sound information
 	final int bits
@@ -48,7 +54,6 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 	private final BlockingQueue<ByteBuffer> samples
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
-	private int buffersQueued
 	private GameTime gameTime
 
 	// Renderer information
@@ -119,7 +124,6 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 			sourceId = renderer.createSource()
 		}
 		bufferIds = []
-		buffersQueued = 0
 	}
 
 	@Override
@@ -137,16 +141,14 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 
 			// Buffers to read and queue, maxing at 5 so we don't spend too much time in here
 			if (samples.size()) {
-				def numBuffersToRead = bufferSize - buffersQueued
-				if (numBuffersToRead) {
-					def newBufferIds = samples.drain(Math.max(numBuffersToRead, 5)).collect { buffer ->
-						def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
-						bufferIds << newBufferId
-						return newBufferId
-					}
-					renderer.queueBuffers(sourceId, newBufferIds as int[])
-					buffersQueued += newBufferIds.size()
+				logger.trace('Samples available: {}', samples.size())
+				def newBufferIds = samples.drain(5).collect { buffer ->
+					def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
+					bufferIds << newBufferId
+					return newBufferId
 				}
+				renderer.queueBuffers(sourceId, newBufferIds as int[])
+				logger.trace('Increasing buffersQueued by {}', newBufferIds.size())
 			}
 
 			// Pause/play with game time
@@ -174,17 +176,16 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 		}
 
 		// Delete played buffers as the track progresses to free up memory
-		if (buffersQueued) {
-			def buffersProcessed = renderer.buffersProcessed(sourceId)
-			if (buffersProcessed) {
-				def processedBufferIds = []
-				buffersProcessed.times {
-					processedBufferIds << bufferIds.removeAt(0)
-				}
-				renderer.unqueueBuffers(sourceId, processedBufferIds as int[])
-				renderer.deleteBuffers(processedBufferIds as int[])
-				buffersQueued -= buffersProcessed
+		def buffersProcessed = renderer.buffersProcessed(sourceId)
+		logger.trace('Buffers processed: {}', buffersProcessed)
+		if (buffersProcessed) {
+			def processedBufferIds = []
+			buffersProcessed.times {
+				processedBufferIds << bufferIds.removeAt(0)
 			}
+			renderer.unqueueBuffers(sourceId, processedBufferIds as int[])
+			renderer.deleteBuffers(processedBufferIds as int[])
+			logger.trace('Decreasing buffersQueued by {}', buffersProcessed)
 		}
 	}
 }
