@@ -98,7 +98,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 		samples = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
 		this.soundDataWorker = soundDataWorker
-		this.soundDataWorker.on(StreamingSampleEvent, true) { event ->
+		this.soundDataWorker.on(StreamingSampleEvent) { event ->
 			samples << event.sample
 			if (bufferReady.count && !samples.remainingCapacity()) {
 				bufferReady.countDown()
