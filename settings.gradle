@@ -17,6 +17,7 @@
 rootProject.name = 'redhorizon'
 
 include(
+	'redhorizon-async',
 	'redhorizon-classic',
 	'redhorizon-cli',
 	'redhorizon-engine',

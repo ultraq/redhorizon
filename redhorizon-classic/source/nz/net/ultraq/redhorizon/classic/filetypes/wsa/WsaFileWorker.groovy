@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.wsa
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
@@ -44,8 +45,11 @@ class WsaFileWorker extends Worker {
 	final WsaFile wsaFile
 	final NativeDataInputStream input
 
+	@Delegate
+	private ControlledLoop workLoop
+
 	@Override
-	void work() {
+	void run() {
 
 		Thread.currentThread().name = 'WsaFile :: Decoding'
 		logger.debug('Decoding started')
@@ -55,7 +59,8 @@ class WsaFileWorker extends Worker {
 		def lcw = new LCW()
 
 		// Decode frame by frame
-		for (def frame = 0; canContinue && frame < numFrames; frame++) {
+		def frame = 0
+		workLoop = new ControlledLoop({ frame < numFrames }, { ->
 			def colouredFrame = average('Decoding frame', 1f, logger) { ->
 				def indexedFrame = xorDelta.decode(
 					lcw.decode(
@@ -67,10 +72,10 @@ class WsaFileWorker extends Worker {
 				return indexedFrame.applyPalette(palette)
 			}
 			trigger(new StreamingFrameEvent(colouredFrame))
-		}
+			frame++
+		})
+		workLoop.run()
 
-		if (!stopped) {
-			logger.debug('Decoding complete')
-		}
+		logger.debug('Decoding complete')
 	}
 }

@@ -111,7 +111,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 	@Override
 	void delete(AudioRenderer renderer) {
 
-		soundDataWorker.stop()
+		soundDataWorker.cancel()
 		samples.drain()
 		renderer.deleteSource(sourceId)
 		renderer.deleteBuffers(bufferIds as int[])

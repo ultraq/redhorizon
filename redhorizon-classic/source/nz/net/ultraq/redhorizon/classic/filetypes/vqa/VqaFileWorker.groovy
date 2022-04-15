@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.vqa
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
@@ -56,6 +57,9 @@ class VqaFileWorker extends Worker {
 	private final int blockSize
 	private final int modifier
 	private final int numBlocks
+
+	@Delegate
+	private ControlledLoop workLoop
 
 	/**
 	 * Constructor, create a new worker for decoding the VQA video data.
@@ -147,7 +151,7 @@ class VqaFileWorker extends Worker {
 	}
 
 	@Override
-	void work() {
+	void run() {
 
 		Thread.currentThread().name = 'VqaFile :: Decoding'
 		logger.debug('Decoding started')
@@ -183,79 +187,77 @@ class VqaFileWorker extends Worker {
 		}
 
 		// Header + Offsets
-		while (canContinue && input.bytesRead < formLength) {
+		workLoop = new ControlledLoop({ input.bytesRead < formLength }, { ->
 			def chunkHeader = new VqaChunkHeader(input)
 
 			switch (chunkHeader.name) {
 
-			// Decode sound data
-			case ~/SND./:
-				def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
-				trigger(new StreamingSampleEvent(sample))
-				break
+				// Decode sound data
+				case ~/SND./:
+					def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
+					trigger(new StreamingSampleEvent(sample))
+					break
 
-			// Decode image and image-related data
-			case 'VQFR':
-				for (def innerBytesRead = 0; innerBytesRead < chunkHeader.length; ) {
-					def innerChunkHeader = new VqaChunkHeader(input)
-					innerBytesRead += 8
+				// Decode image and image-related data
+				case 'VQFR':
+					for (def innerBytesRead = 0; innerBytesRead < chunkHeader.length; ) {
+						def innerChunkHeader = new VqaChunkHeader(input)
+						innerBytesRead += 8
 
-					switch (innerChunkHeader.name) {
+						switch (innerChunkHeader.name) {
 
-					// Full codebook
-					case ~/CBF./:
-						codebook = readChunkData(innerChunkHeader, numBlocks * blockSize)
-						break
+							// Full codebook
+							case ~/CBF./:
+								codebook = readChunkData(innerChunkHeader, numBlocks * blockSize)
+								break
 
-					// Partial codebook
-					case ~/CBP./:
-						partialCodebooks << readChunkData(innerChunkHeader)
-						codebookCompressed = innerChunkHeader.dataCompressed
-						break
+							// Partial codebook
+							case ~/CBP./:
+								partialCodebooks << readChunkData(innerChunkHeader)
+								codebookCompressed = innerChunkHeader.dataCompressed
+								break
 
-					// Palette
-					case ~/CPL./:
-						vqaPalette = new VgaPalette(numColours, format, readChunkData(innerChunkHeader, numColours * format.value))
-						break
+							// Palette
+							case ~/CPL./:
+								vqaPalette = new VgaPalette(numColours, format, readChunkData(innerChunkHeader, numColours * format.value))
+								break
 
-					// Video data
-					case ~/VPT./:
-						def frame = average('Decoding frame', 1f, logger) { ->
-							return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
+							// Video data
+							case ~/VPT./:
+								def frame = average('Decoding frame', 1f, logger) { ->
+									return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
+								}
+								trigger(new StreamingFrameEvent(frame))
+								break
+
+							default:
+								logger.debug('Unknown chunk "{}", skipping', innerChunkHeader.name)
+								input.skip(chunkHeader.length)
 						}
-						trigger(new StreamingFrameEvent(frame))
-						break
 
-					default:
-						logger.debug('Unknown chunk "{}", skipping', innerChunkHeader.name)
-						input.skip(chunkHeader.length)
+						innerBytesRead += innerChunkHeader.length
+						if (discardNullByte()) {
+							innerBytesRead++
+						}
 					}
 
-					innerBytesRead += innerChunkHeader.length
-					if (discardNullByte()) {
-						innerBytesRead++
+					// If full, replace the old lookup table
+					if (partialCodebooks.size() == cbParts) {
+						def codebookData = ByteBuffer.fromBuffers(*partialCodebooks)
+						codebook = codebookCompressed ? decompressData(codebookData, numBlocks * blockSize) : codebookData
+						partialCodebooks.clear()
 					}
-				}
 
-				// If full, replace the old lookup table
-				if (partialCodebooks.size() == cbParts) {
-					def codebookData = ByteBuffer.fromBuffers(*partialCodebooks)
-					codebook = codebookCompressed ? decompressData(codebookData, numBlocks * blockSize) : codebookData
-					partialCodebooks.clear()
-				}
+					break
 
-				break
-
-			default:
-				logger.debug('Unknown chunk "{}", skipping', chunkHeader.name)
-				input.skip(chunkHeader.length)
+				default:
+					logger.debug('Unknown chunk "{}", skipping', chunkHeader.name)
+					input.skip(chunkHeader.length)
 			}
 
 			discardNullByte()
-		}
+		})
 
-		if (!stopped) {
-			logger.debug('Decoding complete')
-		}
+		logger.debug('Decoding complete')
 	}
 }

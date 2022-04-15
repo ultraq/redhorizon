@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes.aud
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
@@ -44,17 +45,20 @@ class AudFileWorker extends Worker {
 	final AudFile audFile
 	final NativeDataInputStream input
 
+	@Delegate
+	private ControlledLoop workLoop
+
 	@Override
-	void work() {
+	void run() {
 
 		Thread.currentThread().name = "AudFile :: Decoding"
-		logger.debug('AudFile decoding started')
+		logger.debug('Decoding started')
 
 		def decoder = type == AudFile.TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 		// Decompress the aud file data by chunks
 		def headerSize = input.bytesRead
-		while (canContinue && input.bytesRead < headerSize + compressedSize) {
+		workLoop = new ControlledLoop({ input.bytesRead < headerSize + compressedSize }, { ->
 			def sample = average('Decoding sample', 1f, logger) { ->
 
 				// Chunk header
@@ -69,10 +73,9 @@ class AudFileWorker extends Worker {
 				)
 			}
 			trigger(new StreamingSampleEvent(sample))
-		}
+		})
+		workLoop.run()
 
-		if (!stopped) {
-			logger.debug('AudFile decoding complete')
-		}
+		logger.debug('Decoding complete')
 	}
 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-description = 'Filetypes module for the Red Horizon project'
-
-dependencies {
-	implementation project(':redhorizon-async')
-	implementation project(':redhorizon-events')
-	implementation "org.reflections:reflections:${reflectionsVersion}"
-}
+description = 'Utilities to aid with non-synchronous programming'

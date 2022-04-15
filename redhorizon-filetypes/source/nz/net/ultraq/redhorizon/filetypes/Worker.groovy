@@ -18,45 +18,14 @@ package nz.net.ultraq.redhorizon.filetypes
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import java.util.concurrent.RunnableFuture
+
 /**
- * A special {@link Runnable} with the ability to be controlled and queried from
- * other threads.  Worker implementations must check in with the various state
- * flags of this class to know when to continue/stop while performing their
- * work.  Workers then emit the data in events for any registered listeners to
- * act upon.
+ * A special {@link Runnable} for decoding file data and emitting the results as
+ * events.  Workers can be stopped using the standard {@code Future.cancel}
+ * method, and worker implementations must respect these controls.
  * 
  * @author Emanuel Rabina
  */
-abstract class Worker implements EventTarget, Runnable {
-
-	protected boolean canContinue
-	protected boolean complete
-	protected boolean running
-	protected boolean stopped
-
-	@Override
-	final void run() {
-
-		Thread.currentThread().priority = Thread.MIN_PRIORITY
-
-		running = true
-		canContinue = true
-		work()
-		running = false
-		complete = true
-	}
-
-	/**
-	 * Signal to the worker to stop.
-	 */
-	void stop() {
-
-		canContinue = false
-		stopped = true
-	}
-
-	/**
-	 * Start the worker.
-	 */
-	abstract void work()
+abstract class Worker implements EventTarget, RunnableFuture<Void> {
 }
