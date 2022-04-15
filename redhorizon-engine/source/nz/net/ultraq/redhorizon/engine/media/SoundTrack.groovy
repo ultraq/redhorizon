@@ -120,9 +120,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 	@Override
 	void init(AudioRenderer renderer) {
 
-		if (!renderer.sourceExists(sourceId)) {
-			sourceId = renderer.createSource()
-		}
+		sourceId = renderer.createSource()
 		bufferIds = []
 	}
 

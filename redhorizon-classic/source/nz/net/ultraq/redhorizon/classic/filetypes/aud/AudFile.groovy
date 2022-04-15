@@ -38,6 +38,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @FileExtensions(['aud', 'v00'])
+@SuppressWarnings('GrFinalVariableAccess')
 class AudFile implements SoundFile, Streaming {
 
 	static final byte TYPE_IMA_ADPCM = 99

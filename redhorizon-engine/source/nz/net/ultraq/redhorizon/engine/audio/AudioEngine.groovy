@@ -125,6 +125,11 @@ class AudioEngine extends Engine {
 
 				// Shutdown
 				running = false
+				scene.accept { sceneElement ->
+					if (sceneElement instanceof AudioElement) {
+						sceneElement.delete(renderer)
+					}
+				}
 				logger.debug('Shutting down audio engine')
 			}
 		}
