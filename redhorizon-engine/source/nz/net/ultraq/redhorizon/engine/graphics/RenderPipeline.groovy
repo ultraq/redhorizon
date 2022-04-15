@@ -83,19 +83,11 @@ class RenderPipeline implements AutoCloseable {
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
 		this.scene = scene
-		this.scene.on(ElementAddedEvent) { event ->
-			addedElements << event.element
-			sceneChanged.set(true)
-		}
-		this.scene.on(ElementRemovedEvent) { event ->
-			removedElements << event.element
-			sceneChanged.set(true)
-		}
 		this.camera = camera
 
 		// Build the standard rendering pipeline, including the debug overlay as
 		// that'll be standard for as long as this thing is in development
-		configurePipeline(config, context)
+		configurePipeline(scene, config, context)
 		def debugOverlayRenderPass = new DebugOverlayRenderPass(renderer, imGuiLayer, config.debug)
 		context.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -135,13 +127,14 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * Build out the rendering pipeline.
 	 * 
+	 * @param scene
 	 * @param config
 	 * @param context
 	 */
-	private void configurePipeline(GraphicsConfiguration config, GraphicsContext context) {
+	private void configurePipeline(Scene scene, GraphicsConfiguration config, GraphicsContext context) {
 
 		// Scene render pass
-		renderPasses << new SceneRenderPass(renderer.createFramebuffer(context.renderResolution, true))
+		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(context.renderResolution, true))
 
 		def modelUniform = new Uniform('model', { material ->
 			return material.transform.get(new float[16])
@@ -244,14 +237,35 @@ class RenderPipeline implements AutoCloseable {
 	 * The render pass for drawing the scene to a framebuffer at the rendering
 	 * resolution.
 	 */
-	@TupleConstructor(defaults = false, includes = ['framebuffer'])
 	private class SceneRenderPass implements RenderPass<Object> {
 
+		final Scene scene
 		final Framebuffer framebuffer
 		final boolean enabled = true
 
+		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
+
+			this.scene = scene
+			this.scene.on(ElementAddedEvent) { event ->
+				addedElements << event.element
+				sceneChanged.set(true)
+			}
+			this.scene.on(ElementRemovedEvent) { event ->
+				removedElements << event.element
+				sceneChanged.set(true)
+			}
+
+			this.framebuffer = framebuffer
+		}
+
 		@Override
 		void delete(GraphicsRenderer renderer) {
+
+			scene.accept { element ->
+				if (element instanceof GraphicsElement) {
+					element.delete(renderer)
+				}
+			}
 		}
 
 		@Override
