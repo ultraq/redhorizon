@@ -24,8 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.Event
-import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 
 import org.slf4j.Logger
@@ -43,7 +41,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @TupleConstructor
-abstract class Application implements EventTarget, Runnable {
+abstract class Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
@@ -60,11 +58,23 @@ abstract class Application implements EventTarget, Runnable {
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
 
 	/**
-	 * Begin the application.
+	 * Called when all the application setup has completed and it's time for the
+	 * application itself to run.
 	 */
-	void start() {
+	protected void applicationStart() {}
 
-		logger.debug('Starting application')
+	/**
+	 * Called when the application is stopping and before the engines are shut
+	 * down.  Ideal for performing any cleanup tasks.
+	 */
+	protected void applicationStop() {}
+
+	/**
+	 * Start the application.
+	 */
+	final void start() {
+
+		logger.debug('Initializing application...')
 
 		// Start the engines
 		inputEventStream = new InputEventStream()
@@ -94,29 +104,24 @@ abstract class Application implements EventTarget, Runnable {
 		def graphicsEngineTask = executorService.submit(graphicsEngine)
 
 		// Start the application
-		executorService.submit(this)
+		logger.debug('Starting application...')
+		applicationStart()
 
 		graphicsEngineTask.get()
 		audioEngineTask.get()
 		gameClockTask.get()
-		logger.debug('Application stopped')
 	}
 
 	/**
-	 * End the application.
+	 * Stop the application.
 	 */
-	void stop() {
+	final void stop() {
 
-		trigger(new ApplicationStoppingEvent(), true)
+		logger.debug('Stopping application...')
+		applicationStop()
 
 		graphicsEngine.stop()
 		audioEngine.stop()
 		gameClock.stop()
 	}
-
-	/**
-	 * Event for when the application is about to be stopped, before the engines
-	 * are shut down.  Can be used for performing any cleanup tasks.
-	 */
-	class ApplicationStoppingEvent extends Event {}
 }

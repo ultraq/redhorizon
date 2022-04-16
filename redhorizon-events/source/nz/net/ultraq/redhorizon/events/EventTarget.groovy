@@ -32,37 +32,21 @@ import java.util.concurrent.Executors
 trait EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
-	private static final ExecutorService executorService = Executors.newFixedThreadPool(2)
 
-	private final List<Tuple3<Class<? extends Event>, EventListener<? extends Event>, Boolean>> eventListeners =
+	@Lazy
+	private final ExecutorService executorService = { Executors.newSingleThreadExecutor() } ()
+	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners =
 		new CopyOnWriteArrayList<>()
 
 	/**
-	 * Register an event listener on this event target.  When the event is
-	 * triggered by the target, then the listener will be invoked with that event
-	 * on a separate thread from what triggered the event.
+	 * Register an event listener on this event target.
 	 * 
 	 * @param eventClass
 	 * @param eventListener
 	 */
 	public <E extends Event> void on(Class<E> eventClass, EventListener<E> eventListener) {
 
-		on(eventClass, false, eventListener)
-	}
-
-	/**
-	 * Register an event listener on this event target, with the configured
-	 * threading behaviour.  When the event is triggered by the target, then the
-	 * listener will be invoked with that event, either on a separate thread from
-	 * what triggered the event or the same thread.
-	 * 
-	 * @param eventClass
-	 * @param eventListener
-	 * @param useTriggeringThread
-	 */
-	public <E extends Event> void on(Class<E> eventClass, boolean useTriggeringThread, EventListener<E> eventListener) {
-
-		eventListeners << new Tuple3<>(eventClass, eventListener, useTriggeringThread)
+		eventListeners << new Tuple2<>(eventClass, eventListener)
 	}
 
 	/**
@@ -83,31 +67,34 @@ trait EventTarget {
 	 * Fire the event, invoking all listeners registered for that event.
 	 * 
 	 * @param event
-	 * @param forceUseTriggeringThread
-	 *   Set to {@code true} if all handlers for this event <strong>must</strong>
-	 *   be called synchronously.
+	 * @param useSeparateThread
+	 *   Set to {@code true} to have this event handled in a different thread.
 	 * @return This object.
 	 */
-	public <E extends Event> void trigger(E event, boolean forceUseTriggeringThread = false) {
+	public <E extends Event> void trigger(E event, boolean useSeparateThread = false) {
 
-		eventListeners.each { tuple ->
-			def (eventClass, listener, useTriggeringThread) = tuple
-			if (eventClass.isInstance(event)) {
-				try {
-					if (useTriggeringThread || forceUseTriggeringThread) {
+		def eventHandler = { ->
+			eventListeners.each { tuple ->
+				def (eventClass, listener) = tuple
+				if (eventClass.isInstance(event)) {
+					try {
 						listener.handleEvent(event)
 					}
-					else {
-						executorService.execute { ->
-							Thread.currentThread().name = 'Non-blocking event execution thread'
-							listener.handleEvent(event)
-						}
+					catch (Exception ex) {
+						logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
 					}
 				}
-				catch (Exception ex) {
-					logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
-				}
 			}
+		}
+
+		if (useSeparateThread) {
+			executorService.execute { ->
+				Thread.currentThread().name = 'Non-blocking event execution thread'
+				eventHandler()
+			}
+		}
+		else {
+			eventHandler()
 		}
 	}
 }

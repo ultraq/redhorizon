@@ -119,7 +119,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		frames = new ArrayBlockingQueue<>(bufferSize)
 		this.bufferSize = bufferSize
 		this.animationDataWorker = animationDataWorker
-		this.animationDataWorker.on(StreamingFrameEvent, true) { event ->
+		this.animationDataWorker.on(StreamingFrameEvent) { event ->
 			frames << event.frame.flipVertical(width, height, format)
 			if (bufferReady.count && !frames.remainingCapacity()) {
 				bufferReady.countDown()

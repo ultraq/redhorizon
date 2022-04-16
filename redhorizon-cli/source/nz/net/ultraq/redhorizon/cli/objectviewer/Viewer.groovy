@@ -51,7 +51,7 @@ abstract class Viewer extends Application {
 	}
 
 	@Override
-	void run() {
+	protected void applicationStart() {
 
 		def mouseMovementModifier = 1f
 		graphicsEngine.on(WindowCreatedEvent) { event ->
