@@ -132,7 +132,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		animationDataWorker.cancel()
+		animationDataWorker.stop()
 		frames.drain()
 		renderer.deleteMesh(mesh)
 		textures.each { texture ->

@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
+import nz.net.ultraq.redhorizon.async.RunnableWorker
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -25,14 +28,16 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-class GameClock implements GameTime, Runnable {
+class GameClock implements GameTime, RunnableWorker {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
 	private float speed = 1.0f
 	private float lastSpeed
-	private boolean running = true
 	long currentTimeMillis
+
+	@Delegate
+	private ControlledLoop timeLoop
 
 	@Override
 	boolean isPaused() {
@@ -66,11 +71,8 @@ class GameClock implements GameTime, Runnable {
 		currentTimeMillis = lastSystemTimeMillis
 
 		Thread.currentThread().name = 'Game clock'
-		while (running) {
-			sleep(1) { ex ->
-				running = false
-				return true
-			}
+		timeLoop = new ControlledLoop({ ->
+			sleep(1)
 			def currentSystemTimeMillis = System.currentTimeMillis()
 			def diff = currentSystemTimeMillis - lastSystemTimeMillis
 
@@ -83,15 +85,8 @@ class GameClock implements GameTime, Runnable {
 				currentTimeMillis += (diff * speed)
 			}
 			lastSystemTimeMillis = currentSystemTimeMillis
-		}
-	}
-
-	/**
-	 * Stop the ticking of the game clock.
-	 */
-	void stop() {
-
-		running = false
+		})
+		timeLoop.run()
 	}
 
 	/**

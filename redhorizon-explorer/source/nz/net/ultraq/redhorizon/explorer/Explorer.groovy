@@ -164,7 +164,7 @@ class Explorer extends Application {
 		if (selectedMedia) {
 			if (selectedFileClass instanceof Streaming) {
 				logger.debug('Stopping streaming worker')
-				selectedFileClass.streamingDataWorker.cancel()
+				selectedFileClass.streamingDataWorker.stop()
 			}
 			if (selectedMedia instanceof Playable) {
 				logger.debug('Stopping playable file')

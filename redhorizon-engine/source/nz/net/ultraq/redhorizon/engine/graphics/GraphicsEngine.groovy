@@ -47,7 +47,6 @@ class GraphicsEngine extends Engine implements InputSource {
 	private OpenGLContext context
 	private Camera camera
 	private RenderPipeline renderPipeline
-	private boolean running
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
@@ -104,7 +103,6 @@ class GraphicsEngine extends Engine implements InputSource {
 
 		Thread.currentThread().name = 'Graphics Engine'
 		logger.debug('Starting graphics engine')
-		running = true
 
 		// Initialization
 		context = new OpenGLContext(windowTitle, config)
@@ -128,14 +126,13 @@ class GraphicsEngine extends Engine implements InputSource {
 
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')
-							engineLoop { ->
+							engineLoop({ !context.windowShouldClose() }) { ->
 								pipeline.render()
 								context.swapBuffers()
 								context.pollEvents()
 							}
 
 							// Shutdown
-							running = false
 							logger.debug('Shutting down graphics engine')
 							camera.delete(renderer)
 						}
@@ -145,20 +142,5 @@ class GraphicsEngine extends Engine implements InputSource {
 		}
 		logger.debug('Graphics engine stopped')
 		trigger(new EngineStoppedEvent())
-	}
-
-	@Override
-	protected boolean shouldRun() {
-
-		return !context.windowShouldClose()
-	}
-
-	@Override
-	void stop() {
-
-		if (running) {
-			context.windowShouldClose(true)
-		}
-		running = false
 	}
 }

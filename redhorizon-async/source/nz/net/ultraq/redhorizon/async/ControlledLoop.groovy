@@ -27,10 +27,21 @@ import java.util.concurrent.RunnableFuture
  * 
  * @author Emanuel Rabina
  */
-class ControlledLoop implements RunnableFuture<Void> {
+class ControlledLoop implements RunnableWorker {
 
 	@Delegate
 	final FutureTask<Void> loopTask
+
+	/**
+	 * Constructor, build a {@link FutureTask} with a loop solely controlled by
+	 * the task state.
+	 * 
+	 * @param loop
+	 */
+	ControlledLoop(Closure loop) {
+
+		this({ true }, loop)
+	}
 
 	/**
 	 * Constructor, build a {@link FutureTask} with a loop based around the given
@@ -46,5 +57,17 @@ class ControlledLoop implements RunnableFuture<Void> {
 				loop()
 			}
 		}, null)
+	}
+
+	@Override
+	boolean isStopped() {
+
+		return isDone()
+	}
+
+	@Override
+	void stop() {
+
+		cancel()
 	}
 }

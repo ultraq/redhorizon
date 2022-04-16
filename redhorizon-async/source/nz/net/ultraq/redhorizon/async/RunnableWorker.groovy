@@ -1,5 +1,5 @@
 /* 
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
+package nz.net.ultraq.redhorizon.async
 
-import nz.net.ultraq.redhorizon.async.RunnableWorker
-import nz.net.ultraq.redhorizon.events.EventTarget
+import java.util.concurrent.RunnableFuture
 
 /**
- * A special {@link Runnable} for decoding file data and emitting the results as
- * events.  Workers can be stopped using the standard {@code Future.cancel}
- * method, and worker implementations must respect these controls.
+ * A {@link Runnable} with methods more geared towards threads that perform
+ * repeated/looped tasks.
  * 
  * @author Emanuel Rabina
  */
-abstract class Worker implements EventTarget, RunnableWorker {
+interface RunnableWorker extends RunnableFuture<Void> {
+
+	/**
+	 * Return whether or not this worker has been stopped.
+	 * 
+	 * @return
+	 */
+	boolean isStopped()
+
+	/**
+	 * Signal to the worker to stop.
+	 */
+	void stop()
 }

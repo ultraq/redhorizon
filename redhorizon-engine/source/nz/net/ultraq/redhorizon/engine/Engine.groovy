@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
+import nz.net.ultraq.redhorizon.async.RunnableWorker
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
@@ -26,47 +28,43 @@ import org.slf4j.LoggerFactory
  * 
  * @author Emanuel Rabina
  */
-abstract class Engine implements EventTarget, Runnable {
+abstract class Engine implements EventTarget, RunnableWorker {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
+	@Delegate
+	private ControlledLoop engineLoop
+
 	/**
-	 * Perform the main engine loop within a certain time budget, sleeping the
-	 * thread if necessary to not overdo it.
+	 * Perform the main engine loop.  The loop execution can be controlled by
+	 * other objects.
 	 * 
-	 * @param closure
+	 * @param loop
 	 */
-	protected void engineLoop(Closure closure) {
+	protected void engineLoop(Closure loop) {
+
+		engineLoop({ true }, loop)
+	}
+
+	/**
+	 * Perform the main engine loop.  The loop execution can be controlled by
+	 * other objects.
+	 * 
+	 * @param loopCondition
+	 * @param loop
+	 */
+	protected void engineLoop(Closure loopCondition, Closure loop) {
 
 		trigger(new EngineLoopStartEvent())
 
 		try {
-			while (shouldRun()) {
-				closure()
-			}
+			engineLoop = new ControlledLoop(loopCondition, loop)
+			engineLoop.run()
 			trigger(new EngineLoopStopEvent())
 		}
 		catch (Exception ex) {
 			logger.error('An error occurred during the render loop', ex)
 			trigger(new EngineLoopStopEvent(ex))
 		}
-		finally {
-			stop()
-		}
 	}
-
-	/**
-	 * Return whether or not the engine loop should be executed.  Used for
-	 * checking if the engine is in a state to continue or if it should be
-	 * shutting down for exiting.
-	 * 
-	 * @return
-	 */
-	protected abstract boolean shouldRun()
-
-	/**
-	 * Stop this subsystem.  Signals to the subsystem to attempt a clean shutdown
-	 * at the next available opportunity.
-	 */
-	abstract void stop()
 }

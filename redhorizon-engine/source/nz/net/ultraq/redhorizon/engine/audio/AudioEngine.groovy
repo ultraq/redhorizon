@@ -47,8 +47,6 @@ class AudioEngine extends Engine {
 	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
 	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
 
-	private boolean running
-
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
@@ -77,7 +75,6 @@ class AudioEngine extends Engine {
 
 		Thread.currentThread().name = 'Audio Engine'
 		logger.debug('Starting audio engine')
-		running = true
 
 		// Initialization
 		new OpenALContext().withCloseable { context ->
@@ -124,7 +121,6 @@ class AudioEngine extends Engine {
 				}
 
 				// Shutdown
-				running = false
 				scene.accept { sceneElement ->
 					if (sceneElement instanceof AudioElement) {
 						sceneElement.delete(renderer)
@@ -135,17 +131,5 @@ class AudioEngine extends Engine {
 		}
 		logger.debug('Audio engine stopped')
 		trigger(new EngineStoppedEvent())
-	}
-
-	@Override
-	boolean shouldRun() {
-
-		return running
-	}
-
-	@Override
-	void stop() {
-
-		running = false
 	}
 }
