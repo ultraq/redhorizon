@@ -53,24 +53,30 @@ class MixEntryTester {
 		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)
 
 		// Try a VQA file
-		def isVqaFile = VqaFile.test(mixFile.getEntryData(mixEntry))
-		if (isVqaFile) {
+		try {
+			def vqaFile = new VqaFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing VQA file')
-			return new MixEntryTesterResult(VqaFile, "(unknown VQA file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(vqaFile, "(unknown VQA file, ID: 0x${hexId})")
+		}
+		catch (ignored) {
 		}
 
 		// Try a SHP file
-		def isShpFile = ShpFile.test(mixFile.getEntryData(mixEntry))
-		if (isShpFile) {
+		try {
+			def shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing SHP file')
-			return new MixEntryTesterResult(ShpFile, "(unknown SHP file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(shpFile, "(unknown SHP file, ID: 0x${hexId})")
+		}
+		catch (ignored) {
 		}
 
 		// Try an AUD file
-		def isAudFile = AudFile.test(mixFile.getEntryData(mixEntry))
-		if (isAudFile) {
+		try {
+			def audFile = new AudFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing AUD file')
-			return new MixEntryTesterResult(AudFile, "(unknown AUD file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(audFile, "(unknown AUD file, ID: 0x${hexId})")
+		}
+		catch (ignored) {
 		}
 
 		logger.debug('Could not determine type')

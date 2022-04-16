@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import static nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,7 +51,7 @@ class AudFileWorker extends Worker {
 		Thread.currentThread().name = "AudFile :: Decoding"
 		logger.debug('AudFile decoding started')
 
-		def decoder = type == AudFile.TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
+		def decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 		// Decompress the aud file data by chunks
 		def headerSize = input.bytesRead

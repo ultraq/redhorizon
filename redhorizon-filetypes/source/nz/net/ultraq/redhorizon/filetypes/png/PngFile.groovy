@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes.png
 
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile

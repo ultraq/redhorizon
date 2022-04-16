@@ -27,11 +27,11 @@ import org.reflections.Reflections
  */
 class FileNameExtensions {
 
-	private static final Set<Class<?>> fileExtensionClasses = new Reflections(
+	private static final Reflections reflections = new Reflections(
 		'nz.net.ultraq.redhorizon.filetypes',
 		'nz.net.ultraq.redhorizon.classic.filetypes'
 	)
-		.getTypesAnnotatedWith(FileExtensions)
+	private static final Set<Class<?>> fileExtensionClasses = reflections.getTypesAnnotatedWith(FileExtensions)
 
 	/**
 	 * Find the appropriate class for reading a file with the given name.

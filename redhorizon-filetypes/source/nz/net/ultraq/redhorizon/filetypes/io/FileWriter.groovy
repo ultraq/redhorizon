@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filetypes
+package nz.net.ultraq.redhorizon.filetypes.io
+
+import groovy.transform.TupleConstructor
 
 /**
- * Interface for files that can be written out.
+ * Take an object and write it out to a file stream.
  * 
  * @author Emanuel Rabina
  */
-interface Writable {
+@TupleConstructor(defaults = false)
+abstract class FileWriter<T> {
+
+	final OutputStream outputStream
 
 	/**
-	 * Write this file to the given stream.
+	 * Write the given object to the current output stream.
 	 * 
-	 * @param outputStream
+	 * @param source
+	 * @param options
 	 */
-	void write(OutputStream outputStream)
+	abstract void write(T source, Map options)
 }

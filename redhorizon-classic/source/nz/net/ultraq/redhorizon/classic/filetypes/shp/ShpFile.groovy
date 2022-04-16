@@ -18,13 +18,10 @@ package nz.net.ultraq.redhorizon.classic.filetypes.shp
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
-import nz.net.ultraq.redhorizon.classic.filetypes.Writable
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import java.nio.ByteBuffer
@@ -39,17 +36,18 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @FileExtensions('shp')
-class ShpFile implements ImagesFile, Writable {
+@SuppressWarnings('GrFinalVariableAccess')
+class ShpFile implements ImagesFile {
 
-	private static final int HEADER_SIZE = 14
-	private static final int OFFSET_SIZE = 8
-	private static final int MAX_WIDTH = 65535
-	private static final int MAX_HEIGHT = 65535
+	static final int HEADER_SIZE = 14
+	static final int OFFSET_SIZE = 8
+	static final int MAX_WIDTH = 65535
+	static final int MAX_HEIGHT = 65535
 
 	// Header flags
-	private static final byte FORMAT_LCW       = (byte)0x80
-	private static final byte FORMAT_XOR_BASE  = (byte)0x40
-	private static final byte FORMAT_XOR_CHAIN = (byte)0x20
+	static final byte FORMAT_LCW       = (byte)0x80
+	static final byte FORMAT_XOR_BASE  = (byte)0x40
+	static final byte FORMAT_XOR_CHAIN = (byte)0x20
 	private static final byte[] FORMATS = [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 
 	// File header
@@ -77,17 +75,28 @@ class ShpFile implements ImagesFile, Writable {
 
 		// File header
 		numImages = input.readShort()
-		x         = input.readShort()
-		y         = input.readShort()
-		width     = input.readShort()
-		height    = input.readShort()
-		delta     = input.readShort()
-		flags     = input.readShort()
+		assert numImages > 0
+
+		x = input.readShort()
+		y = input.readShort()
+
+		width = input.readShort()
+		assert width > 0
+
+		height = input.readShort()
+		assert height > 0
+
+		delta = input.readShort()
+		assert delta >= 0
+
+		flags = input.readShort()
 
 		// numImages() + 2 for the 0 offset and EOF pointer
 		imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->
-			imageOffsets[i] = new ShpImageInfo(input)
+			def imageInfo = new ShpImageInfo(input)
+			assert imageInfo.offsetFormat == 0 || imageInfo.offsetFormat in FORMATS
+			imageOffsets[i] = imageInfo
 		}
 
 		// Decompresses the raw SHP data into palette-index data
@@ -125,90 +134,6 @@ class ShpFile implements ImagesFile, Writable {
 	}
 
 	/**
-	 * Constructor, create a new SHP file from a single image.
-	 * 
-	 * @param imageFile
-	 * @param width
-	 * @param height
-	 * @param numImages
-	 */
-	ShpFile(ImageFile imageFile, int width, int height, int numImages) {
-
-		assert width < MAX_WIDTH : "Image width must be less than ${MAX_WIDTH}"
-		assert height < MAX_HEIGHT : "Image height must be less than ${MAX_HEIGHT}"
-		assert imageFile.width % width == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert imageFile.height % height == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert imageFile.format == FORMAT_INDEXED : 'Source file must contain paletted image data'
-
-		this.width = width
-		this.height = height
-		this.numImages = numImages
-
-		// Split the image file data into multiple smaller images
-		def imageSize = width * height
-		imagesData = new ByteBuffer[numImages].collect { ->
-			return ByteBuffer.allocateNative(imageSize)
-		}
-
-		// TODO: What's happening here is similar to the single-loop-for-buffer code
-		//       in the VqaFileWorker.  See if we can't figure a way to generalize
-		//       this?
-		def sourceData = imageFile.imageData
-		def imagesAcross = imageFile.width / width
-		for (def pointer = 0; pointer < imageSize; pointer += width) {
-			def frame = (pointer / imagesAcross as int) * imageFile.width + (pointer * width)
-
-			// Fill the target frame with 1 row from the current pointer
-			imagesData[frame].put(sourceData, width)
-		}
-		imagesData*.rewind()
-		sourceData.rewind()
-	}
-
-	/**
-	 * Return whether or not the data at the input stream could be a SHP file.
-	 * 
-	 * @param inputStream
-	 * @return
-	 */
-	static boolean test(InputStream inputStream) {
-
-		try {
-			// Check file headers and see if they make sense
-			def input = new NativeDataInputStream(inputStream)
-
-			def numImages = input.readShort()
-			assert numImages > 0
-
-			input.readShort() // x
-			input.readShort() // y
-
-			def width = input.readShort()
-			assert width > 0
-
-			def height = input.readShort()
-			assert height > 0
-
-			def delta = input.readShort()
-			assert delta >= 0
-
-			input.readShort() // Flags
-
-			def totalImageOffsets = numImages + 2
-			totalImageOffsets.times { i ->
-				def offsetInfo = new ShpImageInfo(input)
-				def offsetFormat = offsetInfo.offsetFormat
-				assert offsetFormat == 0 || offsetFormat in FORMATS
-			}
-
-			return true
-		}
-		catch (Throwable ignored) {
-			return false
-		}
-	}
-
-	/**
 	 * Returns some information on this SHP file.
 	 * 
 	 * @return SHP file info.
@@ -217,45 +142,5 @@ class ShpFile implements ImagesFile, Writable {
 	String toString() {
 
 		return "SHP file (C&C), contains ${numImages} ${width}x${height} images (no palette)"
-	}
-
-	@Override
-	void write(OutputStream outputStream) {
-
-		def output = new NativeDataOutputStream(outputStream)
-		def lcw = new LCW()
-
-		// Encode images
-		def images = new ByteBuffer[numImages]
-		numImages.each { index ->
-			def rawImage = imagesData[index]
-			images[index] = lcw.encode(rawImage, ByteBuffer.allocateNative(rawImage.capacity()))
-		}
-
-		// Write header
-		output.writeShort(numImages)
-		output.writeShort(x)
-		output.writeShort(y)
-		output.writeShort(width)
-		output.writeShort(height)
-		output.writeShort(delta)
-		output.writeShort(flags)
-
-		// Write offset data
-		def offsetBase = HEADER_SIZE + (OFFSET_SIZE * (numImages + 2))
-		numImages.times { index ->
-			output.writeInt(offsetBase | (FORMAT_LCW << 24))
-			output.writeInt(0)
-			offsetBase += images[index].limit()
-		}
-		output.writeInt(offsetBase)
-		output.writeInt(0)
-		output.writeInt(0)
-		output.writeInt(0)
-
-		// Write images data
-		images.each { image ->
-			output.write(image.array(), 0, image.limit())
-		}
 	}
 }

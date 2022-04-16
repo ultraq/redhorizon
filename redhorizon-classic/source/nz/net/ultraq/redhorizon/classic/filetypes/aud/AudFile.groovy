@@ -68,11 +68,19 @@ class AudFile implements SoundFile, Streaming {
 		input = new NativeDataInputStream(inputStream)
 
 		// File header
-		frequency        = input.readShort()
-		compressedSize   = input.readInt()
+		frequency = input.readShort()
+		assert 0 < frequency && frequency <= 48000
+
+		compressedSize = input.readInt()
+		assert compressedSize > 0
+
 		uncompressedSize = input.readInt()
-		flags            = input.readByte()
-		type             = input.readByte()
+		assert uncompressedSize > 0
+		assert compressedSize < uncompressedSize
+
+		flags = input.readByte()
+
+		type = input.readByte()
 		assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
 
 		bits = (flags & FLAG_16BIT) ? 16 : 8
@@ -114,39 +122,6 @@ class AudFile implements SoundFile, Streaming {
 	boolean isForStreaming() {
 
 		return uncompressedSize > 1048576 // 1MB
-	}
-
-	/**
-	 * Return whether or not the data at the input stream could be an AUD file.
-	 * 
-	 * @param inputStream
-	 * @return
-	 */
-	static boolean test(InputStream inputStream) {
-
-		try {
-			// Check file headers and see if they make sense
-			def input = new NativeDataInputStream(inputStream)
-
-			def frequency = input.readShort()
-			assert 0 < frequency && frequency <= 48000
-
-			def compressedSize = input.readInt()
-			assert compressedSize > 0
-			def uncompressedSize = input.readInt()
-			assert uncompressedSize > 0
-			assert compressedSize < uncompressedSize
-
-			input.readByte() // Flags
-
-			def type = input.readByte()
-			assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
-
-			return true
-		}
-		catch (Throwable ignored) {
-			return false
-		}
 	}
 
 	/**
