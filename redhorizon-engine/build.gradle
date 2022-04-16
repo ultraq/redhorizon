@@ -17,7 +17,7 @@
 description = 'Core rendering engine for Red Horizon'
 
 dependencies {
-	implementation project(':redhorizon-async')
+	api project(':redhorizon-async')
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
