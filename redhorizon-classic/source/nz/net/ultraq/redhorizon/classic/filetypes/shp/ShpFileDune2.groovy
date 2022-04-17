@@ -43,11 +43,11 @@ import java.nio.ByteBuffer
  * it's 0, seems to be a commonly accepted practice amongst existing Dune 2 SHP
  * file readers:
  * <p>
- * <code>
+ * <code><pre>
  * A 2-byte offset file: 01 00 06 00 EC 00 45 0A ...
  * A 4-byte offset file: 01 00 08 00 00 00 EC 00 ...
  *                                   ^^
- * </code>
+ * </pre></code>
  * <p>
  * The marked byte will be 0 in 4-byte offset files, non 0 in 2-byte offset
  * files.
@@ -84,14 +84,18 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
+@SuppressWarnings('GrFinalVariableAccess')
 class ShpFileDune2 {
 
+	static final int MAX_WIDTH = 65535
+	static final int MAX_HEIGHT = 255
+
 	// File header
-	final short numImages
+	final int numImages
 	final int[] imageOffsets
 
 	// Image data
-	final ByteBuffer[] images
+	final ByteBuffer[] imagesData
 
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
@@ -121,15 +125,15 @@ class ShpFileDune2 {
 		def lcw = new LCW()
 		def rleZero = new RLEZero()
 
-		images = new ByteBuffer[numImages]
-		images.length.times { i ->
+		imagesData = new ByteBuffer[numImages]
+		imagesData.length.times { i ->
 			def imageHeader = new ShpImageInfoDune2(input)
 			def imageData = ByteBuffer.wrapNative(input.readNBytes(imageHeader.compressedSize))
 			def imageSize = imageHeader.width * imageHeader.height
 
 			// Decompress the image data
 			def image = ByteBuffer.allocate(imageSize)
-			images[i] = imageHeader.compressed ?
+			imagesData[i] = imageHeader.compressed ?
 				rleZero.decode(
 					lcw.decode(
 						imageData,

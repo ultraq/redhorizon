@@ -18,12 +18,17 @@ package nz.net.ultraq.redhorizon.classic.filetypes.shp
 
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
+import groovy.transform.MapConstructor
+import groovy.transform.PackageScope
+
 /**
  * Representation of the Dune 2 SHP image header (different from the file
  * header), which contains data on the image it references.
  * 
  * @author Emanuel Rabina
  */
+@MapConstructor
+@PackageScope
 class ShpImageInfoDune2 {
 
 	// The various known flags
@@ -68,6 +73,9 @@ class ShpImageInfoDune2 {
 			lookupTable.length.times { i ->
 				lookupTable[i] = input.readByte()
 			}
+		}
+		else {
+			lookupTable = null
 		}
 	}
 }

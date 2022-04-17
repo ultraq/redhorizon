@@ -60,30 +60,15 @@ class ShpFileWriter extends FileWriter<ImageFile> {
 		output.writeShort(0) // flags
 
 		// Split the image file data into multiple smaller images
-		def imageSize = width * height
-		def rawImages = new ByteBuffer[numImages].collect { ByteBuffer.allocateNative(imageSize) }
-
-		// TODO: What's happening here is similar to the single-loop-for-buffer code
-		//       in the VqaFileWorker.  See if we can't figure a way to generalize
-		//       this?
-		def sourceData = source.imageData
-		def imagesAcross = source.width / width
-		for (def pointer = 0; pointer < imageSize; pointer += width) {
-			def frame = (pointer / imagesAcross as int) * source.width + (pointer * width)
-
-			// Fill the target frame with 1 row from the current pointer
-			rawImages[frame].put(sourceData, width)
-		}
-		rawImages*.rewind()
-		sourceData.rewind()
+		def imagesData = source.imageData.splitImage(source.width, source.height, width, height)
 
 		def lcw = new LCW()
 
 		// Encode images
 		def encodedImages = new ByteBuffer[numImages]
 		numImages.each { index ->
-			def rawImage = rawImages[index]
-			encodedImages[index] = lcw.encode(rawImage, ByteBuffer.allocateNative(rawImage.capacity()))
+			def imageData = imagesData[index]
+			encodedImages[index] = lcw.encode(imageData, ByteBuffer.allocateNative(imageData.capacity()))
 		}
 
 		// Write images offset data

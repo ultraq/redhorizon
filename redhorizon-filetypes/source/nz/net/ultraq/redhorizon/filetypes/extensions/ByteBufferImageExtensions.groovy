@@ -102,4 +102,35 @@ class ByteBufferImageExtensions {
 		}
 		return flippedImageBuffer.flip()
 	}
+
+	/**
+	 * Take the image data for a single image and split it into several smaller
+	 * images of the given dimensions.
+	 * 
+	 * @param self
+	 * @param sourceWidth
+	 * @param sourceHeight
+	 * @param targetWidth
+	 * @param targetHeight
+	 * @return
+	 */
+	static ByteBuffer[] splitImage(ByteBuffer self, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
+
+		def imagesAcross = sourceWidth / targetWidth as int
+		def numImages = imagesAcross * (sourceHeight / targetHeight) as int
+		def targetSize = targetWidth * targetHeight as int
+		def images = new ByteBuffer[numImages].collect { ByteBuffer.allocateNative(targetSize) } as ByteBuffer[]
+
+		for (int pointer = 0; pointer < targetSize; pointer += sourceWidth) {
+			def frame = (pointer / imagesAcross as int) * sourceWidth + (pointer * sourceWidth)
+
+			// Fill the target frame with 1 row from the current pointer
+			images[frame].put(self, sourceWidth)
+		}
+
+		images*.rewind()
+		self.rewind()
+
+		return images
+	}
 }
