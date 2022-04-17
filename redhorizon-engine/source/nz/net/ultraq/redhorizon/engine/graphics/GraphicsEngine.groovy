@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.async.RateLimitedLoop
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
@@ -126,11 +127,11 @@ class GraphicsEngine extends Engine implements InputSource {
 
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')
-							engineLoop({ !context.windowShouldClose() }) { ->
+							doEngineLoop(new RateLimitedLoop(30, { !context.windowShouldClose() }, { ->
 								pipeline.render()
 								context.swapBuffers()
 								context.pollEvents()
-							}
+							}))
 
 							// Shutdown
 							logger.debug('Shutting down graphics engine')

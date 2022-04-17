@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
+
 import nz.net.ultraq.redhorizon.async.RunnableWorker
 import nz.net.ultraq.redhorizon.events.EventTarget
 
@@ -33,32 +33,19 @@ abstract class Engine implements EventTarget, RunnableWorker {
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
 	@Delegate
-	private ControlledLoop engineLoop
+	private RunnableWorker engineLoop
 
 	/**
-	 * Perform the main engine loop.  The loop execution can be controlled by
-	 * other objects.
+	 * Perform the engine loop using the given worker implementation.
 	 * 
-	 * @param loop
+	 * @param loopWorker
 	 */
-	protected void engineLoop(Closure loop) {
-
-		engineLoop({ true }, loop)
-	}
-
-	/**
-	 * Perform the main engine loop.  The loop execution can be controlled by
-	 * other objects.
-	 * 
-	 * @param loopCondition
-	 * @param loop
-	 */
-	protected void engineLoop(Closure loopCondition, Closure loop) {
+	protected void doEngineLoop(RunnableWorker loopWorker) {
 
 		trigger(new EngineLoopStartEvent())
 
 		try {
-			engineLoop = new ControlledLoop(loopCondition, loop)
+			engineLoop = loopWorker
 			engineLoop.run()
 			trigger(new EngineLoopStopEvent())
 		}

@@ -257,6 +257,7 @@ class VqaFileWorker extends Worker {
 
 			discardNullByte()
 		})
+		workLoop.run()
 
 		logger.debug('Decoding complete')
 	}

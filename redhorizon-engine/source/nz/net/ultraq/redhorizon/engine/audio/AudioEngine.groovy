@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.async.RateLimitedLoop
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
@@ -84,7 +85,7 @@ class AudioEngine extends Engine {
 
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
-				engineLoop { ->
+				doEngineLoop(new RateLimitedLoop(10, { ->
 
 					// Initialize or delete objects which have been added/removed to/from the scene
 					if (addedElements) {
@@ -116,9 +117,7 @@ class AudioEngine extends Engine {
 							element.render(renderer)
 						}
 					}
-
-					Thread.sleep(20)
-				}
+				}))
 
 				// Shutdown
 				scene.accept { sceneElement ->
