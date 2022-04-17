@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
+import groovy.transform.Memoized
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -118,6 +119,7 @@ class WsaFile implements AnimationFile, Streaming {
 	 * 
 	 * @return Worker for streaming animation data.
 	 */
+	@Memoized
 	@Override
 	Worker getStreamingDataWorker() {
 

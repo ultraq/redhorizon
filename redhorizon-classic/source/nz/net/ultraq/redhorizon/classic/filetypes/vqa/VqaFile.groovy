@@ -29,6 +29,7 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.Memoized
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -204,6 +205,7 @@ class VqaFile implements Streaming, VideoFile {
 	 * 
 	 * @return Worker for streaming video data.
 	 */
+	@Memoized
 	@Override
 	Worker getStreamingDataWorker() {
 
