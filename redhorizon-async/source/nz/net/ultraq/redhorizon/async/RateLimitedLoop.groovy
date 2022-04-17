@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.async
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.CompileStatic
 import java.util.concurrent.FutureTask
 
@@ -27,6 +30,8 @@ import java.util.concurrent.FutureTask
  */
 @CompileStatic
 class RateLimitedLoop implements RunnableWorker {
+
+	private static final Logger logger = LoggerFactory.getLogger(RateLimitedLoop)
 
 	@Delegate
 	final FutureTask<Void> loopTask
@@ -53,18 +58,16 @@ class RateLimitedLoop implements RunnableWorker {
 	 */
 	RateLimitedLoop(float frequency, Closure loopCondition, Closure loop) {
 
-		def maxRunTimeMs = 1000 / frequency as long
+		double maxRunTimeNanos = 1000000000 / frequency
 
 		loopTask = new FutureTask<>({ ->
-			def lastTimeMs = System.currentTimeMillis()
+			def lastTimeNanos = System.nanoTime()
 			while (!cancelled && loopCondition()) {
 				loop()
-				long diffTimeMs = System.currentTimeMillis() - lastTimeMs
-				if (diffTimeMs < maxRunTimeMs) {
-					long sleepTimeMs = maxRunTimeMs - diffTimeMs
-					Thread.sleep(sleepTimeMs)
+				while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {
+					Thread.onSpinWait()
 				}
-				lastTimeMs = System.currentTimeMillis()
+				lastTimeNanos = System.nanoTime()
 			}
 		}, null)
 	}
