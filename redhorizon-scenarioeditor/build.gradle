@@ -17,7 +17,11 @@
 description = 'Map viewer & editor for classic Command & Conquer maps'
 
 dependencies {
+	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
 	implementation project(':redhorizon-filetypes')
+	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+	implementation 'org.lwjgl:lwjgl-glfw'
 }

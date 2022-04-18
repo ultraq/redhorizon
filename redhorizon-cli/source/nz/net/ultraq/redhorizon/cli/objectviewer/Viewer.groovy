@@ -65,7 +65,7 @@ abstract class Viewer extends Application {
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
 					case GLFW_KEY_ESCAPE:
-						graphicsEngine.stop()
+						stop()
 						break
 				}
 			}
