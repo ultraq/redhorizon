@@ -127,7 +127,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')
-							doEngineLoop(new RateLimitedLoop(30, { !context.windowShouldClose() }, { ->
+							doEngineLoop(new RateLimitedLoop(60, { !context.windowShouldClose() }, { ->
 								pipeline.render()
 								context.swapBuffers()
 								context.pollEvents()
