@@ -1,5 +1,5 @@
 /* 
- * Copyright 2015, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,27 @@
  * limitations under the License.
  */
 
-description = 'Filetypes module for the Red Horizon project'
+package nz.net.ultraq.redhorizon.async
 
-dependencies {
-	implementation project(':redhorizon-async')
-	implementation project(':redhorizon-events')
-	implementation "org.reflections:reflections:${reflectionsVersion}"
+import java.util.concurrent.RunnableFuture
+
+/**
+ * A {@link Runnable} with methods more geared towards threads that perform
+ * repeated/looped tasks.
+ * 
+ * @author Emanuel Rabina
+ */
+interface RunnableWorker extends RunnableFuture<Void> {
+
+	/**
+	 * Return whether or not this worker has been stopped.
+	 * 
+	 * @return
+	 */
+	boolean isStopped()
+
+	/**
+	 * Signal to the worker to stop.
+	 */
+	void stop()
 }

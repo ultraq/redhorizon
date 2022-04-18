@@ -32,6 +32,7 @@ description = 'Recreating the original 2D Command & Conquer games'
 
 // Subproject configuration
 subprojects {
+	apply plugin: 'java-library'
 	apply plugin: 'groovy'
 	apply plugin: 'idea'
 	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.0.1/gradle-support.gradle'

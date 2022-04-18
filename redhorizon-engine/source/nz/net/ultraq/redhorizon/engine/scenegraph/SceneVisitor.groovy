@@ -21,6 +21,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
  * 
  * @author Emanuel Rabina
  */
+@FunctionalInterface
 interface SceneVisitor {
 
 	/**

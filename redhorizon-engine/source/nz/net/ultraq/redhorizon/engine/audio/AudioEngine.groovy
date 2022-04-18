@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.async.RateLimitedLoop
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
@@ -47,8 +48,6 @@ class AudioEngine extends Engine {
 	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
 	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
 
-	private boolean running
-
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 * 
@@ -77,7 +76,6 @@ class AudioEngine extends Engine {
 
 		Thread.currentThread().name = 'Audio Engine'
 		logger.debug('Starting audio engine')
-		running = true
 
 		// Initialization
 		new OpenALContext().withCloseable { context ->
@@ -87,7 +85,7 @@ class AudioEngine extends Engine {
 
 				// Rendering loop
 				logger.debug('Audio engine in render loop...')
-				engineLoop { ->
+				doEngineLoop(new RateLimitedLoop(10, { ->
 
 					// Initialize or delete objects which have been added/removed to/from the scene
 					if (addedElements) {
@@ -119,12 +117,9 @@ class AudioEngine extends Engine {
 							element.render(renderer)
 						}
 					}
-
-					Thread.sleep(20)
-				}
+				}))
 
 				// Shutdown
-				running = false
 				scene.accept { sceneElement ->
 					if (sceneElement instanceof AudioElement) {
 						sceneElement.delete(renderer)
@@ -135,17 +130,5 @@ class AudioEngine extends Engine {
 		}
 		logger.debug('Audio engine stopped')
 		trigger(new EngineStoppedEvent())
-	}
-
-	@Override
-	boolean shouldRun() {
-
-		return running
-	}
-
-	@Override
-	void stop() {
-
-		running = false
 	}
 }
