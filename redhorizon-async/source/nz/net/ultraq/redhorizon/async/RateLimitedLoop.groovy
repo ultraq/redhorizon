@@ -16,22 +16,18 @@
 
 package nz.net.ultraq.redhorizon.async
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 import groovy.transform.CompileStatic
 import java.util.concurrent.FutureTask
 
 /**
  * Similar to {@link ControlledLoop}, with the addition of the Thread being put
- * at the end of each loop execution to not exceed a specified frequency.
+ * into wait states  at the end of each loop execution to not exceed a specified
+ * frequency.
  * 
  * @author Emanuel Rabina
  */
 @CompileStatic
 class RateLimitedLoop implements RunnableWorker {
-
-	private static final Logger logger = LoggerFactory.getLogger(RateLimitedLoop)
 
 	@Delegate
 	final FutureTask<Void> loopTask
@@ -64,9 +60,23 @@ class RateLimitedLoop implements RunnableWorker {
 			def lastTimeNanos = System.nanoTime()
 			while (!cancelled && loopCondition()) {
 				loop()
-				while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {
-					Thread.onSpinWait()
+
+				// Add a wait if loop() was too quick
+				long executionTimeNanos = System.nanoTime() - lastTimeNanos
+				if (executionTimeNanos < maxRunTimeNanos) {
+					double diffTimeNanos = maxRunTimeNanos - executionTimeNanos
+					// If the amount to wait is rather large, sleep for most of that time
+					// (all but the remaining 5ms of the time because sleep is a minimum,
+					// it can take a bit to calculate all of this, and to 'wake up')
+					if (diffTimeNanos > 5000000) {
+						Thread.sleep((long)(diffTimeNanos / 1000000 - 5))
+					}
+					// Go into a spin-lock for the remaining time
+					while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {
+						Thread.yield()
+					}
 				}
+
 				lastTimeNanos = System.nanoTime()
 			}
 		}, null)
