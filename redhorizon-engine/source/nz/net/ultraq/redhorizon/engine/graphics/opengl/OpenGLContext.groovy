@@ -39,6 +39,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
  * 
  * @author Emanuel Rabina
  */
+@SuppressWarnings('GrFinalVariableAccess')
 class OpenGLContext extends GraphicsContext implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
@@ -46,13 +47,15 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	// The width of most full-screen graphics in C&C
 	private static final int BASE_WIDTH = 320
 
-	private final GraphicsConfiguration config
 	final long window
 	Dimension framebufferSize
 	float monitorScale
 	Dimension windowSize
 	Dimension renderResolution
 	Dimension targetResolution
+
+	private boolean isFullScreen
+	private long lastClickTime
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -61,8 +64,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * @param config
 	 */
 	OpenGLContext(String windowTitle, GraphicsConfiguration config) {
-
-		this.config = config
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -90,7 +91,9 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		}
 
 		def videoMode = glfwGetVideoMode(monitor)
-		windowSize = config.fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : calculateWindowSize()
+		isFullScreen = config.fullScreen
+		def windowedSize = calculateWindowSize(config.targetAspectRatio)
+		windowSize = isFullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
@@ -106,10 +109,9 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 		}
 
-		// Create a centered window
+		// Create a centered or full screen (borderless) window
 		logger.debug('Creating a window of size {}', windowSize)
-		window = glfwCreateWindow(windowSize.width, windowSize.height, windowTitle ?: 'Red Horizon',
-			config.fullScreen ? monitor : NULL, NULL)
+		window = glfwCreateWindow(windowSize.width, windowSize.height, windowTitle ?: 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
@@ -157,6 +159,32 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			trigger(new ScrollEvent(xoffset, yoffset))
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
+
+			// Implementing double-click to switch between window/fullscreen
+			if (action == GLFW_RELEASE) {
+				def clickTime = System.currentTimeMillis()
+				if (clickTime - lastClickTime < 300) {
+
+					// Switch to window mode
+					if (isFullScreen) {
+						glfwSetWindowMonitor(window, NULL,
+							(videoMode.width() / 2) - (windowedSize.width / 2) as int,
+							(videoMode.height() / 2) - (windowedSize.height / 2) as int,
+							windowedSize.width,
+							windowedSize.height,
+							GLFW_DONT_CARE)
+					}
+
+					// Switch to borderless full screen
+					else {
+						glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
+					}
+
+					isFullScreen = !isFullScreen
+				}
+				lastClickTime = clickTime
+			}
+
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
@@ -172,9 +200,10 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * Calculate the dimensions for a window that will fit any monitor in a user's
 	 * setup.
 	 * 
+	 * @param targetAspectRatio
 	 * @return
 	 */
-	private Dimension calculateWindowSize() {
+	private static Dimension calculateWindowSize(float targetAspectRatio) {
 
 		// Try get the smallest dimensions of each monitor so that a window cannot
 		// be created that exceeds any monitor
@@ -192,7 +221,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def heightGap = minHeight / 3
 		while (true) {
 			def testWidth = BASE_WIDTH * multiplier
-			def testHeight = Math.ceil(testWidth / config.targetAspectRatio) as int
+			def testHeight = Math.ceil(testWidth / targetAspectRatio) as int
 			if (minWidth - testWidth <= widthGap || minHeight - testHeight <= heightGap) {
 				return new Dimension(testWidth, testHeight)
 			}
