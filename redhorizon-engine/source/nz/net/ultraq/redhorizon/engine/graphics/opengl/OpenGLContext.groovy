@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.glfw.GLFWVidMode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -43,9 +44,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
 class OpenGLContext extends GraphicsContext implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
-
-	// The width of most full-screen graphics in C&C
-	private static final int BASE_WIDTH = 320
+	private static final boolean isWindows = System.getProperty('os.name').startsWith('Windows')
 
 	final long window
 	Dimension framebufferSize
@@ -80,8 +79,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		// Get the monitor to render to and any information about it
 		def monitor = glfwGetPrimaryMonitor()
 
-		def os = System.getProperty('os.name')
-		if (os.startsWith('Windows')) {
+		if (isWindows) {
 			def monitorScaleX = new float[1]
 			glfwGetMonitorContentScale(monitor, monitorScaleX, new float[1])
 			monitorScale = monitorScaleX[0] // To work with Windows desktop scaling
@@ -91,8 +89,8 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		}
 
 		def videoMode = glfwGetVideoMode(monitor)
+		def windowedSize = getLargestWindowSize().calculateFit(config.targetAspectRatio) * 0.8f
 		isFullScreen = config.fullScreen
-		def windowedSize = calculateWindowSize(config.targetAspectRatio)
 		windowSize = isFullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
@@ -133,16 +131,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 
 		// Track framebuffer size changes from window size changes
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
-			logger.debug('Framebuffer changed to {}x{}', width, height)
-			framebufferSize = new Dimension(width, height)
-
-			def windowWidthPointer = new int[1]
-			def windowHeightPointer = new int[1]
-			glfwGetWindowSize(window, windowWidthPointer, windowHeightPointer)
-			windowSize = new Dimension(windowWidthPointer[0], windowHeightPointer[0])
-			targetResolution = framebufferSize.calculateFit(config.targetAspectRatio)
-			logger.debug('Target resolution changed to {}', targetResolution)
-
+			trackFramebufferSizeChanges(width, height, config.targetAspectRatio)
 			trigger(new FramebufferSizeEvent(framebufferSize, windowSize, targetResolution))
 		}
 
@@ -159,32 +148,9 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			trigger(new ScrollEvent(xoffset, yoffset))
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
-
-			// Implementing double-click to switch between window/fullscreen
-			if (action == GLFW_RELEASE) {
-				def clickTime = System.currentTimeMillis()
-				if (clickTime - lastClickTime < 300) {
-
-					// Switch to window mode
-					if (isFullScreen) {
-						glfwSetWindowMonitor(window, NULL,
-							(videoMode.width() / 2) - (windowedSize.width / 2) as int,
-							(videoMode.height() / 2) - (windowedSize.height / 2) as int,
-							windowedSize.width,
-							windowedSize.height,
-							GLFW_DONT_CARE)
-					}
-
-					// Switch to borderless full screen
-					else {
-						glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
-					}
-
-					isFullScreen = !isFullScreen
-				}
-				lastClickTime = clickTime
+			if (isWindows) {
+				checkScreenMode(button, action, videoMode, windowedSize)
 			}
-
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
@@ -197,35 +163,42 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	}
 
 	/**
-	 * Calculate the dimensions for a window that will fit any monitor in a user's
-	 * setup.
+	 * Implementation of double-click being used to toggle between windowed and
+	 * full screen modes.  This isn't natively supported in GLFW given platform
+	 * differences in double-click behaviour, so we have to roll it ourselves.
 	 * 
-	 * @param targetAspectRatio
-	 * @return
+	 * @param button
+	 * @param action
+	 * @param videoMode
+	 * @param windowedSize
 	 */
-	private static Dimension calculateWindowSize(float targetAspectRatio) {
+	private void checkScreenMode(int button, int action, GLFWVidMode videoMode, Dimension windowedSize) {
 
-		// Try get the smallest dimensions of each monitor so that a window cannot
-		// be created that exceeds any monitor
-		def monitors = glfwGetMonitors()
-		def minWidth = 0
-		def minHeight = 0
-		for (def m = 0; m < monitors.limit(); m++) {
-			def monitorVideoMode = glfwGetVideoMode(monitors.get(m))
-			minWidth = minWidth ? Math.min(minWidth, monitorVideoMode.width()) : monitorVideoMode.width()
-			minHeight = minHeight ? Math.min(minHeight, monitorVideoMode.height()) : monitorVideoMode.height()
-		}
+		if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
+			def clickTime = System.currentTimeMillis()
+			if (clickTime - lastClickTime < 300) {
 
-		def multiplier = 1
-		def widthGap = minWidth / 3
-		def heightGap = minHeight / 3
-		while (true) {
-			def testWidth = BASE_WIDTH * multiplier
-			def testHeight = Math.ceil(testWidth / targetAspectRatio) as int
-			if (minWidth - testWidth <= widthGap || minHeight - testHeight <= heightGap) {
-				return new Dimension(testWidth, testHeight)
+				// Switch to window mode
+				if (isFullScreen) {
+					logger.debug('Switching to windowed mode')
+					glfwSetWindowMonitor(window, NULL,
+						(videoMode.width() / 2) - (windowedSize.width / 2) as int,
+						(videoMode.height() / 2) - (windowedSize.height / 2) as int,
+						windowedSize.width,
+						windowedSize.height,
+						GLFW_DONT_CARE)
+				}
+
+				// Switch to borderless full screen
+				else {
+					logger.debug('Switching to full screen mode')
+					glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
+				}
+
+				isFullScreen = !isFullScreen
 			}
-			multiplier++
+
+			lastClickTime = clickTime
 		}
 	}
 
@@ -238,6 +211,26 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 
 		glfwDestroyWindow(window)
 		glfwTerminate()
+	}
+
+	/**
+	 * Return dimensions of the largest window that can be created from the user's
+	 * monitor setup.  This is so that we don't create a window that exceeds any
+	 * monitor
+	 * 
+	 * @return
+	 */
+	private static Dimension getLargestWindowSize() {
+
+		def monitors = glfwGetMonitors()
+		def minWidth = 0
+		def minHeight = 0
+		for (def m = 0; m < monitors.limit(); m++) {
+			def monitorVideoMode = glfwGetVideoMode(monitors.get(m))
+			minWidth = minWidth ? Math.min(minWidth, monitorVideoMode.width()) : monitorVideoMode.width()
+			minHeight = minHeight ? Math.min(minHeight, monitorVideoMode.height()) : monitorVideoMode.height()
+		}
+		return new Dimension(minWidth, minHeight)
 	}
 
 	@Override
@@ -267,6 +260,27 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	void swapBuffers() {
 
 		glfwSwapBuffers(window)
+	}
+
+	/**
+	 * Track framebuffer size changes, updating all of the other things that are
+	 * based off it.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param targetAspectRatio
+	 */
+	private void trackFramebufferSizeChanges(int width, int height, float targetAspectRatio) {
+
+		logger.debug('Framebuffer changed to {}x{}', width, height)
+		framebufferSize = new Dimension(width, height)
+
+		def windowWidthPointer = new int[1]
+		def windowHeightPointer = new int[1]
+		glfwGetWindowSize(window, windowWidthPointer, windowHeightPointer)
+		windowSize = new Dimension(windowWidthPointer[0], windowHeightPointer[0])
+		targetResolution = framebufferSize.calculateFit(targetAspectRatio)
+		logger.debug('Target resolution changed to {}', targetResolution)
 	}
 
 	@Override
