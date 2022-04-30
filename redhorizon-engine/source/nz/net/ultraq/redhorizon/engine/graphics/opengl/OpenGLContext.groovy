@@ -46,7 +46,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	// The width of most full-screen graphics in C&C
 	private static final int BASE_WIDTH = 320
 
-	private final GraphicsConfiguration config
 	final long window
 	Dimension framebufferSize
 	float monitorScale
@@ -61,8 +60,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * @param config
 	 */
 	OpenGLContext(String windowTitle, GraphicsConfiguration config) {
-
-		this.config = config
 
 		glfwSetErrorCallback(new GLFWErrorCallback() {
 			@Override
@@ -90,7 +87,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		}
 
 		def videoMode = glfwGetVideoMode(monitor)
-		windowSize = config.fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : calculateWindowSize()
+		windowSize = config.fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : calculateWindowSize(config.targetAspectRatio)
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
 
@@ -164,7 +161,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		}
 
 		withCurrent { ->
-			glfwSwapInterval(1)
+			glfwSwapInterval(config.vsync ? 1 : 0)
 		}
 	}
 
@@ -172,9 +169,10 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * Calculate the dimensions for a window that will fit any monitor in a user's
 	 * setup.
 	 * 
+	 * @param targetAspectRatio
 	 * @return
 	 */
-	private Dimension calculateWindowSize() {
+	private Dimension calculateWindowSize(float targetAspectRatio) {
 
 		// Try get the smallest dimensions of each monitor so that a window cannot
 		// be created that exceeds any monitor
@@ -192,7 +190,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		def heightGap = minHeight / 3
 		while (true) {
 			def testWidth = BASE_WIDTH * multiplier
-			def testHeight = Math.ceil(testWidth / config.targetAspectRatio) as int
+			def testHeight = Math.ceil(testWidth / targetAspectRatio) as int
 			if (minWidth - testWidth <= widthGap || minHeight - testHeight <= heightGap) {
 				return new Dimension(testWidth, testHeight)
 			}
@@ -220,6 +218,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	/**
 	 * Communicate with the window so we're not locking up.
 	 */
+	@SuppressWarnings('GrMethodMayBeStatic')
 	void pollEvents() {
 
 		glfwPollEvents()
