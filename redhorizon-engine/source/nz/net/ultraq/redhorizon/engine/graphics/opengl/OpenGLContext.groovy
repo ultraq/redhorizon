@@ -158,7 +158,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		}
 
 		withCurrent { ->
-			glfwSwapInterval(1)
+			glfwSwapInterval(config.vsync ? 1 : 0)
 		}
 	}
 
@@ -218,6 +218,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	 * monitor setup.  This is so that we don't create a window that exceeds any
 	 * monitor
 	 * 
+	 * @param targetAspectRatio
 	 * @return
 	 */
 	private static Dimension getLargestWindowSize() {
@@ -242,6 +243,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	/**
 	 * Communicate with the window so we're not locking up.
 	 */
+	@SuppressWarnings('GrMethodMayBeStatic')
 	void pollEvents() {
 
 		glfwPollEvents()

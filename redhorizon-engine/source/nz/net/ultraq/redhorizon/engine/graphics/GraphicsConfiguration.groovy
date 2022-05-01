@@ -74,4 +74,6 @@ class GraphicsConfiguration {
 	 * The target aspect ratio for rendering given the current settings.
 	 */
 	final float targetAspectRatio = ASPECT_RATIO_MODERN
+
+	final boolean vsync = true
 }
