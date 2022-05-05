@@ -44,7 +44,6 @@ import static org.lwjgl.system.MemoryUtil.NULL
 class OpenGLContext extends GraphicsContext implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLContext)
-	private static final boolean isWindows = System.getProperty('os.name').startsWith('Windows')
 
 	final long window
 	Dimension framebufferSize
@@ -80,7 +79,7 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 		// Get the monitor to render to and any information about it
 		def monitor = glfwGetPrimaryMonitor()
 
-		if (isWindows) {
+		if (System.isWindows()) {
 			def monitorScaleX = new float[1]
 			glfwGetMonitorContentScale(monitor, monitorScaleX, new float[1])
 			monitorScale = monitorScaleX[0] // To work with Windows desktop scaling

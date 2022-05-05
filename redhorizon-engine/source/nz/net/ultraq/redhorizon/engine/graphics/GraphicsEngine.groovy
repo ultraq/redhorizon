@@ -132,12 +132,19 @@ class GraphicsEngine extends Engine implements InputSource {
 		// Initialization
 		context = new OpenGLContext(windowTitle, config)
 		context.withCloseable { context ->
-			context.on(MouseButtonEvent) { event ->
-				checkScreenMode(event)
-			}
 			context.relay(ContextErrorEvent, this)
 			context.relay(FramebufferSizeEvent, this)
 			context.relay(WindowMaximizedEvent, this)
+
+			// Only do quick window mode switching on Windows - the macOS experience
+			// is quite different from using the fullscreen button which assigns the
+			// app its own space.
+			if (System.isWindows()) {
+				context.on(MouseButtonEvent) { event ->
+					checkScreenMode(event)
+				}
+			}
+
 			context.withCurrent { ->
 				camera = new Camera(graphicsContext.renderResolution)
 				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))

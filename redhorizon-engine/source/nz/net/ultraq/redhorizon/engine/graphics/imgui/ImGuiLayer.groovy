@@ -54,7 +54,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	static {
 
 		// Extract and use the locally built natives for macOS running M1 processors
-		if (System.getProperty('os.name').toLowerCase().contains('mac') && System.getProperty('os.arch').contains('aarch64')) {
+		if (System.isMacOs() && System.isArm64()) {
 			ImGuiLayer.classLoader.getResourceAsStream('io/imgui/java/native-bin/libimgui-javaarm64.dylib').withStream { inputStream ->
 				def tmpDir = File.createTempDir('imgui-java-natives-macos-arm64')
 				tmpDir.deleteOnExit()
