@@ -236,13 +236,13 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 				(videoMode.height() / 2) - (windowedSize.height / 2) as int,
 				windowedSize.width,
 				windowedSize.height,
-				GLFW_DONT_CARE)
+				videoMode.refreshRate())
 		}
 
-		// Switch to a borderless full screen mode
+		// Switch to full screen mode
 		else {
 			logger.debug('Switching to full screen mode')
-			glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
+			glfwSetWindowMonitor(window, primaryMonitor, 0, 0, videoMode.width(), videoMode.height(), videoMode.refreshRate())
 		}
 
 		isFullScreen = !isFullScreen
