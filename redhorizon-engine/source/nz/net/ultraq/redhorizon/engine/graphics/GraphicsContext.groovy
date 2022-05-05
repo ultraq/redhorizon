@@ -71,6 +71,11 @@ abstract class GraphicsContext extends Context implements InputSource {
 	abstract Dimension getWindowSize()
 
 	/**
+	 * Switch between windowed and fullscreen modes.
+	 */
+	abstract void toggleFullScreen()
+
+	/**
 	 * Return whether or not the underlying window has signalled to be closed.
 	 * 
 	 * @return

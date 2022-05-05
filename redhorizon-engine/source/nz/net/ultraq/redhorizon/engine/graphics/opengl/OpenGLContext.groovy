@@ -53,8 +53,9 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	Dimension renderResolution
 	Dimension targetResolution
 
+	private final GLFWVidMode videoMode
+	private final Dimension windowedSize
 	private boolean isFullScreen
-	private long lastClickTime
 
 	/**
 	 * Constructor, create a new OpenGL window and context using GLFW.
@@ -88,8 +89,8 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			monitorScale = 1f
 		}
 
-		def videoMode = glfwGetVideoMode(monitor)
-		def windowedSize = getLargestWindowSize().calculateFit(config.targetAspectRatio) * 0.8f
+		videoMode = glfwGetVideoMode(monitor)
+		windowedSize = getLargestWindowSize().calculateFit(config.targetAspectRatio) * 0.8f
 		isFullScreen = config.fullScreen
 		windowSize = isFullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
@@ -148,9 +149,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 			trigger(new ScrollEvent(xoffset, yoffset))
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
-			if (isWindows) {
-				checkScreenMode(button, action, videoMode, windowedSize)
-			}
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
@@ -159,46 +157,6 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 
 		withCurrent { ->
 			glfwSwapInterval(config.vsync ? 1 : 0)
-		}
-	}
-
-	/**
-	 * Implementation of double-click being used to toggle between windowed and
-	 * full screen modes.  This isn't natively supported in GLFW given platform
-	 * differences in double-click behaviour, so we have to roll it ourselves.
-	 * 
-	 * @param button
-	 * @param action
-	 * @param videoMode
-	 * @param windowedSize
-	 */
-	private void checkScreenMode(int button, int action, GLFWVidMode videoMode, Dimension windowedSize) {
-
-		if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
-			def clickTime = System.currentTimeMillis()
-			if (clickTime - lastClickTime < 300) {
-
-				// Switch to window mode
-				if (isFullScreen) {
-					logger.debug('Switching to windowed mode')
-					glfwSetWindowMonitor(window, NULL,
-						(videoMode.width() / 2) - (windowedSize.width / 2) as int,
-						(videoMode.height() / 2) - (windowedSize.height / 2) as int,
-						windowedSize.width,
-						windowedSize.height,
-						GLFW_DONT_CARE)
-				}
-
-				// Switch to borderless full screen
-				else {
-					logger.debug('Switching to full screen mode')
-					glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
-				}
-
-				isFullScreen = !isFullScreen
-			}
-
-			lastClickTime = clickTime
 		}
 	}
 
@@ -262,6 +220,32 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 	void swapBuffers() {
 
 		glfwSwapBuffers(window)
+	}
+
+	@Override
+	void toggleFullScreen() {
+
+		def primaryMonitor = glfwGetPrimaryMonitor()
+		def videoMode = glfwGetVideoMode(primaryMonitor)
+
+		// Switch to window mode
+		if (isFullScreen) {
+			logger.debug('Switching to windowed mode')
+			glfwSetWindowMonitor(window, NULL,
+				(videoMode.width() / 2) - (windowedSize.width / 2) as int,
+				(videoMode.height() / 2) - (windowedSize.height / 2) as int,
+				windowedSize.width,
+				windowedSize.height,
+				GLFW_DONT_CARE)
+		}
+
+		// Switch to a borderless full screen mode
+		else {
+			logger.debug('Switching to full screen mode')
+			glfwSetWindowMonitor(window, NULL, 0, 0, videoMode.width(), videoMode.height(), GLFW_DONT_CARE)
+		}
+
+		isFullScreen = !isFullScreen
 	}
 
 	/**

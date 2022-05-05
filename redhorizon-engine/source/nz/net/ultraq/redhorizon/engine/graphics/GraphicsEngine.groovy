@@ -25,10 +25,13 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
 
 /**
  * Graphics subsystem, creates a display which drives the rendering loop of
@@ -49,6 +52,9 @@ class GraphicsEngine extends Engine implements InputSource {
 	private Camera camera
 	private RenderPipeline renderPipeline
 
+	private boolean shouldToggleFullScreen
+	private long lastClickTime
+
 	/**
 	 * Constructor, build a new engine for rendering graphics.
 	 * 
@@ -63,6 +69,24 @@ class GraphicsEngine extends Engine implements InputSource {
 		this.config = config ?: new GraphicsConfiguration()
 		this.scene = scene
 		this.inputEventStream = inputEventStream
+	}
+
+	/**
+	 * Implementation of double-click being used to toggle between windowed and
+	 * full screen modes.  This isn't natively supported in GLFW given platform
+	 * differences in double-click behaviour, so we have to roll it ourselves.
+	 * 
+	 * @param event
+	 */
+	private void checkScreenMode(MouseButtonEvent event) {
+
+		if (event.button == GLFW_MOUSE_BUTTON_1 && event.action == GLFW_RELEASE) {
+			def clickTime = System.currentTimeMillis()
+			if (clickTime - lastClickTime < 300) {
+				shouldToggleFullScreen = true
+			}
+			lastClickTime = clickTime
+		}
 	}
 
 	/**
@@ -108,6 +132,9 @@ class GraphicsEngine extends Engine implements InputSource {
 		// Initialization
 		context = new OpenGLContext(windowTitle, config)
 		context.withCloseable { context ->
+			context.on(MouseButtonEvent) { event ->
+				checkScreenMode(event)
+			}
 			context.relay(ContextErrorEvent, this)
 			context.relay(FramebufferSizeEvent, this)
 			context.relay(WindowMaximizedEvent, this)
@@ -128,6 +155,10 @@ class GraphicsEngine extends Engine implements InputSource {
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')
 							doEngineLoop(new RateLimitedLoop(60, { !context.windowShouldClose() }, { ->
+								if (shouldToggleFullScreen) {
+									context.toggleFullScreen()
+									shouldToggleFullScreen = false
+								}
 								pipeline.render()
 								context.swapBuffers()
 								context.pollEvents()
