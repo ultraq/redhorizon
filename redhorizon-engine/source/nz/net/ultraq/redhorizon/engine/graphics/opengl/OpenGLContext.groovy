@@ -90,7 +90,12 @@ class OpenGLContext extends GraphicsContext implements EventTarget {
 
 		videoMode = glfwGetVideoMode(monitor)
 		windowedSize = getLargestWindowSize().calculateFit(config.targetAspectRatio) * 0.8f
-		isFullScreen = config.fullScreen
+
+		// GLFW can't do a proper macOS full screen, so only respect this setting on
+		// Windows.  macOS windows can go full screen using the green full screen
+		// button.
+		isFullScreen = System.isWindows() && config.fullScreen
+
 		windowSize = isFullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)

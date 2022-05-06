@@ -30,7 +30,7 @@ import groovy.transform.NamedVariant
  */
 class GraphicsOptions {
 
-	@Option(names = ['--full-screen'], description = 'Run in fullscreen mode')
+	@Option(names = ['--full-screen'], description = 'Start in full screen mode.  Windows only, macOS users can use the full screen button for full screen mode')
 	boolean fullScreen
 
 	@Option(names = ['--maximized'], description = 'Use a maximized window')
