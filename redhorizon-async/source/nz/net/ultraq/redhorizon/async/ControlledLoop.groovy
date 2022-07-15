@@ -62,7 +62,7 @@ class ControlledLoop implements RunnableWorker {
 	@Override
 	boolean isStopped() {
 
-		return isDone()
+		return done
 	}
 
 	@Override
