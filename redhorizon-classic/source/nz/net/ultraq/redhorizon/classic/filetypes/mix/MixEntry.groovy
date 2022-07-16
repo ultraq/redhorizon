@@ -54,9 +54,9 @@ class MixEntry implements ArchiveEntry, Comparable<MixEntry> {
 	 */
 	MixEntry(ByteBuffer input) {
 
-		id     = input.getInt()
-		offset = input.getInt()
-		size   = input.getInt()
+		id     = input.int
+		offset = input.int
+		size   = input.int
 	}
 
 	/**

@@ -37,6 +37,7 @@ import java.nio.ShortBuffer
  * 
  * @author Emanuel Rabina
  */
+@SuppressWarnings('BitwiseOperatorInConditional')
 class MixFileKey {
 
 	static final int SIZE_KEY_SOURCE = 80
@@ -57,19 +58,19 @@ class MixFileKey {
 		// Construct the public key bigint from the public key string
 		// -------------------------------------------------------------------------
 
-		def publicKeyBytes = ByteBuffer.wrap(Base64.getDecoder().decode(PUBLIC_KEY_STRING))
-		assert publicKeyBytes.get() == 2
+		def publicKeyBytes = ByteBuffer.wrap(Base64.decoder.decode(PUBLIC_KEY_STRING))
+		assert publicKeyBytes.byte == 2
 
 		// Get the length (in bytes) of the base64 decoded key string.  This is
 		// usually obtained in the second byte of the decoded string, but if the
 		// sign bit of that byte is set, then that byte is the number of following
 		// bytes that need to be read to construct the length value.
-		def nextByte = publicKeyBytes.get()
+		def nextByte = publicKeyBytes.byte
 		def keyLength = 0
 		if (nextByte & 0x80) {
 			for (int i = 0; i < (nextByte & 0x7f); i++) {
 				keyLength <<= 8
-				keyLength |= publicKeyBytes.get() & 0xff
+				keyLength |= publicKeyBytes.byte & 0xff
 			}
 		}
 		else {
@@ -90,8 +91,8 @@ class MixFileKey {
 			pkHiBitLength--
 		}
 		def g1hiinvAsShortBuffer = ByteBuffer.wrap(pkHiIntInv.toByteArrayNoSignByte()).asShortBuffer()
-		pkHiInvHi = g1hiinvAsShortBuffer.get() & 0xffff
-		pkHiInvLo = g1hiinvAsShortBuffer.get() & 0xffff
+		pkHiInvHi = g1hiinvAsShortBuffer.byte & 0xffff
+		pkHiInvLo = g1hiinvAsShortBuffer.byte & 0xffff
 	}
 
 	/**

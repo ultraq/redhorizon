@@ -63,6 +63,7 @@ class AudFile implements SoundFile, Streaming {
 	 * 
 	 * @param inputStream Input stream over an AUD file.
 	 */
+	@SuppressWarnings('BitwiseOperatorInConditional')
 	AudFile(InputStream inputStream) {
 
 		input = new NativeDataInputStream(inputStream)

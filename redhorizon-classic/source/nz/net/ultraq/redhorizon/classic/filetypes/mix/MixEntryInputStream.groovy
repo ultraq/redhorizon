@@ -43,6 +43,7 @@ class MixEntryInputStream extends InputStream {
 	private int lastPosition = 0
 
 	@Override
+	@SuppressWarnings('SynchronizedMethod')
 	synchronized void mark(int readLimit) {
 
 		lastMark = lastPosition
@@ -84,6 +85,7 @@ class MixEntryInputStream extends InputStream {
 	}
 
 	@Override
+	@SuppressWarnings('SynchronizedMethod')
 	synchronized void reset() {
 
 		lastPosition = lastMark

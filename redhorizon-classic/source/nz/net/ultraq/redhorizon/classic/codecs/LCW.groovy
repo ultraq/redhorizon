@@ -70,10 +70,11 @@ class LCW implements Encoder, Decoder {
 	private static final int  CMD_FILL_THRESHOLD   = 3
 
 	@Override
+	@SuppressWarnings('InvertedIfElse')
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (true) {
-			byte command = source.get()
+			byte command = source.byte
 			int count, copyPos
 
 			// b7 = 0
@@ -83,7 +84,7 @@ class LCW implements Encoder, Decoder {
 				// This can overlap with the current position, so a bulk copy is not
 				// easily doable.
 				count = (command >>> 4) + 3
-				copyPos = dest.position() - (((command & 0x0f) << 8) | (source.get() & 0xff))
+				copyPos = dest.position() - (((command & 0x0f) << 8) | (source.byte & 0xff))
 				while (count--) {
 					dest.put(dest.get(copyPos++))
 				}
@@ -109,23 +110,23 @@ class LCW implements Encoder, Decoder {
 					// Command #3 - copy bytes from the given position in dest.
 					if (count < 0x3e) {
 						count += 3
-						copyPos = source.getShort() & 0xffff
+						copyPos = source.short & 0xffff
 						while (count--) {
 							dest.put(dest.get(copyPos++))
 						}
 					}
 					// Command #4 - fill dest with the next byte for up to count bytes.
 					else if (count == 0x3e) {
-						count = source.getShort() & 0xffff
-						byte fill = source.get()
+						count = source.short & 0xffff
+						byte fill = source.byte
 						while (count--) {
 							dest.put(fill)
 						}
 					}
 					// Command #5 - copy bytes from the given position in dest.
 					else {
-						count = source.getShort() & 0xffff
-						copyPos = source.getShort() & 0xffff
+						count = source.short & 0xffff
+						copyPos = source.short & 0xffff
 						while (count--) {
 							dest.put(dest.get(copyPos++))
 						}
@@ -142,7 +143,7 @@ class LCW implements Encoder, Decoder {
 
 		// Format80 data must be opened by the transfer command
 		dest.put((byte)(CMD_TRANSFER | 1))
-		dest.put(source.get())
+		dest.put(source.byte)
 
 		// Encode the source
 		while (source.hasRemaining()) {
@@ -157,7 +158,7 @@ class LCW implements Encoder, Decoder {
 
 			// Command #4 - run-length encoding, aka: fill
 			if (bestmethod == filllength) {
-				byte colourval = source.get()
+				byte colourval = source.byte
 
 				dest.put(CMD_FILL)
 				dest.putShort((short)filllength)
@@ -247,7 +248,7 @@ class LCW implements Encoder, Decoder {
 				// Potential match
 				int runlength = 0
 				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_OFFSET_MAX) {
-					if (source.get() == sourcecopy.get()) {
+					if (source.byte == sourcecopy.byte) {
 						runlength++
 					}
 					else {
@@ -311,7 +312,7 @@ class LCW implements Encoder, Decoder {
 				// Potential match
 				int runlength = 0
 				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_COPY_L_MAX) {
-					if (source.get() == sourcecopy.get()) {
+					if (source.byte == sourcecopy.byte) {
 						runlength++
 					}
 					else {
@@ -358,10 +359,10 @@ class LCW implements Encoder, Decoder {
 
 			// Find out how many bytes ahead have the same value as the starting byte
 			int candidatelength = 1
-			byte fillbyte = source.get()
+			byte fillbyte = source.byte
 
 			while (source.hasRemaining() && candidatelength < CMD_FILL_MAX) {
-				if (fillbyte != source.get()) {
+				if (fillbyte != source.byte) {
 					break
 				}
 				candidatelength++
@@ -393,10 +394,10 @@ class LCW implements Encoder, Decoder {
 			// Find out the longest stretch of dissimilar bytes
 			int candidatelength = 1
 			int runlength = 1
-			byte lastbyte = source.get()
+			byte lastbyte = source.byte
 
 			while (source.hasRemaining() && candidatelength < CMD_TRANSFER_MAX) {
-				byte nextbyte = source.get()
+				byte nextbyte = source.byte
 				if (nextbyte == lastbyte) {
 					runlength++
 					if (runlength > CMD_FILL_THRESHOLD) {

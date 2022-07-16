@@ -52,7 +52,7 @@ class AudFileWorker extends Worker {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = "AudFile :: Decoding"
+		Thread.currentThread().name = 'AudFile :: Decoding'
 		logger.debug('Decoding started')
 
 		def decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()

@@ -36,9 +36,9 @@ import java.util.concurrent.Semaphore
  * @author Emanuel Rabina
  */
 @FileExtensions('mix')
-class MixFile implements ArchiveFile<MixEntry> {
+class MixFile implements ArchiveFile<MixEntry>, AutoCloseable {
 
-	private static final short FLAG_CHECKSUM  = 0x0001
+//	private static final short FLAG_CHECKSUM  = 0x0001
 	private static final short FLAG_ENCRYPTED = 0x0002
 
 	private final NativeRandomAccessFile input
@@ -52,6 +52,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 	 * 
 	 * @param file
 	 */
+	@SuppressWarnings('BitwiseOperatorInConditional')
 	MixFile(File file) {
 
 		input = new NativeRandomAccessFile(file)

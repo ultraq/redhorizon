@@ -35,6 +35,7 @@ import java.nio.ByteBuffer
 class ShpFileWriter extends FileWriter<ImageFile> {
 
 	@Override
+	@SuppressWarnings('UnnecessaryObjectReferences')
 	void write(ImageFile source, Map options) {
 
 		def width = options.width as int

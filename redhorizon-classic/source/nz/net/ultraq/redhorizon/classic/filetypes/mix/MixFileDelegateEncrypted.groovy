@@ -58,8 +58,8 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 		def headerDecryptedBuffer = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
 		blowfishCipher.doFinal(headerEncryptedBytes, 0, headerEncryptedBytes.length, headerDecryptedBuffer.array(), 0)
 
-		numEntries = headerDecryptedBuffer.getShort()
-		dataSize = headerDecryptedBuffer.getInt()
+		numEntries = headerDecryptedBuffer.short
+		dataSize = headerDecryptedBuffer.int
 
 		// Knowing the number of entries ahead, decrypt as many 8 byte blocks that
 		// fit the index, reading it and the 2 unread bytes from the first block

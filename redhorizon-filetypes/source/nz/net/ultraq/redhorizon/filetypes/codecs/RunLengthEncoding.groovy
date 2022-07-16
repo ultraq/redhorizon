@@ -38,12 +38,12 @@ class RunLengthEncoding implements Decoder {
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (source.hasRemaining() && dest.hasRemaining()) {
-			def value = source.get()
+			def value = source.byte
 
 			// Count byte & copy byte run
 			if ((value & countByte) == countByte) {
 				def count = value & ~countByte
-				def copy = source.get()
+				def copy = source.byte
 
 				while (count-- > 0) {
 					dest.put(copy)

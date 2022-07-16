@@ -45,11 +45,11 @@ class RLEZero implements Encoder, Decoder {
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (source.hasRemaining()) {
-			byte command = source.get()
+			byte command = source.byte
 
 			// Fill 0s
 			if (command == CMD_FILL) {
-				int count = source.get() & 0xff
+				int count = source.byte & 0xff
 				while (count--) {
 					dest.put(CMD_FILL_VAL)
 				}
@@ -69,14 +69,14 @@ class RLEZero implements Encoder, Decoder {
 		int limit = Math.min(source.limit(), 255)
 
 		outer: while (source.hasRemaining()) {
-			byte value = source.get()
+			byte value = source.byte
 
 			// Count a series of 0s, describe the series
 			while (value == CMD_FILL_VAL) {
 				while (value == CMD_FILL_VAL && count < limit) {
 					count++
 					if (source.hasRemaining()) {
-						value = source.get()
+						value = source.byte
 					}
 					else {
 						break

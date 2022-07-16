@@ -32,7 +32,7 @@ import java.nio.ByteOrder
 @TupleConstructor(defaults = false)
 class PackData implements Decoder {
 
-	private final Base64.Decoder base64Decoder = Base64.getDecoder()
+	private final Base64.Decoder base64Decoder = Base64.decoder
 	private final LCW lcw = new LCW()
 
 	final int chunks
@@ -53,10 +53,10 @@ class PackData implements Decoder {
 		for (int i = 0; i < chunks; i++) {
 
 			// Get following chunk size, skip 0x20 (unknown) byte
-			int a = mapBytes2.get() & 0xff
-			int b = mapBytes2.get() & 0xff
-			int c = mapBytes2.get() & 0xff
-			int d = mapBytes2.get() & 0xff // Is always 0x20, but unused
+			int a = mapBytes2.byte & 0xff
+			int b = mapBytes2.byte & 0xff
+			int c = mapBytes2.byte & 0xff
+			int d = mapBytes2.byte & 0xff // Is always 0x20, but unused
 			assert d == 0x20
 			int chunksize = (c << 16) | (b << 8) | a
 

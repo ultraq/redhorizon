@@ -317,7 +317,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 				TILES_Y.times { x ->
 
 					// Get the byte representing the tile
-					def tileVal = tileData.get()
+					def tileVal = tileData.byte
 
 					// Retrieve the appropriate tile, skip empty tiles
 					if (tileVal != -1) {

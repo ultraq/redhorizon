@@ -63,6 +63,7 @@ class IMAADPCM16bit implements Decoder {
 	 * Decode a sound sample in IMA-ADPCM format.
 	 */
 	@Override
+	@SuppressWarnings(['BitwiseOperatorInConditional', 'BrokenOddnessCheck'])
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Until all the compressed data has been decompressed

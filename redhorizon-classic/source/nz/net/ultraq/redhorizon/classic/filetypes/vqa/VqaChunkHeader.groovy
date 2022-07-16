@@ -30,8 +30,8 @@ import groovy.transform.PackageScope
 @PackageScope
 class VqaChunkHeader {
 
-	static final String SUFFIX_UNCOMPRESSED = "0"
-	static final String SUFFIX_COMPRESSED = "Z"
+	static final String SUFFIX_UNCOMPRESSED = '0'
+	static final String SUFFIX_COMPRESSED = 'Z'
 
 	final String name
 	final int length

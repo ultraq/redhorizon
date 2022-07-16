@@ -92,6 +92,7 @@ class VqaFileWorker extends Worker {
 	 * @return A fully decoded frame of video.
 	 */
 	@CompileStatic
+	@SuppressWarnings('NestedForLoop')
 	private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook) {
 
 		def frameBytes = ByteBuffer.allocateNative(width * height)

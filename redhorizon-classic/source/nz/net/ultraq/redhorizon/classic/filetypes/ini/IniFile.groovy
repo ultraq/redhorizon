@@ -48,10 +48,7 @@ class IniFile implements MapFile {
 
 		inputStream.withReader { reader ->
 			reader.eachLine { line ->
-				if (line) {
-					if (line.matches(COMMENT_PATTERN)) {
-						return
-					}
+				if (line && !line.matches(COMMENT_PATTERN)) {
 					def sectionMatcher = SECTION_PATTERN.matcher(line)
 					if (sectionMatcher.matches()) {
 						def sectionHeader = sectionMatcher.group(1)
@@ -85,6 +82,6 @@ class IniFile implements MapFile {
 	@Override
 	String toString() {
 
-		return "INI/Configuration file"
+		return 'INI/Configuration file'
 	}
 }

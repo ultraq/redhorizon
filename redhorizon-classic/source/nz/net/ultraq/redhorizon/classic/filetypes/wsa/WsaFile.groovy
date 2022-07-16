@@ -71,6 +71,7 @@ class WsaFile implements AnimationFile, Streaming {
 	 * 
 	 * @param input
 	 */
+	@SuppressWarnings('BitwiseOperatorInConditional')
 	WsaFile(InputStream inputStream) {
 
 		input = new NativeDataInputStream(inputStream)
@@ -97,7 +98,7 @@ class WsaFile implements AnimationFile, Streaming {
 			frameOffsets[i] = input.readInt()
 		}
 
-		looping = frameOffsets[frameOffsets.length - 1] != 0
+		looping = frameOffsets[-1] != 0
 
 		// Internal VGA palette
 		if (flags & FLAG_HAS_PALETTE) {

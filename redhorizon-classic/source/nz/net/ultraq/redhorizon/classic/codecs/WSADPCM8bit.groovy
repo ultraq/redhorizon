@@ -45,6 +45,7 @@ class WSADPCM8bit implements Decoder {
 	]
 
 	@Override
+	@SuppressWarnings('BitwiseOperatorInConditional')
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		// Mere copy if chunk is uncompressed
@@ -56,7 +57,7 @@ class WSADPCM8bit implements Decoder {
 		int sample = 0x80
 		while (dest.hasRemaining()) {
 
-			short input = source.getShort()
+			short input = source.short
 			input <<= 2
 			byte command = (byte)(input >>> 8)
 			byte count   = (byte)((input & 0xff) >> 2)
@@ -78,7 +79,7 @@ class WSADPCM8bit implements Decoder {
 			// 2x compression (4-bit -> 8-bit)
 			else if (command == 1) {
 				while (count--) {
-					command = source.get()
+					command = source.byte
 
 					sample += WS_TABLE_4BIT[command & 0x0f]
 					sample = Math.clamp(sample, 0, 255)
@@ -93,7 +94,7 @@ class WSADPCM8bit implements Decoder {
 			// 4x compression (2-bit -> 8-bit)
 			else if (command == 0) {
 				while (count--) {
-					command = source.get()
+					command = source.byte
 
 					sample += WS_TABLE_2BIT[command & 0x03]
 					sample = Math.clamp(sample, 0, 255)

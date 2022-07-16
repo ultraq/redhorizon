@@ -107,10 +107,11 @@ class XORDelta implements Encoder, Decoder {
 	}
 
 	@Override
+	@SuppressWarnings(['InvertedIfElse', 'NestedBlockDepth'])
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
 
 		while (true) {
-			byte command = source.get()
+			byte command = source.byte
 			int count
 
 			// b7 = 0
@@ -118,17 +119,17 @@ class XORDelta implements Encoder, Decoder {
 
 				// Command #1 - small XOR base with value
 				if (!command) {
-					count = source.get() & 0xff
-					byte fill = source.get()
+					count = source.byte & 0xff
+					byte fill = source.byte
 					while (count--) {
-						dest.put((byte)(xorSource.get() ^ fill))
+						dest.put((byte)(xorSource.byte ^ fill))
 					}
 				}
 				// Command #2 - small XOR source with base for count
 				else {
 					count = command
 					while (count--) {
-						dest.put((byte)(source.get() ^ xorSource.get()))
+						dest.put((byte)(source.byte ^ xorSource.byte))
 					}
 				}
 			}
@@ -138,7 +139,7 @@ class XORDelta implements Encoder, Decoder {
 
 				// b6-0 = 0
 				if (!count) {
-					count = source.getShort() & 0xffff
+					count = source.short & 0xffff
 					command = (byte)(count >>> 8)
 
 					// b7 of next byte = 0
@@ -159,14 +160,14 @@ class XORDelta implements Encoder, Decoder {
 						// Command #4 - large XOR source with base for count
 						if (!(command & 0x40)) {
 							while (count--) {
-								dest.put((byte)(source.get() ^ xorSource.get()))
+								dest.put((byte)(source.byte ^ xorSource.byte))
 							}
 						}
 						// Command #5 - large XOR base with value
 						else {
-							byte fill = source.get()
+							byte fill = source.byte
 							while (count--) {
-								dest.put((byte)(xorSource.get() ^ fill))
+								dest.put((byte)(xorSource.byte ^ fill))
 							}
 						}
 					}
@@ -218,7 +219,7 @@ class XORDelta implements Encoder, Decoder {
 
 			// Either small or large XOR fill
 			else if (bestmethod == filllength) {
-				byte xorfillval = (byte)(source.get() ^ xorSource.get())
+				byte xorfillval = (byte)(source.byte ^ xorSource.byte)
 
 				// Command #1 - small XOR fill
 				if (filllength <= CMD_FILL_S_MAX) {
@@ -252,7 +253,7 @@ class XORDelta implements Encoder, Decoder {
 				}
 
 				while (xorlength-- > 0) {
-					dest.put((byte)(source.get() ^ xorSource.get()))
+					dest.put((byte)(source.byte ^ xorSource.byte))
 				}
 			}
 		}
@@ -290,7 +291,7 @@ class XORDelta implements Encoder, Decoder {
 				// Find out how many bytes there are in common to skip
 				int candidatelength = 0
 				while (source.hasRemaining() && candidatelength < CMD_SKIP_L_MAX) {
-					if (source.get() != base.get()) {
+					if (source.byte != base.byte) {
 						break
 					}
 					candidatelength++
@@ -325,11 +326,11 @@ class XORDelta implements Encoder, Decoder {
 
 				// Find out how many similar bytes can be XOR'ed over contiguous base data
 				int candidatelength = 1
-				byte sourcebyte = source.get()
-				byte basebyte   = base.get()
+				byte sourcebyte = source.byte
+				byte basebyte   = base.byte
 
 				while (source.hasRemaining() && candidatelength < CMD_FILL_L_MAX) {
-					if (source.get() != sourcebyte || base.get() != basebyte) {
+					if (source.byte != sourcebyte || base.byte != basebyte) {
 						break
 					}
 					candidatelength++
@@ -365,12 +366,12 @@ class XORDelta implements Encoder, Decoder {
 				// Find out how many dissimilar bytes can be encoded with the XOR command
 				int candidatelength = 1
 				int runlength = 1
-				byte lastsourcebyte = source.get()
-				byte lastbasebyte   = base.get()
+				byte lastsourcebyte = source.byte
+				byte lastbasebyte   = base.byte
 
 				while (source.hasRemaining() && candidatelength < CMD_XOR_L_MAX) {
-					byte nextsourcebyte = source.get()
-					byte nextbasebyte   = base.get()
+					byte nextsourcebyte = source.byte
+					byte nextbasebyte   = base.byte
 
 					if (nextsourcebyte == lastsourcebyte && nextbasebyte == lastbasebyte) {
 						runlength++
