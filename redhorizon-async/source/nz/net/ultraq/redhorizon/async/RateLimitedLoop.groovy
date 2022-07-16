@@ -73,7 +73,7 @@ class RateLimitedLoop implements RunnableWorker {
 					}
 					// Go into a spin-lock for the remaining time
 					while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {
-						Thread.yield()
+						Thread.onSpinWait()
 					}
 				}
 
