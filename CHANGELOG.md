@@ -7,6 +7,8 @@ Changelog
    release with native support for the M1 processors) and a custom-built
    version of the ImGui binaries.  As such, Java 17 is now required for this
    project.
+ - Restored the paletted PNG -> Dune 2 SHP converter
+ - Toggle fullscreen mode on double click.
 
 ### 0.34.1
  - Sort files by name in the explorer when browsing a mix file
