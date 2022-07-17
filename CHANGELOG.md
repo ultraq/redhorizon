@@ -8,7 +8,7 @@ Changelog
    version of the ImGui binaries.  As such, Java 17 is now required for this
    project.
  - Restored the paletted PNG -> Dune 2 SHP converter
- - Toggle fullscreen mode on double click.
+ - Toggle fullscreen mode on double click (Windows only)
 
 ### 0.34.1
  - Sort files by name in the explorer when browsing a mix file
