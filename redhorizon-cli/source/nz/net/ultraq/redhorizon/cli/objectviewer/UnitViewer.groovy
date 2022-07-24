@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
+import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -86,19 +87,11 @@ class UnitViewer extends Viewer {
 		}
 
 		def unitData = new JsonSlurper().parseText(unitConfig) as UnitData
-		def targetClass
-		switch (unitData.type) {
-			case 'infantry':
-				targetClass = Infantry
-				break
-			case 'vehicle':
-				targetClass = Vehicle
-				break
-			case 'structure':
-				targetClass = Structure
-				break
-			default:
-				throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
+		def targetClass = switch (unitData.type) {
+			case 'infantry' -> Infantry
+			case 'vehicle' -> Vehicle
+			case 'structure' -> Structure
+			default -> throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
 		}
 
 		graphicsEngine.on(WindowCreatedEvent) { event ->
@@ -110,7 +103,9 @@ class UnitViewer extends Viewer {
 			.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
 			.newInstance(unitData, shpFile, palette, gameClock)
 			.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
-		scene << unit
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			scene << unit
+		}
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')
 
