@@ -45,6 +45,9 @@ class UnitViewer extends Viewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitViewer)
 
+	final float initialScale = 2.0f
+	final float[] scaleRange = (1.0..4.0).by(0.1)
+
 	final ShpFile shpFile
 	final String unitId
 	final Palette palette
@@ -92,10 +95,6 @@ class UnitViewer extends Viewer {
 			case 'vehicle' -> Vehicle
 			case 'structure' -> Structure
 			default -> throw new UnsupportedOperationException("Unit type ${unitData.type} not supported")
-		}
-
-		graphicsEngine.on(WindowCreatedEvent) { event ->
-			graphicsEngine.camera.scale(2)
 		}
 
 		// Add the unit to the engine

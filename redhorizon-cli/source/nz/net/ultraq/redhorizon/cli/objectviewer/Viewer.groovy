@@ -54,14 +54,15 @@ abstract class Viewer extends Application {
 	protected void applicationStart() {
 
 		def mouseMovementModifier = 1f
+		def scaleIndex = scaleRange.findIndexOf { it == initialScale }
+
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			def renderResolution = graphicsEngine.graphicsContext.renderResolution
 			def targetResolution = graphicsEngine.graphicsContext.targetResolution
 			mouseMovementModifier = renderResolution.width / targetResolution.width
-		}
 
-		def scaleTicks = (1.0..4.0).by(0.1) as float[]
-		def scaleIndex = scaleTicks.findIndexOf { it == 2.0 }
+			graphicsEngine.camera.scale(scaleRange[scaleIndex])
+		}
 
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
@@ -87,12 +88,12 @@ abstract class Viewer extends Application {
 				// Zoom in/out using CTRL + scroll up/down
 				if (ctrl) {
 					if (event.yOffset < 0) {
-						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleTicks.length - 1)
+						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
 					}
 					else if (event.yOffset > 0) {
-						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleTicks.length - 1)
+						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 					}
-					graphicsEngine.camera.scale(scaleTicks[scaleIndex])
+					graphicsEngine.camera.scale(scaleRange[scaleIndex])
 				}
 				// Use scroll input to move around the map
 				else {
@@ -132,12 +133,12 @@ abstract class Viewer extends Application {
 			// Zoom in/out using the scroll wheel
 			inputEventStream.on(ScrollEvent) { event ->
 				if (event.yOffset < 0) {
-					scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleTicks.length - 1)
+					scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
 				}
 				else if (event.yOffset > 0) {
-					scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleTicks.length - 1)
+					scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 				}
-				graphicsEngine.camera.scale(scaleTicks[scaleIndex])
+				graphicsEngine.camera.scale(scaleRange[scaleIndex])
 			}
 			inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
@@ -146,4 +147,18 @@ abstract class Viewer extends Application {
 			}
 		}
 	}
+
+	/**
+	 * Return the initial scale of the camera to apply to this viewer.
+	 * 
+	 * @return
+	 */
+	protected abstract float getInitialScale()
+
+	/**
+	 * Return the range of scaling options available for this viewer.
+	 * 
+	 * @return
+	 */
+	protected abstract float[] getScaleRange()
 }

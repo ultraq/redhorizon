@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 
@@ -46,12 +47,14 @@ class GraphicsOptions {
 	 * @return
 	 */
 	@NamedVariant
-	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = Colour.BLACK, boolean startWithChrome = false) {
+	GraphicsConfiguration asGraphicsConfiguration(Colour clearColour = Colour.BLACK,
+		Dimension renderResolution = new Dimension(640, 400), boolean startWithChrome = false) {
 
 		return new GraphicsConfiguration(
 			clearColour: clearColour ?: Colour.BLACK,
 			fullScreen: fullScreen,
 			maximized: maximized,
+			renderResolution: renderResolution,
 			scanlines: scanlines,
 			startWithChrome: startWithChrome ?: false
 		)

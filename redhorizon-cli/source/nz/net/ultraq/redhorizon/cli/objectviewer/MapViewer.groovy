@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapLines
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapRA
+import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -38,6 +39,9 @@ class MapViewer extends Viewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapViewer)
 	private static final int TICK = 48
+
+	final float initialScale = 1.0f
+	final float[] scaleRange = (1.0..2.0).by(0.1)
 
 	final ResourceManager resourceManager
 	final IniFile mapFile
@@ -70,10 +74,12 @@ class MapViewer extends Viewer {
 			map = new MapRA(resourceManager, mapFile)
 			mapInitialPosition = new Vector3f(map.initialPosition, 0)
 			logger.info('Map details: {}', map)
-			scene << map
-			graphicsEngine.camera.center(mapInitialPosition)
 
-			scene << new MapLines(map)
+			graphicsEngine.on(EngineLoopStartEvent) { engineLoopStartEvent ->
+				graphicsEngine.camera.center(mapInitialPosition)
+				scene << map
+				scene << new MapLines(map)
+			}
 		}
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')

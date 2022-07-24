@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
 import nz.net.ultraq.redhorizon.cli.PaletteOptions
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 
@@ -89,7 +90,9 @@ class ObjectViewerCli implements Callable<Integer> {
 				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.loadPalette(true), touchpadInput).start()
 				break
 			case IniFile:
-				def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
+				def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+					renderResolution: new Dimension(1280, 800)
+				)
 				// Assume the directory in which file resides is where we can search for items
 				new ResourceManager(fileOptions.file.parentFile,
 					'nz.net.ultraq.redhorizon.filetypes',
