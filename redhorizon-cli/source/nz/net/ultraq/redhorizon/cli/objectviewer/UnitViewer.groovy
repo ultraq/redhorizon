@@ -19,12 +19,11 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
