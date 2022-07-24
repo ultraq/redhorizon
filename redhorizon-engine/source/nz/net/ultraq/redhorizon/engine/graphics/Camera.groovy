@@ -115,11 +115,16 @@ class Camera implements GraphicsElement {
 	 * Scale the camera view as a way of altering the perceived zoom.
 	 * 
 	 * @param factor
+	 *   Amount to scale relative to the standard zoom.
 	 * @return
 	 */
 	Camera scale(float factor) {
 
-		view.scaleLocal(factor, factor, 1)
+		// Calculate diff between current and target scale to use as the scale factor
+		def scale = view.getScale(new Vector3f()).x
+		def diff = factor / scale as float
+
+		view.scaleLocal(diff, diff, 1)
 		moved = true
 		return this
 	}

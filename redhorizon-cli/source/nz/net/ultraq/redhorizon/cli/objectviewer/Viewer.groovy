@@ -60,6 +60,9 @@ abstract class Viewer extends Application {
 			mouseMovementModifier = renderResolution.width / targetResolution.width
 		}
 
+		def scaleTicks = (1.0..4.0).by(0.1) as float[]
+		def scaleIndex = scaleTicks.findIndexOf { it == 2.0 }
+
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
@@ -84,11 +87,12 @@ abstract class Viewer extends Application {
 				// Zoom in/out using CTRL + scroll up/down
 				if (ctrl) {
 					if (event.yOffset < 0) {
-						graphicsEngine.camera.scale(0.95)
+						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleTicks.length - 1)
 					}
 					else if (event.yOffset > 0) {
-						graphicsEngine.camera.scale(1.05)
+						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleTicks.length - 1)
 					}
+					graphicsEngine.camera.scale(scaleTicks[scaleIndex])
 				}
 				// Use scroll input to move around the map
 				else {
@@ -128,11 +132,12 @@ abstract class Viewer extends Application {
 			// Zoom in/out using the scroll wheel
 			inputEventStream.on(ScrollEvent) { event ->
 				if (event.yOffset < 0) {
-					graphicsEngine.camera.scale(0.95)
+					scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleTicks.length - 1)
 				}
 				else if (event.yOffset > 0) {
-					graphicsEngine.camera.scale(1.05)
+					scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleTicks.length - 1)
 				}
+				graphicsEngine.camera.scale(scaleTicks[scaleIndex])
 			}
 			inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
