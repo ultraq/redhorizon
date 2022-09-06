@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.cps.CpsFileWriter
-import nz.net.ultraq.redhorizon.filetypes.pcx.PcxFile
+import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileWriter
+import nz.net.ultraq.redhorizon.filetypes.PcxFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

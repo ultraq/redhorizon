@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.classic.PaletteType
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import picocli.CommandLine.Option

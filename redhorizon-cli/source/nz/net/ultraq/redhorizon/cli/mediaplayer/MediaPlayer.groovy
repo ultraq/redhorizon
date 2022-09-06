@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.classic.PaletteType
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
@@ -38,12 +38,7 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Media player application for watching media files.

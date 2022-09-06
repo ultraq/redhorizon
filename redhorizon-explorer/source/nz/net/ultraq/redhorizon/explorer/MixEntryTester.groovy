@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.aud.AudFile
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
-import nz.net.ultraq.redhorizon.classic.filetypes.vqa.VqaFile
+import nz.net.ultraq.redhorizon.classic.filetypes.AudFile
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.VqaFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,7 +47,7 @@ class MixEntryTester {
 	 *   A best guess of the class to use to load the entry, or {@code null} if
 	 *   the type could not be determined.
 	 */
-	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry mixEntry) {
+	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry) {
 
 		def hexId = Integer.toHexString(mixEntry.id)
 		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)

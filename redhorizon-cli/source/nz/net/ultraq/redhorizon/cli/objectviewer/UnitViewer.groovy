@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
 import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData

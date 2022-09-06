@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFileWriter
-import nz.net.ultraq.redhorizon.filetypes.png.PngFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriter
+import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

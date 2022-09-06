@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.mix.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor
@@ -31,7 +31,7 @@ import groovy.transform.TupleConstructor
 class MixEntry implements Entry<MixEntry> {
 
 	final MixFile mixFile
-	final nz.net.ultraq.redhorizon.classic.filetypes.mix.MixEntry mixEntry
+	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
 	String name
 	Class<?> fileClass
 	Object file

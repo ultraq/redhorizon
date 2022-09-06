@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 
 import nz.net.ultraq.redhorizon.classic.codecs.PackData
-import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
-import nz.net.ultraq.redhorizon.classic.filetypes.pal.PalFile
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
-import nz.net.ultraq.redhorizon.classic.filetypes.tmp.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material

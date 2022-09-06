@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapLines
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapRA
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
-import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
-import nz.net.ultraq.redhorizon.classic.filetypes.shp.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
 import nz.net.ultraq.redhorizon.cli.PaletteOptions
