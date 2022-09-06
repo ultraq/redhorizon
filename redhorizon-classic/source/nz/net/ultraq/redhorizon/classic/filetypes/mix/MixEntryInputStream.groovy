@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes.mix
 
 import nz.net.ultraq.redhorizon.filetypes.io.NativeRandomAccessFile
 
+import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
 
@@ -31,6 +32,7 @@ import java.util.concurrent.Semaphore
  * 
  * @author Emanuel Rabina
  */
+@PackageScope
 @TupleConstructor
 class MixEntryInputStream extends InputStream {
 

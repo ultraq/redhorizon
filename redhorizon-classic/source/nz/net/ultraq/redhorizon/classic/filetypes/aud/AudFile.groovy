@@ -30,7 +30,7 @@ import java.util.concurrent.Executors
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
  * file is the sound format of choice for these games, compressed using one of 2
- * schemes: IMA-ADPCM and WS-ADPCM the latter being a Westwood proprietary
+ * schemes: IMA-ADPCM and WS-ADPCM, the latter being a Westwood proprietary
  * format.
  * <p>
  * For more information, see: http://vladan.bato.net/cnc/aud3.txt
