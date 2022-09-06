@@ -35,7 +35,7 @@ subprojects {
 	apply plugin: 'java-library'
 	apply plugin: 'groovy'
 	apply plugin: 'idea'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.0.1/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.0/gradle-support.gradle'
 
 //	configurations.all {
 //		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -43,7 +43,7 @@ subprojects {
 //	}
 
 	ext {
-		groovyVersion = '4.0.1'
+		groovyVersion = '4.0.4'
 		imguiVersion = '1.86.4'
 		jomlVersion = '1.10.4'
 		jomlPrimitivesVersion = '1.10.0'
@@ -55,7 +55,7 @@ subprojects {
 	ext.targetPlatform = targetPlatform
 
 	dependencies {
-		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.1.0-SNAPSHOT'
+		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.1.0'
 		implementation 'nz.net.ultraq.groovy:groovy-io-extensions:0.1.2'
 		implementation 'nz.net.ultraq.groovy:groovy-profiling-extensions:0.7.0'
 		implementation "org.apache.groovy:groovy:${groovyVersion}"
