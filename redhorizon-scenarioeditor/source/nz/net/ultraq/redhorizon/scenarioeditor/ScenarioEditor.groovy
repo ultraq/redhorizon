@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.scenarioeditor
 
-import nz.net.ultraq.redhorizon.classic.filetypes.ini.IniFile
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension

@@ -126,8 +126,6 @@ class AudFile implements SoundFile, Streaming {
 
 	/**
 	 * Return a summary of this file.
-	 * 
-	 * @return
 	 */
 	@Override
 	String toString() {
