@@ -96,6 +96,22 @@ class Palette {
 	}
 
 	/**
+	 * Convert this palette to a {@code ByteBuffer} with the {@code as} keyword.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	Object asType(Class type) {
+
+		if (type === ByteBuffer) {
+			var buffer = ByteBuffer.allocateNative(size * format.value)
+			palette.each { colour -> buffer.put(colour) }
+			return buffer.rewind()
+		}
+		throw new IllegalArgumentException("Cannot convert a Palette to type ${type}")
+	}
+
+	/**
 	 * Return the colour data at the specified index.
 	 * 
 	 * @param index Position in the palette.

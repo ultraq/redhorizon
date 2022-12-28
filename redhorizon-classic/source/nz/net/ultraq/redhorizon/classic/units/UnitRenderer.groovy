@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformSetter
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.primitives.Rectanglef
 
@@ -84,18 +85,34 @@ class UnitRenderer implements GraphicsElement {
 
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
 		textures = imagesData.collect { data ->
-			return renderer.createTexture(unit.width, unit.height, palette.format.value,
-				data.applyPalette(palette).flipVertical(unit.width, unit.height, palette.format)
+			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED.value,
+				data.flipVertical(unit.width, unit.height, FORMAT_INDEXED)
 			)
 		}
-		shader = renderer.createShader('Paletted', new Uniform('palette') {
-			@Override
-			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-
+		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
+		shader = renderer.createShader('Paletted',
+			new Uniform('indexTexture') {
+				@Override
+				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+					uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+				}
+			},
+			new Uniform('paletteTexture') {
+				@Override
+				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+					uniformSetter.setUniformTexture(location, 1, paletteAsTexture.textureId)
+				}
+			},
+			new Uniform('model') {
+				@Override
+				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+					uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+				}
 			}
-		})
+		)
 		material = renderer.createMaterial(
 			mesh: mesh,
+			shader: shader,
 			transform: unit.transform
 		)
 	}

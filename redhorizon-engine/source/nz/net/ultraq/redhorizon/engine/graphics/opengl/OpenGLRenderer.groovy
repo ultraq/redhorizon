@@ -597,7 +597,7 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 	@Override
 	void setUniformTexture(int location, int textureUnit, int textureId) {
 
-		glUniform1iv(location, textureUnit)
+		glUniform1i(location, textureUnit)
 		glActiveTexture(GL_TEXTURE0 + textureUnit)
 		glBindTexture(GL_TEXTURE_2D, textureId)
 	}
