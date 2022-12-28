@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
+import nz.net.ultraq.redhorizon.classic.units.Infantry
+import nz.net.ultraq.redhorizon.classic.units.Structure
+import nz.net.ultraq.redhorizon.classic.units.UnitData
+import nz.net.ultraq.redhorizon.classic.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.units
+package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -31,7 +31,7 @@ class Structure extends Unit {
 
 	/**
 	 * Constructor, builds a structure out of unit data.
-	 *
+	 * 
 	 * @param data
 	 * @param imagesFile
 	 * @param palette

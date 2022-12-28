@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.units
+package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformSetter
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.primitives.Rectanglef
@@ -44,6 +47,7 @@ class UnitRenderer implements GraphicsElement {
 	protected Material material
 	protected Mesh mesh
 	protected Texture[] textures
+	protected Shader shader
 
 	/**
 	 * Constructor, create a unit renderer with the following frames.
@@ -84,9 +88,15 @@ class UnitRenderer implements GraphicsElement {
 				data.applyPalette(palette).flipVertical(unit.width, unit.height, palette.format)
 			)
 		}
+		shader = renderer.createShader('Paletted', new Uniform('palette') {
+			@Override
+			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+
+			}
+		})
 		material = renderer.createMaterial(
 			mesh: mesh,
-			transform:  unit.transform
+			transform: unit.transform
 		)
 	}
 

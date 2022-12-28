@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.units
+package nz.net.ultraq.redhorizon.classic.units
 
 /**
  * Model of the data of a C&C unit type.
