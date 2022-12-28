@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 interface ShaderUniformSetter {
 
 	/**
-	 * Apply a uniform of the given data size to the shader.
+	 * Apply a data uniform to the shader.
 	 * 
 	 * @param location
 	 * @param data
@@ -32,10 +32,19 @@ interface ShaderUniformSetter {
 	void setUniform(int location, float[] data)
 
 	/**
-	 * Apply a uniform matix of the given data size to the shader.
+	 * Apply a matrix uniform to the shader.
 	 * 
 	 * @param location
 	 * @param data
 	 */
 	void setUniformMatrix(int location, float[] data)
+
+	/**
+	 * Apply a texture uniform using the given texture ID.
+	 * 
+	 * @param location
+	 * @param textureUnit
+	 * @param textureId
+	 */
+	void setUniformTexture(int location, int textureUnit, int textureId)
 }

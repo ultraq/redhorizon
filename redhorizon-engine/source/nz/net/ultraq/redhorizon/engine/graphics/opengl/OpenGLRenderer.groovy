@@ -139,12 +139,20 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 		}
 
 		// Create the shader programs used by this renderer
-		standardShader = createShader('Standard', new Uniform('models') {
-			@Override
-			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-				uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+		standardShader = createShader('Standard',
+			new Uniform('textures') {
+				@Override
+				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+					uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+				}
+			},
+			new Uniform('models') {
+				@Override
+				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+					uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+				}
 			}
-		})
+		)
 
 		// The white texture used as a fallback when no texture is bound
 		def textureBytes = ByteBuffer.allocateNative(4)
@@ -535,15 +543,9 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			def mesh = material.mesh
-			def texture = material.texture
 			def shader = material.shader
 
 			glUseProgram(shader.programId)
-
-			def texturesLocation = getUniformLocation(shader, 'textures')
-			glUniform1iv(texturesLocation, 0)
-			glActiveTexture(GL_TEXTURE0)
-			glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
 			shader.uniforms.each { uniform ->
 				uniform.apply(getUniformLocation(shader, uniform.name), material, this)
@@ -629,6 +631,14 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
 			}
 		}
+	}
+
+	@Override
+	void setUniformTexture(int location, int textureUnit, int textureId) {
+
+		glUniform1iv(location, textureUnit)
+		glActiveTexture(GL_TEXTURE0 + textureUnit)
+		glBindTexture(GL_TEXTURE_2D, textureId)
 	}
 
 	/**

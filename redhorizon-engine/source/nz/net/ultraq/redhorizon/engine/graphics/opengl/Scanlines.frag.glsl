@@ -11,7 +11,7 @@ in vec2 v_omega;
 
 out vec4 fragmentColour;
 
-uniform sampler2D textures[MAX_TEXTURE_UNITS];
+uniform sampler2D framebuffer;
 
 /**
  * Fragment shader main function, applies a scanline effect to an existing
@@ -22,7 +22,7 @@ uniform sampler2D textures[MAX_TEXTURE_UNITS];
  */
 void main() {
 
-	fragmentColour = texture(textures[0], v_textureUVs);
+	fragmentColour = texture(framebuffer, v_textureUVs);
 	fragmentColour *= vec4(scanlineBaseBrightness + dot(sineComp * sin(v_textureUVs * v_omega - 1), vec2(1.0, 1.0)));
 	fragmentColour *= v_vertexColour;
 }

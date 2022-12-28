@@ -136,6 +136,12 @@ class RenderPipeline implements AutoCloseable {
 		// Scene render pass
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(context.renderResolution, true))
 
+		var framebufferUniform = new Uniform('framebuffer') {
+			@Override
+			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+				uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+			}
+		}
 		def modelUniform = new Uniform('model') {
 			@Override
 			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
@@ -155,6 +161,7 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('SharpUpscaling',
+					framebufferUniform,
 					modelUniform,
 					new Uniform('textureSourceSize') {
 						@Override
@@ -175,6 +182,7 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Scanlines',
+					framebufferUniform,
 					modelUniform,
 					new Uniform('textureSourceSize') {
 						@Override
@@ -194,7 +202,7 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('Screen', modelUniform)
+				shader: renderer.createShader('Screen', framebufferUniform, modelUniform)
 			),
 			!config.startWithChrome,
 			context

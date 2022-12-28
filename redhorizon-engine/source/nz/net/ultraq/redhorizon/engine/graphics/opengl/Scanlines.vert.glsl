@@ -5,8 +5,6 @@
 layout (location = 0) in vec4 colour;
 layout (location = 1) in vec4 position;
 layout (location = 2) in vec2 textureUVs;
-layout (location = 3) in float textureUnit;
-layout (location = 4) in float modelIndex;
 
 out vec4 v_vertexColour;
 out vec2 v_textureUVs;

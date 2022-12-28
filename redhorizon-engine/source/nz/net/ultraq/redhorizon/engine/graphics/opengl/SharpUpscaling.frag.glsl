@@ -6,7 +6,7 @@ in vec2 v_textureScale;
 
 out vec4 fragmentColour;
 
-uniform sampler2D textures[MAX_TEXTURE_UNITS];
+uniform sampler2D framebuffer;
 uniform vec2 textureSourceSize;
 
 /**
@@ -30,6 +30,6 @@ void main() {
 	vec2 texelOffset = (centerDist - clamp(centerDist, -regionRange, regionRange)) * scale + 0.5;
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
-	fragmentColour = texture(textures[0], targetUVs);
+	fragmentColour = texture(framebuffer, targetUVs);
 	fragmentColour *= v_vertexColour;
 }
