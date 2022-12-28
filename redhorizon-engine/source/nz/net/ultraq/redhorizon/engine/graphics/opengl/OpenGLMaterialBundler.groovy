@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -26,9 +25,7 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
 
 import org.joml.Matrix4f
-import org.joml.Vector2f
 import org.joml.Vector3f
-import org.joml.primitives.Rectanglef
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
@@ -120,18 +117,6 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 		}
 	}
 
-	@Override
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
-
-		return renderer.createMesh(GL_LINE_LOOP, colour, vertices)
-	}
-
-	@Override
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
-
-		return renderer.createMesh(GL_LINES, colour, vertices)
-	}
-
 	@NamedVariant
 	@Override
 	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
@@ -145,17 +130,5 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 		)
 		materials << material
 		return material
-	}
-
-	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
-
-		return renderer.createMesh(
-			GL_TRIANGLES,
-			Colour.WHITE,
-			surface as Vector2f[],
-			textureUVs as Vector2f[],
-			new int[]{ 0, 1, 3, 1, 2, 3 }
-		)
 	}
 }
