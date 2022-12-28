@@ -37,7 +37,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
@@ -80,7 +79,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 	private Dimension framebufferSize
 	private final Shader standardShader
 	protected final List<Shader> shaders = []
-	private final Texture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
 
@@ -142,12 +140,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 				}
 			}
 		)
-
-		// The white texture used as a fallback when no texture is bound
-		def textureBytes = ByteBuffer.allocateNative(4)
-			.putInt(0xffffffff as int)
-			.flip()
-		whiteTexture = createTexture(1, 1, FORMAT_RGBA.value, textureBytes)
 	}
 
 	/**
@@ -280,7 +272,7 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 
 		return new Material(
 			mesh: mesh,
-			texture: texture ?: whiteTexture,
+			texture: texture,
 			shader: shader ?: standardShader,
 			transform: transform ?: new Matrix4f()
 		)
