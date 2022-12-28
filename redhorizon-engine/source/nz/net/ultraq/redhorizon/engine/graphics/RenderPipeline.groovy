@@ -21,9 +21,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.FrustumIntersection
@@ -136,12 +136,18 @@ class RenderPipeline implements AutoCloseable {
 		// Scene render pass
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(context.renderResolution, true))
 
-		def modelUniform = new Uniform('model', { material ->
-			return material.transform.get(new float[16])
-		})
-		def textureTargetSizeUniform = new Uniform<float>('textureTargetSize', { material ->
-			return context.targetResolution as float[]
-		})
+		def modelUniform = new Uniform('model') {
+			@Override
+			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+				uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+			}
+		}
+		def textureTargetSizeUniform = new Uniform('textureTargetSize') {
+			@Override
+			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+				uniformSetter.setUniform(location, context.targetResolution as float[])
+			}
+		}
 
 		// Sharp upscaling post-processing pass
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
@@ -150,9 +156,12 @@ class RenderPipeline implements AutoCloseable {
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('SharpUpscaling',
 					modelUniform,
-					new Uniform<float>('textureSourceSize', { material ->
-						return context.renderResolution as float[]
-					}),
+					new Uniform('textureSourceSize') {
+						@Override
+						void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+							uniformSetter.setUniform(location, context.renderResolution as float[])
+						}
+					},
 					textureTargetSizeUniform
 				)
 			),
@@ -167,10 +176,13 @@ class RenderPipeline implements AutoCloseable {
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
 				shader: renderer.createShader('Scanlines',
 					modelUniform,
-					new Uniform<float>('textureSourceSize', { material ->
-						def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
-						return context.renderResolution * scale as float[]
-					}),
+					new Uniform('textureSourceSize') {
+						@Override
+						void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+							def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
+							uniformSetter.setUniform(location, context.renderResolution * scale as float[])
+						}
+					},
 					textureTargetSizeUniform
 				)
 			),

@@ -31,12 +31,13 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformSetter
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
@@ -63,7 +64,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -138,9 +139,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		// Create the shader programs used by this renderer
-		standardShader = createShader('Standard', new Uniform('models', { material ->
-			return material.transform.get(new float[16])
-		}))
+		standardShader = createShader('Standard', new Uniform('models') {
+			@Override
+			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+				uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+			}
+		})
 
 		// The white texture used as a fallback when no texture is bound
 		def textureBytes = ByteBuffer.allocateNative(4)
@@ -425,18 +429,21 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			return programId
 		}
 
-		def vertexShaderId = createShader(GL_VERTEX_SHADER)
-		def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
-		def programId = createProgram(vertexShaderId, fragmentShaderId)
-		glDeleteShader(vertexShaderId)
-		glDeleteShader(fragmentShaderId)
+		def shader = shaders.find { shader -> shader.name == name }
+		if (!shader) {
+			def vertexShaderId = createShader(GL_VERTEX_SHADER)
+			def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
+			def programId = createProgram(vertexShaderId, fragmentShaderId)
+			glDeleteShader(vertexShaderId)
+			glDeleteShader(fragmentShaderId)
 
-		def shader = new Shader(
-			programId: programId,
-			name: name,
-			uniforms: uniforms
-		)
-		shaders << shader
+			shader = new Shader(
+				programId: programId,
+				name: name,
+				uniforms: uniforms
+			)
+			shaders << shader
+		}
 		return shader
 	}
 
@@ -527,43 +534,30 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void drawMaterial(Material material) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
-			stackPush().withCloseable { stack ->
-				def mesh = material.mesh
-				def texture = material.texture
-				def shader = material.shader
+			def mesh = material.mesh
+			def texture = material.texture
+			def shader = material.shader
 
-				glUseProgram(shader.programId)
+			glUseProgram(shader.programId)
 
-				def texturesLocation = getUniformLocation(shader, 'textures')
-				glUniform1iv(texturesLocation, 0)
-				glActiveTexture(GL_TEXTURE0)
-				glBindTexture(GL_TEXTURE_2D, texture.textureId)
+			def texturesLocation = getUniformLocation(shader, 'textures')
+			glUniform1iv(texturesLocation, 0)
+			glActiveTexture(GL_TEXTURE0)
+			glBindTexture(GL_TEXTURE_2D, texture.textureId)
 
-				shader.uniforms.each { uniform ->
-					def uniformLocation = getUniformLocation(shader, uniform.name)
-					def uniformData = stack.floats(uniform.function(material))
-					switch (uniformData.capacity()) {
-						case 2:
-							glUniform2fv(uniformLocation, uniformData)
-							break
-						case 16:
-							glUniformMatrix4fv(uniformLocation, false, uniformData)
-							break
-						default:
-							throw new UnsupportedOperationException("Uniform data of size ${uniformData.capacity()} is not supported")
-					}
-				}
-
-				glBindVertexArray(mesh.vertexArrayId)
-				if (mesh.indices) {
-					glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
-				}
-				else {
-					glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
-				}
-
-				trigger(new DrawEvent())
+			shader.uniforms.each { uniform ->
+				uniform.apply(getUniformLocation(shader, uniform.name), material, this)
 			}
+
+			glBindVertexArray(mesh.vertexArrayId)
+			if (mesh.indices) {
+				glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
+			}
+			else {
+				glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
+			}
+
+			trigger(new DrawEvent())
 		}
 	}
 
@@ -606,6 +600,34 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		else {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
 			glViewport(0, 0, framebufferSize.width, framebufferSize.height)
+		}
+	}
+
+	@Override
+	void setUniform(int location, float[] data) {
+
+		stackPush().withCloseable { stack ->
+			switch (data.length) {
+				case 2:
+					glUniform2fv(location, stack.floats(data))
+					break
+				default:
+					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
+			}
+		}
+	}
+
+	@Override
+	void setUniformMatrix(int location, float[] data) {
+
+		stackPush().withCloseable { stack ->
+			switch (data.length) {
+				case 16:
+					glUniformMatrix4fv(location, false, stack.floats(data))
+					break
+				default:
+					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
+			}
 		}
 	}
 

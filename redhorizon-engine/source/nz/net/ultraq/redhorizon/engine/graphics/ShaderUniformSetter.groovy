@@ -1,5 +1,5 @@
 /* 
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,26 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.TupleConstructor
-
 /**
- * Class detailing a uniform value in a shader and how to apply it to the shader
- * during rendering.
+ * A subset of renderer functions for applying uniform values to shaders.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Uniform {
-
-	final String name
+interface ShaderUniformSetter {
 
 	/**
-	 * Apply the uniform value to the shader it's associated with.
+	 * Apply a uniform of the given data size to the shader.
 	 * 
 	 * @param location
-	 * @param material
-	 * @param uniformSetter
+	 * @param data
 	 */
-	abstract void apply(int location, Material material, ShaderUniformSetter uniformSetter)
+	void setUniform(int location, float[] data)
+
+	/**
+	 * Apply a uniform matix of the given data size to the shader.
+	 * 
+	 * @param location
+	 * @param data
+	 */
+	void setUniformMatrix(int location, float[] data)
 }
