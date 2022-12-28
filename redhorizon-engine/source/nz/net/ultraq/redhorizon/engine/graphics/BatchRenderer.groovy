@@ -23,8 +23,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
  * 
  * @author Emanuel Rabina
  */
-interface BatchRenderer<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh,
-	TShader extends Shader, TTexture extends Texture> extends GraphicsRenderer<TFramebuffer, TMaterial, TMesh, TShader, TTexture> {
+interface BatchRenderer extends GraphicsRenderer {
 
 	/**
 	 * Render all objects accumulated in the renderer, clearing out the object

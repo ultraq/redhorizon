@@ -27,10 +27,10 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor
-abstract class Material<TMesh extends Mesh, TShader extends Shader, TTexture extends Texture> {
+class Material {
 
-	TMesh mesh
-	TTexture texture
-	TShader shader
+	Mesh mesh
+	Texture texture
+	Shader shader
 	Matrix4f transform
 }

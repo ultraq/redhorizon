@@ -19,14 +19,19 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -58,8 +63,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
-	AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -77,12 +81,12 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	protected final int maxTransforms
 
 	private Dimension framebufferSize
-	private final OpenGLShader standardShader
-	protected final List<OpenGLShader> shaders = []
-	private final OpenGLTexture whiteTexture
+	private final Shader standardShader
+	protected final List<Shader> shaders = []
+	private final Texture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
-	protected OpenGLTexture currentPalette
+	protected Texture currentPalette
 
 	private OpenGLBatchRenderer batchRenderer
 
@@ -230,7 +234,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLFramebuffer createFramebuffer(Dimension resolution, boolean filter) {
+	Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
 
 		def frameBufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
@@ -247,7 +251,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
 		glBindTexture(GL_TEXTURE_2D, 0)
 
-		def colourTexture = new OpenGLTexture(
+		def colourTexture = new Texture(
 			textureId: colourTextureId,
 			width: width,
 			height: height
@@ -263,7 +267,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
-		def framebuffer = new OpenGLFramebuffer(
+		def framebuffer = new Framebuffer(
 			framebufferId: frameBufferId,
 			texture: colourTexture
 		)
@@ -272,23 +276,23 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINE_LOOP, colour, vertices))
 	}
 
 	@Override
-	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return createMeshData(createMesh(GL_LINES, colour, vertices))
 	}
 
 	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(@NamedParam(required = true) OpenGLMesh mesh,
-		@NamedParam OpenGLTexture texture, @NamedParam OpenGLShader shader, @NamedParam Matrix4f transform) {
+	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
+		@NamedParam Shader shader, @NamedParam Matrix4f transform) {
 
-		return new OpenGLMaterial(
+		return new Material(
 			mesh: mesh,
 			texture: texture ?: whiteTexture,
 			shader: shader ?: standardShader,
@@ -308,10 +312,10 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	 * @param indices
 	 * @return
 	 */
-	protected OpenGLMesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
+	protected Mesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
 		Vector2f[] textureUVs = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
 
-		def mesh = new OpenGLMesh(
+		def mesh = new Mesh(
 			vertexType: vertexType,
 			colour: colour,
 			vertices: vertices,
@@ -329,7 +333,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	 * @param mesh
 	 * @return
 	 */
-	private static OpenGLMesh createMeshData(OpenGLMesh mesh) {
+	private static Mesh createMeshData(Mesh mesh) {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -378,7 +382,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLShader createShader(String name, Uniform ...uniforms) {
+	Shader createShader(String name, Uniform ...uniforms) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
@@ -427,7 +431,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
 
-		def shader = new OpenGLShader(
+		def shader = new Shader(
 			programId: programId,
 			name: name,
 			uniforms: uniforms
@@ -437,7 +441,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return createMeshData(createMesh(
 			GL_TRIANGLES,
@@ -449,7 +453,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLTexture createTexture(int width, int height, int format, ByteBuffer data) {
+	Texture createTexture(int width, int height, int format, ByteBuffer data) {
 
 		return stackPush().withCloseable { stack ->
 			def textureId = glGenTextures()
@@ -474,7 +478,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 				glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
 			}
 
-			def texture = new OpenGLTexture(
+			def texture = new Texture(
 				textureId: textureId,
 				width: width,
 				height: height
@@ -485,14 +489,14 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	void deleteFramebuffer(OpenGLFramebuffer framebuffer) {
+	void deleteFramebuffer(Framebuffer framebuffer) {
 
 		glDeleteFramebuffers(framebuffer.framebufferId)
 		trigger(new FramebufferDeletedEvent(framebuffer))
 	}
 
 	@Override
-	void deleteMaterial(OpenGLMaterial material) {
+	void deleteMaterial(Material material) {
 
 		deleteMesh(material.mesh)
 		def texture = material.texture
@@ -502,7 +506,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	void deleteMesh(OpenGLMesh mesh) {
+	void deleteMesh(Mesh mesh) {
 
 		if (mesh.elementBufferId) {
 			glDeleteBuffers(mesh.elementBufferId)
@@ -513,14 +517,14 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	void deleteTexture(OpenGLTexture texture) {
+	void deleteTexture(Texture texture) {
 
 		glDeleteTextures(texture.textureId)
 		trigger(new TextureDeletedEvent(texture))
 	}
 
 	@Override
-	void drawMaterial(OpenGLMaterial material) {
+	void drawMaterial(Material material) {
 
 		averageNanos('drawMaterial', 1f, logger) { ->
 			stackPush().withCloseable { stack ->
@@ -587,13 +591,13 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	 * @return
 	 */
 	@Memoized
-	protected static int getUniformLocation(OpenGLShader shader, String name) {
+	protected static int getUniformLocation(Shader shader, String name) {
 
 		return glGetUniformLocation(shader.programId, name)
 	}
 
 	@Override
-	void setRenderTarget(OpenGLFramebuffer framebuffer) {
+	void setRenderTarget(Framebuffer framebuffer) {
 
 		if (framebuffer) {
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
@@ -631,7 +635,7 @@ class OpenGLRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMateri
 	}
 
 	@Override
-	OpenGLMaterial withMaterialBundler(
+	Material withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
 		Closure closure) {
 

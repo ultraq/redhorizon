@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
 
@@ -36,8 +39,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
  * 
  * @author Emanuel Rabina
  */
-class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
-	BatchRenderer<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>, EventTarget {
+class OpenGLBatchRenderer implements GraphicsRenderer, BatchRenderer, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLBatchRenderer)
 
@@ -54,11 +56,11 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLM
 	private final int batchElementBufferId
 
 	// Batched data to be rendered on flush
-	private List<OpenGLMaterial> batchMaterials = []
+	private List<Material> batchMaterials = []
 	private int batchVertices = 0
 	private int batchIndices = 0
 	private int batchTextureUnit = 0
-	private Map<OpenGLTexture,Integer> batchTextures = [:]
+	private Map<Texture, Integer> batchTextures = [:]
 
 	// Information about the current batch materials
 	private int batchVertexType
@@ -101,19 +103,19 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLM
 	}
 
 	@Override
-	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
-	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINES, colour, vertices)
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,
@@ -125,7 +127,7 @@ class OpenGLBatchRenderer implements GraphicsRenderer<OpenGLFramebuffer, OpenGLM
 	}
 
 	@Override
-	void drawMaterial(OpenGLMaterial material) {
+	void drawMaterial(Material material) {
 
 		def mesh = material.mesh
 		def texture = material.texture

@@ -35,8 +35,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends Material, TMesh extends Mesh,
-	TShader extends Shader, TTexture extends Texture> extends EventTarget {
+interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Use the renderer in a batch rendering mode within the context of the given
@@ -73,7 +72,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param vertices
 	 * @return
 	 */
-	TMesh createLineLoopMesh(Colour colour, Vector2f... vertices)
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Create a mesh representing disjoint lines.
@@ -83,7 +82,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 *                 of a line to be drawn.
 	 * @return New lines mesh.
 	 */
-	TMesh createLinesMesh(Colour colour, Vector2f... vertices)
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
 
 	/**
 	 * Create a material out of the given component parts.
@@ -95,8 +94,8 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @return
 	 */
 	@NamedVariant
-	TMaterial createMaterial(@NamedParam(required = true) TMesh mesh,
-		@NamedParam TTexture texture, @NamedParam TShader shader, @NamedParam Matrix4f transform)
+	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
+		@NamedParam Shader shader, @NamedParam Matrix4f transform)
 
 	/**
 	 * Create a framebuffer that can be rendered to.
@@ -105,7 +104,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param filter
 	 * @return
 	 */
-	TFramebuffer createFramebuffer(Dimension resolution, boolean filter)
+	Framebuffer createFramebuffer(Dimension resolution, boolean filter)
 
 	/**
 	 * Create a new shader program for the shader source files with the given
@@ -115,7 +114,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param uniforms
 	 * @return
 	 */
-	TShader createShader(String name, Uniform ...uniforms)
+	Shader createShader(String name, Uniform ...uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using
@@ -124,7 +123,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param surface
 	 * @return
 	 */
-	default TMesh createSpriteMesh(Rectanglef surface) {
+	default Mesh createSpriteMesh(Rectanglef surface) {
 
 		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
 	}
@@ -136,7 +135,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param textureUVs
 	 * @return
 	 */
-	TMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**
 	 * Create and fill a texture with the given image data.
@@ -147,42 +146,42 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * @param data
 	 * @return New texture object.
 	 */
-	TTexture createTexture(int width, int height, int format, ByteBuffer data)
+	Texture createTexture(int width, int height, int format, ByteBuffer data)
 
 	/**
 	 * Delete framebuffer data.
 	 * 
 	 * @param framebuffer
 	 */
-	void deleteFramebuffer(TFramebuffer framebuffer)
+	void deleteFramebuffer(Framebuffer framebuffer)
 
 	/**
 	 * Delete all of the items tied to the material.
 	 * 
 	 * @param material
 	 */
-	void deleteMaterial(TMaterial material)
+	void deleteMaterial(Material material)
 
 	/**
 	 * Delete mesh data.
 	 * 
 	 * @param mesh
 	 */
-	void deleteMesh(TMesh mesh)
+	void deleteMesh(Mesh mesh)
 
 	/**
 	 * Delete texture data.
 	 * 
 	 * @param texture
 	 */
-	void deleteTexture(TTexture texture)
+	void deleteTexture(Texture texture)
 
 	/**
 	 * Render a material.
 	 * 
 	 * @param material
 	 */
-	void drawMaterial(TMaterial material)
+	void drawMaterial(Material material)
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
@@ -190,7 +189,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 * 
 	 * @param framebuffer
 	 */
-	void setRenderTarget(TFramebuffer framebuffer)
+	void setRenderTarget(Framebuffer framebuffer)
 
 	/**
 	 * Update the camera's view matrix.
@@ -210,7 +209,7 @@ interface GraphicsRenderer<TFramebuffer extends Framebuffer, TMaterial extends M
 	 *   closure.  This material can then be rendered as normal to render all of
 	 *   the created materials at once.
 	 */
-	TMaterial withMaterialBundler(
+	Material withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
 		Closure closure)
 }

@@ -27,7 +27,12 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor
-abstract class Mesh {
+@SuppressWarnings('GrFinalVariableAccess')
+class Mesh {
+
+	int vertexArrayId
+	int vertexBufferId
+	int elementBufferId
 
 	final int vertexType
 	final Colour colour

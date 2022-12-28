@@ -17,7 +17,11 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
 
@@ -38,16 +42,15 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGLMaterial, OpenGLMesh, OpenGLShader, OpenGLTexture>,
-	EventTarget {
+class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
 	@Delegate
 	final OpenGLRenderer renderer
 
-	private final List<OpenGLMaterial> materials = []
+	private final List<Material> materials = []
 
 	@Override
-	OpenGLMaterial bundle() {
+	Material bundle() {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -100,8 +103,8 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 			// Return a new material based off the first one in the list which is
 			// assumed to be representative of the entire batch
 			def templateMaterial = materials.first()
-			return new OpenGLMaterial(
-				mesh: new OpenGLMesh(
+			return new Material(
+				mesh: new Mesh(
 					vertexType: templateMaterial.mesh.vertexType,
 					colour: templateMaterial.mesh.colour,
 					vertices: allVertices,
@@ -118,21 +121,21 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 	}
 
 	@Override
-	OpenGLMesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINE_LOOP, colour, vertices)
 	}
 
 	@Override
-	OpenGLMesh createLinesMesh(Colour colour, Vector2f... vertices) {
+	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
 		return renderer.createMesh(GL_LINES, colour, vertices)
 	}
 
 	@NamedVariant
 	@Override
-	OpenGLMaterial createMaterial(@NamedParam(required = true) OpenGLMesh mesh,
-		@NamedParam OpenGLTexture texture, @NamedParam OpenGLShader shader, @NamedParam Matrix4f transform) {
+	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
+		@NamedParam Shader shader, @NamedParam Matrix4f transform) {
 
 		def material = renderer.createMaterial(
 			mesh: mesh,
@@ -145,7 +148,7 @@ class OpenGLMaterialBundler implements MaterialBundler<OpenGLFramebuffer, OpenGL
 	}
 
 	@Override
-	OpenGLMesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return renderer.createMesh(
 			GL_TRIANGLES,

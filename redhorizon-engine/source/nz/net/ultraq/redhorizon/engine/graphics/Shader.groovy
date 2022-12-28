@@ -24,7 +24,10 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor
-abstract class Shader {
+@SuppressWarnings('GrFinalVariableAccess')
+class Shader {
+
+	final int programId
 
 	final String name
 	final Uniform[] uniforms

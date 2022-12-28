@@ -18,15 +18,16 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 
-import groovy.transform.EqualsAndHashCode
+import groovy.transform.NamedVariant
 
 /**
  * Representation of a single texture to render.
  * 
  * @author Emanuel Rabina
  */
-@EqualsAndHashCode
-abstract class Texture {
+class Texture {
+
+	final int textureId
 
 	final int width
 	final int height
@@ -35,11 +36,14 @@ abstract class Texture {
 	/**
 	 * Constructor, create a new texture of the given dimensions.
 	 * 
+	 * @param textureId
 	 * @param width
 	 * @param height
 	 */
-	protected Texture(int width, int height) {
+	@NamedVariant
+	Texture(int textureId, int width, int height) {
 
+		this.textureId = textureId
 		this.width = width
 		this.height = height
 		size = new Dimension(width, height)

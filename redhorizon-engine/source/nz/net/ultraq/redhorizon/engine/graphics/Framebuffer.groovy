@@ -25,7 +25,9 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor
-abstract class Framebuffer<TTexture extends Texture> {
+@SuppressWarnings('GrFinalVariableAccess')
+class Framebuffer {
 
-	final TTexture texture
+	final int framebufferId
+	final Texture texture
 }
