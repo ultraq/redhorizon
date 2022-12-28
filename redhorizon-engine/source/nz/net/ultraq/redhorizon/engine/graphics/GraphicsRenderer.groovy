@@ -38,19 +38,6 @@ import java.nio.ByteBuffer
 interface GraphicsRenderer extends EventTarget {
 
 	/**
-	 * Use the renderer in a batch rendering mode within the context of the given
-	 * closure.  While the renderer will auto-flush when its buffers are full,
-	 * callers will still need to do a final call to {@link BatchRenderer#flush}
-	 * when they are done with it to ensure that all rendered objects are drawn to
-	 * the screen.
-	 * 
-	 * @param closure
-	 */
-	void asBatchRenderer(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer')
-		Closure closure)
-
-	/**
 	 * Clears the buffer.
 	 */
 	void clear()

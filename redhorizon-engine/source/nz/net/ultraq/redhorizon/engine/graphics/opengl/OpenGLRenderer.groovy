@@ -71,15 +71,11 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 	protected static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
 		VertexBufferLayoutPart.COLOUR,
 		VertexBufferLayoutPart.POSITION,
-		VertexBufferLayoutPart.TEXTURE_UVS,
-		VertexBufferLayoutPart.TEXTURE_UNIT,
-		VertexBufferLayoutPart.MODEL_INDEX
+		VertexBufferLayoutPart.TEXTURE_UVS
 	)
 
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
-	protected final int maxTextureUnits
-	protected final int maxTransforms
 
 	private Dimension framebufferSize
 	private final Shader standardShader
@@ -87,9 +83,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 	private final Texture whiteTexture
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
-	protected Texture currentPalette
-
-	private OpenGLBatchRenderer batchRenderer
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -103,10 +96,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 		this.config = config
 
 		capabilities = GL.createCapabilities()
-
-		// Set up hardware limits
-		maxTextureUnits = glGetInteger(GL_MAX_TEXTURE_IMAGE_UNITS)
-		maxTransforms = 32
 
 		if (config.debug && capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)
@@ -140,13 +129,13 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 
 		// Create the shader programs used by this renderer
 		standardShader = createShader('Standard',
-			new Uniform('textures') {
+			new Uniform('mainTexture') {
 				@Override
 				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
 					uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
 				}
 			},
-			new Uniform('models') {
+			new Uniform('model') {
 				@Override
 				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
 					uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
@@ -159,18 +148,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 			.putInt(0xffffffff as int)
 			.flip()
 		whiteTexture = createTexture(1, 1, FORMAT_RGBA.value, textureBytes)
-	}
-
-	@Override
-	void asBatchRenderer(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.BatchRenderer')
-		Closure closure) {
-
-		if (!batchRenderer) {
-			batchRenderer = new OpenGLBatchRenderer(this)
-			batchRenderer.relay(RendererEvent, this)
-		}
-		closure(batchRenderer)
 	}
 
 	/**
@@ -216,9 +193,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 	@Override
 	void close() {
 
-		if (batchRenderer) {
-			batchRenderer.close()
-		}
 		glDeleteTextures(*paletteTextureIds)
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
@@ -364,8 +338,7 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 				vertexBuffer.put(
 					colour.r, colour.g, colour.b, colour.a,
 					vertex.x, vertex.y,
-					textureUV.x, textureUV.y,
-					0, 0
+					textureUV.x, textureUV.y
 				)
 			}
 			vertexBuffer.flip()
@@ -402,11 +375,7 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 		 */
 		def createShader = { int type ->
 			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/opengl/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
-			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream ->
-				return stream.text
-					.replace('MAX_TEXTURE_UNITS', "${maxTextureUnits}")
-					.replace('MAX_TRANSFORMS', "${maxTransforms}")
-			}
+			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream -> stream.text }
 			def shaderId = glCreateShader(type)
 			glShaderSource(shaderId, shaderSource)
 			glCompileShader(shaderId)

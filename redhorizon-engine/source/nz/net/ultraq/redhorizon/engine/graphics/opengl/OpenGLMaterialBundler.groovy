@@ -75,8 +75,7 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 					vertexBuffer.put(
 						colour.r, colour.g, colour.b, colour.a,
 						position.x, position.y,
-						textureUV.x, textureUV.y,
-						0, 0
+						textureUV.x, textureUV.y
 					)
 				}
 				mesh.indices.each { index ->
