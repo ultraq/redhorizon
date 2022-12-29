@@ -28,6 +28,8 @@ import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
 
 /**
+ * Small overlay for displaying registered controls in the application.
+ *
  * @author Emanuel Rabina
  */
 class ControlsOverlayRenderPass implements OverlayRenderPass {
