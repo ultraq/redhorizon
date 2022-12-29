@@ -21,5 +21,5 @@ package nz.net.ultraq.redhorizon.filetypes
  * 
  * @author Emanuel Rabina
  */
-interface VideoFile extends AnimationFile, SoundFile {
+interface VideoFile extends AnimationFile, SoundFile, Streaming {
 }

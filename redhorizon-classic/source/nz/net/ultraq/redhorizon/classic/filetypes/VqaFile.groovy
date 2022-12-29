@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
@@ -53,7 +52,7 @@ import java.util.concurrent.Executors
  */
 @FileExtensions('vqa')
 @SuppressWarnings('GrFinalVariableAccess')
-class VqaFile implements Streaming, VideoFile {
+class VqaFile implements VideoFile {
 
 	private static final Logger logger = LoggerFactory.getLogger(VqaFile)
 
