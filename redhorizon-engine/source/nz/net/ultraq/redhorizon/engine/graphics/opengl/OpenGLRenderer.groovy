@@ -66,12 +66,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
-	protected static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
-		VertexBufferLayoutPart.COLOUR,
-		VertexBufferLayoutPart.POSITION,
-		VertexBufferLayoutPart.TEXTURE_UVS
-	)
-
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 
@@ -255,13 +249,27 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(GL_LINE_LOOP, colour, vertices))
+		def mesh = new Mesh(
+			vertexType: GL_LINE_LOOP,
+			colour: colour,
+			vertices: vertices
+		)
+		trigger(new MeshCreatedEvent(mesh))
+
+		return createMeshData(mesh, new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION))
 	}
 
 	@Override
 	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
 
-		return createMeshData(createMesh(GL_LINES, colour, vertices))
+		def mesh = new Mesh(
+			vertexType: GL_LINES,
+			colour: colour,
+			vertices: vertices
+		)
+		trigger(new MeshCreatedEvent(mesh))
+
+		return createMeshData(mesh, new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION))
 	}
 
 	@NamedVariant
@@ -278,39 +286,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	/**
-	 * Build a mesh object.
-	 * 
-	 * @param vertexType
-	 * @param colour
-	 *   The colour to use for all vertices.  Currently doesn't support different
-	 *   colours for each vertex.
-	 * @param vertices
-	 * @param textureUVs
-	 * @param indices
-	 * @return
-	 */
-	protected Mesh createMesh(int vertexType, Colour colour, Vector2f[] vertices,
-		Vector2f[] textureUVs = new Rectanglef() as Vector2f[], int[] indices = new int[0]) {
-
-		def mesh = new Mesh(
-			vertexType: vertexType,
-			colour: colour,
-			vertices: vertices,
-			textureUVs: textureUVs,
-			indices: indices
-		)
-		trigger(new MeshCreatedEvent(mesh))
-		return mesh
-	}
-
-	/**
 	 * Create buffers based on the given mesh data representing some kind of
 	 * OpenGL primitive.
 	 * 
 	 * @param mesh
+	 * @param vertexBufferLayout
 	 * @return
 	 */
-	private static Mesh createMeshData(Mesh mesh) {
+	private static Mesh createMeshData(Mesh mesh, VertexBufferLayout vertexBufferLayout) {
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -323,19 +306,21 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			def colour = mesh.colour
 			def vertices = mesh.vertices
 			def textureUVs = mesh.textureUVs
-			def vertexBuffer = stack.mallocFloat(VERTEX_BUFFER_LAYOUT.size() * vertices.size())
+			def vertexBuffer = stack.mallocFloat(vertexBufferLayout.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
-				def textureUV = textureUVs[index]
 				vertexBuffer.put(
 					colour.r, colour.g, colour.b, colour.a,
-					vertex.x, vertex.y,
-					textureUV.x, textureUV.y
+					vertex.x, vertex.y
 				)
+				if (vertexBufferLayout.parts.contains(VertexBufferLayoutPart.TEXTURE_UVS)) {
+					def textureUV = textureUVs[index]
+					vertexBuffer.put(textureUV.x, textureUV.y)
+				}
 			}
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
 
-			enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
+			enableVertexBufferLayout(vertexBufferLayout)
 
 			// Buffer for all the index data, if applicable
 			int elementBufferId = 0
@@ -393,7 +378,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			def status = glGetProgrami(programId, GL_LINK_STATUS)
 			if (status != GL_TRUE) {
-				throw new Exception(glGetProgramInfoLog(programId))
+				var message = glGetProgramInfoLog(programId)
+				logger.error(message)
+				throw new Exception(message)
 			}
 
 			return programId
@@ -420,12 +407,19 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
-		return createMeshData(createMesh(
-			GL_TRIANGLES,
-			Colour.WHITE,
-			surface as Vector2f[],
-			textureUVs as Vector2f[],
-			new int[]{ 0, 1, 3, 1, 2, 3 }
+		def mesh = new Mesh(
+			vertexType: GL_TRIANGLES,
+			colour: Colour.WHITE,
+			vertices: surface as Vector2f[],
+			textureUVs: textureUVs as Vector2f[],
+			indices: [0, 1, 3, 1, 2, 3] as int[]
+		)
+		trigger(new MeshCreatedEvent(mesh))
+
+		return createMeshData(mesh, new VertexBufferLayout(
+			VertexBufferLayoutPart.COLOUR,
+			VertexBufferLayoutPart.POSITION,
+			VertexBufferLayoutPart.TEXTURE_UVS
 		))
 	}
 

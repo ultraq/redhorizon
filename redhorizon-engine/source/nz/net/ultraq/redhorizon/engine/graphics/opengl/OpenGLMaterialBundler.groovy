@@ -41,6 +41,12 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
+	private static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
+		VertexBufferLayoutPart.COLOUR,
+		VertexBufferLayoutPart.POSITION,
+		VertexBufferLayoutPart.TEXTURE_UVS
+	)
+
 	@Delegate
 	final OpenGLRenderer renderer
 
