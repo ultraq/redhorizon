@@ -16,28 +16,83 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import groovy.transform.TupleConstructor
+import org.joml.Vector3f
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Load a collection of images into existing engines.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImagesLoader implements MediaLoader<ImagesFile, ImageStrip> {
+class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> implements EventListener<KeyEvent> {
 
-	final Palette palette
-	final Scene scene
+	private final Palette palette
+	private final GraphicsEngine graphicsEngine
+	private final InputEventStream inputEventStream
+	private final Vector3f center
+	private final int tick
+
+	/**
+	 * Constructor, create a loader for an images file.
+	 * 
+	 * @param imagesFile
+	 * @param palette
+	 * @param scene
+	 * @param graphicsEngine
+	 * @param inputEventStream
+	 */
+	ImagesLoader(ImagesFile imagesFile, Palette palette, Scene scene, GraphicsEngine graphicsEngine,
+		InputEventStream inputEventStream) {
+
+		super(imagesFile, scene)
+		this.palette = palette
+		this.graphicsEngine = graphicsEngine
+		this.inputEventStream = inputEventStream
+
+		center = new Vector3f()
+		tick = imagesFile.width
+	}
 
 	@Override
-	ImageStrip load(ImagesFile imagesFile) {
+	void handleEvent(KeyEvent event) {
 
-		def imageStrip = new ImageStrip(imagesFile, palette)
-		scene << imageStrip
-		return imageStrip
+		if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
+			switch (event.key) {
+				case GLFW_KEY_LEFT:
+					graphicsEngine.camera.translate(tick, 0)
+					break
+				case GLFW_KEY_RIGHT:
+					graphicsEngine.camera.translate(-tick, 0)
+					break
+				case GLFW_KEY_SPACE:
+					graphicsEngine.camera.center(center)
+					break
+			}
+		}
+	}
+
+	@Override
+	ImageStrip load() {
+
+		media = new ImageStrip(file, palette)
+		scene << media
+		inputEventStream.on(KeyEvent, this)
+
+		return media
+	}
+
+	@Override
+	void unload() {
+
+		inputEventStream.off(KeyEvent, this)
+		scene.removeSceneElement(media)
 	}
 }

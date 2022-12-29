@@ -17,27 +17,74 @@
 package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load a sound effect or music track into existing engines.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class SoundLoader implements MediaLoader<SoundFile, Playable> {
+class SoundLoader extends MediaLoader<SoundFile, Playable> implements EventListener<KeyEvent> {
 
-	final Scene scene
 	final GameClock gameClock
+	final InputEventStream inputEventStream
+
+	/**
+	 * Constructor, create a loader for sound files.
+	 *
+	 * @param soundFile
+	 * @param scene
+	 * @param gameClock
+	 * @param inputEventStream
+	 */
+	SoundLoader(SoundFile soundFile, Scene scene, GameClock gameClock, InputEventStream inputEventStream) {
+
+		super(soundFile, scene)
+		this.gameClock = gameClock
+		this.inputEventStream = inputEventStream
+	}
 
 	@Override
-	Playable load(SoundFile soundFile) {
+	void handleEvent(KeyEvent event) {
 
-		def sound = soundFile.forStreaming ? new SoundTrack(soundFile, gameClock) : new SoundEffect(soundFile)
-		scene << sound
-		return sound
+		if (event.action == GLFW_PRESS) {
+			switch (event.key) {
+				case GLFW_KEY_SPACE:
+					gameClock.togglePause()
+					break
+			}
+		}
+	}
+
+	@Override
+	Playable load() {
+
+		media = file.forStreaming ? new SoundTrack(file, gameClock) : new SoundEffect(file)
+		scene << media
+		inputEventStream.on(KeyEvent, this)
+
+		return media
+	}
+
+	@Override
+	void unload() {
+
+		if (media.playing) {
+			media.stop()
+			if (file instanceof Streaming) {
+				file.streamingDataWorker.stop()
+			}
+		}
+		inputEventStream.off(KeyEvent, this)
+		scene.removeSceneElement((SceneElement)media)
 	}
 }

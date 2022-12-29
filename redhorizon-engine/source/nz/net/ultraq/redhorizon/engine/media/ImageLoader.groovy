@@ -20,29 +20,44 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
-import groovy.transform.TupleConstructor
-
 /**
  * Load a single image into existing engines.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImageLoader implements MediaLoader<ImageFile, Image> {
+class ImageLoader extends MediaLoader<ImageFile, Image> {
 
-	final Scene scene
-	final GraphicsEngine graphicsEngine
+	private final GraphicsEngine graphicsEngine
+
+	/**
+	 * Constructor, create a loader for an image file.
+	 * 
+	 * @param imageFile
+	 * @param scene
+	 * @param graphicsEngine
+	 */
+	ImageLoader(ImageFile imageFile, Scene scene, GraphicsEngine graphicsEngine) {
+
+		super(imageFile, scene)
+		this.graphicsEngine = graphicsEngine
+	}
 
 	@Override
-	Image load(ImageFile imageFile) {
+	Image load() {
 
-		def width = imageFile.width
-		def height = imageFile.height
-
-		def image = new Image(imageFile)
+		def width = file.width
+		def height = file.height
+		media = new Image(file)
 			.scaleXY(graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height))
 			.translate(-width / 2, -height / 2)
-		scene << image
-		return image
+		scene << media
+
+		return media
+	}
+
+	@Override
+	void unload() {
+
+		scene.removeSceneElement(media)
 	}
 }

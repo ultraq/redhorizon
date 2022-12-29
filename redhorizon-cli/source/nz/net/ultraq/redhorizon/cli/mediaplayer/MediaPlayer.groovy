@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
 import nz.net.ultraq.redhorizon.engine.media.ImageLoader
 import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
+import nz.net.ultraq.redhorizon.engine.media.MediaLoader
 import nz.net.ultraq.redhorizon.engine.media.SoundLoader
 import nz.net.ultraq.redhorizon.engine.media.StopEvent
 import nz.net.ultraq.redhorizon.engine.media.VideoLoader
@@ -35,10 +36,10 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Media player application for watching media files.
@@ -59,6 +60,7 @@ class MediaPlayer extends Application {
 
 	private final Object mediaFile
 	private final PaletteType paletteType
+	private MediaLoader mediaLoader
 
 	/**
 	 * Constructor, create a new application around the given media file.
@@ -70,7 +72,7 @@ class MediaPlayer extends Application {
 	 */
 	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, PaletteType paletteType) {
 
-		super(null, audioConfig, graphicsConfig)
+		super('Media Player', audioConfig, graphicsConfig)
 		this.mediaFile = mediaFile
 		this.paletteType = paletteType
 	}
@@ -80,26 +82,27 @@ class MediaPlayer extends Application {
 
 		logger.info('File details: {}', mediaFile)
 
-		switch (mediaFile) {
-			case VideoFile:
-				loadVideo(mediaFile)
-				break
-			case AnimationFile:
-				loadAnimation(mediaFile)
-				break
-			case SoundFile:
-				loadSound(mediaFile)
-				break
-			case ImageFile:
-				loadImage(mediaFile)
-				break
-			case ImagesFile:
-				loadImages(mediaFile)
-				break
-			default:
-				logger.error('No media player for the associated file class of {}', mediaFile)
-				throw new UnsupportedOperationException()
+		mediaLoader = switch (mediaFile) {
+			case VideoFile -> loadVideo(mediaFile)
+			case AnimationFile -> loadAnimation(mediaFile)
+			case SoundFile -> loadSound(mediaFile)
+			case ImageFile -> loadImage(mediaFile)
+			case ImagesFile -> loadImages(mediaFile)
+			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
 		}
+
+		// Universal quit on exit
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+				stop()
+			}
+		}
+	}
+
+	@Override
+	protected void applicationStop() {
+
+		mediaLoader.unload()
 	}
 
 	/**
@@ -107,12 +110,12 @@ class MediaPlayer extends Application {
 	 * 
 	 * @param animationFile
 	 */
-	private void loadAnimation(AnimationFile animationFile) {
+	private AnimationLoader loadAnimation(AnimationFile animationFile) {
 
-		def animationLoader = new AnimationLoader(scene, graphicsEngine, gameClock)
+		def animationLoader = new AnimationLoader(animationFile, scene, graphicsEngine, gameClock, inputEventStream)
 
 		graphicsEngine.on(EngineLoopStartEvent) { engineLoopStartEvent ->
-			def animation = animationLoader.load(animationFile)
+			def animation = animationLoader.load()
 			animation.play()
 			logger.debug('Animation started')
 
@@ -122,21 +125,9 @@ class MediaPlayer extends Application {
 			}
 
 			logger.info('Waiting for animation to finish.  Close the window to exit.')
-
-			// Key event handler
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					switch (keyEvent.key) {
-						case GLFW_KEY_SPACE:
-							gameClock.togglePause()
-							break
-						case GLFW_KEY_ESCAPE:
-							animation.stop()
-							break
-					}
-				}
-			}
 		}
+
+		return animationLoader
 	}
 
 	/**
@@ -144,24 +135,16 @@ class MediaPlayer extends Application {
 	 * 
 	 * @param imageFile
 	 */
-	private void loadImage(ImageFile imageFile) {
+	private ImageLoader loadImage(ImageFile imageFile) {
 
-		def imageLoader = new ImageLoader(scene, graphicsEngine)
+		def imageLoader = new ImageLoader(imageFile, scene, graphicsEngine)
 
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			imageLoader.load(imageFile)
+			imageLoader.load()
 			logger.info('Displaying the image.  Close the window to exit.')
-
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					switch (keyEvent.key) {
-						case GLFW_KEY_ESCAPE:
-							stop()
-							break
-					}
-				}
-			}
 		}
+
+		return imageLoader
 	}
 
 	/**
@@ -169,39 +152,18 @@ class MediaPlayer extends Application {
 	 * 
 	 * @param imagesFile
 	 */
-	private void loadImages(ImagesFile imagesFile) {
+	private ImagesLoader loadImages(ImagesFile imagesFile) {
 
-		getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
 			def palette = new PalFile(inputStream)
-			def imagesLoader = new ImagesLoader(palette, scene)
+			def imagesLoader = new ImagesLoader(imagesFile, palette, scene, graphicsEngine, inputEventStream)
 
 			graphicsEngine.on(EngineLoopStartEvent) { event ->
-				imagesLoader.load(imagesFile)
+				imagesLoader.load()
 				logger.info('Displaying the image.  Close the window to exit.')
-
-				def center = new Vector3f()
-				def tick = imagesFile.width
-
-				// Key event handler
-				inputEventStream.on(KeyEvent) { keyEvent ->
-					if (keyEvent.action == GLFW_PRESS || keyEvent.action == GLFW_REPEAT) {
-						switch (keyEvent.key) {
-							case GLFW_KEY_LEFT:
-								graphicsEngine.camera.translate(tick, 0)
-								break
-							case GLFW_KEY_RIGHT:
-								graphicsEngine.camera.translate(-tick, 0)
-								break
-							case GLFW_KEY_SPACE:
-								graphicsEngine.camera.center(center)
-								break
-							case GLFW_KEY_ESCAPE:
-								stop()
-								break
-						}
-					}
-				}
 			}
+
+			return imagesLoader
 		}
 	}
 
@@ -210,12 +172,12 @@ class MediaPlayer extends Application {
 	 * 
 	 * @param soundFile
 	 */
-	private void loadSound(SoundFile soundFile) {
+	private SoundLoader loadSound(SoundFile soundFile) {
 
-		def soundLoader = new SoundLoader(scene, gameClock)
+		def soundLoader = new SoundLoader(soundFile, scene, gameClock, inputEventStream)
 
 		audioEngine.on(EngineLoopStartEvent) { event ->
-			def sound = soundLoader.load(soundFile)
+			def sound = soundLoader.load()
 			sound.play()
 			logger.debug('Sound started')
 
@@ -225,21 +187,9 @@ class MediaPlayer extends Application {
 			}
 
 			logger.info('Waiting for sound to stop playing.  Close the window to exit.')
-
-			// Key event handler
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					switch (keyEvent.key) {
-						case GLFW_KEY_SPACE:
-							gameClock.togglePause()
-							break
-						case GLFW_KEY_ESCAPE:
-							sound.stop()
-							break
-					}
-				}
-			}
 		}
+
+		return soundLoader
 	}
 
 	/**
@@ -247,12 +197,12 @@ class MediaPlayer extends Application {
 	 * 
 	 * @param videoFile
 	 */
-	private void loadVideo(VideoFile videoFile) {
+	private VideoLoader loadVideo(VideoFile videoFile) {
 
-		def videoLoader = new VideoLoader(scene, graphicsEngine, gameClock)
+		def videoLoader = new VideoLoader(videoFile, scene, graphicsEngine, gameClock, inputEventStream)
 
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			def video = videoLoader.load(videoFile)
+			def video = videoLoader.load()
 			video.play()
 			logger.debug('Video started')
 
@@ -262,20 +212,8 @@ class MediaPlayer extends Application {
 			}
 
 			logger.info('Waiting for video to finish.  Close the window to exit.')
-
-			// Key event handler
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					switch (keyEvent.key) {
-						case GLFW_KEY_SPACE:
-							gameClock.togglePause()
-							break
-						case GLFW_KEY_ESCAPE:
-							video.stop()
-							break
-					}
-				}
-			}
 		}
+
+		return videoLoader
 	}
 }

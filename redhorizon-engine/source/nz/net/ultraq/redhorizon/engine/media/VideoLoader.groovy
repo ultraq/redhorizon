@@ -18,35 +18,83 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load a video file into existing engines.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class VideoLoader implements MediaLoader<VideoFile, Video> {
+class VideoLoader extends MediaLoader<VideoFile, Video> implements EventListener<KeyEvent> {
 
-	final Scene scene
 	final GraphicsEngine graphicsEngine
 	final GameClock gameClock
+	final InputEventStream inputEventStream
+
+	/**
+	 * Create a loader for an video file.
+	 * 
+	 * @param videoFile
+	 * @param scene
+	 * @param graphicsEngine
+	 * @param gameClock
+	 * @param inputEventStream
+	 */
+	VideoLoader(VideoFile videoFile, Scene scene, GraphicsEngine graphicsEngine, GameClock gameClock,
+		InputEventStream inputEventStream) {
+
+		super(videoFile, scene)
+		this.graphicsEngine = graphicsEngine
+		this.gameClock = gameClock
+		this.inputEventStream = inputEventStream
+	}
 
 	@Override
-	Video load(VideoFile videoFile) {
+	void handleEvent(KeyEvent event) {
 
-		def width = videoFile.width
-		def height = videoFile.height
-		def scaleY = videoFile.forVgaMonitors ? 1.2f : 1f
+		if (event.action == GLFW_PRESS) {
+			switch (event.key) {
+				case GLFW_KEY_SPACE:
+					gameClock.togglePause()
+					break
+			}
+		}
+	}
+
+	@Override
+	Video load() {
+
+		// Create a video and scale to fit the target size
+		def width = file.width
+		def height = file.height
+		def scaleY = file.forVgaMonitors ? 1.2f : 1f
 		def scale = graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height * scaleY as int)
-
-		def video = new Video(videoFile, gameClock)
+		media = new Video(file, gameClock)
 			.scale(scale, scale * scaleY as float, 1)
 			.translate(-width / 2, -height / 2)
-		scene << video
-		return video
+		scene << media
+
+		// Key events for controlling the video
+		inputEventStream.on(KeyEvent, this)
+
+		return media
+	}
+
+	@Override
+	void unload() {
+
+		if (media.playing) {
+			media.stop()
+			file.streamingDataWorker.stop()
+		}
+		inputEventStream.off(KeyEvent, this)
+		scene.removeSceneElement(media)
 	}
 }

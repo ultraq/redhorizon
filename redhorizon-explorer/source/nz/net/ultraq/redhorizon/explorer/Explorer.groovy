@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
 import nz.net.ultraq.redhorizon.engine.media.ImageLoader
 import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
+import nz.net.ultraq.redhorizon.engine.media.MediaLoader
 import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.media.SoundLoader
 import nz.net.ultraq.redhorizon.engine.media.VideoLoader
@@ -36,7 +37,6 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.joml.Vector3f
@@ -64,10 +64,9 @@ class Explorer extends Application {
 
 	private File currentDirectory
 	private InputStream selectedFileInputStream
-	private Object selectedFileClass
-	private Object selectedMedia
+	private Object selectedFile
+	private MediaLoader selectedLoader
 	private Palette palette
-	private int tick
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -77,7 +76,7 @@ class Explorer extends Application {
 	 */
 	Explorer(String version, Palette palette) {
 
-		super("Red Horizon Explorer ${version}",
+		super("Explorer - ${version}",
 			new AudioConfiguration(),
 			new GraphicsConfiguration(
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
@@ -139,28 +138,10 @@ class Explorer extends Application {
 			}
 		}
 
-		// Key event handler
+		// Universal quit on exit
 		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-				switch (event.key) {
-					case GLFW_KEY_LEFT:
-						graphicsEngine.camera.translate(tick, 0)
-						break
-					case GLFW_KEY_RIGHT:
-						graphicsEngine.camera.translate(-tick, 0)
-						break
-					case GLFW_KEY_SPACE:
-						if (selectedFileClass instanceof AnimationFile) {
-							gameClock.togglePause()
-						}
-						else if (selectedFileClass instanceof ImagesFile) {
-							graphicsEngine.camera.center(new Vector3f())
-						}
-						break
-					case GLFW_KEY_ESCAPE:
-						stop()
-						break
-				}
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+				stop()
 			}
 		}
 	}
@@ -237,21 +218,7 @@ class Explorer extends Application {
 	 */
 	private void clearCurrentFile() {
 
-		if (selectedMedia) {
-			if (selectedFileClass instanceof Streaming) {
-				logger.debug('Stopping streaming worker')
-				selectedFileClass.streamingDataWorker.stop()
-			}
-			if (selectedMedia instanceof Playable) {
-				logger.debug('Stopping playable file')
-				selectedMedia.stop()
-			}
-			selectedFileInputStream.close()
-
-			// TODO: Wait for stop event before proceeding.  Need to allow the engines
-			//       to clean up the item before clearing the scene
-			Thread.sleep(100)
-		}
+		selectedLoader?.unload()
 	}
 
 	/**
@@ -260,6 +227,11 @@ class Explorer extends Application {
 	private void clearPreview() {
 
 		clearCurrentFile()
+
+		// TODO: Wait for stop event before proceeding.  Need to allow the engines
+		//       to clean up the item before clearing the scene
+		Thread.sleep(100)
+
 		scene.clear()
 		graphicsEngine.camera.center(new Vector3f())
 	}
@@ -267,47 +239,26 @@ class Explorer extends Application {
 	/**
 	 * Update the preview are for the given file data and type.
 	 * 
-	 * @param fileType
+	 * @param file
 	 */
-	private void preview(Object fileType) {
+	private void preview(Object file) {
 
-		switch (fileType) {
+		selectedFile = file
 
-			case VideoFile:
-				def videoLoader = new VideoLoader(scene, graphicsEngine, gameClock)
-				selectedMedia = videoLoader.load(fileType)
-				selectedMedia.play()
-				break
-
-			case AnimationFile:
-				def animationLoader = new AnimationLoader(scene, graphicsEngine, gameClock)
-				selectedMedia = animationLoader.load(fileType)
-				selectedMedia.play()
-				break
-
-			case ImageFile:
-				def imageLoader = new ImageLoader(scene, graphicsEngine)
-				selectedMedia = imageLoader.load(fileType)
-				break
-
-			case ImagesFile:
-				def imagesLoader = new ImagesLoader(palette, scene)
-				selectedMedia = imagesLoader.load(fileType)
-				tick = fileType.width
-				break
-
-			case SoundFile:
-				def soundLoader = new SoundLoader(scene, gameClock)
-				selectedMedia = soundLoader.load(fileType)
-				selectedMedia.play()
-				break
-
-			default:
-				logger.info('Filetype of {} not yet configured', selectedFileClass.class.simpleName)
-				selectedMedia = null
+		selectedLoader = switch (file) {
+			case VideoFile -> new VideoLoader(file, scene, graphicsEngine, gameClock, inputEventStream)
+			case AnimationFile -> new AnimationLoader(file, scene, graphicsEngine, gameClock, inputEventStream)
+			case ImageFile -> new ImageLoader(file, scene, graphicsEngine)
+			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsEngine, inputEventStream)
+			case SoundFile -> new SoundLoader(file, scene, gameClock, inputEventStream)
+			default -> logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
 		}
 
-		selectedFileClass = fileType
+		var media = selectedLoader.load()
+		if (media instanceof Playable) {
+			media.play()
+		}
+
 		// TODO: Display selected file info elsewhere?  Currently these are long
 		//       lines of text 🤔
 //		logger.info('{}', selectedFileClass)

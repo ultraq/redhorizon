@@ -29,7 +29,6 @@ import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.TupleConstructor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -40,7 +39,6 @@ import java.util.concurrent.Executors
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor
 abstract class Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
@@ -56,6 +54,21 @@ abstract class Application {
 	protected Scene scene = new Scene()
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
+
+	/**
+	 * Constructor, creates an application with the title suffix and
+	 * configuration.
+	 * 
+	 * @param windowTitle
+	 * @param audioConfig
+	 * @param graphicsConfig
+	 */
+	protected Application(String windowTitle, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
+
+		this.windowTitle = windowTitle ? "Red Horizon - ${windowTitle}" : null
+		this.audioConfig = audioConfig
+		this.graphicsConfig = graphicsConfig
+	}
 
 	/**
 	 * Called when all the application setup has completed and it's time for the

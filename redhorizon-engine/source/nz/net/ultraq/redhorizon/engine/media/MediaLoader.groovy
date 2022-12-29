@@ -16,20 +16,41 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+
 /**
  * An object that can be used to create media types from media files, and attach
  * them to existing game engines.
  * 
+ * @param <F> The type of file to load.
+ * @param <M> The type of media loaded from the file.
  * @author Emanuel Rabina
  */
-interface MediaLoader<F, M> {
+abstract class MediaLoader<F, M> {
+
+	protected final F file
+	protected final Scene scene
+	protected M media
 
 	/**
-	 * Load the given media file into an existing scene, returning the constructed
-	 * media object.
+	 * Constructor, create a new loader for the given media file.
 	 * 
-	 * @param mediaFile
-	 * @return
+	 * @param file
+	 * @param scene
 	 */
-	M load(F mediaFile)
+	protected MediaLoader(F file, Scene scene) {
+
+		this.file = file
+		this.scene = scene
+	}
+
+	/**
+	 * Load the media file into an existing scene.
+	 */
+	abstract M load()
+
+	/**
+	 * Unload the current media object from the scene.
+	 */
+	abstract void unload()
 }

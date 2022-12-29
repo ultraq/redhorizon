@@ -18,36 +18,86 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
 
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load an animation file into existing engines.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class AnimationLoader implements MediaLoader<AnimationFile, Animation> {
+class AnimationLoader extends MediaLoader<AnimationFile, Animation> implements EventListener<KeyEvent> {
 
-	final Scene scene
-	final GraphicsEngine graphicsEngine
-	final GameClock gameClock
+	private final GraphicsEngine graphicsEngine
+	private final GameClock gameClock
+	private final InputEventStream inputEventStream
+
+	/**
+	 * Create a loader for an animation file.
+	 * 
+	 * @param animationFile
+	 * @param scene
+	 * @param graphicsEngine
+	 * @param gameClock
+	 * @param inputEventStream
+	 */
+	AnimationLoader(AnimationFile animationFile, Scene scene, GraphicsEngine graphicsEngine, GameClock gameClock,
+		InputEventStream inputEventStream) {
+
+		super(animationFile, scene)
+		this.graphicsEngine = graphicsEngine
+		this.gameClock = gameClock
+		this.inputEventStream = inputEventStream
+	}
 
 	@Override
-	Animation load(AnimationFile animationFile) {
+	void handleEvent(KeyEvent event) {
+
+		if (event.action == GLFW_PRESS) {
+			switch (event.key) {
+				case GLFW_KEY_SPACE:
+					gameClock.togglePause()
+					break
+			}
+		}
+	}
+
+	@Override
+	Animation load() {
 
 		// Create an animation and scale it to fit the target size
-		def width = animationFile.width
-		def height = animationFile.height
-		def scaleY = animationFile.forVgaMonitors ? 1.2f : 1f
+		def width = file.width
+		def height = file.height
+		def scaleY = file.forVgaMonitors ? 1.2f : 1f
 		def scale = graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height * scaleY as int)
-
-		def animation = new Animation(animationFile, gameClock)
+		media = new Animation(file, gameClock)
 			.scale(scale, scale * scaleY as float, 1)
 			.translate(-width / 2, -height / 2)
-		scene << animation
-		return animation
+		scene << media
+
+		// Key events for controlling the animation
+		inputEventStream.on(KeyEvent, this)
+
+		return media
+	}
+
+	@Override
+	void unload() {
+
+		if (media.playing) {
+			media.stop()
+			if (file instanceof Streaming) {
+				file.streamingDataWorker.stop()
+			}
+		}
+		inputEventStream.off(KeyEvent, this)
+		scene.removeSceneElement(media)
 	}
 }
