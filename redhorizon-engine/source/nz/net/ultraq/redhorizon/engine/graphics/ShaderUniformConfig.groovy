@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
+
 /**
  * A subset of renderer functions for applying uniform values to shaders.
  * 
@@ -45,9 +47,9 @@ interface ShaderUniformConfig {
 	 * Apply a matrix uniform to the shader.
 	 * 
 	 * @param name
-	 * @param data
+	 * @param matrix
 	 */
-	void setUniformMatrix(String name, float[] data)
+	void setUniformMatrix(String name, Matrix4f matrix)
 
 	/**
 	 * Apply a texture uniform using the given texture ID.

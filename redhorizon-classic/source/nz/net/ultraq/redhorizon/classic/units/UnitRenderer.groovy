@@ -114,7 +114,7 @@ class UnitRenderer implements GraphicsElement {
 			new Uniform('model') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(name, material.transform.get(new float[16]))
+					shaderConfig.setUniformMatrix(name, material.transform)
 				}
 			}
 		)

@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
+
+import org.joml.Matrix4f
 import static org.lwjgl.opengl.GL41C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
@@ -69,16 +71,10 @@ class OpenGLShaderUniformConfig implements ShaderUniformConfig {
 	}
 
 	@Override
-	void setUniformMatrix(String name, float[] data) {
+	void setUniformMatrix(String name, Matrix4f matrix) {
 
 		stackPush().withCloseable { stack ->
-			switch (data.length) {
-				case 16:
-					glUniformMatrix4fv(getUniformLocation(name), false, stack.floats(data))
-					break
-				default:
-					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
-			}
+			glUniformMatrix4fv(getUniformLocation(name), false, matrix.get(stack.mallocFloat(16)))
 		}
 	}
 
