@@ -22,10 +22,9 @@ import nz.net.ultraq.redhorizon.classic.units.Infantry
 import nz.net.ultraq.redhorizon.classic.units.Structure
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.classic.units.Vehicle
-import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -102,38 +101,48 @@ class UnitViewer extends Viewer {
 			.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
 			.newInstance(unitData, shpFile, palette, gameClock)
 			.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			scene << unit
-		}
+		scene << unit
 
 		logger.info('Displaying the image in another window.  Close the window to exit.')
 
 		// Custom inputs
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-				switch (event.key) {
-					case GLFW_KEY_LEFT:
-						unit.rotateLeft()
-						break
-					case GLFW_KEY_RIGHT:
-						unit.rotateRight()
-						break
-					case GLFW_KEY_UP:
-						unit.previousAnimation()
-						break
-					case GLFW_KEY_DOWN:
-						unit.nextAnimation()
-						break
-					case GLFW_KEY_SPACE:
-						gameClock.togglePause()
-						break
-					// Rotate through available factions (changes the unit's colour)
-					case GLFW_KEY_P:
-						var factions = Faction.values()
-						unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]
-						break
-				}
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left') {
+			@Override
+			void handleKeyPress() {
+				unit.rotateLeft()
 			}
-		}
+		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right') {
+			@Override
+			void handleKeyPress() {
+				unit.rotateRight()
+			}
+		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation') {
+			@Override
+			void handleKeyPress() {
+				unit.previousAnimation()
+			}
+		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation') {
+			@Override
+			void handleKeyPress() {
+				unit.nextAnimation()
+			}
+		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation') {
+			@Override
+			void handleKeyPress() {
+				gameClock.togglePause()
+			}
+		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_P, 'Cycle faction colours') {
+			final Faction[] factions = Faction.values()
+
+			@Override
+			void handleKeyPress() {
+				unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]
+			}
+		})
 	}
 }

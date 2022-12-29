@@ -19,24 +19,23 @@ package nz.net.ultraq.redhorizon.engine.media
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load a video file into existing engines.
  * 
  * @author Emanuel Rabina
  */
-class VideoLoader extends MediaLoader<VideoFile, Video> implements EventListener<KeyEvent> {
+class VideoLoader extends MediaLoader<VideoFile, Video> {
 
-	final GraphicsEngine graphicsEngine
-	final GameClock gameClock
-	final InputEventStream inputEventStream
+	private final GraphicsEngine graphicsEngine
+	private final GameClock gameClock
+	private final InputEventStream inputEventStream
+	private final KeyControl playPauseControl
 
 	/**
 	 * Create a loader for an video file.
@@ -54,16 +53,11 @@ class VideoLoader extends MediaLoader<VideoFile, Video> implements EventListener
 		this.graphicsEngine = graphicsEngine
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
-	}
 
-	@Override
-	void handleEvent(KeyEvent event) {
-
-		if (event.action == GLFW_PRESS) {
-			switch (event.key) {
-				case GLFW_KEY_SPACE:
-					gameClock.togglePause()
-					break
+		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause') {
+			@Override
+			void handleKeyPress() {
+				gameClock.togglePause()
 			}
 		}
 	}
@@ -82,7 +76,7 @@ class VideoLoader extends MediaLoader<VideoFile, Video> implements EventListener
 		scene << media
 
 		// Key events for controlling the video
-		inputEventStream.on(KeyEvent, this)
+		inputEventStream.addControl(playPauseControl)
 
 		return media
 	}
@@ -94,7 +88,12 @@ class VideoLoader extends MediaLoader<VideoFile, Video> implements EventListener
 			media.stop()
 			file.streamingDataWorker.stop()
 		}
-		inputEventStream.off(KeyEvent, this)
+
+		if (gameClock.paused) {
+			gameClock.resume()
+		}
+		inputEventStream.removeControl(playPauseControl)
+
 		scene.removeSceneElement(media)
 	}
 }

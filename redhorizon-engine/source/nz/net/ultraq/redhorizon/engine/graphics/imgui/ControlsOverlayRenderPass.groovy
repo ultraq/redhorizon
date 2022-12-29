@@ -34,7 +34,7 @@ class ControlsOverlayRenderPass implements OverlayRenderPass {
 
 	boolean enabled = true
 
-	private Set<String> controls = new TreeSet<>()
+	private List<String> controls = []
 	private int controlsWindowSizeX = 350
 	private int controlsWindowSizeY = 200
 

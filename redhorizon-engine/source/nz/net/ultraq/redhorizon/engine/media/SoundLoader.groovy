@@ -18,25 +18,24 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load a sound effect or music track into existing engines.
  * 
  * @author Emanuel Rabina
  */
-class SoundLoader extends MediaLoader<SoundFile, Playable> implements EventListener<KeyEvent> {
+class SoundLoader extends MediaLoader<SoundFile, Playable> {
 
-	final GameClock gameClock
-	final InputEventStream inputEventStream
+	private final GameClock gameClock
+	private final InputEventStream inputEventStream
+	private final KeyControl playPauseControl
 
 	/**
 	 * Constructor, create a loader for sound files.
@@ -51,16 +50,11 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> implements EventListe
 		super(soundFile, scene)
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
-	}
 
-	@Override
-	void handleEvent(KeyEvent event) {
-
-		if (event.action == GLFW_PRESS) {
-			switch (event.key) {
-				case GLFW_KEY_SPACE:
-					gameClock.togglePause()
-					break
+		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause') {
+			@Override
+			void handleKeyPress() {
+				gameClock.togglePause()
 			}
 		}
 	}
@@ -70,7 +64,8 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> implements EventListe
 
 		media = file.forStreaming ? new SoundTrack(file, gameClock) : new SoundEffect(file)
 		scene << media
-		inputEventStream.on(KeyEvent, this)
+
+		inputEventStream.addControl(playPauseControl)
 
 		return media
 	}
@@ -84,7 +79,12 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> implements EventListe
 				file.streamingDataWorker.stop()
 			}
 		}
-		inputEventStream.off(KeyEvent, this)
+
+		if (gameClock.paused) {
+			gameClock.resume()
+		}
+		inputEventStream.removeControl(playPauseControl)
+
 		scene.removeSceneElement((SceneElement)media)
 	}
 }

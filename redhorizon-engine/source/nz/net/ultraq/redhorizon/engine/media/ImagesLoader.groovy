@@ -18,9 +18,8 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -32,13 +31,14 @@ import static org.lwjgl.glfw.GLFW.*
  * 
  * @author Emanuel Rabina
  */
-class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> implements EventListener<KeyEvent> {
+class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 
 	private final Palette palette
 	private final GraphicsEngine graphicsEngine
 	private final InputEventStream inputEventStream
-	private final Vector3f center
-	private final int tick
+	private final KeyControl scrollLeftControl
+	private final KeyControl scrollRightContol
+	private final KeyControl recenterControl
 
 	/**
 	 * Constructor, create a loader for an images file.
@@ -57,24 +57,25 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> implements EventL
 		this.graphicsEngine = graphicsEngine
 		this.inputEventStream = inputEventStream
 
-		center = new Vector3f()
-		tick = imagesFile.width
-	}
+		var center = new Vector3f()
+		var tick = imagesFile.width
 
-	@Override
-	void handleEvent(KeyEvent event) {
-
-		if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-			switch (event.key) {
-				case GLFW_KEY_LEFT:
-					graphicsEngine.camera.translate(tick, 0)
-					break
-				case GLFW_KEY_RIGHT:
-					graphicsEngine.camera.translate(-tick, 0)
-					break
-				case GLFW_KEY_SPACE:
-					graphicsEngine.camera.center(center)
-					break
+		scrollLeftControl = new KeyControl(GLFW_KEY_LEFT, 'Scroll left') {
+			@Override
+			void handleKeyPress() {
+				graphicsEngine.camera.translate(tick, 0)
+			}
+		}
+		scrollRightContol = new KeyControl(GLFW_KEY_RIGHT, 'Scroll right') {
+			@Override
+			void handleKeyPress() {
+				graphicsEngine.camera.translate(-tick, 0)
+			}
+		}
+		recenterControl = new KeyControl(GLFW_KEY_SPACE, 'Reset scroll') {
+			@Override
+			void handleKeyPress() {
+				graphicsEngine.camera.center(center)
 			}
 		}
 	}
@@ -84,7 +85,10 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> implements EventL
 
 		media = new ImageStrip(file, palette)
 		scene << media
-		inputEventStream.on(KeyEvent, this)
+
+		inputEventStream.addControl(scrollLeftControl)
+		inputEventStream.addControl(scrollRightContol)
+		inputEventStream.addControl(recenterControl)
 
 		return media
 	}
@@ -92,7 +96,10 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> implements EventL
 	@Override
 	void unload() {
 
-		inputEventStream.off(KeyEvent, this)
+		inputEventStream.removeControl(scrollLeftControl)
+		inputEventStream.removeControl(scrollRightContol)
+		inputEventStream.removeControl(recenterControl)
+
 		scene.removeSceneElement(media)
 	}
 }

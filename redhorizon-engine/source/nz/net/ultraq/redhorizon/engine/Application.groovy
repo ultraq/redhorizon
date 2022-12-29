@@ -29,6 +29,7 @@ import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -97,7 +98,12 @@ abstract class Application {
 			}
 		}
 
+		var applicationReady = new CountDownLatch(2)
+
 		audioEngine = new AudioEngine(audioConfig, scene)
+		audioEngine.on(EngineLoopStartEvent) { event ->
+			applicationReady.countDown()
+		}
 		audioEngine.on(EngineStoppedEvent) { event ->
 			stop()
 		}
@@ -105,6 +111,9 @@ abstract class Application {
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
 		graphicsEngine.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+		}
+		graphicsEngine.on(EngineLoopStartEvent) { event ->
+			applicationReady.countDown()
 		}
 		graphicsEngine.on(EngineStoppedEvent) { event ->
 			stop()
@@ -118,6 +127,7 @@ abstract class Application {
 
 		// Start the application
 		logger.debug('Starting application...')
+		applicationReady.await()
 		applicationStart()
 
 		graphicsEngineTask.get()

@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -56,13 +55,11 @@ abstract class Viewer extends Application {
 		def mouseMovementModifier = 1f
 		def scaleIndex = scaleRange.findIndexOf { it == initialScale }
 
-		graphicsEngine.on(WindowCreatedEvent) { event ->
-			def renderResolution = graphicsEngine.graphicsContext.renderResolution
-			def targetResolution = graphicsEngine.graphicsContext.targetResolution
-			mouseMovementModifier = renderResolution.width / targetResolution.width
+		def renderResolution = graphicsEngine.graphicsContext.renderResolution
+		def targetResolution = graphicsEngine.graphicsContext.targetResolution
+		mouseMovementModifier = renderResolution.width / targetResolution.width
 
-			graphicsEngine.camera.scale(scaleRange[scaleIndex])
-		}
+		graphicsEngine.camera.scale(scaleRange[scaleIndex])
 
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
