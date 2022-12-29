@@ -19,25 +19,24 @@ package nz.net.ultraq.redhorizon.engine.media
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventListener
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Load an animation file into existing engines.
  * 
  * @author Emanuel Rabina
  */
-class AnimationLoader extends MediaLoader<AnimationFile, Animation> implements EventListener<KeyEvent> {
+class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 
 	private final GraphicsEngine graphicsEngine
 	private final GameClock gameClock
 	private final InputEventStream inputEventStream
+	private final KeyControl playPauseControl
 
 	/**
 	 * Create a loader for an animation file.
@@ -55,16 +54,11 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> implements E
 		this.graphicsEngine = graphicsEngine
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
-	}
 
-	@Override
-	void handleEvent(KeyEvent event) {
-
-		if (event.action == GLFW_PRESS) {
-			switch (event.key) {
-				case GLFW_KEY_SPACE:
-					gameClock.togglePause()
-					break
+		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause') {
+			@Override
+			void handleKeyPress() {
+				gameClock.togglePause()
 			}
 		}
 	}
@@ -83,7 +77,7 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> implements E
 		scene << media
 
 		// Key events for controlling the animation
-		inputEventStream.on(KeyEvent, this)
+		inputEventStream.addControl(playPauseControl)
 
 		return media
 	}
@@ -97,7 +91,7 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> implements E
 				file.streamingDataWorker.stop()
 			}
 		}
-		inputEventStream.off(KeyEvent, this)
+		inputEventStream.removeControl(playPauseControl)
 		scene.removeSceneElement(media)
 	}
 }

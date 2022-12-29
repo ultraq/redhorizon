@@ -32,6 +32,17 @@ class InputEventStream implements EventTarget {
 	private static final Logger logger = LoggerFactory.getLogger(InputEventStream)
 
 	/**
+	 * Register an input binding with the application.
+	 * 
+	 * @param control
+	 */
+	void addControl(Control control) {
+
+		on(control.event, control)
+		trigger(new ControlAddedEvent(control))
+	}
+
+	/**
 	 * Add a source for input events that can be listened to using this object.
 	 * 
 	 * @param inputSource
@@ -44,5 +55,16 @@ class InputEventStream implements EventTarget {
 			}
 			trigger(event)
 		}
+	}
+
+	/**
+	 * Deregister an input binding from the application.
+	 * 
+	 * @param control
+	 */
+	void removeControl(Control control) {
+
+		off(control.event, control)
+		trigger(new ControlRemovedEvent(control))
 	}
 }

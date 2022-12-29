@@ -46,7 +46,6 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	private static final int MAX_DEBUG_LINES = 10
 
 	boolean enabled
-	final ImGuiLayer imGuiLayer
 
 	// Debug information
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
@@ -63,10 +62,9 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	 * information it needs to build the display.
 	 * 
 	 * @param renderer
-	 * @param imGuiLayer
 	 * @param enabled
 	 */
-	DebugOverlayRenderPass(GraphicsRenderer renderer, ImGuiLayer imGuiLayer, boolean enabled) {
+	DebugOverlayRenderPass(GraphicsRenderer renderer, boolean enabled) {
 
 		renderer.on(RendererEvent) { event ->
 			if (event instanceof DrawEvent) {
@@ -104,7 +102,6 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 		}
 
 		this.enabled = enabled
-		this.imGuiLayer = imGuiLayer
 	}
 
 	@Override

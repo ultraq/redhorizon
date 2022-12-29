@@ -150,13 +150,12 @@ class GraphicsEngine extends Engine implements InputSource {
 				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
 
 				new OpenGLRenderer(config, context).withCloseable { renderer ->
-					new ImGuiLayer(config, context).withCloseable { imGuiLayer ->
+					new ImGuiLayer(config, context, inputEventStream).withCloseable { imGuiLayer ->
 						logger.debug(renderer.toString())
 						imGuiLayer.relay(FramebufferSizeEvent, this)
-						inputEventStream.addInputSource(imGuiLayer)
 						camera.init(renderer)
 
-						renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, scene, camera)
+						renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, inputEventStream, scene, camera)
 						renderPipeline.withCloseable { pipeline ->
 
 							// Rendering loop

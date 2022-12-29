@@ -21,9 +21,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.*
+import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFontConfig
 import imgui.ImGui
@@ -32,8 +33,9 @@ import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static imgui.flag.ImGuiConfigFlags.*
-import static imgui.flag.ImGuiDockNodeFlags.*
+import static imgui.flag.ImGuiConfigFlags.DockingEnable
+import static imgui.flag.ImGuiDockNodeFlags.NoResize
+import static imgui.flag.ImGuiDockNodeFlags.PassthruCentralNode
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*
@@ -85,9 +87,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 * 
 	 * @param config
 	 * @param context
-	 * @param renderer
+	 * @param inputEventStream
 	 */
-	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context) {
+	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context, InputEventStream inputEventStream) {
 
 		this.config = config
 		debugOverlay = config.debug
@@ -122,6 +124,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 				}
 			}
 		}
+
+		inputEventStream.addInputSource(this)
 	}
 
 	@Override

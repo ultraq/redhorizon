@@ -18,8 +18,10 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
@@ -74,29 +76,42 @@ class RenderPipeline implements AutoCloseable {
 	 * @param context
 	 * @param renderer
 	 * @param imGuiLayer
+	 * @param inputEventStream
 	 * @param scene
 	 * @param camera
 	 */
 	RenderPipeline(GraphicsConfiguration config, GraphicsContext context, GraphicsRenderer renderer,
-		ImGuiLayer imGuiLayer, Scene scene, Camera camera) {
+		ImGuiLayer imGuiLayer, InputEventStream inputEventStream, Scene scene, Camera camera) {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
 		this.scene = scene
 		this.camera = camera
 
-		// Build the standard rendering pipeline, including the debug overlay as
-		// that'll be standard for as long as this thing is in development
+		// Build the standard rendering pipeline, including the debug and control
+		// overlays as they'll be standard for as long as this thing is in
+		// development
 		configurePipeline(scene, config, context)
-		def debugOverlayRenderPass = new DebugOverlayRenderPass(renderer, imGuiLayer, config.debug)
+
+		def debugOverlay = new DebugOverlayRenderPass(renderer, config.debug)
 		context.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_D) {
-					debugOverlayRenderPass.enabled = !debugOverlayRenderPass.enabled
+					debugOverlay.enabled = !debugOverlay.enabled
 				}
 			}
 		}
-		overlayPasses << debugOverlayRenderPass
+		overlayPasses << debugOverlay
+
+		var controlsOverlay = new ControlsOverlayRenderPass(inputEventStream)
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS) {
+				if (event.key == GLFW_KEY_C) {
+					controlsOverlay.enabled = !controlsOverlay.enabled
+				}
+			}
+		}
+		overlayPasses << controlsOverlay
 
 		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
