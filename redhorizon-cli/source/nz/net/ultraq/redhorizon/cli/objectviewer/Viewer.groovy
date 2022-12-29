@@ -97,7 +97,7 @@ abstract class Viewer extends Application {
 				}
 				// Use scroll input to move around the map
 				else {
-					graphicsEngine.camera.translate(3 * event.xOffset as float, 3 * -event.yOffset as float)
+					graphicsEngine.camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
 				}
 			}
 			inputEventStream.on(MouseButtonEvent) { event ->
