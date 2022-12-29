@@ -51,7 +51,6 @@ import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
 
-import groovy.transform.Memoized
 import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
@@ -63,7 +62,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -129,14 +128,14 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoClose
 		standardShader = createShader('Standard',
 			new Uniform('mainTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(location, 0, material.texture.textureId)
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(location, material.transform.get(new float[16]))
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformMatrix(name, material.transform.get(new float[16]))
 				}
 			}
 		)
@@ -408,7 +407,7 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoClose
 			glDeleteShader(vertexShaderId)
 			glDeleteShader(fragmentShaderId)
 
-			shader = new Shader(
+			shader = new OpenGLShader(
 				programId: programId,
 				name: name,
 				uniforms: uniforms
@@ -510,8 +509,9 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoClose
 
 			glUseProgram(shader.programId)
 
+			var shaderUniformConfig = shader.withShaderUniformConfig()
 			shader.uniforms.each { uniform ->
-				uniform.apply(getUniformLocation(shader, uniform.name), material, this)
+				uniform.apply(material, shaderUniformConfig)
 			}
 
 			glBindVertexArray(mesh.vertexArrayId)
@@ -542,19 +542,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoClose
 		}
 	}
 
-	/**
-	 * Cached function for looking up a uniform location in a shader program.
-	 * 
-	 * @param shader
-	 * @param name
-	 * @return
-	 */
-	@Memoized
-	protected static int getUniformLocation(Shader shader, String name) {
-
-		return glGetUniformLocation(shader.programId, name)
-	}
-
 	@Override
 	void setRenderTarget(Framebuffer framebuffer) {
 
@@ -566,50 +553,6 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoClose
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
 			glViewport(0, 0, framebufferSize.width, framebufferSize.height)
 		}
-	}
-
-	@Override
-	void setUniform(int location, float[] data) {
-
-		stackPush().withCloseable { stack ->
-			switch (data.length) {
-				case 2:
-					glUniform2fv(location, stack.floats(data))
-					break
-				default:
-					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
-			}
-		}
-	}
-
-	@Override
-	void setUniform(int location, int[] data) {
-
-		stackPush().withCloseable { stack ->
-			glUniform1iv(location, stack.ints(data))
-		}
-	}
-
-	@Override
-	void setUniformMatrix(int location, float[] data) {
-
-		stackPush().withCloseable { stack ->
-			switch (data.length) {
-				case 16:
-					glUniformMatrix4fv(location, false, stack.floats(data))
-					break
-				default:
-					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
-			}
-		}
-	}
-
-	@Override
-	void setUniformTexture(int location, int textureUnit, int textureId) {
-
-		glUniform1i(location, textureUnit)
-		glActiveTexture(GL_TEXTURE0 + textureUnit)
-		glBindTexture(GL_TEXTURE_2D, textureId)
 	}
 
 	/**

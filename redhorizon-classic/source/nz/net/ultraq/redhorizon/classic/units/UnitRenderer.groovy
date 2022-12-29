@@ -95,26 +95,26 @@ class UnitRenderer implements GraphicsElement {
 		shader = renderer.createShader('Paletted',
 			new Uniform('indexTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(location, 0, material.texture.textureId)
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('paletteTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(location, 1, paletteAsTexture.textureId)
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(name, 1, paletteAsTexture.textureId)
 				}
 			},
 			new Uniform('factionColours') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniform(location, unit.faction.colours)
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniform(name, unit.faction.colours)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(location, material.transform.get(new float[16]))
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformMatrix(name, material.transform.get(new float[16]))
 				}
 			}
 		)

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
+
+import groovy.transform.InheritConstructors
+import groovy.transform.Memoized
 
 /**
- * Class detailing a uniform value in a shader and how to apply it to the shader
- * during rendering.
+ * OpenGL-specific shader implementation.
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Uniform {
+@InheritConstructors
+class OpenGLShader extends Shader {
 
-	final String name
+	@Memoized
+	@Override
+	ShaderUniformConfig withShaderUniformConfig() {
 
-	/**
-	 * Apply the uniform value to the shader it's associated with.
-	 * 
-	 * @param material
-	 * @param shaderConfig
-	 */
-	abstract void apply(Material material, ShaderUniformConfig shaderConfig)
+		return new OpenGLShaderUniformConfig(this)
+	}
 }

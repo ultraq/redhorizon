@@ -25,7 +25,7 @@ import groovy.transform.MapConstructor
  */
 @MapConstructor
 @SuppressWarnings('GrFinalVariableAccess')
-class Shader {
+abstract class Shader {
 
 	final int programId
 
@@ -46,4 +46,12 @@ class Shader {
 		}
 		return string
 	}
+
+	/**
+	 * Return a configuration object that can be used to adjust this shader in
+	 * preparation for rendering.
+	 * 
+	 * @return
+	 */
+	abstract ShaderUniformConfig withShaderUniformConfig()
 }

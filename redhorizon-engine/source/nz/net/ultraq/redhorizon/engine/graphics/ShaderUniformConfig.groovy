@@ -27,34 +27,34 @@ interface ShaderUniformConfig {
 	 * Apply a data uniform to the shader.  The type of data is determined by the
 	 * size of the data array.
 	 * 
-	 * @param location
+	 * @param name
 	 * @param data
 	 */
-	void setUniform(int location, float[] data)
+	void setUniform(String name, float[] data)
 
 	/**
 	 * Apply a data uniform to the shader.  The type of data is determined by the
 	 * size of the data array.
 	 *
-	 * @param location
+	 * @param name
 	 * @param data
 	 */
-	void setUniform(int location, int[] data)
+	void setUniform(String name, int[] data)
 
 	/**
 	 * Apply a matrix uniform to the shader.
 	 * 
-	 * @param location
+	 * @param name
 	 * @param data
 	 */
-	void setUniformMatrix(int location, float[] data)
+	void setUniformMatrix(String name, float[] data)
 
 	/**
 	 * Apply a texture uniform using the given texture ID.
 	 * 
-	 * @param location
+	 * @param name
 	 * @param textureUnit
 	 * @param textureId
 	 */
-	void setUniformTexture(int location, int textureUnit, int textureId)
+	void setUniformTexture(String name, int textureUnit, int textureId)
 }
