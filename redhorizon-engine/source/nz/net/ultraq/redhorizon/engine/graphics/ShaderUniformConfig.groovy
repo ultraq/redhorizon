@@ -21,15 +21,25 @@ package nz.net.ultraq.redhorizon.engine.graphics
  * 
  * @author Emanuel Rabina
  */
-interface ShaderUniformSetter {
+interface ShaderUniformConfig {
 
 	/**
-	 * Apply a data uniform to the shader.
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
 	 * 
 	 * @param location
 	 * @param data
 	 */
 	void setUniform(int location, float[] data)
+
+	/**
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
+	 *
+	 * @param location
+	 * @param data
+	 */
+	void setUniform(int location, int[] data)
 
 	/**
 	 * Apply a matrix uniform to the shader.

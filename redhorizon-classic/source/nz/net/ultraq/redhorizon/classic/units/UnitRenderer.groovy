@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformSetter
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -84,32 +84,41 @@ class UnitRenderer implements GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height))
+
 		textures = imagesData.collect { data ->
 			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED.value,
 				data.flipVertical(unit.width, unit.height, FORMAT_INDEXED)
 			)
 		}
+
 		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
 		shader = renderer.createShader('Paletted',
 			new Uniform('indexTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-					uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(location, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('paletteTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-					uniformSetter.setUniformTexture(location, 1, paletteAsTexture.textureId)
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(location, 1, paletteAsTexture.textureId)
+				}
+			},
+			new Uniform('factionColours') {
+				@Override
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniform(location, unit.faction.colours)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-					uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformMatrix(location, material.transform.get(new float[16]))
 				}
 			}
 		)
+
 		material = renderer.createMaterial(
 			mesh: mesh,
 			shader: shader,

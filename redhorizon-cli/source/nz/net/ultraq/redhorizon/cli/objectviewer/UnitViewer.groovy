@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.units.Faction
 import nz.net.ultraq.redhorizon.classic.units.Infantry
 import nz.net.ultraq.redhorizon.classic.units.Structure
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -125,6 +126,11 @@ class UnitViewer extends Viewer {
 						break
 					case GLFW_KEY_SPACE:
 						gameClock.togglePause()
+						break
+					// Rotate through available factions (changes the unit's colour)
+					case GLFW_KEY_P:
+						var factions = Faction.values()
+						unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]
 						break
 				}
 			}

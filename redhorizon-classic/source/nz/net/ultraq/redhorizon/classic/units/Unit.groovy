@@ -38,6 +38,7 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	protected final int width
 	protected final int height
 	protected float heading
+	Faction faction = Faction.GOLD
 
 	/**
 	 * Constructor, set the unit's width and height.

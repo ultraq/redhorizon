@@ -138,20 +138,20 @@ class RenderPipeline implements AutoCloseable {
 
 		var framebufferUniform = new Uniform('framebuffer') {
 			@Override
-			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-				uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+			void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+				shaderConfig.setUniformTexture(location, 0, material.texture.textureId)
 			}
 		}
 		def modelUniform = new Uniform('model') {
 			@Override
-			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-				uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+			void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+				shaderConfig.setUniformMatrix(location, material.transform.get(new float[16]))
 			}
 		}
 		def textureTargetSizeUniform = new Uniform('textureTargetSize') {
 			@Override
-			void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-				uniformSetter.setUniform(location, context.targetResolution as float[])
+			void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+				shaderConfig.setUniform(location, context.targetResolution as float[])
 			}
 		}
 
@@ -165,8 +165,8 @@ class RenderPipeline implements AutoCloseable {
 					modelUniform,
 					new Uniform('textureSourceSize') {
 						@Override
-						void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-							uniformSetter.setUniform(location, context.renderResolution as float[])
+						void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+							shaderConfig.setUniform(location, context.renderResolution as float[])
 						}
 					},
 					textureTargetSizeUniform
@@ -186,9 +186,9 @@ class RenderPipeline implements AutoCloseable {
 					modelUniform,
 					new Uniform('textureSourceSize') {
 						@Override
-						void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
+						void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
 							def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
-							uniformSetter.setUniform(location, context.renderResolution * scale as float[])
+							shaderConfig.setUniform(location, context.renderResolution * scale as float[])
 						}
 					},
 					textureTargetSizeUniform

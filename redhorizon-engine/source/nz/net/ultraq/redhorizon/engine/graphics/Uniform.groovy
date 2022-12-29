@@ -34,7 +34,7 @@ abstract class Uniform {
 	 * 
 	 * @param location
 	 * @param material
-	 * @param uniformSetter
+	 * @param shaderConfig
 	 */
-	abstract void apply(int location, Material material, ShaderUniformSetter uniformSetter)
+	abstract void apply(int location, Material material, ShaderUniformConfig shaderConfig)
 }

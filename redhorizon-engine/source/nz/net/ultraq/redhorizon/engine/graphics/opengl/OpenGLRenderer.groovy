@@ -31,7 +31,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformSetter
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -63,7 +63,7 @@ import java.nio.ByteBuffer
  * 
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer, ShaderUniformConfig, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -129,14 +129,14 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 		standardShader = createShader('Standard',
 			new Uniform('mainTexture') {
 				@Override
-				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-					uniformSetter.setUniformTexture(location, 0, material.texture.textureId)
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformTexture(location, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(int location, Material material, ShaderUniformSetter uniformSetter) {
-					uniformSetter.setUniformMatrix(location, material.transform.get(new float[16]))
+				void apply(int location, Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformMatrix(location, material.transform.get(new float[16]))
 				}
 			}
 		)
@@ -374,7 +374,9 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 
 			def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
 			if (status != GL_TRUE) {
-				throw new Exception(glGetShaderInfoLog(shaderId))
+				var message = glGetShaderInfoLog(shaderId)
+				logger.error(message)
+				throw new Exception(message)
 			}
 
 			return shaderId
@@ -577,6 +579,14 @@ class OpenGLRenderer implements GraphicsRenderer, ShaderUniformSetter, AutoClose
 				default:
 					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
 			}
+		}
+	}
+
+	@Override
+	void setUniform(int location, int[] data) {
+
+		stackPush().withCloseable { stack ->
+			glUniform1iv(location, stack.ints(data))
 		}
 	}
 
