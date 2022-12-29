@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.async
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.FutureTask
 import java.util.concurrent.RunnableFuture
 
@@ -28,6 +31,8 @@ import java.util.concurrent.RunnableFuture
  * @author Emanuel Rabina
  */
 class ControlledLoop implements RunnableWorker {
+
+	private static final Logger logger = LoggerFactory.getLogger(ControlledLoop)
 
 	@Delegate
 	final FutureTask<Void> loopTask
@@ -53,8 +58,13 @@ class ControlledLoop implements RunnableWorker {
 	ControlledLoop(Closure loopCondition, Closure loop) {
 
 		loopTask = new FutureTask<>({ ->
-			while (!cancelled && loopCondition()) {
-				loop()
+			try {
+				while (!cancelled && loopCondition()) {
+					loop()
+				}
+			}
+			catch (Exception ex) {
+				logger.error("An error occurred in a controlled loop \"${Thread.currentThread().name}\"", ex)
 			}
 		}, null)
 	}
