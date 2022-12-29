@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.Vector2f
@@ -61,12 +63,25 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		var shader = renderer.createShader('Primitives',
+			// TODO: Every shader has a model uniform - should we bake this into the
+			//       createShader method? 🤔
+			new Uniform('model') {
+				@Override
+				void apply(Material material, ShaderUniformConfig shaderConfig) {
+					shaderConfig.setUniformMatrix(name, material.transform)
+				}
+			}
+		)
+
 		axisLines = renderer.createMaterial(
 			mesh: renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX),
+			shader: shader,
 			transform: transform
 		)
 		boundaryLines = renderer.createMaterial(
 			mesh: renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
+			shader: shader,
 			transform: transform
 		)
 	}

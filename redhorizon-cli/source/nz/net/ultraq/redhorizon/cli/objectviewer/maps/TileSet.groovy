@@ -133,7 +133,6 @@ class TileSet implements GraphicsElement {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		// TODO: Move image flipping to the renderer since it's an OpenGL detail?
 		texture = renderer.createTexture(tilesetWidth, tilesetHeight, palette.format.value,
 			tilesetData.flipVertical(tilesetWidth, tilesetHeight, palette.format)
 		)
