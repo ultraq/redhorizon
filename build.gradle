@@ -43,14 +43,14 @@ subprojects {
 //	}
 
 	ext {
-		groovyVersion = '4.0.4'
+		groovyVersion = '4.0.2'
 		imguiVersion = '1.86.4'
-		jomlVersion = '1.10.4'
+		jomlVersion = '1.10.5'
 		jomlPrimitivesVersion = '1.10.0'
-		logbackVersion = '1.2.11'
+		logbackVersion = '1.4.5'
 		lwjglVersion = '3.3.1'
 		reflectionsVersion = '0.10.2'
-		slf4jVersion = '1.7.32'
+		slf4jVersion = '2.0.6'
 	}
 	ext.targetPlatform = targetPlatform
 
@@ -61,7 +61,7 @@ subprojects {
 		implementation "org.apache.groovy:groovy:${groovyVersion}"
 		implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
-		testImplementation 'org.spockframework:spock-core:2.2-M1-groovy-4.0'
+		testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
 		testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
 	}
 
