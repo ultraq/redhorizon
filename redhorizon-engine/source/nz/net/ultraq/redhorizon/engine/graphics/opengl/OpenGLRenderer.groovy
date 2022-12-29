@@ -70,7 +70,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final GLCapabilities capabilities
 
 	private Dimension framebufferSize
-	private final Shader standardShader
+	private final Shader spriteShader
 	protected final List<Shader> shaders = []
 	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
@@ -119,7 +119,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		// Create the shader programs used by this renderer
-		standardShader = createShader('Standard',
+		spriteShader = createShader(
+			'Sprite',
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
 			new Uniform('mainTexture') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {
@@ -280,7 +282,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		return new Material(
 			mesh: mesh,
 			texture: texture,
-			shader: shader ?: standardShader,
+			shader: shader ?: spriteShader,
 			transform: transform ?: new Matrix4f()
 		)
 	}
@@ -343,14 +345,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Shader createShader(String name, Uniform ...uniforms) {
+	Shader createShader(String name, String shaderPathPrefix, Uniform ...uniforms) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
 		 * check to make sure it all went OK.
 		 */
 		def createShader = { int type ->
-			def shaderPath = "nz/net/ultraq/redhorizon/engine/graphics/opengl/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
+			def shaderPath = "${shaderPathPrefix}/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
 			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream -> stream.text }
 			def shaderId = glCreateShader(type)
 			glShaderSource(shaderId, shaderSource)

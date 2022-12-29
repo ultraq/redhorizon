@@ -98,10 +98,11 @@ interface GraphicsRenderer extends EventTarget {
 	 * name.
 	 * 
 	 * @param name
+	 * @param shaderPathPrefix
 	 * @param uniforms
 	 * @return
 	 */
-	Shader createShader(String name, Uniform ...uniforms)
+	Shader createShader(String name, String shaderPathPrefix, Uniform ...uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go, using

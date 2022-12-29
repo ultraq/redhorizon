@@ -160,7 +160,9 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('SharpUpscaling',
+				shader: renderer.createShader(
+					'SharpUpscaling',
+					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
 					framebufferUniform,
 					modelUniform,
 					new Uniform('textureSourceSize') {
@@ -181,7 +183,9 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('Scanlines',
+				shader: renderer.createShader(
+					'Scanlines',
+					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
 					framebufferUniform,
 					modelUniform,
 					new Uniform('textureSourceSize') {
@@ -202,7 +206,12 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(
 				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
-				shader: renderer.createShader('Screen', framebufferUniform, modelUniform)
+				shader: renderer.createShader(
+					'Screen',
+					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+					framebufferUniform,
+					modelUniform
+				)
 			),
 			!config.startWithChrome,
 			context

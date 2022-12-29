@@ -11,7 +11,7 @@ uniform int[16] factionColours;
 
 // The first and last index of the faction colours in the C&C palette, adjusted
 // for the 0.0f-1.0f range that texture coordinates are in
-float factionLower = 0.3125f;     // 80 / 256 
+float factionLower = 0.3125f;     // 80 / 256
 float factionUpper = 0.37109375f; // 95 / 256
 
 /**

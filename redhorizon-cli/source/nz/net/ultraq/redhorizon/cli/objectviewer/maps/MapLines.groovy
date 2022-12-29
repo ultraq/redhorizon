@@ -63,9 +63,9 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		var shader = renderer.createShader('Primitives',
-			// TODO: Every shader has a model uniform - should we bake this into the
-			//       createShader method? 🤔
+		var shader = renderer.createShader(
+			'Primitives',
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
 			new Uniform('model') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {

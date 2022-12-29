@@ -92,7 +92,9 @@ class UnitRenderer implements GraphicsElement {
 		}
 
 		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
-		shader = renderer.createShader('Paletted',
+		shader = renderer.createShader(
+			'PalettedSprite',
+			'nz/net/ultraq/redhorizon/classic/shaders',
 			new Uniform('indexTexture') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {
