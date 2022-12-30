@@ -28,7 +28,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Load a collection of images into existing engines.
- * 
+ *
  * @author Emanuel Rabina
  */
 class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
@@ -42,7 +42,7 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 
 	/**
 	 * Constructor, create a loader for an images file.
-	 * 
+	 *
 	 * @param imagesFile
 	 * @param palette
 	 * @param scene
@@ -60,24 +60,15 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 		var center = new Vector3f()
 		var tick = imagesFile.width
 
-		scrollLeftControl = new KeyControl(GLFW_KEY_LEFT, 'Scroll left') {
-			@Override
-			void handleKeyPress() {
-				graphicsEngine.camera.translate(tick, 0)
-			}
-		}
-		scrollRightContol = new KeyControl(GLFW_KEY_RIGHT, 'Scroll right') {
-			@Override
-			void handleKeyPress() {
-				graphicsEngine.camera.translate(-tick, 0)
-			}
-		}
-		recenterControl = new KeyControl(GLFW_KEY_SPACE, 'Reset scroll') {
-			@Override
-			void handleKeyPress() {
-				graphicsEngine.camera.center(center)
-			}
-		}
+		scrollLeftControl = new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
+			graphicsEngine.camera.translate(tick, 0)
+		})
+		scrollRightContol = new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
+			graphicsEngine.camera.translate(-tick, 0)
+		})
+		recenterControl = new KeyControl(GLFW_KEY_SPACE, 'Reset scroll', { ->
+			graphicsEngine.camera.center(center)
+		})
 	}
 
 	@Override

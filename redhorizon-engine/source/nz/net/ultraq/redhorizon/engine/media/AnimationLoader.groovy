@@ -28,7 +28,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
  * Load an animation file into existing engines.
- * 
+ *
  * @author Emanuel Rabina
  */
 class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
@@ -40,7 +40,7 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 
 	/**
 	 * Create a loader for an animation file.
-	 * 
+	 *
 	 * @param animationFile
 	 * @param scene
 	 * @param graphicsEngine
@@ -55,12 +55,9 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
 
-		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause') {
-			@Override
-			void handleKeyPress() {
-				gameClock.togglePause()
-			}
-		}
+		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			gameClock.togglePause()
+		})
 	}
 
 	@Override

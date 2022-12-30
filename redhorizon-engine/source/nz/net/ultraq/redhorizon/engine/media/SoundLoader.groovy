@@ -28,7 +28,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
  * Load a sound effect or music track into existing engines.
- * 
+ *
  * @author Emanuel Rabina
  */
 class SoundLoader extends MediaLoader<SoundFile, Playable> {
@@ -51,12 +51,9 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
 
-		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause') {
-			@Override
-			void handleKeyPress() {
-				gameClock.togglePause()
-			}
-		}
+		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			gameClock.togglePause()
+		})
 	}
 
 	@Override
@@ -85,6 +82,6 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 		}
 		inputEventStream.removeControl(playPauseControl)
 
-		scene.removeSceneElement((SceneElement)media)
+		scene.removeSceneElement((SceneElement) media)
 	}
 }

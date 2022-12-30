@@ -19,10 +19,8 @@ package nz.net.ultraq.redhorizon.cli.objectviewer
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapLines
 import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapRA
-import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 
 import org.joml.Vector3f
@@ -32,7 +30,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 /**
  * A map viewer for testing map building.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MapViewer extends Viewer {
@@ -48,7 +46,7 @@ class MapViewer extends Viewer {
 
 	/**
 	 * Constructor, set the map and resource manager to use for displaying a map.
-	 * 
+	 *
 	 * @param graphicsConfig
 	 * @param resourceManager
 	 * @param mapFile
@@ -68,43 +66,31 @@ class MapViewer extends Viewer {
 		logger.info('File details: {}', mapFile)
 
 		// Add the map
-		MapRA map
-		Vector3f mapInitialPosition
-		graphicsEngine.on(WindowCreatedEvent) { event ->
-			map = new MapRA(resourceManager, mapFile)
-			mapInitialPosition = new Vector3f(map.initialPosition, 0)
-			logger.info('Map details: {}', map)
+		var map = new MapRA(resourceManager, mapFile)
+		var mapInitialPosition = new Vector3f(map.initialPosition, 0)
+		logger.info('Map details: {}', map)
 
-			graphicsEngine.on(EngineLoopStartEvent) { engineLoopStartEvent ->
-				graphicsEngine.camera.center(mapInitialPosition)
-				scene << map
-				scene << new MapLines(map)
-			}
-		}
+		graphicsEngine.camera.center(mapInitialPosition)
+		scene << map
+		scene << new MapLines(map)
 
-		logger.info('Displaying the image in another window.  Close the window to exit.')
+		logger.info('Displaying the map.  Close the window to exit.')
 
 		// Custom inputs
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-				switch (event.key) {
-					case GLFW_KEY_UP:
-						graphicsEngine.camera.translate(0, -TICK)
-						break
-					case GLFW_KEY_DOWN:
-						graphicsEngine.camera.translate(0, TICK)
-						break
-					case GLFW_KEY_LEFT:
-						graphicsEngine.camera.translate(TICK, 0)
-						break
-					case GLFW_KEY_RIGHT:
-						graphicsEngine.camera.translate(-TICK, 0)
-						break
-					case GLFW_KEY_SPACE:
-						graphicsEngine.camera.center(mapInitialPosition)
-						break
-				}
-			}
-		}
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Scroll up', { ->
+			graphicsEngine.camera.translate(0, -TICK)
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Scroll down', { ->
+			graphicsEngine.camera.translate(0, TICK)
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
+			graphicsEngine.camera.translate(TICK, 0)
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
+			graphicsEngine.camera.translate(-TICK, 0)
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Center starting position', { ->
+			graphicsEngine.camera.center(mapInitialPosition)
+		}))
 	}
 }

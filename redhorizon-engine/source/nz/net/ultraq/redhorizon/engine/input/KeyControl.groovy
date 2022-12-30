@@ -25,34 +25,37 @@ import java.lang.reflect.Modifier
 
 /**
  * Keyboard-specific control class.
- * 
+ *
  * @author Emanuel Rabina
  */
-abstract class KeyControl extends Control<KeyEvent> {
- 
+class KeyControl extends Control<KeyEvent> {
+
 	private final int key
+	private Closure handler
 
 	/**
 	 * Constructor, build a key-handling control around the given key.
-	 * 
+	 *
 	 * @param key
 	 * @param name
+	 * @param handler
 	 */
-	KeyControl(int key, String name) {
+	KeyControl(int key, String name, Closure handler) {
 
 		super(KeyEvent, name, determineKeyBindingName(key))
 		this.key = key
+		this.handler = handler
 	}
 
 	/**
 	 * Return a string representing the name of the key binding.
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
 	private static String determineKeyBindingName(int key) {
 
-		var field = GLFW.class.getDeclaredFields().find { field ->
+		var field = GLFW.getDeclaredFields().find { field ->
 			return Modifier.isStatic(field.modifiers) && field.name.startsWith("GLFW_KEY_") && field.getInt(null) == key
 		}
 		if (field) {
@@ -64,15 +67,8 @@ abstract class KeyControl extends Control<KeyEvent> {
 	@Override
 	void handleEvent(KeyEvent event) {
 
-		if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-			if (event.key == key) {
-				handleKeyPress()
-			}
+		if ((event.action == GLFW_PRESS || event.action == GLFW_REPEAT) && event.key == key) {
+			handler()
 		}
 	}
-
-	/**
-	 * Perform the action of this control.
-	 */
-	abstract void handleKeyPress()
 }

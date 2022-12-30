@@ -37,7 +37,7 @@ import groovy.json.JsonSlurper
 
 /**
  * A unit viewer for testing rendering and unit configuration.
- * 
+ *
  * @author Emanuel Rabina
  */
 class UnitViewer extends Viewer {
@@ -53,7 +53,7 @@ class UnitViewer extends Viewer {
 
 	/**
 	 * Constructor, set the unit to be displayed.
-	 * 
+	 *
 	 * @param graphicsConfig
 	 * @param shpFile
 	 * @param unitId
@@ -106,43 +106,24 @@ class UnitViewer extends Viewer {
 		logger.info('Displaying the image in another window.  Close the window to exit.')
 
 		// Custom inputs
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left') {
-			@Override
-			void handleKeyPress() {
-				unit.rotateLeft()
-			}
-		})
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right') {
-			@Override
-			void handleKeyPress() {
-				unit.rotateRight()
-			}
-		})
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation') {
-			@Override
-			void handleKeyPress() {
-				unit.previousAnimation()
-			}
-		})
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation') {
-			@Override
-			void handleKeyPress() {
-				unit.nextAnimation()
-			}
-		})
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation') {
-			@Override
-			void handleKeyPress() {
-				gameClock.togglePause()
-			}
-		})
-		inputEventStream.addControl(new KeyControl(GLFW_KEY_P, 'Cycle faction colours') {
-			final Faction[] factions = Faction.values()
-
-			@Override
-			void handleKeyPress() {
-				unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]
-			}
-		})
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
+			unit.rotateLeft()
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
+			unit.rotateRight()
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
+			unit.previousAnimation()
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
+			unit.nextAnimation()
+		}))
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
+			gameClock.togglePause()
+		}))
+		final Faction[] factions = Faction.values()
+		inputEventStream.addControl(new KeyControl(GLFW_KEY_P, 'Cycle faction colours', { ->
+			unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]
+		}))
 	}
 }
