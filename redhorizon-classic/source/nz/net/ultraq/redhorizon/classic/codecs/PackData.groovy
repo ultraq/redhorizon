@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Decoder for the [*Pack] sections found inside CNC map file data.
+ * Decoder for the {@code [*Pack]} sections found inside C&C map file data.
  *
  * @author Emanuel Rabina
  */

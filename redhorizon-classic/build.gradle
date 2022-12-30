@@ -16,10 +16,27 @@
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
 
+configurations.all {
+	resolutionStrategy.dependencySubstitution {
+		substitute module('nz.net.ultraq.redhorizon:redhorizon-async') using project(':redhorizon-async')
+		substitute module('nz.net.ultraq.redhorizon:redhorizon-engine') using project(':redhorizon-engine')
+		substitute module('nz.net.ultraq.redhorizon:redhorizon-events') using project(':redhorizon-events')
+		substitute module('nz.net.ultraq.redhorizon:redhorizon-filetypes') using project(':redhorizon-filetypes')
+	}
+}
+
 dependencies {
-	implementation project(':redhorizon-async')
-	implementation project(':redhorizon-engine')
-	implementation project(':redhorizon-events')
-	implementation project(':redhorizon-filetypes')
+	implementation 'nz.net.ultraq.redhorizon:redhorizon-async'
+	implementation 'nz.net.ultraq.redhorizon:redhorizon-engine'
+	implementation 'nz.net.ultraq.redhorizon:redhorizon-events'
+	implementation 'nz.net.ultraq.redhorizon:redhorizon-filetypes'
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+}
+
+groovydoc {
+	overviewText = resources.text.fromString('''
+		A module that bridges the classic C&C file formats for use with the Red Horizon
+		engine.  All of the reverse engineering of the old codecs and files takes place
+		here, and serve as working examples for other programmers.
+	''')
 }

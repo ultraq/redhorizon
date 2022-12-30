@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.engine.Application
-import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -98,16 +97,15 @@ class Explorer extends Application {
 	protected void applicationStart() {
 
 		// Include the explorer GUI in the render pipeline
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			inputEventStream.on(KeyEvent) { keyEvent ->
-				if (keyEvent.action == GLFW_PRESS) {
-					if (keyEvent.key == GLFW_KEY_O) {
-						entryList.enabled = !entryList.enabled
-					}
+		inputEventStream.on(KeyEvent) { keyEvent ->
+			if (keyEvent.action == GLFW_PRESS) {
+				if (keyEvent.key == GLFW_KEY_O) {
+					entryList.enabled = !entryList.enabled
 				}
 			}
-			graphicsEngine.renderPipeline.addOverlayPass(entryList)
 		}
+		graphicsEngine.renderPipeline.addOverlayPass(entryList)
+
 		graphicsEngine.on(WindowMaximizedEvent) { event ->
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}

@@ -34,7 +34,8 @@ import picocli.CommandLine.Command
 	mixinStandardHelpOptions = true,
 	subcommands = [
 	  Pcx2CpsConverter,
-		Png2ShpConverter
+		Png2ShpConverter,
+		Png2ShpDune2Converter
 	],
 	synopsisSubcommandLabel = 'COMMAND'
 )

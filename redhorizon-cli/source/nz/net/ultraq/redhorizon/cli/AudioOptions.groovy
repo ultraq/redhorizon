@@ -27,7 +27,7 @@ import picocli.CommandLine.Option
  */
 class AudioOptions {
 
-	@Option(names = ['--volume'], defaultValue = '50', description = 'The volume level, as a number from 0-100')
+	@Option(names = ['--volume'], defaultValue = '50', description = 'The volume level, as a number from 0-100.  Defaults to 50')
 	int volume
 
 	/**

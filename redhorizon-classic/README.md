@@ -7,6 +7,24 @@ engine.  All of the reverse engineering of the old codecs and files takes place
 here, and serve as working examples for other programmers.
 
 
+Installation
+------------
+
+Requires Java 17 on macOS 10.15 Catalina and newer, or Windows 10 64-bit and
+newer.
+
+### For Maven and Maven-compatible dependency managers
+
+Add a dependency to your project with the following co-ordinates:
+
+ - GroupId: `nz.net.ultraq.redhorizon`
+ - ArtifactId: `redhorizon-classic`
+
+Check the [project releases](https://github.com/ultraq/redhorizon/releases)
+for a list of available versions.  Each release page also includes a
+downloadable JAR if you want to manually add it to your project classpath.
+
+
 Codecs
 ------
 
