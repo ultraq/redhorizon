@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.async.RateLimitedLoop
+import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
@@ -160,7 +160,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 							// Rendering loop
 							logger.debug('Graphics engine in render loop...')
-							doEngineLoop(new RateLimitedLoop(60, { !context.windowShouldClose() }, { ->
+							doEngineLoop(new ControlledLoop({ !context.windowShouldClose() }, { ->
 								if (shouldToggleFullScreen) {
 									context.toggleFullScreen()
 									shouldToggleFullScreen = false
