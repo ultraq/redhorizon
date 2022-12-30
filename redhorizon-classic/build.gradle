@@ -27,7 +27,6 @@ configurations.all {
 
 dependencies {
 	implementation 'nz.net.ultraq.redhorizon:redhorizon-async'
-	implementation 'nz.net.ultraq.redhorizon:redhorizon-engine'
 	implementation 'nz.net.ultraq.redhorizon:redhorizon-events'
 	implementation 'nz.net.ultraq.redhorizon:redhorizon-filetypes'
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"

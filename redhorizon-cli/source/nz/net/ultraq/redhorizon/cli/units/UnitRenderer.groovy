@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.units
+package nz.net.ultraq.redhorizon.cli.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
@@ -94,7 +94,7 @@ class UnitRenderer implements GraphicsElement {
 		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
 		shader = renderer.createShader(
 			'PalettedSprite',
-			'nz/net/ultraq/redhorizon/classic/shaders',
+			'nz/net/ultraq/redhorizon/cli/units/',
 			new Uniform('indexTexture') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {

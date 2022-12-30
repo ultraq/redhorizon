@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.units
+package nz.net.ultraq.redhorizon.cli.units
 
 import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -23,11 +23,11 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import java.nio.ByteBuffer
 
 /**
- * An implementation of the rendered unit for infantry types.
+ * An implementation of a rendered unit for vehicle types.
  * 
  * @author Emanuel Rabina
  */
-class Infantry extends Unit {
+class Vehicle extends Unit {
 
 	/**
 	 * Constructor, build a unit from the given data.
@@ -37,21 +37,17 @@ class Infantry extends Unit {
 	 * @param palette
 	 * @param gameTime
 	 */
-	Infantry(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
+	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette, GameTime gameTime) {
 
 		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
 
 		def bodyPart = data.shpFile.parts.body
-		unitRenderers << new UnitRenderer('body', this, bodyPart.headings,
-			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] as ByteBuffer[],
-			palette)
-
-		// TODO: Utilize alternative body frames for something
-		def bodyAltPart = data.shpFile.parts.bodyAlt
-		if (bodyAltPart) {
-			frameIndex += bodyAltPart.headings
-		}
+		def turretPart = data.shpFile.parts.turret
+		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
+			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] +
+			(turretPart ? imagesFile.imagesData[frameIndex..<(frameIndex += turretPart.headings)] : [])
+			as ByteBuffer[], palette)
 
 		data.shpFile.animations?.each { animation ->
 			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
