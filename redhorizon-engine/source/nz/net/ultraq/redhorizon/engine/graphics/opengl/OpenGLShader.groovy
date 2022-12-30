@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 
-import groovy.transform.InheritConstructors
 import groovy.transform.Memoized
 
 /**
@@ -27,8 +26,15 @@ import groovy.transform.Memoized
  * 
  * @author Emanuel Rabina
  */
-@InheritConstructors
 class OpenGLShader extends Shader {
+
+	/**
+	 * Constructor, build a shader with the given required parts.
+	 */
+	OpenGLShader(Map args) {
+
+		super(args)
+	}
 
 	@Memoized
 	@Override
