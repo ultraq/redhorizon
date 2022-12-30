@@ -83,14 +83,13 @@ class VideoLoader extends MediaLoader<VideoFile, Video> {
 
 		if (media.playing) {
 			media.stop()
-			file.streamingDataWorker.stop()
 		}
-
+		file.streamingDataWorker.stop()
 		if (gameClock.paused) {
 			gameClock.resume()
 		}
-		inputEventStream.removeControl(playPauseControl)
 
+		inputEventStream.removeControl(playPauseControl)
 		scene.removeSceneElement(media)
 	}
 }

@@ -16,10 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
-import nz.net.ultraq.redhorizon.classic.PaletteType
-import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.engine.Application
-import nz.net.ultraq.redhorizon.engine.EngineLoopStartEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -27,12 +24,14 @@ import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
 import nz.net.ultraq.redhorizon.engine.media.ImageLoader
 import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
 import nz.net.ultraq.redhorizon.engine.media.MediaLoader
+import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.media.SoundLoader
 import nz.net.ultraq.redhorizon.engine.media.StopEvent
 import nz.net.ultraq.redhorizon.engine.media.VideoLoader
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
@@ -59,7 +58,7 @@ class MediaPlayer extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
 	private final Object mediaFile
-	private final PaletteType paletteType
+	private final Palette palette
 	private MediaLoader mediaLoader
 
 	/**
@@ -70,11 +69,11 @@ class MediaPlayer extends Application {
 	 * @param graphicsConfig
 	 * @param paletteType
 	 */
-	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, PaletteType paletteType) {
+	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
 
 		super('Media Player', audioConfig, graphicsConfig)
 		this.mediaFile = mediaFile
-		this.paletteType = paletteType
+		this.palette = palette
 	}
 
 	@Override
@@ -83,12 +82,20 @@ class MediaPlayer extends Application {
 		logger.info('File details: {}', mediaFile)
 
 		mediaLoader = switch (mediaFile) {
-			case VideoFile -> loadVideo(mediaFile)
-			case AnimationFile -> loadAnimation(mediaFile)
-			case SoundFile -> loadSound(mediaFile)
-			case ImageFile -> loadImage(mediaFile)
-			case ImagesFile -> loadImages(mediaFile)
+			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsEngine, gameClock, inputEventStream)
+			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsEngine, gameClock, inputEventStream)
+			case SoundFile -> new SoundLoader(mediaFile, scene, gameClock, inputEventStream)
+			case ImageFile -> new ImageLoader(mediaFile, scene, graphicsEngine)
+			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsEngine, inputEventStream)
 			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
+		}
+
+		var media = mediaLoader.load()
+		if (media instanceof Playable) {
+			media.on(StopEvent) { event ->
+				stop()
+			}
+			media.play()
 		}
 
 		// Universal quit on exit
@@ -103,117 +110,5 @@ class MediaPlayer extends Application {
 	protected void applicationStop() {
 
 		mediaLoader.unload()
-	}
-
-	/**
-	 * Load up an animation for playing.
-	 * 
-	 * @param animationFile
-	 */
-	private AnimationLoader loadAnimation(AnimationFile animationFile) {
-
-		def animationLoader = new AnimationLoader(animationFile, scene, graphicsEngine, gameClock, inputEventStream)
-
-		graphicsEngine.on(EngineLoopStartEvent) { engineLoopStartEvent ->
-			def animation = animationLoader.load()
-			animation.play()
-			logger.debug('Animation started')
-
-			animation.on(StopEvent) { stopEvent ->
-				stop()
-				logger.debug('Animation stopped')
-			}
-
-			logger.info('Waiting for animation to finish.  Close the window to exit.')
-		}
-
-		return animationLoader
-	}
-
-	/**
-	 * Load an image for viewing.
-	 * 
-	 * @param imageFile
-	 */
-	private ImageLoader loadImage(ImageFile imageFile) {
-
-		def imageLoader = new ImageLoader(imageFile, scene, graphicsEngine)
-
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			imageLoader.load()
-			logger.info('Displaying the image.  Close the window to exit.')
-		}
-
-		return imageLoader
-	}
-
-	/**
-	 * Load a collection of images for viewing.
-	 * 
-	 * @param imagesFile
-	 */
-	private ImagesLoader loadImages(ImagesFile imagesFile) {
-
-		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
-			def palette = new PalFile(inputStream)
-			def imagesLoader = new ImagesLoader(imagesFile, palette, scene, graphicsEngine, inputEventStream)
-
-			graphicsEngine.on(EngineLoopStartEvent) { event ->
-				imagesLoader.load()
-				logger.info('Displaying the image.  Close the window to exit.')
-			}
-
-			return imagesLoader
-		}
-	}
-
-	/**
-	 * Load a sound effect or music track for playing.
-	 * 
-	 * @param soundFile
-	 */
-	private SoundLoader loadSound(SoundFile soundFile) {
-
-		def soundLoader = new SoundLoader(soundFile, scene, gameClock, inputEventStream)
-
-		audioEngine.on(EngineLoopStartEvent) { event ->
-			def sound = soundLoader.load()
-			sound.play()
-			logger.debug('Sound started')
-
-			sound.on(StopEvent) { stopEvent ->
-				stop()
-				logger.debug('Sound stopped')
-			}
-
-			logger.info('Waiting for sound to stop playing.  Close the window to exit.')
-		}
-
-		return soundLoader
-	}
-
-	/**
-	 * Load a video for playing.
-	 * 
-	 * @param videoFile
-	 */
-	private VideoLoader loadVideo(VideoFile videoFile) {
-
-		def videoLoader = new VideoLoader(videoFile, scene, graphicsEngine, gameClock, inputEventStream)
-
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			def video = videoLoader.load()
-			video.play()
-			logger.debug('Video started')
-
-			video.on(StopEvent) { stopEvent ->
-				stop()
-				logger.debug('Video stopped')
-			}
-
-			logger.info('Waiting for video to finish.  Close the window to exit.')
-		}
-
-		return videoLoader
 	}
 }

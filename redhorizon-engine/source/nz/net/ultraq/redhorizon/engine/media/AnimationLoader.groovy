@@ -84,16 +84,15 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 
 		if (media.playing) {
 			media.stop()
-			if (file instanceof Streaming) {
-				file.streamingDataWorker.stop()
-			}
 		}
-
+		if (file instanceof Streaming) {
+			file.streamingDataWorker.stop()
+		}
 		if (gameClock.paused) {
 			gameClock.resume()
 		}
-		inputEventStream.removeControl(playPauseControl)
 
+		inputEventStream.removeControl(playPauseControl)
 		scene.removeSceneElement(media)
 	}
 }

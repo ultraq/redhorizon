@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.Streaming
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
@@ -72,16 +71,15 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 
 		if (media.playing) {
 			media.stop()
-			if (file instanceof Streaming) {
-				file.streamingDataWorker.stop()
-			}
 		}
-
+		if (file.forStreaming) {
+			file.streamingDataWorker.stop()
+		}
 		if (gameClock.paused) {
 			gameClock.resume()
 		}
-		inputEventStream.removeControl(playPauseControl)
 
+		inputEventStream.removeControl(playPauseControl)
 		scene.removeSceneElement((SceneElement) media)
 	}
 }

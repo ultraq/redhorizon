@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.cli.AudioOptions
 import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
 import nz.net.ultraq.redhorizon.cli.PaletteOptions
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,7 +34,7 @@ import java.util.concurrent.Callable
 /**
  * Basic media player, primarily used for testing the various file formats so
  * that I can check decoding has worked.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -69,7 +70,7 @@ class MediaPlayerCli implements Callable<Integer> {
 	/**
 	 * Launch the media player and present the given file in the most appropriate
 	 * manner.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -79,10 +80,12 @@ class MediaPlayerCli implements Callable<Integer> {
 		logger.info('Red Horizon Media Player {}', commandSpec.parent().version()[0])
 
 		def audioConfig = audioOptions.asAudioConfiguration()
-		def graphicsConfig = graphicsOptions.asGraphicsConfiguration()
+		def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+			renderResolution: new Dimension(1280, 800)
+		)
 
 		fileOptions.useFile(logger) { mediaFile ->
-			new MediaPlayer(mediaFile, audioConfig, graphicsConfig, paletteOptions.paletteType).start()
+			new MediaPlayer(mediaFile, audioConfig, graphicsConfig, paletteOptions.loadPalette()).start()
 		}
 
 		return 0
