@@ -16,13 +16,11 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.classic.PaletteType
-
 import picocli.CommandLine.ITypeConverter
 
 /**
  * A mapping of the C&C palette types to arguments usable in the CLI tool.
- * 
+ *
  * @author Emanuel Rabina
  */
 class PaletteTypeConverter implements ITypeConverter<PaletteType> {

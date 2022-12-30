@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic
+package nz.net.ultraq.redhorizon.cli
 
 import groovy.transform.TupleConstructor
 
 /**
  * Available palette types.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor
 enum PaletteType {
 
-	RA_SNOW      ('ra-snow.pal'),
-	RA_TEMPERATE ('ra-temperate.pal'),
-	TD_TEMPERATE ('td-temperate.pal')
+	RA_SNOW('ra-snow.pal'),
+	RA_TEMPERATE('ra-temperate.pal'),
+	TD_TEMPERATE('td-temperate.pal')
 
 	final String file
 }

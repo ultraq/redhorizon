@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.classic.PaletteType
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -24,7 +23,7 @@ import picocli.CommandLine.Option
 
 /**
  * A mixin of shareable palette options.
- * 
+ *
  * @author Emanuel Rabina
  */
 class PaletteOptions {
@@ -40,7 +39,7 @@ class PaletteOptions {
 
 	/**
 	 * Load the palette indicated by the {@link #paletteType} CLI options.
-	 * 
+	 *
 	 * @param withAlphaMask
 	 */
 	Palette loadPalette(boolean withAlphaMask = false) {
