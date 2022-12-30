@@ -25,12 +25,13 @@ import java.nio.ByteBuffer
 /**
  * Encoder/decoder utilizing Westwood's "RLE-Zero" compression scheme.
  * <p>
- * For details about RLE-Zero, see: http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero
+ * For details about RLE-Zero, see:
+ * <a href="http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero" target="_top">http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero</a>
  * <p>
  * A RLE-Zero file can be decoded as follows:
  * <ol>
- *   <li>0 c = Fill the next c bytes with 0<li>
- *   <li>v   = Write v<li>
+ *   <li>0 c = Fill the next c bytes with 0</li>
+ *   <li>v   = Write v</li>
  * </ol>
  * 
  * @author Emanuel Rabina

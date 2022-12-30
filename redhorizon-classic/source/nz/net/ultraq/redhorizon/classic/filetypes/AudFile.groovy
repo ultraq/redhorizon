@@ -33,7 +33,8 @@ import java.util.concurrent.Executors
  * schemes: IMA-ADPCM and WS-ADPCM, the latter being a Westwood proprietary
  * format.
  * <p>
- * For more information, see: http://vladan.bato.net/cnc/aud3.txt
+ * For more information, see:
+ * <a href="http://vladan.bato.net/cnc/aud3.txt" target="_top">http://vladan.bato.net/cnc/aud3.txt</a>
  * 
  * @author Emanuel Rabina
  */

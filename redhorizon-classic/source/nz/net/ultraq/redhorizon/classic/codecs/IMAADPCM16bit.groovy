@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * decoder should be created for each sound sequence being worked with.
  * <p>
  * Credit goes to Vladan Bato for the original decompression code, which I have
- * adapted below.  See: http://vladan.bato.net/cnc/aud3.txt
+ * adapted below.  See: <a href="http://vladan.bato.net/cnc/aud3.txt" target="_top">http://vladan.bato.net/cnc/aud3.txt</a>
  * 
  * @author Emanuel Rabina
  */

@@ -31,7 +31,8 @@ import java.nio.ByteBuffer
  * Conquer and Red Alert.  SHP files (shapes?) are a series of images used for
  * the visuals of a game object, like a unit or structure.
  * <p>
- * For more information about the C&C SHP file, see: http://vladan.bato.net/cnc/ccfiles4.txt
+ * For more information about the C&C SHP file, see:
+ * <a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a>
  * 
  * @author Emanuel Rabina
  */

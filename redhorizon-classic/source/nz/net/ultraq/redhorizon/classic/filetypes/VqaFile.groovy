@@ -43,9 +43,9 @@ import java.util.concurrent.Executors
  * <p>
  * See:
  * <ul>
- *   <li>http://vladan.bato.net/cnc/vqa_frmt.txt</li>
- *   <li>https://multimedia.cx/VQA_INFO.TXT</li>
- *   <li>https://multimedia.cx/HC-VQA.TXT</li>
+ *   <li><a href="http://vladan.bato.net/cnc/vqa_frmt.txt" target="_top">http://vladan.bato.net/cnc/vqa_frmt.txt</a></li>
+ *   <li><a href="https://multimedia.cx/VQA_INFO.TXT" target="_top">https://multimedia.cx/VQA_INFO.TXT</a></li>
+ *   <li><a href="https://multimedia.cx/HC-VQA.TXT" target="_top">https://multimedia.cx/HC-VQA.TXT</a></li>
  * </ul>
  * 
  * @author Emanuel Rabina

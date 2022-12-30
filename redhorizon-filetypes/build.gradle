@@ -17,7 +17,7 @@
 description = 'Filetypes module for the Red Horizon project'
 
 dependencies {
+	api "org.reflections:reflections:${reflectionsVersion}"
 	implementation project(':redhorizon-async')
 	implementation project(':redhorizon-events')
-	implementation "org.reflections:reflections:${reflectionsVersion}"
 }

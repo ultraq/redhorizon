@@ -29,8 +29,8 @@ import java.util.concurrent.Semaphore
  * Credit goes to Olaf van der Spek and Vladan Bato for their descriptions of
  * the MIX file and some sample code, which I have adapted below.  See:
  * <ul>
- *   <li>http://xhp.xwis.net/documents/MIX_Format.html</li>
- *   <li>http://vladan.bato.net/cnc/ccfiles4.txt</li>
+ *   <li><a href="http://xhp.xwis.net/documents/MIX_Format.html" target="_top">http://xhp.xwis.net/documents/MIX_Format.html</a></li>
+ *   <li><a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a></li>
  * </ul>
  * 
  * @author Emanuel Rabina

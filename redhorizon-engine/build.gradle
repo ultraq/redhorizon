@@ -38,7 +38,6 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-glfw'
 	implementation 'org.lwjgl:lwjgl-openal'
 	implementation 'org.lwjgl:lwjgl-opengl'
-	implementation "org.reflections:reflections:${reflectionsVersion}"
 
 	runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
 	runtimeOnly files("../libraries/imgui-java-natives-macos-arm64-${imguiVersion}.jar")

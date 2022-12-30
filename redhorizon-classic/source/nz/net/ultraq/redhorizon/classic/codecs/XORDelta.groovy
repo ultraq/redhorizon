@@ -29,10 +29,11 @@ import java.nio.ByteBuffer
  * which is useful for decoding the next image in the same sequence.  A new
  * decoder should be created for each image sequence being worked with.
  * <p>
- * For details about XORDelta, see: http://www.shikadi.net/moddingwiki/Westwood_XOR_Delta
+ * For details about XORDelta, see:
+ * <a href="http://www.shikadi.net/moddingwiki/Westwood_XOR_Delta" target="_top">http://www.shikadi.net/moddingwiki/Westwood_XOR_Delta</a>
  * Although credit goes to Vladan Bato for the description of what was
  * previously known as the "Format40" from which the code below is adapted.
- * See: http://vladan.bato.net/cnc/ccfiles4.txt
+ * See: <a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a>
  * <p>
  * Using a notation found in XCCU, the XORDelta commands are as follows:
  * <ol>

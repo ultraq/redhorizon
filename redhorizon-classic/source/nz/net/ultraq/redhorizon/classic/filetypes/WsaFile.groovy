@@ -19,9 +19,9 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
@@ -35,9 +35,11 @@ import java.util.concurrent.Executors
  * typically looped or played to the last frame, with some other sounds taking
  * up background music duties.
  * <p>
- * For more information about the C&C WSA file, see: http://vladan.bato.net/cnc/ccfiles4.txt
+ * For more information about the C&C WSA file, see:
+ * <a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a>.
  * For all the weird nuances surrounding the WSA file and the versions it has
- * gone through, see: http://www.shikadi.net/moddingwiki/Westwood_WSA_Format
+ * gone through, see:
+ * <a href="http://www.shikadi.net/moddingwiki/Westwood_WSA_Format" target="_top">http://www.shikadi.net/moddingwiki/Westwood_WSA_Format</a>
  * 
  * @author Emanuel Rabina
  */

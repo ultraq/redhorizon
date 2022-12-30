@@ -31,9 +31,9 @@ import java.nio.ByteBuffer
  * I can't recall what resources I used to build this file, but as of writing a
  * combination of the following seems useful:
  * <ul>
- *   <li>https://cnc.fandom.com/wiki/Red_Alert_File_Formats_Guide (see the RMT
- *       files section</li>
- *   <li>https://web.archive.org/web/20070812201106/http://freecnc.org:80/dev/template-format/</li>
+ *   <li><a href="https://cnc.fandom.com/wiki/Red_Alert_File_Formats_Guide" target="_top">https://cnc.fandom.com/wiki/Red_Alert_File_Formats_Guide</a>
+ *       (see the RMT files section)</li>
+ *   <li><a href="https://web.archive.org/web/20070812201106/http://freecnc.org:80/dev/template-format/" target="_top">https://web.archive.org/web/20070812201106/http://freecnc.org:80/dev/template-format/</a></li>
  * </ul>
  * 
  * @author Emanuel Rabina

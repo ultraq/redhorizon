@@ -37,21 +37,22 @@ The codecs (encoders/decoders) implemented in this module:
 Filetypes
 ---------
 
-The older file formats implemented in this module:
+The older file formats implemented in this module and found in the [filetypes
+package](source/nz/net/ultraq/redhorizon/classic/filetypes):
 
- - **[AUD](source/nz/net/ultraq/redhorizon/classic/filetypes/aud)**:
+ - **AUD**:
    The sound format used by the classic C&C games.
- - **[CPS](source/nz/net/ultraq/redhorizon/classic/filetypes/cps)**:
+ - **CPS**:
    A 320x200 image file format used lightly in Tiberium Dawn.
- - **[MIX](source/nz/net/ultraq/redhorizon/classic/filetypes/mix)**:
+ - **MIX**:
    A package format, MIX files hold several other files in an uncompressed form.
- - **[PAL](source/nz/net/ultraq/redhorizon/classic/filetypes/pal)**:
+ - **PAL**:
    A standard colour table format used by most programs of the era.
- - **[SHP](source/nz/net/ultraq/redhorizon/classic/filetypes/shp)**:
+ - **SHP**:
    "Shape"(?) files, contain the images that comprise a unit or structure.
- - **[TMP](source/nz/net/ultraq/redhorizon/classic/filetypes/tmp)**:
+ - **TMP**:
    "Template" file for map tiles.
- - **[VQA](source/nz/net/ultraq/redhorizon/classic/filetypes/vqa)**:
+ - **VQA**:
    Full motion video file for briefing videos and cutscenes.
- - **[WSA](source/nz/net/ultraq/redhorizon/classic/filetypes/wsa)**:
+ - **WSA**:
    Full screen animations, contain no sound.

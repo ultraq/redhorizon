@@ -25,10 +25,11 @@ import java.nio.ByteBuffer
 /**
  * Encoder/decoder utilizing the "LCW" compression scheme.
  * <p>
- * For details about LCW, see: http://www.shikadi.net/moddingwiki/Westwood_LCW
+ * For details about LCW, see:
+ * <a href="http://www.shikadi.net/moddingwiki/Westwood_LCW" target="_top">http://www.shikadi.net/moddingwiki/Westwood_LCW</a>
  * Although credit goes to Vladan Bato for the description of what was
  * previously known as the "Format80" from which the code below is adapted.
- * See: http://vladan.bato.net/cnc/ccfiles4.txt
+ * See: <a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a>
  * <p>
  * Using a notation found in XCCU, the LCW commands are as follows:
  * <ol>

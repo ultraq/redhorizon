@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-description = 'A collection of encoders/decoders for C&C file data'
+description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
 
 dependencies {
-	api project(':redhorizon-async')
+	implementation project(':redhorizon-async')
 	implementation project(':redhorizon-engine')
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-filetypes')
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-	implementation "org.reflections:reflections:${reflectionsVersion}"
 }
