@@ -33,12 +33,8 @@ description = 'Recreating the original 2D Command & Conquer games'
 subprojects {
 	apply plugin: 'java-library'
 	apply plugin: 'groovy'
-	apply plugin: 'maven-publish'
 	apply plugin: 'idea'
 	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/gradle-support.gradle'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/maven-publish-support.gradle'
-
-	year = '2007'
 
 //	configurations.all {
 //		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
@@ -77,12 +73,5 @@ subprojects {
 
 	test {
 		useJUnitPlatform()
-	}
-
-	groovydoc {
-		link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-async/${version}/", 'nz.net.ultraq.redhorizon.async.')
-		link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
-		link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
-		link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
 	}
 }

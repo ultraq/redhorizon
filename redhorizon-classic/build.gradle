@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
-
-configurations.all {
-	resolutionStrategy.dependencySubstitution {
-		substitute module('nz.net.ultraq.redhorizon:redhorizon-async') using project(':redhorizon-async')
-		substitute module('nz.net.ultraq.redhorizon:redhorizon-engine') using project(':redhorizon-engine')
-		substitute module('nz.net.ultraq.redhorizon:redhorizon-events') using project(':redhorizon-events')
-		substitute module('nz.net.ultraq.redhorizon:redhorizon-filetypes') using project(':redhorizon-filetypes')
-	}
+plugins {
+	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
+apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/maven-publish-support.gradle'
+
+description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
+year = '2007'
 
 dependencies {
-	implementation 'nz.net.ultraq.redhorizon:redhorizon-async'
-	implementation 'nz.net.ultraq.redhorizon:redhorizon-events'
-	implementation 'nz.net.ultraq.redhorizon:redhorizon-filetypes'
+	implementation project(':redhorizon-async')
+	implementation project(':redhorizon-events')
+	implementation project(':redhorizon-filetypes')
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+}
+
+shadowJar {
+	archiveClassifier.set('')
+	dependencies {
+		include(project(':redhorizon-async'))
+		include(project(':redhorizon-events'))
+		include(project(':redhorizon-filetypes'))
+	}
 }
 
 groovydoc {
@@ -38,4 +45,35 @@ groovydoc {
 		engine.  All of the reverse engineering of the old codecs and files takes place
 		here, and serve as working examples for other programmers.
 	''')
+	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-async/${version}/", 'nz.net.ultraq.redhorizon.async.')
+	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
+	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
+}
+
+publishing {
+	publications {
+		library(MavenPublication) {
+			artifacts = [shadowJar]
+			afterEvaluate {
+				// Have to manually remove the project nodes since shadow won't do that for us
+				pom.withXml {
+					var projectDependencyNodes = []
+					asNode().depthFirst { node ->
+						if (node.name().localPart == 'dependency' && node.get('groupId').text() == 'nz.net.ultraq.redhorizon') {
+							projectDependencyNodes << node
+						}
+					}
+					projectDependencyNodes.each { node ->
+						node.parent().remove(node)
+					}
+				}
+			}
+		}
+	}
+}
+
+// Disable module metadata while publishing fat jars - it's incorrect for what
+// we're shipping
+tasks.withType(GenerateModuleMetadata) {
+	enabled = false
 }
