@@ -2,6 +2,15 @@
 Changelog
 =========
 
+### 0.35.0
+ - The `redhorizon-classic` module is now up on Maven central, allowing Java/JVM
+   developers to use it as a way of reading classic C&C files or decoding C&C
+   file data.  Instructions in the README of the [`redhorizon-classic`](redhorizon-classic)
+   project folder.
+ - A paletted sprite shader was created, and is used in the unit viewer so that
+   can now do faction-based palette shifting to show what units would look like
+   for different factions.
+
 ### 0.34.2
  - Add native support for M1 macs.  This is through Java 17 (the first Java LTS
    release with native support for the M1 processors) and a custom-built
