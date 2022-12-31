@@ -27,7 +27,7 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
+@TupleConstructor
 enum VertexBufferLayoutPart {
 
 	COLOUR      ('colour',     0, Colour.FLOATS),

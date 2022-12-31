@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
  * 
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
+@TupleConstructor
 enum ExplorerPreferences implements UserPreference {
 
 	WINDOW_MAXIMIZED(false)
