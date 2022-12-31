@@ -54,7 +54,7 @@ groovydoc {
 publishing {
 	publications {
 		library(MavenPublication) {
-			artifacts = [shadowJar]
+			artifacts = [shadowJar, sourcesJar, groovydocJar]
 			afterEvaluate {
 				// Have to manually remove the project nodes since shadow won't do that for us
 				pom.withXml {
