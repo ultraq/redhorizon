@@ -45,9 +45,10 @@ groovydoc {
 		engine.  All of the reverse engineering of the old codecs and files takes place
 		here, and serve as working examples for other programmers.
 	''')
-	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-async/${version}/", 'nz.net.ultraq.redhorizon.async.')
-	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
-	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
+	// Can't link to these until they get published on maven central themselves
+//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-async/${version}/", 'nz.net.ultraq.redhorizon.async.')
+//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
+//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
 }
 
 publishing {
