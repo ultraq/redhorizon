@@ -20,8 +20,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.Vector2f
@@ -75,12 +78,22 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 		)
 
 		axisLines = renderer.createMaterial(
-			mesh: renderer.createLinesMesh(Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX),
+			mesh: renderer.createMesh(
+				type: MeshType.LINES,
+				layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+				colour: Colour.RED.withAlpha(0.5),
+				vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX]
+			),
 			shader: shader,
 			transform: transform
 		)
 		boundaryLines = renderer.createMaterial(
-			mesh: renderer.createLineLoopMesh(Colour.YELLOW.withAlpha(0.5), map.boundary as Vector2f[]),
+			mesh: renderer.createMesh(
+				type: MeshType.LINE_LOOP,
+				layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+				colour: Colour.YELLOW.withAlpha(0.5),
+				vertices: map.boundary as Vector2f[]
+			),
 			shader: shader,
 			transform: transform
 		)

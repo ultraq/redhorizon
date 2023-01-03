@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
-
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
+package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Vector2f
 

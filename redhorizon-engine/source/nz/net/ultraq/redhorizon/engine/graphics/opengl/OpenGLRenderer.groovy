@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
@@ -36,6 +37,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Matrix4f
@@ -46,7 +49,11 @@ import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL41C.*
+import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL15C.*
+import static org.lwjgl.opengl.GL20C.*
+import static org.lwjgl.opengl.GL30C.*
+import static org.lwjgl.opengl.GL31C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
@@ -248,32 +255,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		return framebuffer
 	}
 
-	@Override
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices) {
-
-		def mesh = new Mesh(
-			vertexType: GL_LINE_LOOP,
-			colour: colour,
-			vertices: vertices
-		)
-		trigger(new MeshCreatedEvent(mesh))
-
-		return createMeshData(mesh, new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION))
-	}
-
-	@Override
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices) {
-
-		def mesh = new Mesh(
-			vertexType: GL_LINES,
-			colour: colour,
-			vertices: vertices
-		)
-		trigger(new MeshCreatedEvent(mesh))
-
-		return createMeshData(mesh, new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION))
-	}
-
 	@NamedVariant
 	@Override
 	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
@@ -287,15 +268,19 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		)
 	}
 
-	/**
-	 * Create buffers based on the given mesh data representing some kind of
-	 * OpenGL primitive.
-	 * 
-	 * @param mesh
-	 * @param vertexBufferLayout
-	 * @return
-	 */
-	private static Mesh createMeshData(Mesh mesh, VertexBufferLayout vertexBufferLayout) {
+	@NamedVariant
+	@Override
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
+		int[] indices) {
+
+		def mesh = new Mesh(
+			vertexType: type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
+			colour: colour,
+			vertices: vertices,
+			textureUVs: textureUVs,
+			indices: indices
+		)
+		trigger(new MeshCreatedEvent(mesh))
 
 		return stackPush().withCloseable { stack ->
 			def vertexArrayId = glGenVertexArrays()
@@ -305,16 +290,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 
 			// Buffer to hold all the vertex data
-			def colour = mesh.colour
-			def vertices = mesh.vertices
-			def textureUVs = mesh.textureUVs
-			def vertexBuffer = stack.mallocFloat(vertexBufferLayout.size() * vertices.size())
+			def vertexBuffer = stack.mallocFloat(layout.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
 				vertexBuffer.put(
 					colour.r, colour.g, colour.b, colour.a,
 					vertex.x, vertex.y
 				)
-				if (vertexBufferLayout.parts.contains(VertexBufferLayoutPart.TEXTURE_UVS)) {
+				if (layout.parts.contains(VertexBufferLayoutPart.TEXTURE_UVS)) {
 					def textureUV = textureUVs[index]
 					vertexBuffer.put(textureUV.x, textureUV.y)
 				}
@@ -322,7 +304,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
 
-			enableVertexBufferLayout(vertexBufferLayout)
+			enableVertexBufferLayout(layout)
 
 			// Buffer for all the index data, if applicable
 			int elementBufferId = 0
@@ -409,20 +391,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
-		def mesh = new Mesh(
-			vertexType: GL_TRIANGLES,
+		return createMesh(
+			type: MeshType.TRIANGLES,
+			layout: new VertexBufferLayout(
+				VertexBufferLayoutPart.COLOUR,
+				VertexBufferLayoutPart.POSITION,
+				VertexBufferLayoutPart.TEXTURE_UVS
+			),
 			colour: Colour.WHITE,
 			vertices: surface as Vector2f[],
 			textureUVs: textureUVs as Vector2f[],
-			indices: [0, 1, 3, 1, 2, 3] as int[]
+			indices: [0, 1, 3, 1, 2, 3]
 		)
-		trigger(new MeshCreatedEvent(mesh))
-
-		return createMeshData(mesh, new VertexBufferLayout(
-			VertexBufferLayoutPart.COLOUR,
-			VertexBufferLayoutPart.POSITION,
-			VertexBufferLayoutPart.TEXTURE_UVS
-		))
 	}
 
 	@Override

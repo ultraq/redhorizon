@@ -174,7 +174,7 @@ class RenderPipeline implements AutoCloseable {
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1), new Rectanglef(0, 0, 1, 1)),
 				shader: renderer.createShader(
 					'SharpUpscaling',
 					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
@@ -197,7 +197,7 @@ class RenderPipeline implements AutoCloseable {
 		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
 			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1), new Rectanglef(0, 0, 1, 1)),
 				shader: renderer.createShader(
 					'Scanlines',
 					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
@@ -220,7 +220,7 @@ class RenderPipeline implements AutoCloseable {
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1)),
+				mesh: renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1), new Rectanglef(0, 0, 1, 1)),
 				shader: renderer.createShader(
 					'Screen',
 					'nz/net/ultraq/redhorizon/engine/graphics/opengl',

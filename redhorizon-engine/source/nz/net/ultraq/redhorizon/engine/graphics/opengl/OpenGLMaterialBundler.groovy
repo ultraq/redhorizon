@@ -21,12 +21,16 @@ import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.*
+import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.enableVertexBufferLayout
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import static org.lwjgl.opengl.GL41C.*
+import static org.lwjgl.opengl.GL15C.*
+import static org.lwjgl.opengl.GL30C.glBindVertexArray
+import static org.lwjgl.opengl.GL30C.glGenVertexArrays
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.NamedParam
@@ -41,6 +45,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
+	// TODO: Derive the layout from the materials being bundled, not hard-coded in this class
 	private static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
 		VertexBufferLayoutPart.COLOUR,
 		VertexBufferLayoutPart.POSITION,

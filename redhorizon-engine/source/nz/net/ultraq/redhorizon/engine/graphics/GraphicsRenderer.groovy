@@ -51,27 +51,6 @@ interface GraphicsRenderer extends EventTarget {
 	void createCamera(Matrix4f projection, Matrix4f view)
 
 	/**
-	 * Create a mesh that represents a line loop - a series of points where lines
-	 * are drawn between them and then a final one is used to close the last and
-	 * first points.
-	 * 
-	 * @param colour
-	 * @param vertices
-	 * @return
-	 */
-	Mesh createLineLoopMesh(Colour colour, Vector2f... vertices)
-
-	/**
-	 * Create a mesh representing disjoint lines.
-	 * 
-	 * @param colour
-	 * @param vertices Every pair of vertices represents the start and end points
-	 *                 of a line to be drawn.
-	 * @return New lines mesh.
-	 */
-	Mesh createLinesMesh(Colour colour, Vector2f... vertices)
-
-	/**
 	 * Create a material out of the given component parts.
 	 * 
 	 * @param mesh
@@ -83,6 +62,21 @@ interface GraphicsRenderer extends EventTarget {
 	@NamedVariant
 	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
 		@NamedParam Shader shader, @NamedParam Matrix4f transform)
+
+	/**
+	 * Create a mesh with all of the mesh parts.
+	 * 
+	 * @param type
+	 * @param layout
+	 * @param colour
+	 * @param vertices
+	 * @param textureUVs
+	 * @param indices
+	 * @return
+	 */
+	@NamedVariant
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
+		int[] indices)
 
 	/**
 	 * Create a framebuffer that can be rendered to.
@@ -105,19 +99,8 @@ interface GraphicsRenderer extends EventTarget {
 	Shader createShader(String name, String shaderPathPrefix, Uniform ...uniforms)
 
 	/**
-	 * Create a mesh to represent a surface onto which a texture will go, using
-	 * the default texture coordinates.
-	 * 
-	 * @param surface
-	 * @return
-	 */
-	default Mesh createSpriteMesh(Rectanglef surface) {
-
-		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
-	}
-
-	/**
-	 * Create a mesh to represent a surface onto which a texture will go.
+	 * Create a mesh to represent a surface onto which a texture will go.  This is
+	 * a convenience method for {@link #createMesh}.
 	 * 
 	 * @param surface
 	 * @param textureUVs

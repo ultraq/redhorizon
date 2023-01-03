@@ -101,7 +101,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	void init(GraphicsRenderer renderer) {
 
 		material = renderer.createMaterial(
-			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height)),
+			mesh: renderer.createSpriteMesh(new Rectanglef(0, 0, width, height), new Rectanglef(0, 0, 1, 1)),
 			texture: renderer.createTexture(width, height, format.value, imageData),
 			transform: transform
 		)
