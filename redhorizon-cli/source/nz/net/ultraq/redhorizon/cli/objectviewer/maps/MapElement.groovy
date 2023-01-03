@@ -65,8 +65,9 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 
 		material = renderer.createMaterial(
 			mesh: renderer.createSpriteMesh(
-				new Rectanglef(0, 0, tileFile.width, tileFile.height),
-				tileSet.getCoordinates(tileFile, frame)),
+				surface: new Rectanglef(0, 0, tileFile.width, tileFile.height),
+				textureUVs: tileSet.getCoordinates(tileFile, frame)
+			),
 			texture: tileSet.texture,
 			transform: transform
 		)

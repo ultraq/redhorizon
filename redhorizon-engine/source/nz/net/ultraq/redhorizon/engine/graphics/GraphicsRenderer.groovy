@@ -23,7 +23,6 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -60,8 +59,7 @@ interface GraphicsRenderer extends EventTarget {
 	 * @return
 	 */
 	@NamedVariant
-	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
-		@NamedParam Shader shader, @NamedParam Matrix4f transform)
+	Material createMaterial(Mesh mesh, Texture texture, Shader shader, Matrix4f transform)
 
 	/**
 	 * Create a mesh with all of the mesh parts.
@@ -106,6 +104,7 @@ interface GraphicsRenderer extends EventTarget {
 	 * @param textureUVs
 	 * @return
 	 */
+	@NamedVariant
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**

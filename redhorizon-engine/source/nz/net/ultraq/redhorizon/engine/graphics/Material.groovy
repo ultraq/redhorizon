@@ -21,8 +21,9 @@ import org.joml.Matrix4f
 import groovy.transform.MapConstructor
 
 /**
- * A material defines how a shape should be rendered, so references meshes,
- * colours, textures, and a shader.
+ * A material defines how a shape should be rendered.  A {@link Mesh} already
+ * covers the shape part, so a material covers the uniform values that go into
+ * configuring a shader.
  * 
  * @author Emanuel Rabina
  */

@@ -83,7 +83,9 @@ class UnitRenderer implements GraphicsElement {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		mesh = renderer.createSpriteMesh(new Rectanglef(0, 0, unit.width, unit.height), new Rectanglef(0, 0, 1, 1))
+		mesh = renderer.createSpriteMesh(
+			surface: new Rectanglef(0, 0, unit.width, unit.height)
+		)
 
 		textures = imagesData.collect { data ->
 			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED.value,

@@ -82,7 +82,7 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 				type: MeshType.LINES,
 				layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
 				colour: Colour.RED.withAlpha(0.5),
-				vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX]
+				vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX] as Vector2f[]
 			),
 			shader: shader,
 			transform: transform

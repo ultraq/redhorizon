@@ -58,7 +58,6 @@ import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
 
-import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -255,10 +254,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		return framebuffer
 	}
 
-	@NamedVariant
 	@Override
-	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
-		@NamedParam Shader shader, @NamedParam Matrix4f transform) {
+	@NamedVariant
+	Material createMaterial(Mesh mesh, Texture texture = null, Shader shader = null, Matrix4f transform = null) {
 
 		return new Material(
 			mesh: mesh,
@@ -268,10 +266,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		)
 	}
 
-	@NamedVariant
 	@Override
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
-		int[] indices) {
+	@NamedVariant
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
+		Vector2f[] textureUVs = null, int[] indices = null) {
 
 		def mesh = new Mesh(
 			vertexType: type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
@@ -389,7 +387,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	@NamedVariant
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMesh(
 			type: MeshType.TRIANGLES,
@@ -401,7 +400,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			colour: Colour.WHITE,
 			vertices: surface as Vector2f[],
 			textureUVs: textureUVs as Vector2f[],
-			indices: [0, 1, 3, 1, 2, 3]
+			indices: [0, 1, 3, 1, 2, 3] as int[]
 		)
 	}
 

@@ -33,7 +33,6 @@ import static org.lwjgl.opengl.GL30C.glBindVertexArray
 import static org.lwjgl.opengl.GL30C.glGenVertexArrays
 import static org.lwjgl.system.MemoryStack.stackPush
 
-import groovy.transform.NamedParam
 import groovy.transform.NamedVariant
 import groovy.transform.TupleConstructor
 
@@ -52,7 +51,7 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 		VertexBufferLayoutPart.TEXTURE_UVS
 	)
 
-	@Delegate
+	@Delegate(excludes = ["createMaterial"])
 	final OpenGLRenderer renderer
 
 	private final List<Material> materials = []
@@ -127,10 +126,9 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 		}
 	}
 
-	@NamedVariant
 	@Override
-	Material createMaterial(@NamedParam(required = true) Mesh mesh, @NamedParam Texture texture,
-		@NamedParam Shader shader, @NamedParam Matrix4f transform) {
+	@NamedVariant
+	Material createMaterial(Mesh mesh, Texture texture = null, Shader shader = null, Matrix4f transform = null) {
 
 		def material = renderer.createMaterial(
 			mesh: mesh,
