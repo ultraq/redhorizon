@@ -87,9 +87,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	 * Horizon's 2D game engine.
 	 *
 	 * @param config
-	 * @param context
+	 * @param window
 	 */
-	OpenGLRenderer(GraphicsConfiguration config, OpenGLContext context) {
+	OpenGLRenderer(GraphicsConfiguration config, OpenGLWindow window) {
 
 		this.config = config
 
@@ -120,8 +120,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		// Track framebuffer size changes
-		framebufferSize = context.framebufferSize
-		context.on(FramebufferSizeEvent) { event ->
+		framebufferSize = window.framebufferSize
+		window.on(FramebufferSizeEvent) { event ->
 			framebufferSize = event.framebufferSize
 		}
 

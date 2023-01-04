@@ -37,7 +37,7 @@ import java.util.concurrent.Executors
  * A base for developing an application that uses the Red Horizon engine, this
  * class sets up the engine components and provides access to those and the
  * scene the engine was created to render.
- * 
+ *
  * @author Emanuel Rabina
  */
 abstract class Application {
@@ -59,7 +59,7 @@ abstract class Application {
 	/**
 	 * Constructor, creates an application with the title suffix and
 	 * configuration.
-	 * 
+	 *
 	 * @param windowTitle
 	 * @param audioConfig
 	 * @param graphicsConfig
@@ -75,13 +75,15 @@ abstract class Application {
 	 * Called when all the application setup has completed and it's time for the
 	 * application itself to run.
 	 */
-	protected void applicationStart() {}
+	protected void applicationStart() {
+	}
 
 	/**
 	 * Called when the application is stopping and before the engines are shut
 	 * down.  Ideal for performing any cleanup tasks.
 	 */
-	protected void applicationStop() {}
+	protected void applicationStop() {
+	}
 
 	/**
 	 * Start the application.
@@ -110,7 +112,7 @@ abstract class Application {
 
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
 		graphicsEngine.on(WindowCreatedEvent) { event ->
-			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+			inputEventStream.addInputSource(graphicsEngine.window)
 		}
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			applicationReady.countDown()

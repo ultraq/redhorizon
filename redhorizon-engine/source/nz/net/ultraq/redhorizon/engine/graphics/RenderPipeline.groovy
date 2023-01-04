@@ -75,14 +75,14 @@ class RenderPipeline implements AutoCloseable {
 	 * Constructor, configure the rendering pipeline.
 	 *
 	 * @param config
-	 * @param context
+	 * @param window
 	 * @param renderer
 	 * @param imGuiLayer
 	 * @param inputEventStream
 	 * @param scene
 	 * @param camera
 	 */
-	RenderPipeline(GraphicsConfiguration config, GraphicsContext context, GraphicsRenderer renderer,
+	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer,
 		ImGuiLayer imGuiLayer, InputEventStream inputEventStream, Scene scene, Camera camera) {
 
 		this.renderer = renderer
@@ -97,10 +97,10 @@ class RenderPipeline implements AutoCloseable {
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
 		// development
-		configurePipeline(scene, config, context)
+		configurePipeline(scene, config, window)
 
 		def debugOverlay = new DebugOverlayRenderPass(renderer, config.debug)
-		context.on(KeyEvent) { event ->
+		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_D) {
 					debugOverlay.enabled = !debugOverlay.enabled
@@ -151,12 +151,12 @@ class RenderPipeline implements AutoCloseable {
 	 *
 	 * @param scene
 	 * @param config
-	 * @param context
+	 * @param window
 	 */
-	private void configurePipeline(Scene scene, GraphicsConfiguration config, GraphicsContext context) {
+	private void configurePipeline(Scene scene, GraphicsConfiguration config, Window window) {
 
 		// Scene render pass
-		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(context.renderResolution, true))
+		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
 
 		var framebufferUniform = new Uniform('framebuffer') {
 			@Override
@@ -173,13 +173,13 @@ class RenderPipeline implements AutoCloseable {
 		def textureTargetSizeUniform = new Uniform('textureTargetSize') {
 			@Override
 			void apply(Material material, ShaderUniformConfig shaderConfig) {
-				shaderConfig.setUniform(name, context.targetResolution as float[])
+				shaderConfig.setUniform(name, window.targetResolution as float[])
 			}
 		}
 
 		// Sharp upscaling post-processing pass
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
-			renderer.createFramebuffer(context.targetResolution, false),
+			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(
 				'SharpUpscaling',
@@ -189,7 +189,7 @@ class RenderPipeline implements AutoCloseable {
 				new Uniform('textureSourceSize') {
 					@Override
 					void apply(Material material, ShaderUniformConfig shaderConfig) {
-						shaderConfig.setUniform(name, context.renderResolution as float[])
+						shaderConfig.setUniform(name, window.renderResolution as float[])
 					}
 				},
 				textureTargetSizeUniform
@@ -200,7 +200,7 @@ class RenderPipeline implements AutoCloseable {
 
 		// Scanline post-processing pass
 		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
-			renderer.createFramebuffer(context.targetResolution, false),
+			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(
 				'Scanlines',
@@ -210,8 +210,8 @@ class RenderPipeline implements AutoCloseable {
 				new Uniform('textureSourceSize') {
 					@Override
 					void apply(Material material, ShaderUniformConfig shaderConfig) {
-						def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
-						shaderConfig.setUniform(name, context.renderResolution * scale as float[])
+						def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
+						shaderConfig.setUniform(name, window.renderResolution * scale as float[])
 					}
 				},
 				textureTargetSizeUniform
@@ -230,11 +230,11 @@ class RenderPipeline implements AutoCloseable {
 				modelUniform
 			),
 			!config.startWithChrome,
-			context
+			window
 		)
 
 		// Control these passes with the keyboard
-		context.on(KeyEvent) { event ->
+		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_S) {
 					scanlinePostProcessingRenderPass.enabled = !scanlinePostProcessingRenderPass.enabled
@@ -416,20 +416,20 @@ class RenderPipeline implements AutoCloseable {
 		 * @param material
 		 * @param shader
 		 * @param enabled
-		 * @param context
+		 * @param window
 		 */
-		ScreenRenderPass(Material material, Shader shader, boolean enabled, GraphicsContext context) {
+		ScreenRenderPass(Material material, Shader shader, boolean enabled, Window window) {
 
 			this.material = material
 			this.shader = shader
 			this.enabled = enabled
 
-			material.transform.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
-			context.on(FramebufferSizeEvent) { event ->
+			material.transform.set(calculateScreenModelMatrix(window.framebufferSize, window.targetResolution))
+			window.on(FramebufferSizeEvent) { event ->
 				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
 			}
 
-			context.on(KeyEvent) { event ->
+			window.on(KeyEvent) { event ->
 				if (event.action == GLFW_PRESS) {
 					if (event.key == GLFW_KEY_O) {
 						this.enabled = !this.enabled

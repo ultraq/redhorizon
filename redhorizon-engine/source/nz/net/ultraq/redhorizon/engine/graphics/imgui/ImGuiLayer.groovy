@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -46,7 +46,7 @@ import java.nio.file.StandardCopyOption
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
  * setup needed to make it work.
- * 
+ *
  * @author Emanuel Rabina
  */
 class ImGuiLayer implements AutoCloseable, InputSource {
@@ -84,12 +84,12 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
 	 * renderer.
-	 * 
+	 *
 	 * @param config
-	 * @param context
+	 * @param window
 	 * @param inputEventStream
 	 */
-	ImGuiLayer(GraphicsConfiguration config, GraphicsContext context, InputEventStream inputEventStream) {
+	ImGuiLayer(GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
 
 		this.config = config
 		debugOverlay = config.debug
@@ -107,14 +107,14 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
 			def fontConfig = new ImFontConfig()
-			io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * context.monitorScale as float, fontConfig)
+			io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float, fontConfig)
 			fontConfig.destroy()
 		}
 
-		imGuiGlfw.init(context.window, true)
+		imGuiGlfw.init(window.handle, true)
 		imGuiGl3.init('#version 410 core')
 
-		context.on(KeyEvent) { event ->
+		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_O) {
 					drawChrome = !drawChrome
@@ -172,7 +172,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	/**
 	 * Draw the scene from the given framebuffer into an ImGui window that will
 	 * take up the whole screen by default.
-	 * 
+	 *
 	 * @param sceneFramebufferResult
 	 */
 	private void drawScene(Framebuffer sceneFramebufferResult) {
@@ -206,7 +206,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
 			uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
 			imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
-			cursorY = cursorY +(windowSize.height - imageSizeY) * 0.5f as float
+			cursorY = cursorY + (windowSize.height - imageSizeY) * 0.5f as float
 		}
 
 		ImGui.setCursorPos(cursorX, cursorY)
@@ -227,7 +227,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	/**
 	 * Automatically mark the beginning and end of a frame as before and after the
 	 * execution of the given closure.
-	 * 
+	 *
 	 * @param closure
 	 */
 	void frame(Closure closure) {
@@ -243,7 +243,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	/**
 	 * Draw all of the ImGui elements to the screen.
-	 * 
+	 *
 	 * @param sceneFramebufferResult
 	 */
 	void render(Framebuffer sceneFramebufferResult) {

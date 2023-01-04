@@ -29,7 +29,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Common viewer application code.
- * 
+ *
  * @author Emanuel Rabina
  */
 abstract class Viewer extends Application {
@@ -38,7 +38,7 @@ abstract class Viewer extends Application {
 
 	/**
 	 * Constructor, set viewer-specific configuration.
-	 * 
+	 *
 	 * @param audioConfig
 	 * @param graphicsConfig
 	 * @param touchpadInput
@@ -55,8 +55,8 @@ abstract class Viewer extends Application {
 		def mouseMovementModifier = 1f
 		def scaleIndex = scaleRange.findIndexOf { it == initialScale }
 
-		def renderResolution = graphicsEngine.graphicsContext.renderResolution
-		def targetResolution = graphicsEngine.graphicsContext.targetResolution
+		def renderResolution = graphicsEngine.window.renderResolution
+		def targetResolution = graphicsEngine.window.targetResolution
 		mouseMovementModifier = renderResolution.width / targetResolution.width
 
 		graphicsEngine.camera.scale(scaleRange[scaleIndex])
@@ -147,14 +147,14 @@ abstract class Viewer extends Application {
 
 	/**
 	 * Return the initial scale of the camera to apply to this viewer.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract float getInitialScale()
 
 	/**
 	 * Return the range of scaling options available for this viewer.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract float[] getScaleRange()

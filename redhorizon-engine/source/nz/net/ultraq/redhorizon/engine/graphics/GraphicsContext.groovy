@@ -17,75 +17,19 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.Context
-import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.input.InputSource
 
 /**
  * The graphics execution context, contains information about the target
  * rendering device.
- * 
+ *
  * @author Emanuel Rabina
  */
-abstract class GraphicsContext extends Context implements InputSource {
+abstract class GraphicsContext extends Context {
 
 	/**
-	 * Return the current framebuffer dimensions.
-	 * 
+	 * Return the current window device.
+	 *
 	 * @return
 	 */
-	abstract Dimension getFramebufferSize()
-
-	/**
-	 * Returns the DPI scaling value of the current monitor.
-	 * 
-	 * @return
-	 */
-	abstract float getMonitorScale()
-
-	/**
-	 * Returns the current internal rendering resolution.
-	 * 
-	 * @return
-	 */
-	abstract Dimension getRenderResolution()
-
-	/**
-	 * Returns the current output rendering resolution.
-	 * 
-	 * @return
-	 */
-	abstract Dimension getTargetResolution()
-
-	/**
-	 * Return the current window handle.
-	 * 
-	 * @return
-	 */
-	abstract long getWindow()
-
-	/**
-	 * Return the current window dimensions.
-	 * 
-	 * @return
-	 */
-	abstract Dimension getWindowSize()
-
-	/**
-	 * Switch between windowed and fullscreen modes.
-	 */
-	abstract void toggleFullScreen()
-
-	/**
-	 * Return whether or not the underlying window has signalled to be closed.
-	 * 
-	 * @return
-	 */
-	abstract boolean windowShouldClose()
-
-	/**
-	 * Manually set whether or not the underlying window should close.
-	 * 
-	 * @param close
-	 */
-	abstract void windowShouldClose(boolean close)
+	abstract Window getWindow()
 }

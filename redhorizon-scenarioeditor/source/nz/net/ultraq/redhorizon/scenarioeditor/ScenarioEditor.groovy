@@ -34,7 +34,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Application for viewing and editing classic Command & Conquer maps/missions.
- * 
+ *
  * @author Emanuel Rabina
  */
 class ScenarioEditor extends Application {
@@ -70,8 +70,8 @@ class ScenarioEditor extends Application {
 
 		def mouseMovementModifier = 1f
 		graphicsEngine.on(WindowCreatedEvent) { event ->
-			def renderResolution = graphicsEngine.graphicsContext.renderResolution
-			def targetResolution = graphicsEngine.graphicsContext.targetResolution
+			def renderResolution = graphicsEngine.window.renderResolution
+			def targetResolution = graphicsEngine.window.targetResolution
 			mouseMovementModifier = renderResolution.width / targetResolution.width
 		}
 
@@ -107,7 +107,6 @@ class ScenarioEditor extends Application {
 				}
 			}
 		}
-
 
 		// TODO: Load the map
 	}

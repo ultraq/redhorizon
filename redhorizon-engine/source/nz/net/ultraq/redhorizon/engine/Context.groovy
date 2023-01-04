@@ -16,17 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.events.EventTarget
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
  * Common methods for OpenAL/GL execution contexts.
- * 
+ *
  * @author Emanuel Rabina
  */
-abstract class Context implements Closeable, EventTarget {
+abstract class Context implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Context)
 
@@ -43,7 +41,7 @@ abstract class Context implements Closeable, EventTarget {
 	/**
 	 * Execute the given closure with the context current on the executing thread,
 	 * releasing it at the end.
-	 * 
+	 *
 	 * @param closure
 	 */
 	void withCurrent(Closure closure) {
