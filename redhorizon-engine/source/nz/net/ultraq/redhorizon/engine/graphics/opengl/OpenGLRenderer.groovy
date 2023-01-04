@@ -165,7 +165,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		error = glGetError()
 		if (error != GL_NO_ERROR) {
 			var errorCode = GL41C.getFields().find { field ->
-				return Modifier.isStatic(field.modifiers) && field.getInt(null) == error
+				return Modifier.isStatic(field.modifiers) && field.name.startsWith("GL_") && field.getInt(null) == error
 			}
 			throw new Exception("OpenGL error: ${errorCode}")
 		}
