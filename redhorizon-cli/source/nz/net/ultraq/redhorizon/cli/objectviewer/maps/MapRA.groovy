@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
@@ -38,7 +39,7 @@ import java.nio.ByteBuffer
 
 /**
  * A map on which a mission or a skirmish can take place.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MapRA implements SceneElement<MapRA>, GraphicsElement {
@@ -66,7 +67,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 	/**
 	 * Construtor, build a map from the given map file.
-	 * 
+	 *
 	 * @param resourceManager
 	 * @param mapFile
 	 */
@@ -126,7 +127,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	/**
 	 * Converts a map's character data into bytes that represent the tiles used
 	 * throughout the map.
-	 * 
+	 *
 	 * @param data
 	 *   A map section containing the character data to decode.
 	 * @param chunks
@@ -178,7 +179,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 		/**
 		 * Constructor, create the background image layer.
-		 * 
+		 *
 		 * @param resourceManager
 		 */
 		private BackgroundLayer(ResourceManager resourceManager) {
@@ -228,11 +229,12 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	 */
 	private class MapRAMapPack extends MapLayer implements GraphicsElement {
 
+		private Mesh mesh
 		private Material material
 
 		/**
 		 * Constructor, build the MapPack layer from the given tile data.
-		 * 
+		 *
 		 * @param resourceManager
 		 * @param tileData
 		 */
@@ -286,7 +288,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		@Override
 		void init(GraphicsRenderer renderer) {
 
-			material = renderer.withMaterialBundler { bundler ->
+			(mesh, material) = renderer.withMaterialBundler { bundler ->
 				elements*.init(bundler)
 			}
 		}
@@ -294,7 +296,10 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			renderer.drawMaterial(material)
+			renderer.draw(
+				mesh: mesh,
+				material: material
+			)
 		}
 	}
 
@@ -305,7 +310,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 		/**
 		 * Constructor, build the OverlayPack layer from the given tile data.
-		 * 
+		 *
 		 * @param resourceManager
 		 * @param tileData
 		 */
@@ -386,11 +391,11 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 
 		/**
 		 * Constructor, build the terrain layer from the given terrain data.
-		 * 
+		 *
 		 * @param resourceManager
 		 * @param terrainData
 		 */
-		MapRATerrain(ResourceManager resourceManager, Map<String,String> terrainData) {
+		MapRATerrain(ResourceManager resourceManager, Map<String, String> terrainData) {
 
 			terrainData.each { cell, terrainType ->
 				def terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)

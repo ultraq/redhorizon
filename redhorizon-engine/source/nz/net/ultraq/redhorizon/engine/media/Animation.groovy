@@ -42,7 +42,7 @@ import java.util.concurrent.Executors
 
 /**
  * An animation that plays a series of images at a certain speed.
- * 
+ *
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
@@ -73,7 +73,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 	/**
 	 * Constructor, create an animation out of animation file data.
-	 * 
+	 *
 	 * @param animationFile
 	 *   Animation source.
 	 * @param gameTime
@@ -90,7 +90,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 	/**
 	 * Constructor, use all of the given data for building an animation.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param format
@@ -108,9 +108,9 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		this.width     = width
-		this.height    = height
-		this.format    = format
+		this.width = width
+		this.height = height
+		this.format = format
 		this.numFrames = numFrames
 		this.frameRate = frameRate
 
@@ -151,7 +151,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 		)
 		textures = []
 		material = renderer.createMaterial(
-			mesh: mesh,
 			transform: transform
 		)
 		framesQueued = 0
@@ -191,7 +190,10 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 				def texture = textures[currentFrame]
 				if (texture) {
 					material.texture = texture
-					renderer.drawMaterial(material)
+					renderer.draw(
+						mesh: mesh,
+						material: material
+					)
 				}
 				else {
 					logger.debug('Frame {} not available, skipping', currentFrame)

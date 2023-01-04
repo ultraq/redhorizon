@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 
 /**
  * Renderer for drawing animations.
- * 
+ *
  * @author Emanuel Rabina
  */
 class UnitRendererAnimations extends UnitRenderer {
@@ -39,7 +39,7 @@ class UnitRendererAnimations extends UnitRenderer {
 	/**
 	 * Constructor, create a unit renderer for animations with the following
 	 * frames.
-	 * 
+	 *
 	 * @param type
 	 * @param unit
 	 * @param headings
@@ -61,7 +61,7 @@ class UnitRendererAnimations extends UnitRenderer {
 
 		def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
 		material.texture = textures[rotationFrames() * framesPerHeading + currentFrame]
-		renderer.drawMaterial(material)
+		renderer.draw(mesh, shader, material)
 	}
 
 	/**

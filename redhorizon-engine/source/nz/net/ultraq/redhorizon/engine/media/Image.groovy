@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -31,7 +32,7 @@ import java.nio.ByteBuffer
 
 /**
  * A basic image / texture / 2D sprite.
- * 
+ *
  * @author Emanuel Rabina
  */
 class Image implements GraphicsElement, SceneElement<Image> {
@@ -41,11 +42,12 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	final ColourFormat format
 	private ByteBuffer imageData
 
+	private Mesh mesh
 	private Material material
 
 	/**
 	 * Constructor, creates an image out of the given image file data.
-	 * 
+	 *
 	 * @param imageFile
 	 *   Image source.
 	 * @param palette
@@ -59,7 +61,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	/**
 	 * Constructor, creates an image out of a specific frame in a multi-image
 	 * file.
-	 * 
+	 *
 	 * @param imagesFile
 	 *   Image source.
 	 * @param frame
@@ -74,7 +76,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 
 	/**
 	 * Constructor, creates an image from the given data.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param format
@@ -83,9 +85,9 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	 */
 	Image(int width, int height, ColourFormat format, ByteBuffer imageData, Palette palette = null) {
 
-		this.width     = width
-		this.height    = height
-		this.format    = palette?.format ?: format
+		this.width = width
+		this.height = height
+		this.format = palette?.format ?: format
 		this.imageData = (palette ? imageData.applyPalette(palette) : imageData).flipVertical(width, height, this.format)
 
 		this.bounds.set(0, 0, width, height)
@@ -100,10 +102,10 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		mesh = renderer.createSpriteMesh(
+			surface: new Rectanglef(0, 0, width, height)
+		)
 		material = renderer.createMaterial(
-			mesh: renderer.createSpriteMesh(
-				surface: new Rectanglef(0, 0, width, height)
-			),
 			texture: renderer.createTexture(width, height, format.value, imageData),
 			transform: transform
 		)
@@ -113,6 +115,9 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.draw(
+			mesh: mesh,
+			material: material
+		)
 	}
 }

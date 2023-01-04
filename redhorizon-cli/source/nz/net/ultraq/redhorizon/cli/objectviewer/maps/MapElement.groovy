@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
@@ -26,7 +27,7 @@ import org.joml.primitives.Rectanglef
 
 /**
  * The graphical form of a map tile.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MapElement implements GraphicsElement, SceneElement<MapElement> {
@@ -35,21 +36,22 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	final ImagesFile tileFile
 	final int frame
 
+	private Mesh mesh
 	private Material material
 
 	/**
 	 * Constructor, create a  map element from a map sprite, set to the given
 	 * position.
-	 * 
+	 *
 	 * @param tileSet
 	 * @param tileFile
 	 * @param frame
 	 */
 	MapElement(TileSet tileSet, ImagesFile tileFile, int frame) {
 
-		this.tileSet  = tileSet
+		this.tileSet = tileSet
 		this.tileFile = tileFile
-		this.frame    = frame
+		this.frame = frame
 
 		this.bounds.set(0, 0, tileFile.width, tileFile.height)
 	}
@@ -63,11 +65,11 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		mesh = renderer.createSpriteMesh(
+			surface: new Rectanglef(0, 0, tileFile.width, tileFile.height),
+			textureUVs: tileSet.getCoordinates(tileFile, frame)
+		)
 		material = renderer.createMaterial(
-			mesh: renderer.createSpriteMesh(
-				surface: new Rectanglef(0, 0, tileFile.width, tileFile.height),
-				textureUVs: tileSet.getCoordinates(tileFile, frame)
-			),
 			texture: tileSet.texture,
 			transform: transform
 		)
@@ -76,6 +78,9 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.draw(
+			mesh: mesh,
+			material: material
+		)
 	}
 }

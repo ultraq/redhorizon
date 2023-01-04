@@ -45,6 +45,7 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL41C
 import org.lwjgl.opengl.GLCapabilities
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
@@ -61,11 +62,12 @@ import static org.lwjgl.system.MemoryUtil.NULL
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
+import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
 
 /**
  * A graphics renderer utilizing the modern OpenGL API, version 4.1.
- * 
+ *
  * @author Emanuel Rabina
  */
 class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
@@ -78,13 +80,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private Dimension framebufferSize
 	private final Shader spriteShader
 	protected final List<Shader> shaders = []
-	protected List<Integer> paletteTextureIds = []
 	protected int cameraBufferObject
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
-	 * 
+	 *
 	 * @param config
 	 * @param context
 	 */
@@ -146,7 +147,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	/**
 	 * Check for any OpenGL errors created by the OpenGL call in the given
 	 * closure, throwing them if they occur.
-	 * 
+	 *
 	 * @param closure
 	 * @return
 	 */
@@ -163,15 +164,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def result = closure()
 		error = glGetError()
 		if (error != GL_NO_ERROR) {
-			def errorCode =
-				error == GL_INVALID_ENUM ? 'GL_INVALID_ENUM' :
-				error == GL_INVALID_VALUE ? 'GL_INVALID_VALUE' :
-				error == GL_INVALID_OPERATION ? 'GL_INVALID_OPERATION' :
-				error == GL_INVALID_FRAMEBUFFER_OPERATION ? 'GL_INVALID_FRAMEBUFFER_OPERATION' :
-				error == GL_OUT_OF_MEMORY ? 'GL_OUT_OF_MEMORY' :
-				error == GL_STACK_UNDERFLOW ? 'GL_STACK_UNDERFLOW' :
-				error == GL_STACK_OVERFLOW ? 'GL_STACK_OVERFLOW' :
-				error
+			var errorCode = GL41C.getFields().find { field ->
+				return Modifier.isStatic(field.modifiers) && field.getInt(null) == error
+			}
 			throw new Exception("OpenGL error: ${errorCode}")
 		}
 		return result
@@ -186,7 +181,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
-		glDeleteTextures(*paletteTextureIds)
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)
@@ -238,17 +232,18 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		trigger(new TextureCreatedEvent(colourTexture))
 
 		// Depth buffer attachment
-		def depthBuffer = glGenRenderbuffers()
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer)
+		def depthBufferId = glGenRenderbuffers()
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferId)
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer)
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBufferId)
 		glBindRenderbuffer(GL_RENDERBUFFER, 0)
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
 		def framebuffer = new Framebuffer(
 			framebufferId: frameBufferId,
-			texture: colourTexture
+			texture: colourTexture,
+			depthBufferId: depthBufferId
 		)
 		trigger(new FramebufferCreatedEvent(framebuffer))
 		return framebuffer
@@ -256,13 +251,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	@Override
 	@NamedVariant
-	Material createMaterial(Mesh mesh, Texture texture = null, Shader shader = null, Matrix4f transform = null) {
+	Material createMaterial(Texture texture = null, Matrix4f transform = new Matrix4f()) {
 
 		return new Material(
-			mesh: mesh,
 			texture: texture,
-			shader: shader ?: spriteShader,
-			transform: transform ?: new Matrix4f()
+			transform: transform
 		)
 	}
 
@@ -325,7 +318,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Shader createShader(String name, String shaderPathPrefix, Uniform ...uniforms) {
+	Shader createShader(String name, String shaderPathPrefix, Uniform... uniforms) {
 
 		/* 
 		 * Create a shader of the specified name and type, running a compilation
@@ -413,11 +406,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-			def colourFormat =
-				format == 1 ? GL_RED :
-				format == 3 ? GL_RGB :
-				format == 4 ? GL_RGBA :
-				0
+			var colourFormat = switch (format) {
+				case 1 -> GL_RED
+				case 3 -> GL_RGB
+				case 4 -> GL_RGBA
+				default -> 0
+			}
 			def textureBuffer = stack.malloc(data.remaining())
 				.put(data.array(), data.position(), data.remaining())
 				.flip()
@@ -443,46 +437,56 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void deleteFramebuffer(Framebuffer framebuffer) {
 
-		glDeleteFramebuffers(framebuffer.framebufferId)
-		trigger(new FramebufferDeletedEvent(framebuffer))
+		if (framebuffer) {
+			glDeleteFramebuffers(framebuffer.framebufferId)
+			glDeleteRenderbuffers(framebuffer.depthBufferId)
+			deleteTexture(framebuffer.texture)
+			trigger(new FramebufferDeletedEvent(framebuffer))
+		}
 	}
 
 	@Override
 	void deleteMaterial(Material material) {
 
-		deleteMesh(material.mesh)
-		def texture = material.texture
-		if (texture && !paletteTextureIds.contains(texture.textureId)) {
-			deleteTexture(texture)
+		if (material) {
+			if (material.texture) {
+				deleteTexture(material.texture)
+			}
 		}
 	}
 
 	@Override
 	void deleteMesh(Mesh mesh) {
 
-		if (mesh.elementBufferId) {
-			glDeleteBuffers(mesh.elementBufferId)
+		if (mesh) {
+			if (mesh.elementBufferId) {
+				glDeleteBuffers(mesh.elementBufferId)
+			}
+			glDeleteBuffers(mesh.vertexBufferId)
+			glDeleteVertexArrays(mesh.vertexArrayId)
+			trigger(new MeshDeletedEvent(mesh))
 		}
-		glDeleteBuffers(mesh.vertexBufferId)
-		glDeleteVertexArrays(mesh.vertexArrayId)
-		trigger(new MeshDeletedEvent(mesh))
 	}
 
 	@Override
 	void deleteTexture(Texture texture) {
 
-		glDeleteTextures(texture.textureId)
-		trigger(new TextureDeletedEvent(texture))
+		if (texture) {
+			glDeleteTextures(texture.textureId)
+			trigger(new TextureDeletedEvent(texture))
+		}
 	}
 
+	private int lastProgramId
+
 	@Override
-	void drawMaterial(Material material) {
+	@NamedVariant
+	void draw(Mesh mesh, Shader shader = spriteShader, Material material = null) {
 
-		averageNanos('drawMaterial', 1f, logger) { ->
-			def mesh = material.mesh
-			def shader = material.shader
-
-			glUseProgram(shader.programId)
+		averageNanos('draw', 1f, logger) { ->
+			if (lastProgramId != shader.programId) {
+				glUseProgram(shader.programId)
+			}
 
 			var shaderUniformConfig = shader.withShaderUniformConfig()
 			shader.uniforms.each { uniform ->
@@ -504,7 +508,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	/**
 	 * Enables the vertex attributes specified by the given vertex buffer layout
 	 * object.
-	 * 
+	 *
 	 * @param parts
 	 * @return
 	 */
@@ -532,7 +536,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	/**
 	 * Return some information about the renderer.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -556,9 +560,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Material withMaterialBundler(
+	Tuple2<Mesh, Material> withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
-		Closure closure) {
+			Closure closure) {
 
 		def materialBuilder = new OpenGLMaterialBundler(this)
 		materialBuilder.relay(RendererEvent, this)

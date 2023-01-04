@@ -31,7 +31,7 @@ import java.nio.ByteBuffer
 /**
  * Interface for the graphics renderer, used by the graphics subsystem to draw
  * objects to the screen.
- * 
+ *
  * @author Emanuel Rabina
  */
 interface GraphicsRenderer extends EventTarget {
@@ -43,7 +43,7 @@ interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Create a camera with the given projection and view matrices.
-	 * 
+	 *
 	 * @param view
 	 * @param projection
 	 */
@@ -51,7 +51,7 @@ interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Create a material out of the given component parts.
-	 * 
+	 *
 	 * @param mesh
 	 * @param texture
 	 * @param shader
@@ -59,11 +59,11 @@ interface GraphicsRenderer extends EventTarget {
 	 * @return
 	 */
 	@NamedVariant
-	Material createMaterial(Mesh mesh, Texture texture, Shader shader, Matrix4f transform)
+	Material createMaterial(Texture texture, Matrix4f transform)
 
 	/**
 	 * Create a mesh with all of the mesh parts.
-	 * 
+	 *
 	 * @param type
 	 * @param layout
 	 * @param colour
@@ -78,7 +78,7 @@ interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Create a framebuffer that can be rendered to.
-	 * 
+	 *
 	 * @param resolution
 	 * @param filter
 	 * @return
@@ -88,18 +88,18 @@ interface GraphicsRenderer extends EventTarget {
 	/**
 	 * Create a new shader program for the shader source files with the given
 	 * name.
-	 * 
+	 *
 	 * @param name
 	 * @param shaderPathPrefix
 	 * @param uniforms
 	 * @return
 	 */
-	Shader createShader(String name, String shaderPathPrefix, Uniform ...uniforms)
+	Shader createShader(String name, String shaderPathPrefix, Uniform... uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
 	 * a convenience method for {@link #createMesh}.
-	 * 
+	 *
 	 * @param surface
 	 * @param textureUVs
 	 * @return
@@ -109,7 +109,7 @@ interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Create and fill a texture with the given image data.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param format
@@ -120,50 +120,53 @@ interface GraphicsRenderer extends EventTarget {
 
 	/**
 	 * Delete framebuffer data.
-	 * 
+	 *
 	 * @param framebuffer
 	 */
 	void deleteFramebuffer(Framebuffer framebuffer)
 
 	/**
 	 * Delete all of the items tied to the material.
-	 * 
+	 *
 	 * @param material
 	 */
 	void deleteMaterial(Material material)
 
 	/**
 	 * Delete mesh data.
-	 * 
+	 *
 	 * @param mesh
 	 */
 	void deleteMesh(Mesh mesh)
 
 	/**
 	 * Delete texture data.
-	 * 
+	 *
 	 * @param texture
 	 */
 	void deleteTexture(Texture texture)
 
 	/**
-	 * Render a material.
-	 * 
+	 * Draw a mesh using a shader and material to configure the shader.
+	 *
+	 * @param mesh
+	 * @param shader
 	 * @param material
 	 */
-	void drawMaterial(Material material)
+	@NamedVariant
+	void draw(Mesh mesh, Shader shader, Material material)
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
 	 * {@code null} to set the render target as the screen.
-	 * 
+	 *
 	 * @param framebuffer
 	 */
 	void setRenderTarget(Framebuffer framebuffer)
 
 	/**
 	 * Update the camera's view matrix.
-	 * 
+	 *
 	 * @param view
 	 */
 	void updateCamera(Matrix4f view)
@@ -172,14 +175,14 @@ interface GraphicsRenderer extends EventTarget {
 	 * Use a batching material builder within the context of the given closure
 	 * that will return a single renderable material that is the sum of all the
 	 * materials initialized within the closure.
-	 * 
+	 *
 	 * @param closure
 	 * @return
 	 *   A material that represents all of the materials created within the
 	 *   closure.  This material can then be rendered as normal to render all of
 	 *   the created materials at once.
 	 */
-	Material withMaterialBundler(
+	Tuple2<Mesh, Material> withMaterialBundler(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
-		Closure closure)
+			Closure closure)
 }

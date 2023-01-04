@@ -24,14 +24,12 @@ import groovy.transform.MapConstructor
  * A material defines how a shape should be rendered.  A {@link Mesh} already
  * covers the shape part, so a material covers the uniform values that go into
  * configuring a shader.
- * 
+ *
  * @author Emanuel Rabina
  */
 @MapConstructor
 class Material {
 
-	Mesh mesh
 	Texture texture
-	Shader shader
 	Matrix4f transform
 }

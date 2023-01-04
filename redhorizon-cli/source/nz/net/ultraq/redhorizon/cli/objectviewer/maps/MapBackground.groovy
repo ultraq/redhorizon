@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.cli.objectviewer.maps
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -29,7 +30,7 @@ import java.nio.ByteBuffer
 
 /**
  * A repeated texture stretched over the entirety of the possible map area.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
@@ -41,11 +42,12 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	final float repeatX
 	final float repeatY
 
+	private Mesh mesh
 	private Material material
 
 	/**
 	 * Constructor, set the image and area the background will be stretched over.
-	 * 
+	 *
 	 * @param imageWidth
 	 * @param imageHeight
 	 * @param imageData
@@ -55,12 +57,12 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	 */
 	MapBackground(int imageWidth, int imageHeight, ByteBuffer imageData, float repeatX, float repeatY, Palette palette) {
 
-		this.width     = imageWidth
-		this.height    = imageHeight
-		this.format    = palette.format
+		this.width = imageWidth
+		this.height = imageHeight
+		this.format = palette.format
 		this.imageData = imageData.applyPalette(palette).flipVertical(width, height, format)
-		this.repeatX   = repeatX
-		this.repeatY   = repeatY
+		this.repeatX = repeatX
+		this.repeatY = repeatY
 
 		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
@@ -74,11 +76,11 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
+		mesh = renderer.createSpriteMesh(
+			surface: new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
+			textureUVs: new Rectanglef(0, 0, repeatX, repeatY)
+		)
 		material = renderer.createMaterial(
-			mesh: renderer.createSpriteMesh(
-				surface: new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
-				textureUVs: new Rectanglef(0, 0, repeatX, repeatY)
-			),
 			texture: renderer.createTexture(width, height, format.value, imageData),
 			transform: transform
 		)
@@ -88,6 +90,9 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(material)
+		renderer.draw(
+			mesh: mesh,
+			material: material
+		)
 	}
 }

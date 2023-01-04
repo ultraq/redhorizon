@@ -21,7 +21,7 @@ import groovy.transform.MapConstructor
 /**
  * A section of memory that can be drawn to like a screen, but that can then be
  * used as input for further rendering steps.
- * 
+ *
  * @author Emanuel Rabina
  */
 @MapConstructor
@@ -30,4 +30,5 @@ class Framebuffer {
 
 	final int framebufferId
 	final Texture texture
+	final int depthBufferId
 }

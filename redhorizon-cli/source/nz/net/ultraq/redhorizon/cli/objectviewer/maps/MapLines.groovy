@@ -20,7 +20,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
@@ -31,7 +33,7 @@ import org.joml.Vector2f
 
 /**
  * Map overlays and lines to help with debugging maps.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MapLines implements GraphicsElement, SceneElement<MapLines> {
@@ -41,32 +43,37 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
 	private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
 
-	final MapRA map
-	private Material axisLines
-	private Material boundaryLines
+	private final Vector2f[] mapBoundary
+	private Shader shader
+	private Mesh axisLinesMesh
+	private Material axisLinesMaterial
+	private Mesh boundaryLinesMesh
+	private Material boundaryLinesMaterial
 
 	/**
 	 * Constructor, set the bounds of this object for culling purposes.
-	 * 
+	 *
 	 * @param map
 	 */
 	MapLines(MapRA map) {
 
-		this.map = map
-		this.bounds.set(X_AXIS_MIN.x, Y_AXIS_MIN.y, X_AXIS_MAX.x, Y_AXIS_MAX.y)
+		mapBoundary = map.boundary as Vector2f[]
+		bounds.set(X_AXIS_MIN.x, Y_AXIS_MIN.y, X_AXIS_MAX.x, Y_AXIS_MAX.y)
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		renderer.deleteMesh(axisLines.mesh)
-		renderer.deleteMesh(boundaryLines.mesh)
+		renderer.deleteMesh(axisLinesMesh)
+		renderer.deleteMaterial(axisLinesMaterial)
+		renderer.deleteMesh(boundaryLinesMesh)
+		renderer.deleteMaterial(boundaryLinesMaterial)
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		var shader = renderer.createShader(
+		shader = renderer.createShader(
 			'Primitives',
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
 			new Uniform('model') {
@@ -77,24 +84,23 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 			}
 		)
 
-		axisLines = renderer.createMaterial(
-			mesh: renderer.createMesh(
-				type: MeshType.LINES,
-				layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
-				colour: Colour.RED.withAlpha(0.5),
-				vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX] as Vector2f[]
-			),
-			shader: shader,
+		axisLinesMesh = renderer.createMesh(
+			type: MeshType.LINES,
+			layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+			colour: Colour.RED.withAlpha(0.5),
+			vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX] as Vector2f[]
+		)
+		axisLinesMaterial = renderer.createMaterial(
 			transform: transform
 		)
-		boundaryLines = renderer.createMaterial(
-			mesh: renderer.createMesh(
-				type: MeshType.LINE_LOOP,
-				layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
-				colour: Colour.YELLOW.withAlpha(0.5),
-				vertices: map.boundary as Vector2f[]
-			),
-			shader: shader,
+
+		boundaryLinesMesh = renderer.createMesh(
+			type: MeshType.LINE_LOOP,
+			layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+			colour: Colour.YELLOW.withAlpha(0.5),
+			vertices: mapBoundary
+		)
+		boundaryLinesMaterial = renderer.createMaterial(
 			transform: transform
 		)
 	}
@@ -102,7 +108,7 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.drawMaterial(axisLines)
-		renderer.drawMaterial(boundaryLines)
+		renderer.draw(axisLinesMesh, shader, axisLinesMaterial)
+		renderer.draw(boundaryLinesMesh, shader, boundaryLinesMaterial)
 	}
 }

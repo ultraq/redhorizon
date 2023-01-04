@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
 
 /**
  * The base unit renderer for drawing simple static bodies.
- * 
+ *
  * @author Emanuel Rabina
  */
 class UnitRenderer implements GraphicsElement {
@@ -45,14 +45,16 @@ class UnitRenderer implements GraphicsElement {
 	protected final Palette palette
 	protected final float degreesPerHeading
 
-	protected Material material
 	protected Mesh mesh
-	protected Texture[] textures
 	protected Shader shader
+	protected Material material
+	// TODO: This should be a single texture, with changing UVs based on which
+	//       frame to render
+	protected Texture[] textures
 
 	/**
 	 * Constructor, create a unit renderer with the following frames.
-	 * 
+	 *
 	 * @param type
 	 * @param unit
 	 * @param headings
@@ -124,8 +126,6 @@ class UnitRenderer implements GraphicsElement {
 		)
 
 		material = renderer.createMaterial(
-			mesh: mesh,
-			shader: shader,
 			transform: unit.transform
 		)
 	}
@@ -134,12 +134,12 @@ class UnitRenderer implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		material.texture = textures[rotationFrames()]
-		renderer.drawMaterial(material)
+		renderer.draw(mesh, shader, material)
 	}
 
 	/**
 	 * Calculate which of the frames to use based on the current heading.
-	 * 
+	 *
 	 * @return
 	 */
 	protected int rotationFrames() {

@@ -17,18 +17,19 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * A builder for batching together several similar materials into a single one,
- * which can then be used for rendering them all out with a single draw call.
- * 
+ * A builder for batching together several similar meshes and materials into a
+ * single mesh & material, which can then be used for rendering them all out
+ * with a single draw call.
+ *
  * @author Emanuel Rabina
  */
 interface MaterialBundler extends GraphicsRenderer {
 
 	/**
-	 * Build a batched material that represents all of the materials created
-	 * using {@link #createMaterial}.
-	 * 
+	 * Build a batched mesh and material that represents all of the meshes and
+	 * materials created with calls to {@link #createMesh} and {@link #createMaterial}.
+	 *
 	 * @return
 	 */
-	Material bundle()
+	Tuple2<Mesh, Material> bundle()
 }

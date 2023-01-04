@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * added/removed dynamically, but usually consist of: culling the scene to
  * exclude off-screen objects, rendering the scene, post-processing effects, and
  * overlays.
- * 
+ *
  * @author Emanuel Rabina
  */
 class RenderPipeline implements AutoCloseable {
@@ -56,6 +56,8 @@ class RenderPipeline implements AutoCloseable {
 	final ImGuiLayer imGuiLayer
 	final Scene scene
 	final Camera camera
+
+	private Mesh fullScreenQuad
 
 	// For object lifecycles
 	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
@@ -71,7 +73,7 @@ class RenderPipeline implements AutoCloseable {
 
 	/**
 	 * Constructor, configure the rendering pipeline.
-	 * 
+	 *
 	 * @param config
 	 * @param context
 	 * @param renderer
@@ -87,6 +89,10 @@ class RenderPipeline implements AutoCloseable {
 		this.imGuiLayer = imGuiLayer
 		this.scene = scene
 		this.camera = camera
+
+		fullScreenQuad = renderer.createSpriteMesh(
+			surface: new Rectanglef(-1, -1, 1, 1)
+		)
 
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
@@ -125,7 +131,7 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * Register an overlay rendering pass with the rendering pipeline.  Overlays
 	 * are drawn after the scene and use the target resolution of the window.
-	 * 
+	 *
 	 * @param overlayPass
 	 */
 	void addOverlayPass(OverlayRenderPass overlayPass) {
@@ -137,11 +143,12 @@ class RenderPipeline implements AutoCloseable {
 	void close() {
 
 		renderPasses*.delete(renderer)
+		renderer.deleteMesh(fullScreenQuad)
 	}
 
 	/**
 	 * Build out the rendering pipeline.
-	 * 
+	 *
 	 * @param scene
 	 * @param config
 	 * @param context
@@ -173,23 +180,19 @@ class RenderPipeline implements AutoCloseable {
 		// Sharp upscaling post-processing pass
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
-			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(
-					surface: new Rectanglef(-1, -1, 1, 1)
-				),
-				shader: renderer.createShader(
-					'SharpUpscaling',
-					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
-					framebufferUniform,
-					modelUniform,
-					new Uniform('textureSourceSize') {
-						@Override
-						void apply(Material material, ShaderUniformConfig shaderConfig) {
-							shaderConfig.setUniform(name, context.renderResolution as float[])
-						}
-					},
-					textureTargetSizeUniform
-				)
+			renderer.createMaterial(),
+			renderer.createShader(
+				'SharpUpscaling',
+				'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+				framebufferUniform,
+				modelUniform,
+				new Uniform('textureSourceSize') {
+					@Override
+					void apply(Material material, ShaderUniformConfig shaderConfig) {
+						shaderConfig.setUniform(name, context.renderResolution as float[])
+					}
+				},
+				textureTargetSizeUniform
 			),
 			true
 		)
@@ -198,24 +201,20 @@ class RenderPipeline implements AutoCloseable {
 		// Scanline post-processing pass
 		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(context.targetResolution, false),
-			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(
-					surface: new Rectanglef(-1, -1, 1, 1)
-				),
-				shader: renderer.createShader(
-					'Scanlines',
-					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
-					framebufferUniform,
-					modelUniform,
-					new Uniform('textureSourceSize') {
-						@Override
-						void apply(Material material, ShaderUniformConfig shaderConfig) {
-							def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
-							shaderConfig.setUniform(name, context.renderResolution * scale as float[])
-						}
-					},
-					textureTargetSizeUniform
-				)
+			renderer.createMaterial(),
+			renderer.createShader(
+				'Scanlines',
+				'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+				framebufferUniform,
+				modelUniform,
+				new Uniform('textureSourceSize') {
+					@Override
+					void apply(Material material, ShaderUniformConfig shaderConfig) {
+						def scale = context.renderResolution.height / context.targetResolution.height / 2 as float
+						shaderConfig.setUniform(name, context.renderResolution * scale as float[])
+					}
+				},
+				textureTargetSizeUniform
 			),
 			config.scanlines
 		)
@@ -223,16 +222,12 @@ class RenderPipeline implements AutoCloseable {
 
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
-			renderer.createMaterial(
-				mesh: renderer.createSpriteMesh(
-					surface: new Rectanglef(-1, -1, 1, 1)
-				),
-				shader: renderer.createShader(
-					'Screen',
-					'nz/net/ultraq/redhorizon/engine/graphics/opengl',
-					framebufferUniform,
-					modelUniform
-				)
+			renderer.createMaterial(),
+			renderer.createShader(
+				'Screen',
+				'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+				framebufferUniform,
+				modelUniform
 			),
 			!config.startWithChrome,
 			context
@@ -290,6 +285,7 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Object> {
 
 		final Scene scene
+		final Set<GraphicsElement> initialized = new HashSet<>()
 		final Framebuffer framebuffer
 		final boolean enabled = true
 
@@ -328,6 +324,7 @@ class RenderPipeline implements AutoCloseable {
 					elementToInit.accept { element ->
 						if (element instanceof GraphicsElement) {
 							element.init(renderer)
+							initialized << element
 						}
 					}
 				}
@@ -352,7 +349,8 @@ class RenderPipeline implements AutoCloseable {
 					visibleElements.clear()
 					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
 					scene.accept { element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds) &&
+							initialized.contains(element)) {
 							visibleElements << element
 						}
 					}
@@ -382,6 +380,7 @@ class RenderPipeline implements AutoCloseable {
 
 		final Framebuffer framebuffer
 		final Material material
+		final Shader shader
 		boolean enabled
 
 		@Override
@@ -395,7 +394,7 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Framebuffer previous) {
 
 			material.texture = previous.texture
-			renderer.drawMaterial(material)
+			renderer.draw(fullScreenQuad, shader, material)
 		}
 	}
 
@@ -407,19 +406,22 @@ class RenderPipeline implements AutoCloseable {
 
 		final Framebuffer framebuffer = null
 		final Material material
+		final Shader shader
 		boolean enabled
 
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
 		 * to changes in output/window resolution.
-		 * 
+		 *
 		 * @param material
+		 * @param shader
 		 * @param enabled
 		 * @param context
 		 */
-		ScreenRenderPass(Material material, boolean enabled, GraphicsContext context) {
+		ScreenRenderPass(Material material, Shader shader, boolean enabled, GraphicsContext context) {
 
 			this.material = material
+			this.shader = shader
 			this.enabled = enabled
 
 			material.transform.set(calculateScreenModelMatrix(context.framebufferSize, context.targetResolution))
@@ -440,7 +442,7 @@ class RenderPipeline implements AutoCloseable {
 		 * Return a matrix for adjusting the final texture drawn to screen to
 		 * accomodate the various screen/window sizes while respecting the target
 		 * resolution's aspect ratio.
-		 * 
+		 *
 		 * @param framebufferSize
 		 * @param targetResolution
 		 * @return
@@ -469,7 +471,7 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Framebuffer previous) {
 
 			material.texture = previous.texture
-			renderer.drawMaterial(material)
+			renderer.draw(fullScreenQuad, shader, material)
 		}
 	}
 }

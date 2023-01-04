@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 
 /**
  * Vehicle-specific unit renderer.
- * 
+ *
  * @author Emanuel Rabina
  */
 class VehicleRenderer extends UnitRenderer {
@@ -54,8 +54,6 @@ class VehicleRenderer extends UnitRenderer {
 		super.init(renderer)
 		if (turretHeadings) {
 			turretMaterial = renderer.createMaterial(
-				mesh: mesh,
-				shader: shader,
 				transform: unit.transform
 			)
 		}
@@ -67,7 +65,7 @@ class VehicleRenderer extends UnitRenderer {
 		super.render(renderer)
 		if (turretHeadings) {
 			turretMaterial.texture = textures[headings + rotationFrames()]
-			renderer.drawMaterial(turretMaterial)
+			renderer.draw(mesh, shader, turretMaterial)
 		}
 	}
 }
