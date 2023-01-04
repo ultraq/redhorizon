@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsContext
-import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.slf4j.Logger
@@ -60,15 +59,6 @@ class OpenGLContext extends GraphicsContext {
 		}
 
 		window = new OpenGLWindow(windowTitle, config)
-
-		// Only do quick window mode switching on Windows - the macOS experience
-		// is quite different from using the fullscreen button which assigns the
-		// app its own space.
-		if (System.isWindows()) {
-			window.on(MouseButtonEvent) { event ->
-				checkScreenMode(event)
-			}
-		}
 
 		withCurrent { ->
 			glfwSwapInterval(config.vsync ? 1 : 0)

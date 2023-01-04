@@ -42,14 +42,6 @@ interface GraphicsRenderer extends EventTarget {
 	void clear()
 
 	/**
-	 * Create a camera with the given projection and view matrices.
-	 *
-	 * @param view
-	 * @param projection
-	 */
-	void createCamera(Matrix4f projection, Matrix4f view)
-
-	/**
 	 * Create a material out of the given component parts.
 	 *
 	 * @param mesh
@@ -163,13 +155,6 @@ interface GraphicsRenderer extends EventTarget {
 	 * @param framebuffer
 	 */
 	void setRenderTarget(Framebuffer framebuffer)
-
-	/**
-	 * Update the camera's view matrix.
-	 *
-	 * @param view
-	 */
-	void updateCamera(Matrix4f view)
 
 	/**
 	 * Use a batching material builder within the context of the given closure

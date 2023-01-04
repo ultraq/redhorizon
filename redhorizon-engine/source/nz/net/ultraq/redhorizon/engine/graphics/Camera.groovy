@@ -25,21 +25,21 @@ import org.slf4j.LoggerFactory
 
 /**
  * A representation of the player's view into the world.
- * 
+ *
  * @author Emanuel Rabina
  */
-class Camera implements GraphicsElement {
+abstract class Camera implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
 	final Dimension size
 	final Matrix4f projection
 	final Matrix4f view = new Matrix4f()
-	private boolean moved = false
+	protected boolean moved = false
 
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
-	 * 
+	 *
 	 * @param renderResolution
 	 */
 	Camera(Dimension renderResolution) {
@@ -57,7 +57,7 @@ class Camera implements GraphicsElement {
 
 	/**
 	 * Move the camera so it centers the given point in the view.
-	 * 
+	 *
 	 * @param point
 	 * @return
 	 */
@@ -68,7 +68,7 @@ class Camera implements GraphicsElement {
 
 	/**
 	 * Move the camera so it centers the given point in the view.
-	 * 
+	 *
 	 * @param point
 	 * @return
 	 */
@@ -79,28 +79,9 @@ class Camera implements GraphicsElement {
 		return this
 	}
 
-	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-
-		renderer.createCamera(projection, view)
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		if (moved) {
-			renderer.updateCamera(view)
-			moved = false
-		}
-	}
-
 	/**
 	 * Reset this camera's scale.
-	 * 
+	 *
 	 * @return
 	 */
 	Camera resetScale() {
@@ -113,7 +94,7 @@ class Camera implements GraphicsElement {
 
 	/**
 	 * Scale the camera view as a way of altering the perceived zoom.
-	 * 
+	 *
 	 * @param factor
 	 *   Amount to scale relative to the standard zoom.
 	 * @return
@@ -131,7 +112,7 @@ class Camera implements GraphicsElement {
 
 	/**
 	 * Translates the position of this camera.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param z
@@ -144,4 +125,9 @@ class Camera implements GraphicsElement {
 		moved = true
 		return this
 	}
+
+	/**
+	 * Update the camera's matrices before rendering.
+	 */
+	abstract void update()
 }

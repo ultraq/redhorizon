@@ -54,7 +54,8 @@ import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL15C.*
 import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.opengl.GL30C.*
-import static org.lwjgl.opengl.GL31C.*
+import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex
+import static org.lwjgl.opengl.GL31C.glUniformBlockBinding
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
@@ -184,25 +185,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		glDeleteBuffers(cameraBufferObject)
 		shaders.each { shader ->
 			glDeleteProgram(shader.programId)
-		}
-	}
-
-	@Override
-	void createCamera(Matrix4f projection, Matrix4f view) {
-
-		stackPush().withCloseable { stack ->
-			cameraBufferObject = glGenBuffers()
-			glBindBuffer(GL_UNIFORM_BUFFER, cameraBufferObject)
-			def projectionAndViewBuffer = stack.mallocFloat(Matrix4f.FLOATS * 2)
-			projection.get(0, projectionAndViewBuffer)
-			view.get(Matrix4f.FLOATS, projectionAndViewBuffer)
-			glBufferData(GL_UNIFORM_BUFFER, projectionAndViewBuffer, GL_DYNAMIC_DRAW)
-
-			shaders.each { shader ->
-				def blockIndex = glGetUniformBlockIndex(shader.programId, 'Camera')
-				glUniformBlockBinding(shader.programId, blockIndex, 0)
-			}
-			glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBufferObject)
 		}
 	}
 
@@ -376,6 +358,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			)
 			shaders << shader
 		}
+
+		// Tie the shader's view/projection uniforms to the camera
+		def blockIndex = glGetUniformBlockIndex(shader.programId, 'Camera')
+		glUniformBlockBinding(shader.programId, blockIndex, 0)
+
 		return shader
 	}
 
@@ -548,15 +535,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			 - Device name: ${glGetString(GL_RENDERER)}
 			 - OpenGL version: ${glGetString(GL_VERSION)}
 		""".stripIndent()
-	}
-
-	@Override
-	void updateCamera(Matrix4f view) {
-
-		stackPush().withCloseable { stack ->
-			glBindBuffer(GL_UNIFORM_BUFFER, cameraBufferObject)
-			glBufferSubData(GL_UNIFORM_BUFFER, Matrix4f.BYTES, view.get(stack.mallocFloat(Matrix4f.FLOATS)))
-		}
 	}
 
 	@Override

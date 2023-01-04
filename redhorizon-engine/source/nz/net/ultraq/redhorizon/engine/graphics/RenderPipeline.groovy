@@ -254,7 +254,7 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		imGuiLayer.frame { ->
 			renderer.clear()
-			camera.render(renderer)
+			camera.update()
 
 			// Perform all rendering passes
 			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->

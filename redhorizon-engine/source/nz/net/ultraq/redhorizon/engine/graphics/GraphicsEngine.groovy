@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
@@ -48,7 +49,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	private final InputEventStream inputEventStream
 
 	private OpenGLContext context
-	private Camera camera
+	private OpenGLCamera camera
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
@@ -145,33 +146,33 @@ class GraphicsEngine extends Engine implements InputSource {
 			}
 
 			context.withCurrent { ->
-				camera = new Camera(window.renderResolution)
 				trigger(new WindowCreatedEvent(window.size, window.renderResolution))
 
 				new OpenGLRenderer(config, window).withCloseable { renderer ->
-					new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
-						logger.debug(renderer.toString())
-						imGuiLayer.relay(FramebufferSizeEvent, this)
-						camera.init(renderer)
+					camera = new OpenGLCamera(window.renderResolution)
+					camera.withCloseable { camera ->
+						new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
+							logger.debug(renderer.toString())
+							imGuiLayer.relay(FramebufferSizeEvent, this)
 
-						renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene, camera)
-						renderPipeline.withCloseable { pipeline ->
+							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene, camera)
+							renderPipeline.withCloseable { pipeline ->
 
-							// Rendering loop
-							logger.debug('Graphics engine in render loop...')
-							doEngineLoop(new ControlledLoop({ !window.shouldClose() }, { ->
-								if (shouldToggleFullScreen) {
-									window.toggleFullScreen()
-									shouldToggleFullScreen = false
-								}
-								pipeline.render()
-								window.swapBuffers()
-								window.pollEvents()
-							}))
+								// Rendering loop
+								logger.debug('Graphics engine in render loop...')
+								doEngineLoop(new ControlledLoop({ !window.shouldClose() }, { ->
+									if (shouldToggleFullScreen) {
+										window.toggleFullScreen()
+										shouldToggleFullScreen = false
+									}
+									pipeline.render()
+									window.swapBuffers()
+									window.pollEvents()
+								}))
 
-							// Shutdown
-							logger.debug('Shutting down graphics engine')
-							camera.delete(renderer)
+								// Shutdown
+								logger.debug('Shutting down graphics engine')
+							}
 						}
 					}
 				}
