@@ -464,16 +464,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 	}
 
-	private int lastProgramId
-
 	@Override
 	@NamedVariant
 	void draw(Mesh mesh, Shader shader = spriteShader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
-			if (lastProgramId != shader.programId) {
-				glUseProgram(shader.programId)
-			}
+			glUseProgram(shader.programId)
 
 			var shaderUniformConfig = shader.withShaderUniformConfig()
 			shader.uniforms.each { uniform ->
