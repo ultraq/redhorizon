@@ -18,16 +18,12 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 
-import groovy.transform.NamedVariant
-
 /**
  * Representation of a single texture to render.
- * 
+ *
  * @author Emanuel Rabina
  */
-class Texture {
-
-	final int textureId
+abstract class Texture implements AutoCloseable {
 
 	final int width
 	final int height
@@ -35,17 +31,24 @@ class Texture {
 
 	/**
 	 * Constructor, create a new texture of the given dimensions.
-	 * 
-	 * @param textureId
+	 *
 	 * @param width
 	 * @param height
 	 */
-	@NamedVariant
-	Texture(int textureId, int width, int height) {
+	Texture(int width, int height) {
 
-		this.textureId = textureId
 		this.width = width
 		this.height = height
 		size = new Dimension(width, height)
 	}
+
+	/**
+	 * Enable the use of this texture for the next rendering commands at a given
+	 * texture unit slot.
+	 *
+	 * @param textureUnit
+	 *   The texture unit to bind this texture to.  If not specified, then the
+	 *   currently active texture slot is used.
+	 */
+	abstract void bind(int textureUnit = -1)
 }

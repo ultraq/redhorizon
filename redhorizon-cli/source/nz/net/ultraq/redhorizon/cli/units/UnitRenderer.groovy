@@ -88,21 +88,21 @@ class UnitRenderer implements GraphicsElement {
 		)
 
 		textures = imagesData.collect { data ->
-			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED.value,
+			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED,
 				data.flipVertical(unit.width, unit.height, FORMAT_INDEXED)
 			)
 		}
 
-		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
+		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
 		shader = renderer.createShader(
 			'PalettedSprite',
 			getResourceAsStream('nz/net/ultraq/redhorizon/cli/units/PalettedSprite.vert.glsl').text,
 			getResourceAsStream('nz/net/ultraq/redhorizon/cli/units/PalettedSprite.frag.glsl').text,
 			{ shader, material ->
-				shader.setUniformTexture('indexTexture', 0, material.texture.textureId)
+				shader.setUniformTexture('indexTexture', 0, material.texture)
 			},
 			{ shader, material ->
-				shader.setUniformTexture('paletteTexture', 1, paletteAsTexture.textureId)
+				shader.setUniformTexture('paletteTexture', 1, paletteAsTexture)
 			},
 			{ shader, material ->
 				shader.setUniform('factionColours', unit.faction.colours)

@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -210,7 +211,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		}
 
 		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(sceneFramebufferResult.texture.textureId, imageSizeX, imageSizeY,
+		ImGui.image(((OpenGLTexture)sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
 			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
 		ImGui.end()

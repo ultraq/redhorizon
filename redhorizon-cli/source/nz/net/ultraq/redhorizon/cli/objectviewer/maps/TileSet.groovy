@@ -31,7 +31,7 @@ import java.nio.ByteBuffer
  * A texture made to contain all of the textures that make up the current map so
  * that the entire tileset can be bound to a single texture slot.  Individual
  * textures are then picked out by their coordinates within the overall tileset.
- * 
+ *
  * @author Emanuel Rabina
  */
 class TileSet implements GraphicsElement {
@@ -43,12 +43,12 @@ class TileSet implements GraphicsElement {
 	final Palette palette
 
 	private final List<ImagesFile> tileFileList = []
-	private final Map<ImagesFile,Integer> tileFileMap = [:]
+	private final Map<ImagesFile, Integer> tileFileMap = [:]
 	private Texture texture
 
 	/**
 	 * Constructor, build a tileset to fit data that uses the given palette.
-	 * 
+	 *
 	 * @param palette
 	 */
 	TileSet(Palette palette) {
@@ -59,7 +59,7 @@ class TileSet implements GraphicsElement {
 
 	/**
 	 * Add more tiles to the tileset.
-	 * 
+	 *
 	 * @param tilesFile
 	 */
 	void addTiles(ImagesFile tilesFile) {
@@ -103,7 +103,7 @@ class TileSet implements GraphicsElement {
 	/**
 	 * Return the rectangle representing the texture coordinates in the tileset
 	 * for the given tile file and frame.
-	 * 
+	 *
 	 * @param tileFile
 	 * @param frame
 	 * @return
@@ -122,7 +122,7 @@ class TileSet implements GraphicsElement {
 
 	/**
 	 * Return the texture underlying this tileset, if available.
-	 * 
+	 *
 	 * @return
 	 */
 	Texture getTexture() {
@@ -133,7 +133,7 @@ class TileSet implements GraphicsElement {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		texture = renderer.createTexture(tilesetWidth, tilesetHeight, palette.format.value,
+		texture = renderer.createTexture(tilesetWidth, tilesetHeight, palette.format,
 			tilesetData.flipVertical(tilesetWidth, tilesetHeight, palette.format)
 		)
 	}

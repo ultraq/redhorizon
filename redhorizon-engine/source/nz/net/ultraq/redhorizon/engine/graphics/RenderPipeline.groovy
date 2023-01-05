@@ -159,7 +159,7 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
 
 		var framebufferUniform = { Shader shader, Material material ->
-			shader.setUniformTexture('framebuffer', 0, material.texture.textureId)
+			shader.setUniformTexture('framebuffer', 0, material.texture)
 		}
 		def modelUniform = { Shader shader, Material material ->
 			shader.setUniformMatrix('model', material.transform)

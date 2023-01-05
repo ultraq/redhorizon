@@ -39,6 +39,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
@@ -56,7 +57,6 @@ import static org.lwjgl.opengl.GL20C.glVertexAttribPointer
 import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
-import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
@@ -130,7 +130,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl').text,
 			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl').text,
 			{ shader, material ->
-				shader.setUniformTexture('mainTexture', 0, material.texture.textureId)
+				shader.setUniformTexture('mainTexture', 0, material.texture)
 			},
 			{ shader, material ->
 				shader.setUniformMatrix('model', material.transform)
@@ -189,20 +189,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		def height = resolution.height
 
 		// Colour texture attachment
-		def colourTextureId = glGenTextures()
-		glBindTexture(GL_TEXTURE_2D, colourTextureId)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTextureId, 0)
-		glBindTexture(GL_TEXTURE_2D, 0)
-
-		def colourTexture = new Texture(
-			textureId: colourTextureId,
-			width: width,
-			height: height
-		)
+		var colourTexture = new OpenGLTexture(width, height, filter)
 		trigger(new TextureCreatedEvent(colourTexture))
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
 
 		// Depth buffer attachment
 		def depthBufferId = glGenRenderbuffers()
@@ -320,40 +310,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Texture createTexture(int width, int height, int format, ByteBuffer data) {
+	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data) {
 
-		return stackPush().withCloseable { stack ->
-			def textureId = glGenTextures()
-			glBindTexture(GL_TEXTURE_2D, textureId)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-			var colourFormat = switch (format) {
-				case 1 -> GL_RED
-				case 3 -> GL_RGB
-				case 4 -> GL_RGBA
-				default -> 0
-			}
-			def textureBuffer = stack.malloc(data.remaining())
-				.put(data.array(), data.position(), data.remaining())
-				.flip()
-			def matchesAlignment = (width * format) % 4 == 0
-			if (!matchesAlignment) {
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-			}
-			glTexImage2D(GL_TEXTURE_2D, 0, colourFormat, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
-			if (!matchesAlignment) {
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
-			}
-
-			def texture = new Texture(
-				textureId: textureId,
-				width: width,
-				height: height
-			)
-			trigger(new TextureCreatedEvent(texture))
-			return texture
-		}
+		var texture = new OpenGLTexture(width, height, format, data)
+		trigger(new TextureCreatedEvent(texture))
+		return texture
 	}
 
 	@Override
@@ -394,7 +355,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteTexture(Texture texture) {
 
 		if (texture) {
-			glDeleteTextures(texture.textureId)
+			texture.close()
 			trigger(new TextureDeletedEvent(texture))
 		}
 	}

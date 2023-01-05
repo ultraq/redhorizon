@@ -42,21 +42,6 @@ abstract class Shader implements AutoCloseable {
 	}
 
 	/**
-	 * Return the name of this shader program.
-	 *
-	 * @return
-	 */
-	@Override
-	String toString() {
-
-		def string = "${name} shader program"
-		if (uniforms) {
-			string += ", uniforms: ${uniforms.collect { it.name }}"
-		}
-		return string
-	}
-
-	/**
 	 * Apply a data uniform to the shader.  The type of data is determined by the
 	 * size of the data array.
 	 *
@@ -89,7 +74,22 @@ abstract class Shader implements AutoCloseable {
 	 * @param textureUnit
 	 * @param textureId
 	 */
-	abstract void setUniformTexture(String name, int textureUnit, int textureId)
+	abstract void setUniformTexture(String name, int textureUnit, Texture texture)
+
+	/**
+	 * Return the name of this shader program.
+	 *
+	 * @return
+	 */
+	@Override
+	String toString() {
+
+		def string = "${name} shader program"
+		if (uniforms) {
+			string += " (${uniforms.length}, uniforms)"
+		}
+		return string
+	}
 
 	/**
 	 * Enable the use of this shader for the next rendering commands.

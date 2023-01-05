@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
@@ -109,7 +110,7 @@ interface GraphicsRenderer extends EventTarget {
 	 * @param data
 	 * @return New texture object.
 	 */
-	Texture createTexture(int width, int height, int format, ByteBuffer data)
+	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data)
 
 	/**
 	 * Delete framebuffer data.

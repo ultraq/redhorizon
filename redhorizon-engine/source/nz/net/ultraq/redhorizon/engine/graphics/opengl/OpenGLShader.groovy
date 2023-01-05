@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 import org.joml.Matrix4f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11C.*
-import static org.lwjgl.opengl.GL13C.GL_TEXTURE0
-import static org.lwjgl.opengl.GL13C.glActiveTexture
+import static org.lwjgl.opengl.GL11C.GL_TRUE
 import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex
 import static org.lwjgl.opengl.GL31C.glUniformBlockBinding
@@ -157,11 +156,10 @@ class OpenGLShader extends Shader {
 	}
 
 	@Override
-	void setUniformTexture(String name, int textureUnit, int textureId) {
+	void setUniformTexture(String name, int textureUnit, Texture texture) {
 
 		glUniform1i(getUniformLocation(name), textureUnit)
-		glActiveTexture(GL_TEXTURE0 + textureUnit)
-		glBindTexture(GL_TEXTURE_2D, textureId)
+		texture.bind(textureUnit)
 	}
 
 	@Override
