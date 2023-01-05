@@ -158,23 +158,14 @@ class RenderPipeline implements AutoCloseable {
 		// Scene render pass
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
 
-		var framebufferUniform = new Uniform('framebuffer') {
-			@Override
-			void apply(Shader shader, Material material) {
-				shader.setUniformTexture(name, 0, material.texture.textureId)
-			}
+		var framebufferUniform = { Shader shader, Material material ->
+			shader.setUniformTexture('framebuffer', 0, material.texture.textureId)
 		}
-		def modelUniform = new Uniform('model') {
-			@Override
-			void apply(Shader shader, Material material) {
-				shader.setUniformMatrix(name, material.transform)
-			}
+		def modelUniform = { Shader shader, Material material ->
+			shader.setUniformMatrix('model', material.transform)
 		}
-		def textureTargetSizeUniform = new Uniform('textureTargetSize') {
-			@Override
-			void apply(Shader shader, Material material) {
-				shader.setUniform(name, window.targetResolution as float[])
-			}
+		def textureTargetSizeUniform = { Shader shader, Material material ->
+			shader.setUniform('textureTargetSize', window.targetResolution as float[])
 		}
 
 		// Sharp upscaling post-processing pass
@@ -187,11 +178,8 @@ class RenderPipeline implements AutoCloseable {
 				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.frag.glsl').text,
 				framebufferUniform,
 				modelUniform,
-				new Uniform('textureSourceSize') {
-					@Override
-					void apply(Shader shader, Material material) {
-						shader.setUniform(name, window.renderResolution as float[])
-					}
+				{ shader, material ->
+					shader.setUniform('textureSourceSize', window.renderResolution as float[])
 				},
 				textureTargetSizeUniform
 			),
@@ -209,12 +197,9 @@ class RenderPipeline implements AutoCloseable {
 				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.frag.glsl').text,
 				framebufferUniform,
 				modelUniform,
-				new Uniform('textureSourceSize') {
-					@Override
-					void apply(Shader shader, Material material) {
-						def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
-						shader.setUniform(name, window.renderResolution * scale as float[])
-					}
+				{ shader, material ->
+					def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
+					shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
 				},
 				textureTargetSizeUniform
 			),

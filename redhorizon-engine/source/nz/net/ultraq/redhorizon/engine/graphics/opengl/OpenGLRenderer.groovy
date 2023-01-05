@@ -129,17 +129,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			'Sprite',
 			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl').text,
 			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl').text,
-			new Uniform('mainTexture') {
-				@Override
-				void apply(Shader shader, Material material) {
-					shader.setUniformTexture(name, 0, material.texture.textureId)
-				}
+			{ shader, material ->
+				shader.setUniformTexture('mainTexture', 0, material.texture.textureId)
 			},
-			new Uniform('model') {
-				@Override
-				void apply(Shader shader, Material material) {
-					shader.setUniformMatrix(name, material.transform)
-				}
+			{ shader, material ->
+				shader.setUniformMatrix('model', material.transform)
 			}
 		)
 	}
