@@ -16,25 +16,34 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
  * A shader is a small program that runs on the GPU.
- * 
+ *
  * @author Emanuel Rabina
  */
-@MapConstructor
-@SuppressWarnings('GrFinalVariableAccess')
+@TupleConstructor(defaults = false, includes = ['name', 'uniforms'])
 abstract class Shader {
 
-	final int programId
+	protected int programId
 
 	final String name
 	final Uniform[] uniforms
 
 	/**
+	 * Return the shader program ID.
+	 *
+	 * @return
+	 */
+	int getProgramId() {
+
+		return programId
+	}
+
+	/**
 	 * Return the name of this shader program.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -50,7 +59,7 @@ abstract class Shader {
 	/**
 	 * Return a configuration object that can be used to adjust this shader in
 	 * preparation for rendering.
-	 * 
+	 *
 	 * @return
 	 */
 	abstract ShaderUniformConfig withShaderUniformConfig()

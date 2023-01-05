@@ -78,15 +78,16 @@ interface GraphicsRenderer extends EventTarget {
 	Framebuffer createFramebuffer(Dimension resolution, boolean filter)
 
 	/**
-	 * Create a new shader program for the shader source files with the given
-	 * name.
+	 * Create a new shader program from a pair of vertex and fragment shader
+	 * scripts.
 	 *
 	 * @param name
-	 * @param shaderPathPrefix
+	 * @param vertexShaderSource
+	 * @param fragmentShaderSource
 	 * @param uniforms
 	 * @return
 	 */
-	Shader createShader(String name, String shaderPathPrefix, Uniform... uniforms)
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is

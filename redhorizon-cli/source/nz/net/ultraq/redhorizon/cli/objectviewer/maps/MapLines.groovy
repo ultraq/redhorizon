@@ -75,7 +75,8 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 
 		shader = renderer.createShader(
 			'Primitives',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl').text,
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl').text,
 			new Uniform('model') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {

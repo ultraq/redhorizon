@@ -54,8 +54,6 @@ import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL15C.*
 import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.opengl.GL30C.*
-import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex
-import static org.lwjgl.opengl.GL31C.glUniformBlockBinding
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
@@ -129,7 +127,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		// Create the shader programs used by this renderer
 		spriteShader = createShader(
 			'Sprite',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl').text,
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl').text,
 			new Uniform('mainTexture') {
 				@Override
 				void apply(Material material, ShaderUniformConfig shaderConfig) {
@@ -300,69 +299,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Shader createShader(String name, String shaderPathPrefix, Uniform... uniforms) {
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms) {
 
-		/* 
-		 * Create a shader of the specified name and type, running a compilation
-		 * check to make sure it all went OK.
-		 */
-		def createShader = { int type ->
-			def shaderPath = "${shaderPathPrefix}/${name}.${type == GL_VERTEX_SHADER ? 'vert' : 'frag'}.glsl"
-			def shaderSource = getResourceAsStream(shaderPath).withBufferedStream { stream -> stream.text }
-			def shaderId = glCreateShader(type)
-			glShaderSource(shaderId, shaderSource)
-			glCompileShader(shaderId)
-
-			def status = glGetShaderi(shaderId, GL_COMPILE_STATUS)
-			if (status != GL_TRUE) {
-				var message = glGetShaderInfoLog(shaderId)
-				logger.error(message)
-				throw new Exception(message)
-			}
-
-			return shaderId
-		}
-
-		/* 
-		 * Link multiple shader parts together into a shader program.
-		 */
-		def createProgram = { int vertexShaderId, int fragmentShaderId ->
-			def programId = glCreateProgram()
-			glAttachShader(programId, vertexShaderId)
-			glAttachShader(programId, fragmentShaderId)
-			glLinkProgram(programId)
-			glValidateProgram(programId)
-
-			def status = glGetProgrami(programId, GL_LINK_STATUS)
-			if (status != GL_TRUE) {
-				var message = glGetProgramInfoLog(programId)
-				logger.error(message)
-				throw new Exception(message)
-			}
-
-			return programId
-		}
-
-		def shader = shaders.find { shader -> shader.name == name }
+		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
-			def vertexShaderId = createShader(GL_VERTEX_SHADER)
-			def fragmentShaderId = createShader(GL_FRAGMENT_SHADER)
-			def programId = createProgram(vertexShaderId, fragmentShaderId)
-			glDeleteShader(vertexShaderId)
-			glDeleteShader(fragmentShaderId)
-
-			shader = new OpenGLShader(
-				programId: programId,
-				name: name,
-				uniforms: uniforms
-			)
+			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, uniforms)
 			shaders << shader
 		}
-
-		// Tie the shader's view/projection uniforms to the camera
-		def blockIndex = glGetUniformBlockIndex(shader.programId, 'Camera')
-		glUniformBlockBinding(shader.programId, blockIndex, 0)
-
 		return shader
 	}
 
