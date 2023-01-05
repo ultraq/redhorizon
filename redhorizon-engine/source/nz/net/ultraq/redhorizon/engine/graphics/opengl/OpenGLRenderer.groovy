@@ -32,7 +32,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -52,7 +51,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL15C.*
-import static org.lwjgl.opengl.GL20C.*
+import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer
 import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryStack.stackPush
@@ -131,14 +131,14 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl').text,
 			new Uniform('mainTexture') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
+				void apply(Shader shader, Material material) {
+					shader.setUniformTexture(name, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(name, material.transform)
+				void apply(Shader shader, Material material) {
+					shader.setUniformMatrix(name, material.transform)
 				}
 			}
 		)
@@ -182,9 +182,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void close() {
 
 		glDeleteBuffers(cameraBufferObject)
-		shaders.each { shader ->
-			glDeleteProgram(shader.programId)
-		}
+		shaders*.close()
 	}
 
 	@Override
@@ -412,11 +410,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void draw(Mesh mesh, Shader shader = spriteShader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
-			glUseProgram(shader.programId)
-
-			var shaderUniformConfig = shader.withShaderUniformConfig()
-			shader.uniforms.each { uniform ->
-				uniform.apply(material, shaderUniformConfig)
+			shader.use()
+			if (material) {
+				shader.applyMaterial(material)
 			}
 
 			glBindVertexArray(mesh.vertexArrayId)

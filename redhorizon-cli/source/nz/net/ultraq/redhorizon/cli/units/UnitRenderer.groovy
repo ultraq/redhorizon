@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -102,26 +101,26 @@ class UnitRenderer implements GraphicsElement {
 			getResourceAsStream('nz/net/ultraq/redhorizon/cli/units/PalettedSprite.frag.glsl').text,
 			new Uniform('indexTexture') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
+				void apply(Shader shader, Material material) {
+					shader.setUniformTexture(name, 0, material.texture.textureId)
 				}
 			},
 			new Uniform('paletteTexture') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(name, 1, paletteAsTexture.textureId)
+				void apply(Shader shader, Material material) {
+					shader.setUniformTexture(name, 1, paletteAsTexture.textureId)
 				}
 			},
 			new Uniform('factionColours') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniform(name, unit.faction.colours)
+				void apply(Shader shader, Material material) {
+					shader.setUniform(name, unit.faction.colours)
 				}
 			},
 			new Uniform('model') {
 				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(name, material.transform)
+				void apply(Shader shader, Material material) {
+					shader.setUniformMatrix(name, material.transform)
 				}
 			}
 		)

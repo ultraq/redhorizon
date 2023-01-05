@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
+import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 
 /**
@@ -43,7 +44,9 @@ class OpenGLWindow extends Window {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
+	@PackageScope
 	final long window
+
 	final float monitorScale
 	final Dimension renderResolution
 	Dimension size

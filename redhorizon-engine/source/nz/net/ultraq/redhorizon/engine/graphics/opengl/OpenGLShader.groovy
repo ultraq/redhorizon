@@ -17,15 +17,18 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
+import org.joml.Matrix4f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11C.GL_TRUE
+import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL13C.GL_TEXTURE0
+import static org.lwjgl.opengl.GL13C.glActiveTexture
 import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.opengl.GL31C.glGetUniformBlockIndex
 import static org.lwjgl.opengl.GL31C.glUniformBlockBinding
+import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
 
@@ -37,6 +40,8 @@ import groovy.transform.Memoized
 class OpenGLShader extends Shader {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
+
+	private final int programId
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
@@ -103,10 +108,65 @@ class OpenGLShader extends Shader {
 		glUniformBlockBinding(programId, blockIndex, 0)
 	}
 
-	@Memoized
 	@Override
-	ShaderUniformConfig withShaderUniformConfig() {
+	void close() {
 
-		return new OpenGLShaderUniformConfig(this)
+		glDeleteProgram(programId)
+	}
+
+	/**
+	 * Cached function for looking up a uniform location in a shader program.
+	 *
+	 * @param name
+	 * @return
+	 */
+	@Memoized
+	private int getUniformLocation(String name) {
+
+		return glGetUniformLocation(programId, name)
+	}
+
+	@Override
+	void setUniform(String name, float[] data) {
+
+		stackPush().withCloseable { stack ->
+			switch (data.length) {
+				case 2:
+					glUniform2fv(getUniformLocation(name), stack.floats(data))
+					break
+				default:
+					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
+			}
+		}
+	}
+
+	@Override
+	void setUniform(String name, int[] data) {
+
+		stackPush().withCloseable { stack ->
+			glUniform1iv(getUniformLocation(name), stack.ints(data))
+		}
+	}
+
+	@Override
+	void setUniformMatrix(String name, Matrix4f matrix) {
+
+		stackPush().withCloseable { stack ->
+			glUniformMatrix4fv(getUniformLocation(name), false, matrix.get(stack.mallocFloat(16)))
+		}
+	}
+
+	@Override
+	void setUniformTexture(String name, int textureUnit, int textureId) {
+
+		glUniform1i(getUniformLocation(name), textureUnit)
+		glActiveTexture(GL_TEXTURE0 + textureUnit)
+		glBindTexture(GL_TEXTURE_2D, textureId)
+	}
+
+	@Override
+	void use() {
+
+		glUseProgram(programId)
 	}
 }

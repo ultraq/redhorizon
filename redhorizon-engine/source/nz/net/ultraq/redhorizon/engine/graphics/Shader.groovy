@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import org.joml.Matrix4f
+
 import groovy.transform.TupleConstructor
 
 /**
@@ -23,22 +25,20 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = ['name', 'uniforms'])
-abstract class Shader {
-
-	protected int programId
+@TupleConstructor(defaults = false)
+abstract class Shader implements AutoCloseable {
 
 	final String name
 	final Uniform[] uniforms
 
 	/**
-	 * Return the shader program ID.
+	 * Update a shader's uniforms using the given material.
 	 *
-	 * @return
+	 * @param material
 	 */
-	int getProgramId() {
+	void applyMaterial(Material material) {
 
-		return programId
+		uniforms*.apply(this, material)
 	}
 
 	/**
@@ -57,10 +57,42 @@ abstract class Shader {
 	}
 
 	/**
-	 * Return a configuration object that can be used to adjust this shader in
-	 * preparation for rendering.
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
 	 *
-	 * @return
+	 * @param name
+	 * @param data
 	 */
-	abstract ShaderUniformConfig withShaderUniformConfig()
+	abstract void setUniform(String name, float[] data)
+
+	/**
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
+	 *
+	 * @param name
+	 * @param data
+	 */
+	abstract void setUniform(String name, int[] data)
+
+	/**
+	 * Apply a matrix uniform to the shader.
+	 *
+	 * @param name
+	 * @param matrix
+	 */
+	abstract void setUniformMatrix(String name, Matrix4f matrix)
+
+	/**
+	 * Apply a texture uniform using the given texture ID.
+	 *
+	 * @param name
+	 * @param textureUnit
+	 * @param textureId
+	 */
+	abstract void setUniformTexture(String name, int textureUnit, int textureId)
+
+	/**
+	 * Enable the use of this shader for the next rendering commands.
+	 */
+	abstract void use()
 }

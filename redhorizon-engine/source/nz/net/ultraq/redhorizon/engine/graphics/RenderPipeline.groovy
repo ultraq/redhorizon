@@ -160,20 +160,20 @@ class RenderPipeline implements AutoCloseable {
 
 		var framebufferUniform = new Uniform('framebuffer') {
 			@Override
-			void apply(Material material, ShaderUniformConfig shaderConfig) {
-				shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
+			void apply(Shader shader, Material material) {
+				shader.setUniformTexture(name, 0, material.texture.textureId)
 			}
 		}
 		def modelUniform = new Uniform('model') {
 			@Override
-			void apply(Material material, ShaderUniformConfig shaderConfig) {
-				shaderConfig.setUniformMatrix(name, material.transform)
+			void apply(Shader shader, Material material) {
+				shader.setUniformMatrix(name, material.transform)
 			}
 		}
 		def textureTargetSizeUniform = new Uniform('textureTargetSize') {
 			@Override
-			void apply(Material material, ShaderUniformConfig shaderConfig) {
-				shaderConfig.setUniform(name, window.targetResolution as float[])
+			void apply(Shader shader, Material material) {
+				shader.setUniform(name, window.targetResolution as float[])
 			}
 		}
 
@@ -189,8 +189,8 @@ class RenderPipeline implements AutoCloseable {
 				modelUniform,
 				new Uniform('textureSourceSize') {
 					@Override
-					void apply(Material material, ShaderUniformConfig shaderConfig) {
-						shaderConfig.setUniform(name, window.renderResolution as float[])
+					void apply(Shader shader, Material material) {
+						shader.setUniform(name, window.renderResolution as float[])
 					}
 				},
 				textureTargetSizeUniform
@@ -211,9 +211,9 @@ class RenderPipeline implements AutoCloseable {
 				modelUniform,
 				new Uniform('textureSourceSize') {
 					@Override
-					void apply(Material material, ShaderUniformConfig shaderConfig) {
+					void apply(Shader shader, Material material) {
 						def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
-						shaderConfig.setUniform(name, window.renderResolution * scale as float[])
+						shader.setUniform(name, window.renderResolution * scale as float[])
 					}
 				},
 				textureTargetSizeUniform
