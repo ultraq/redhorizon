@@ -28,8 +28,14 @@ import groovy.transform.MapConstructor
  * @author Emanuel Rabina
  */
 @MapConstructor
-class Material {
+class Material implements AutoCloseable {
 
 	Texture texture
 	Matrix4f transform
+
+	@Override
+	void close() {
+
+		texture?.close()
+	}
 }

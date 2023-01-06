@@ -331,11 +331,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void deleteMaterial(Material material) {
 
-		if (material) {
-			if (material.texture) {
-				deleteTexture(material.texture)
-			}
-		}
+		material?.close()
 	}
 
 	@Override
