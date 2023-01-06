@@ -51,7 +51,6 @@ import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
-import static org.lwjgl.opengl.GL15C.glDeleteBuffers
 import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
 import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.KHRDebug.*
@@ -77,7 +76,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	private Dimension framebufferSize
 	private final Shader spriteShader
 	protected final List<Shader> shaders = []
-	protected int cameraBufferObject
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -173,7 +171,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@Override
 	void close() {
 
-		glDeleteBuffers(cameraBufferObject)
 		shaders*.close()
 	}
 
