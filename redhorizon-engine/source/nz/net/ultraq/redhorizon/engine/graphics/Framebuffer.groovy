@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
  * A section of memory that can be drawn to like a screen, but that can then be
@@ -24,11 +24,13 @@ import groovy.transform.MapConstructor
  *
  * @author Emanuel Rabina
  */
-@MapConstructor
-@SuppressWarnings('GrFinalVariableAccess')
-class Framebuffer {
+@TupleConstructor
+abstract class Framebuffer implements AutoCloseable {
 
-	final int framebufferId
 	final Texture texture
-	final int depthBufferId
+
+	/**
+	 * Use this framebuffer in upcoming rendering operations.
+	 */
+	abstract void bind()
 }

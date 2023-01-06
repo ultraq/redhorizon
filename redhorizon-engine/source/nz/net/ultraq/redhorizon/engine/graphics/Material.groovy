@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Matrix4f
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
  * A material defines how a shape should be rendered.  A {@link Mesh} already
@@ -27,7 +27,7 @@ import groovy.transform.MapConstructor
  *
  * @author Emanuel Rabina
  */
-@MapConstructor
+@TupleConstructor
 class Material implements AutoCloseable {
 
 	Texture texture

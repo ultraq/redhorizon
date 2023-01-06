@@ -180,34 +180,13 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	}
 
 	@Override
-	Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
-
-		def frameBufferId = glGenFramebuffers()
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId)
-
-		def width = resolution.width
-		def height = resolution.height
+	Framebuffer createFramebuffer(int width, int height, boolean filter) {
 
 		// Colour texture attachment
 		var colourTexture = new OpenGLTexture(width, height, filter)
 		trigger(new TextureCreatedEvent(colourTexture))
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
-
-		// Depth buffer attachment
-		def depthBufferId = glGenRenderbuffers()
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferId)
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBufferId)
-		glBindRenderbuffer(GL_RENDERBUFFER, 0)
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0)
-
-		def framebuffer = new Framebuffer(
-			framebufferId: frameBufferId,
-			texture: colourTexture,
-			depthBufferId: depthBufferId
-		)
+		var framebuffer = new OpenGLFramebuffer(width, height, colourTexture)
 		trigger(new FramebufferCreatedEvent(framebuffer))
 		return framebuffer
 	}
@@ -216,10 +195,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@NamedVariant
 	Material createMaterial(Texture texture = null, Matrix4f transform = new Matrix4f()) {
 
-		return new Material(
-			texture: texture,
-			transform: transform
-		)
+		return new Material(texture, transform)
 	}
 
 	@Override
@@ -321,9 +297,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteFramebuffer(Framebuffer framebuffer) {
 
 		if (framebuffer) {
-			glDeleteFramebuffers(framebuffer.framebufferId)
-			glDeleteRenderbuffers(framebuffer.depthBufferId)
-			deleteTexture(framebuffer.texture)
+			framebuffer?.close()
 			trigger(new FramebufferDeletedEvent(framebuffer))
 		}
 	}
@@ -398,7 +372,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void setRenderTarget(Framebuffer framebuffer) {
 
 		if (framebuffer) {
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.framebufferId)
+			framebuffer.bind()
 			glViewport(0, 0, framebuffer.texture.width, framebuffer.texture.height)
 		}
 		else {

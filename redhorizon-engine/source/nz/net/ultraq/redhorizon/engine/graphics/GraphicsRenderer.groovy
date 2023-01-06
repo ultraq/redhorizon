@@ -43,6 +43,28 @@ interface GraphicsRenderer extends EventTarget {
 	void clear()
 
 	/**
+	 * Create a framebuffer that can be rendered to.
+	 *
+	 * @param resolution
+	 * @param filter
+	 * @return
+	 */
+	default Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
+
+		return createFramebuffer(resolution.width, resolution.height, filter)
+	}
+
+	/**
+	 * Create a framebuffer that can be rendered to.
+	 *
+	 * @param width
+	 * @param height
+	 * @param filter
+	 * @return
+	 */
+	Framebuffer createFramebuffer(int width, int height, boolean filter)
+
+	/**
 	 * Create a material out of the given component parts.
 	 *
 	 * @param mesh
@@ -68,15 +90,6 @@ interface GraphicsRenderer extends EventTarget {
 	@NamedVariant
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
 		int[] indices)
-
-	/**
-	 * Create a framebuffer that can be rendered to.
-	 *
-	 * @param resolution
-	 * @param filter
-	 * @return
-	 */
-	Framebuffer createFramebuffer(Dimension resolution, boolean filter)
 
 	/**
 	 * Create a new shader program from a pair of vertex and fragment shader

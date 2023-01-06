@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
+@TupleConstructor
 abstract class Shader implements AutoCloseable {
 
 	final String name
