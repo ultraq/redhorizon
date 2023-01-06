@@ -25,16 +25,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer.enableVertexBufferLayout
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
-import static org.lwjgl.opengl.GL15C.*
-import static org.lwjgl.opengl.GL30C.glBindVertexArray
-import static org.lwjgl.opengl.GL30C.glGenVertexArrays
-import static org.lwjgl.system.MemoryStack.stackPush
+import static org.lwjgl.opengl.GL11C.*
 
 import groovy.transform.NamedVariant
 import groovy.transform.TupleConstructor
@@ -65,81 +61,43 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 	@Override
 	Tuple2<Mesh, Material> bundle() {
 
-		return stackPush().withCloseable { stack ->
-			def vertexArrayId = glGenVertexArrays()
-			glBindVertexArray(vertexArrayId)
-
-			// Create and pass to OpenGL buffers that contain all of the materials
-			// created with this builder
-			def allVertices = []
-			def allIndices = []
-			meshes.each { mesh ->
-				allVertices.addAll(mesh.vertices)
-				allIndices.addAll(mesh.indices)
-			}
-			def vertexBuffer = stack.mallocFloat(allVertices.size() * VERTEX_BUFFER_LAYOUT.size())
-			def indexBuffer = stack.mallocInt(allIndices.size())
-			def indexOffset = 0
-
-			for (var i = 0; i < meshes.size(); i++) {
-				var mesh = meshes[i]
-				var material = materials[i]
-				def colour = mesh.colour
-				def textureUVs = mesh.textureUVs
-				mesh.vertices.eachWithIndex { vertex, vertexIndex ->
-					def position = material.transform.transformPosition(new Vector3f(vertex, 0))
-					def textureUV = textureUVs[vertexIndex]
-					vertexBuffer.put(
-						colour.r, colour.g, colour.b, colour.a,
-						position.x, position.y,
-						textureUV.x, textureUV.y
-					)
-				}
-				mesh.indices.each { index ->
-					indexBuffer.put(index + indexOffset)
-				}
-				indexOffset += mesh.vertices.size()
-			}
-			vertexBuffer.flip()
-			indexBuffer.flip()
-
-			def vertexBufferId = glGenBuffers()
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
-
-			enableVertexBufferLayout(VERTEX_BUFFER_LAYOUT)
-
-			def elementBufferId = glGenBuffers()
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
-
-			// Return a new mesh and material based off the first ones in the lists
-			// which is assumed to be representative of the entire batch
-			var templateMesh = meshes.first()
-			var templateMaterial = materials.first()
-			var mesh = new Mesh(
-				vertexType: templateMesh.vertexType,
-				colour: templateMesh.colour,
-				vertices: allVertices,
-				vertexArrayId: vertexArrayId,
-				vertexBufferId: vertexBufferId,
-				indices: allIndices,
-				elementBufferId: elementBufferId
-			)
-			var material = new Material(
-				texture: templateMaterial.texture,
-				transform: new Matrix4f()
-			)
-
-			return new Tuple2<>(mesh, material)
+		var allVertices = []
+		var allTextureUVs = []
+		var allIndices = []
+		var indexOffset = 0
+		for (var i = 0; i < meshes.size(); i++) {
+			var mesh = meshes[i]
+			var material = materials[i]
+			allVertices.addAll(mesh.vertices.collect { vertex ->
+				var position = material.transform.transformPosition(new Vector3f(vertex, 0))
+				return new Vector2f(position.x, position.y)
+			})
+			allTextureUVs.addAll(mesh.textureUVs)
+			allIndices.addAll(mesh.indices.collect { index -> index + indexOffset })
+			indexOffset += mesh.vertices.size()
 		}
+
+		// Return a new mesh and material based off the first ones in the lists
+		// which is assumed to be representative of the entire batch
+
+		var templateMesh = meshes.first()
+		var mesh = new OpenGLMesh(templateMesh.vertexType, VERTEX_BUFFER_LAYOUT, templateMesh.colour,
+			allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+
+		var templateMaterial = materials.first()
+		var material = new Material(
+			texture: templateMaterial.texture,
+			transform: new Matrix4f()
+		)
+
+		return new Tuple2<>(mesh, material)
 	}
 
 	@Override
 	@NamedVariant
 	Material createMaterial(Texture texture = null, Matrix4f transform = null) {
 
-		def material = renderer.createMaterial(texture, transform)
+		var material = new Material(texture, transform)
 		materials << material
 		return material
 	}
@@ -149,7 +107,8 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
 		Vector2f[] textureUVs = null, int[] indices = null) {
 
-		var mesh = renderer.createMesh(type, layout, colour, vertices, textureUVs, indices)
+		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
+			layout, colour, vertices, textureUVs, indices)
 		meshes << mesh
 		return mesh
 	}

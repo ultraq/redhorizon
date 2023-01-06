@@ -51,12 +51,10 @@ import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
-import static org.lwjgl.opengl.GL15C.*
-import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray
-import static org.lwjgl.opengl.GL20C.glVertexAttribPointer
-import static org.lwjgl.opengl.GL30C.*
+import static org.lwjgl.opengl.GL15C.glDeleteBuffers
+import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
+import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.KHRDebug.*
-import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
@@ -203,57 +201,10 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
 		Vector2f[] textureUVs = null, int[] indices = null) {
 
-		def mesh = new Mesh(
-			vertexType: type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
-			colour: colour,
-			vertices: vertices,
-			textureUVs: textureUVs,
-			indices: indices
-		)
+		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
+			layout, colour, vertices, textureUVs, indices)
 		trigger(new MeshCreatedEvent(mesh))
-
-		return stackPush().withCloseable { stack ->
-			def vertexArrayId = glGenVertexArrays()
-			glBindVertexArray(vertexArrayId)
-
-			def vertexBufferId = glGenBuffers()
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-
-			// Buffer to hold all the vertex data
-			def vertexBuffer = stack.mallocFloat(layout.size() * vertices.size())
-			vertices.eachWithIndex { vertex, index ->
-				vertexBuffer.put(
-					colour.r, colour.g, colour.b, colour.a,
-					vertex.x, vertex.y
-				)
-				if (layout.parts.contains(VertexBufferLayoutPart.TEXTURE_UVS)) {
-					def textureUV = textureUVs[index]
-					vertexBuffer.put(textureUV.x, textureUV.y)
-				}
-			}
-			vertexBuffer.flip()
-			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
-
-			enableVertexBufferLayout(layout)
-
-			// Buffer for all the index data, if applicable
-			int elementBufferId = 0
-			if (mesh.indices) {
-				elementBufferId = glGenBuffers()
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
-				def indexBuffer = stack.mallocInt(mesh.indices.size())
-					.put(mesh.indices)
-					.flip()
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
-			}
-
-			mesh.vertexArrayId = vertexArrayId
-			mesh.vertexBufferId = vertexBufferId
-			if (mesh.indices) {
-				mesh.elementBufferId = elementBufferId
-			}
-			return mesh
-		}
+		return mesh
 	}
 
 	@Override
@@ -312,11 +263,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteMesh(Mesh mesh) {
 
 		if (mesh) {
-			if (mesh.elementBufferId) {
-				glDeleteBuffers(mesh.elementBufferId)
-			}
-			glDeleteBuffers(mesh.vertexBufferId)
-			glDeleteVertexArrays(mesh.vertexArrayId)
+			mesh.close()
 			trigger(new MeshDeletedEvent(mesh))
 		}
 	}
@@ -340,7 +287,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				shader.applyMaterial(material)
 			}
 
-			glBindVertexArray(mesh.vertexArrayId)
+			mesh.bind()
 			if (mesh.indices) {
 				glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
 			}
@@ -349,22 +296,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			}
 
 			trigger(new DrawEvent())
-		}
-	}
-
-	/**
-	 * Enables the vertex attributes specified by the given vertex buffer layout
-	 * object.
-	 *
-	 * @param parts
-	 * @return
-	 */
-	protected static void enableVertexBufferLayout(VertexBufferLayout layout) {
-
-		def stride = layout.sizeInBytes()
-		layout.parts.each { part ->
-			glEnableVertexAttribArray(part.location)
-			glVertexAttribPointer(part.location, part.size, GL_FLOAT, false, stride, layout.offsetOfInBytes(part))
 		}
 	}
 
