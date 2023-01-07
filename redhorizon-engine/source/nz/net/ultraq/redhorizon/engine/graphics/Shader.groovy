@@ -16,25 +16,69 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.MapConstructor
+import org.joml.Matrix4f
+
+import groovy.transform.TupleConstructor
 
 /**
  * A shader is a small program that runs on the GPU.
- * 
+ *
  * @author Emanuel Rabina
  */
-@MapConstructor
-@SuppressWarnings('GrFinalVariableAccess')
-abstract class Shader {
-
-	final int programId
+@TupleConstructor
+abstract class Shader implements AutoCloseable {
 
 	final String name
 	final Uniform[] uniforms
 
 	/**
+	 * Update a shader's uniforms using the given material.
+	 *
+	 * @param material
+	 */
+	void applyMaterial(Material material) {
+
+		uniforms*.apply(this, material)
+	}
+
+	/**
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
+	 *
+	 * @param name
+	 * @param data
+	 */
+	abstract void setUniform(String name, float[] data)
+
+	/**
+	 * Apply a data uniform to the shader.  The type of data is determined by the
+	 * size of the data array.
+	 *
+	 * @param name
+	 * @param data
+	 */
+	abstract void setUniform(String name, int[] data)
+
+	/**
+	 * Apply a matrix uniform to the shader.
+	 *
+	 * @param name
+	 * @param matrix
+	 */
+	abstract void setUniformMatrix(String name, Matrix4f matrix)
+
+	/**
+	 * Apply a texture uniform using the given texture ID.
+	 *
+	 * @param name
+	 * @param textureUnit
+	 * @param textureId
+	 */
+	abstract void setUniformTexture(String name, int textureUnit, Texture texture)
+
+	/**
 	 * Return the name of this shader program.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -42,16 +86,13 @@ abstract class Shader {
 
 		def string = "${name} shader program"
 		if (uniforms) {
-			string += ", uniforms: ${uniforms.collect { it.name }}"
+			string += " (${uniforms.length}, uniforms)"
 		}
 		return string
 	}
 
 	/**
-	 * Return a configuration object that can be used to adjust this shader in
-	 * preparation for rendering.
-	 * 
-	 * @return
+	 * Enable the use of this shader for the next rendering commands.
 	 */
-	abstract ShaderUniformConfig withShaderUniformConfig()
+	abstract void use()
 }

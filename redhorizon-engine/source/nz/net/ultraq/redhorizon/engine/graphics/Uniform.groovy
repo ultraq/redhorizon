@@ -16,24 +16,19 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import groovy.transform.TupleConstructor
-
 /**
- * Class detailing a uniform value in a shader and how to apply it to the shader
- * during rendering.
- * 
+ * Interface detailing how a uniform value in a shader is set for a given
+ * material.
+ *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Uniform {
-
-	final String name
+interface Uniform {
 
 	/**
-	 * Apply the uniform value to the shader it's associated with.
-	 * 
+	 * Apply the uniform value to the shader using a given material.
+	 *
+	 * @param shader
 	 * @param material
-	 * @param shaderConfig
 	 */
-	abstract void apply(Material material, ShaderUniformConfig shaderConfig)
+	void apply(Shader shader, Material material)
 }

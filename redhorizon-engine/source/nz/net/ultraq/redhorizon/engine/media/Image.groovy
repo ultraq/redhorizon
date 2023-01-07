@@ -106,7 +106,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 			surface: new Rectanglef(0, 0, width, height)
 		)
 		material = renderer.createMaterial(
-			texture: renderer.createTexture(width, height, format.value, imageData),
+			texture: renderer.createTexture(width, height, format, imageData),
 			transform: transform
 		)
 		imageData = null

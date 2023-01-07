@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * An overlay rendering pass for displaying debug information about the game.
- * 
+ *
  * @author Emanuel Rabina
  */
 class DebugOverlayRenderPass implements OverlayRenderPass {
@@ -49,7 +49,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 
 	// Debug information
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
-	private final Map<String,String> persistentLines = [:]
+	private final Map<String, String> persistentLines = [:]
 	private AtomicInteger drawCalls = new AtomicInteger()
 	private AtomicInteger activeFramebuffers = new AtomicInteger()
 	private AtomicInteger activeMeshes = new AtomicInteger()
@@ -60,7 +60,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	/**
 	 * Constructor, tie the debug overlay to the renderer so it can get the
 	 * information it needs to build the display.
-	 * 
+	 *
 	 * @param renderer
 	 * @param enabled
 	 */
@@ -131,7 +131,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 		if (debugLines.size()) {
 			ImGui.separator()
 			debugLines.each { line ->
-				ImGui.text(line)
+				ImGui.textWrapped(line)
 			}
 		}
 

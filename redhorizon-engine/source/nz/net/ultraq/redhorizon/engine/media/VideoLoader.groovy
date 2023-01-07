@@ -63,7 +63,7 @@ class VideoLoader extends MediaLoader<VideoFile, Video> {
 		def width = file.width
 		def height = file.height
 		def scaleY = file.forVgaMonitors ? 1.2f : 1f
-		def scale = graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height * scaleY as int)
+		def scale = graphicsEngine.window.renderResolution.calculateScaleToFit(width, height * scaleY as int)
 		media = new Video(file, gameClock)
 			.scale(scale, scale * scaleY as float, 1)
 			.translate(-width / 2, -height / 2)

@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.async.ControlledLoop
-import nz.net.ultraq.redhorizon.engine.ContextErrorEvent
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
@@ -49,7 +49,7 @@ class GraphicsEngine extends Engine implements EventTarget {
 	private final InputEventStream inputEventStream
 
 	private OpenGLContext context
-	private Camera camera
+	private OpenGLCamera camera
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
@@ -100,16 +100,6 @@ class GraphicsEngine extends Engine implements EventTarget {
 	}
 
 	/**
-	 * Return this engine's graphics context.
-	 *
-	 * @return
-	 */
-	GraphicsContext getGraphicsContext() {
-
-		return context
-	}
-
-	/**
 	 * Return the rendering pipeline.
 	 *
 	 * @return
@@ -117,6 +107,16 @@ class GraphicsEngine extends Engine implements EventTarget {
 	RenderPipeline getRenderPipeline() {
 
 		return renderPipeline
+	}
+
+	/**
+	 * Return the window that is the target for rendering.
+	 *
+	 * @return
+	 */
+	Window getWindow() {
+
+		return context.window
 	}
 
 	/**
@@ -132,47 +132,47 @@ class GraphicsEngine extends Engine implements EventTarget {
 		// Initialization
 		context = new OpenGLContext(windowTitle, config)
 		context.withCloseable { context ->
-			context.relay(ContextErrorEvent, this)
-			context.relay(FramebufferSizeEvent, this)
-			context.relay(WindowMaximizedEvent, this)
+			var window = context.window
+			window.relay(FramebufferSizeEvent, this)
+			window.relay(WindowMaximizedEvent, this)
 
 			// Only do quick window mode switching on Windows - the macOS experience
 			// is quite different from using the fullscreen button which assigns the
 			// app its own space.
 			if (System.isWindows()) {
-				context.on(MouseButtonEvent) { event ->
+				window.on(MouseButtonEvent) { event ->
 					checkScreenMode(event)
 				}
 			}
 
 			context.withCurrent { ->
-				camera = new Camera(graphicsContext.renderResolution)
-				trigger(new WindowCreatedEvent(context.windowSize, context.renderResolution))
+				trigger(new WindowCreatedEvent(window.size, window.renderResolution))
 
-				new OpenGLRenderer(config, context).withCloseable { renderer ->
-					new ImGuiLayer(config, context, inputEventStream).withCloseable { imGuiLayer ->
-						logger.debug(renderer.toString())
-						imGuiLayer.relay(FramebufferSizeEvent, this)
-						camera.init(renderer)
+				new OpenGLRenderer(config, window).withCloseable { renderer ->
+					camera = new OpenGLCamera(window.renderResolution)
+					camera.withCloseable { camera ->
+						new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
+							logger.debug(renderer.toString())
+							imGuiLayer.relay(FramebufferSizeEvent, this)
 
-						renderPipeline = new RenderPipeline(config, context, renderer, imGuiLayer, inputEventStream, scene, camera)
-						renderPipeline.withCloseable { pipeline ->
+							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene, camera)
+							renderPipeline.withCloseable { pipeline ->
 
-							// Rendering loop
-							logger.debug('Graphics engine in render loop...')
-							doEngineLoop(new ControlledLoop({ !context.windowShouldClose() }, { ->
-								if (shouldToggleFullScreen) {
-									context.toggleFullScreen()
-									shouldToggleFullScreen = false
-								}
-								pipeline.render()
-								context.swapBuffers()
-								context.pollEvents()
-							}))
+								// Rendering loop
+								logger.debug('Graphics engine in render loop...')
+								doEngineLoop(new ControlledLoop({ !window.shouldClose() }, { ->
+									if (shouldToggleFullScreen) {
+										window.toggleFullScreen()
+										shouldToggleFullScreen = false
+									}
+									pipeline.render()
+									window.swapBuffers()
+									window.pollEvents()
+								}))
 
-							// Shutdown
-							logger.debug('Shutting down graphics engine')
-							camera.delete(renderer)
+								// Shutdown
+								logger.debug('Shutting down graphics engine')
+							}
 						}
 					}
 				}

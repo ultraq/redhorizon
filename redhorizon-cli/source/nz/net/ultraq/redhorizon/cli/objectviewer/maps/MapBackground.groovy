@@ -81,7 +81,7 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 			textureUVs: new Rectanglef(0, 0, repeatX, repeatY)
 		)
 		material = renderer.createMaterial(
-			texture: renderer.createTexture(width, height, format.value, imageData),
+			texture: renderer.createTexture(width, height, format, imageData),
 			transform: transform
 		)
 		imageData = null

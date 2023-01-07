@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
@@ -42,12 +43,26 @@ interface GraphicsRenderer extends EventTarget {
 	void clear()
 
 	/**
-	 * Create a camera with the given projection and view matrices.
+	 * Create a framebuffer that can be rendered to.
 	 *
-	 * @param view
-	 * @param projection
+	 * @param resolution
+	 * @param filter
+	 * @return
 	 */
-	void createCamera(Matrix4f projection, Matrix4f view)
+	default Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
+
+		return createFramebuffer(resolution.width, resolution.height, filter)
+	}
+
+	/**
+	 * Create a framebuffer that can be rendered to.
+	 *
+	 * @param width
+	 * @param height
+	 * @param filter
+	 * @return
+	 */
+	Framebuffer createFramebuffer(int width, int height, boolean filter)
 
 	/**
 	 * Create a material out of the given component parts.
@@ -77,24 +92,16 @@ interface GraphicsRenderer extends EventTarget {
 		int[] indices)
 
 	/**
-	 * Create a framebuffer that can be rendered to.
-	 *
-	 * @param resolution
-	 * @param filter
-	 * @return
-	 */
-	Framebuffer createFramebuffer(Dimension resolution, boolean filter)
-
-	/**
-	 * Create a new shader program for the shader source files with the given
-	 * name.
+	 * Create a new shader program from a pair of vertex and fragment shader
+	 * scripts.
 	 *
 	 * @param name
-	 * @param shaderPathPrefix
+	 * @param vertexShaderSource
+	 * @param fragmentShaderSource
 	 * @param uniforms
 	 * @return
 	 */
-	Shader createShader(String name, String shaderPathPrefix, Uniform... uniforms)
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
@@ -116,7 +123,7 @@ interface GraphicsRenderer extends EventTarget {
 	 * @param data
 	 * @return New texture object.
 	 */
-	Texture createTexture(int width, int height, int format, ByteBuffer data)
+	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data)
 
 	/**
 	 * Delete framebuffer data.
@@ -163,13 +170,6 @@ interface GraphicsRenderer extends EventTarget {
 	 * @param framebuffer
 	 */
 	void setRenderTarget(Framebuffer framebuffer)
-
-	/**
-	 * Update the camera's view matrix.
-	 *
-	 * @param view
-	 */
-	void updateCamera(Matrix4f view)
 
 	/**
 	 * Use a batching material builder within the context of the given closure

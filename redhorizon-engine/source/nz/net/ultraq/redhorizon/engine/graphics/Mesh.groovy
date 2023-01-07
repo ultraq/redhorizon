@@ -18,26 +18,25 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import org.joml.Vector2f
 
-import groovy.transform.MapConstructor
+import groovy.transform.TupleConstructor
 
 /**
  * A mesh defines the shape of an object, and so contain data on points and
  * edges.
- * 
+ *
  * @author Emanuel Rabina
  */
-@MapConstructor
-@SuppressWarnings('GrFinalVariableAccess')
-class Mesh {
-
-	int vertexArrayId
-	int vertexBufferId
-	int elementBufferId
+@TupleConstructor(defaults = false)
+abstract class Mesh implements AutoCloseable {
 
 	final int vertexType
 	final Colour colour
 	final Vector2f[] vertices
 	final Vector2f[] textureUVs
-
 	final int[] indices
+
+	/**
+	 * Use this mesh in upcoming render operations.
+	 */
+	abstract void bind()
 }

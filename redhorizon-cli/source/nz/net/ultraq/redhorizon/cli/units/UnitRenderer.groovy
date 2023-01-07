@@ -21,9 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
@@ -90,38 +88,27 @@ class UnitRenderer implements GraphicsElement {
 		)
 
 		textures = imagesData.collect { data ->
-			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED.value,
+			return renderer.createTexture(unit.width, unit.height, FORMAT_INDEXED,
 				data.flipVertical(unit.width, unit.height, FORMAT_INDEXED)
 			)
 		}
 
-		var paletteAsTexture = renderer.createTexture(256, 1, palette.format.value, palette as ByteBuffer)
+		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
 		shader = renderer.createShader(
 			'PalettedSprite',
-			'nz/net/ultraq/redhorizon/cli/units/',
-			new Uniform('indexTexture') {
-				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(name, 0, material.texture.textureId)
-				}
+			getResourceAsStream('nz/net/ultraq/redhorizon/cli/units/PalettedSprite.vert.glsl').text,
+			getResourceAsStream('nz/net/ultraq/redhorizon/cli/units/PalettedSprite.frag.glsl').text,
+			{ shader, material ->
+				shader.setUniformTexture('indexTexture', 0, material.texture)
 			},
-			new Uniform('paletteTexture') {
-				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformTexture(name, 1, paletteAsTexture.textureId)
-				}
+			{ shader, material ->
+				shader.setUniformTexture('paletteTexture', 1, paletteAsTexture)
 			},
-			new Uniform('factionColours') {
-				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniform(name, unit.faction.colours)
-				}
+			{ shader, material ->
+				shader.setUniform('factionColours', unit.faction.colours)
 			},
-			new Uniform('model') {
-				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(name, material.transform)
-				}
+			{ shader, material ->
+				shader.setUniformMatrix('model', material.transform)
 			}
 		)
 

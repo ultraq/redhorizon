@@ -21,14 +21,16 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.engine.geometry.Orientation
 
 import org.joml.Vector3f
+import org.lwjgl.openal.AL
 import static org.lwjgl.openal.AL10.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
+import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
 
 /**
  * An audio renderer using the OpenAL API.
- * 
+ *
  * @author Emanuel Rabina
  */
 class OpenALRenderer implements AudioRenderer {
@@ -37,7 +39,7 @@ class OpenALRenderer implements AudioRenderer {
 
 	/**
 	 * Constructor, create an OpenAL renderer with the given configuration.
-	 * 
+	 *
 	 * @param config
 	 */
 	OpenALRenderer(AudioConfiguration config) {
@@ -50,7 +52,7 @@ class OpenALRenderer implements AudioRenderer {
 	/**
 	 * Check for any OpenAL errors created by the OpenAL call in the given
 	 * closure, throwing them if they occur.
-	 * 
+	 *
 	 * @param closure
 	 */
 	private static <T> T checkForError(Closure<T> closure) {
@@ -58,13 +60,9 @@ class OpenALRenderer implements AudioRenderer {
 		def result = closure()
 		def error = alGetError()
 		if (error != AL_NO_ERROR) {
-			def errorCode =
-				error == AL_INVALID_NAME ? 'AL_INVALID_NAME' :
-				error == AL_INVALID_ENUM ? 'AL_INVALID_ENUM' :
-				error == AL_INVALID_VALUE ? 'AL_INVALID_VALUE' :
-				error == AL_INVALID_OPERATION ? 'AL_INVALID_OPERATION' :
-				error == AL_OUT_OF_MEMORY ? 'AL_OUT_OF_MEMORY' :
-				error
+			var errorCode = AL.getFields().find { field ->
+				return Modifier.isStatic(field.modifiers) && field.name.startsWith("AL_") && field.getInt(null) == error
+			}
 			throw new Exception("OpenAL error: ${errorCode}")
 		}
 		return result
@@ -87,12 +85,11 @@ class OpenALRenderer implements AudioRenderer {
 
 		return stackPush().withCloseable { stack ->
 			int bufferId = checkForError { -> alGenBuffers() }
-			def format =
-				bits == 8 && channels == 1 ? AL_FORMAT_MONO8 :
-				bits == 8 && channels == 2 ? AL_FORMAT_STEREO8 :
-				bits == 16 && channels == 1 ? AL_FORMAT_MONO16 :
-				bits == 16 && channels == 2 ? AL_FORMAT_STEREO16 :
-				0
+			def format = switch (bits) {
+				case 8 -> channels == 2 ? AL_FORMAT_STEREO8 : AL_FORMAT_MONO8
+				case 16 -> channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16
+				default -> 0
+			}
 			def soundBuffer = stack.malloc(data.capacity())
 				.put(data)
 				.flip()
@@ -109,7 +106,7 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void deleteBuffers(int... bufferIds) {
+	void deleteBuffers(int ... bufferIds) {
 
 		checkForError { -> alDeleteBuffers(bufferIds) }
 	}
@@ -133,7 +130,7 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void queueBuffers(int sourceId, int... bufferIds) {
+	void queueBuffers(int sourceId, int ... bufferIds) {
 
 		checkForError { -> alSourceQueueBuffers(sourceId, bufferIds) }
 	}
@@ -170,7 +167,7 @@ class OpenALRenderer implements AudioRenderer {
 
 	/**
 	 * Emit some information about the OpenAL rendering device.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -185,7 +182,7 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void unqueueBuffers(int sourceId, int... bufferIds) {
+	void unqueueBuffers(int sourceId, int ... bufferIds) {
 
 		checkForError { -> alSourceUnqueueBuffers(sourceId, bufferIds) }
 	}

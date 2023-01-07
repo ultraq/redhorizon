@@ -178,7 +178,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 					def numFramesToRead = framesAhead - framesQueued
 					if (numFramesToRead) {
 						frames.drain(Math.max(numFramesToRead, 5)).each { frame ->
-							textures << renderer.createTexture(width, height, format.value, frame)
+							textures << renderer.createTexture(width, height, format, frame)
 							framesQueued++
 						}
 					}

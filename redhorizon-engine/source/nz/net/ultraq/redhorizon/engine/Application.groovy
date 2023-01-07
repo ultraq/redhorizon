@@ -115,7 +115,7 @@ abstract class Application {
 
 		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
 		graphicsEngine.on(WindowCreatedEvent) { event ->
-			inputEventStream.addInputSource(graphicsEngine.graphicsContext)
+			inputEventStream.addInputSource(graphicsEngine.window)
 		}
 		graphicsEngine.on(EngineLoopStartEvent) { event ->
 			applicationReady.countDown()

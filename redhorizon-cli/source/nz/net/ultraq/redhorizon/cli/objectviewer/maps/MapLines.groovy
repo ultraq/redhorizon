@@ -23,8 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderUniformConfig
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
@@ -75,12 +73,10 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 
 		shader = renderer.createShader(
 			'Primitives',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl',
-			new Uniform('model') {
-				@Override
-				void apply(Material material, ShaderUniformConfig shaderConfig) {
-					shaderConfig.setUniformMatrix(name, material.transform)
-				}
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl').text,
+			getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl').text,
+			{ shader, material ->
+				shader.setUniformMatrix('model', material.transform)
 			}
 		)
 

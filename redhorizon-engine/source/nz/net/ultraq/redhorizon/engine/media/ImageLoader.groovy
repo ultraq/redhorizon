@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
 /**
  * Load a single image into existing engines.
- * 
+ *
  * @author Emanuel Rabina
  */
 class ImageLoader extends MediaLoader<ImageFile, Image> {
@@ -31,7 +31,7 @@ class ImageLoader extends MediaLoader<ImageFile, Image> {
 
 	/**
 	 * Constructor, create a loader for an image file.
-	 * 
+	 *
 	 * @param imageFile
 	 * @param scene
 	 * @param graphicsEngine
@@ -48,7 +48,7 @@ class ImageLoader extends MediaLoader<ImageFile, Image> {
 		def width = file.width
 		def height = file.height
 		media = new Image(file)
-			.scaleXY(graphicsEngine.graphicsContext.renderResolution.calculateScaleToFit(width, height))
+			.scaleXY(graphicsEngine.window.renderResolution.calculateScaleToFit(width, height))
 			.translate(-width / 2, -height / 2)
 		scene << media
 
