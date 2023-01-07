@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.media
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -36,9 +37,7 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 	private final Palette palette
 	private final GraphicsEngine graphicsEngine
 	private final InputEventStream inputEventStream
-	private final KeyControl scrollLeftControl
-	private final KeyControl scrollRightContol
-	private final KeyControl recenterControl
+	private List<RemoveControlFunction> removeControlFunctions = []
 
 	/**
 	 * Constructor, create a loader for an images file.
@@ -56,19 +55,6 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 		this.palette = palette
 		this.graphicsEngine = graphicsEngine
 		this.inputEventStream = inputEventStream
-
-		var center = new Vector3f()
-		var tick = imagesFile.width
-
-		scrollLeftControl = new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
-			graphicsEngine.camera.translate(tick, 0)
-		})
-		scrollRightContol = new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
-			graphicsEngine.camera.translate(-tick, 0)
-		})
-		recenterControl = new KeyControl(GLFW_KEY_SPACE, 'Reset scroll', { ->
-			graphicsEngine.camera.center(center)
-		})
 	}
 
 	@Override
@@ -77,9 +63,18 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 		media = new ImageStrip(file, palette)
 		scene << media
 
-		inputEventStream.addControl(scrollLeftControl)
-		inputEventStream.addControl(scrollRightContol)
-		inputEventStream.addControl(recenterControl)
+		var center = new Vector3f()
+		var tick = file.width
+
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
+			graphicsEngine.camera.translate(tick, 0)
+		}))
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
+			graphicsEngine.camera.translate(-tick, 0)
+		}))
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset scroll', { ->
+			graphicsEngine.camera.center(center)
+		}))
 
 		return media
 	}
@@ -87,10 +82,7 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 	@Override
 	void unload() {
 
-		inputEventStream.removeControl(scrollLeftControl)
-		inputEventStream.removeControl(scrollRightContol)
-		inputEventStream.removeControl(recenterControl)
-
+		removeControlFunctions*.apply(null)
 		scene.removeSceneElement(media)
 	}
 }

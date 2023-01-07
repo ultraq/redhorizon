@@ -26,7 +26,7 @@ import java.util.concurrent.Executors
 /**
  * Inspired by the DOM, an event target is a class that can generate events
  * which can be listened for by the appropriate event listeners.
- * 
+ *
  * @author Emanuel Rabina
  */
 trait EventTarget {
@@ -34,37 +34,32 @@ trait EventTarget {
 	private static final Logger logger = LoggerFactory.getLogger(EventTarget)
 
 	@Lazy
-	private final ExecutorService executorService = { Executors.newSingleThreadExecutor() } ()
+	private final ExecutorService executorService = { Executors.newSingleThreadExecutor() }()
 	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners =
 		new CopyOnWriteArrayList<>()
 
 	/**
-	 * Unregister an event listener from this event target.  The listener will no
-	 * longer be notified of events triggered by the target.
-	 * 
-	 * @param eventClass
-	 * @param eventListener
-	 */
-	public <E extends Event> void off(Class<E> eventClass, EventListener<E> eventListener) {
-
-		eventListeners.remove(new Tuple2<>(eventClass, eventListener))
-	}
-
-	/**
 	 * Register an event listener on this event target.
-	 * 
+	 *
 	 * @param eventClass
 	 * @param eventListener
+	 * @return
+	 *   A function that can be executed to deregister the event listener that was
+	 *   just added.
 	 */
-	public <E extends Event> void on(Class<E> eventClass, EventListener<E> eventListener) {
+	public <E extends Event> DeregisterEventFunction on(Class<E> eventClass, EventListener<E> eventListener) {
 
 		eventListeners << new Tuple2<>(eventClass, eventListener)
+
+		return { unused ->
+			eventListeners.remove(new Tuple2<>(eventClass, eventListener))
+		}
 	}
 
 	/**
 	 * Re-fire events on this class through the given event target, effectively
 	 * forwarding events.
-	 * 
+	 *
 	 * @param eventClass
 	 * @param newTarget
 	 */
@@ -77,7 +72,7 @@ trait EventTarget {
 
 	/**
 	 * Fire the event, invoking all listeners registered for that event.
-	 * 
+	 *
 	 * @param event
 	 * @param useSeparateThread
 	 *   Set to {@code true} to have this event handled in a different thread.
