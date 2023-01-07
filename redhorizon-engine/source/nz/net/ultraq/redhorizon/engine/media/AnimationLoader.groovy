@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
@@ -36,7 +37,7 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 	private final GraphicsEngine graphicsEngine
 	private final GameClock gameClock
 	private final InputEventStream inputEventStream
-	private final KeyControl playPauseControl
+	private RemoveControlFunction removePlayPauseControl
 
 	/**
 	 * Create a loader for an animation file.
@@ -54,10 +55,6 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 		this.graphicsEngine = graphicsEngine
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
-
-		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
-			gameClock.togglePause()
-		})
 	}
 
 	@Override
@@ -74,7 +71,9 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 		scene << media
 
 		// Key events for controlling the animation
-		inputEventStream.addControl(playPauseControl)
+		removePlayPauseControl = inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			gameClock.togglePause()
+		}))
 
 		return media
 	}
@@ -92,7 +91,7 @@ class AnimationLoader extends MediaLoader<AnimationFile, Animation> {
 			gameClock.resume()
 		}
 
-		inputEventStream.removeControl(playPauseControl)
+		removePlayPauseControl.apply(null)
 		scene.removeSceneElement(media)
 	}
 }

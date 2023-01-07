@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.media
 import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
@@ -34,7 +35,7 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 
 	private final GameClock gameClock
 	private final InputEventStream inputEventStream
-	private final KeyControl playPauseControl
+	private RemoveControlFunction removePlayPauseControl
 
 	/**
 	 * Constructor, create a loader for sound files.
@@ -49,10 +50,6 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 		super(soundFile, scene)
 		this.gameClock = gameClock
 		this.inputEventStream = inputEventStream
-
-		playPauseControl = new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
-			gameClock.togglePause()
-		})
 	}
 
 	@Override
@@ -61,7 +58,9 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 		media = file.forStreaming ? new SoundTrack(file, gameClock) : new SoundEffect(file)
 		scene << media
 
-		inputEventStream.addControl(playPauseControl)
+		removePlayPauseControl = inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			gameClock.togglePause()
+		}))
 
 		return media
 	}
@@ -79,7 +78,7 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 			gameClock.resume()
 		}
 
-		inputEventStream.removeControl(playPauseControl)
-		scene.removeSceneElement((SceneElement) media)
+		removePlayPauseControl.apply(null)
+		scene.removeSceneElement((SceneElement)media)
 	}
 }

@@ -24,7 +24,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * The input event stream for relaying input events from other input sources.
- * 
+ *
  * @author Emanuel Rabina
  */
 class InputEventStream implements EventTarget {
@@ -33,18 +33,26 @@ class InputEventStream implements EventTarget {
 
 	/**
 	 * Register an input binding with the application.
-	 * 
+	 *
 	 * @param control
+	 * @return
+	 *   A function that can be executed to remove the input binding that was just
+	 *   added.
 	 */
-	void addControl(Control control) {
+	Closure addControl(Control control) {
 
-		on(control.event, control)
+		var deregisterEventFunction = on(control.event, control)
 		trigger(new ControlAddedEvent(control))
+
+		return { unused ->
+			deregisterEventFunction.apply(null)
+			trigger(new ControlRemovedEvent(control))
+		}
 	}
 
 	/**
 	 * Add a source for input events that can be listened to using this object.
-	 * 
+	 *
 	 * @param inputSource
 	 */
 	void addInputSource(InputSource inputSource) {
@@ -55,16 +63,5 @@ class InputEventStream implements EventTarget {
 			}
 			trigger(event)
 		}
-	}
-
-	/**
-	 * Deregister an input binding from the application.
-	 * 
-	 * @param control
-	 */
-	void removeControl(Control control) {
-
-		off(control.event, control)
-		trigger(new ControlRemovedEvent(control))
 	}
 }

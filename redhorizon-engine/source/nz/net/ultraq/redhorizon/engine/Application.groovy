@@ -32,12 +32,13 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 
 /**
  * A base for developing an application that uses the Red Horizon engine, this
  * class sets up the engine components and provides access to those and the
  * scene the engine was created to render.
- * 
+ *
  * @author Emanuel Rabina
  */
 abstract class Application {
@@ -53,13 +54,15 @@ abstract class Application {
 	protected GraphicsEngine graphicsEngine
 	protected InputEventStream inputEventStream
 	protected Scene scene = new Scene()
+	protected boolean applicationStopped
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
+	private final Semaphore applicationStoppingSemaphore = new Semaphore(1)
 
 	/**
 	 * Constructor, creates an application with the title suffix and
 	 * configuration.
-	 * 
+	 *
 	 * @param windowTitle
 	 * @param audioConfig
 	 * @param graphicsConfig
@@ -75,13 +78,15 @@ abstract class Application {
 	 * Called when all the application setup has completed and it's time for the
 	 * application itself to run.
 	 */
-	protected void applicationStart() {}
+	protected void applicationStart() {
+	}
 
 	/**
 	 * Called when the application is stopping and before the engines are shut
 	 * down.  Ideal for performing any cleanup tasks.
 	 */
-	protected void applicationStop() {}
+	protected void applicationStop() {
+	}
 
 	/**
 	 * Start the application.
@@ -140,11 +145,17 @@ abstract class Application {
 	 */
 	final void stop() {
 
-		logger.debug('Stopping application...')
-		applicationStop()
+		applicationStoppingSemaphore.tryAcquireAndRelease { ->
+			if (!applicationStopped) {
+				logger.debug('Stopping application...')
+				applicationStop()
 
-		graphicsEngine.stop()
-		audioEngine.stop()
-		gameClock.stop()
+				graphicsEngine.stop()
+				audioEngine.stop()
+				gameClock.stop()
+
+				applicationStopped = true
+			}
+		}
 	}
 }
