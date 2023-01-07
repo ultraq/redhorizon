@@ -24,9 +24,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,10 +36,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
 /**
  * Graphics subsystem, creates a display which drives the rendering loop of
  * drawing graphics objects.
- * 
+ *
  * @author Emanuel Rabina
  */
-class GraphicsEngine extends Engine implements InputSource {
+class GraphicsEngine extends Engine implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
 
@@ -57,7 +57,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	/**
 	 * Constructor, build a new engine for rendering graphics.
-	 * 
+	 *
 	 * @param windowTitle
 	 * @param config
 	 * @param scene
@@ -75,7 +75,7 @@ class GraphicsEngine extends Engine implements InputSource {
 	 * Implementation of double-click being used to toggle between windowed and
 	 * full screen modes.  This isn't natively supported in GLFW given platform
 	 * differences in double-click behaviour, so we have to roll it ourselves.
-	 * 
+	 *
 	 * @param event
 	 */
 	private void checkScreenMode(MouseButtonEvent event) {
@@ -91,7 +91,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	/**
 	 * Return the current camera.
-	 * 
+	 *
 	 * @return
 	 */
 	Camera getCamera() {
@@ -101,7 +101,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	/**
 	 * Return this engine's graphics context.
-	 * 
+	 *
 	 * @return
 	 */
 	GraphicsContext getGraphicsContext() {
@@ -111,7 +111,7 @@ class GraphicsEngine extends Engine implements InputSource {
 
 	/**
 	 * Return the rendering pipeline.
-	 * 
+	 *
 	 * @return
 	 */
 	RenderPipeline getRenderPipeline() {
