@@ -52,7 +52,6 @@ abstract class Context implements AutoCloseable {
 		}
 		catch (Throwable ex) {
 			logger.error('An error occurred within the scope of the context', ex)
-			trigger(new ContextErrorEvent(ex))
 		}
 		finally {
 			releaseCurrent()

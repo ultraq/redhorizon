@@ -22,13 +22,18 @@ import nz.net.ultraq.redhorizon.async.RunnableWorker
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.InheritConstructors
+
 /**
  * An implementation of the separate time source of game time that can be
  * controlled to affect it.
- * 
+ *
  * @author Emanuel Rabina
  */
-class GameClock implements GameTime, RunnableWorker {
+// TODO: Make this a proper system that updates scene objects instead of it
+//       needing to be passed to time-sensitive objects.
+@InheritConstructors
+class GameClock extends EngineSystem implements GameTime, RunnableWorker {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
@@ -71,6 +76,8 @@ class GameClock implements GameTime, RunnableWorker {
 		currentTimeMillis = lastSystemTimeMillis
 
 		Thread.currentThread().name = 'Game clock'
+		trigger(new SystemReadyEvent())
+
 		timeLoop = new ControlledLoop({ ->
 			sleep(1)
 			def currentSystemTimeMillis = System.currentTimeMillis()

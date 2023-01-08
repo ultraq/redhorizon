@@ -48,7 +48,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
  * classic C&C files using a file explorer-like interface.
- * 
+ *
  * @author Emanuel Rabina
  */
 class Explorer extends Application {
@@ -69,7 +69,7 @@ class Explorer extends Application {
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
-	 * 
+	 *
 	 * @param version
 	 * @param palette
 	 */
@@ -104,9 +104,9 @@ class Explorer extends Application {
 				}
 			}
 		}
-		graphicsEngine.renderPipeline.addOverlayPass(entryList)
+		graphicsSystem.renderPipeline.addOverlayPass(entryList)
 
-		graphicsEngine.on(WindowMaximizedEvent) { event ->
+		graphicsSystem.on(WindowMaximizedEvent) { event ->
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}
 
@@ -152,7 +152,7 @@ class Explorer extends Application {
 
 	/**
 	 * Update the contents of the list from the current directory.
-	 * 
+	 *
 	 * @param directory
 	 */
 	private void buildList(File directory) {
@@ -166,7 +166,7 @@ class Explorer extends Application {
 			.sort { file1, file2 ->
 				file1.directory && !file2.directory ? -1 :
 					!file1.directory && file2.directory ? 1 :
-					file1.name <=> file2.name
+						file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
 				entries << new FileEntry(fileOrDirectory)
@@ -177,7 +177,7 @@ class Explorer extends Application {
 
 	/**
 	 * Update the contents of the list from the current mix file.
-	 * 
+	 *
 	 * @param mixFile
 	 */
 	private void buildList(MixFile mixFile) {
@@ -231,12 +231,12 @@ class Explorer extends Application {
 		Thread.sleep(100)
 
 		scene.clear()
-		graphicsEngine.camera.center(new Vector3f())
+		graphicsSystem.camera.center(new Vector3f())
 	}
 
 	/**
 	 * Update the preview are for the given file data and type.
-	 * 
+	 *
 	 * @param file
 	 */
 	private void preview(Object file) {
@@ -244,10 +244,10 @@ class Explorer extends Application {
 		selectedFile = file
 
 		selectedLoader = switch (file) {
-			case VideoFile -> new VideoLoader(file, scene, graphicsEngine, gameClock, inputEventStream)
-			case AnimationFile -> new AnimationLoader(file, scene, graphicsEngine, gameClock, inputEventStream)
-			case ImageFile -> new ImageLoader(file, scene, graphicsEngine)
-			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsEngine, inputEventStream)
+			case VideoFile -> new VideoLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
+			case AnimationFile -> new AnimationLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
+			case ImageFile -> new ImageLoader(file, scene, graphicsSystem)
+			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsSystem, inputEventStream)
 			case SoundFile -> new SoundLoader(file, scene, gameClock, inputEventStream)
 			default -> logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
 		}
@@ -264,7 +264,7 @@ class Explorer extends Application {
 
 	/**
 	 * Update the preview area with the media for the selected mix file entry.
-	 * 
+	 *
 	 * @param entry
 	 */
 	private void previewEntry(MixEntry entry) {
@@ -289,7 +289,7 @@ class Explorer extends Application {
 
 	/**
 	 * Update the preview area with the media for the selected file.
-	 * 
+	 *
 	 * @param file
 	 */
 	private void previewFile(File file) {

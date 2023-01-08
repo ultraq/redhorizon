@@ -16,32 +16,30 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-
 /**
  * Interface for audio objects 'rendered' to the audio hardware.
- * 
+ *
  * @author Emanuel Rabina
  */
 interface AudioElement {
 
 	/**
 	 * Perform any cleanup for this element.
-	 * 
+	 *
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	void delete(AudioRenderer renderer)
 
 	/**
 	 * Perform any setup for this element.
-	 * 
+	 *
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	void init(AudioRenderer renderer)
 
 	/**
 	 * Update the element within a render loop.
-	 * 
+	 *
 	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	void render(AudioRenderer renderer)

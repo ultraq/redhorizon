@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.events.Event
 
 import groovy.transform.TupleConstructor
@@ -24,12 +23,11 @@ import groovy.transform.TupleConstructor
 /**
  * Fired when the OpenGL window and context have been created.  Passes them
  * along to event listeners so they can be queried.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
 class WindowCreatedEvent extends Event {
 
-	final Dimension windowSize
-	final Dimension renderSize
+	final Window window
 }

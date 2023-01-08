@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
-import nz.net.ultraq.redhorizon.engine.audio.AudioEngine
+import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
@@ -29,9 +29,6 @@ import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
 
 /**
@@ -45,18 +42,17 @@ abstract class Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
-	final String windowTitle
-	final AudioConfiguration audioConfig
-	final GraphicsConfiguration graphicsConfig
-
-	protected AudioEngine audioEngine
+	protected Engine engine
+	protected AudioSystem audioSystem
 	protected GameClock gameClock
-	protected GraphicsEngine graphicsEngine
+	protected GraphicsSystem graphicsSystem
 	protected InputEventStream inputEventStream
 	protected Scene scene = new Scene()
 	protected boolean applicationStopped
 
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
+	private final String windowTitle
+	private final AudioConfiguration audioConfig
+	private final GraphicsConfiguration graphicsConfig
 	private final Semaphore applicationStoppingSemaphore = new Semaphore(1)
 
 	/**
@@ -95,7 +91,9 @@ abstract class Application {
 
 		logger.debug('Initializing application...')
 
-		// Start the engines
+		// Create the necessary systems 
+		engine = new Engine()
+
 		inputEventStream = new InputEventStream()
 		inputEventStream.on(GuiEvent) { event ->
 			if (event.type == EVENT_TYPE_STOP) {
@@ -103,41 +101,24 @@ abstract class Application {
 			}
 		}
 
-		var applicationReady = new CountDownLatch(2)
+		audioSystem = new AudioSystem(scene, audioConfig)
+		engine << audioSystem
 
-		audioEngine = new AudioEngine(audioConfig, scene)
-		audioEngine.on(EngineLoopStartEvent) { event ->
-			applicationReady.countDown()
+		graphicsSystem = new GraphicsSystem(scene, windowTitle, inputEventStream, graphicsConfig)
+		graphicsSystem.on(WindowCreatedEvent) { event ->
+			inputEventStream.addInputSource(event.window)
 		}
-		audioEngine.on(EngineStoppedEvent) { event ->
-			stop()
-		}
+		engine << graphicsSystem
 
-		graphicsEngine = new GraphicsEngine(windowTitle, graphicsConfig, scene, inputEventStream)
-		graphicsEngine.on(WindowCreatedEvent) { event ->
-			inputEventStream.addInputSource(graphicsEngine.window)
-		}
-		graphicsEngine.on(EngineLoopStartEvent) { event ->
-			applicationReady.countDown()
-		}
-		graphicsEngine.on(EngineStoppedEvent) { event ->
-			stop()
-		}
-
-		gameClock = new GameClock()
-
-		def gameClockTask = executorService.submit(gameClock)
-		def audioEngineTask = executorService.submit(audioEngine)
-		def graphicsEngineTask = executorService.submit(graphicsEngine)
+		gameClock = new GameClock(scene)
+		engine << gameClock
 
 		// Start the application
 		logger.debug('Starting application...')
-		applicationReady.await()
+		engine.start()
 		applicationStart()
 
-		graphicsEngineTask.get()
-		audioEngineTask.get()
-		gameClockTask.get()
+		engine.waitUntilStopped()
 	}
 
 	/**
@@ -149,11 +130,7 @@ abstract class Application {
 			if (!applicationStopped) {
 				logger.debug('Stopping application...')
 				applicationStop()
-
-				graphicsEngine.stop()
-				audioEngine.stop()
-				gameClock.stop()
-
+				engine.stop()
 				applicationStopped = true
 			}
 		}

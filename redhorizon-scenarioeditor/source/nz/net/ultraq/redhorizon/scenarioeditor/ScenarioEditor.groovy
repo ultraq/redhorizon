@@ -69,10 +69,8 @@ class ScenarioEditor extends Application {
 	protected void applicationStart() {
 
 		def mouseMovementModifier = 1f
-		graphicsEngine.on(WindowCreatedEvent) { event ->
-			def renderResolution = graphicsEngine.window.renderResolution
-			def targetResolution = graphicsEngine.window.targetResolution
-			mouseMovementModifier = renderResolution.width / targetResolution.width
+		graphicsSystem.on(WindowCreatedEvent) { event ->
+			mouseMovementModifier = event.window.renderResolution.width / event.window.targetResolution.width
 		}
 
 		// Key event handler
@@ -93,7 +91,7 @@ class ScenarioEditor extends Application {
 			if (dragging) {
 				def diffX = (cursorPosition.x - event.xPos) * mouseMovementModifier as float
 				def diffY = (cursorPosition.y - event.yPos) * mouseMovementModifier as float
-				graphicsEngine.camera.translate(-diffX, diffY)
+				graphicsSystem.camera.translate(-diffX, diffY)
 			}
 			cursorPosition.set(event.xPos as float, event.yPos as float)
 		}

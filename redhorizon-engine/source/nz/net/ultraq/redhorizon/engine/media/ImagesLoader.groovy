@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
@@ -35,7 +35,7 @@ import static org.lwjgl.glfw.GLFW.*
 class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 
 	private final Palette palette
-	private final GraphicsEngine graphicsEngine
+	private final GraphicsSystem graphicsEngine
 	private final InputEventStream inputEventStream
 	private List<RemoveControlFunction> removeControlFunctions = []
 
@@ -48,7 +48,7 @@ class ImagesLoader extends MediaLoader<ImagesFile, ImageStrip> {
 	 * @param graphicsEngine
 	 * @param inputEventStream
 	 */
-	ImagesLoader(ImagesFile imagesFile, Palette palette, Scene scene, GraphicsEngine graphicsEngine,
+	ImagesLoader(ImagesFile imagesFile, Palette palette, Scene scene, GraphicsSystem graphicsEngine,
 		InputEventStream inputEventStream) {
 
 		super(imagesFile, scene)

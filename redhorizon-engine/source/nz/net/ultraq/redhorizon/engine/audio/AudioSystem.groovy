@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.async.RateLimitedLoop
-import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
@@ -32,32 +32,34 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
- * Audio subsystem, manages the connection to the audio hardware and playback
- * of audio objects.
- * 
+ * Audio system, manages the connection to the audio hardware and playback of
+ * audio objects.
+ *
  * @author Emanuel Rabina
  */
-class AudioEngine extends Engine {
+class AudioSystem extends EngineSystem {
 
-	private static final Logger logger = LoggerFactory.getLogger(AudioEngine)
+	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
 	final AudioConfiguration config
-	final Scene scene
 
 	// For object lifecycles
 	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
 	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
 
+	@Delegate
+	private RateLimitedLoop systemLoop
+
 	/**
 	 * Constructor, build a new engine for rendering audio.
-	 * 
-	 * @param config
+	 *
 	 * @param scene
+	 * @param config
 	 */
-	AudioEngine(AudioConfiguration config, Scene scene) {
+	AudioSystem(Scene scene, AudioConfiguration config) {
 
+		super(scene)
 		this.config = config ?: new AudioConfiguration()
-		this.scene = scene
 		this.scene.on(ElementAddedEvent) { event ->
 			addedElements << event.element
 		}
@@ -74,18 +76,19 @@ class AudioEngine extends Engine {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Audio Engine'
-		logger.debug('Starting audio engine')
+		Thread.currentThread().name = 'Audio System'
+		logger.debug('Starting audio system')
 
 		// Initialization
 		new OpenALContext().withCloseable { context ->
 			context.withCurrent { ->
 				def renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
+				trigger(new SystemReadyEvent())
 
 				// Rendering loop
-				logger.debug('Audio engine in render loop...')
-				doEngineLoop(new RateLimitedLoop(10, { ->
+				logger.debug('Audio system in render loop...')
+				systemLoop = new RateLimitedLoop(10, { ->
 
 					// Initialize or delete objects which have been added/removed to/from the scene
 					if (addedElements) {
@@ -117,7 +120,8 @@ class AudioEngine extends Engine {
 							element.render(renderer)
 						}
 					}
-				}))
+				})
+				systemLoop.run()
 
 				// Shutdown
 				scene.accept { sceneElement ->
@@ -125,10 +129,9 @@ class AudioEngine extends Engine {
 						sceneElement.delete(renderer)
 					}
 				}
-				logger.debug('Shutting down audio engine')
+				logger.debug('Shutting down audio system')
 			}
 		}
-		logger.debug('Audio engine stopped')
-		trigger(new EngineStoppedEvent())
+		logger.debug('Audio system stopped')
 	}
 }

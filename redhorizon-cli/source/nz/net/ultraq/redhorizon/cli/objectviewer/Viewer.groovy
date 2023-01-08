@@ -55,11 +55,11 @@ abstract class Viewer extends Application {
 		def mouseMovementModifier = 1f
 		def scaleIndex = scaleRange.findIndexOf { it == initialScale }
 
-		def renderResolution = graphicsEngine.window.renderResolution
-		def targetResolution = graphicsEngine.window.targetResolution
+		def renderResolution = graphicsSystem.window.renderResolution
+		def targetResolution = graphicsSystem.window.targetResolution
 		mouseMovementModifier = renderResolution.width / targetResolution.width
 
-		graphicsEngine.camera.scale(scaleRange[scaleIndex])
+		graphicsSystem.camera.scale(scaleRange[scaleIndex])
 
 		// Key event handler
 		inputEventStream.on(KeyEvent) { event ->
@@ -90,16 +90,16 @@ abstract class Viewer extends Application {
 					else if (event.yOffset > 0) {
 						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 					}
-					graphicsEngine.camera.scale(scaleRange[scaleIndex])
+					graphicsSystem.camera.scale(scaleRange[scaleIndex])
 				}
 				// Use scroll input to move around the map
 				else {
-					graphicsEngine.camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
+					graphicsSystem.camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
 				}
 			}
 			inputEventStream.on(MouseButtonEvent) { event ->
 				if (ctrl && event.button == GLFW_MOUSE_BUTTON_RIGHT) {
-					graphicsEngine.camera.resetScale()
+					graphicsSystem.camera.resetScale()
 				}
 			}
 		}
@@ -112,7 +112,7 @@ abstract class Viewer extends Application {
 				if (dragging) {
 					def diffX = (cursorPosition.x - event.xPos) * mouseMovementModifier as float
 					def diffY = (cursorPosition.y - event.yPos) * mouseMovementModifier as float
-					graphicsEngine.camera.translate(-diffX, diffY)
+					graphicsSystem.camera.translate(-diffX, diffY)
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)
 			}
@@ -135,11 +135,11 @@ abstract class Viewer extends Application {
 				else if (event.yOffset > 0) {
 					scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 				}
-				graphicsEngine.camera.scale(scaleRange[scaleIndex])
+				graphicsSystem.camera.scale(scaleRange[scaleIndex])
 			}
 			inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
-					graphicsEngine.camera.resetScale()
+					graphicsSystem.camera.resetScale()
 				}
 			}
 		}

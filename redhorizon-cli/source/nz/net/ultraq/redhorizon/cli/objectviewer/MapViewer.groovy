@@ -70,7 +70,7 @@ class MapViewer extends Viewer {
 		var mapInitialPosition = new Vector3f(map.initialPosition, 0)
 		logger.info('Map details: {}', map)
 
-		graphicsEngine.camera.center(mapInitialPosition)
+		graphicsSystem.camera.center(mapInitialPosition)
 		scene << map
 		scene << new MapLines(map)
 
@@ -78,19 +78,19 @@ class MapViewer extends Viewer {
 
 		// Custom inputs
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Scroll up', { ->
-			graphicsEngine.camera.translate(0, -TICK)
+			graphicsSystem.camera.translate(0, -TICK)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Scroll down', { ->
-			graphicsEngine.camera.translate(0, TICK)
+			graphicsSystem.camera.translate(0, TICK)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
-			graphicsEngine.camera.translate(TICK, 0)
+			graphicsSystem.camera.translate(TICK, 0)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
-			graphicsEngine.camera.translate(-TICK, 0)
+			graphicsSystem.camera.translate(-TICK, 0)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Center starting position', { ->
-			graphicsEngine.camera.center(mapInitialPosition)
+			graphicsSystem.camera.center(mapInitialPosition)
 		}))
 	}
 }

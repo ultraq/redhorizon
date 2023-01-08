@@ -1,5 +1,5 @@
 /* 
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,11 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.events.Event
 
-import groovy.transform.TupleConstructor
-
 /**
- * Event for errors emitted from a current context.
- * 
+ * Used by systems to signal that they have started and are ready to operate on
+ * a scene.
+ *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-class ContextErrorEvent extends Event {
-
-	final Throwable exception
+class SystemReadyEvent extends Event {
 }

@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.async.ControlledLoop
-import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.EngineStoppedEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
@@ -34,18 +34,17 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
 
 /**
- * Graphics subsystem, creates a display which drives the rendering loop of
- * drawing graphics objects.
+ * Graphics system, creates a display which drives the rendering loop of drawing
+ * graphics objects.
  *
  * @author Emanuel Rabina
  */
-class GraphicsEngine extends Engine implements EventTarget {
+class GraphicsSystem extends EngineSystem implements EventTarget {
 
-	private static final Logger logger = LoggerFactory.getLogger(GraphicsEngine)
+	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
 	private final String windowTitle
 	private final GraphicsConfiguration config
-	private final Scene scene
 	private final InputEventStream inputEventStream
 
 	private OpenGLContext context
@@ -55,20 +54,23 @@ class GraphicsEngine extends Engine implements EventTarget {
 	private boolean shouldToggleFullScreen
 	private long lastClickTime
 
-	/**
-	 * Constructor, build a new engine for rendering graphics.
-	 *
-	 * @param windowTitle
-	 * @param config
-	 * @param scene
-	 * @param inputEventStream
-	 */
-	GraphicsEngine(String windowTitle, GraphicsConfiguration config, Scene scene, InputEventStream inputEventStream) {
+	@Delegate
+	private ControlledLoop systemLoop
 
+	/**
+	 * Constructor, build a new system for rendering graphics.
+	 *
+	 * @param scene
+	 * @param windowTitle
+	 * @param inputEventStream
+	 * @param config
+	 */
+	GraphicsSystem(Scene scene, String windowTitle, InputEventStream inputEventStream, GraphicsConfiguration config) {
+
+		super(scene)
 		this.windowTitle = windowTitle
-		this.config = config ?: new GraphicsConfiguration()
-		this.scene = scene
 		this.inputEventStream = inputEventStream
+		this.config = config ?: new GraphicsConfiguration()
 	}
 
 	/**
@@ -120,14 +122,14 @@ class GraphicsEngine extends Engine implements EventTarget {
 	}
 
 	/**
-	 * Start the graphics engine loop: creates a new window in which to render the
+	 * Start the graphics system loop: creates a new window in which to render the
 	 * elements in the current scene, cleaning it all up when made to shut down.
 	 */
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Graphics Engine'
-		logger.debug('Starting graphics engine')
+		Thread.currentThread().name = 'Graphics System'
+		logger.debug('Starting graphics system')
 
 		// Initialization
 		context = new OpenGLContext(windowTitle, config)
@@ -146,7 +148,7 @@ class GraphicsEngine extends Engine implements EventTarget {
 			}
 
 			context.withCurrent { ->
-				trigger(new WindowCreatedEvent(window.size, window.renderResolution))
+				trigger(new WindowCreatedEvent(window))
 
 				new OpenGLRenderer(config, window).withCloseable { renderer ->
 					camera = new OpenGLCamera(window.renderResolution)
@@ -157,10 +159,11 @@ class GraphicsEngine extends Engine implements EventTarget {
 
 							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene, camera)
 							renderPipeline.withCloseable { pipeline ->
+								trigger(new SystemReadyEvent())
 
 								// Rendering loop
-								logger.debug('Graphics engine in render loop...')
-								doEngineLoop(new ControlledLoop({ !window.shouldClose() }, { ->
+								logger.debug('Graphics system in render loop...')
+								systemLoop = new ControlledLoop({ !window.shouldClose() }, { ->
 									if (shouldToggleFullScreen) {
 										window.toggleFullScreen()
 										shouldToggleFullScreen = false
@@ -168,17 +171,17 @@ class GraphicsEngine extends Engine implements EventTarget {
 									pipeline.render()
 									window.swapBuffers()
 									window.pollEvents()
-								}))
+								})
+								systemLoop.run()
 
 								// Shutdown
-								logger.debug('Shutting down graphics engine')
+								logger.debug('Shutting down graphics system')
 							}
 						}
 					}
 				}
 			}
 		}
-		logger.debug('Graphics engine stopped')
-		trigger(new EngineStoppedEvent())
+		logger.debug('Graphics system stopped')
 	}
 }

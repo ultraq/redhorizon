@@ -16,42 +16,93 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-
-import nz.net.ultraq.redhorizon.async.RunnableWorker
-import nz.net.ultraq.redhorizon.events.EventTarget
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.Semaphore
+
 /**
- * Common code for any of the specific engine systems.
- * 
+ * The engine is responsible for running the systems that operate on a scene.
+ * Each system can be given it's own thread to take advantage of multi-processor
+ * CPUs.
+ *
  * @author Emanuel Rabina
  */
-abstract class Engine implements EventTarget, RunnableWorker {
+class Engine {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	@Delegate
-	private RunnableWorker engineLoop
+	private final ExecutorService executorService = Executors.newCachedThreadPool()
+	private final List<EngineSystem> systems = []
+	private List<Future<?>> systemTasks
+
+	private final Semaphore engineStoppingSemaphore = new Semaphore(1)
+	private boolean engineStopped
 
 	/**
-	 * Perform the engine loop using the given worker implementation.
-	 * 
-	 * @param loopWorker
+	 * Add a system to the engine.
+	 *
+	 * @param system
 	 */
-	protected void doEngineLoop(RunnableWorker loopWorker) {
+	void addSystem(EngineSystem system) {
 
-		trigger(new EngineLoopStartEvent())
+		systems << system
+	}
 
-		try {
-			engineLoop = loopWorker
-			engineLoop.run()
-			trigger(new EngineLoopStopEvent())
+	/**
+	 * Groovy overload of {@code <<} to call {@link #addSystem}.
+	 *
+	 * @param system
+	 */
+	void leftShift(EngineSystem system) {
+
+		addSystem(system)
+	}
+
+	/**
+	 * Start the game engine.  This will assign all entity systems their own
+	 * thread to operate on the scene.  This method will block until all systems
+	 * have signalled their ready status.
+	 */
+	void start() {
+
+		logger.debug('Starting engine...')
+
+		var engineReadyLatch = new CountDownLatch(systems.size())
+		systemTasks = systems.collect() { system ->
+			system.on(SystemReadyEvent) { event ->
+				engineReadyLatch.countDown()
+			}
+			return executorService.submit(system)
 		}
-		catch (Exception ex) {
-			logger.error('An error occurred during the render loop', ex)
-			trigger(new EngineLoopStopEvent(ex))
+		engineReadyLatch.await()
+
+		logger.debug('Engine started')
+	}
+
+	/**
+	 * Stop the game engine.  This method will block until all systems have
+	 * stopped/completed.
+	 */
+	void stop() {
+
+		systems.each { system ->
+			system.stop()
 		}
+//		waitUntilStopped()
+		logger.debug('Engine stopped')
+	}
+
+	/**
+	 * Wait here until the engine has stopped/completed.
+	 */
+	void waitUntilStopped() {
+
+		systemTasks*.get()
+		logger.debug('All systems stopped')
 	}
 }

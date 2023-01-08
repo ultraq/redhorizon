@@ -42,7 +42,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Media player application for watching media files.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MediaPlayer extends Application {
@@ -63,7 +63,7 @@ class MediaPlayer extends Application {
 
 	/**
 	 * Constructor, create a new application around the given media file.
-	 * 
+	 *
 	 * @param mediaFile
 	 * @param audioConfig
 	 * @param graphicsConfig
@@ -82,11 +82,11 @@ class MediaPlayer extends Application {
 		logger.info('File details: {}', mediaFile)
 
 		mediaLoader = switch (mediaFile) {
-			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsEngine, gameClock, inputEventStream)
-			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsEngine, gameClock, inputEventStream)
+			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
+			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
 			case SoundFile -> new SoundLoader(mediaFile, scene, gameClock, inputEventStream)
-			case ImageFile -> new ImageLoader(mediaFile, scene, graphicsEngine)
-			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsEngine, inputEventStream)
+			case ImageFile -> new ImageLoader(mediaFile, scene, graphicsSystem)
+			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsSystem, inputEventStream)
 			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
 		}
 

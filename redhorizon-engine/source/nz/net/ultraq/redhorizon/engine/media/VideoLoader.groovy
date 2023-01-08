@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.GameClock
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
@@ -33,7 +33,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  */
 class VideoLoader extends MediaLoader<VideoFile, Video> {
 
-	private final GraphicsEngine graphicsEngine
+	private final GraphicsSystem graphicsEngine
 	private final GameClock gameClock
 	private final InputEventStream inputEventStream
 	private RemoveControlFunction removePlayPauseControl
@@ -47,7 +47,7 @@ class VideoLoader extends MediaLoader<VideoFile, Video> {
 	 * @param gameClock
 	 * @param inputEventStream
 	 */
-	VideoLoader(VideoFile videoFile, Scene scene, GraphicsEngine graphicsEngine, GameClock gameClock,
+	VideoLoader(VideoFile videoFile, Scene scene, GraphicsSystem graphicsEngine, GameClock gameClock,
 		InputEventStream inputEventStream) {
 
 		super(videoFile, scene)

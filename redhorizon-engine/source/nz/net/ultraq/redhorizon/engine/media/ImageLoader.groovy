@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsEngine
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
  */
 class ImageLoader extends MediaLoader<ImageFile, Image> {
 
-	private final GraphicsEngine graphicsEngine
+	private final GraphicsSystem graphicsEngine
 
 	/**
 	 * Constructor, create a loader for an image file.
@@ -36,7 +36,7 @@ class ImageLoader extends MediaLoader<ImageFile, Image> {
 	 * @param scene
 	 * @param graphicsEngine
 	 */
-	ImageLoader(ImageFile imageFile, Scene scene, GraphicsEngine graphicsEngine) {
+	ImageLoader(ImageFile imageFile, Scene scene, GraphicsSystem graphicsEngine) {
 
 		super(imageFile, scene)
 		this.graphicsEngine = graphicsEngine
