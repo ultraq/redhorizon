@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.units
+package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 /**
  * Available factions in classic C&C.
- * 
+ *
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GroovyAssignabilityCheck')
 enum Faction {
 
+	// @formatter:off
 	GOLD  ([80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91 , 92 , 93,  94,  95]),
 	BLUE  ([160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175]),
 	RED   ([229, 230, 231, 232, 233, 234, 235,   8, 236, 237, 238, 239, 221, 222, 223, 223]),
@@ -32,6 +33,7 @@ enum Faction {
 	BROWN ([128, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 121, 122, 122, 123, 123]),
 	TEAL  ([224, 224, 225, 225, 226, 184, 185, 186, 187, 188, 188, 189, 190, 190, 191, 191]),
 	MAROON([200, 200, 201, 202, 203, 203, 204, 205, 206, 206, 207, 221, 222, 222, 223, 223])
+	// @formatter:on
 
 	final int[] colours
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.units
+package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 /**
  * Model of the data of a C&C unit type.
- * 
+ *
  * @author Emanuel Rabina
  */
 class UnitData {

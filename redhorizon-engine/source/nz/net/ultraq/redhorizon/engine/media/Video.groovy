@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
@@ -33,7 +32,7 @@ import java.util.concurrent.Executors
  * The combination of an animation and sound track, a video is a stream from a
  * video file, rendering out to both the audio and graphics engines during
  * playback.
- * 
+ *
  * @author Emanuel Rabina
  */
 class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Video> {
@@ -45,24 +44,22 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 
 	/**
 	 * Constructor, creates a video out of video file data.
-	 * 
-	 * @param videoFile
-	 *   Video source.
-	 * @param gameTime
+	 *
+	 * @param videoFile Video source.
 	 */
-	Video(VideoFile videoFile, GameTime gameTime) {
+	Video(VideoFile videoFile) {
 
 		if (videoFile instanceof Streaming) {
 			def videoWorker = videoFile.streamingDataWorker
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
-				videoFile.frameRate * 2 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 as int, videoWorker)
 			animation.on(StopEvent) { event ->
 				stop()
 			}
 
 			soundTrack = new SoundTrack(videoFile.bits, videoFile.channels, videoFile.frequency,
-				videoFile.frameRate * 2 + 1 as int, videoWorker, gameTime)
+				videoFile.frameRate * 2 + 1 as int, videoWorker)
 			soundTrack.on(StopEvent) { event ->
 				stop()
 			}

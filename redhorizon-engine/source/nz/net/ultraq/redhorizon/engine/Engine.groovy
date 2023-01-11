@@ -23,7 +23,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.Semaphore
 
 /**
  * The engine is responsible for running the systems that operate on a scene.
@@ -39,9 +38,6 @@ class Engine {
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final List<EngineSystem> systems = []
 	private List<Future<?>> systemTasks
-
-	private final Semaphore engineStoppingSemaphore = new Semaphore(1)
-	private boolean engineStopped
 
 	/**
 	 * Add a system to the engine.
@@ -85,15 +81,13 @@ class Engine {
 	}
 
 	/**
-	 * Stop the game engine.  This method will block until all systems have
-	 * stopped/completed.
+	 * Signal to stop the game engine.
 	 */
 	void stop() {
 
 		systems.each { system ->
 			system.stop()
 		}
-//		waitUntilStopped()
 		logger.debug('Engine stopped')
 	}
 

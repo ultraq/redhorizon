@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.units
+package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
-import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -32,7 +31,6 @@ class UnitRendererAnimations extends UnitRenderer {
 	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
 	protected int framesPerHeading
-	protected GameTime gameTime
 
 	private long animationTimeStart
 
@@ -46,20 +44,18 @@ class UnitRendererAnimations extends UnitRenderer {
 	 * @param framesPerHeading
 	 * @param imageData
 	 * @param palette
-	 * @param gameTime
 	 */
 	UnitRendererAnimations(String type, Unit unit, int headings, int framesPerHeading, ByteBuffer[] imageData,
-		Palette palette, GameTime gameTime) {
+		Palette palette) {
 
 		super(type, unit, headings, imageData, palette)
 		this.framesPerHeading = framesPerHeading
-		this.gameTime = gameTime
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
+		var currentFrame = Math.floor((unit.currentTimeMs - animationTimeStart) / 1000 * FRAMERATE) % framesPerHeading as int
 		material.texture = textures[rotationFrames() * framesPerHeading + currentFrame]
 		renderer.draw(mesh, shader, material)
 	}
@@ -69,6 +65,6 @@ class UnitRendererAnimations extends UnitRenderer {
 	 */
 	void start() {
 
-		animationTimeStart = gameTime.currentTimeMillis
+		animationTimeStart = unit.currentTimeMs
 	}
 }

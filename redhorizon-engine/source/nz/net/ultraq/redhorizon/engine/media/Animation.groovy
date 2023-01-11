@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Streaming
@@ -46,7 +46,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
-class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
+class Animation implements GraphicsElement, Playable, SceneElement<Animation>, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 
@@ -63,7 +63,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private int framesQueued
 	private long animationTimeStart
-	private final GameTime gameTime
+	private long currentTimeMs
 
 	// Rendering information
 	private int lastFrame
@@ -76,14 +76,12 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 *
 	 * @param animationFile
 	 *   Animation source.
-	 * @param gameTime
 	 */
-	Animation(AnimationFile animationFile, GameTime gameTime) {
+	Animation(AnimationFile animationFile) {
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
 			animationFile.frameRate as int,
-			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null,
-			gameTime)
+			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
 
 		Executors.newSingleThreadExecutor().execute(animationDataWorker)
 	}
@@ -98,11 +96,10 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	 * @param frameRate
 	 * @param bufferSize
 	 * @param animationDataWorker
-	 * @param gameTime
 	 */
 	@PackageScope
 	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
-		int bufferSize = 10, Worker animationDataWorker, GameTime gameTime) {
+		int bufferSize = 10, Worker animationDataWorker) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
@@ -125,8 +122,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 				bufferReady.countDown()
 			}
 		}
-
-		this.gameTime = gameTime
 	}
 
 	@Override
@@ -161,7 +156,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 
 		// Wait until the frame buffer is filled before starting play
 		bufferReady.await()
-		animationTimeStart = gameTime.currentTimeMillis
+		animationTimeStart = currentTimeMs
 		Playable.super.play()
 	}
 
@@ -169,7 +164,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 	void render(GraphicsRenderer renderer) {
 
 		if (playing) {
-			def currentFrame = Math.floor((gameTime.currentTimeMillis - animationTimeStart) / 1000 * frameRate) as int
+			var currentFrame = Math.floor((currentTimeMs - animationTimeStart) / 1000 * frameRate) as int
 
 			// Try to load up to bufferSize frames ahead, maxing at 5 so we don't spent too much time in here
 			if (frames.size()) {
@@ -215,5 +210,11 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation> {
 			}
 			lastFrame = currentFrame
 		}
+	}
+
+	@Override
+	void tick(long updatedTimeMs) {
+
+		currentTimeMs = updatedTimeMs
 	}
 }

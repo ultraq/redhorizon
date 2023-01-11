@@ -27,7 +27,7 @@ import java.util.concurrent.RunnableFuture
  * be queried and controlled from other objects.  Useful as a {@code @Delegate}
  * property in a class that needs to fulfil a {@code RunnableFuture<Void>}
  * class contract.
- * 
+ *
  * @author Emanuel Rabina
  */
 class ControlledLoop implements RunnableWorker {
@@ -35,12 +35,12 @@ class ControlledLoop implements RunnableWorker {
 	private static final Logger logger = LoggerFactory.getLogger(ControlledLoop)
 
 	@Delegate
-	final FutureTask<Void> loopTask
+	private final FutureTask<Void> loopTask
 
 	/**
 	 * Constructor, build a {@link FutureTask} with a loop solely controlled by
 	 * the task state.
-	 * 
+	 *
 	 * @param loop
 	 */
 	ControlledLoop(Closure loop) {
@@ -51,7 +51,7 @@ class ControlledLoop implements RunnableWorker {
 	/**
 	 * Constructor, build a {@link FutureTask} with a loop based around the given
 	 * parameters.
-	 * 
+	 *
 	 * @param loopCondition
 	 * @param loop
 	 */

@@ -26,7 +26,7 @@ import java.util.concurrent.FutureTask
  * Similar to {@link ControlledLoop}, with the addition of the Thread being put
  * into wait states  at the end of each loop execution to not exceed a specified
  * frequency.
- * 
+ *
  * @author Emanuel Rabina
  */
 @CompileStatic
@@ -35,7 +35,7 @@ class RateLimitedLoop implements RunnableWorker {
 	private final Logger logger = LoggerFactory.getLogger(RateLimitedLoop)
 
 	@Delegate
-	final FutureTask<Void> loopTask
+	private final FutureTask<Void> loopTask
 
 	/**
 	 * Constructor, build a {@link FutureTask} with a rate-limited loop solely
@@ -52,7 +52,7 @@ class RateLimitedLoop implements RunnableWorker {
 	/**
 	 * Constructor, build a {@link FutureTask} with a rate-limited loop based
 	 * around the given parameters.
-	 * 
+	 *
 	 * @param frequency
 	 * @param loopCondition
 	 * @param loop
@@ -75,7 +75,7 @@ class RateLimitedLoop implements RunnableWorker {
 						// (all but the remaining 5ms of the time because sleep is a minimum,
 						// it can take a bit to calculate all of this, and to 'wake up')
 						if (diffTimeNanos > 5000000) {
-							Thread.sleep((long) (diffTimeNanos / 1000000 - 5))
+							Thread.sleep((long)(diffTimeNanos / 1000000 - 5))
 						}
 						// Go into a spin-lock for the remaining time
 						while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {

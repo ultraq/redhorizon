@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
@@ -64,7 +64,7 @@ class VideoLoader extends MediaLoader<VideoFile, Video> {
 		def height = file.height
 		def scaleY = file.forVgaMonitors ? 1.2f : 1f
 		def scale = graphicsEngine.window.renderResolution.calculateScaleToFit(width, height * scaleY as int)
-		media = new Video(file, gameClock)
+		media = new Video(file)
 			.scale(scale, scale * scaleY as float, 1)
 			.translate(-width / 2, -height / 2)
 		scene << media

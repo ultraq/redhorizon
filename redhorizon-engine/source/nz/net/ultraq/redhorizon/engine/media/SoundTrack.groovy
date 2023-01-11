@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.GameTime
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
@@ -37,11 +37,11 @@ import java.util.concurrent.Executors
 
 /**
  * A long piece of audio that is streamed from its source.
- * 
+ *
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
-class SoundTrack implements AudioElement, Playable, SceneElement {
+class SoundTrack implements AudioElement, Playable, SceneElement, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundTrack)
 
@@ -54,45 +54,44 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 	private final BlockingQueue<ByteBuffer> samples
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
-	private GameTime gameTime
 
 	// Renderer information
 	private int sourceId
 	private List<Integer> bufferIds
+	private long currentTimeMs
+	private boolean paused
 
 	/**
 	 * Constructor, use the data in {@code soundFile} for playing the sound track.
-	 * 
+	 *
 	 * @param soundFile
-	 * @param gameTime
 	 */
-	SoundTrack(SoundFile soundFile, GameTime gameTime) {
+	SoundTrack(SoundFile soundFile) {
 
 		this(soundFile.bits, soundFile.channels, soundFile.frequency,
-			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null, gameTime)
+			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null)
 
 		Executors.newSingleThreadExecutor().execute(soundDataWorker)
 	}
 
 	/**
 	 * Constructor, use all of the given data for building a sound track.
-	 * 
+	 *
 	 * @param bits
 	 * @param channels
 	 * @param frequency
 	 * @param bufferSize
 	 * @param soundDataWorker
-	 * @param gameTime
 	 */
 	@PackageScope
-	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker, GameTime gameTime) {
+	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker) {
 
 		if (!soundDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')
 		}
 
-		this.bits      = bits
-		this.channels  = channels
+		this.bits = bits
+		this.channels = channels
 		this.frequency = frequency
 
 		samples = new ArrayBlockingQueue<>(bufferSize)
@@ -104,8 +103,6 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 				bufferReady.countDown()
 			}
 		}
-
-		this.gameTime = gameTime
 	}
 
 	@Override
@@ -150,7 +147,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 			}
 
 			// Pause/play with game time
-			if (gameTime.paused) {
+			if (paused) {
 				if (!renderer.sourcePaused(sourceId)) {
 					renderer.pauseSource(sourceId)
 				}
@@ -185,5 +182,12 @@ class SoundTrack implements AudioElement, Playable, SceneElement {
 			renderer.deleteBuffers(processedBufferIds as int[])
 			logger.trace('Decreasing buffersQueued by {}', buffersProcessed)
 		}
+	}
+
+	@Override
+	void tick(long updatedTimeMs) {
+
+		paused = currentTimeMs == updatedTimeMs
+		currentTimeMs = updatedTimeMs
 	}
 }

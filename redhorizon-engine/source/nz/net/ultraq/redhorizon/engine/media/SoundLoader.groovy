@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.redhorizon.engine.media
 
-import nz.net.ultraq.redhorizon.engine.GameClock
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
@@ -55,7 +55,7 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 	@Override
 	Playable load() {
 
-		media = file.forStreaming ? new SoundTrack(file, gameClock) : new SoundEffect(file)
+		media = file.forStreaming ? new SoundTrack(file) : new SoundEffect(file)
 		scene << media
 
 		removePlayPauseControl = inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->

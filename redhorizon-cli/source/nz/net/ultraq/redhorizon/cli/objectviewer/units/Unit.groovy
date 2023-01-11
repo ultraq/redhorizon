@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.units
+package nz.net.ultraq.redhorizon.cli.objectviewer.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.time.Temporal
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
  * The unit that gets displayed on the screen.
- * 
+ *
  * @author Emanuel Rabina
  */
-abstract class Unit implements GraphicsElement, SceneElement<Unit> {
+abstract class Unit implements GraphicsElement, SceneElement<Unit>, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(Unit)
 
@@ -40,9 +41,11 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 	protected float heading
 	Faction faction = Faction.GOLD
 
+	protected long currentTimeMs
+
 	/**
 	 * Constructor, set the unit's width and height.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 */
@@ -112,7 +115,7 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 
 	/**
 	 * Select the next animation either next or previously in the sequence.
-	 * 
+	 *
 	 * @param next
 	 */
 	private void selectAnimation(int next) {
@@ -122,5 +125,11 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit> {
 			currentRenderer.start()
 		}
 		logger.debug("${currentRenderer.type} animation selected")
+	}
+
+	@Override
+	void tick(long updatedTimeMs) {
+
+		currentTimeMs = updatedTimeMs
 	}
 }

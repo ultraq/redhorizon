@@ -14,44 +14,54 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.time
 
 import nz.net.ultraq.redhorizon.async.ControlledLoop
-import nz.net.ultraq.redhorizon.async.RunnableWorker
+import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.InheritConstructors
-
 /**
- * An implementation of the separate time source of game time that can be
- * controlled to affect it.
+ * A separate time source from the usual system time, allowing game time to flow
+ * at different speeds.
  *
  * @author Emanuel Rabina
  */
-// TODO: Make this a proper system that updates scene objects instead of it
-//       needing to be passed to time-sensitive objects.
-@InheritConstructors
-class GameClock extends EngineSystem implements GameTime, RunnableWorker {
+class GameClock extends EngineSystem {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
 	private float speed = 1.0f
 	private float lastSpeed
-	long currentTimeMillis
 
 	@Delegate
 	private ControlledLoop timeLoop
 
-	@Override
-	boolean isPaused() {
+	/**
+	 * Constructor, creates a new time system over a scene.
+	 *
+	 * @param scene
+	 */
+	GameClock(Scene scene) {
 
-		return !speed
+		super(scene)
 	}
 
 	/**
-	 * Pauses the flow of time.
+	 * Return whether or not time has been paused.
+	 *
+	 * @return
+	 */
+	boolean isPaused() {
+
+		return speed == 0.0f
+	}
+
+	/**
+	 * Pause the flow of time.
 	 */
 	void pause() {
 
@@ -61,7 +71,7 @@ class GameClock extends EngineSystem implements GameTime, RunnableWorker {
 	}
 
 	/**
-	 * Resumes the flow of time.
+	 * Resume the flow of time.
 	 */
 	void resume() {
 
@@ -69,35 +79,51 @@ class GameClock extends EngineSystem implements GameTime, RunnableWorker {
 		speed = lastSpeed
 	}
 
+	/**
+	 * Starts the game clock and uses it to update temporal objects in the scene.
+	 */
 	@Override
 	void run() {
 
-		def lastSystemTimeMillis = System.currentTimeMillis()
-		currentTimeMillis = lastSystemTimeMillis
-
 		Thread.currentThread().name = 'Game clock'
+		logger.debug('Starting game clock')
+
 		trigger(new SystemReadyEvent())
 
+		var lastSystemTimeMillis = System.currentTimeMillis()
+		long currentTimeMillis = lastSystemTimeMillis
+
+		logger.debug('Game clock in update loop')
 		timeLoop = new ControlledLoop({ ->
-			sleep(1)
-			def currentSystemTimeMillis = System.currentTimeMillis()
-			def diff = currentSystemTimeMillis - lastSystemTimeMillis
+			Thread.sleep(10)
+			var currentSystemTimeMillis = System.currentTimeMillis()
+			var delta = currentSystemTimeMillis - lastSystemTimeMillis
 
 			// Normal flow of time, accumulate ticks at the same rate as system time
 			if (speed == 1.0f) {
-				currentTimeMillis += diff
+				currentTimeMillis += delta
 			}
 			// Modified flow, accumulate ticks at system time * flow speed
 			else {
-				currentTimeMillis += (diff * speed)
+				currentTimeMillis += (delta * speed)
 			}
+
+			// Update time with scene objects
+			scene.accept { element ->
+				if (element instanceof Temporal) {
+					element.tick(currentTimeMillis)
+				}
+			}
+
 			lastSystemTimeMillis = currentSystemTimeMillis
 		})
 		timeLoop.run()
+
+		logger.debug('Game clock stopped')
 	}
 
 	/**
-	 * Toggles between a paused and flowing state.
+	 * Toggles between paused and flowing states.
 	 */
 	void togglePause() {
 

@@ -17,12 +17,11 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.cli.units.Faction
-import nz.net.ultraq.redhorizon.cli.units.Infantry
-import nz.net.ultraq.redhorizon.cli.units.Structure
-import nz.net.ultraq.redhorizon.cli.units.UnitData
-import nz.net.ultraq.redhorizon.cli.units.Vehicle
-import nz.net.ultraq.redhorizon.engine.GameTime
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.Faction
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
+import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -98,8 +97,8 @@ class UnitViewer extends Viewer {
 
 		// Add the unit to the engine
 		def unit = targetClass
-			.getDeclaredConstructor(UnitData, ImagesFile, Palette, GameTime)
-			.newInstance(unitData, shpFile, palette, gameClock)
+			.getDeclaredConstructor(UnitData, ImagesFile, Palette)
+			.newInstance(unitData, shpFile, palette)
 			.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
 		scene << unit
 

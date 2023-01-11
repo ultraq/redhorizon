@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.time
 
 /**
- * A separate time source from the usual system time, allowing game time to flow
- * at different speeds.
- * 
+ * A temporal component is one that can receive updates about the game time.
+ *
  * @author Emanuel Rabina
  */
-interface GameTime {
+interface Temporal {
 
 	/**
-	 * Get the current game time with millisecond precision.
-	 * 
-	 * @return
+	 * Update this object's current time with a new value from the game clock.
+	 *
+	 * @param updatedTimeMs
 	 */
-	long getCurrentTimeMillis()
-
-	/**
-	 * Return whether or not time has been paused.
-	 * 
-	 * @return
-	 */
-	boolean isPaused()
+	void tick(long updatedTimeMs)
 }
