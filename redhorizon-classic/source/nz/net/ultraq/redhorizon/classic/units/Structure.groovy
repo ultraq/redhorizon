@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.units
+package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -22,35 +22,35 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import java.nio.ByteBuffer
 
 /**
- * An implementation of a rendered unit for vehicle types.
+ * A rendered unit for building/structure types.
  *
  * @author Emanuel Rabina
  */
-class Vehicle extends Unit {
+class Structure extends Unit {
 
 	/**
-	 * Constructor, build a unit from the given data.
+	 * Constructor, builds a structure out of unit data.
 	 *
 	 * @param data
 	 * @param imagesFile
 	 * @param palette
 	 */
-	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette) {
+	Structure(UnitData data, ImagesFile imagesFile, Palette palette) {
 
 		super(imagesFile.width, imagesFile.height)
 		def frameIndex = 0
-
 		def bodyPart = data.shpFile.parts.body
-		def turretPart = data.shpFile.parts.turret
-		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
-			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] +
-				(turretPart ? imagesFile.imagesData[frameIndex..<(frameIndex += turretPart.headings)] : [])
-				as ByteBuffer[], palette)
 
-		data.shpFile.animations?.each { animation ->
-			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
+		['', '-damaged'].forEach { status ->
+			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
+				imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] as ByteBuffer[],
 				palette)
+
+			data.shpFile.animations?.each { animation ->
+				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
+					imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
+					palette)
+			}
 		}
 
 		currentRenderer = unitRenderers.first()

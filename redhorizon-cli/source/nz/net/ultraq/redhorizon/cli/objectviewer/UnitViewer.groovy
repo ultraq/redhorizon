@@ -17,11 +17,11 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Faction
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Infantry
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Structure
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.UnitData
-import nz.net.ultraq.redhorizon.cli.objectviewer.units.Vehicle
+import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.units.Infantry
+import nz.net.ultraq.redhorizon.classic.units.Structure
+import nz.net.ultraq.redhorizon.classic.units.UnitData
+import nz.net.ultraq.redhorizon.classic.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -74,11 +74,8 @@ class UnitViewer extends Viewer {
 
 		def unitConfig
 		try {
-			unitConfig = getResourceAsStream(
-				"nz/net/ultraq/redhorizon/cli/objectviewer/configurations/${unitId.toLowerCase()}.json")
-				.withBufferedStream { inputStream ->
-					return inputStream.text
-				}
+			unitConfig = getResourceAsStream("nz/net/ultraq/redhorizon/classic/units/data/${unitId.toLowerCase()}.json")
+				.withBufferedStream { inputStream -> inputStream.text }
 			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
 		catch (IllegalArgumentException ignored) {
