@@ -39,7 +39,7 @@ class InputEventStream implements EventTarget {
 	 *   A function that can be executed to remove the input binding that was just
 	 *   added.
 	 */
-	Closure addControl(Control control) {
+	RemoveControlFunction addControl(Control control) {
 
 		var deregisterEventFunction = on(control.event, control)
 		trigger(new ControlAddedEvent(control))
