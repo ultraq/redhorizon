@@ -94,11 +94,6 @@ class RenderPipeline implements AutoCloseable {
 			surface: new Rectanglef(-1, -1, 1, 1)
 		)
 
-		// Build the standard rendering pipeline, including the debug and control
-		// overlays as they'll be standard for as long as this thing is in
-		// development
-		configurePipeline(scene, config, window)
-
 		def debugOverlay = new DebugOverlayRenderPass(renderer, config.debug)
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -126,6 +121,11 @@ class RenderPipeline implements AutoCloseable {
 			}
 			postProcessingRenderPass.enabled = event.value
 		}
+
+		// Build the standard rendering pipeline, including the debug and control
+		// overlays as they'll be standard for as long as this thing is in
+		// development
+		configurePipeline(scene, config, window)
 	}
 
 	/**
