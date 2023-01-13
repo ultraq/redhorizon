@@ -37,7 +37,7 @@ import java.util.concurrent.Callable
 
 /**
  * A game object viewer for testing their rendering and configuration.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -71,7 +71,7 @@ class ObjectViewerCli implements Callable<Integer> {
 
 	/**
 	 * Launch the unit viewer.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -82,27 +82,27 @@ class ObjectViewerCli implements Callable<Integer> {
 
 		fileOptions.useFile(logger) { objectFile ->
 			switch (objectFile) {
-			case ShpFile:
-				def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
-				def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
-					clearColour: Colour.GREY
-				)
-				new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.loadPalette(true), touchpadInput).start()
-				break
-			case IniFile:
-				def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
-					renderResolution: new Dimension(1280, 800)
-				)
-				// Assume the directory in which file resides is where we can search for items
-				new ResourceManager(fileOptions.file.parentFile,
-					'nz.net.ultraq.redhorizon.filetypes',
-					'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
-					new MapViewer(graphicsConfig, resourceManager, objectFile, touchpadInput).start()
-				}
-				break
-			default:
-				logger.error('No viewer for the associated file class of {}', objectFile)
-				throw new UnsupportedOperationException()
+				case ShpFile:
+					def objectId = fileOptions.entryName?.nameWithoutExtension ?: fileOptions.file.nameWithoutExtension
+					def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+						clearColour: Colour.GREY
+					)
+					new UnitViewer(graphicsConfig, objectFile, objectId, paletteOptions.loadPalette(true)).start()
+					break
+				case IniFile:
+					def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
+						renderResolution: new Dimension(1280, 800)
+					)
+					// Assume the directory in which file resides is where we can search for items
+					new ResourceManager(fileOptions.file.parentFile,
+						'nz.net.ultraq.redhorizon.filetypes',
+						'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+						new MapViewer(graphicsConfig, resourceManager, objectFile, touchpadInput).start()
+					}
+					break
+				default:
+					logger.error('No viewer for the associated file class of {}', objectFile)
+					throw new UnsupportedOperationException()
 			}
 		}
 

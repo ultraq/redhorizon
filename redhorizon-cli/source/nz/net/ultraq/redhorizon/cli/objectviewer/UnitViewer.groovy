@@ -57,11 +57,10 @@ class UnitViewer extends Viewer {
 	 * @param shpFile
 	 * @param unitId
 	 * @param palette
-	 * @param touchpadInput
 	 */
-	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, Palette palette, boolean touchpadInput) {
+	UnitViewer(GraphicsConfiguration graphicsConfig, ShpFile shpFile, String unitId, Palette palette) {
 
-		super(null, graphicsConfig, touchpadInput)
+		super(null, graphicsConfig)
 		this.shpFile = shpFile
 		this.unitId = unitId
 		this.palette = palette
