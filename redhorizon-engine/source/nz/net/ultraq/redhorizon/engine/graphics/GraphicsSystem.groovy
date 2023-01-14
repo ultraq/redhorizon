@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
@@ -182,6 +183,7 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 				}
 			}
 		}
+		trigger(new SystemStoppedEvent(), true)
 		logger.debug('Graphics system stopped')
 	}
 }

@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.async.RateLimitedLoop
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
@@ -132,6 +133,7 @@ class AudioSystem extends EngineSystem {
 				logger.debug('Shutting down audio system')
 			}
 		}
+		trigger(new SystemStoppedEvent(), true)
 		logger.debug('Audio system stopped')
 	}
 }
