@@ -21,12 +21,17 @@ package nz.net.ultraq.redhorizon.engine.time
  *
  * @author Emanuel Rabina
  */
-interface Temporal {
+trait Temporal {
+
+	long currentTimeMs
 
 	/**
 	 * Update this object's current time with a new value from the game clock.
 	 *
 	 * @param updatedTimeMs
 	 */
-	void tick(long updatedTimeMs)
+	void tick(long updatedTimeMs) {
+
+		currentTimeMs = updatedTimeMs
+	}
 }

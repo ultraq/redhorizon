@@ -58,7 +58,6 @@ class SoundTrack implements AudioElement, Playable, SceneElement, Temporal {
 	// Renderer information
 	private int sourceId
 	private List<Integer> bufferIds
-	private long currentTimeMs
 	private boolean paused
 
 	/**

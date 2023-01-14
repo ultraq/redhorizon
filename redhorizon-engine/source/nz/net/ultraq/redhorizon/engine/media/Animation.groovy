@@ -63,7 +63,6 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
 	private int framesQueued
 	private long animationTimeStart
-	private long currentTimeMs
 
 	// Rendering information
 	private int lastFrame
@@ -210,11 +209,5 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 			}
 			lastFrame = currentFrame
 		}
-	}
-
-	@Override
-	void tick(long updatedTimeMs) {
-
-		currentTimeMs = updatedTimeMs
 	}
 }
