@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,26 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+
+import groovy.transform.TupleConstructor
+
 /**
- * Model of the data of a C&C unit type.
+ * Base type for any separate component of a unit.
  *
  * @author Emanuel Rabina
  */
-class UnitData {
+@TupleConstructor(defaults = false)
+abstract class UnitPart implements GraphicsElement {
 
-	String type
-	ShpFile shpFile
+	final Unit unit
+	final int width
+	final int height
 
-	static class ShpFile {
-		ShpFileParts parts
-		ShpFileState[] states
-	}
-
-	static class ShpFileParts {
-		ShpFilePart body
-		ShpFilePart bodyAlt
-		ShpFilePart turret
-	}
-
-	static class ShpFilePart {
-		int headings
-	}
-
-	static class ShpFileState {
-		String name
-		int frames
-		int headings
-	}
+	/**
+	 * Returns the name of this type of part.
+	 *
+	 * @return
+	 */
+	abstract String getType()
 }

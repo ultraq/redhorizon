@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,13 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
+import groovy.transform.InheritConstructors
+
 /**
- * Model of the data of a C&C unit type.
- *
- * @author Emanuel Rabina
+ * An independently movable turret.
  */
-class UnitData {
+@InheritConstructors
+class UnitTurret extends UnitBody {
 
-	String type
-	ShpFile shpFile
-
-	static class ShpFile {
-		ShpFileParts parts
-		ShpFileState[] states
-	}
-
-	static class ShpFileParts {
-		ShpFilePart body
-		ShpFilePart bodyAlt
-		ShpFilePart turret
-	}
-
-	static class ShpFilePart {
-		int headings
-	}
-
-	static class ShpFileState {
-		String name
-		int frames
-		int headings
-	}
+	final String type = 'turret'
 }

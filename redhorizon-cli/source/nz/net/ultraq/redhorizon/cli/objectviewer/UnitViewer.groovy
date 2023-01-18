@@ -98,24 +98,47 @@ class UnitViewer extends Viewer {
 			.translate(-shpFile.width / 2, -shpFile.height / 2, 0)
 		scene << unit
 
-		logger.info('Displaying the image in another window.  Close the window to exit.')
+		logger.info('Displaying the unit in another window.  Close the window to exit.')
 
 		// Custom inputs
+
+		var states = unitData.shpFile.states?.size() ?: 0
+		var stateIndex = -1
+
+		// Adjust the heading of the unit such that it's rotated left enough to
+		// utilize its next state/animation in that direction.
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
-			unit.rotateLeft()
+			var headings = stateIndex == -1 ?
+				unitData.shpFile.parts.body.headings :
+				unitData.shpFile.states[stateIndex].headings
+			var degreesPerHeading = (360f / headings) as float
+			unit.heading -= degreesPerHeading
 		}))
+
+		// Adjust the heading of the unit such that it's rotated right enough to
+		// utilize its next state/animation in that direction.
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
-			unit.rotateRight()
+			var headings = stateIndex == -1 ?
+				unitData.shpFile.parts.body.headings :
+				unitData.shpFile.states[stateIndex].headings
+			var degreesPerHeading = (360f / headings) as float
+			unit.heading += degreesPerHeading
 		}))
+
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
-			unit.previousAnimation()
+			unit.previousState()
+			unit.startAnimation()
+			stateIndex = Math.wrap(stateIndex - 1, -1, states)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
-			unit.nextAnimation()
+			unit.nextState()
+			unit.startAnimation()
+			stateIndex = Math.wrap(stateIndex + 1, -1, states)
 		}))
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
 			gameClock.togglePause()
 		}))
+
 		final Faction[] factions = Faction.values()
 		inputEventStream.addControl(new KeyControl(GLFW_KEY_P, 'Cycle faction colours', { ->
 			unit.faction = factions[(unit.faction.ordinal() + 1) % factions.length]

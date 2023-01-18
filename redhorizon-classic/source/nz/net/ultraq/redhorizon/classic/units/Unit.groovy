@@ -18,99 +18,130 @@ package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.engine.time.Temporal
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.nio.ByteBuffer
 
 /**
  * The unit that gets displayed on the screen.
  *
  * @author Emanuel Rabina
  */
-abstract class Unit implements GraphicsElement, SceneElement<Unit>, Temporal {
+abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, Temporal {
 
-	private static final Logger logger = LoggerFactory.getLogger(Unit)
+	private static Logger logger = LoggerFactory.getLogger(Unit)
 
-	protected final List<UnitRenderer> unitRenderers = []
-	protected UnitRenderer currentRenderer
+	final int width
+	final int height
+	final ImagesFile imagesFile
+	final float frameStep
+	final Palette palette
+	final List<UnitPart> parts = []
+	final List<UnitState> states = []
 
-	protected final int width
-	protected final int height
-	protected float heading
 	Faction faction = Faction.GOLD
 
-	protected long currentTimeMs
+	protected Shader shader
+	protected Texture texture
+	protected Material material
+	// TODO: State machine for transitioning between states?
+	protected int stateIndex
+	protected long animationStartTime
 
 	/**
-	 * Constructor, set the unit's width and height.
+	 * Constructor, create a new basic unit.
 	 *
-	 * @param width
-	 * @param height
+	 * @param imagesFile
+	 * @param palette
 	 */
-	protected Unit(int width, int height) {
+	protected Unit(ImagesFile imagesFile, Palette palette) {
 
-		this.width = width
-		this.height = height
-
+		this.width = imagesFile.width
+		this.height = imagesFile.height
 		bounds.set(0, 0, width, height)
+
+		this.imagesFile = imagesFile
+		frameStep = 1 / imagesFile.numImages
+		this.palette = palette
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
+	}
 
-		unitRenderers.each { unitRenderer ->
-			unitRenderer.delete(renderer)
-		}
+	/**
+	 * A shortcut to retrieving the {@code UnitBody} part of a unit.
+	 *
+	 * @return
+	 */
+	UnitBody getBody() {
+
+		return parts.find { it instanceof UnitBody } as UnitBody
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		unitRenderers.each { unitRenderer ->
-			unitRenderer.init(renderer)
-		}
+		// TODO: Load the palette shader elsewhere?
+		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
+		shader = renderer.createShader(
+			'PalettedSprite',
+			getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/shaders/PalettedSprite.vert.glsl').text,
+			getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/shaders/PalettedSprite.frag.glsl').text,
+			{ shader, material ->
+				shader.setUniformTexture('indexTexture', 0, material.texture)
+			},
+			{ shader, material ->
+				shader.setUniformTexture('paletteTexture', 1, paletteAsTexture)
+			},
+			{ shader, material ->
+				shader.setUniform('factionColours', faction.colours)
+			},
+			{ shader, material ->
+				shader.setUniformMatrix('model', material.transform)
+			}
+		)
+
+		var spriteSheetWidth = imagesFile.width * imagesFile.numImages
+		var imagesAsSpriteSheet = imagesFile.imagesData
+			.combineImages(imagesFile.width, imagesFile.height, imagesFile.numImages)
+			.flipVertical(spriteSheetWidth, imagesFile.height, imagesFile.format)
+		texture = renderer.createTexture(spriteSheetWidth, height, imagesFile.format, imagesAsSpriteSheet)
+		material = renderer.createMaterial(texture, transform)
+
+		parts*.init(renderer)
+		states*.init(renderer)
 	}
 
 	/**
-	 * Selects this unit's next animation for rendering.
+	 * Selects this unit's next state for rendering.
 	 */
-	void nextAnimation() {
+	void nextState() {
 
-		selectAnimation(+1)
+		setState(+1)
 	}
 
 	/**
 	 * Selects this unit's previous animation for rendering.
 	 */
-	void previousAnimation() {
+	void previousState() {
 
-		selectAnimation(-1)
+		setState(-1)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		currentRenderer.render(renderer)
-	}
-
-	/**
-	 * Adjust the heading of the unit such that it's rotated left enough to
-	 * utilize its next frame or animation in that direction.
-	 */
-	void rotateLeft() {
-
-		heading = Math.wrap(heading - currentRenderer.degreesPerHeading as float, 0f, 360f)
-	}
-
-	/**
-	 * Adjust the heading of the unit such that it's rotated right enough to
-	 * utilize its next frame or animation in that direction.
-	 */
-	void rotateRight() {
-
-		heading = Math.wrap(heading + currentRenderer.degreesPerHeading as float, 0f, 360f)
+		parts*.render(renderer)
 	}
 
 	/**
@@ -118,18 +149,30 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Temporal {
 	 *
 	 * @param next
 	 */
-	private void selectAnimation(int next) {
+	private void setState(int next) {
 
-		currentRenderer = unitRenderers[(unitRenderers.indexOf(currentRenderer) + next) % unitRenderers.size()]
-		if (currentRenderer instanceof UnitRendererAnimations) {
-			currentRenderer.start()
+		if (states.size()) {
+			stateIndex = Math.wrap(stateIndex + next, 0, states.size())
+			logger.debug("${stateIndex == -1 ? 'body' : states[stateIndex].name} state selected")
 		}
-		logger.debug("${currentRenderer.type} animation selected")
 	}
 
 	@Override
-	void tick(long updatedTimeMs) {
+	void setHeading(float newHeading) {
 
-		currentTimeMs = updatedTimeMs
+		Rotatable.super.setHeading(newHeading)
+		parts.each { part ->
+			if (part instanceof Rotatable) {
+				part.heading = newHeading
+			}
+		}
+	}
+
+	/**
+	 * (Re)start playing the current animation.
+	 */
+	void startAnimation() {
+
+		animationStartTime = currentTimeMs
 	}
 }

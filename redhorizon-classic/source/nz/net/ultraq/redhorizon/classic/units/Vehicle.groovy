@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.classic.units
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import java.nio.ByteBuffer
-
 /**
  * An implementation of a rendered unit for vehicle types.
  *
@@ -37,22 +35,22 @@ class Vehicle extends Unit {
 	 */
 	Vehicle(UnitData data, ImagesFile imagesFile, Palette palette) {
 
-		super(imagesFile.width, imagesFile.height)
-		def frameIndex = 0
+		super(imagesFile, palette)
+		var frameIndex = 0
 
-		def bodyPart = data.shpFile.parts.body
-		def turretPart = data.shpFile.parts.turret
-		unitRenderers << new VehicleRenderer('body', this, bodyPart.headings, turretPart?.headings ?: 0,
-			imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] +
-				(turretPart ? imagesFile.imagesData[frameIndex..<(frameIndex += turretPart.headings)] : [])
-				as ByteBuffer[], palette)
+		var bodyPart = data.shpFile.parts.body
+		parts << new UnitBody(this, width, height, bodyPart.headings, 1, frameIndex)
+		frameIndex += bodyPart.headings
 
-		data.shpFile.animations?.each { animation ->
-			unitRenderers << new UnitRendererAnimations(animation.type, this, animation.headings, animation.frames,
-				imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
-				palette)
+		var turretPart = data.shpFile.parts.turret
+		if (turretPart) {
+			parts << new UnitTurret(this, width, height, bodyPart.headings, 1, frameIndex)
+			frameIndex += bodyPart.headings
 		}
 
-		currentRenderer = unitRenderers.first()
+		data.shpFile.states?.each { state ->
+			states << new UnitState(this, state.name, state.headings, state.frames, frameIndex)
+			frameIndex += (state.frames * state.headings)
+		}
 	}
 }

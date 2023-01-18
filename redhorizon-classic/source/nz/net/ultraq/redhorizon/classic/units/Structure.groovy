@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.classic.units
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import java.nio.ByteBuffer
-
 /**
  * A rendered unit for building/structure types.
  *
@@ -37,22 +35,20 @@ class Structure extends Unit {
 	 */
 	Structure(UnitData data, ImagesFile imagesFile, Palette palette) {
 
-		super(imagesFile.width, imagesFile.height)
-		def frameIndex = 0
-		def bodyPart = data.shpFile.parts.body
+		super(imagesFile, palette)
+		var frameIndex = 0
+		var bodyPart = data.shpFile.parts.body
 
-		['', '-damaged'].forEach { status ->
-			unitRenderers << new UnitRenderer("body${status}", this, bodyPart.headings,
-				imagesFile.imagesData[frameIndex..<(frameIndex += bodyPart.headings)] as ByteBuffer[],
-				palette)
+		parts << new UnitBody(this, width, height)
 
-			data.shpFile.animations?.each { animation ->
-				unitRenderers << new UnitRendererAnimations(animation.type + status, this, animation.headings, animation.frames,
-					imagesFile.imagesData[frameIndex..<(frameIndex += (animation.frames * animation.headings))] as ByteBuffer[],
-					palette)
+		['default', 'damaged'].forEach { name ->
+			states << new UnitState(this, name, bodyPart.headings, 1, frameIndex)
+			frameIndex += bodyPart.headings
+
+			data.shpFile.states?.each { state ->
+				states << new UnitState(this, state.name, state.headings, state.frames, frameIndex)
+				frameIndex += state.frames * state.headings
 			}
 		}
-
-		currentRenderer = unitRenderers.first()
 	}
 }

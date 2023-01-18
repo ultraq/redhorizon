@@ -6,9 +6,9 @@
 				"headings": 1
 			}
 		},
-		"animations": [
+		"states": [
 			{
-				"type": "construction-complete",
+				"name": "construction-complete",
 				"frames": 25,
 				"headings": 1
 			}

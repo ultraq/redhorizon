@@ -1,5 +1,5 @@
 /* 
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,33 @@
 package nz.net.ultraq.redhorizon.classic.units
 
 /**
- * Model of the data of a C&C unit type.
+ * Trait for scene bodies that can be rotated around some axis.
  *
  * @author Emanuel Rabina
  */
-class UnitData {
+trait Rotatable {
 
-	String type
-	ShpFile shpFile
+	private float heading
 
-	static class ShpFile {
-		ShpFileParts parts
-		ShpFileState[] states
+	/**
+	 * Return this object's heading.  The value will be within the range 0 - 360
+	 * degrees.
+	 *
+	 * @return
+	 */
+	float getHeading() {
+
+		return heading
 	}
 
-	static class ShpFileParts {
-		ShpFilePart body
-		ShpFilePart bodyAlt
-		ShpFilePart turret
-	}
+	/**
+	 * Update this object's heading.  The value is clamped to the range 0 - 360
+	 * degrees.
+	 *
+	 * @param newHeading
+	 */
+	void setHeading(float newHeading) {
 
-	static class ShpFilePart {
-		int headings
-	}
-
-	static class ShpFileState {
-		String name
-		int frames
-		int headings
+		heading = Math.wrap(newHeading, 0f, 360f)
 	}
 }
