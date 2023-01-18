@@ -70,6 +70,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
+	final int maxTextureSize
+
 	protected final GraphicsConfiguration config
 	protected final GLCapabilities capabilities
 
@@ -132,6 +134,8 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 				shader.setUniformMatrix('model', material.transform)
 			}
 		)
+
+		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
 	}
 
 	/**

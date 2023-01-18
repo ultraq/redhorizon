@@ -164,6 +164,14 @@ interface GraphicsRenderer extends EventTarget {
 	void draw(Mesh mesh, Shader shader, Material material)
 
 	/**
+	 * Return the maximum size that any dimension of a texture can be for the
+	 * current platform.
+	 *
+	 * @return
+	 */
+	int getMaxTextureSize()
+
+	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
 	 * {@code null} to set the render target as the screen.
 	 *

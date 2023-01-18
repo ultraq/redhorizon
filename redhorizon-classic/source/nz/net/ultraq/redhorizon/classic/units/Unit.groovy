@@ -43,7 +43,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 	final int width
 	final int height
 	final ImagesFile imagesFile
-	final float frameStep
 	final Palette palette
 	final List<UnitPart> parts = []
 	final List<UnitState> states = []
@@ -52,6 +51,12 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 
 	protected Shader shader
 	protected Texture texture
+	protected int spritesHorizontal
+	protected int spritesVertical
+	protected int spriteSheetWidth
+	protected int spriteSheetHeight
+	protected float frameStepX
+	protected float frameStepY
 	protected Material material
 	// TODO: State machine for transitioning between states?
 	protected int stateIndex
@@ -70,7 +75,6 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 		bounds.set(0, 0, width, height)
 
 		this.imagesFile = imagesFile
-		frameStep = 1 / imagesFile.numImages
 		this.palette = palette
 	}
 
@@ -111,11 +115,21 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 			}
 		)
 
-		var spriteSheetWidth = imagesFile.width * imagesFile.numImages
+		spritesHorizontal = Math.min(imagesFile.numImages, renderer.maxTextureSize / imagesFile.width as int)
+		spritesVertical = Math.ceil(imagesFile.numImages / spritesHorizontal) as int
+		spriteSheetWidth = spritesHorizontal * imagesFile.width
+		spriteSheetHeight = spritesVertical * imagesFile.height
+		logger.debug('Sprite sheet - across: {}, down: {}, width: {}, height: {}',
+			spritesHorizontal, spritesVertical, spriteSheetWidth, spriteSheetHeight)
+
+		frameStepX = 1 / spritesHorizontal
+		frameStepY = 1 / spritesVertical
+		logger.debug('Texture UV steps for sprite sheet: {}x{}', frameStepX, frameStepY)
+
 		var imagesAsSpriteSheet = imagesFile.imagesData
-			.combineImages(imagesFile.width, imagesFile.height, imagesFile.numImages)
-			.flipVertical(spriteSheetWidth, imagesFile.height, imagesFile.format)
-		texture = renderer.createTexture(spriteSheetWidth, height, imagesFile.format, imagesAsSpriteSheet)
+			.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
+			.combineImages(imagesFile.width, imagesFile.height, spritesHorizontal)
+		texture = renderer.createTexture(spriteSheetWidth, spriteSheetHeight, imagesFile.format, imagesAsSpriteSheet)
 		material = renderer.createMaterial(texture, transform)
 
 		parts*.init(renderer)

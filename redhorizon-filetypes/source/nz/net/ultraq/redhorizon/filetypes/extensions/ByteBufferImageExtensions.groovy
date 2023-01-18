@@ -60,14 +60,14 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, int imagesX) {
 
-		def imagesY = (self.length / imagesX) as int
-		def compileWidth = width * imagesX
-		def compileHeight = height * imagesY
-		def compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
+		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
+		var compileWidth = width * imagesX as int
+		var compileHeight = height * imagesY
+		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
 
 		// For each image
 		self.eachWithIndex { image, i ->
-			def compilationPointer = (i / imagesX as int) * (compileWidth * height) + ((i % imagesX) * width)
+			var compilationPointer = (i / imagesX as int) * (compileWidth * height) + ((i % imagesX) * width)
 
 			// For each vertical line of pixels in the current image
 			height.times { y ->
@@ -78,7 +78,7 @@ class ByteBufferImageExtensions {
 			}
 			image.rewind()
 		}
-		return compilation.flip()
+		return compilation.rewind()
 	}
 
 	/**
@@ -101,6 +101,21 @@ class ByteBufferImageExtensions {
 			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
 		}
 		return flippedImageBuffer.flip()
+	}
+
+	/**
+	 * Flip a series of image buffers.  Calls {@link #flipVertical} for each
+	 * buffer in the array.
+	 *
+	 * @param self
+	 * @param width  Width of each image.
+	 * @param height Height of each image.
+	 * @param format The number of colour channels in each pixel.
+	 * @return A new array of buffers whose pixel data has been flipped.
+	 */
+	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, ColourFormat format) {
+
+		return self.collect { image -> flipVertical(image, width, height, format) } as ByteBuffer[]
 	}
 
 	/**

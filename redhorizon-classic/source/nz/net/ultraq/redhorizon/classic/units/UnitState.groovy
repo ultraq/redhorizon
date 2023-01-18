@@ -66,8 +66,14 @@ class UnitState implements GraphicsElement {
 		headings.times { heading ->
 			frames.times { frame ->
 				var frameIndex = frameOffset + (heading ? (headings - heading) * frames : 0) + frame
-				var textureU = frameIndex * unit.frameStep as float
-				var textureUvs = new Rectanglef(textureU, 0, textureU + unit.frameStep as float, 1)
+				var textureU = (frameIndex % unit.spritesHorizontal) * unit.frameStepX as float
+				var textureV = Math.floor(frameIndex / unit.spritesHorizontal) * unit.frameStepY as float
+				var textureUvs = new Rectanglef(
+					textureU,
+					textureV,
+					textureU + unit.frameStepX as float,
+					textureV + unit.frameStepY as float
+				)
 				meshes[heading][frame] = renderer.createSpriteMesh(
 					surface: new Rectanglef(0, 0, unit.width, unit.height),
 					textureUVs: textureUvs
