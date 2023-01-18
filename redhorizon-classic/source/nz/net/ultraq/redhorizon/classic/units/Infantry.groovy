@@ -40,6 +40,7 @@ class Infantry extends Unit {
 
 		var bodyPart = data.shpFile.parts.body
 		parts << new UnitBody(this, width, height, bodyPart.headings, 1, frameIndex)
+		frameIndex += bodyPart.headings
 
 		data.shpFile.states?.each { state ->
 			states << new UnitState(this, state.name, state.headings, state.frames, frameIndex)
