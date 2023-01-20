@@ -44,14 +44,15 @@ abstract class Context implements AutoCloseable {
 	 *
 	 * @param closure
 	 */
-	void withCurrent(Closure closure) {
+	<T> T withCurrent(Closure<T> closure) {
 
 		try {
 			makeCurrent()
-			closure()
+			return closure()
 		}
 		catch (Throwable ex) {
 			logger.error('An error occurred within the scope of the context', ex)
+			throw ex
 		}
 		finally {
 			releaseCurrent()

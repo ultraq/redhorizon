@@ -55,6 +55,7 @@ class OpenGLWindow extends Window {
 
 	private final Dimension windowedSize
 	private boolean fullScreen
+	private boolean vsync
 
 	/**
 	 * Constructor, create a new OpenGL window.
@@ -198,6 +199,13 @@ class OpenGLWindow extends Window {
 	}
 
 	@Override
+	void setVsync(boolean newVsync) {
+
+		glfwSwapInterval(newVsync ? 1 : 0)
+		vsync = newVsync
+	}
+
+	@Override
 	boolean shouldClose() {
 
 		return glfwWindowShouldClose(window)
@@ -239,5 +247,12 @@ class OpenGLWindow extends Window {
 		}
 
 		fullScreen = !fullScreen
+	}
+
+	@Override
+	void toggleVsync() {
+
+		glfwSwapInterval(vsync ? 0 : 1)
+		vsync = !vsync
 	}
 }

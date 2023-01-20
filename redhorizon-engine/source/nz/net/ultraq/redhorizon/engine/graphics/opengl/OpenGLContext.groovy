@@ -61,7 +61,7 @@ class OpenGLContext extends GraphicsContext {
 		window = new OpenGLWindow(windowTitle, config)
 
 		withCurrent { ->
-			glfwSwapInterval(config.vsync ? 1 : 0)
+			window.setVsync(config.vsync)
 		}
 	}
 

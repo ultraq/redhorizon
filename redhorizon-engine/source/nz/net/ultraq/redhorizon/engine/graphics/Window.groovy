@@ -74,6 +74,11 @@ abstract class Window implements AutoCloseable, InputSource {
 	abstract void pollEvents()
 
 	/**
+	 * Control whether vertical sync is anabled/disabled.
+	 */
+	abstract void setVsync(boolean newVsync)
+
+	/**
 	 * Return whether or not the underlying window has signalled to be closed.
 	 *
 	 * @return
@@ -97,4 +102,9 @@ abstract class Window implements AutoCloseable, InputSource {
 	 * Switch between windowed and fullscreen modes.
 	 */
 	abstract void toggleFullScreen()
+
+	/**
+	 * Switch between vertical sync being anabled/disabled.
+	 */
+	abstract void toggleVsync()
 }

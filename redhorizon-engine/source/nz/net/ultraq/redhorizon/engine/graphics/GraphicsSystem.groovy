@@ -25,14 +25,14 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Graphics system, creates a display which drives the rendering loop of drawing
@@ -53,6 +53,7 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
+	private boolean shouldToggleVsync
 	private long lastClickTime
 
 	@Delegate
@@ -148,6 +149,12 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 				}
 			}
 
+			window.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_V) {
+					shouldToggleVsync = true
+				}
+			}
+
 			context.withCurrent { ->
 				trigger(new WindowCreatedEvent(window))
 
@@ -168,6 +175,10 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 									if (shouldToggleFullScreen) {
 										window.toggleFullScreen()
 										shouldToggleFullScreen = false
+									}
+									if (shouldToggleVsync) {
+										window.toggleVsync()
+										shouldToggleVsync = false
 									}
 									pipeline.render()
 									window.swapBuffers()
