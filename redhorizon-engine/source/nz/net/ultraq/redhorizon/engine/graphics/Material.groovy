@@ -23,13 +23,15 @@ import groovy.transform.TupleConstructor
 /**
  * A material defines how a shape should be rendered.  A {@link Mesh} already
  * covers the shape part, so a material covers the uniform values that go into
- * configuring a shader.
+ * configuring a shader.  These values are stored as a general-purpose
+ * {@code Map}, with extensions used to simplify access to that map.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
+@TupleConstructor(includes = ['texture', 'transform'])
 class Material implements AutoCloseable {
 
+	final Map<String, Object> attributes = [:]
 	Texture texture
 	Matrix4f transform
 

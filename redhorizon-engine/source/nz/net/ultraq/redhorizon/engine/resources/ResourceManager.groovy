@@ -28,17 +28,17 @@ import groovy.transform.TupleConstructor
  * The resource manager is used to search for files in directories and other
  * archives from some base directory, then loading them into a target type which
  * is saved for subsequent requests.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
 class ResourceManager implements Closeable {
 
 	@Lazy
-	private Map<String,Class<? extends ArchiveFile>> knownArchiveTypes = {
+	private Map<String, Class<? extends ArchiveFile>> knownArchiveTypes = {
 		def archiveTypes = new Reflections(packageNames)
 			.getSubTypesOf(ArchiveFile)
-			.inject(new LinkedHashMap<String,Class<? extends ArchiveFile>>()) { acc, type ->
+			.inject(new LinkedHashMap<String, Class<? extends ArchiveFile>>()) { acc, type ->
 				def fileExtensionsAnnotation = type.getDeclaredAnnotation(FileExtensions)
 				fileExtensionsAnnotation.value().each { extension ->
 					acc << [(extension): type]
@@ -46,12 +46,12 @@ class ResourceManager implements Closeable {
 				return acc
 			}
 		return archiveTypes
-	} ()
+	}()
 
 	final File baseDirectory
 	final String[] packageNames
 
-	private final Map<String,ArchiveFile> archiveFiles = [:]
+	private final Map<String, ArchiveFile> archiveFiles = [:]
 
 	/**
 	 * Close any archive files that have been opened during the life time of this
@@ -67,15 +67,15 @@ class ResourceManager implements Closeable {
 	 * Search for a file in the base directory, subdirectories, and any archive
 	 * files encountered.  If found, an attempt is made to load it into the target
 	 * class.
-	 * 
+	 *
 	 * @param resourceName
 	 * @param targetType
 	 * @return
 	 */
 	@Memoized
-	public <T> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
+	<T> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
 
-		return directory.listFiles().sort().findResult { File file ->
+		return directory.listFiles().sort().findResult { file ->
 			if (file.file) {
 				def fileName = file.name
 				if (fileName == resourceName) {
@@ -99,6 +99,6 @@ class ResourceManager implements Closeable {
 				return null
 			}
 			return loadFile(resourceName, targetType, file)
-		}
+		} as T
 	}
 }

@@ -32,6 +32,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -206,6 +207,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			layout, colour, vertices, textureUVs, indices)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
+	}
+
+	@Override
+	Shader createShader(ShaderConfig config) {
+
+		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.uniforms)
 	}
 
 	@Override

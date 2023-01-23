@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
+import nz.net.ultraq.redhorizon.classic.shaders.ShaderConfigs
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
@@ -95,25 +96,10 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		// TODO: Load the palette shader elsewhere?
+		shader = renderer.createShader(ShaderConfigs.PALETTED_SHADER)
+
+		// TODO: Load the palette once
 		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
-		shader = renderer.createShader(
-			'PalettedSprite',
-			getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/shaders/PalettedSprite.vert.glsl').text,
-			getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/shaders/PalettedSprite.frag.glsl').text,
-			{ shader, material ->
-				shader.setUniformTexture('indexTexture', 0, material.texture)
-			},
-			{ shader, material ->
-				shader.setUniformTexture('paletteTexture', 1, paletteAsTexture)
-			},
-			{ shader, material ->
-				shader.setUniform('factionColours', faction.colours)
-			},
-			{ shader, material ->
-				shader.setUniformMatrix('model', material.transform)
-			}
-		)
 
 		spritesHorizontal = Math.min(imagesFile.numImages, renderer.maxTextureSize / imagesFile.width as int)
 		spritesVertical = Math.ceil(imagesFile.numImages / spritesHorizontal) as int
@@ -131,6 +117,8 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 			.combineImages(imagesFile.width, imagesFile.height, spritesHorizontal)
 		texture = renderer.createTexture(spriteSheetWidth, spriteSheetHeight, imagesFile.format, imagesAsSpriteSheet)
 		material = renderer.createMaterial(texture, transform)
+		material.palette = paletteAsTexture
+		material.faction = faction
 
 		parts*.init(renderer)
 		states*.init(renderer)

@@ -92,8 +92,18 @@ interface GraphicsRenderer extends EventTarget {
 		int[] indices)
 
 	/**
+	 * Create a new shader program from the given configuration, or return the
+	 * existing shader program if one has already been created from the config.
+	 *
+	 * @param config
+	 * @return
+	 */
+	Shader createShader(ShaderConfig config)
+
+	/**
 	 * Create a new shader program from a pair of vertex and fragment shader
-	 * scripts.
+	 * scripts, or return the existing shader program if one has already been
+	 * created with the given name.
 	 *
 	 * @param name
 	 * @param vertexShaderSource

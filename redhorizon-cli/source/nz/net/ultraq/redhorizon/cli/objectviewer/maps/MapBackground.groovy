@@ -71,6 +71,7 @@ class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteMaterial(material)
+		renderer.deleteMesh(mesh)
 	}
 
 	@Override

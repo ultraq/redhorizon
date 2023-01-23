@@ -21,6 +21,9 @@ import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.units.UnitData
+import nz.net.ultraq.redhorizon.classic.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
@@ -35,6 +38,7 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.json.JsonSlurper
 import java.nio.ByteBuffer
 
 /**
@@ -96,6 +100,8 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
 		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
 		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
+
+		layers << new MapRAUnits(resourceManager, mapFile['UNITS'])
 
 		def halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		def halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
@@ -212,7 +218,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	 */
 	private abstract class MapLayer implements SceneElement<MapLayer> {
 
-		protected final List<MapElement> elements = []
+		protected final List<SceneElement> elements = []
 
 		@Override
 		void accept(SceneVisitor visitor) {
@@ -289,7 +295,11 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		void init(GraphicsRenderer renderer) {
 
 			(mesh, material) = renderer.withMaterialBundler { bundler ->
-				elements*.init(bundler)
+				elements.each { element ->
+					if (element instanceof GraphicsElement) {
+						element.init(bundler)
+					}
+				}
 			}
 		}
 
@@ -412,6 +422,46 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 //				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
 //				       imageB.dimensions.minX - imageA.dimensions.minX
 //			}
+		}
+	}
+
+	/**
+	 * Thee "Units" layer of a map.
+	 */
+	private class MapRAUnits extends MapLayer {
+
+		/**
+		 * Constructor, build the unit layer from the given unit data.
+		 *
+		 * @param resourceManager
+		 * @param unitData
+		 */
+		MapRAUnits(ResourceManager resourceManager, Map<String, String> unitData) {
+
+			unitData.each { index, data ->
+				var unitLine = UnitLine.fromString(data)
+
+				// TODO: Add resource path support to the resource manager
+				var unitConfig = getResourceAsStream("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
+					.withBufferedStream { inputStream ->
+						return new JsonSlurper().parseText(inputStream.text) as UnitData
+					}
+				var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
+
+				var unit = new Vehicle(unitConfig, unitImages, palette)
+
+				// TODO: Country to faction map
+				unit.faction = switch (unitLine.faction) {
+					case "Greece" -> Faction.BLUE
+					case "USSR" -> Faction.RED
+					default -> Faction.GOLD
+				}
+
+				unit.heading = unitLine.heading
+				unit.translate(unitLine.coords.asWorldCoords())
+
+				elements << unit
+			}
 		}
 	}
 }

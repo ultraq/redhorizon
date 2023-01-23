@@ -16,4 +16,5 @@
 
 moduleName = redhorizon-classic
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.classic.extensions.BigIntegerExtensions
+extensionClasses = nz.net.ultraq.redhorizon.classic.extensions.BigIntegerExtensions,\
+                   nz.net.ultraq.redhorizon.classic.extensions.MaterialExtensions
