@@ -159,6 +159,17 @@ abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, T
 		}
 	}
 
+	/**
+	 * Update this unit's faction.
+	 *
+	 * @param newFaction
+	 */
+	void setFaction(Faction newFaction) {
+
+		faction = newFaction
+		material?.faction = newFaction
+	}
+
 	@Override
 	void setHeading(float newHeading) {
 
