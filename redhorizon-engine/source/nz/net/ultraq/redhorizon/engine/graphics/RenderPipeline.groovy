@@ -174,8 +174,8 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createMaterial(),
 			renderer.createShader(
 				'SharpUpscaling',
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.vert.glsl').text,
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.frag.glsl').text,
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.vert.glsl'),
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.frag.glsl'),
 				framebufferUniform,
 				modelUniform,
 				{ shader, material ->
@@ -193,8 +193,8 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createMaterial(),
 			renderer.createShader(
 				'Scanlines',
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.vert.glsl').text,
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.frag.glsl').text,
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.vert.glsl'),
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.frag.glsl'),
 				framebufferUniform,
 				modelUniform,
 				{ shader, material ->
@@ -212,8 +212,8 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createMaterial(),
 			renderer.createShader(
 				'Screen',
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.vert.glsl').text,
-				getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.frag.glsl').text,
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.vert.glsl'),
+				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.frag.glsl'),
 				framebufferUniform,
 				modelUniform
 			),

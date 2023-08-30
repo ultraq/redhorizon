@@ -96,8 +96,8 @@ class UnitRenderer implements GraphicsElement {
 		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
 		shader = renderer.createShader(
 			'PalettedSprite',
-			getResourceAsStream('nz/net/ultraq/redhorizon/cli/objectviewer/units/PalettedSprite.vert.glsl').text,
-			getResourceAsStream('nz/net/ultraq/redhorizon/cli/objectviewer/units/PalettedSprite.frag.glsl').text,
+			getResourceAsText('nz/net/ultraq/redhorizon/cli/objectviewer/units/PalettedSprite.vert.glsl'),
+			getResourceAsText('nz/net/ultraq/redhorizon/cli/objectviewer/units/PalettedSprite.frag.glsl'),
 			{ shader, material ->
 				shader.setUniformTexture('indexTexture', 0, material.texture)
 			},
