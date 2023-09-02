@@ -60,6 +60,7 @@ subprojects {
 		implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
 		testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 		testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
 	}
 

@@ -16,7 +16,7 @@
 
 plugins {
 	id 'maven-publish'
-	id 'com.github.johnrengelman.shadow' version '7.1.2'
+	id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/maven-publish-support.gradle'
 
