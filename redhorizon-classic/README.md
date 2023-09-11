@@ -2,7 +2,7 @@
 Red Horizon - Classic
 =====================
 
-[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-classic)](https://central.sonatype.dev/search?q=redhorizon-classic)
+[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-classic)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-classic)
 
 A module that bridges the classic C&C file formats for use with the Red Horizon
 engine.  All of the reverse engineering of the old codecs and files takes place
