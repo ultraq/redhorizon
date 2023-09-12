@@ -29,7 +29,7 @@ import groovy.transform.TupleConstructor
 /**
  * Attempt to determine the type of a mix file entry by testing it against
  * various known file formats.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
@@ -41,7 +41,7 @@ class MixEntryTester {
 
 	/**
 	 * Attempt to determine the type of file this mix entry is for.
-	 * 
+	 *
 	 * @param mixEntry
 	 * @return
 	 *   A best guess of the class to use to load the entry, or {@code null} if
@@ -58,7 +58,7 @@ class MixEntryTester {
 			logger.debug('Guessing VQA file')
 			return new MixEntryTesterResult(vqaFile, "(unknown VQA file, ID: 0x${hexId})")
 		}
-		catch (ignored) {
+		catch (AssertionError ignored) {
 		}
 
 		// Try a SHP file
@@ -67,7 +67,7 @@ class MixEntryTester {
 			logger.debug('Guessing SHP file')
 			return new MixEntryTesterResult(shpFile, "(unknown SHP file, ID: 0x${hexId})")
 		}
-		catch (ignored) {
+		catch (AssertionError ignored) {
 		}
 
 		// Try an AUD file
@@ -76,7 +76,7 @@ class MixEntryTester {
 			logger.debug('Guessing AUD file')
 			return new MixEntryTesterResult(audFile, "(unknown AUD file, ID: 0x${hexId})")
 		}
-		catch (ignored) {
+		catch (AssertionError ignored) {
 		}
 
 		logger.debug('Could not determine type')
