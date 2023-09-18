@@ -74,7 +74,7 @@ class UnitViewer extends Viewer {
 
 		def unitConfig
 		try {
-			unitConfig = getResourceAsText("nz/net/ultraq/redhorizon/cli/objectviewer/configurations/${unitId.toLowerCase()}.json")
+			unitConfig = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${unitId.toLowerCase()}.json")
 			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
 		catch (IllegalArgumentException ignored) {

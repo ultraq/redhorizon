@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.units.Infantry
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.classic.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
@@ -102,6 +103,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
 
 		layers << new MapRAUnits(resourceManager, mapFile['UNITS'])
+		layers << new MapRAInfantry(resourceManager, mapFile['INFANTRY'])
 
 		def halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		def halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
@@ -426,7 +428,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	}
 
 	/**
-	 * Thee "Units" layer of a map.
+	 * The "Units" layer of a map.
 	 */
 	private class MapRAUnits extends MapLayer {
 
@@ -461,6 +463,54 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 				unit.translate(unitLine.coords.asWorldCoords())
 
 				elements << unit
+			}
+		}
+	}
+
+	/**
+	 * The "Infantry" layer of a map.
+	 */
+	private class MapRAInfantry extends MapLayer {
+
+		/**
+		 * Constructor, build the infantry layer from the given infantry data.
+		 *
+		 * @param resourceManager
+		 * @param infantryData
+		 */
+		MapRAInfantry(ResourceManager resourceManager, Map<String, String> infantryData) {
+
+			var jsonSlurper = new JsonSlurper()
+			infantryData.each { index, data ->
+				var infantryLine = InfantryLine.fromString(data)
+
+				try {
+
+					// TODO: Add resource path support to the resource manager
+					var unitConfigJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${infantryLine.type.toLowerCase()}.json")
+					var unitConfig = jsonSlurper.parseText(unitConfigJson) as UnitData
+					var infantryImages = resourceManager.loadFile("${infantryLine.type}.shp", ShpFile)
+
+					var infantry = new Infantry(unitConfig, infantryImages, palette).tap { it ->
+
+						// TODO: Country to faction map
+						it.faction = switch (infantryLine.faction) {
+							case "Greece" -> Faction.BLUE
+							case "USSR" -> Faction.RED
+							default -> Faction.GOLD
+						}
+						it.heading = infantryLine.heading
+
+						// TODO: Sub positions within cells
+						it.translate(infantryLine.coords.asWorldCoords())
+					}
+
+					elements << infantry
+				}
+				catch (IllegalArgumentException ignored) {
+					// Ignore unknown units
+					logger.warn("Unhandled unit line encountered, line ${index}, data: ${data}")
+				}
 			}
 		}
 	}

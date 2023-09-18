@@ -1,0 +1,52 @@
+{
+	"type": "infantry",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 8
+			}
+		},
+		"states": [
+			{
+				"name": "walking",
+				"frames": 6,
+				"headings": 8
+			},
+			{
+				"name": "running",
+				"frames": 6,
+				"headings": 8
+			},
+			{
+				"name": "pouncing",
+				"frames": 14,
+				"headings": 8
+			},
+			{
+				"name": "sitting",
+				"frames": 19,
+				"headings": 1
+			},
+			{
+				"name": "dying-shot",
+				"frames": 7,
+				"headings": 1
+			},
+			{
+				"name": "dying-explode",
+				"frames": 9,
+				"headings": 1
+			},
+			{
+				"name": "dying-burning",
+				"frames": 14,
+				"headings": 1
+			},
+			{
+				"name": "dying-electrocuted",
+				"frames": 3,
+				"headings": 1
+			}
+		]
+	}
+}
