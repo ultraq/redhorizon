@@ -44,7 +44,7 @@ class Vehicle extends Unit {
 
 		var turretPart = data.shpFile.parts.turret
 		if (turretPart) {
-			parts << new UnitTurret(this, width, height, bodyPart.headings, 1, frameIndex)
+			parts << new UnitTurret(this, width, height, bodyPart.headings, 1, frameIndex, 1)
 			frameIndex += bodyPart.headings
 		}
 

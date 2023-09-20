@@ -51,7 +51,7 @@ class UnitBody extends UnitBodyBase {
 	 */
 	UnitBody(Unit unit, int width, int height, int headings, int frames, int frameOffset) {
 
-		super(unit, width, height, headings, frames, frameOffset)
+		super(unit, width, height, 'body-default', headings, frames, frameOffset)
 	}
 
 	@Override

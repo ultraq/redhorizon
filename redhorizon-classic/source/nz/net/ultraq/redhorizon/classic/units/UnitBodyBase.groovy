@@ -50,15 +50,16 @@ abstract class UnitBodyBase extends UnitPart implements Rotatable {
 	 * @param unit
 	 * @param width
 	 * @param height
+	 * @param stateName
 	 * @param headings
 	 * @param frames
 	 * @param frameOffset
 	 */
-	UnitBodyBase(Unit unit, int width, int height, int headings, int frames, int frameOffset) {
+	UnitBodyBase(Unit unit, int width, int height, String stateName, int headings, int frames, int frameOffset) {
 
 		super(unit, width, height)
 
-		unit.states << new UnitState(unit, 'default', headings, frames, frameOffset)
+		unit.states << new UnitState(unit, stateName, headings, frames, frameOffset)
 	}
 
 	@Override

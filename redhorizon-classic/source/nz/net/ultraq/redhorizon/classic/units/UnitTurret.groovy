@@ -16,13 +16,35 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
-import groovy.transform.InheritConstructors
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 
 /**
  * An independently movable turret.
  */
-@InheritConstructors
-class UnitTurret extends UnitBody {
+class UnitTurret extends UnitBodyBase {
 
+	private final int partOffset
 	final String type = 'turret'
+
+	/**
+	 * Constructor, build a new main unit turret.
+	 *
+	 * @param unit
+	 * @param width
+	 * @param height
+	 * @param headings
+	 * @param frames
+	 * @param frameOffset
+	 */
+	UnitTurret(Unit unit, int width, int height, int headings, int frames, int frameOffset, int partOffset) {
+
+		super(unit, width, height, 'turret-default', headings, frames, frameOffset)
+		this.partOffset = partOffset
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+		unit.states[unit.stateIndex + partOffset].render(renderer)
+	}
 }
