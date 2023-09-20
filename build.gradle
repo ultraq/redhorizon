@@ -42,13 +42,13 @@ subprojects {
 //	}
 
 	ext {
-		groovyVersion = '4.0.7'
-		imguiVersion = '1.86.4'
+		groovyVersion = '4.0.14'
+		imguiVersion = '1.86.10'
 		jomlVersion = '1.10.5'
 		jomlPrimitivesVersion = '1.10.0'
-		logbackVersion = '1.4.5'
-		lwjglVersion = '3.3.1'
-		slf4jVersion = '2.0.6'
+		logbackVersion = '1.4.11'
+		lwjglVersion = '3.3.2'
+		slf4jVersion = '2.0.9'
 	}
 	ext.targetPlatform = targetPlatform
 
