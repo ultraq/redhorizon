@@ -25,6 +25,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import static nz.net.ultraq.redhorizon.engine.graphics.RenderPipeline.SHADER_NAME_SCANLINES
+import static nz.net.ultraq.redhorizon.engine.graphics.RenderPipeline.SHADER_NAME_SHARPUPSCALING
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFontConfig
@@ -157,11 +159,11 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 				}
 				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
 					shaderScanlines = !shaderScanlines
-					trigger(new ChangeEvent('Scanlines', shaderScanlines))
+					trigger(new ChangeEvent(SHADER_NAME_SCANLINES, shaderScanlines))
 				}
 				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
 					shaderSharpUpscaling = !shaderSharpUpscaling
-					trigger(new ChangeEvent('SharpUpscaling', shaderSharpUpscaling))
+					trigger(new ChangeEvent(SHADER_NAME_SHARPUPSCALING, shaderSharpUpscaling))
 				}
 				ImGui.endMenu()
 			}
@@ -211,7 +213,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		}
 
 		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(((OpenGLTexture)sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
+		ImGui.image(((OpenGLTexture) sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
 			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
 		ImGui.end()

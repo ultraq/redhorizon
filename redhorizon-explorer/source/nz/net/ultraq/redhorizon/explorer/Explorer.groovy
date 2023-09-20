@@ -187,7 +187,6 @@ class Explorer extends Application {
 
 		def mixEntryTester = new MixEntryTester(mixFile)
 		mixFile.entries.each { entry ->
-//			println("0x${Integer.toHexString(entry.id)}")
 
 			// Perform a lookup to see if we know about this file already, getting both a name and class
 			def matchingData = mixDatabase.find(entry.id)
@@ -252,14 +251,16 @@ class Explorer extends Application {
 			default -> logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
 		}
 
-		var media = selectedLoader.load()
-		if (media instanceof Playable) {
-			media.play()
-		}
+		if (selectedLoader) {
+			var media = selectedLoader.load()
+			if (media instanceof Playable) {
+				media.play()
+			}
 
-		// TODO: Display selected file info elsewhere?  Currently these are long
-		//       lines of text 🤔
-//		logger.info('{}', selectedFileClass)
+			// TODO: Display selected file info elsewhere?  Currently these are long
+			//       lines of text 🤔
+//			logger.info('{}', selectedFileClass)
+		}
 	}
 
 	/**

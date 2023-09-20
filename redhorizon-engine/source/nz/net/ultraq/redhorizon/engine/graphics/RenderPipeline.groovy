@@ -50,6 +50,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class RenderPipeline implements AutoCloseable {
 
+	public static final String SHADER_NAME_SHARPUPSCALING = 'SharpUpscaling'
+	public static final String SHADER_NAME_SCANLINES = 'Scanlines'
+
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 
 	final GraphicsRenderer renderer
@@ -117,7 +120,7 @@ class RenderPipeline implements AutoCloseable {
 		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
 			def postProcessingRenderPass = renderPasses.find { renderPass ->
-				return renderPass instanceof PostProcessingRenderPass && renderPass.material.shader.name == event.name
+				return renderPass instanceof PostProcessingRenderPass && renderPass.shader.name == event.name
 			}
 			postProcessingRenderPass.enabled = event.value
 		}
@@ -173,7 +176,7 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(
-				'SharpUpscaling',
+				SHADER_NAME_SHARPUPSCALING,
 				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.vert.glsl'),
 				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.frag.glsl'),
 				framebufferUniform,
@@ -192,7 +195,7 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(
-				'Scanlines',
+				SHADER_NAME_SCANLINES,
 				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.vert.glsl'),
 				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.frag.glsl'),
 				framebufferUniform,

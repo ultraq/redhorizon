@@ -15,6 +15,7 @@
  */
 
 package nz.net.ultraq.redhorizon.engine.graphics
+
 /**
  * The configuration for a shader program, can be used to build shaders with the
  * renderer.
