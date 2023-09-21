@@ -18,6 +18,8 @@ plugins {
 	id 'application'
 }
 
+def picocliVersion = '4.7.5'
+
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
@@ -27,17 +29,22 @@ dependencies {
 	implementation project(':redhorizon-scenarioeditor')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
-	implementation 'info.picocli:picocli:4.7.0'
+	implementation "info.picocli:picocli:${picocliVersion}"
 	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation 'org.lwjgl:lwjgl-glfw'
+	annotationProcessor "info.picocli:picocli-codegen:${picocliVersion}"
 }
 
 processResources {
 	filesMatching('**/cli.properties') {
 		expand version: version
 	}
+}
+
+compileJava {
+	options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
 
 def args = [
