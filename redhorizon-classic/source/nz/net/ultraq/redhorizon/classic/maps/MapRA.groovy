@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
+import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
@@ -30,7 +31,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
-import nz.net.ultraq.redhorizon.filetypes.MapFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector2f
@@ -75,34 +75,33 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	 * @param resourceManager
 	 * @param mapFile
 	 */
-	MapRA(ResourceManager resourceManager, IniFile mapFile) {
+	MapRA(ResourceManager resourceManager, MapFile mapFile) {
 
-		name = mapFile['Basic']['Name']
+		name = mapFile.name
 
-		def mapSection = mapFile['Map']
-		def theaterString = mapSection['Theater']
-		theater = Theater.valueOf(theaterString)
+		var mapSection = mapFile.mapSection
+		theater = Theater.valueOf(mapSection.theater())
 		palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
-		def mapXY = new Vector2f(mapSection['X'] as int, mapSection['Y'] as int)
-		def mapWH = new Vector2f(mapXY).add(mapSection['Width'] as int, mapSection['Height'] as int)
+		var mapXY = new Vector2f(mapSection.x(), mapSection.y())
+		var mapWH = new Vector2f(mapXY).add(mapSection.width(), mapSection.height())
 		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
 
-		def waypoints = mapFile['Waypoints']
-		def waypoint98 = waypoints['98'] as int
+		var waypoints = mapFile.waypointsData
+		var waypoint98 = waypoints['98']
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		tileSet = new TileSet(palette)
 
 		// Build the various layers
 		layers << new BackgroundLayer(resourceManager)
-		layers << new MapRAMapPack(resourceManager, mapDataToBytes(mapFile['MapPack'], 6))
-		layers << new MapRAOverlayPack(resourceManager, mapDataToBytes(mapFile['OverlayPack'], 2))
-		layers << new MapRATerrain(resourceManager, mapFile['TERRAIN'])
+		layers << new MapRAMapPack(resourceManager, mapFile.mapPackData)
+		layers << new MapRAOverlayPack(resourceManager, mapFile.overlayPackData)
+		layers << new MapRATerrain(resourceManager, mapFile.terrainData)
 
-		layers << new MapRAUnits(resourceManager, mapFile['UNITS'])
-		layers << new MapRAInfantry(resourceManager, mapFile['INFANTRY'])
+		layers << new MapRAUnits(resourceManager, mapFile.unitsData)
+		layers << new MapRAInfantry(resourceManager, mapFile.infantryData)
 
 		def halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		def halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
@@ -129,32 +128,6 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	void init(GraphicsRenderer renderer) {
 
 		tileSet.init(renderer)
-	}
-
-	/**
-	 * Converts a map's character data into bytes that represent the tiles used
-	 * throughout the map.
-	 *
-	 * @param data
-	 *   A map section containing the character data to decode.
-	 * @param chunks
-	 *   Number of chunks to allocate the pack data during the decoding process.
-	 * @return The converted map data.
-	 */
-	private static ByteBuffer mapDataToBytes(Map<String, String> data, int chunks) {
-
-		// Turn the section into 8-bit chars
-		def sourceBytes = ByteBuffer.allocateNative(data.size() * 70) // Lines are only ever 70 characters long
-		(1..data.size()).each { i ->
-			def line = data[i.toString()]
-			line.chars.each { c ->
-				sourceBytes.put(c as byte)
-			}
-		}
-		sourceBytes.flip()
-
-		// Decode section bytes
-		return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
 	}
 
 	@Override
@@ -437,10 +410,9 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		 * @param resourceManager
 		 * @param unitData
 		 */
-		MapRAUnits(ResourceManager resourceManager, Map<String, String> unitData) {
+		MapRAUnits(ResourceManager resourceManager, List<UnitLine> unitData) {
 
-			unitData.each { index, data ->
-				var unitLine = UnitLine.fromString(data)
+			unitData.each { unitLine ->
 
 				// TODO: Add resource path support to the resource manager
 				var unitConfig = getResourceAsStream("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
@@ -477,12 +449,10 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		 * @param resourceManager
 		 * @param infantryData
 		 */
-		MapRAInfantry(ResourceManager resourceManager, Map<String, String> infantryData) {
+		MapRAInfantry(ResourceManager resourceManager, List<InfantryLine> infantryData) {
 
 			var jsonSlurper = new JsonSlurper()
-			infantryData.each { index, data ->
-				var infantryLine = InfantryLine.fromString(data)
-
+			infantryData.eachWithIndex { infantryLine, index ->
 				try {
 
 					// TODO: Add resource path support to the resource manager
