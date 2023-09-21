@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.maps
+package nz.net.ultraq.redhorizon.classic.maps
 
 import groovy.transform.TupleConstructor
 
 /**
  * All of the overlay tiles and their matching name and hex values in the
  * scenario files.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor
 enum MapRAOverlayPackTile {
 
+	// @formatter:off
 	// Walls
 	WALL_SANDBAGS    ('SBAG', 0x00, true, false),
 	WALL_CHAINLINK   ('CYCL', 0x01, true, false),
@@ -60,6 +61,7 @@ enum MapRAOverlayPackTile {
 
 	// Misc
 	FLAGHOLDER ('FPLS', 0x14, false, false)
+	// @formatter:on
 
 	// Tile attributes
 	final String name

@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
-import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapLines
-import nz.net.ultraq.redhorizon.cli.objectviewer.maps.MapRA
+import nz.net.ultraq.redhorizon.classic.maps.MapLines
+import nz.net.ultraq.redhorizon.classic.maps.MapRA
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyControl

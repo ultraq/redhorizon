@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,65 +14,78 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.objectviewer.maps
+package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.primitives.Rectanglef
 
+import java.nio.ByteBuffer
+
 /**
- * The graphical form of a map tile.
+ * A repeated texture stretched over the entirety of the possible map area.
  *
  * @author Emanuel Rabina
  */
-class MapElement implements GraphicsElement, SceneElement<MapElement> {
+class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
 
-	final TileSet tileSet
-	final ImagesFile tileFile
-	final int frame
+	final int width
+	final int height
+	final ColourFormat format
+	private ByteBuffer imageData
+	final float repeatX
+	final float repeatY
 
 	private Mesh mesh
 	private Material material
 
 	/**
-	 * Constructor, create a  map element from a map sprite, set to the given
-	 * position.
+	 * Constructor, set the image and area the background will be stretched over.
 	 *
-	 * @param tileSet
-	 * @param tileFile
-	 * @param frame
+	 * @param imageWidth
+	 * @param imageHeight
+	 * @param imageData
+	 * @param repeatX
+	 * @param repeatY
+	 * @param palette
 	 */
-	MapElement(TileSet tileSet, ImagesFile tileFile, int frame) {
+	MapBackground(int imageWidth, int imageHeight, ByteBuffer imageData, float repeatX, float repeatY, Palette palette) {
 
-		this.tileSet = tileSet
-		this.tileFile = tileFile
-		this.frame = frame
+		this.width = imageWidth
+		this.height = imageHeight
+		this.format = palette.format
+		this.imageData = imageData.applyPalette(palette).flipVertical(width, height, format)
+		this.repeatX = repeatX
+		this.repeatY = repeatY
 
-		this.bounds.set(0, 0, tileFile.width, tileFile.height)
+		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteMaterial(material)
+		renderer.deleteMesh(mesh)
 	}
 
 	@Override
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(
-			surface: new Rectanglef(0, 0, tileFile.width, tileFile.height),
-			textureUVs: tileSet.getCoordinates(tileFile, frame)
+			surface: new Rectanglef(0, 0, width * repeatX as float, height * repeatY as float),
+			textureUVs: new Rectanglef(0, 0, repeatX, repeatY)
 		)
 		material = renderer.createMaterial(
-			texture: tileSet.texture,
+			texture: renderer.createTexture(width, height, format, imageData),
 			transform: transform
 		)
+		imageData = null
 	}
 
 	@Override

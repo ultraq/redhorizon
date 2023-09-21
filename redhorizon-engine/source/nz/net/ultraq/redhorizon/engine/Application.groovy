@@ -64,7 +64,8 @@ abstract class Application {
 	 * @param audioConfig
 	 * @param graphicsConfig
 	 */
-	protected Application(String windowTitle, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
+	Application(String windowTitle, AudioConfiguration audioConfig = new AudioConfiguration(),
+		GraphicsConfiguration graphicsConfig = new GraphicsConfiguration()) {
 
 		this.windowTitle = windowTitle ? "Red Horizon - ${windowTitle}" : null
 		this.audioConfig = audioConfig
