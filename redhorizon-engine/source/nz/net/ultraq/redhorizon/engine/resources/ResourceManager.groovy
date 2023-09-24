@@ -79,9 +79,7 @@ class ResourceManager implements Closeable {
 			if (file.file) {
 				def fileName = file.name
 				if (fileName == resourceName) {
-					return file.withInputStream { stream ->
-						return targetType.newInstance(stream)
-					}
+					return file.withInputStream { targetType.newInstance(it) }
 				}
 				def fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
 				if (knownArchiveTypes.containsKey(fileExtension)) {
@@ -91,9 +89,7 @@ class ResourceManager implements Closeable {
 					}
 					def entry = archive.getEntry(resourceName)
 					if (entry) {
-						return archive.getEntryData(entry).withBufferedStream { bis ->
-							return targetType.newInstance(bis)
-						}
+						return archive.getEntryData(entry).withBufferedStream { targetType.newInstance(it) }
 					}
 				}
 				return null

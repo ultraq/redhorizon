@@ -89,7 +89,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
 
 		var waypoints = mapFile.waypointsData
-		var waypoint98 = waypoints['98']
+		var waypoint98 = waypoints[98]
 		initialPosition = waypoint98.asCellCoords().asWorldCoords()
 
 		tileSet = new TileSet(palette)
@@ -412,28 +412,33 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		 */
 		MapRAUnits(ResourceManager resourceManager, List<UnitLine> unitData) {
 
-			unitData.each { unitLine ->
+			unitData.eachWithIndex { unitLine, index ->
+				try {
+					// TODO: Add resource path support to the resource manager
+					var unitConfig = getResourceAsStream("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
+						.withBufferedStream { inputStream ->
+							return new JsonSlurper().parseText(inputStream.text) as UnitData
+						}
+					var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
 
-				// TODO: Add resource path support to the resource manager
-				var unitConfig = getResourceAsStream("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
-					.withBufferedStream { inputStream ->
-						return new JsonSlurper().parseText(inputStream.text) as UnitData
+					var unit = new Vehicle(unitConfig, unitImages, palette)
+
+					// TODO: Country to faction map
+					unit.faction = switch (unitLine.faction) {
+						case "Greece" -> Faction.BLUE
+						case "USSR" -> Faction.RED
+						default -> Faction.GOLD
 					}
-				var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
 
-				var unit = new Vehicle(unitConfig, unitImages, palette)
+					unit.heading = unitLine.heading
+					unit.translate(unitLine.coords.asWorldCoords())
 
-				// TODO: Country to faction map
-				unit.faction = switch (unitLine.faction) {
-					case "Greece" -> Faction.BLUE
-					case "USSR" -> Faction.RED
-					default -> Faction.GOLD
+					elements << unit
 				}
-
-				unit.heading = unitLine.heading
-				unit.translate(unitLine.coords.asWorldCoords())
-
-				elements << unit
+				catch (IllegalArgumentException ignored) {
+					// Ignore unknown units
+					logger.warn("Unhandled unit line encountered, line ${index}, type: ${unitLine.type}")
+				}
 			}
 		}
 	}
@@ -454,7 +459,6 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 			var jsonSlurper = new JsonSlurper()
 			infantryData.eachWithIndex { infantryLine, index ->
 				try {
-
 					// TODO: Add resource path support to the resource manager
 					var unitConfigJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${infantryLine.type.toLowerCase()}.json")
 					var unitConfig = jsonSlurper.parseText(unitConfigJson) as UnitData
@@ -478,7 +482,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 				}
 				catch (IllegalArgumentException ignored) {
 					// Ignore unknown units
-					logger.warn("Unhandled unit line encountered, line ${index}, data: ${data}")
+					logger.warn("Unhandled unit line encountered, line ${index}, type: ${infantryLine.type}")
 				}
 			}
 		}

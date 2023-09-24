@@ -113,7 +113,7 @@ class IniFile implements MapFile {
 	@Override
 	ByteBuffer getOverlayPackData() {
 
-		return mapDataToBytes(this['OverylayPack'], 2)
+		return mapDataToBytes(this['OverlayPack'], 2)
 	}
 
 	@Override

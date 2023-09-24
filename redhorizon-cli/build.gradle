@@ -26,10 +26,12 @@ dependencies {
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-filetypes')
+	implementation project(':redhorizon-sandbox')
 	implementation project(':redhorizon-scenarioeditor')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "info.picocli:picocli:${picocliVersion}"
+	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation 'org.lwjgl:lwjgl-glfw'

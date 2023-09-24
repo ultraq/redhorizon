@@ -27,7 +27,7 @@ import picocli.CommandLine.IVersionProvider
 
 /**
  * The top-level CLI program, hosting all the other programs as subcommands.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -43,9 +43,10 @@ import picocli.CommandLine.IVersionProvider
 	subcommands = [
 		ConverterCli,
 		ExplorerCli,
-	  MediaPlayerCli,
+		MediaPlayerCli,
 		MixReaderCli,
-		ObjectViewerCli
+		ObjectViewerCli,
+		SandboxCli
 	],
 	versionProvider = VersionProvider
 )
@@ -63,14 +64,14 @@ class RedHorizonCli {
 				def cliProperties = new Properties()
 				cliProperties.load(reader)
 				def version = cliProperties.getProperty('version')
-				return new String[] { version == '${version}' ? '(development)' : version }
+				return new String[]{ version == '${version}' ? '(development)' : version }
 			}
 		}
 	}
 
 	/**
 	 * Bootstrap the application using Picocli.
-	 * 
+	 *
 	 * @param args
 	 */
 	static void main(String[] args) {
