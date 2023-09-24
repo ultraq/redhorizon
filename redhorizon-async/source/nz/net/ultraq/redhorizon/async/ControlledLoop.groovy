@@ -63,8 +63,8 @@ class ControlledLoop implements RunnableWorker {
 					loop()
 				}
 			}
-			catch (Exception ex) {
-				logger.error("An error occurred in a controlled loop \"${Thread.currentThread().name}\"", ex)
+			catch (Throwable ex) {
+				logger.error("An error occurred in controlled loop \"${Thread.currentThread().name}\".  Exiting...", ex)
 			}
 		}, null)
 	}

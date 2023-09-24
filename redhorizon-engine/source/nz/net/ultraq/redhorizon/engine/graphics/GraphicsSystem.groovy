@@ -172,23 +172,17 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 								// Rendering loop
 								logger.debug('Graphics system in render loop...')
 								systemLoop = new ControlledLoop({ !window.shouldClose() }, { ->
-									try {
-										if (shouldToggleFullScreen) {
-											window.toggleFullScreen()
-											shouldToggleFullScreen = false
-										}
-										if (shouldToggleVsync) {
-											window.toggleVsync()
-											shouldToggleVsync = false
-										}
-										pipeline.render()
-										window.swapBuffers()
-										window.pollEvents()
+									if (shouldToggleFullScreen) {
+										window.toggleFullScreen()
+										shouldToggleFullScreen = false
 									}
-									catch (Throwable ex) {
-										logger.error('Exiting render loop due to error', ex)
-										throw ex
+									if (shouldToggleVsync) {
+										window.toggleVsync()
+										shouldToggleVsync = false
 									}
+									pipeline.render()
+									window.swapBuffers()
+									window.pollEvents()
 								})
 								systemLoop.run()
 

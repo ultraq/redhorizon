@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,7 +75,7 @@ class RateLimitedLoop implements RunnableWorker {
 						// (all but the remaining 5ms of the time because sleep is a minimum,
 						// it can take a bit to calculate all of this, and to 'wake up')
 						if (diffTimeNanos > 5000000) {
-							Thread.sleep((long)(diffTimeNanos / 1000000 - 5))
+							Thread.sleep((long) (diffTimeNanos / 1000000 - 5))
 						}
 						// Go into a spin-lock for the remaining time
 						while (System.nanoTime() - lastTimeNanos < maxRunTimeNanos) {
@@ -86,8 +86,8 @@ class RateLimitedLoop implements RunnableWorker {
 					lastTimeNanos = System.nanoTime()
 				}
 			}
-			catch (Exception ex) {
-				logger.error("An error occurred in a rate-limited loop \"${Thread.currentThread().name}\"", ex)
+			catch (Throwable ex) {
+				logger.error("An error occurred in rate-limited loop \"${Thread.currentThread().name}\".  Exiting...", ex)
 			}
 		}, null)
 	}
