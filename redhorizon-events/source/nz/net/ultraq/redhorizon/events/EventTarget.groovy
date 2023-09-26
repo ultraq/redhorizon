@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.events
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -35,8 +36,8 @@ trait EventTarget {
 
 	@Lazy
 	private final ExecutorService executorService = { Executors.newSingleThreadExecutor() }()
-	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners =
-		new CopyOnWriteArrayList<>()
+	private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>()
+	private final List<Tuple2<Class<? extends Event>, EventListener<? extends Event>>> eventListeners = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Register an event listener on this event target.
@@ -71,37 +72,36 @@ trait EventTarget {
 	}
 
 	/**
-	 * Fire the event, invoking all listeners registered for that event.
+	 * Fire an event, invoking all listeners registered for that event.
+	 * <p>
+	 * Events will be processed in a separate thread, and in a FIFO manner,
+	 * ensuring that this method won't block while it waits on event handlers, and
+	 * to allow some kind of predictability in the way/order events are processed.
+	 * Exceptions that arise from any event listeners will be logged but not
+	 * impact other listeners from running.
 	 *
 	 * @param event
-	 * @param useSeparateThread
-	 *   Set to {@code true} to have this event handled in a different thread.
 	 * @return This object.
 	 */
-	public <E extends Event> void trigger(E event, boolean useSeparateThread = false) {
+	public <E extends Event> void trigger(E event) {
 
-		def eventHandler = { ->
+		eventQueue.add(event)
+
+		executorService.execute { ->
+			Thread.currentThread().name = "Event handler for ${this.class.simpleName}"
+
+			var nextEvent = eventQueue.remove()
 			eventListeners.each { tuple ->
 				def (eventClass, listener) = tuple
-				if (eventClass.isInstance(event)) {
+				if (eventClass.isInstance(nextEvent)) {
 					try {
-						listener.handleEvent(event)
+						listener.handleEvent(nextEvent)
 					}
 					catch (Exception ex) {
-						logger.error("An error occurred while processing ${event.class.simpleName} events on ${this.class.simpleName}", ex)
+						logger.error("An error occurred while processing ${nextEvent.class.simpleName} events on ${this.class.simpleName}", ex)
 					}
 				}
 			}
-		}
-
-		if (useSeparateThread) {
-			executorService.execute { ->
-				Thread.currentThread().name = 'Non-blocking event execution thread'
-				eventHandler()
-			}
-		}
-		else {
-			eventHandler()
 		}
 	}
 }
