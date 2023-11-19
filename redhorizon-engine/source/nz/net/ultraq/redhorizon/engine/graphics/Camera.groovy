@@ -128,6 +128,10 @@ abstract class Camera implements AutoCloseable {
 
 	/**
 	 * Update the camera's matrices before rendering.
+	 *
+	 * @return
+	 * {@code true} if the camera had to perform operations because it had been
+	 *   moved.
 	 */
-	abstract void update()
+	abstract boolean update()
 }

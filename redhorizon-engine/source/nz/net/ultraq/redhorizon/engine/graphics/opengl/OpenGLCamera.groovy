@@ -61,7 +61,7 @@ class OpenGLCamera extends Camera {
 	}
 
 	@Override
-	void update() {
+	boolean update() {
 
 		if (moved) {
 			stackPush().withCloseable { stack ->
@@ -69,6 +69,8 @@ class OpenGLCamera extends Camera {
 				glBufferSubData(GL_UNIFORM_BUFFER, Matrix4f.BYTES, view.get(stack.mallocFloat(Matrix4f.FLOATS)))
 			}
 			moved = false
+			return true
 		}
+		return false
 	}
 }

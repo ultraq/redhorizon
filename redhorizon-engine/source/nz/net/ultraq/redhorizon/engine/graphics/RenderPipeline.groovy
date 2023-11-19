@@ -60,17 +60,7 @@ class RenderPipeline implements AutoCloseable {
 	final Scene scene
 	final Camera camera
 
-	private Mesh fullScreenQuad
-
-	// For object lifecycles
-	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
-	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
-
-	// For object culling
-	private final List<GraphicsElement> visibleElements = []
-	private final Matrix4f lastCameraView = new Matrix4f()
-	private final AtomicBoolean sceneChanged = new AtomicBoolean(true)
-
+	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
 	private final List<OverlayRenderPass> overlayPasses = []
 
@@ -245,10 +235,10 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		imGuiLayer.frame { ->
 			renderer.clear()
-			camera.update()
+			var cameraMoved = camera.update()
 
 			// Perform all rendering passes
-			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
+			def sceneResult = renderPasses.inject(cameraMoved) { lastResult, renderPass ->
 				if (renderPass.enabled) {
 					renderer.setRenderTarget(renderPass.framebuffer)
 					renderer.clear()
@@ -273,12 +263,20 @@ class RenderPipeline implements AutoCloseable {
 	 * The render pass for drawing the scene to a framebuffer at the rendering
 	 * resolution.
 	 */
-	private class SceneRenderPass implements RenderPass<Object> {
+	private class SceneRenderPass implements RenderPass<Boolean> {
 
 		final Scene scene
 		final Set<GraphicsElement> initialized = new HashSet<>()
 		final Framebuffer framebuffer
 		final boolean enabled = true
+
+		// For object lifecycles
+		private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
+		private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+
+		// For object culling
+		private final List<GraphicsElement> visibleElements = []
+		private final AtomicBoolean sceneChanged = new AtomicBoolean(true)
 
 		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
 
@@ -306,7 +304,7 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		@Override
-		void render(GraphicsRenderer renderer, Object nothing) {
+		void render(GraphicsRenderer renderer, Boolean cameraMoved) {
 
 			// Initialize or delete objects which have been added/removed to/from the scene
 			if (addedElements) {
@@ -335,10 +333,9 @@ class RenderPipeline implements AutoCloseable {
 
 			// Reduce the list of renderable items to those just visible in the scene
 			averageNanos('objectCulling', 1f, logger) { ->
-				def currentCameraView = camera.view
-				if (sceneChanged.get() || !currentCameraView.equals(lastCameraView)) {
+				if (sceneChanged.get() || cameraMoved) {
 					visibleElements.clear()
-					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
+					def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 					scene.accept { element ->
 						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds) &&
 							initialized.contains(element)) {
@@ -346,7 +343,6 @@ class RenderPipeline implements AutoCloseable {
 						}
 					}
 					sceneChanged.compareAndSet(true, false)
-					lastCameraView.set(currentCameraView)
 				}
 			}
 
