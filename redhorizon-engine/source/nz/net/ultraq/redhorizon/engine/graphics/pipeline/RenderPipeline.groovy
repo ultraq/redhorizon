@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.Camera
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
@@ -48,9 +58,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @author Emanuel Rabina
  */
 class RenderPipeline implements AutoCloseable {
-
-	public static final String SHADER_NAME_SHARPUPSCALING = 'SharpUpscaling'
-	public static final String SHADER_NAME_SCANLINES = 'Scanlines'
 
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 
@@ -164,17 +171,14 @@ class RenderPipeline implements AutoCloseable {
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
-			renderer.createShader(
-				SHADER_NAME_SHARPUPSCALING,
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.vert.glsl'),
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/SharpUpscaling.frag.glsl'),
+			renderer.createShader(new SharpUpscalingShader(
 				framebufferUniform,
 				modelUniform,
 				{ shader, material ->
 					shader.setUniform('textureSourceSize', window.renderResolution as float[])
 				},
 				textureTargetSizeUniform
-			),
+			)),
 			true
 		)
 		renderPasses << sharpUpscalingPostProcessingRenderPass
@@ -183,10 +187,7 @@ class RenderPipeline implements AutoCloseable {
 		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
-			renderer.createShader(
-				SHADER_NAME_SCANLINES,
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.vert.glsl'),
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Scanlines.frag.glsl'),
+			renderer.createShader(new ScanlinesShader(
 				framebufferUniform,
 				modelUniform,
 				{ shader, material ->
@@ -194,7 +195,7 @@ class RenderPipeline implements AutoCloseable {
 					shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
 				},
 				textureTargetSizeUniform
-			),
+			)),
 			config.scanlines
 		)
 		renderPasses << scanlinePostProcessingRenderPass
@@ -202,13 +203,7 @@ class RenderPipeline implements AutoCloseable {
 		// Final pass to emit the result to the screen
 		var screenRenderPass = new ScreenRenderPass(
 			renderer.createMaterial(),
-			renderer.createShader(
-				'Screen',
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.vert.glsl'),
-				getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Screen.frag.glsl'),
-				framebufferUniform,
-				modelUniform
-			),
+			renderer.createShader(new ScreenShader(framebufferUniform, modelUniform)),
 			!config.startWithChrome,
 			window
 		)

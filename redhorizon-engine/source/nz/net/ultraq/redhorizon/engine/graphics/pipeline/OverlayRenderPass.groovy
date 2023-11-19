@@ -14,37 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.pipeline
+
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Switch
 
 /**
- * A single rendering pass with a specific framebuffer as the rendering target.
+ * A rendering pass for drawing overlay content to the game viewport.
  *
- * @param <T>
- *   The expected type of input data from a prior rendering pass.
  * @author Emanuel Rabina
  */
-interface RenderPass<T> extends Switch {
+interface OverlayRenderPass extends Switch {
 
 	/**
-	 * Perform any cleanup for this render pass.
+	 * Render the overlay.
 	 *
 	 * @param renderer
+	 * @param sceneFramebufferResult
 	 */
-	void delete(GraphicsRenderer renderer)
-
-	/**
-	 * Return the target framebuffer for this rendering pass.
-	 *
-	 * @return
-	 */
-	Framebuffer getFramebuffer()
-
-	/**
-	 * Perform the render pass, using the expected result of any previous render
-	 * pass.
-	 *
-	 * @param renderer
-	 * @param previous
-	 */
-	void render(GraphicsRenderer renderer, T previous)
+	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
 }

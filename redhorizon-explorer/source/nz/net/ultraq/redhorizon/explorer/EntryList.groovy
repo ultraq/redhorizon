@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
@@ -26,20 +26,22 @@ import imgui.type.ImBoolean
 import static imgui.flag.ImGuiCond.FirstUseEver
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 
-import groovy.transform.TupleConstructor
-
 /**
  * Renders the file/entry list window for the explorer application.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = ['entries'])
 class EntryList implements EventTarget, OverlayRenderPass {
 
-	boolean enabled = true
 	final List<Entry> entries
 
 	private Entry selectedEntry
+
+	EntryList(List<Entry> entries) {
+
+		this.entries = entries
+		this.enabled = true
+	}
 
 	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneResult) {

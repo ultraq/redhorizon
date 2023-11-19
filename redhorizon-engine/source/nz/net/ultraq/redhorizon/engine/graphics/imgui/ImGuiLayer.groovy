@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,11 +22,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ScanlinesShader
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import static nz.net.ultraq.redhorizon.engine.graphics.RenderPipeline.SHADER_NAME_SCANLINES
-import static nz.net.ultraq.redhorizon.engine.graphics.RenderPipeline.SHADER_NAME_SHARPUPSCALING
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFontConfig
@@ -159,11 +159,11 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 				}
 				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
 					shaderScanlines = !shaderScanlines
-					trigger(new ChangeEvent(SHADER_NAME_SCANLINES, shaderScanlines))
+					trigger(new ChangeEvent(ScanlinesShader.NAME, shaderScanlines))
 				}
 				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
 					shaderSharpUpscaling = !shaderSharpUpscaling
-					trigger(new ChangeEvent(SHADER_NAME_SHARPUPSCALING, shaderSharpUpscaling))
+					trigger(new ChangeEvent(SharpUpscalingShader.NAME, shaderSharpUpscaling))
 				}
 				ImGui.endMenu()
 			}

@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.input.ControlAddedEvent
 import nz.net.ultraq.redhorizon.engine.input.ControlRemovedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream

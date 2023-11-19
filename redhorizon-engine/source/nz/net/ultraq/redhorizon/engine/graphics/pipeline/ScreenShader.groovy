@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.pipeline
+
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
- * A rendering pass for drawing overlay content to the game viewport.
+ * Configuration for the Screen shader.
  *
  * @author Emanuel Rabina
  */
-interface OverlayRenderPass extends Switch {
+class ScreenShader extends ShaderConfig {
 
 	/**
-	 * Render the overlay.
-	 *
-	 * @param renderer
-	 * @param sceneFramebufferResult
+	 * Constructor, create the screen shader with the given uniforms.
 	 */
-	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
+	ScreenShader(Uniform... uniforms) {
+
+		super(
+			'Screen',
+			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
+			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
+			uniforms)
+	}
 }
