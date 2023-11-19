@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-abstract class Camera implements AutoCloseable {
+abstract class Camera implements AutoCloseable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
@@ -76,6 +77,7 @@ abstract class Camera implements AutoCloseable {
 
 		view.translate(view.origin(new Vector3f()).sub(x, y, z))
 		moved = true
+		trigger(new CameraMovedEvent())
 		return this
 	}
 
@@ -89,6 +91,7 @@ abstract class Camera implements AutoCloseable {
 		def scale = view.getScale(new Vector3f())
 		view.scaleLocal(1 / scale.x as float, 1 / scale.y as float, 1)
 		moved = true
+		trigger(new CameraMovedEvent())
 		return this
 	}
 
@@ -107,6 +110,7 @@ abstract class Camera implements AutoCloseable {
 
 		view.scaleLocal(diff, diff, 1)
 		moved = true
+		trigger(new CameraMovedEvent())
 		return this
 	}
 
@@ -123,6 +127,7 @@ abstract class Camera implements AutoCloseable {
 		def scale = view.getScale(new Vector3f())
 		view.translate(x / scale.x as float, y / scale.y as float, z)
 		moved = true
+		trigger(new CameraMovedEvent())
 		return this
 	}
 

@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,8 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * A render pipeline contains all of the configured rendering passes and
@@ -57,40 +58,20 @@ class RenderPipeline implements AutoCloseable {
 
 	final GraphicsRenderer renderer
 	final ImGuiLayer imGuiLayer
-	final Scene scene
 	final Camera camera
 
-	private Mesh fullScreenQuad
-
-	// For object lifecycles
-	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
-	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
-
-	// For object culling
-	private final List<GraphicsElement> visibleElements = []
-	private final Matrix4f lastCameraView = new Matrix4f()
-	private final AtomicBoolean sceneChanged = new AtomicBoolean(true)
-
+	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
 	private final List<OverlayRenderPass> overlayPasses = []
 
 	/**
 	 * Constructor, configure the rendering pipeline.
-	 *
-	 * @param config
-	 * @param window
-	 * @param renderer
-	 * @param imGuiLayer
-	 * @param inputEventStream
-	 * @param scene
-	 * @param camera
 	 */
 	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer,
 		ImGuiLayer imGuiLayer, InputEventStream inputEventStream, Scene scene, Camera camera) {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
-		this.scene = scene
 		this.camera = camera
 
 		fullScreenQuad = renderer.createSpriteMesh(
@@ -128,7 +109,7 @@ class RenderPipeline implements AutoCloseable {
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
 		// development
-		configurePipeline(scene, config, window)
+		configurePipeline(scene, camera, config, window)
 	}
 
 	/**
@@ -151,15 +132,11 @@ class RenderPipeline implements AutoCloseable {
 
 	/**
 	 * Build out the rendering pipeline.
-	 *
-	 * @param scene
-	 * @param config
-	 * @param window
 	 */
-	private void configurePipeline(Scene scene, GraphicsConfiguration config, Window window) {
+	private void configurePipeline(Scene scene, Camera camera, GraphicsConfiguration config, Window window) {
 
 		// Scene render pass
-		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
+		renderPasses << new SceneRenderPass(scene, camera, renderer.createFramebuffer(window.renderResolution, true))
 
 		var framebufferUniform = { Shader shader, Material material ->
 			shader.setUniformTexture('framebuffer', 0, material.texture)
@@ -276,20 +253,35 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Object> {
 
 		final Scene scene
+		final Camera camera
 		final Set<GraphicsElement> initialized = new HashSet<>()
 		final Framebuffer framebuffer
 		final boolean enabled = true
 
-		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
+		// For object lifecycles
+		private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
+		private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+
+		// For object culling
+		private final ExecutorService objectCullingExecutor = Executors.newSingleThreadExecutor()
+		private List<GraphicsElement> visibleElements = []
+		private final Matrix4f lastCameraView = new Matrix4f()
+
+		SceneRenderPass(Scene scene, Camera camera, Framebuffer framebuffer) {
 
 			this.scene = scene
-			this.scene.on(ElementAddedEvent) { event ->
+			this.camera = camera
+
+			scene.on(ElementAddedEvent) { event ->
 				addedElements << event.element
-				sceneChanged.set(true)
+				updateVisibleElements()
 			}
-			this.scene.on(ElementRemovedEvent) { event ->
+			scene.on(ElementRemovedEvent) { event ->
 				removedElements << event.element
-				sceneChanged.set(true)
+				updateVisibleElements()
+			}
+			camera.on(CameraMovedEvent) { event ->
+				updateVisibleElements()
 			}
 
 			this.framebuffer = framebuffer
@@ -333,25 +325,12 @@ class RenderPipeline implements AutoCloseable {
 				removedElements.removeAll(elementsToDelete)
 			}
 
-			// Reduce the list of renderable items to those just visible in the scene
-			averageNanos('objectCulling', 1f, logger) { ->
-				def currentCameraView = camera.view
-				if (sceneChanged.get() || !currentCameraView.equals(lastCameraView)) {
-					visibleElements.clear()
-					def frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
-					scene.accept { element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds) &&
-							initialized.contains(element)) {
-							visibleElements << element
-						}
+			if (visibleElements) {
+				visibleElements.each { element ->
+					if (initialized.contains(element)) {
+						element.render(renderer)
 					}
-					sceneChanged.compareAndSet(true, false)
-					lastCameraView.set(currentCameraView)
 				}
-			}
-
-			visibleElements.each { element ->
-				element.render(renderer)
 			}
 		}
 
@@ -359,6 +338,31 @@ class RenderPipeline implements AutoCloseable {
 		void setEnabled(boolean enabled) {
 
 			// Does nothing, this pass is always used
+		}
+
+		/**
+		 * Perform culling of hidden elements from a scene in an off-render thread.
+		 */
+		private void updateVisibleElements() {
+
+			objectCullingExecutor.execute {
+				Thread.currentThread().name = 'Object culling thread'
+
+				averageNanos('Object culling', 1f, logger) { ->
+					var currentCameraView = camera.view
+					if (!currentCameraView.equals(lastCameraView)) {
+						var newVisibleElements = new ArrayList<GraphicsElement>()
+						var frustumIntersection = new FrustumIntersection(camera.projection * currentCameraView)
+						scene.accept { element ->
+							if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+								newVisibleElements << element
+							}
+						}
+						lastCameraView.set(currentCameraView)
+						visibleElements = newVisibleElements
+					}
+				}
+			}
 		}
 	}
 
