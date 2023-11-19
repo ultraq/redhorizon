@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,20 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * A rendering pass for drawing overlay content to the game viewport.
+ * The trait for something being in an enabled/disabled state, with operations
+ * to flip between the 2.
  *
  * @author Emanuel Rabina
  */
-interface OverlayRenderPass extends Switch {
+trait Switch {
+
+	boolean enabled
 
 	/**
-	 * Render the overlay.
-	 *
-	 * @param renderer
-	 * @param sceneFramebufferResult
+	 * Change the state of this switch.
 	 */
-	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
+	void toggle() {
+
+		enabled = !enabled
+	}
 }

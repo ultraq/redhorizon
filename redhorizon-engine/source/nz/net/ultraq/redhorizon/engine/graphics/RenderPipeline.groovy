@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.TupleConstructor
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -91,7 +90,7 @@ class RenderPipeline implements AutoCloseable {
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_D) {
-					debugOverlay.enabled = !debugOverlay.enabled
+					debugOverlay.toggle()
 				}
 			}
 		}
@@ -101,7 +100,7 @@ class RenderPipeline implements AutoCloseable {
 		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_C) {
-					controlsOverlay.enabled = !controlsOverlay.enabled
+					controlsOverlay.toggle()
 				}
 			}
 		}
@@ -201,7 +200,7 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses << scanlinePostProcessingRenderPass
 
 		// Final pass to emit the result to the screen
-		renderPasses << new ScreenRenderPass(
+		var screenRenderPass = new ScreenRenderPass(
 			renderer.createMaterial(),
 			renderer.createShader(
 				'Screen',
@@ -213,15 +212,19 @@ class RenderPipeline implements AutoCloseable {
 			!config.startWithChrome,
 			window
 		)
+		renderPasses << screenRenderPass
 
 		// Control these passes with the keyboard
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_S) {
-					scanlinePostProcessingRenderPass.enabled = !scanlinePostProcessingRenderPass.enabled
+					scanlinePostProcessingRenderPass.toggle()
 				}
 				else if (event.key == GLFW_KEY_U) {
-					sharpUpscalingPostProcessingRenderPass.enabled = !sharpUpscalingPostProcessingRenderPass.enabled
+					sharpUpscalingPostProcessingRenderPass.toggle()
+				}
+				else if (event.key == GLFW_KEY_O) {
+					screenRenderPass.toggle()
 				}
 			}
 		}
@@ -246,7 +249,7 @@ class RenderPipeline implements AutoCloseable {
 					return renderPass.framebuffer
 				}
 				return lastResult
-			}
+			} as Framebuffer
 			renderer.setRenderTarget(null)
 
 			// Draw overlays
@@ -268,7 +271,6 @@ class RenderPipeline implements AutoCloseable {
 		final Scene scene
 		final Set<GraphicsElement> initialized = new HashSet<>()
 		final Framebuffer framebuffer
-		final boolean enabled = true
 
 		// For object lifecycles
 		private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
@@ -291,6 +293,7 @@ class RenderPipeline implements AutoCloseable {
 			}
 
 			this.framebuffer = framebuffer
+			this.enabled = true
 		}
 
 		@Override
@@ -350,25 +353,25 @@ class RenderPipeline implements AutoCloseable {
 				element.render(renderer)
 			}
 		}
-
-		@Override
-		void setEnabled(boolean enabled) {
-
-			// Does nothing, this pass is always used
-		}
 	}
 
 	/**
 	 * A post-processing render pass for taking a previous framebuffer and
 	 * applying some effect to it for the next post-processing pass.
 	 */
-	@TupleConstructor
 	private class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer
 		final Material material
 		final Shader shader
-		boolean enabled
+
+		PostProcessingRenderPass(Framebuffer framebuffer, Material material, Shader shader, boolean enabled) {
+
+			this.framebuffer = framebuffer
+			this.material = material
+			this.shader = shader
+			this.enabled = enabled
+		}
 
 		@Override
 		void delete(GraphicsRenderer renderer) {
@@ -394,7 +397,6 @@ class RenderPipeline implements AutoCloseable {
 		final Framebuffer framebuffer = null
 		final Material material
 		final Shader shader
-		boolean enabled
 
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
@@ -414,14 +416,6 @@ class RenderPipeline implements AutoCloseable {
 			material.transform.set(calculateScreenModelMatrix(window.framebufferSize, window.targetResolution))
 			window.on(FramebufferSizeEvent) { event ->
 				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
-			}
-
-			window.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS) {
-					if (event.key == GLFW_KEY_O) {
-						this.enabled = !this.enabled
-					}
-				}
 			}
 		}
 
