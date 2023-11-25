@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +21,15 @@ import spock.lang.Specification
 /**
  * Tests for the event target trait which includes the event registration and
  * triggering mechanisms.
- * 
+ *
  * @author Emanuel Rabina
  */
 class EventTargetTests extends Specification {
 
 	private class TestEventTarget implements EventTarget {}
+
 	private class TestEvent extends Event {}
+
 	private class TestSubclassEvent extends TestEvent {}
 
 	def target = new TestEventTarget()
@@ -39,6 +41,7 @@ class EventTargetTests extends Specification {
 			def event = new TestEvent()
 		when:
 			target.trigger(event)
+			Thread.sleep(100) // Event trigger is async
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -50,6 +53,7 @@ class EventTargetTests extends Specification {
 			def event = new TestSubclassEvent()
 		when:
 			target.trigger(event)
+			Thread.sleep(100) // Event trigger is async
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -65,6 +69,7 @@ class EventTargetTests extends Specification {
 			target.on(TestEvent, listener2)
 		when:
 			target.trigger(event)
+			Thread.sleep(100) // Event trigger is async
 		then:
 			notThrown(Exception)
 			1 * listener2.handleEvent(event)
