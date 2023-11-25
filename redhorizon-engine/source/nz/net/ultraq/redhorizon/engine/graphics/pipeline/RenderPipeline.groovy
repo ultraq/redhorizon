@@ -98,6 +98,7 @@ class RenderPipeline implements AutoCloseable {
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_D) {
 					debugOverlay.toggle()
+					logger.debug("Debug output ${debugOverlay.enabled ? 'enabled' : 'disabled'}")
 				}
 			}
 		}
@@ -189,9 +190,11 @@ class RenderPipeline implements AutoCloseable {
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_S) {
 					scanlinePostProcessingRenderPass.toggle()
+					logger.debug("Scanlines ${scanlinePostProcessingRenderPass.enabled ? 'enabled' : 'disabled'}")
 				}
 				else if (event.key == GLFW_KEY_U) {
 					sharpUpscalingPostProcessingRenderPass.toggle()
+					logger.debug("Sharp upscaling ${sharpUpscalingPostProcessingRenderPass.enabled ? 'enabled' : 'disabled'}")
 				}
 				else if (event.key == GLFW_KEY_O) {
 					screenRenderPass.toggle()
