@@ -157,28 +157,11 @@ class RenderPipeline implements AutoCloseable {
 		// Scene render pass
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
 
-		var framebufferUniform = { Shader shader, Material material ->
-			shader.setUniformTexture('framebuffer', 0, material.texture)
-		}
-		def modelUniform = { Shader shader, Material material ->
-			shader.setUniformMatrix('model', material.transform)
-		}
-		def textureTargetSizeUniform = { Shader shader, Material material ->
-			shader.setUniform('textureTargetSize', window.targetResolution as float[])
-		}
-
 		// Sharp upscaling post-processing pass
 		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
-			renderer.createShader(new SharpUpscalingShader(
-				framebufferUniform,
-				modelUniform,
-				{ shader, material ->
-					shader.setUniform('textureSourceSize', window.renderResolution as float[])
-				},
-				textureTargetSizeUniform
-			)),
+			renderer.createShader(new SharpUpscalingShader()),
 			true
 		)
 		renderPasses << sharpUpscalingPostProcessingRenderPass
@@ -187,15 +170,7 @@ class RenderPipeline implements AutoCloseable {
 		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
-			renderer.createShader(new ScanlinesShader(
-				framebufferUniform,
-				modelUniform,
-				{ shader, material ->
-					def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
-					shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
-				},
-				textureTargetSizeUniform
-			)),
+			renderer.createShader(new ScanlinesShader()),
 			config.scanlines
 		)
 		renderPasses << scanlinePostProcessingRenderPass
@@ -203,7 +178,7 @@ class RenderPipeline implements AutoCloseable {
 		// Final pass to emit the result to the screen
 		var screenRenderPass = new ScreenRenderPass(
 			renderer.createMaterial(),
-			renderer.createShader(new ScreenShader(framebufferUniform, modelUniform)),
+			renderer.createShader(new ScreenShader()),
 			!config.startWithChrome,
 			window
 		)

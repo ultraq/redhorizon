@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.pipeline
-
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-
+package nz.net.ultraq.redhorizon.classic.shaders
 /**
- * Configuration for the Screen shader.
+ * A collection of shaders used by this module.
  *
  * @author Emanuel Rabina
  */
-class ScreenShader extends ShaderConfig {
+class Shaders {
 
-	/**
-	 * Constructor, create the screen shader.
-	 */
-	ScreenShader() {
-
-		super(
-			'Screen',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform
-		)
-	}
+	static final PalettedSpriteShader palettedSpriteShader = new PalettedSpriteShader()
 }

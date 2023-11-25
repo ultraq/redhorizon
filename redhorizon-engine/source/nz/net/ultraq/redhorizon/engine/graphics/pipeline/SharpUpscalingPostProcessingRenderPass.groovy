@@ -16,32 +16,19 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 
 /**
- * Configuration for the Sharp Upscaling shader.
+ * A render pass to upscale a frame to the target resolution while maintaining
+ * sharpness.
  *
  * @author Emanuel Rabina
  */
-class SharpUpscalingShader extends ShaderConfig {
+class SharpUpscalingPostProcessingRenderPass extends PostProcessingRenderPass {
 
-	public static final String NAME = 'SharpUpscaling'
+	SharpUpscalingPostProcessingRenderPass(Framebuffer framebuffer, Material material) {
 
-	/**
-	 * Constructor, create the sharp upscaling shader.
-	 */
-	SharpUpscalingShader() {
-
-		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform,
-			{ shader, material, window ->
-				shader.setUniform('textureSourceSize', window.renderResolution as float[])
-			},
-			Uniforms.textureTargetSizeUniform
-		)
+		super(framebuffer, material)
 	}
 }

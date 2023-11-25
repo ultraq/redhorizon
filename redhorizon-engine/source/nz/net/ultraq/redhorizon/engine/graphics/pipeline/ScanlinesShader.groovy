@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
  * Configuration for the Scanlines shader.
@@ -29,15 +28,21 @@ class ScanlinesShader extends ShaderConfig {
 	public static final String NAME = 'Scanlines'
 
 	/**
-	 * Constructor, create the scanline shader with the given uniforms.
+	 * Constructor, create the scanline shader.
 	 */
-	ScanlinesShader(Uniform... uniforms) {
+	ScanlinesShader() {
 
 		super(
 			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.frag.glsl',
-			uniforms
+			Uniforms.framebufferUniform,
+			Uniforms.modelUniform,
+			{ shader, material, window ->
+				def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
+				shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
+			},
+			Uniforms.textureTargetSizeUniform
 		)
 	}
 }

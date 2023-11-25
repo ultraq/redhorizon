@@ -14,34 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.pipeline
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
- * Configuration for the Sharp Upscaling shader.
+ * A simple 2D sprite shader.
  *
  * @author Emanuel Rabina
  */
-class SharpUpscalingShader extends ShaderConfig {
+class SpriteShader extends ShaderConfig {
 
-	public static final String NAME = 'SharpUpscaling'
-
-	/**
-	 * Constructor, create the sharp upscaling shader.
-	 */
-	SharpUpscalingShader() {
+	SpriteShader() {
 
 		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform,
+			'Sprite',
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl',
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl',
 			{ shader, material, window ->
-				shader.setUniform('textureSourceSize', window.renderResolution as float[])
+				shader.setUniformTexture('mainTexture', 0, material.texture)
 			},
-			Uniforms.textureTargetSizeUniform
+			{ shader, material, window ->
+				shader.setUniformMatrix('model', material.transform)
+			}
 		)
 	}
 }

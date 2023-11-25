@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,6 +74,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	final int maxTextureSize
 
 	protected final GraphicsConfiguration config
+	protected final OpenGLWindow window
 	protected final GLCapabilities capabilities
 
 	private Dimension framebufferSize
@@ -83,13 +84,11 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
-	 *
-	 * @param config
-	 * @param window
 	 */
 	OpenGLRenderer(GraphicsConfiguration config, OpenGLWindow window) {
 
 		this.config = config
+		this.window = window
 
 		capabilities = GL.createCapabilities()
 
@@ -124,17 +123,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		}
 
 		// Create the shader programs used by this renderer
-		spriteShader = createShader(
-			'Sprite',
-			getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl'),
-			getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl'),
-			{ shader, material ->
-				shader.setUniformTexture('mainTexture', 0, material.texture)
-			},
-			{ shader, material ->
-				shader.setUniformMatrix('model', material.transform)
-			}
-		)
+		spriteShader = createShader(new SpriteShader())
 
 		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
 	}
@@ -292,7 +281,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()
 			if (material) {
-				shader.applyMaterial(material)
+				shader.applyMaterial(material, window)
 			}
 
 			mesh.bind()
