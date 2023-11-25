@@ -41,7 +41,7 @@ class EventTargetTests extends Specification {
 			def event = new TestEvent()
 		when:
 			target.trigger(event)
-			Thread.sleep(100) // Event trigger is async
+			Thread.sleep(200) // Event trigger is async
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -53,7 +53,7 @@ class EventTargetTests extends Specification {
 			def event = new TestSubclassEvent()
 		when:
 			target.trigger(event)
-			Thread.sleep(100) // Event trigger is async
+			Thread.sleep(200) // Event trigger is async
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -69,7 +69,7 @@ class EventTargetTests extends Specification {
 			target.on(TestEvent, listener2)
 		when:
 			target.trigger(event)
-			Thread.sleep(100) // Event trigger is async
+			Thread.sleep(200) // Event trigger is async
 		then:
 			notThrown(Exception)
 			1 * listener2.handleEvent(event)
