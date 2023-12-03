@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
+import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
+import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
@@ -23,7 +26,9 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
-import groovy.transform.Memoized
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -35,16 +40,18 @@ import java.util.concurrent.Executors
  * <p>
  * For more information, see:
  * <a href="http://vladan.bato.net/cnc/aud3.txt" target="_top">http://vladan.bato.net/cnc/aud3.txt</a>
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions(['aud', 'v00'])
 @SuppressWarnings('GrFinalVariableAccess')
 class AudFile implements SoundFile, Streaming {
 
+	private static final Logger logger = LoggerFactory.getLogger(AudFile)
+
 	static final byte TYPE_IMA_ADPCM = 99
-	static final byte TYPE_WS_ADPCM  = 1
-	static final byte FLAG_16BIT  = 0x02
+	static final byte TYPE_WS_ADPCM = 1
+	static final byte FLAG_16BIT = 0x02
 	static final byte FLAG_STEREO = 0x01
 
 	private final NativeDataInputStream input
@@ -61,7 +68,7 @@ class AudFile implements SoundFile, Streaming {
 
 	/**
 	 * Constructor, creates a new AUD file from the data in the input stream.
-	 * 
+	 *
 	 * @param inputStream Input stream over an AUD file.
 	 */
 	AudFile(InputStream inputStream) {
@@ -109,14 +116,13 @@ class AudFile implements SoundFile, Streaming {
 	/**
 	 * Returns a worker that can be run to start streaming sound data.  The worker
 	 * will emit {@link StreamingSampleEvent}s for new samples available.
-	 * 
+	 *
 	 * @return Worker for streaming sound data.
 	 */
-	@Memoized
 	@Override
 	Worker getStreamingDataWorker() {
 
-		return new AudFileWorker(this, input)
+		return new AudFileWorker()
 	}
 
 	@Override
@@ -136,5 +142,45 @@ class AudFile implements SoundFile, Streaming {
 			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm",
 			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
 		].join(', ')
+	}
+
+	/**
+	 * A worker for decoding AUD file sound data.
+	 */
+	class AudFileWorker extends Worker {
+
+		@Delegate
+		private ControlledLoop workLoop
+
+		@Override
+		void run() {
+
+			Thread.currentThread().name = "AudFile :: Decoding"
+			logger.debug('Decoding started')
+
+			def decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
+
+			// Decompress the aud file data by chunks
+			def headerSize = input.bytesRead
+			workLoop = new ControlledLoop({ input.bytesRead < headerSize + compressedSize }, { ->
+				def sample = average('Decoding sample', 1f, logger) { ->
+
+					// Chunk header
+					def compressedSize = input.readShort()
+					def uncompressedSize = input.readShort()
+					assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
+
+					// Decode
+					return decoder.decode(
+						ByteBuffer.wrapNative(input.readNBytes(compressedSize)),
+						ByteBuffer.allocateNative(uncompressedSize)
+					)
+				}
+				trigger(new StreamingSampleEvent(sample))
+			})
+			workLoop.run()
+
+			logger.debug('Decoding complete')
+		}
 	}
 }

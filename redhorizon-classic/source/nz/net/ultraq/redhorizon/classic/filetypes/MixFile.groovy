@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.io.NativeRandomAccessFile
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
 
 /**
@@ -32,13 +33,13 @@ import java.util.concurrent.Semaphore
  *   <li><a href="http://xhp.xwis.net/documents/MIX_Format.html" target="_top">http://xhp.xwis.net/documents/MIX_Format.html</a></li>
  *   <li><a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a></li>
  * </ul>
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions('mix')
 class MixFile implements ArchiveFile<MixEntry> {
 
-	private static final short FLAG_CHECKSUM  = 0x0001
+	private static final short FLAG_CHECKSUM = 0x0001
 	private static final short FLAG_ENCRYPTED = 0x0002
 
 	private final NativeRandomAccessFile input
@@ -49,7 +50,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 
 	/**
 	 * Constructor, open a MIX file for the given File object.
-	 * 
+	 *
 	 * @param file
 	 */
 	MixFile(File file) {
@@ -71,7 +72,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 	/**
 	 * Calculates an ID for a {@link MixEntry} given the original file name
 	 * for the entry to which it is referring to.
-	 * 
+	 *
 	 * @param filename The original filename of the item in the MIX body.
 	 * @return The ID of the entry from the filename.
 	 */
@@ -80,7 +81,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 		def name = filename.toUpperCase()
 		def id = 0
 
-		for (def i = 0; i < name.length(); ) {
+		for (def i = 0; i < name.length();) {
 			def a = 0
 			4.times { j ->
 				a >>>= 8
@@ -106,7 +107,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 
 	/**
 	 * Returns an entry which describes an item's place in the MIX file.
-	 * 
+	 *
 	 * @param name Name of the item and the record.
 	 * @return Entry for the item, or {@code null} if the item doesn't exist in
 	 *         the file.
@@ -126,6 +127,81 @@ class MixFile implements ArchiveFile<MixEntry> {
 	@Override
 	InputStream getEntryData(MixEntry entry) {
 
-		return new MixEntryInputStream(input, inputSemaphore, baseEntryOffset, entry)
+		return new MixEntryInputStream(baseEntryOffset, entry)
+	}
+
+	/**
+	 * An {@code InputStream} around an entry in a MIX file.
+	 * <p>
+	 * Each input stream is a wrapper around the same underlying I/O channel
+	 * ({@code RandomAccessFile} as of writing), so we need to ensure that reads
+	 * between threads do not disrupt each other by splitting positioning and
+	 * making file accesses synchronous.
+	 */
+	@TupleConstructor
+	class MixEntryInputStream extends InputStream {
+
+		final int baseEntryOffset
+		final MixEntry entry
+
+		private int lastMark = -1
+		private int lastPosition = 0
+
+		@Override
+		synchronized void mark(int readLimit) {
+
+			lastMark = lastPosition
+		}
+
+		@Override
+		boolean markSupported() {
+
+			return true
+		}
+
+		@Override
+		int read() {
+
+			return inputSemaphore.acquireAndRelease { ->
+				if (lastPosition >= entry.size) {
+					return -1
+				}
+				input.seek(baseEntryOffset + entry.offset + lastPosition)
+				def b = input.read()
+				lastPosition++
+				return b
+			}
+		}
+
+		@Override
+		int read(byte[] b, int off, int len) {
+
+			return inputSemaphore.acquireAndRelease { ->
+				if (lastPosition >= entry.size) {
+					return -1
+				}
+				input.seek(baseEntryOffset + entry.offset + lastPosition)
+				def toRead = Math.min(len, entry.size - lastPosition)
+				def bytesRead = input.read(b, off, toRead)
+				lastPosition += bytesRead
+				return bytesRead
+			}
+		}
+
+		@Override
+		synchronized void reset() {
+
+			lastPosition = lastMark
+		}
+
+		@Override
+		long skip(long n) {
+
+			return inputSemaphore.acquireAndRelease { ->
+				def toSkip = Math.min(n, entry.size - lastPosition)
+				lastPosition += toSkip
+				return toSkip
+			}
+		}
 	}
 }

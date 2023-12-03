@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import nz.net.ultraq.redhorizon.async.ControlledLoop
+import nz.net.ultraq.redhorizon.classic.codecs.LCW
+import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -25,7 +28,9 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
-import groovy.transform.Memoized
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
@@ -40,12 +45,14 @@ import java.util.concurrent.Executors
  * For all the weird nuances surrounding the WSA file and the versions it has
  * gone through, see:
  * <a href="http://www.shikadi.net/moddingwiki/Westwood_WSA_Format" target="_top">http://www.shikadi.net/moddingwiki/Westwood_WSA_Format</a>
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions('wsa')
 @SuppressWarnings('GrFinalVariableAccess')
 class WsaFile implements AnimationFile, Streaming {
+
+	private static final Logger logger = LoggerFactory.getLogger(WsaFile)
 
 	static final short FLAG_HAS_PALETTE = 0x01
 
@@ -69,7 +76,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 	/**
 	 * Constructor, creates a new WSA file from the data in the input stream.
-	 * 
+	 *
 	 * @param input
 	 */
 	WsaFile(InputStream inputStream) {
@@ -83,7 +90,7 @@ class WsaFile implements AnimationFile, Streaming {
 		x = input.readShort()
 		y = input.readShort()
 
-		width     = input.readShort()
+		width = input.readShort()
 		assert width > 0
 
 		height = input.readShort()
@@ -125,19 +132,18 @@ class WsaFile implements AnimationFile, Streaming {
 	/**
 	 * Return a worker that can be used for streaming the animation's frames.  The
 	 * worker will emit {@link StreamingFrameEvent}s for new frames available.
-	 * 
+	 *
 	 * @return Worker for streaming animation data.
 	 */
-	@Memoized
 	@Override
 	Worker getStreamingDataWorker() {
 
-		return new WsaFileWorker(this, input)
+		return new WsaFileWorker()
 	}
 
 	/**
 	 * Returns some information on this WSA file.
-	 * 
+	 *
 	 * @return WSA file info.
 	 */
 	@Override
@@ -147,5 +153,45 @@ class WsaFile implements AnimationFile, Streaming {
 			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}",
 			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps"
 		].join(', ')
+	}
+
+	/**
+	 * A worker for decoding WSA file frame data.
+	 */
+	class WsaFileWorker extends Worker {
+
+		@Delegate
+		private ControlledLoop workLoop
+
+		@Override
+		void run() {
+
+			Thread.currentThread().name = 'WsaFile :: Decoding'
+			logger.debug('Decoding started')
+
+			def frameSize = width * height
+			def xorDelta = new XORDelta(frameSize)
+			def lcw = new LCW()
+
+			// Decode frame by frame
+			def frame = 0
+			workLoop = new ControlledLoop({ frame < numFrames }, { ->
+				def colouredFrame = average('Decoding frame', 1f, logger) { ->
+					def indexedFrame = xorDelta.decode(
+						lcw.decode(
+							ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
+							ByteBuffer.allocateNative(delta)
+						),
+						ByteBuffer.allocateNative(frameSize)
+					)
+					return indexedFrame.applyPalette(palette)
+				}
+				trigger(new StreamingFrameEvent(colouredFrame))
+				frame++
+			})
+			workLoop.run()
+
+			logger.debug('Decoding complete')
+		}
 	}
 }
