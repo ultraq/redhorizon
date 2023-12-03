@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.events
 
 import spock.lang.Specification
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 /**
  * Tests for the event target trait which includes the event registration and
  * triggering mechanisms.
@@ -32,6 +35,21 @@ class EventTargetTests extends Specification {
 
 	private class TestSubclassEvent extends TestEvent {}
 
+	/**
+	 * An executor service that runs commands immediately on the same thread.
+	 */
+	private class TestExecutorService {
+
+		@Delegate
+		private final ExecutorService executorService = Executors.newSingleThreadExecutor()
+
+		@Override
+		void execute(Runnable command) {
+
+			command.run()
+		}
+	}
+
 	def target = new TestEventTarget()
 
 	def 'Handler invoked for exact event class matches'() {
@@ -40,8 +58,7 @@ class EventTargetTests extends Specification {
 			target.on(TestEvent, listener)
 			def event = new TestEvent()
 		when:
-			target.trigger(event)
-			Thread.sleep(200) // Event trigger is async
+			target.trigger(event, new TestExecutorService())
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -52,8 +69,7 @@ class EventTargetTests extends Specification {
 			target.on(TestEvent, listener)
 			def event = new TestSubclassEvent()
 		when:
-			target.trigger(event)
-			Thread.sleep(200) // Event trigger is async
+			target.trigger(event, new TestExecutorService())
 		then:
 			1 * listener.handleEvent(event)
 	}
@@ -68,8 +84,7 @@ class EventTargetTests extends Specification {
 			}
 			target.on(TestEvent, listener2)
 		when:
-			target.trigger(event)
-			Thread.sleep(200) // Event trigger is async
+			target.trigger(event, new TestExecutorService())
 		then:
 			notThrown(Exception)
 			1 * listener2.handleEvent(event)
