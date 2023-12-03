@@ -42,7 +42,7 @@ subprojects {
 //	}
 
 	ext {
-		groovyVersion = '4.0.14'
+		groovyVersion = '4.0.16'
 		imguiVersion = '1.86.11'
 		jomlVersion = '1.10.5'
 		jomlPrimitivesVersion = '1.10.0'
