@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,8 @@ import nz.net.ultraq.redhorizon.classic.codecs.RLEZero
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
-import static nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDune2.*
+import static nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDune2.getMAX_HEIGHT
+import static nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDune2.getMAX_WIDTH
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import groovy.transform.InheritConstructors
@@ -28,25 +29,23 @@ import java.nio.ByteBuffer
 
 /**
  * Write a Dune 2 SHP file from a source image.
- * 
+ *
  * @author Emanuel Rabina
  */
 @InheritConstructors
-class ShpFileWriterDune2 extends FileWriter<ImageFile> {
+class ShpFileWriterDune2 extends FileWriter<ImageFile, ShpFileWriterDune2Options> {
 
 	@Override
-	void write(ImageFile source, Map options) {
+	void write(OutputStream outputStream, ShpFileWriterDune2Options options) {
 
-		def width = options.width as int
-		def height = options.height as int
-		def numImages = options.numImages as int
+		def (width, height, numImages, faction) = options
 
 		// Check options for converting a single image to an SHP file are valid
-		assert width < MAX_WIDTH : "Image width must be less than ${MAX_WIDTH}"
-		assert height < MAX_HEIGHT : "Image height must be less than ${MAX_HEIGHT}"
-		assert source.width % width == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.height % height == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.format == FORMAT_INDEXED : 'Source file must contain paletted image data'
+		assert width < MAX_WIDTH: "Image width must be less than ${MAX_WIDTH}"
+		assert height < MAX_HEIGHT: "Image height must be less than ${MAX_HEIGHT}"
+		assert source.width % width == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.height % height == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.format == FORMAT_INDEXED: 'Source file must contain paletted image data'
 
 		def widths = new int[numImages]
 		Arrays.fill(widths, width)
@@ -72,8 +71,8 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile> {
 
 			// If meant for faction colours, generate a colour table for the frame,
 			// while at the same time replacing the image bytes with the index
-			if (options.faction) {
-				LinkedHashMap<Byte,Byte> colours = [:]
+			if (faction) {
+				LinkedHashMap<Byte, Byte> colours = [:]
 
 				// Track colour values used, replace colour values with table values
 				byte tableIndex = 0
@@ -88,7 +87,7 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile> {
 				// Convert from hashmap -> byte[]
 				colourTable = new byte[Math.max(colours.size(), 16)]
 				def j = 0
-				for (byte colour: colours.keySet()) {
+				for (byte colour : colours.keySet()) {
 					colourTable[j++] = colour
 				}
 			}
@@ -142,3 +141,8 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile> {
 		}
 	}
 }
+
+/**
+ * Dune 2 SHP file writing options.
+ */
+record ShpFileWriterDune2Options(int width, int height, int numImages, boolean faction) {}

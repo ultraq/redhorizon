@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.converter
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriter
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterOptions
 import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 import org.slf4j.Logger
@@ -29,7 +30,7 @@ import java.util.concurrent.Callable
 
 /**
  * Subcommand for converting PNG files to the C&C SHP format.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -57,8 +58,6 @@ class Png2ShpConverter implements Callable<Integer> {
 
 	/**
 	 * Perform the file conversion.
-	 * 
-	 * @return
 	 */
 	@Override
 	Integer call() {
@@ -69,11 +68,7 @@ class Png2ShpConverter implements Callable<Integer> {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
 						def pngFile = new PngFile(inputStream)
-						new ShpFileWriter(outputStream).write(pngFile, [
-						  width: width,
-							height: height,
-							numImages: numImages
-						])
+						new ShpFileWriter(pngFile).write(outputStream, new ShpFileWriterOptions(width, height, numImages))
 					}
 				}
 				return 0

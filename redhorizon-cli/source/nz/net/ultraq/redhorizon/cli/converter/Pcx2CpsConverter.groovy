@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,7 @@ import java.util.concurrent.Callable
 
 /**
  * Converter subcommand for converting PCX files to C&C CPS files.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -47,8 +47,6 @@ class Pcx2CpsConverter implements Callable<Integer> {
 
 	/**
 	 * Perform the file conversion.
-	 * 
-	 * @return
 	 */
 	@Override
 	Integer call() {
@@ -59,7 +57,7 @@ class Pcx2CpsConverter implements Callable<Integer> {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
 						def pcxFile = new PcxFile(inputStream)
-						new CpsFileWriter(outputStream).write(pcxFile)
+						new CpsFileWriter(pcxFile).write(outputStream)
 					}
 				}
 				return 0

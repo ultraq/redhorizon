@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,17 +33,17 @@ import java.nio.ByteBuffer
  * <p>
  * The CPS file is only used for the conversion utility, and does not take part
  * in the Red Horizon game.
- * 
+ *
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
 class CpsFile implements ImageFile, InternalPalette {
 
 	// Header constants
-	static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
-	static final int COMPRESSION_LCW = 0x0004
-	static final int IMAGE_SIZE      = 64000  // 320x200
-	static final int PALETTE_SIZE    = 768
+	public static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
+	public static final int COMPRESSION_LCW = 0x0004
+	public static final int IMAGE_SIZE = 64000  // 320x200
+	public static final int PALETTE_SIZE = 768
 
 	// File header
 	final short fileSize
@@ -60,7 +60,7 @@ class CpsFile implements ImageFile, InternalPalette {
 
 	/**
 	 * Constructor, creates a new CPS file from data in the given input stream.
-	 * 
+	 *
 	 * @param input
 	 */
 	CpsFile(InputStream inputStream) {
@@ -71,15 +71,15 @@ class CpsFile implements ImageFile, InternalPalette {
 		fileSize = input.readShort()
 
 		compression = input.readShort()
-		assert compression == COMPRESSION_LCW : 'Only LCW compression supported'
+		assert compression == COMPRESSION_LCW: 'Only LCW compression supported'
 
 		imageSize = input.readShort()
-		assert imageSize == IMAGE_SIZE : "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
+		assert imageSize == IMAGE_SIZE: "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
 
 		unknown = input.readShort()
 
 		paletteSize = input.readShort()
-		assert paletteSize == 0 || paletteSize == PALETTE_SIZE : "CPS palette size isn't 0 or 768"
+		assert paletteSize == 0 || paletteSize == PALETTE_SIZE: "CPS palette size isn't 0 or 768"
 
 		// Optional palette
 		if (paletteSize) {
@@ -92,7 +92,7 @@ class CpsFile implements ImageFile, InternalPalette {
 
 	/**
 	 * Returns some information on this CPS file.
-	 * 
+	 *
 	 * @return CPS file info.
 	 */
 	@Override

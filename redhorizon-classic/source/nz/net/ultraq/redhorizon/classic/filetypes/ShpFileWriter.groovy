@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,25 +28,23 @@ import java.nio.ByteBuffer
 
 /**
  * Write SHP files to an output stream from any single image file.
- * 
+ *
  * @author Emanuel Rabina
  */
 @InheritConstructors
-class ShpFileWriter extends FileWriter<ImageFile> {
+class ShpFileWriter extends FileWriter<ImageFile, ShpFileWriterOptions> {
 
 	@Override
-	void write(ImageFile source, Map options) {
+	void write(OutputStream outputStream, ShpFileWriterOptions options) {
 
-		def width = options.width as int
-		def height = options.height as int
-		def numImages = options.numImages as int
+		def (width, height, numImages) = options
 
 		// Check options for converting a single image to an SHP file are valid
-		assert width < MAX_WIDTH : "Image width must be less than ${MAX_WIDTH}"
-		assert height < MAX_HEIGHT : "Image height must be less than ${MAX_HEIGHT}"
-		assert source.width % width == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.height % height == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.format == FORMAT_INDEXED : 'Source file must contain paletted image data'
+		assert width < MAX_WIDTH: "Image width must be less than ${MAX_WIDTH}"
+		assert height < MAX_HEIGHT: "Image height must be less than ${MAX_HEIGHT}"
+		assert source.width % width == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.height % height == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.format == FORMAT_INDEXED: 'Source file must contain paletted image data'
 
 		def output = new NativeDataOutputStream(outputStream)
 
@@ -89,3 +87,10 @@ class ShpFileWriter extends FileWriter<ImageFile> {
 		}
 	}
 }
+
+/**
+ * SHP file writing options.
+ *
+ * @author Emanuel Rabina
+ */
+record ShpFileWriterOptions(int width, int height, int numImages) {}
