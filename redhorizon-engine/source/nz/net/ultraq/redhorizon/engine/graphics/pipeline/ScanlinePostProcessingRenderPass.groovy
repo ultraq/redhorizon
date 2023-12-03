@@ -16,26 +16,20 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 
 /**
- * Configuration for the Screen shader.
+ * A render pass to apply a CRT scanlines effect to the screen.
  *
  * @author Emanuel Rabina
  */
-class ScreenShader extends ShaderConfig {
+class ScanlinePostProcessingRenderPass extends PostProcessingRenderPass {
 
-	/**
-	 * Constructor, create the screen shader.
-	 */
-	ScreenShader() {
+	ScanlinePostProcessingRenderPass(Mesh fullScreenMesh, GraphicsRenderer renderer, Window window, GraphicsConfiguration config) {
 
-		super(
-			'Screen',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform
-		)
+		super(fullScreenMesh, renderer, window, renderer.createShader(new ScanlinesShader()), config.scanlines)
 	}
 }
