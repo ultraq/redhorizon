@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.COMPRESSION_LCW
+import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.PALETTE_SIZE
 
 import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer

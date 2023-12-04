@@ -31,5 +31,5 @@ abstract class FileWriter<TSource, TOptions> {
 	/**
 	 * Write the given object to the current output stream.
 	 */
-	abstract void write(OutputStream outputStream, TOptions options)
+	abstract void write(OutputStream outputStream, TOptions options = null)
 }
