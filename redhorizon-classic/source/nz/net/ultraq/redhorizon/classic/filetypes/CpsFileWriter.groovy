@@ -21,8 +21,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
-import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.COMPRESSION_LCW
-import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.PALETTE_SIZE
+import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.*
 
 import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer
@@ -46,9 +45,9 @@ class CpsFileWriter extends FileWriter<ImageFile, Void> {
 		def encodedImage = lcw.encode(source.imageData, ByteBuffer.allocateNative(source.imageData.capacity()))
 
 		// Write header
-		output.writeShort(8 + encodedImage.limit()) // Header + image - this value itself
+		output.writeShort(8 + encodedImage.limit()) // (Header - this value) + image
 		output.writeShort(COMPRESSION_LCW)
-		output.writeShort(encodedImage.limit())
+		output.writeShort(IMAGE_SIZE)
 		output.writeShort(0)
 		output.writeShort(palette ? PALETTE_SIZE : 0)
 

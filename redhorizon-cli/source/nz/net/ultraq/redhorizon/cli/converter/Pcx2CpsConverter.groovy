@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.filetypes.PcxFile
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine.Command
+import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
 import java.util.concurrent.Callable
@@ -45,6 +46,9 @@ class Pcx2CpsConverter implements Callable<Integer> {
 	@Parameters(index = '1', description = 'Path for the CPS file to be written to.')
 	File destFile
 
+	@Option(names = ['-o', '--overwrite'], description = 'Overwrite the destination file if it already exists')
+	boolean overwrite
+
 	/**
 	 * Perform the file conversion.
 	 */
@@ -53,6 +57,9 @@ class Pcx2CpsConverter implements Callable<Integer> {
 
 		logger.info('Loading {}...', sourceFile)
 		if (sourceFile.exists()) {
+			if (destFile.exists() && overwrite) {
+				destFile.delete()
+			}
 			if (!destFile.exists()) {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->

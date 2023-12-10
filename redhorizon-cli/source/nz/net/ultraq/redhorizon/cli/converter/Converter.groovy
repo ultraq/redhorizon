@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-description = 'Event system for Red Horizon (something something "Event Horizon"? 🤔)'
+package nz.net.ultraq.redhorizon.cli.converter
 
-dependencies {
-	testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
+/**
+ * Converts one file type to another.
+ *
+ * @author Emanuel Rabina
+ */
+abstract class Converter {
+
+	/**
+	 * Perform conversion of the input stream data to the output stream.
+	 */
+	abstract void convert(InputStream inputStream, OutputStream outputStream)
 }

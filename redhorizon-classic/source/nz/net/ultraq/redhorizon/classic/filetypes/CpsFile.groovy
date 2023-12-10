@@ -40,7 +40,6 @@ import java.nio.ByteBuffer
 class CpsFile implements ImageFile, InternalPalette {
 
 	// Header constants
-	public static final int COMPRESSION_LBM = 0x0003 // From WestPak2, don't know what this is
 	public static final int COMPRESSION_LCW = 0x0004
 	public static final int IMAGE_SIZE = 64000  // 320x200
 	public static final int PALETTE_SIZE = 768
@@ -48,7 +47,7 @@ class CpsFile implements ImageFile, InternalPalette {
 	// File header
 	final short fileSize
 	final short compression
-	final short imageSize
+	final int imageSize // Stored in file as short
 	final short unknown
 	final short paletteSize
 
@@ -60,8 +59,6 @@ class CpsFile implements ImageFile, InternalPalette {
 
 	/**
 	 * Constructor, creates a new CPS file from data in the given input stream.
-	 *
-	 * @param input
 	 */
 	CpsFile(InputStream inputStream) {
 
@@ -71,15 +68,15 @@ class CpsFile implements ImageFile, InternalPalette {
 		fileSize = input.readShort()
 
 		compression = input.readShort()
-		assert compression == COMPRESSION_LCW: 'Only LCW compression supported'
+		assert compression == COMPRESSION_LCW : 'Only LCW compression supported'
 
-		imageSize = input.readShort()
-		assert imageSize == IMAGE_SIZE: "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
+		imageSize = input.readShort() & 0x00ffff
+		assert imageSize == IMAGE_SIZE : "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
 
 		unknown = input.readShort()
 
 		paletteSize = input.readShort()
-		assert paletteSize == 0 || paletteSize == PALETTE_SIZE: "CPS palette size isn't 0 or 768"
+		assert paletteSize == 0 || paletteSize == PALETTE_SIZE : "CPS palette size isn't 0 or 768"
 
 		// Optional palette
 		if (paletteSize) {
@@ -87,7 +84,10 @@ class CpsFile implements ImageFile, InternalPalette {
 		}
 
 		// Image data
-		imageData = new LCW().decode(ByteBuffer.wrapNative(input.readNBytes(imageSize)), ByteBuffer.allocateNative(imageSize))
+		imageData = new LCW().decode(
+			ByteBuffer.wrapNative(input.readNBytes(fileSize - 8)), // Subtract header parts excluding the 2 bytes for fileSize itself
+			ByteBuffer.allocateNative(imageSize)
+		)
 	}
 
 	/**
