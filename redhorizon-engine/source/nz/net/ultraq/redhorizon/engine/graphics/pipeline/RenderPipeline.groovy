@@ -56,6 +56,7 @@ class RenderPipeline implements AutoCloseable {
 	private final Mesh fullScreenMesh
 	private final List<RenderPass> renderPasses = []
 	private final List<OverlayRenderPass> overlayPasses = []
+	private int customRenderPasses
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -126,6 +127,16 @@ class RenderPipeline implements AutoCloseable {
 		overlayPasses << overlayPass
 	}
 
+	/**
+	 * Register a post-processing step with the render pipeline.  These will be
+	 * run after the scene has been drawn, but before the final output is emitted
+	 * to the screen framebuffer.
+	 */
+	void addRenderPass(Class<PostProcessingRenderPass> renderPassClass) {
+
+		renderPasses.add(customRenderPasses++, renderPassClass.newInstance([scene, ]))
+	}
+
 	@Override
 	void close() {
 
@@ -146,7 +157,12 @@ class RenderPipeline implements AutoCloseable {
 		renderPasses << new SceneRenderPass(scene, camera, renderer.createFramebuffer(window.renderResolution, true))
 
 		// Sharp upscaling post-processing pass
-		def sharpUpscalingPostProcessingRenderPass = new SharpUpscalingPostProcessingRenderPass(fullScreenMesh, renderer, window)
+		def sharpUpscalingPostProcessingRenderPass = new SharpUpscalingPostProcessingRenderPass(
+			fullScreenMesh,
+			renderer.createFramebuffer(window.targetResolution, false),
+			renderer.createMaterial(),
+			renderer.createShader(new SharpUpscalingShader())
+		)
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_U) {
 				sharpUpscalingPostProcessingRenderPass.toggle()
@@ -154,6 +170,9 @@ class RenderPipeline implements AutoCloseable {
 			}
 		}
 		renderPasses << sharpUpscalingPostProcessingRenderPass
+
+		// Any custom render passes are added here
+		customRenderPasses = 2
 
 		// Scanline post-processing pass
 		def scanlinePostProcessingRenderPass = new ScanlinePostProcessingRenderPass(fullScreenMesh, renderer, window, config)

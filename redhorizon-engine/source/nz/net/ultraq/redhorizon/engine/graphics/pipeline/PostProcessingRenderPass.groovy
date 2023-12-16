@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.Window
 
 /**
  * A post-processing render pass for taking a previous framebuffer and
@@ -36,11 +35,11 @@ class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 	final Material material
 	final Shader shader
 
-	PostProcessingRenderPass(Mesh fullScreenMesh, GraphicsRenderer renderer, Window window, Shader shader, boolean enabled) {
+	PostProcessingRenderPass(Mesh fullScreenMesh, Framebuffer framebuffer, Material material, Shader shader, boolean enabled) {
 
 		this.fullScreenMesh = fullScreenMesh
-		this.framebuffer = renderer.createFramebuffer(window.targetResolution, false)
-		this.material = renderer.createMaterial()
+		this.framebuffer = framebuffer
+		this.material = material
 		this.shader = shader
 		this.enabled = enabled
 	}

@@ -16,9 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 
 /**
  * A render pass to upscale a frame to the target resolution while maintaining
@@ -28,8 +29,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.Window
  */
 class SharpUpscalingPostProcessingRenderPass extends PostProcessingRenderPass {
 
-	SharpUpscalingPostProcessingRenderPass(Mesh fullScreenMesh, GraphicsRenderer renderer, Window window) {
+	SharpUpscalingPostProcessingRenderPass(Mesh fullScreenMesh, Framebuffer framebuffer, Material material, Shader shader) {
 
-		super(fullScreenMesh, renderer, window, renderer.createShader(new SharpUpscalingShader()), true)
+		super(fullScreenMesh, framebuffer, material, shader, true)
 	}
 }
