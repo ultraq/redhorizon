@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.time.GameClock
+import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import org.slf4j.Logger
@@ -39,7 +40,7 @@ import java.util.concurrent.Semaphore
  *
  * @author Emanuel Rabina
  */
-abstract class Application {
+abstract class Application implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
@@ -93,7 +94,7 @@ abstract class Application {
 
 		logger.debug('Initializing application...')
 
-		// Create the necessary systems 
+		// Create the necessary systems
 		engine = new Engine()
 
 		inputEventStream = new InputEventStream()
@@ -119,6 +120,7 @@ abstract class Application {
 		logger.debug('Starting application...')
 		engine.start()
 		applicationStart()
+		trigger(new ApplicationStartedEvent())
 
 		engine.waitUntilStopped()
 	}
@@ -128,6 +130,7 @@ abstract class Application {
 	 */
 	final void stop() {
 
+		trigger(new ApplicationStoppingEvent())
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!applicationStopped) {
 				logger.debug('Stopping application...')

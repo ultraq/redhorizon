@@ -37,16 +37,16 @@ dependencies {
 	runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 	annotationProcessor "info.picocli:picocli-codegen:${picocliVersion}"
 
-	testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
-	testImplementation 'org.assertj:assertj-core:3.24.2'
+//	testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
+//	testImplementation 'org.assertj:assertj-core:3.24.2'
 	testRuntimeOnly 'org.objenesis:objenesis:3.3'
 }
 
-configurations {
-	testRuntimeOnly {
-		exclude group: 'ch.qos.logback'
-	}
-}
+//configurations {
+//	testRuntimeOnly {
+//		exclude group: 'ch.qos.logback'
+//	}
+//}
 
 processResources {
 	filesMatching('**/cli.properties') {

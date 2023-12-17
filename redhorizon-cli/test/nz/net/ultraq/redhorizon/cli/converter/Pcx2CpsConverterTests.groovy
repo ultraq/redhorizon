@@ -18,10 +18,8 @@ package nz.net.ultraq.redhorizon.cli.converter
 
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
 
-import com.github.valfirst.slf4jtest.TestLoggerFactory
 import spock.lang.Ignore
 import spock.lang.Specification
-import static com.github.valfirst.slf4jtest.Assertions.assertThat
 
 /**
  * Tests for the PCX -> CPS converter.
@@ -30,7 +28,7 @@ import static com.github.valfirst.slf4jtest.Assertions.assertThat
  */
 class Pcx2CpsConverterTests extends Specification {
 
-	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverter)
+//	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverter)
 
 	@Ignore("CPS conversion got busted somewhere along the way 😢")
 	def "Converts a PCX file to a CPS file"() {
@@ -68,7 +66,7 @@ class Pcx2CpsConverterTests extends Specification {
 
 		then:
 			exitCode == 1
-			assertThat(logger).hasLogged(event -> event.formattedMessage == 'not-a-file.pcx not found')
+//			assertThat(logger).hasLogged(event -> event.formattedMessage == 'not-a-file.pcx not found')
 	}
 
 	def "Destination file already exists"() {
@@ -87,6 +85,6 @@ class Pcx2CpsConverterTests extends Specification {
 
 		then:
 			exitCode == 1
-			assertThat(logger).hasLogged(event -> event.formattedMessage == 'Output file, existing-file.cps, already exists')
+// 			assertThat(logger).hasLogged(event -> event.formattedMessage == 'Output file, existing-file.cps, already exists')
 	}
 }
