@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2016, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
+import java.util.concurrent.Future.State
 import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 
 /**
  * The engine is responsible for running the systems that operate on a scene.
@@ -82,7 +84,20 @@ class Engine {
 			}
 			return executorService.submit(system)
 		}
-		engineReadyLatch.await()
+
+		while (true) {
+			engineReadyLatch.await(1, TimeUnit.SECONDS)
+			if (engineReadyLatch.count == 0) {
+				break
+			}
+			var failedTasks = systemTasks.findAll { task -> task.state() == State.FAILED }
+			if (failedTasks) {
+				failedTasks.each { failedTask ->
+					logger.error('An error occurred during engine startup', failedTask)
+				}
+				throw failedTasks.first().exceptionNow()
+			}
+		}
 
 		logger.debug('Engine started')
 	}
