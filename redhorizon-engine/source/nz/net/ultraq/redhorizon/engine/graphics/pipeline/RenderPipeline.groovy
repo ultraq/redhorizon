@@ -32,7 +32,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -93,26 +92,8 @@ class RenderPipeline implements AutoCloseable {
 			surface: new Rectanglef(-1, -1, 1, 1)
 		)
 
-		def debugOverlay = new DebugOverlayRenderPass(renderer, config.debug)
-		window.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				if (event.key == GLFW_KEY_D) {
-					debugOverlay.toggle()
-					logger.debug("Debug output ${debugOverlay.enabled ? 'enabled' : 'disabled'}")
-				}
-			}
-		}
-		overlayPasses << debugOverlay
-
-		var controlsOverlay = new ControlsOverlayRenderPass(inputEventStream)
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				if (event.key == GLFW_KEY_C) {
-					controlsOverlay.toggle()
-				}
-			}
-		}
-		overlayPasses << controlsOverlay
+		overlayPasses << new DebugOverlayRenderPass(renderer, config.debug).toggleWith(inputEventStream, GLFW_KEY_D)
+		overlayPasses << new ControlsOverlayRenderPass(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
 
 		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
@@ -125,7 +106,7 @@ class RenderPipeline implements AutoCloseable {
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
 		// development
-		configurePipeline(scene, config, window)
+		configurePipeline(scene, config, window, inputEventStream)
 	}
 
 	/**
@@ -148,59 +129,42 @@ class RenderPipeline implements AutoCloseable {
 
 	/**
 	 * Build out the rendering pipeline.
-	 *
-	 * @param scene
-	 * @param config
-	 * @param window
 	 */
-	private void configurePipeline(Scene scene, GraphicsConfiguration config, Window window) {
+	private void configurePipeline(Scene scene, GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
 
 		// Scene render pass
 		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
 
 		// Sharp upscaling post-processing pass
-		def sharpUpscalingPostProcessingRenderPass = new PostProcessingRenderPass(
+		renderPasses << new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(new SharpUpscalingShader()),
 			true
 		)
-		renderPasses << sharpUpscalingPostProcessingRenderPass
+			.toggleWith(inputEventStream, GLFW_KEY_U) { renderPass ->
+				logger.debug("Scanlines ${renderPass.enabled ? 'enabled' : 'disabled'}")
+			}
 
 		// Scanline post-processing pass
-		def scanlinePostProcessingRenderPass = new PostProcessingRenderPass(
+		renderPasses << new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
 			renderer.createMaterial(),
 			renderer.createShader(new ScanlinesShader()),
 			config.scanlines
 		)
-		renderPasses << scanlinePostProcessingRenderPass
+			.toggleWith(inputEventStream, GLFW_KEY_S) { renderPass ->
+				logger.debug("Sharp upscaling ${renderPass.enabled ? 'enabled' : 'disabled'}")
+			}
 
 		// Final pass to emit the result to the screen
-		var screenRenderPass = new ScreenRenderPass(
+		renderPasses << new ScreenRenderPass(
 			renderer.createMaterial(),
 			renderer.createShader(new ScreenShader()),
 			!config.startWithChrome,
 			window
 		)
-		renderPasses << screenRenderPass
-
-		// Control these passes with the keyboard
-		window.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				if (event.key == GLFW_KEY_S) {
-					scanlinePostProcessingRenderPass.toggle()
-					logger.debug("Scanlines ${scanlinePostProcessingRenderPass.enabled ? 'enabled' : 'disabled'}")
-				}
-				else if (event.key == GLFW_KEY_U) {
-					sharpUpscalingPostProcessingRenderPass.toggle()
-					logger.debug("Sharp upscaling ${sharpUpscalingPostProcessingRenderPass.enabled ? 'enabled' : 'disabled'}")
-				}
-				else if (event.key == GLFW_KEY_O) {
-					screenRenderPass.toggle()
-				}
-			}
-		}
+			.toggleWith(inputEventStream, GLFW_KEY_O)
 	}
 
 	/**

@@ -103,6 +103,10 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	}
 
 	@Override
+	void delete(GraphicsRenderer renderer) {
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
 
 		def viewport = ImGui.getMainViewport()

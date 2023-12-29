@@ -49,6 +49,10 @@ class ControlsOverlayRenderPass implements OverlayRenderPass {
 	}
 
 	@Override
+	void delete(GraphicsRenderer renderer) {
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
 
 		if (!controls) {

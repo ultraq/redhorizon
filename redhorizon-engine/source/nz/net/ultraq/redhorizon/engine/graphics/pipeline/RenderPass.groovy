@@ -19,6 +19,13 @@ package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * A single rendering pass with a specific framebuffer as the rendering target.
@@ -51,4 +58,21 @@ interface RenderPass<T> extends Switch {
 	 * @param previous
 	 */
 	void render(GraphicsRenderer renderer, T previous)
+
+	/**
+	 * Toggle the state of this render pass with the given key.
+	 */
+	default RenderPass<T> toggleWith(InputEventStream inputEventStream, int key,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPass') Closure closure = null) {
+
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == key) {
+				toggle()
+				if (closure) {
+					closure(this)
+				}
+			}
+		}
+		return this
+	}
 }

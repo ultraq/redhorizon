@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.WireframeShader
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.Vector2f
@@ -71,14 +72,7 @@ class MapLines implements GraphicsElement, SceneElement<MapLines> {
 	@Override
 	void init(GraphicsRenderer renderer) {
 
-		shader = renderer.createShader(
-			'Primitives',
-			getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl'),
-			getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl'),
-			{ shader, material, window ->
-				shader.setUniformMatrix('model', material.transform)
-			}
-		)
+		shader = renderer.getShader(WireframeShader.NAME)
 
 		axisLinesMesh = renderer.createMesh(
 			type: MeshType.LINES,
