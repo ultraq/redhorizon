@@ -28,6 +28,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
@@ -210,6 +212,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	private class MapRAMapPack extends MapLayer implements GraphicsElement {
 
 		private Mesh mesh
+		private Shader shader
 		private Material material
 
 		/**
@@ -268,6 +271,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		@Override
 		void init(GraphicsRenderer renderer) {
 
+			shader = renderer.getShader(SpriteShader.NAME)
 			(mesh, material) = renderer.withMaterialBundler { bundler ->
 				elements.each { element ->
 					if (element instanceof GraphicsElement) {
@@ -280,10 +284,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			renderer.draw(
-				mesh: mesh,
-				material: material
-			)
+			renderer.draw(mesh, shader, material)
 		}
 	}
 

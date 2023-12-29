@@ -14,35 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.pipeline
+package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
- * Configuration for the Sharp Upscaling shader.
+ * A simple outline shader for primitive objects.
  *
  * @author Emanuel Rabina
  */
-class SharpUpscalingShader extends ShaderConfig {
+class PrimitivesShader extends ShaderConfig {
 
-	static final String NAME = 'SharpUpscaling'
-	static final String UNIFORM_TEXTURE_SOURCE_SIZE = 'textureSourceSize'
+	static final String NAME = 'Primitives'
 
-	/**
-	 * Constructor, create the sharp upscaling shader.
-	 */
-	SharpUpscalingShader() {
+	PrimitivesShader() {
 
 		super(
 			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform,
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl',
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl',
 			{ shader, material, window ->
-				shader.setUniform(UNIFORM_TEXTURE_SOURCE_SIZE, window.renderResolution as float[])
-			},
-			Uniforms.textureTargetSizeUniform
+				shader.setUniformMatrix(UNIFORM_MODEL, material.transform)
+			}
 		)
 	}
 }

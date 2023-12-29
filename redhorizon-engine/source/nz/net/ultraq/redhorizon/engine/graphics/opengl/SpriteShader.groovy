@@ -25,17 +25,20 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class SpriteShader extends ShaderConfig {
 
+	static final String NAME = 'Sprite'
+	static final String UNIFORM_MAIN_TEXTURE = 'mainTexture'
+
 	SpriteShader() {
 
 		super(
-			'Sprite',
+			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl',
 			{ shader, material, window ->
-				shader.setUniformTexture('mainTexture', 0, material.texture)
+				shader.setUniformTexture(UNIFORM_MAIN_TEXTURE, 0, material.texture)
 			},
 			{ shader, material, window ->
-				shader.setUniformMatrix('model', material.transform)
+				shader.setUniformMatrix(UNIFORM_MODEL, material.transform)
 			}
 		)
 	}

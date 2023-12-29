@@ -247,6 +247,10 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Boolean cameraMoved) {
 
 			// Initialize or delete objects which have been added/removed to/from the scene
+			// TODO: This is really odd to be managed here.  Can we think of some way
+			//       to add something to the scene and for the scene to run it through
+			//       an initialization step and then move it to some 'renderable'
+			//       pool? 🤔
 			if (addedElements) {
 				def elementsToInit = new ArrayList<SceneElement>(addedElements)
 				elementsToInit.each { elementToInit ->

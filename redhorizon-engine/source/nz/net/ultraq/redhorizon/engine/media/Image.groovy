@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -43,6 +45,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	private ByteBuffer imageData
 
 	private Mesh mesh
+	private Shader shader
 	private Material material
 
 	/**
@@ -105,6 +108,7 @@ class Image implements GraphicsElement, SceneElement<Image> {
 		mesh = renderer.createSpriteMesh(
 			surface: new Rectanglef(0, 0, width, height)
 		)
+		shader = renderer.getShader(SpriteShader.NAME)
 		material = renderer.createMaterial(
 			texture: renderer.createTexture(width, height, format, imageData),
 			transform: transform
@@ -115,9 +119,6 @@ class Image implements GraphicsElement, SceneElement<Image> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.draw(
-			mesh: mesh,
-			material: material
-		)
+		renderer.draw(mesh, shader, material)
 	}
 }

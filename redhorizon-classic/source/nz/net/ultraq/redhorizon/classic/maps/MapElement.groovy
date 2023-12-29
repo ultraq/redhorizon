@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
@@ -37,6 +39,7 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	final int frame
 
 	private Mesh mesh
+	private Shader shader
 	private Material material
 
 	/**
@@ -69,6 +72,7 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 			surface: new Rectanglef(0, 0, tileFile.width, tileFile.height),
 			textureUVs: tileSet.getCoordinates(tileFile, frame)
 		)
+		shader = renderer.getShader(SpriteShader.NAME)
 		material = renderer.createMaterial(
 			texture: tileSet.texture,
 			transform: transform
@@ -78,9 +82,6 @@ class MapElement implements GraphicsElement, SceneElement<MapElement> {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		renderer.draw(
-			mesh: mesh,
-			material: material
-		)
+		renderer.draw(mesh, shader, material)
 	}
 }

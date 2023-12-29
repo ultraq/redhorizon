@@ -78,8 +78,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	protected final GLCapabilities capabilities
 
 	private Dimension framebufferSize
-	private final Shader spriteShader
-	protected final List<Shader> shaders = []
+	private final List<Shader> shaders = []
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -122,8 +121,9 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 			framebufferSize = event.framebufferSize
 		}
 
-		// Create the shader programs used by this renderer
-		spriteShader = createShader(new SpriteShader())
+		// Create the default shader programs used by this renderer
+		createShader(new SpriteShader())
+		createShader(new PrimitivesShader())
 
 		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
 	}
@@ -276,7 +276,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 	@Override
 	@NamedVariant
-	void draw(Mesh mesh, Shader shader = spriteShader, Material material = null) {
+	void draw(Mesh mesh, Shader shader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()
@@ -294,6 +294,12 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 
 			trigger(new DrawEvent())
 		}
+	}
+
+	@Override
+	Shader getShader(String name) {
+
+		return shaders.find { shader -> shader.name == name }
 	}
 
 	@Override
