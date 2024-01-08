@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import org.joml.primitives.Rectanglef
@@ -32,7 +32,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class MapElement implements GraphicsElement, SceneElement<MapElement> {
+class MapElement implements GraphicsElement, Node {
 
 	final TileSet tileSet
 	final ImagesFile tileFile

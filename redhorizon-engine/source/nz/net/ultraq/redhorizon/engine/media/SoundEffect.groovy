@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,7 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-import nz.net.ultraq.redhorizon.engine.scenegraph.Movable
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
 import java.nio.ByteBuffer
@@ -27,10 +26,10 @@ import java.nio.ByteBuffer
 /**
  * A simple piece of short audio that can be loaded entirely into memory for
  * multiple playbacks.
- * 
+ *
  * @author Emanuel Rabina
  */
-class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
+class SoundEffect implements AudioElement, Playable, Node {
 
 	// Sound information
 	final int bits
@@ -45,15 +44,15 @@ class SoundEffect implements AudioElement, Movable, Playable, SceneElement {
 	/**
 	 * Constructor, use the data in {@code soundFile} for playing the sound
 	 * effect.
-	 * 
+	 *
 	 * @param soundFile
 	 */
 	SoundEffect(SoundFile soundFile) {
 
-		bits      = soundFile.bits
-		channels  = soundFile.channels
+		bits = soundFile.bits
+		channels = soundFile.channels
 		frequency = soundFile.frequency
-		buffer    = soundFile.soundData
+		buffer = soundFile.soundData
 	}
 
 	@Override

@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
@@ -35,7 +35,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Video> {
+class Video implements AudioElement, GraphicsElement, Playable, Node {
 
 	@Delegate
 	private final Animation animation
@@ -81,13 +81,13 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	@Override
 	Rectanglef getBounds() {
 
-		return SceneElement.super.bounds
+		return Node.super.bounds
 	}
 
 	@Override
 	Matrix4f getTransform() {
 
-		return SceneElement.super.transform
+		return Node.super.transform
 	}
 
 	@Override
@@ -107,7 +107,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	Video scale(float x, float y, float z) {
 
 		[animation, soundTrack]*.scale(x, y, z)
-		SceneElement.super.scale(x, y, z)
+		Node.super.scale(x, y, z)
 		return this
 	}
 
@@ -122,7 +122,7 @@ class Video implements AudioElement, GraphicsElement, Playable, SceneElement<Vid
 	Video translate(float x, float y, float z) {
 
 		[animation, soundTrack]*.translate(x, y, z)
-		SceneElement.super.translate(x, y, z)
+		Node.super.translate(x, y, z)
 		return this
 	}
 }

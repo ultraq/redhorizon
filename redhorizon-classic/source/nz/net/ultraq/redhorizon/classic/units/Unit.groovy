@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -37,7 +37,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-abstract class Unit implements GraphicsElement, SceneElement<Unit>, Rotatable, Temporal {
+abstract class Unit implements GraphicsElement, Node, Rotatable, Temporal {
 
 	private static Logger logger = LoggerFactory.getLogger(Unit)
 

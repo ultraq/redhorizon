@@ -32,10 +32,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeAddedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
@@ -210,8 +210,8 @@ class RenderPipeline implements AutoCloseable {
 		final Framebuffer framebuffer
 
 		// For object lifecycles
-		private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
-		private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+		private final CopyOnWriteArrayList<Node> addedElements = new CopyOnWriteArrayList<>()
+		private final CopyOnWriteArrayList<Node> removedElements = new CopyOnWriteArrayList<>()
 
 		// For object culling
 		private final List<GraphicsElement> visibleElements = []
@@ -220,11 +220,11 @@ class RenderPipeline implements AutoCloseable {
 		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
 
 			this.scene = scene
-			this.scene.on(ElementAddedEvent) { event ->
+			this.scene.on(NodeAddedEvent) { event ->
 				addedElements << event.element
 				sceneChanged.set(true)
 			}
-			this.scene.on(ElementRemovedEvent) { event ->
+			this.scene.on(NodeRemovedEvent) { event ->
 				removedElements << event.element
 				sceneChanged.set(true)
 			}
@@ -252,7 +252,7 @@ class RenderPipeline implements AutoCloseable {
 			//       an initialization step and then move it to some 'renderable'
 			//       pool? 🤔
 			if (addedElements) {
-				def elementsToInit = new ArrayList<SceneElement>(addedElements)
+				def elementsToInit = new ArrayList<Node>(addedElements)
 				elementsToInit.each { elementToInit ->
 					elementToInit.accept { element ->
 						if (element instanceof GraphicsElement) {
@@ -264,7 +264,7 @@ class RenderPipeline implements AutoCloseable {
 				addedElements.removeAll(elementsToInit)
 			}
 			if (removedElements) {
-				def elementsToDelete = new ArrayList<SceneElement>(removedElements)
+				def elementsToDelete = new ArrayList<Node>(removedElements)
 				elementsToDelete.each { elementToDelete ->
 					elementToDelete.accept { element ->
 						if (element instanceof GraphicsElement) {

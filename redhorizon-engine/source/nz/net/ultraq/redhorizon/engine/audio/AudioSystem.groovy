@@ -22,10 +22,10 @@ import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
-import nz.net.ultraq.redhorizon.engine.scenegraph.ElementAddedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.ElementRemovedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeAddedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,8 +45,8 @@ class AudioSystem extends EngineSystem {
 	final AudioConfiguration config
 
 	// For object lifecycles
-	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
-	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+	private final CopyOnWriteArrayList<Node> addedElements = new CopyOnWriteArrayList<>()
+	private final CopyOnWriteArrayList<Node> removedElements = new CopyOnWriteArrayList<>()
 
 	@Delegate
 	private RateLimitedLoop systemLoop
@@ -61,10 +61,10 @@ class AudioSystem extends EngineSystem {
 
 		super(scene)
 		this.config = config ?: new AudioConfiguration()
-		this.scene.on(ElementAddedEvent) { event ->
+		this.scene.on(NodeAddedEvent) { event ->
 			addedElements << event.element
 		}
-		this.scene.on(ElementRemovedEvent) { event ->
+		this.scene.on(NodeRemovedEvent) { event ->
 			removedElements << event.element
 		}
 	}
@@ -93,7 +93,7 @@ class AudioSystem extends EngineSystem {
 
 					// Initialize or delete objects which have been added/removed to/from the scene
 					if (addedElements) {
-						def elementsToInit = new ArrayList<SceneElement>(addedElements)
+						def elementsToInit = new ArrayList<Node>(addedElements)
 						elementsToInit.each { elementToInit ->
 							elementToInit.accept { element ->
 								if (element instanceof AudioElement) {
@@ -104,7 +104,7 @@ class AudioSystem extends EngineSystem {
 						addedElements.removeAll(elementsToInit)
 					}
 					if (removedElements) {
-						def elementsToDelete = new ArrayList<SceneElement>(removedElements)
+						def elementsToDelete = new ArrayList<Node>(removedElements)
 						elementsToDelete.each { elementToInit ->
 							elementToInit.accept { element ->
 								if (element instanceof AudioElement) {

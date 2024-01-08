@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
@@ -48,7 +48,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
-class Animation implements GraphicsElement, Playable, SceneElement<Animation>, Temporal {
+class Animation implements GraphicsElement, Playable, Node, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 

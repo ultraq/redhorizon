@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.PrimitivesShader
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.joml.Vector2f
 
@@ -35,7 +35,7 @@ import org.joml.Vector2f
  *
  * @author Emanuel Rabina
  */
-class MapLines implements GraphicsElement, SceneElement<MapLines> {
+class MapLines implements GraphicsElement, Node {
 
 	private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
 	private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)

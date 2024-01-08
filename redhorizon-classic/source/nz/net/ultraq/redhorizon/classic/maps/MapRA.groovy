@@ -31,7 +31,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -48,7 +48,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class MapRA implements SceneElement<MapRA>, GraphicsElement {
+class MapRA implements Node, GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -68,7 +68,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	final Vector2f initialPosition
 
 	private final TileSet tileSet
-	private final List<SceneElement> layers = []
+	private final List<Node> layers = []
 	private Palette palette
 
 	/**
@@ -155,7 +155,7 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	/**
 	 * Special layer for the background image.
 	 */
-	private class BackgroundLayer implements SceneElement<BackgroundLayer> {
+	private class BackgroundLayer implements Node {
 
 		private final MapBackground background
 
@@ -192,9 +192,9 @@ class MapRA implements SceneElement<MapRA>, GraphicsElement {
 	/**
 	 * Common code for rendering a map layer consisting of multiple elements.
 	 */
-	private abstract class MapLayer implements SceneElement<MapLayer> {
+	private abstract class MapLayer implements Node {
 
-		protected final List<SceneElement> elements = []
+		protected final List<Node> elements = []
 
 		@Override
 		void accept(SceneVisitor visitor) {

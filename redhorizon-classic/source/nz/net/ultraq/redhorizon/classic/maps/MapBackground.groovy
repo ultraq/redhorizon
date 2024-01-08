@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class MapBackground implements GraphicsElement, SceneElement<MapBackground> {
+class MapBackground implements GraphicsElement, Node {
 
 	final int width
 	final int height

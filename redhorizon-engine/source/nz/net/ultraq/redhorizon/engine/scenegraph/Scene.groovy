@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,36 +23,36 @@ import java.util.concurrent.CopyOnWriteArrayList
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
  * make up the 'world'.
- * 
+ *
  * @author Emanuel Rabina
  */
 class Scene implements EventTarget, Visitable {
 
-	private final List<SceneElement> elements = new CopyOnWriteArrayList<>()
+	private final List<Node> nodes = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Allow visitors into the scene for traversal.
-	 * 
+	 *
 	 * @param visitor
 	 */
 	@Override
 	void accept(SceneVisitor visitor) {
 
-		elements.each { element ->
-			element.accept(visitor)
+		nodes.each { node ->
+			node.accept(visitor)
 		}
 	}
 
 	/**
-	 * Add an element to this scene.
-	 * 
-	 * @param element
+	 * Add a node to this scene.
+	 *
+	 * @param node
 	 * @return
 	 */
-	Scene addSceneElement(SceneElement element) {
+	Scene addNode(Node node) {
 
-		elements << element
-		trigger(new ElementAddedEvent(element))
+		nodes << node
+		trigger(new NodeAddedEvent(node))
 		return this
 	}
 
@@ -61,25 +61,25 @@ class Scene implements EventTarget, Visitable {
 	 */
 	void clear() {
 
-		elements.each { element ->
-			removeSceneElement(element)
+		nodes.each { node ->
+			removeNode(node)
 		}
 	}
 
 	/**
 	 * Overloads the {@code <<} operator to add elements to this scene.
-	 * 
+	 *
 	 * @param element
 	 * @return
 	 */
-	Scene leftShift(SceneElement element) {
+	Scene leftShift(Node element) {
 
-		return addSceneElement(element)
+		return addNode(element)
 	}
 
 	/**
 	 * Select objects whose bounding volumes intersect the given ray.
-	 * 
+	 *
 	 * @param ray Ray to test objects against.
 	 * @return List of objects that intersect the ray.
 	 */
@@ -92,9 +92,9 @@ class Scene implements EventTarget, Visitable {
 
 	/**
 	 * Select objects whose bounding volumes intersect the given ray.
-	 * 
-	 * @param ray	  Ray to test objects against.
-	 * @param node	  Node being checked for intersecting objects.
+	 *
+	 * @param ray Ray to test objects against.
+	 * @param node Node being checked for intersecting objects.
 	 * @param results List to add intersecting objects to.
 	 */
 //	private void pickObjects(Ray ray, Node node, List<Spatial> results) {
@@ -112,15 +112,15 @@ class Scene implements EventTarget, Visitable {
 //	}
 
 	/**
-	 * Removes an element from the scene.
-	 * 
-	 * @param element
+	 * Removes a node from the scene.
+	 *
+	 * @param node
 	 * @return
 	 */
-	Scene removeSceneElement(SceneElement element) {
+	Scene removeNode(Node node) {
 
-		elements.remove(element)
-		trigger(new ElementRemovedEvent(element))
+		nodes.remove(node)
+		trigger(new NodeRemovedEvent(node))
 		return this
 	}
 }
