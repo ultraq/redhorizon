@@ -143,7 +143,7 @@ class RenderPipeline implements AutoCloseable {
 			true
 		)
 			.toggleWith(inputEventStream, GLFW_KEY_U) { renderPass ->
-				logger.debug("Scanlines ${renderPass.enabled ? 'enabled' : 'disabled'}")
+				logger.debug("Sharp upscaling ${renderPass.enabled ? 'enabled' : 'disabled'}")
 			}
 
 		// Scanline post-processing pass
@@ -154,7 +154,7 @@ class RenderPipeline implements AutoCloseable {
 			config.scanlines
 		)
 			.toggleWith(inputEventStream, GLFW_KEY_S) { renderPass ->
-				logger.debug("Sharp upscaling ${renderPass.enabled ? 'enabled' : 'disabled'}")
+				logger.debug("Scanlines ${renderPass.enabled ? 'enabled' : 'disabled'}")
 			}
 
 		// Final pass to emit the result to the screen
