@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
@@ -57,7 +58,7 @@ class MediaPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
-	private final Object mediaFile
+	private final ResourceFile mediaFile
 	private final Palette palette
 	private MediaLoader mediaLoader
 
@@ -69,7 +70,7 @@ class MediaPlayer extends Application {
 	 * @param graphicsConfig
 	 * @param paletteType
 	 */
-	MediaPlayer(Object mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
+	MediaPlayer(ResourceFile mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
 
 		super('Media Player', audioConfig, graphicsConfig)
 		this.mediaFile = mediaFile

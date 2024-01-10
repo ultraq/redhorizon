@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,11 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import java.nio.ByteBuffer
-
 /**
- * Interface for animation filetypes.
+ * Base type for all files that contain data that can be used for a resource,
+ * eg: an image file can be loaded to build a texture.
  *
  * @author Emanuel Rabina
  */
-interface AnimationFile extends ImageBase, ResourceFile {
-
-	/**
-	 * Get the uncompressed data for each frame of the animation that can be used
-	 * for rendering.
-	 *
-	 * @return Buffer for each frame.
-	 */
-	ByteBuffer[] getFrameData()
-
-	/**
-	 * Returns the speed at which this animation should be run, in
-	 * frames-per-second.
-	 *
-	 * @return
-	 */
-	float getFrameRate()
-
-	/**
-	 * Return the number of frames that make up this animation.
-	 *
-	 * @return
-	 */
-	int getNumFrames()
+interface ResourceFile {
 }

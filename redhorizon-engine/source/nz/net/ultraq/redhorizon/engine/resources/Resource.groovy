@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
-
-import java.nio.ByteBuffer
+package nz.net.ultraq.redhorizon.engine.resources
 
 /**
- * Interface for image file formats.
+ * Base type for all resources, usually loaded from a corresponding resource
+ * file, eg: a texture can be built from an image file.
  *
  * @author Emanuel Rabina
  */
-interface ImageFile extends ImageBase, ResourceFile {
-
-	/**
-	 * Return the image data of the file.
-	 *
-	 * @return Buffer of the bytes in RGB(A) order for the image.
-	 */
-	ByteBuffer getImageData()
+interface Resource {
 }

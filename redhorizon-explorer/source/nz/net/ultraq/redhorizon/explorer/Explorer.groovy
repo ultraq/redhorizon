@@ -27,8 +27,8 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
 import nz.net.ultraq.redhorizon.engine.media.ImageLoader
 import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
-import nz.net.ultraq.redhorizon.engine.media.MediaLoader
 import nz.net.ultraq.redhorizon.engine.media.Playable
+import nz.net.ultraq.redhorizon.engine.media.ResourceLoader
 import nz.net.ultraq.redhorizon.engine.media.SoundLoader
 import nz.net.ultraq.redhorizon.engine.media.VideoLoader
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
@@ -64,7 +64,7 @@ class Explorer extends Application {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private Object selectedFile
-	private MediaLoader selectedLoader
+	private ResourceLoader selectedLoader
 	private Palette palette
 
 	/**
