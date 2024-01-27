@@ -20,8 +20,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 /**
- * An object that can be used to create media types from media files, and attach
- * them to existing game engines.
+ * An object that can be used to create media types from resource files, and
+ * attach them to existing game engines.
  *
  * @param <F> The type of file to load.
  * @param <M> The type of media loaded from the file.
@@ -39,7 +39,7 @@ abstract class MediaLoader<F extends ResourceFile, M> {
 	 * @param file
 	 * @param scene
 	 */
-	protected MediaLoader(F file, Scene scene) {
+	MediaLoader(F file, Scene scene) {
 
 		this.file = file
 		this.scene = scene

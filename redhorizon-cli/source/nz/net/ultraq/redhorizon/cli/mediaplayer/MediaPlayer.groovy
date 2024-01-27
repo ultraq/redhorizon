@@ -20,21 +20,11 @@ import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.media.AnimationLoader
-import nz.net.ultraq.redhorizon.engine.media.ImageLoader
-import nz.net.ultraq.redhorizon.engine.media.ImagesLoader
 import nz.net.ultraq.redhorizon.engine.media.MediaLoader
-import nz.net.ultraq.redhorizon.engine.media.Playable
-import nz.net.ultraq.redhorizon.engine.media.SoundLoader
-import nz.net.ultraq.redhorizon.engine.media.StopEvent
-import nz.net.ultraq.redhorizon.engine.media.VideoLoader
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
-import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,16 +54,11 @@ class MediaPlayer extends Application {
 
 	/**
 	 * Constructor, create a new application around the given media file.
-	 *
-	 * @param mediaFile
-	 * @param audioConfig
-	 * @param graphicsConfig
-	 * @param paletteType
 	 */
-	MediaPlayer(ResourceFile mediaFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
+	MediaPlayer(ResourceFile resourceFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
 
 		super('Media Player', audioConfig, graphicsConfig)
-		this.mediaFile = mediaFile
+		this.mediaFile = resourceFile
 		this.palette = palette
 	}
 
@@ -82,22 +67,28 @@ class MediaPlayer extends Application {
 
 		logger.info('File details: {}', mediaFile)
 
-		mediaLoader = switch (mediaFile) {
-			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
-			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
-			case SoundFile -> new SoundLoader(mediaFile, scene, gameClock, inputEventStream)
-			case ImageFile -> new ImageLoader(mediaFile, scene, graphicsSystem)
-			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsSystem, inputEventStream)
-			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
+		switch (mediaFile) {
+			case ImageFile:
+				scene << new Sprite(mediaFile).attachScript(new ImageScript())
+				break
 		}
 
-		var media = mediaLoader.load()
-		if (media instanceof Playable) {
-			media.on(StopEvent) { event ->
-				stop()
-			}
-			media.play()
-		}
+//		mediaLoader = switch (mediaFile) {
+//			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
+//			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
+//			case SoundFile -> new SoundLoader(mediaFile, scene, gameClock, inputEventStream)
+//			case ImageFile -> new ImageLoader(mediaFile, scene)
+//			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsSystem, inputEventStream)
+//			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
+//		}
+//
+//		var media = mediaLoader.load()
+//		if (media instanceof Playable) {
+//			media.on(StopEvent) { event ->
+//				stop()
+//			}
+//			media.play()
+//		}
 
 		// Universal quit on exit
 		inputEventStream.on(KeyEvent) { event ->

@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.scripting.Scriptable
+
 import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -26,7 +28,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-trait Node implements Visitable {
+trait Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 	final Vector3f position = new Vector3f()
 	final Matrix4f transform = new Matrix4f()
@@ -38,10 +40,14 @@ trait Node implements Visitable {
 		visitor.visit(this)
 	}
 
+	@Override
+	void onSceneAdded(Scene scene) {
+	}
+
 	/**
 	 * Scale this element by the given values.
 	 */
-	Node scale(float x, float y, float z) {
+	T scale(float x, float y, float z) {
 
 		transform.scale(x, y, z)
 		bounds.scale(x, y, z)
@@ -54,7 +60,7 @@ trait Node implements Visitable {
 	 * @param factor
 	 * @return
 	 */
-	Node scaleXY(float factor) {
+	T scaleXY(float factor) {
 
 		return scale(factor, factor, 1)
 	}
@@ -65,7 +71,7 @@ trait Node implements Visitable {
 	 * @param offset
 	 * @return
 	 */
-	Node translate(Vector3f offset) {
+	T translate(Vector3f offset) {
 
 		return translate(offset.x, offset.y, offset.z)
 	}
@@ -77,7 +83,7 @@ trait Node implements Visitable {
 	 * @param z
 	 * @return
 	 */
-	Node translate(Vector2f xyOffset, float z = 0) {
+	T translate(Vector2f xyOffset, float z = 0) {
 
 		return translate(xyOffset.x, xyOffset.y, z)
 	}
@@ -90,7 +96,7 @@ trait Node implements Visitable {
 	 * @param z
 	 * @return
 	 */
-	Node translate(float x, float y, float z = 0) {
+	T translate(float x, float y, float z = 0) {
 
 		transform.translate(x, y, z)
 		bounds.translate(x, y)

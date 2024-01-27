@@ -35,19 +35,30 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.LinkedBlockingQueue
+
 /**
  * Graphics system, creates a display which drives the rendering loop of drawing
  * graphics objects.
  *
  * @author Emanuel Rabina
  */
-class GraphicsSystem extends EngineSystem implements EventTarget {
+class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
 	private final String windowTitle
 	private final GraphicsConfiguration config
 	private final InputEventStream inputEventStream
+	private final ExecutorService executorService = Executors.newCachedThreadPool()
+	private final BlockingQueue<Tuple2<SpriteMeshRequest, BlockingQueue<Mesh>>> meshRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<ShaderRequest, BlockingQueue<Shader>>> shaderRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<TextureRequest, BlockingQueue<Texture>>> textureRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
 	private OpenGLCamera camera
@@ -125,6 +136,67 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 	}
 
 	/**
+	 * Run through all of the queued requests for graphics resources.
+	 *
+	 * @param renderer
+	 */
+	void processRequests(GraphicsRenderer renderer) {
+
+		if (meshRequests) {
+			meshRequests.drain().each { meshRequestAndPipe ->
+				def (meshRequest, pipe) = meshRequestAndPipe
+				pipe.add(renderer.createSpriteMesh(surface: meshRequest.surface()))
+			}
+		}
+
+		if (shaderRequests) {
+			shaderRequests.drain().each { shaderRequestAndPipe ->
+				def (shaderRequest, pipe) = shaderRequestAndPipe
+				pipe.add(renderer.getShader(shaderRequest.name()))
+			}
+		}
+
+		if (textureRequests) {
+			textureRequests.drain().each { textureRequestAndPipe ->
+				def (textureRequest, pipe) = textureRequestAndPipe
+				pipe.add(renderer.createTexture(textureRequest.width(), textureRequest.height(),
+					textureRequest.format(), textureRequest.data()))
+			}
+		}
+	}
+
+	/**
+	 * Load a request onto the given queue, returning a future of the requested
+	 * resource.
+	 */
+	<R extends Request<V>, V> Future<V> queueRequest(R request, BlockingQueue<Tuple2<R, BlockingQueue<V>>> requestQueue) {
+
+		return executorService.submit({ ->
+			var pipe = new LinkedBlockingQueue<V>(1)
+			requestQueue.add(new Tuple2(request, pipe))
+			return pipe.take()
+		} as Callable<V>)
+	}
+
+	@Override
+	Future<Mesh> requestMesh(SpriteMeshRequest spriteMeshRequest) {
+
+		return queueRequest(spriteMeshRequest, meshRequests)
+	}
+
+	@Override
+	Future<Shader> requestShader(ShaderRequest shaderRequest) {
+
+		return queueRequest(shaderRequest, shaderRequests)
+	}
+
+	@Override
+	Future<Texture> requestTexture(TextureRequest textureRequest) {
+
+		return queueRequest(textureRequest, textureRequests)
+	}
+
+	/**
 	 * Start the graphics system loop: creates a new window in which to render the
 	 * elements in the current scene, cleaning it all up when made to shut down.
 	 */
@@ -140,6 +212,7 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 			var window = context.window
 			window.relay(FramebufferSizeEvent, this)
 			window.relay(WindowMaximizedEvent, this)
+			scene.window = window
 
 			// Only do quick window mode switching on Windows - the macOS experience
 			// is quite different from using the fullscreen button which assigns the
@@ -160,6 +233,8 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 				trigger(new WindowCreatedEvent(window))
 
 				new OpenGLRenderer(config, window).withCloseable { renderer ->
+					scene.graphicsRequestHandler = this
+
 					camera = new OpenGLCamera(window.renderResolution)
 					camera.withCloseable { camera ->
 						new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
@@ -181,6 +256,8 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 										window.toggleVsync()
 										shouldToggleVsync = false
 									}
+
+									processRequests(renderer)
 									pipeline.render()
 									window.swapBuffers()
 									window.pollEvents()

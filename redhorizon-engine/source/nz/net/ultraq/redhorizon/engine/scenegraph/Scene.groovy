@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -29,6 +31,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Scene implements EventTarget, Visitable {
 
 	private final List<Node> nodes = new CopyOnWriteArrayList<>()
+
+	@Delegate
+	GraphicsRequests graphicsRequestHandler
+
+	Window window
 
 	/**
 	 * Allow visitors into the scene for traversal.
@@ -45,13 +52,12 @@ class Scene implements EventTarget, Visitable {
 
 	/**
 	 * Add a node to this scene.
-	 *
-	 * @param node
-	 * @return
 	 */
 	Scene addNode(Node node) {
 
 		nodes << node
+		node.onSceneAdded(this)
+		node.script?.onSceneAdded(this)
 		trigger(new NodeAddedEvent(node))
 		return this
 	}
@@ -64,6 +70,18 @@ class Scene implements EventTarget, Visitable {
 		nodes.each { node ->
 			removeNode(node)
 		}
+	}
+
+	/**
+	 * Locate the first node in the scene that satisfies the given predicate.
+	 *
+	 * @param predicate
+	 * @return
+	 *   The matching node, or {code null} if no node satisfies {@code predicate}.
+	 */
+	<T extends Node> T findNode(Closure predicate) {
+
+		return nodes.find(predicate)
 	}
 
 	/**

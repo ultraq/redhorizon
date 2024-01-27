@@ -62,7 +62,6 @@ class RenderPipeline implements AutoCloseable {
 
 	final GraphicsRenderer renderer
 	final ImGuiLayer imGuiLayer
-	final Scene scene
 	final Camera camera
 
 	private final Mesh fullScreenQuad
@@ -85,7 +84,6 @@ class RenderPipeline implements AutoCloseable {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
-		this.scene = scene
 		this.camera = camera
 
 		fullScreenQuad = renderer.createSpriteMesh(

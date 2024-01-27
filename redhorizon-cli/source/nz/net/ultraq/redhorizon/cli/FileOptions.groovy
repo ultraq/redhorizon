@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,12 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import org.slf4j.Logger
 import picocli.CommandLine.Parameters
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * A mixin of shareable file options.
- * 
+ *
  * @author Emanuel Rabina
  */
 class FileOptions {
@@ -37,11 +40,9 @@ class FileOptions {
 	/**
 	 * Load the file indicated by the {@code file} and {@code entryName}
 	 * parameters, passing it along to the given closure.
-	 * 
-	 * @param logger
-	 * @param closure
 	 */
-	void useFile(Logger logger, Closure closure) {
+	void useFile(Logger logger,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.filetypes.ResourceFile') Closure closure) {
 
 		logger.info('Loading {}...', file)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.media
+package nz.net.ultraq.redhorizon.cli.mediaplayer
 
-import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
 
 import groovy.transform.InheritConstructors
 
 /**
- * Load a single image into existing engines.
+ * A script to make a sprite node behave as a full-screen image.
  *
  * @author Emanuel Rabina
  */
 @InheritConstructors
-class ImageLoader extends MediaLoader<ImageFile, Image> {
+class ImageScript extends SpriteScript {
 
 	@Override
-	Image load() {
+	void onSceneAdded(Scene scene) {
 
-		def width = file.width
-		def height = file.height
-		media = new Image(file)
+		var width = sprite.imageFile.width
+		var height = sprite.imageFile.height
+		sprite
 			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
 			.translate(-width / 2, -height / 2)
-		scene << media
-
-		return media
-	}
-
-	@Override
-	void unload() {
-
-		scene.removeNode(media)
 	}
 }
