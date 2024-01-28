@@ -56,9 +56,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 	private final GraphicsConfiguration config
 	private final InputEventStream inputEventStream
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
-	private final BlockingQueue<Tuple2<SpriteMeshRequest, BlockingQueue<Mesh>>> meshRequests = new LinkedBlockingQueue<>()
-	private final BlockingQueue<Tuple2<ShaderRequest, BlockingQueue<Shader>>> shaderRequests = new LinkedBlockingQueue<>()
-	private final BlockingQueue<Tuple2<TextureRequest, BlockingQueue<Texture>>> textureRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<Request, BlockingQueue>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
@@ -155,38 +153,26 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 			}
 		}
 
-		if (meshRequests) {
-			meshRequests.drain().each { meshRequestAndPipe ->
-				def (meshRequest, pipe) = meshRequestAndPipe
-				pipe.add(renderer.createSpriteMesh(surface: meshRequest.surface()))
-			}
-		}
-
-		if (shaderRequests) {
-			shaderRequests.drain().each { shaderRequestAndPipe ->
-				def (shaderRequest, pipe) = shaderRequestAndPipe
-				pipe.add(renderer.getShader(shaderRequest.name()))
-			}
-		}
-
-		if (textureRequests) {
-			textureRequests.drain().each { textureRequestAndPipe ->
-				def (textureRequest, pipe) = textureRequestAndPipe
-				pipe.add(renderer.createTexture(textureRequest.width(), textureRequest.height(),
-					textureRequest.format(), textureRequest.data()))
+		if (creationRequests) {
+			creationRequests.drain().each { creationRequest ->
+				def (request, pipe) = creationRequest
+				var resource = switch (request) {
+					case ShaderRequest -> renderer.getShader(request.name())
+					case SpriteMeshRequest -> renderer.createSpriteMesh(surface: request.surface())
+					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
+					default -> throw new IllegalArgumentException("Cannot create resource from type ${request}")
+				}
+				pipe.add(resource)
 			}
 		}
 	}
 
-	/**
-	 * Load a request onto the given queue, returning a future of the requested
-	 * resource.
-	 */
-	<R extends Request<V>, V> Future<V> queueRequest(R request, BlockingQueue<Tuple2<R, BlockingQueue<V>>> requestQueue) {
+	@Override
+	<V extends GraphicsResource, R extends Request<V>> Future<V> requestCreateOrGet(R request) {
 
 		return executorService.submit({ ->
 			var pipe = new LinkedBlockingQueue<V>(1)
-			requestQueue.add(new Tuple2(request, pipe))
+			creationRequests.add(new Tuple2(request, pipe))
 			return pipe.take()
 		} as Callable<V>)
 	}
@@ -195,24 +181,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 	void requestDelete(GraphicsResource... resource) {
 
 		deletionRequests.addAll(resource)
-	}
-
-	@Override
-	Future<Mesh> requestMesh(SpriteMeshRequest spriteMeshRequest) {
-
-		return queueRequest(spriteMeshRequest, meshRequests)
-	}
-
-	@Override
-	Future<Shader> requestShader(ShaderRequest shaderRequest) {
-
-		return queueRequest(shaderRequest, shaderRequests)
-	}
-
-	@Override
-	Future<Texture> requestTexture(TextureRequest textureRequest) {
-
-		return queueRequest(textureRequest, textureRequests)
 	}
 
 	/**

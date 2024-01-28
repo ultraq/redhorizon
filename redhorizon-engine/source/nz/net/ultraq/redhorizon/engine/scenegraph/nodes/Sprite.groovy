@@ -66,14 +66,14 @@ class Sprite implements Node<Sprite>, GraphicsElement {
 		var format = imageFile.format
 
 		mesh = scene
-			.requestMesh(new SpriteMeshRequest(new Rectanglef(0, 0, width, height)))
+			.requestCreateOrGet(new SpriteMeshRequest(new Rectanglef(0, 0, width, height)))
 			.get()
 		shader = scene
-			.requestShader(new ShaderRequest(SpriteShader.NAME))
+			.requestCreateOrGet(new ShaderRequest(SpriteShader.NAME))
 			.get()
 		material = new Material(
 			texture: scene
-				.requestTexture(new TextureRequest(width, height, format, imageFile.imageData.flipVertical(width, height, format)))
+				.requestCreateOrGet(new TextureRequest(width, height, format, imageFile.imageData.flipVertical(width, height, format)))
 				.get(),
 			transform: transform
 		)

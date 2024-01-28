@@ -43,22 +43,14 @@ interface GraphicsRequests {
 	}
 
 	/**
+	 * Request the creation or retrieval of the given resource type from the
+	 * graphics system, which will eventually be resolved in the returned
+	 * {@code Future}.
+	 */
+	<V extends GraphicsResource, R extends Request<V>> Future<V> requestCreateOrGet(R request)
+
+	/**
 	 * Request the graphics system to delete a resource.
 	 */
 	void requestDelete(GraphicsResource... resource)
-
-	/**
-	 * Request the creation of a mesh from the graphics system.
-	 */
-	Future<Mesh> requestMesh(SpriteMeshRequest spriteMeshRequest)
-
-	/**
-	 * Request an existing shader by name.
-	 */
-	Future<Shader> requestShader(ShaderRequest shaderRequest)
-
-	/**
-	 * Request the creation of a texture from the graphics system.
-	 */
-	Future<Texture> requestTexture(TextureRequest textureRequest)
 }
