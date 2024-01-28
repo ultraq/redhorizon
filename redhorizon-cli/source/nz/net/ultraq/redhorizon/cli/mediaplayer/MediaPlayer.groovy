@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.media.MediaLoader
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -51,6 +52,7 @@ class MediaPlayer extends Application {
 	private final ResourceFile mediaFile
 	private final Palette palette
 	private MediaLoader mediaLoader
+	private Node media
 
 	/**
 	 * Constructor, create a new application around the given media file.
@@ -67,11 +69,11 @@ class MediaPlayer extends Application {
 
 		logger.info('File details: {}', mediaFile)
 
-		switch (mediaFile) {
-			case ImageFile:
-				scene << new Sprite(mediaFile).attachScript(new ImageScript())
-				break
+		var media = switch (mediaFile) {
+			case ImageFile -> new Sprite(mediaFile).attachScript(new ImageScript())
 		}
+
+		scene << media
 
 //		mediaLoader = switch (mediaFile) {
 //			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
@@ -101,6 +103,6 @@ class MediaPlayer extends Application {
 	@Override
 	protected void applicationStop() {
 
-		mediaLoader.unload()
+		scene.removeNode(media)
 	}
 }

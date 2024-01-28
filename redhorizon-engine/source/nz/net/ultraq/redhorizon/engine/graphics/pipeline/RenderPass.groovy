@@ -41,7 +41,8 @@ interface RenderPass<T> extends Switch {
 	 *
 	 * @param renderer
 	 */
-	void delete(GraphicsRenderer renderer)
+	default void delete(GraphicsRenderer renderer) {
+	}
 
 	/**
 	 * Return the target framebuffer for this rendering pass.

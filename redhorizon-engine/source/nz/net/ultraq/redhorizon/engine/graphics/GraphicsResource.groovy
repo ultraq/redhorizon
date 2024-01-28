@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph
+package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * Interface for all of the scene events a node will encounter during its
- * lifetime in a scene.
+ * Identifies a resource that can only be created/deleted via the graphics
+ * system and its thread.
  *
  * @author Emanuel Rabina
  */
-interface SceneEvents {
-
-	/**
-	 * Called when this node is added to the scene.
-	 */
-	default void onSceneAdded(Scene scene) {
-	}
-
-	/**
-	 * Called when the node is removed from the scene.
-	 */
-	default void onSceneRemoved(Scene scene) {
-	}
+interface GraphicsResource extends Closeable {
 }

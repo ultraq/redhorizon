@@ -44,10 +44,6 @@ class EntryList implements EventTarget, OverlayRenderPass {
 	}
 
 	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
 	void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
 
 		ImGui.setNextWindowSize(300, 500, FirstUseEver)

@@ -81,6 +81,12 @@ class Sprite implements Node<Sprite>, GraphicsElement {
 	}
 
 	@Override
+	void onSceneRemoved(Scene scene) {
+
+		scene.requestDelete(mesh, shader, material)
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 
 		renderer.draw(mesh, shader, material)

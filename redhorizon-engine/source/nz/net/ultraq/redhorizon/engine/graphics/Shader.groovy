@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-abstract class Shader implements AutoCloseable {
+abstract class Shader implements GraphicsResource {
 
 	final String name
 	final Uniform[] uniforms

@@ -32,9 +32,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.NodeAddedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.NodeRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.FrustumIntersection
@@ -44,7 +41,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -204,12 +200,7 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Boolean> {
 
 		final Scene scene
-		final Set<GraphicsElement> initialized = new HashSet<>()
 		final Framebuffer framebuffer
-
-		// For object lifecycles
-		private final CopyOnWriteArrayList<Node> addedElements = new CopyOnWriteArrayList<>()
-		private final CopyOnWriteArrayList<Node> removedElements = new CopyOnWriteArrayList<>()
 
 		// For object culling
 		private final List<GraphicsElement> visibleElements = []
@@ -218,69 +209,20 @@ class RenderPipeline implements AutoCloseable {
 		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
 
 			this.scene = scene
-			this.scene.on(NodeAddedEvent) { event ->
-				addedElements << event.element
-				sceneChanged.set(true)
-			}
-			this.scene.on(NodeRemovedEvent) { event ->
-				removedElements << event.element
-				sceneChanged.set(true)
-			}
-
 			this.framebuffer = framebuffer
 			this.enabled = true
 		}
 
 		@Override
-		void delete(GraphicsRenderer renderer) {
-
-			scene.accept { element ->
-				if (element instanceof GraphicsElement) {
-					element.delete(renderer)
-				}
-			}
-		}
-
-		@Override
 		void render(GraphicsRenderer renderer, Boolean cameraMoved) {
 
-			// Initialize or delete objects which have been added/removed to/from the scene
-			// TODO: This is really odd to be managed here.  Can we think of some way
-			//       to add something to the scene and for the scene to run it through
-			//       an initialization step and then move it to some 'renderable'
-			//       pool? 🤔
-			if (addedElements) {
-				def elementsToInit = new ArrayList<Node>(addedElements)
-				elementsToInit.each { elementToInit ->
-					elementToInit.accept { element ->
-						if (element instanceof GraphicsElement) {
-							element.init(renderer)
-							initialized << element
-						}
-					}
-				}
-				addedElements.removeAll(elementsToInit)
-			}
-			if (removedElements) {
-				def elementsToDelete = new ArrayList<Node>(removedElements)
-				elementsToDelete.each { elementToDelete ->
-					elementToDelete.accept { element ->
-						if (element instanceof GraphicsElement) {
-							element.delete(renderer)
-						}
-					}
-				}
-				removedElements.removeAll(elementsToDelete)
-			}
-
-			// Reduce the list of renderable items to those just visible in the scene
+			// Cull the list of renderable items to those just visible in the scene
 			averageNanos('objectCulling', 1f, logger) { ->
 				if (sceneChanged.get() || cameraMoved) {
 					visibleElements.clear()
 					def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
 					scene.accept { element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds) &&
-							initialized.contains(element)) {
+						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
 							visibleElements << element
 						}
 					}

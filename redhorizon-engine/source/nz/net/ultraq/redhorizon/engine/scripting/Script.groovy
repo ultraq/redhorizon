@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.scripting
 
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 
 /**
@@ -36,9 +35,5 @@ abstract class Script<T extends Scriptable> implements SceneEvents {
 
 		this.scriptable = scriptable
 		return this
-	}
-
-	@Override
-	void onSceneAdded(Scene scene) {
 	}
 }

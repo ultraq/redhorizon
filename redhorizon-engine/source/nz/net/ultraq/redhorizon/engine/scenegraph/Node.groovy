@@ -40,10 +40,6 @@ trait Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 		visitor.visit(this)
 	}
 
-	@Override
-	void onSceneAdded(Scene scene) {
-	}
-
 	/**
 	 * Scale this element by the given values.
 	 */

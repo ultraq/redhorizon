@@ -59,6 +59,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 	private final BlockingQueue<Tuple2<SpriteMeshRequest, BlockingQueue<Mesh>>> meshRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<ShaderRequest, BlockingQueue<Shader>>> shaderRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<TextureRequest, BlockingQueue<Texture>>> textureRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
 	private OpenGLCamera camera
@@ -136,11 +137,23 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 	}
 
 	/**
-	 * Run through all of the queued requests for graphics resources.
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
 	 *
 	 * @param renderer
 	 */
 	void processRequests(GraphicsRenderer renderer) {
+
+		if (deletionRequests) {
+			deletionRequests.drain().each { deletionRequest ->
+				switch (deletionRequest) {
+					case Material -> renderer.deleteMaterial(deletionRequest)
+					case Mesh -> renderer.deleteMesh(deletionRequest)
+					case Texture -> renderer.deleteTexture(deletionRequest)
+					default -> throw new IllegalArgumentException("Cannot delete resource of type ${deletionRequest}")
+				}
+			}
+		}
 
 		if (meshRequests) {
 			meshRequests.drain().each { meshRequestAndPipe ->
@@ -176,6 +189,12 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests, EventTarg
 			requestQueue.add(new Tuple2(request, pipe))
 			return pipe.take()
 		} as Callable<V>)
+	}
+
+	@Override
+	void requestDelete(GraphicsResource... resource) {
+
+		deletionRequests.addAll(resource)
 	}
 
 	@Override

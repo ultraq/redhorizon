@@ -43,6 +43,11 @@ interface GraphicsRequests {
 	}
 
 	/**
+	 * Request the graphics system to delete a resource.
+	 */
+	void requestDelete(GraphicsResource... resource)
+
+	/**
 	 * Request the creation of a mesh from the graphics system.
 	 */
 	Future<Mesh> requestMesh(SpriteMeshRequest spriteMeshRequest)
