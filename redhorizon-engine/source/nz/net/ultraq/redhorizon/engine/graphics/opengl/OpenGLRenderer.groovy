@@ -278,15 +278,6 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	@NamedVariant
 	void draw(Mesh mesh, Shader shader, Material material = null) {
 
-		// TODO: This should be an error - move responsiblity to that calling draw 🤔
-		//       Is currently an issue because of the parallel nature of creating
-		//       graphics resources.  Once many can be created and returned at once,
-		//       then this should no longer be needed.
-		if (!mesh || !shader) {
-			logger.warn('draw() method called without a mesh or shader')
-			return
-		}
-
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()
 			if (material) {
