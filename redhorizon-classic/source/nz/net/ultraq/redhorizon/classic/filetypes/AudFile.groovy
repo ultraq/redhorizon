@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
@@ -122,7 +122,7 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	Worker getStreamingDataWorker() {
 
-		return new AudFileWorker()
+		return new Worker(new AudFileDecoder())
 	}
 
 	@Override
@@ -145,12 +145,9 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	/**
-	 * A worker for decoding AUD file sound data.
+	 * Decode AUD file sound data and emit as {@link StreamingSampleEvent}s.
 	 */
-	class AudFileWorker extends Worker {
-
-		@Delegate
-		private ControlledLoop workLoop
+	class AudFileDecoder implements Runnable, EventTarget {
 
 		@Override
 		void run() {
@@ -162,7 +159,7 @@ class AudFile implements SoundFile, Streaming {
 
 			// Decompress the aud file data by chunks
 			def headerSize = input.bytesRead
-			workLoop = new ControlledLoop({ input.bytesRead < headerSize + compressedSize }, { ->
+			while (input.bytesRead < headerSize + compressedSize && !Thread.interrupted()) {
 				def sample = average('Decoding sample', 1f, logger) { ->
 
 					// Chunk header
@@ -177,8 +174,8 @@ class AudFile implements SoundFile, Streaming {
 					)
 				}
 				trigger(new StreamingSampleEvent(sample))
-			})
-			workLoop.run()
+				Thread.sleep(20)
+			}
 
 			logger.debug('Decoding complete')
 		}

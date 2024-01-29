@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -215,7 +215,7 @@ class VqaFile implements VideoFile {
 	@Override
 	Worker getStreamingDataWorker() {
 
-		return new VqaFileWorker()
+		return new Worker(new VqaFileDecoder())
 	}
 
 	/**
@@ -234,9 +234,10 @@ class VqaFile implements VideoFile {
 	}
 
 	/**
-	 * A worker for decoding VQA file video data.
+	 * Decode VQA file frame and sound data and emit as {@link StreamingFrameEvent}s
+	 * and {@link StreamingSampleEvent}s respectively.
 	 */
-	class VqaFileWorker extends Worker {
+	class VqaFileDecoder implements Runnable, EventTarget {
 
 		private final LCW lcw = new LCW()
 		private final Decoder audioDecoder
@@ -247,13 +248,10 @@ class VqaFile implements VideoFile {
 		private final int modifier
 		private final int numBlocks
 
-		@Delegate
-		private ControlledLoop workLoop
-
 		/**
 		 * Constructor, create a new worker for decoding the VQA video data.
 		 */
-		VqaFileWorker() {
+		VqaFileDecoder() {
 
 			audioDecoder = bits == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
@@ -370,7 +368,7 @@ class VqaFile implements VideoFile {
 			}
 
 			// Header + Offsets
-			workLoop = new ControlledLoop({ input.bytesRead < formLength }, { ->
+			while (input.bytesRead < formLength && !Thread.interrupted()) {
 				def chunkHeader = new VqaChunkHeader(input)
 
 				switch (chunkHeader.name) {
@@ -439,8 +437,8 @@ class VqaFile implements VideoFile {
 				}
 
 				discardNullByte()
-			})
-			workLoop.run()
+				Thread.sleep(25)
+			}
 
 			logger.debug('Decoding complete')
 		}

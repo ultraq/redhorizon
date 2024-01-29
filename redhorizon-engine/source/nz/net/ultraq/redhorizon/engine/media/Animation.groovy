@@ -85,7 +85,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 			animationFile.frameRate as int,
 			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
 
-		Executors.newSingleThreadExecutor().execute(animationDataWorker)
+		Executors.newVirtualThreadPerTaskExecutor().execute(animationDataWorker)
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 	@Override
 	void delete(GraphicsRenderer renderer) {
 
-		animationDataWorker.stop()
+		animationDataWorker.cancel(true)
 		frames.drain()
 		renderer.deleteMesh(mesh)
 		textures.each { texture ->
