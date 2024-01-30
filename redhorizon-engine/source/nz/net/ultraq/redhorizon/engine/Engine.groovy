@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -66,9 +67,9 @@ class Engine {
 	}
 
 	/**
-	 * Start the game engine.  This will assign all entity systems their own
-	 * thread to operate on the scene.  This method will block until all systems
-	 * have signalled their ready status.
+	 * Start the game engine.  This will assign all systems their own thread to
+	 * run.  This method will block until all systems have signalled their ready
+	 * status.
 	 */
 	void start() {
 
@@ -109,7 +110,7 @@ class Engine {
 
 		enginesStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!engineStopped) {
-				systems*.stop()
+				systemTasks*.cancel(true)
 				engineStopped = true
 				logger.debug('Engine stopped')
 			}
@@ -121,7 +122,14 @@ class Engine {
 	 */
 	void waitUntilStopped() {
 
-		systemTasks*.get()
+		systemTasks.each { systemTask ->
+			try {
+				systemTask.get()
+			}
+			catch (CancellationException ignored) {
+				// Do nothing
+			}
+		}
 		logger.debug('All systems stopped')
 	}
 }

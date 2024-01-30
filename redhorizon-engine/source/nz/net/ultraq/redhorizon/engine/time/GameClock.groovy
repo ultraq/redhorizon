@@ -16,14 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine.time
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import groovy.transform.InheritConstructors
 
 /**
  * A separate time source from the usual system time, allowing game time to flow
@@ -31,25 +31,13 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
+@InheritConstructors
 class GameClock extends EngineSystem {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
 	private float speed = 1.0f
 	private float lastSpeed
-
-	@Delegate
-	private ControlledLoop timeLoop
-
-	/**
-	 * Constructor, creates a new time system over a scene.
-	 *
-	 * @param scene
-	 */
-	GameClock(Scene scene) {
-
-		super(scene)
-	}
 
 	/**
 	 * Return whether or not time has been paused.
@@ -95,30 +83,34 @@ class GameClock extends EngineSystem {
 		long currentTimeMillis = lastSystemTimeMillis
 
 		logger.debug('Game clock in update loop')
-		timeLoop = new ControlledLoop({ ->
-			Thread.sleep(10)
-			var currentSystemTimeMillis = System.currentTimeMillis()
-			var delta = currentSystemTimeMillis - lastSystemTimeMillis
+		while (!Thread.interrupted()) {
+			try {
+				Thread.sleep(10)
+				var currentSystemTimeMillis = System.currentTimeMillis()
+				var delta = currentSystemTimeMillis - lastSystemTimeMillis
 
-			// Normal flow of time, accumulate ticks at the same rate as system time
-			if (speed == 1.0f) {
-				currentTimeMillis += delta
-			}
-			// Modified flow, accumulate ticks at system time * flow speed
-			else {
-				currentTimeMillis += (delta * speed)
-			}
-
-			// Update time with scene objects
-			scene.accept { element ->
-				if (element instanceof Temporal) {
-					element.tick(currentTimeMillis)
+				// Normal flow of time, accumulate ticks at the same rate as system time
+				if (speed == 1.0f) {
+					currentTimeMillis += delta
 				}
-			}
+				// Modified flow, accumulate ticks at system time * flow speed
+				else {
+					currentTimeMillis += (delta * speed)
+				}
 
-			lastSystemTimeMillis = currentSystemTimeMillis
-		})
-		timeLoop.run()
+				// Update time with scene objects
+				scene.accept { element ->
+					if (element instanceof Temporal) {
+						element.tick(currentTimeMillis)
+					}
+				}
+
+				lastSystemTimeMillis = currentSystemTimeMillis
+			}
+			catch (InterruptedException ignored) {
+				break
+			}
+		}
 
 		trigger(new SystemStoppedEvent())
 		logger.debug('Game clock stopped')

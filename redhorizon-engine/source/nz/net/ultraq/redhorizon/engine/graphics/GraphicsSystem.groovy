@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
@@ -29,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -41,7 +39,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class GraphicsSystem extends EngineSystem implements EventTarget {
+class GraphicsSystem extends EngineSystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
@@ -56,9 +54,6 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 	private boolean shouldToggleFullScreen
 	private boolean shouldToggleVsync
 	private long lastClickTime
-
-	@Delegate
-	private ControlledLoop systemLoop
 
 	/**
 	 * Constructor, build a new system for rendering graphics.
@@ -172,20 +167,24 @@ class GraphicsSystem extends EngineSystem implements EventTarget {
 
 								// Rendering loop
 								logger.debug('Graphics system in render loop...')
-								systemLoop = new ControlledLoop({ !window.shouldClose() }, { ->
-									if (shouldToggleFullScreen) {
-										window.toggleFullScreen()
-										shouldToggleFullScreen = false
+								while (!window.shouldClose() && !Thread.interrupted()) {
+									try {
+										if (shouldToggleFullScreen) {
+											window.toggleFullScreen()
+											shouldToggleFullScreen = false
+										}
+										if (shouldToggleVsync) {
+											window.toggleVsync()
+											shouldToggleVsync = false
+										}
+										pipeline.render()
+										window.swapBuffers()
+										window.pollEvents()
 									}
-									if (shouldToggleVsync) {
-										window.toggleVsync()
-										shouldToggleVsync = false
+									catch (InterruptedException ignored) {
+										break
 									}
-									pipeline.render()
-									window.swapBuffers()
-									window.pollEvents()
-								})
-								systemLoop.run()
+								}
 
 								// Shutdown
 								logger.debug('Shutting down graphics system')
