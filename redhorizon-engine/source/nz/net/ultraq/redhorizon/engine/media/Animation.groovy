@@ -28,8 +28,8 @@ import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -59,7 +59,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 	final int numFrames
 	final float frameRate
 
-	private final Worker animationDataWorker
+	private final StreamingDecoder animationDataWorker
 	private final BlockingQueue<ByteBuffer> frames
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
@@ -83,7 +83,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 
 		this(animationFile.width, animationFile.height, animationFile.format, animationFile.numFrames, animationFile.frameRate,
 			animationFile.frameRate as int,
-			animationFile instanceof Streaming ? animationFile.streamingDataWorker : null)
+			animationFile instanceof Streaming ? animationFile.streamingDecoder : null)
 
 		Executors.newVirtualThreadPerTaskExecutor().execute(animationDataWorker)
 	}
@@ -101,7 +101,7 @@ class Animation implements GraphicsElement, Playable, SceneElement<Animation>, T
 	 */
 	@PackageScope
 	Animation(int width, int height, ColourFormat format, int numFrames, float frameRate,
-		int bufferSize = 10, Worker animationDataWorker) {
+		int bufferSize = 10, StreamingDecoder animationDataWorker) {
 
 		if (!animationDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')

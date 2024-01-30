@@ -20,21 +20,21 @@ package nz.net.ultraq.redhorizon.filetypes
  * Certain files are better read by streaming their data out rather than
  * obtaining it all in one go, usually for the purpose of saving memory.  This
  * interface provides the ability for files to expose that streaming data
- * through {@link Worker} classes that can be started and listened to by a
- * consuming thread.
+ * through a {@link StreamingDecoder}.
  *
  * @author Emanuel Rabina
  */
 interface Streaming {
 
 	/**
-	 * Returns a worker that can be used for streaming file data.  Workers can be
-	 * listened to for events that contain data in useful portions that are usable
-	 * by some kind of consumer.
+	 * Returns an object for streaming file data.  Streaming decoders can be
+	 * submitted to executors to begin processing, and then  listened to for
+	 * events that contain data in useful portions that are usable by some kind of
+	 * consumer.
 	 *
 	 * @return
-	 *   A worker that can be executed as its own thread for generating the
-	 *   streaming data.
+	 *   A streaming decoder that can be executed as its own thread for generating
+	 *   the data.
 	 */
-	Worker getStreamingDataWorker()
+	StreamingDecoder getStreamingDecoder()
 }

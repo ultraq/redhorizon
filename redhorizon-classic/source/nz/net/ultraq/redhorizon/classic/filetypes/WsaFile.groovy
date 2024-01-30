@@ -24,8 +24,8 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import org.slf4j.Logger
@@ -118,7 +118,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
 			def frames = []
-			def worker = streamingDataWorker
+			def worker = streamingDecoder
 			worker.on(StreamingFrameEvent) { event ->
 				frames << event.frame
 			}
@@ -133,12 +133,12 @@ class WsaFile implements AnimationFile, Streaming {
 	 * Return a worker that can be used for streaming the animation's frames.  The
 	 * worker will emit {@link StreamingFrameEvent}s for new frames available.
 	 *
-	 * @return Worker for streaming animation data.
+	 * @return StreamingDecoder for streaming animation data.
 	 */
 	@Override
-	Worker getStreamingDataWorker() {
+	StreamingDecoder getStreamingDecoder() {
 
-		return new Worker(new WsaFileDecoder())
+		return new StreamingDecoder(new WsaFileDecoder())
 	}
 
 	/**

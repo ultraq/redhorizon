@@ -22,8 +22,8 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import org.slf4j.Logger
@@ -100,7 +100,7 @@ class AudFile implements SoundFile, Streaming {
 
 		return ByteBuffer.fromBuffers(
 			Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-				def worker = streamingDataWorker
+				def worker = streamingDecoder
 				def samples = []
 				worker.on(StreamingSampleEvent) { event ->
 					samples << event.sample
@@ -117,12 +117,12 @@ class AudFile implements SoundFile, Streaming {
 	 * Returns a worker that can be run to start streaming sound data.  The worker
 	 * will emit {@link StreamingSampleEvent}s for new samples available.
 	 *
-	 * @return Worker for streaming sound data.
+	 * @return StreamingDecoder for streaming sound data.
 	 */
 	@Override
-	Worker getStreamingDataWorker() {
+	StreamingDecoder getStreamingDecoder() {
 
-		return new Worker(new AudFileDecoder())
+		return new StreamingDecoder(new AudFileDecoder())
 	}
 
 	@Override

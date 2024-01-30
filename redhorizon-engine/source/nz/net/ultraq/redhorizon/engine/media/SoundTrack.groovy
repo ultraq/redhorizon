@@ -22,8 +22,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.SceneElement
 import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,7 +50,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement, Temporal {
 	final int channels
 	final int frequency
 
-	private final Worker soundDataWorker
+	private final StreamingDecoder soundDataWorker
 	private final BlockingQueue<ByteBuffer> samples
 	private final int bufferSize
 	private final CountDownLatch bufferReady = new CountDownLatch(1)
@@ -68,7 +68,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement, Temporal {
 	SoundTrack(SoundFile soundFile) {
 
 		this(soundFile.bits, soundFile.channels, soundFile.frequency,
-			soundFile instanceof Streaming ? soundFile.streamingDataWorker : null)
+			soundFile instanceof Streaming ? soundFile.streamingDecoder : null)
 
 		Executors.newVirtualThreadPerTaskExecutor().execute(soundDataWorker)
 	}
@@ -83,7 +83,7 @@ class SoundTrack implements AudioElement, Playable, SceneElement, Temporal {
 	 * @param soundDataWorker
 	 */
 	@PackageScope
-	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, Worker soundDataWorker) {
+	SoundTrack(int bits, int channels, int frequency, int bufferSize = 10, StreamingDecoder soundDataWorker) {
 
 		if (!soundDataWorker) {
 			throw new UnsupportedOperationException('Streaming configuration used, but source doesn\'t support streaming')

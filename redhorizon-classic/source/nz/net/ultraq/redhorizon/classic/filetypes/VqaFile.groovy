@@ -23,10 +23,10 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.codecs.Decoder
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
@@ -176,7 +176,7 @@ class VqaFile implements VideoFile {
 
 		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
 			def frames = []
-			def worker = streamingDataWorker
+			def worker = streamingDecoder
 			worker.on(StreamingFrameEvent) { event ->
 				frames << event.frame
 			}
@@ -193,7 +193,7 @@ class VqaFile implements VideoFile {
 		return ByteBuffer.fromBuffers(
 			Executors.newSingleThreadExecutor().executeAndShutdown { ExecutorService executorService ->
 				def samples = []
-				def worker = streamingDataWorker
+				def worker = streamingDecoder
 				worker.on(StreamingSampleEvent) { event ->
 					samples << event.sample
 				}
@@ -210,12 +210,12 @@ class VqaFile implements VideoFile {
 	 * {@link StreamingFrameEvent}s for new frames, and
 	 * {@link StreamingSampleEvent}s for new samples.
 	 *
-	 * @return Worker for streaming video data.
+	 * @return StreamingDecoder for streaming video data.
 	 */
 	@Override
-	Worker getStreamingDataWorker() {
+	StreamingDecoder getStreamingDecoder() {
 
-		return new Worker(new VqaFileDecoder())
+		return new StreamingDecoder(new VqaFileDecoder())
 	}
 
 	/**

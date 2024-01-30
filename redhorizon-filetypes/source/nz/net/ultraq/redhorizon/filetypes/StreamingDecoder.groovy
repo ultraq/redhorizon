@@ -29,12 +29,12 @@ import java.util.concurrent.FutureTask
  *
  * @author Emanuel Rabina
  */
-class Worker extends FutureTask<Void> implements EventTarget {
+class StreamingDecoder extends FutureTask<Void> implements EventTarget {
 
 	/**
 	 * Constructor, set the work loop.
 	 */
-	Worker(Runnable runnable) {
+	StreamingDecoder(Runnable runnable) {
 
 		super(runnable, null)
 		assert runnable instanceof EventTarget
