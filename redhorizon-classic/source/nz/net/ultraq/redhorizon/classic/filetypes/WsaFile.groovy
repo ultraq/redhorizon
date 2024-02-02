@@ -16,16 +16,16 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import org.slf4j.Logger
@@ -118,7 +118,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
 			def frames = []
-			def worker = streamingDataWorker
+			def worker = streamingDecoder
 			worker.on(StreamingFrameEvent) { event ->
 				frames << event.frame
 			}
@@ -130,15 +130,14 @@ class WsaFile implements AnimationFile, Streaming {
 	}
 
 	/**
-	 * Return a worker that can be used for streaming the animation's frames.  The
-	 * worker will emit {@link StreamingFrameEvent}s for new frames available.
-	 *
-	 * @return Worker for streaming animation data.
+	 * Return a decoder that can be used for streaming the animation's frames.
+	 * The decoder will emit {@link StreamingFrameEvent}s for new frames
+	 * available.
 	 */
 	@Override
-	Worker getStreamingDataWorker() {
+	StreamingDecoder getStreamingDecoder() {
 
-		return new WsaFileWorker()
+		return new StreamingDecoder(new WsaFileDecoder())
 	}
 
 	/**
@@ -156,12 +155,9 @@ class WsaFile implements AnimationFile, Streaming {
 	}
 
 	/**
-	 * A worker for decoding WSA file frame data.
+	 * Decode WSA file frame data and emit as {@link StreamingFrameEvent}s.
 	 */
-	class WsaFileWorker extends Worker {
-
-		@Delegate
-		private ControlledLoop workLoop
+	class WsaFileDecoder implements Runnable, EventTarget {
 
 		@Override
 		void run() {
@@ -175,7 +171,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 			// Decode frame by frame
 			def frame = 0
-			workLoop = new ControlledLoop({ frame < numFrames }, { ->
+			while (frame < numFrames && !Thread.interrupted()) {
 				def colouredFrame = average('Decoding frame', 1f, logger) { ->
 					def indexedFrame = xorDelta.decode(
 						lcw.decode(
@@ -188,8 +184,8 @@ class WsaFile implements AnimationFile, Streaming {
 				}
 				trigger(new StreamingFrameEvent(colouredFrame))
 				frame++
-			})
-			workLoop.run()
+				Thread.sleep(50)
+			}
 
 			logger.debug('Decoding complete')
 		}

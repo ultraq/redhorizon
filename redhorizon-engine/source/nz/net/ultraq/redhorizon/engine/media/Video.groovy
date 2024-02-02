@@ -50,7 +50,7 @@ class Video implements AudioElement, GraphicsElement, Playable, Node {
 	Video(VideoFile videoFile) {
 
 		if (videoFile instanceof Streaming) {
-			def videoWorker = videoFile.streamingDataWorker
+			def videoWorker = videoFile.streamingDecoder
 
 			animation = new Animation(videoFile.width, videoFile.height, videoFile.format, videoFile.numFrames, videoFile.frameRate,
 				videoFile.frameRate * 2 as int, videoWorker)

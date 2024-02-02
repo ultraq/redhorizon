@@ -83,7 +83,7 @@ class VideoLoader extends MediaLoader<VideoFile, Video> {
 		if (media.playing) {
 			media.stop()
 		}
-		file.streamingDataWorker.stop()
+		file.streamingDecoder.stop()
 		if (gameClock.paused) {
 			gameClock.resume()
 		}

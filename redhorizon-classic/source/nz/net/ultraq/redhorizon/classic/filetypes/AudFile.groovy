@@ -16,14 +16,14 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.async.ControlledLoop
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
-import nz.net.ultraq.redhorizon.filetypes.Worker
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import org.slf4j.Logger
@@ -100,7 +100,7 @@ class AudFile implements SoundFile, Streaming {
 
 		return ByteBuffer.fromBuffers(
 			Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-				def worker = streamingDataWorker
+				def worker = streamingDecoder
 				def samples = []
 				worker.on(StreamingSampleEvent) { event ->
 					samples << event.sample
@@ -114,15 +114,13 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data.  The worker
-	 * will emit {@link StreamingSampleEvent}s for new samples available.
-	 *
-	 * @return Worker for streaming sound data.
+	 * Returns a decoder that can be run to start streaming sound data.  The
+	 * decoder will emit {@link StreamingSampleEvent}s for new samples available.
 	 */
 	@Override
-	Worker getStreamingDataWorker() {
+	StreamingDecoder getStreamingDecoder() {
 
-		return new AudFileWorker()
+		return new StreamingDecoder(new AudFileDecoder())
 	}
 
 	@Override
@@ -145,12 +143,9 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	/**
-	 * A worker for decoding AUD file sound data.
+	 * Decode AUD file sound data and emit as {@link StreamingSampleEvent}s.
 	 */
-	class AudFileWorker extends Worker {
-
-		@Delegate
-		private ControlledLoop workLoop
+	class AudFileDecoder implements Runnable, EventTarget {
 
 		@Override
 		void run() {
@@ -162,7 +157,7 @@ class AudFile implements SoundFile, Streaming {
 
 			// Decompress the aud file data by chunks
 			def headerSize = input.bytesRead
-			workLoop = new ControlledLoop({ input.bytesRead < headerSize + compressedSize }, { ->
+			while (input.bytesRead < headerSize + compressedSize && !Thread.interrupted()) {
 				def sample = average('Decoding sample', 1f, logger) { ->
 
 					// Chunk header
@@ -177,8 +172,8 @@ class AudFile implements SoundFile, Streaming {
 					)
 				}
 				trigger(new StreamingSampleEvent(sample))
-			})
-			workLoop.run()
+				Thread.sleep(20)
+			}
 
 			logger.debug('Decoding complete')
 		}

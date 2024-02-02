@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.async.RateLimitedLoop
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
@@ -45,11 +44,10 @@ class AudioSystem extends EngineSystem {
 	final AudioConfiguration config
 
 	// For object lifecycles
+	// TODO: Move to using the 'request' system from the scripting branch to remove these
 	private final CopyOnWriteArrayList<Node> addedElements = new CopyOnWriteArrayList<>()
 	private final CopyOnWriteArrayList<Node> removedElements = new CopyOnWriteArrayList<>()
-
-	@Delegate
-	private RateLimitedLoop systemLoop
+	private final Set<AudioElement> initialized = new HashSet<>()
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -89,40 +87,47 @@ class AudioSystem extends EngineSystem {
 
 				// Rendering loop
 				logger.debug('Audio system in render loop...')
-				systemLoop = new RateLimitedLoop(10, { ->
+				while (!Thread.interrupted()) {
+					try {
+						rateLimit(100) { ->
 
-					// Initialize or delete objects which have been added/removed to/from the scene
-					if (addedElements) {
-						def elementsToInit = new ArrayList<Node>(addedElements)
-						elementsToInit.each { elementToInit ->
-							elementToInit.accept { element ->
-								if (element instanceof AudioElement) {
-									element.init(renderer)
+							// Initialize or delete objects which have been added/removed to/from the scene
+							if (addedElements) {
+								def elementsToInit = new ArrayList<Node>(addedElements)
+								elementsToInit.each { elementToInit ->
+									elementToInit.accept { element ->
+										if (element instanceof AudioElement) {
+											element.init(renderer)
+											initialized << element
+										}
+									}
+								}
+								addedElements.removeAll(elementsToInit)
+							}
+							if (removedElements) {
+								def elementsToDelete = new ArrayList<Node>(removedElements)
+								elementsToDelete.each { elementToInit ->
+									elementToInit.accept { element ->
+										if (element instanceof AudioElement) {
+											element.delete(renderer)
+										}
+									}
+								}
+								removedElements.removeAll(elementsToDelete)
+							}
+
+							// Run the audio elements
+							scene.accept { element ->
+								if (element instanceof AudioElement && initialized.contains(element)) {
+									element.render(renderer)
 								}
 							}
 						}
-						addedElements.removeAll(elementsToInit)
 					}
-					if (removedElements) {
-						def elementsToDelete = new ArrayList<Node>(removedElements)
-						elementsToDelete.each { elementToInit ->
-							elementToInit.accept { element ->
-								if (element instanceof AudioElement) {
-									element.delete(renderer)
-								}
-							}
-						}
-						removedElements.removeAll(elementsToDelete)
+					catch (InterruptedException ignored) {
+						break
 					}
-
-					// Run the audio elements
-					scene.accept { element ->
-						if (element instanceof AudioElement) {
-							element.render(renderer)
-						}
-					}
-				})
-				systemLoop.run()
+				}
 
 				// Shutdown
 				scene.accept { sceneElement ->
