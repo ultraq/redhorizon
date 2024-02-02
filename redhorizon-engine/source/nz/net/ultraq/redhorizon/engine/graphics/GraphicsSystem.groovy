@@ -34,9 +34,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -53,8 +51,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final String windowTitle
 	private final GraphicsConfiguration config
 	private final InputEventStream inputEventStream
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
-	private final BlockingQueue<Tuple2<Request, BlockingQueue>> creationRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
@@ -150,14 +147,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 		if (creationRequests) {
 			creationRequests.drain().each { creationRequest ->
-				def (request, pipe) = creationRequest
+				def (request, future) = creationRequest
 				var resource = switch (request) {
 					case ShaderRequest -> renderer.getShader(request.name())
 					case SpriteMeshRequest -> renderer.createSpriteMesh(surface: request.surface())
 					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
 					default -> throw new IllegalArgumentException("Cannot create resource from type ${request}")
 				}
-				pipe.add(resource)
+				future.complete(resource)
 			}
 		}
 	}
@@ -165,11 +162,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	<V extends GraphicsResource, R extends Request<V>> Future<V> requestCreateOrGet(R request) {
 
-		return executorService.submit({ ->
-			var pipe = new LinkedBlockingQueue<V>(1)
-			creationRequests.add(new Tuple2(request, pipe))
-			return pipe.take()
-		} as Callable<V>)
+		var future = new CompletableFuture<V>()
+		creationRequests << new Tuple2(request, future)
+		return future
 	}
 
 	@Override
