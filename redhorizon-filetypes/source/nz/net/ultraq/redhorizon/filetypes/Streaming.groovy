@@ -28,7 +28,7 @@ interface Streaming {
 
 	/**
 	 * Returns an object for streaming file data.  Streaming decoders can be
-	 * submitted to executors to begin processing, and then  listened to for
+	 * submitted to executors to begin processing, and then listened to for
 	 * events that contain data in useful portions that are usable by some kind of
 	 * consumer.
 	 *

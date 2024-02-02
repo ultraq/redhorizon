@@ -114,10 +114,8 @@ class AudFile implements SoundFile, Streaming {
 	}
 
 	/**
-	 * Returns a worker that can be run to start streaming sound data.  The worker
-	 * will emit {@link StreamingSampleEvent}s for new samples available.
-	 *
-	 * @return StreamingDecoder for streaming sound data.
+	 * Returns a decoder that can be run to start streaming sound data.  The
+	 * decoder will emit {@link StreamingSampleEvent}s for new samples available.
 	 */
 	@Override
 	StreamingDecoder getStreamingDecoder() {

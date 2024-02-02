@@ -206,11 +206,9 @@ class VqaFile implements VideoFile {
 	}
 
 	/**
-	 * Return a worker that can be used for streaming video.  The worker will emit
-	 * {@link StreamingFrameEvent}s for new frames, and
-	 * {@link StreamingSampleEvent}s for new samples.
-	 *
-	 * @return StreamingDecoder for streaming video data.
+	 * Return a decoder that can be used for streaming video.  The decoder will
+	 * emit {@link StreamingFrameEvent}s for new frames and
+	 * {@link StreamingSampleEvent}s for new sound samples.
 	 */
 	@Override
 	StreamingDecoder getStreamingDecoder() {

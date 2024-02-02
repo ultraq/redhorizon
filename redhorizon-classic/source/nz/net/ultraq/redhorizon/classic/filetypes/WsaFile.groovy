@@ -130,10 +130,9 @@ class WsaFile implements AnimationFile, Streaming {
 	}
 
 	/**
-	 * Return a worker that can be used for streaming the animation's frames.  The
-	 * worker will emit {@link StreamingFrameEvent}s for new frames available.
-	 *
-	 * @return StreamingDecoder for streaming animation data.
+	 * Return a decoder that can be used for streaming the animation's frames.
+	 * The decoder will emit {@link StreamingFrameEvent}s for new frames
+	 * available.
 	 */
 	@Override
 	StreamingDecoder getStreamingDecoder() {
