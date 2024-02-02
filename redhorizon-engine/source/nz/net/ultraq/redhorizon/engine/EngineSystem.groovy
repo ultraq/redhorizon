@@ -34,4 +34,23 @@ abstract class EngineSystem implements Runnable, EventTarget {
 
 		this.scene = scene
 	}
+
+	/**
+	 * Execute an action and optionally wait, such that, if repeated, it would run
+	 * no faster than the given frequency.
+	 *
+	 * @param frequency
+	 *   The number of times per second the action could be repeated.
+	 * @param action
+	 * @return
+	 */
+	protected static void rateLimit(float frequency, Closure action) {
+
+		var maxExecTime = 1000f / frequency
+		var execTime = time(action)
+		var waitTime = maxExecTime - execTime
+		if (waitTime > 0) {
+			Thread.sleep((long)waitTime)
+		}
+	}
 }

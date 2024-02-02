@@ -85,27 +85,28 @@ class GameClock extends EngineSystem {
 		logger.debug('Game clock in update loop')
 		while (!Thread.interrupted()) {
 			try {
-				Thread.sleep(10)
-				var currentSystemTimeMillis = System.currentTimeMillis()
-				var delta = currentSystemTimeMillis - lastSystemTimeMillis
+				rateLimit(100) { ->
+					var currentSystemTimeMillis = System.currentTimeMillis()
+					var delta = currentSystemTimeMillis - lastSystemTimeMillis
 
-				// Normal flow of time, accumulate ticks at the same rate as system time
-				if (speed == 1.0f) {
-					currentTimeMillis += delta
-				}
-				// Modified flow, accumulate ticks at system time * flow speed
-				else {
-					currentTimeMillis += (delta * speed)
-				}
-
-				// Update time with scene objects
-				scene.accept { element ->
-					if (element instanceof Temporal) {
-						element.tick(currentTimeMillis)
+					// Normal flow of time, accumulate ticks at the same rate as system time
+					if (speed == 1.0f) {
+						currentTimeMillis += delta
 					}
-				}
+					// Modified flow, accumulate ticks at system time * flow speed
+					else {
+						currentTimeMillis += (delta * speed)
+					}
 
-				lastSystemTimeMillis = currentSystemTimeMillis
+					// Update time with scene objects
+					scene.accept { element ->
+						if (element instanceof Temporal) {
+							element.tick(currentTimeMillis)
+						}
+					}
+
+					lastSystemTimeMillis = currentSystemTimeMillis
+				}
 			}
 			catch (InterruptedException ignored) {
 				break

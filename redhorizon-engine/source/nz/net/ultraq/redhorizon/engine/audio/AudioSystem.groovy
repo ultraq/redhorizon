@@ -44,8 +44,10 @@ class AudioSystem extends EngineSystem {
 	final AudioConfiguration config
 
 	// For object lifecycles
+	// TODO: Move to using the 'request' system from the scripting branch to remove these
 	private final CopyOnWriteArrayList<SceneElement> addedElements = new CopyOnWriteArrayList<>()
 	private final CopyOnWriteArrayList<SceneElement> removedElements = new CopyOnWriteArrayList<>()
+	private final Set<AudioElement> initialized = new HashSet<>()
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -87,39 +89,40 @@ class AudioSystem extends EngineSystem {
 				logger.debug('Audio system in render loop...')
 				while (!Thread.interrupted()) {
 					try {
+						rateLimit(100) { ->
 
-						// Initialize or delete objects which have been added/removed to/from the scene
-						if (addedElements) {
-							def elementsToInit = new ArrayList<SceneElement>(addedElements)
-							elementsToInit.each { elementToInit ->
-								elementToInit.accept { element ->
-									if (element instanceof AudioElement) {
-										element.init(renderer)
+							// Initialize or delete objects which have been added/removed to/from the scene
+							if (addedElements) {
+								def elementsToInit = new ArrayList<SceneElement>(addedElements)
+								elementsToInit.each { elementToInit ->
+									elementToInit.accept { element ->
+										if (element instanceof AudioElement) {
+											element.init(renderer)
+											initialized << element
+										}
 									}
 								}
+								addedElements.removeAll(elementsToInit)
 							}
-							addedElements.removeAll(elementsToInit)
-						}
-						if (removedElements) {
-							def elementsToDelete = new ArrayList<SceneElement>(removedElements)
-							elementsToDelete.each { elementToInit ->
-								elementToInit.accept { element ->
-									if (element instanceof AudioElement) {
-										element.delete(renderer)
+							if (removedElements) {
+								def elementsToDelete = new ArrayList<SceneElement>(removedElements)
+								elementsToDelete.each { elementToInit ->
+									elementToInit.accept { element ->
+										if (element instanceof AudioElement) {
+											element.delete(renderer)
+										}
 									}
 								}
+								removedElements.removeAll(elementsToDelete)
 							}
-							removedElements.removeAll(elementsToDelete)
-						}
 
-						// Run the audio elements
-						scene.accept { element ->
-							if (element instanceof AudioElement) {
-								element.render(renderer)
+							// Run the audio elements
+							scene.accept { element ->
+								if (element instanceof AudioElement && initialized.contains(element)) {
+									element.render(renderer)
+								}
 							}
 						}
-
-						Thread.sleep(10)
 					}
 					catch (InterruptedException ignored) {
 						break
