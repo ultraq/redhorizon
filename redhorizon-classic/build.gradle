@@ -24,7 +24,6 @@ description = 'Code that bridges the classic C&C file formats for use with the R
 year = '2007'
 
 dependencies {
-	implementation project(':redhorizon-async')
 	implementation project(':redhorizon-engine')
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-filetypes')
@@ -35,7 +34,6 @@ dependencies {
 shadowJar {
 	archiveClassifier.set('')
 	dependencies {
-		include(project(':redhorizon-async'))
 		include(project(':redhorizon-engine'))
 		include(project(':redhorizon-events'))
 		include(project(':redhorizon-filetypes'))
@@ -49,7 +47,6 @@ groovydoc {
 		here, and serve as working examples for other programmers.
 	''')
 	// Can't link to these until they get published on maven central themselves
-//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-async/${version}/", 'nz.net.ultraq.redhorizon.async.')
 //	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
 //	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
 }
