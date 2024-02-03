@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffect
 import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 

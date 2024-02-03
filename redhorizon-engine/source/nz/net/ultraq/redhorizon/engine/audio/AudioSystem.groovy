@@ -21,15 +21,15 @@ import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.NodeAddedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.NodeRemovedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * Audio system, manages the connection to the audio hardware and playback of
@@ -37,17 +37,14 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class AudioSystem extends EngineSystem {
+class AudioSystem extends EngineSystem implements AudioRequests {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
-	final AudioConfiguration config
+	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<AudioResource> deletionRequests = new LinkedBlockingQueue<>()
 
-	// For object lifecycles
-	// TODO: Move to using the 'request' system from the scripting branch to remove these
-	private final CopyOnWriteArrayList<Node> addedElements = new CopyOnWriteArrayList<>()
-	private final CopyOnWriteArrayList<Node> removedElements = new CopyOnWriteArrayList<>()
-	private final Set<AudioElement> initialized = new HashSet<>()
+	final AudioConfiguration config
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -59,12 +56,51 @@ class AudioSystem extends EngineSystem {
 
 		super(scene)
 		this.config = config ?: new AudioConfiguration()
-		this.scene.on(NodeAddedEvent) { event ->
-			addedElements << event.element
+	}
+
+	/**
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
+	 *
+	 * @param renderer
+	 */
+	private void processRequests(AudioRenderer renderer) {
+
+		if (deletionRequests) {
+			deletionRequests.drain().each { deletionRequest ->
+				switch (deletionRequest) {
+					case Source -> renderer.deleteSource(deletionRequest)
+					case Buffer -> renderer.deleteBuffers(deletionRequest)
+					default -> throw new IllegalArgumentException("Cannot delete resource of type ${deletionRequest}")
+				}
+			}
 		}
-		this.scene.on(NodeRemovedEvent) { event ->
-			removedElements << event.element
+
+		if (creationRequests) {
+			creationRequests.drain().each { creationRequest ->
+				def (request, future) = creationRequest
+				var resource = switch (request) {
+					case SourceRequest -> renderer.createSource()
+					case BufferRequest -> renderer.createBuffer(request.bits(), request.channels(), request.frequency(), request.data())
+					default -> throw new IllegalArgumentException("Cannot create resource from type ${request}")
+				}
+				future.complete(resource)
+			}
 		}
+	}
+
+	@Override
+	<V extends AudioResource, R extends Request<V>> Future<V> requestCreateOrGet(R request) {
+
+		var future = new CompletableFuture<V>()
+		creationRequests << new Tuple2(request, future)
+		return future
+	}
+
+	@Override
+	void requestDelete(AudioResource... resources) {
+
+		deletionRequests.addAll(resources)
 	}
 
 	/**
@@ -83,6 +119,8 @@ class AudioSystem extends EngineSystem {
 			context.withCurrent { ->
 				def renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
+
+				scene.audioRequestsHandler = this
 				trigger(new SystemReadyEvent())
 
 				// Rendering loop
@@ -91,34 +129,11 @@ class AudioSystem extends EngineSystem {
 					try {
 						rateLimit(100) { ->
 
-							// Initialize or delete objects which have been added/removed to/from the scene
-							if (addedElements) {
-								def elementsToInit = new ArrayList<Node>(addedElements)
-								elementsToInit.each { elementToInit ->
-									elementToInit.accept { element ->
-										if (element instanceof AudioElement) {
-											element.init(renderer)
-											initialized << element
-										}
-									}
-								}
-								addedElements.removeAll(elementsToInit)
-							}
-							if (removedElements) {
-								def elementsToDelete = new ArrayList<Node>(removedElements)
-								elementsToDelete.each { elementToInit ->
-									elementToInit.accept { element ->
-										if (element instanceof AudioElement) {
-											element.delete(renderer)
-										}
-									}
-								}
-								removedElements.removeAll(elementsToDelete)
-							}
+							processRequests(renderer)
 
 							// Run the audio elements
 							scene.accept { element ->
-								if (element instanceof AudioElement && initialized.contains(element)) {
+								if (element instanceof AudioElement) {
 									element.render(renderer)
 								}
 							}
@@ -130,11 +145,6 @@ class AudioSystem extends EngineSystem {
 				}
 
 				// Shutdown
-				scene.accept { sceneElement ->
-					if (sceneElement instanceof AudioElement) {
-						sceneElement.delete(renderer)
-					}
-				}
 				logger.debug('Shutting down audio system')
 			}
 		}

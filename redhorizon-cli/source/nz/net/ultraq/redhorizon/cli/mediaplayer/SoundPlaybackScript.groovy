@@ -16,23 +16,24 @@
 
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffectScript
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
- * A script to make a sprite node behave as a full-screen image.
+ * A script to control playback of a sound effect.
  *
  * @author Emanuel Rabina
  */
-class ImageScript extends SpriteScript {
+class SoundPlaybackScript extends SoundEffectScript {
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		var width = sprite.imageFile.width
-		var height = sprite.imageFile.height
-		sprite
-			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-			.translate(-width / 2, -height / 2)
+		scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play', { ->
+			soundEffect.play()
+		}))
 	}
 }

@@ -40,6 +40,8 @@ class ControlsOverlayRenderPass implements OverlayRenderPass {
 
 	ControlsOverlayRenderPass(InputEventStream inputEventStream) {
 
+		enabled = true
+
 		inputEventStream.on(ControlAddedEvent) { event ->
 			controls << event.control.toString()
 		}

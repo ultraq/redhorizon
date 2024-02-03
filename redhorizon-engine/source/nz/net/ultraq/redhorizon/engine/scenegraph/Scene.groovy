@@ -16,8 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -33,7 +35,11 @@ class Scene implements EventTarget, Visitable {
 	private final List<Node> nodes = new CopyOnWriteArrayList<>()
 
 	@Delegate
+	AudioRequests audioRequestsHandler
+	@Delegate
 	GraphicsRequests graphicsRequestHandler
+	// TODO: A better name for this or way for nodes to have access to inputs?
+	InputEventStream inputEventStream
 
 	Window window
 

@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
-
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
+package nz.net.ultraq.redhorizon.engine.audio
 
 /**
- * A script to make a sprite node behave as a full-screen image.
+ * Identifies a resource that can only be created/deleted via the audio system
+ * and its thread.
  *
  * @author Emanuel Rabina
  */
-class ImageScript extends SpriteScript {
-
-	@Override
-	void onSceneAdded(Scene scene) {
-
-		var width = sprite.imageFile.width
-		var height = sprite.imageFile.height
-		sprite
-			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-			.translate(-width / 2, -height / 2)
-	}
+interface AudioResource extends Closeable {
 }

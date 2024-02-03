@@ -137,7 +137,7 @@ class SoundTrack implements AudioElement, Playable, Node, Temporal {
 			if (samples.size()) {
 				logger.trace('Samples available: {}', samples.size())
 				def newBufferIds = samples.drain(5).collect { buffer ->
-					def newBufferId = renderer.createBuffer(buffer, bits, channels, frequency)
+					def newBufferId = renderer.createBuffer(bits, channels, frequency, buffer)
 					bufferIds << newBufferId
 					return newBufferId
 				}

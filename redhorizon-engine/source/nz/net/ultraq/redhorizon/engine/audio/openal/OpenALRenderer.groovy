@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,13 @@ package nz.net.ultraq.redhorizon.engine.audio.openal
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
+import nz.net.ultraq.redhorizon.engine.audio.Buffer
+import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.audio.Source
+import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
+import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 import nz.net.ultraq.redhorizon.engine.geometry.Orientation
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3f
 import org.lwjgl.openal.AL
@@ -33,7 +39,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenALRenderer implements AudioRenderer {
+class OpenALRenderer implements AudioRenderer, EventTarget {
 
 	private final AudioConfiguration config
 
@@ -69,100 +75,44 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void attachBufferToSource(int sourceId, int bufferId) {
-
-		checkForError { -> alSourcei(sourceId, AL_BUFFER, bufferId) }
-	}
-
-	@Override
 	int buffersProcessed(int sourceId) {
 
 		return checkForError { -> alGetSourcei(sourceId, AL_BUFFERS_PROCESSED) }
 	}
 
 	@Override
-	int createBuffer(ByteBuffer data, int bits, int channels, int frequency) {
+	Buffer createBuffer(int bits, int channels, int frequency, ByteBuffer data) {
 
-		return stackPush().withCloseable { stack ->
-			int bufferId = checkForError { -> alGenBuffers() }
-			def format = switch (bits) {
-				case 8 -> channels == 2 ? AL_FORMAT_STEREO8 : AL_FORMAT_MONO8
-				case 16 -> channels == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16
-				default -> 0
-			}
-			def soundBuffer = stack.malloc(data.capacity())
-				.put(data)
-				.flip()
-			data.rewind()
-			checkForError { -> alBufferData(bufferId, format, soundBuffer, frequency) }
-			return bufferId
-		}
+		var buffer = new OpenALBuffer(bits, channels, frequency, data)
+		trigger(new BufferCreatedEvent(buffer))
+		return buffer
 	}
 
 	@Override
-	int createSource() {
+	Source createSource() {
 
-		return checkForError { -> alGenSources() }
+		var source = new OpenALSource()
+		trigger(new SourceCreatedEvent(source))
+		return source
 	}
 
 	@Override
-	void deleteBuffers(int ... bufferIds) {
+	void deleteBuffers(Buffer... buffers) {
 
-		checkForError { -> alDeleteBuffers(bufferIds) }
+		buffers*.close()
 	}
 
 	@Override
-	void deleteSource(int sourceId) {
+	void deleteSource(Source source) {
 
-		checkForError { -> alDeleteSources(sourceId) }
-	}
-
-	@Override
-	void pauseSource(int sourceId) {
-
-		checkForError { -> alSourcePause(sourceId) }
-	}
-
-	@Override
-	void playSource(int sourceId) {
-
-		checkForError { -> alSourcePlay(sourceId) }
+		source.close()
+		trigger(new SourceDeletedEvent(source))
 	}
 
 	@Override
 	void queueBuffers(int sourceId, int ... bufferIds) {
 
 		checkForError { -> alSourceQueueBuffers(sourceId, bufferIds) }
-	}
-
-	@Override
-	boolean sourceExists(int sourceId) {
-
-		return checkForError { -> alIsSource(sourceId) }
-	}
-
-	@Override
-	boolean sourcePaused(int sourceId) {
-
-		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PAUSED }
-	}
-
-	@Override
-	boolean sourcePlaying(int sourceId) {
-
-		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING }
-	}
-
-	@Override
-	boolean sourceStopped(int sourceId) {
-
-		return checkForError { -> alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_STOPPED }
-	}
-
-	@Override
-	void stopSource(int sourceId) {
-
-		checkForError { -> alSourceStop(sourceId) }
 	}
 
 	/**

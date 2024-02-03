@@ -31,7 +31,7 @@ import java.util.concurrent.Future
  */
 interface GraphicsRequests {
 
-	static interface Request<T> {}
+	static interface Request<T extends GraphicsResource> {}
 
 	static record ShaderRequest(String name) implements Request<Shader> {}
 
@@ -52,5 +52,5 @@ interface GraphicsRequests {
 	/**
 	 * Request the graphics system to delete a resource.
 	 */
-	void requestDelete(GraphicsResource... resource)
+	void requestDelete(GraphicsResource... resources)
 }

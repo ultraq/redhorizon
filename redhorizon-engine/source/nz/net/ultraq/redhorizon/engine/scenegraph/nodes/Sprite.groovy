@@ -89,8 +89,10 @@ class Sprite implements Node<Sprite>, GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (mesh && shader && material) {
-			renderer.draw(mesh, shader, material)
+		if (!mesh || !shader || !material) {
+			return
 		}
+
+		renderer.draw(mesh, shader, material)
 	}
 }

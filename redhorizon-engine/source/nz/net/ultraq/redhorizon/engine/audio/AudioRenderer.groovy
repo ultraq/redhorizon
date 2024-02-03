@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,23 +25,15 @@ import java.nio.ByteBuffer
 /**
  * The audio renderer is responsible for setting up and playing back sounds
  * through the audio device.
- * 
+ *
  * @author Emanuel Rabina
  */
 interface AudioRenderer {
 
 	/**
-	 * Attaches a single buffer to a source.
-	 * 
-	 * @param sourceId
-	 * @param bufferId
-	 */
-	void attachBufferToSource(int sourceId, int bufferId)
-
-	/**
 	 * Return the number of buffers that have been processed for the given source,
 	 * which is the number of buffers that can be safely unqueued from the source.
-	 * 
+	 *
 	 * @param sourceId
 	 * @return Number of processed buffers.
 	 */
@@ -49,108 +41,55 @@ interface AudioRenderer {
 
 	/**
 	 * Creates and fills a sound buffer with the given data.
-	 * 
+	 *
 	 * @param data
 	 * @param bits
 	 * @param channels
 	 * @param frequency
-	 * @return Buffer ID.
+	 * @return Buffer
 	 */
-	int createBuffer(ByteBuffer data, int bits, int channels, int frequency)
+	Buffer createBuffer(int bits, int channels, int frequency, ByteBuffer data)
 
 	/**
 	 * Creates a new source through which to play sound data.
-	 * 
-	 * @return Source ID.
+	 *
+	 * @return New source object.
 	 */
-	int createSource()
+	Source createSource()
 
 	/**
 	 * Delete multiple buffers at once.
-	 * 
-	 * @param bufferIds
+	 *
+	 * @param buffers
 	 */
-	void deleteBuffers(int... bufferIds)
+	void deleteBuffers(Buffer... buffers)
 
 	/**
 	 * Delete a source.
-	 * 
-	 * @param sourceId
+	 *
+	 * @param source
 	 */
-	void deleteSource(int sourceId)
-
-	/**
-	 * Pause playing a source.
-	 * 
-	 * @param sourceId
-	 */
-	void pauseSource(int sourceId)
-
-	/**
-	 * Start a source playing.
-	 * 
-	 * @param sourceId
-	 */
-	void playSource(int sourceId)
+	void deleteSource(Source source)
 
 	/**
 	 * Queue some buffers to an existing source.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param bufferIds
 	 */
-	void queueBuffers(int sourceId, int... bufferId)
-
-	/**
-	 * Return whether a source with the given ID exists or not.
-	 * 
-	 * @param sourceId
-	 * @return
-	 */
-	boolean sourceExists(int sourceId)
-
-	/**
-	 * Return whether a source is currently paused.
-	 * 
-	 * @param sourceId
-	 * @return
-	 */
-	boolean sourcePaused(int sourceId)
-
-	/**
-	 * Return whether a source is currently playing.
-	 * 
-	 * @param sourceId
-	 * @return
-	 */
-	boolean sourcePlaying(int sourceId)
-
-	/**
-	 * Return whether a source is currently stopped.
-	 * 
-	 * @param sourceId
-	 * @return
-	 */
-	boolean sourceStopped(int sourceId)
-
-	/**
-	 * Stop playing a source.
-	 * 
-	 * @param sourceId
-	 */
-	void stopSource(int sourceId)
+	void queueBuffers(int sourceId, int ... bufferId)
 
 	/**
 	 * Unqueue some buffers from an existing source.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param bufferIds
 	 */
-	void unqueueBuffers(int sourceId, int... bufferId)
+	void unqueueBuffers(int sourceId, int ... bufferId)
 
 	/**
 	 * Update details about the listener.
-	 * 
+	 *
 	 * @param position
 	 * @param velocity
 	 * @param orientation
@@ -159,7 +98,7 @@ interface AudioRenderer {
 
 	/**
 	 * Update details about the source.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param position
 	 * @param direction
@@ -169,7 +108,7 @@ interface AudioRenderer {
 
 	/**
 	 * Update the volume of the listener.
-	 * 
+	 *
 	 * @param volume
 	 */
 	void updateVolume(float volume)

@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
+import groovy.transform.TupleConstructor
 
 /**
- * A script to make a sprite node behave as a full-screen image.
+ * An object that contains audio data.
  *
  * @author Emanuel Rabina
  */
-class ImageScript extends SpriteScript {
+@TupleConstructor(defaults = false)
+abstract class Buffer implements AudioResource {
 
-	@Override
-	void onSceneAdded(Scene scene) {
-
-		var width = sprite.imageFile.width
-		var height = sprite.imageFile.height
-		sprite
-			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-			.translate(-width / 2, -height / 2)
-	}
+	final int bits
+	final int channels
+	final int frequency
 }

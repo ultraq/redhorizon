@@ -67,7 +67,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer, Closeable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -245,7 +245,7 @@ class OpenGLRenderer implements GraphicsRenderer, AutoCloseable, EventTarget {
 	void deleteFramebuffer(Framebuffer framebuffer) {
 
 		if (framebuffer) {
-			framebuffer?.close()
+			framebuffer.close()
 			trigger(new FramebufferDeletedEvent(framebuffer))
 		}
 	}

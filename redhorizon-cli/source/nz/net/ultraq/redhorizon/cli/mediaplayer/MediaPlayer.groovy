@@ -22,10 +22,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.media.MediaLoader
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffect
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -71,6 +73,8 @@ class MediaPlayer extends Application {
 
 		var media = switch (mediaFile) {
 			case ImageFile -> new Sprite(mediaFile).attachScript(new ImageScript())
+			case SoundFile -> new SoundEffect(mediaFile).attachScript(new SoundPlaybackScript())
+			default -> throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
 		}
 
 		scene << media

@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
+import nz.net.ultraq.redhorizon.engine.scripting.Script
 
 /**
- * A script to make a sprite node behave as a full-screen image.
+ * A script for sound effects.  Can be used over the standard {@link Script}
+ * class so that the sound effect has a better name within scripts.
  *
  * @author Emanuel Rabina
  */
-class ImageScript extends SpriteScript {
+abstract class SoundEffectScript extends Script<SoundEffect> {
 
-	@Override
-	void onSceneAdded(Scene scene) {
+	/**
+	 * Adds an alias of {@code soundEffect} to the script target.
+	 *
+	 * @return
+	 */
+	protected SoundEffect getSoundEffect() {
 
-		var width = sprite.imageFile.width
-		var height = sprite.imageFile.height
-		sprite
-			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-			.translate(-width / 2, -height / 2)
+		return scriptable
 	}
 }
