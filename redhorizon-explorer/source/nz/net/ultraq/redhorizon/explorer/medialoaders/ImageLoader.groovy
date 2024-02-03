@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.media
+package nz.net.ultraq.redhorizon.explorer.medialoaders
 
+import nz.net.ultraq.redhorizon.engine.media.Image
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
 import groovy.transform.InheritConstructors

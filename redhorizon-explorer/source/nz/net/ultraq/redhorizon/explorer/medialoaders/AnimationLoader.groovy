@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.media
+package nz.net.ultraq.redhorizon.explorer.medialoaders
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
+import nz.net.ultraq.redhorizon.engine.media.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile

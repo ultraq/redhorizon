@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.media.MediaLoader
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffect
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
@@ -53,7 +52,6 @@ class MediaPlayer extends Application {
 
 	private final ResourceFile mediaFile
 	private final Palette palette
-	private MediaLoader mediaLoader
 	private Node media
 
 	/**
