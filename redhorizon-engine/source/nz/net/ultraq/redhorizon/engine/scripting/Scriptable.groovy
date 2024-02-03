@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scripting
 
 /**
- * Any class that can have a script attached to customize its behaviour.
+ * A class that can have a script attached to customize its behaviour.
  *
  * @author Emanuel Rabina
  */

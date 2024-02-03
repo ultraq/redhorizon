@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.engine.scripting
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 
+import groovy.transform.PackageScope
+
 /**
  * A script is a piece of code attached to an entity to customize its behaviour.
  *
@@ -31,6 +33,7 @@ abstract class Script<T extends Scriptable> implements SceneEvents {
 	 * Attach the script target to this script, allowing it to act as a delegate
 	 * within other script methods.
 	 */
+	@PackageScope
 	Script<T> attachScriptable(T scriptable) {
 
 		this.scriptable = scriptable

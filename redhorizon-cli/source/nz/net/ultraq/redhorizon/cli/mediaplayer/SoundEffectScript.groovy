@@ -18,7 +18,8 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffectScript
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffect
+import nz.net.ultraq.redhorizon.engine.scripting.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
@@ -27,7 +28,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
-class SoundPlaybackScript extends SoundEffectScript {
+class SoundPlaybackScript extends Script<SoundEffect> {
+
+	@Delegate
+	private Sound applyDelegate() {
+		return scriptable
+	}
 
 	@Override
 	void onSceneAdded(Scene scene) {

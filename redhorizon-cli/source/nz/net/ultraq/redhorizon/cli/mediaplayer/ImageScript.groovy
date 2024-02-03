@@ -17,22 +17,27 @@
 package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SpriteScript
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
+import nz.net.ultraq.redhorizon.engine.scripting.Script
 
 /**
  * A script to make a sprite node behave as a full-screen image.
  *
  * @author Emanuel Rabina
  */
-class ImageScript extends SpriteScript {
+class ImageScript extends Script<Sprite> {
+
+	@Delegate
+	private Sprite applyDelegate() {
+		return scriptable
+	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		var width = sprite.imageFile.width
-		var height = sprite.imageFile.height
-		sprite
-			.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-			.translate(-width / 2, -height / 2)
+		var width = imageFile.width
+		var height = imageFile.height
+		scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
+		translate(-width / 2, -height / 2)
 	}
 }
