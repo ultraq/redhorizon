@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Implementation of a VQA file, which is the video format used in Red Alert and
@@ -174,35 +172,25 @@ class VqaFile implements VideoFile {
 	@Override
 	ByteBuffer[] getFrameData() {
 
-		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-			def frames = []
-			def worker = streamingDecoder
-			worker.on(StreamingFrameEvent) { event ->
-				frames << event.frame
-			}
-			executorService
-				.submit(worker)
-				.get()
-			return frames
+		var decoder = new VqaFileDecoder()
+		var frames = []
+		decoder.on(StreamingFrameEvent) { event ->
+			frames << event.frame
 		}
+		decoder.run()
+		return ByteBuffer.fromBuffers(frames as ByteBuffer[])
 	}
 
 	@Override
 	ByteBuffer getSoundData() {
 
-		return ByteBuffer.fromBuffers(
-			Executors.newSingleThreadExecutor().executeAndShutdown { ExecutorService executorService ->
-				def samples = []
-				def worker = streamingDecoder
-				worker.on(StreamingSampleEvent) { event ->
-					samples << event.sample
-				}
-				executorService
-					.submit(worker)
-					.get()
-				return ByteBuffer.fromBuffers(samples as ByteBuffer[])
-			}
-		)
+		var decoder = new VqaFileDecoder()
+		var samples = []
+		decoder.on(StreamingSampleEvent) { event ->
+			samples << event.sample
+		}
+		decoder.run()
+		return ByteBuffer.fromBuffers(samples as ByteBuffer[])
 	}
 
 	/**
@@ -213,7 +201,7 @@ class VqaFile implements VideoFile {
 	@Override
 	StreamingDecoder getStreamingDecoder() {
 
-		return new StreamingDecoder(new VqaFileDecoder())
+		return new StreamingDecoder(new VqaFileDecoder(true))
 	}
 
 	/**
@@ -237,6 +225,8 @@ class VqaFile implements VideoFile {
 	 */
 	class VqaFileDecoder implements Runnable, EventTarget {
 
+		final boolean rateLimit
+
 		private final LCW lcw = new LCW()
 		private final Decoder audioDecoder
 
@@ -249,7 +239,9 @@ class VqaFile implements VideoFile {
 		/**
 		 * Constructor, create a new worker for decoding the VQA video data.
 		 */
-		VqaFileDecoder() {
+		VqaFileDecoder(boolean rateLimit = false) {
+
+			this.rateLimit = rateLimit
 
 			audioDecoder = bits == 16 ? new IMAADPCM16bit() : new WSADPCM8bit()
 
@@ -435,7 +427,10 @@ class VqaFile implements VideoFile {
 				}
 
 				discardNullByte()
-				Thread.sleep(25)
+
+				if (rateLimit) {
+					Thread.sleep(25)
+				}
 			}
 
 			logger.debug('Decoding complete')

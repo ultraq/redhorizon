@@ -31,8 +31,8 @@ import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
-import java.util.concurrent.Executors
 
 /**
  * Implementation of the WSA file format as used in Tiberium Dawn and Red Alert.
@@ -116,17 +116,13 @@ class WsaFile implements AnimationFile, Streaming {
 	@Override
 	ByteBuffer[] getFrameData() {
 
-		return Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-			def frames = []
-			def worker = streamingDecoder
-			worker.on(StreamingFrameEvent) { event ->
-				frames << event.frame
-			}
-			executorService
-				.submit(worker)
-				.get()
-			return frames
+		var decoder = new WsaFileDecoder()
+		var frames = []
+		decoder.on(StreamingFrameEvent) { event ->
+			frames << event.frame
 		}
+		decoder.run()
+		return frames as ByteBuffer[]
 	}
 
 	/**
@@ -137,7 +133,7 @@ class WsaFile implements AnimationFile, Streaming {
 	@Override
 	StreamingDecoder getStreamingDecoder() {
 
-		return new StreamingDecoder(new WsaFileDecoder())
+		return new StreamingDecoder(new WsaFileDecoder(true))
 	}
 
 	/**
@@ -157,7 +153,10 @@ class WsaFile implements AnimationFile, Streaming {
 	/**
 	 * Decode WSA file frame data and emit as {@link StreamingFrameEvent}s.
 	 */
+	@TupleConstructor
 	class WsaFileDecoder implements Runnable, EventTarget {
+
+		final boolean rateLimit
 
 		@Override
 		void run() {
@@ -184,7 +183,10 @@ class WsaFile implements AnimationFile, Streaming {
 				}
 				trigger(new StreamingFrameEvent(colouredFrame))
 				frame++
-				Thread.sleep(50)
+
+				if (rateLimit) {
+					Thread.sleep(50)
+				}
 			}
 
 			logger.debug('Decoding complete')

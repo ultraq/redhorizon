@@ -29,8 +29,8 @@ import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
-import java.util.concurrent.Executors
 
 /**
  * Implementation of the AUD files used in Red Alert and Tiberium Dawn.  An AUD
@@ -98,19 +98,13 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	ByteBuffer getSoundData() {
 
-		return ByteBuffer.fromBuffers(
-			Executors.newSingleThreadExecutor().executeAndShutdown { executorService ->
-				def worker = streamingDecoder
-				def samples = []
-				worker.on(StreamingSampleEvent) { event ->
-					samples << event.sample
-				}
-				executorService
-					.submit(worker)
-					.get()
-				return samples as ByteBuffer[]
-			}
-		)
+		var decoder = new AudFileDecoder()
+		var samples = []
+		decoder.on(StreamingSampleEvent) { event ->
+			samples << event.sample
+		}
+		decoder.run()
+		return ByteBuffer.fromBuffers(samples as ByteBuffer[])
 	}
 
 	/**
@@ -120,7 +114,7 @@ class AudFile implements SoundFile, Streaming {
 	@Override
 	StreamingDecoder getStreamingDecoder() {
 
-		return new StreamingDecoder(new AudFileDecoder())
+		return new StreamingDecoder(new AudFileDecoder(true))
 	}
 
 	@Override
@@ -145,7 +139,10 @@ class AudFile implements SoundFile, Streaming {
 	/**
 	 * Decode AUD file sound data and emit as {@link StreamingSampleEvent}s.
 	 */
+	@TupleConstructor
 	class AudFileDecoder implements Runnable, EventTarget {
+
+		final boolean rateLimit
 
 		@Override
 		void run() {
@@ -172,7 +169,10 @@ class AudFile implements SoundFile, Streaming {
 					)
 				}
 				trigger(new StreamingSampleEvent(sample))
-				Thread.sleep(20)
+
+				if (rateLimit) {
+					Thread.sleep(20)
+				}
 			}
 
 			logger.debug('Decoding complete')
