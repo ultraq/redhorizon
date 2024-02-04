@@ -24,12 +24,12 @@ import nz.net.ultraq.redhorizon.engine.scripting.Script
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
- * A script to control playback of a sound effect.  This script will load up an
- * entire sound into memory before playback.
+ * A script to control playback of a sound effect.  This script will stream the
+ * data to the sound during playback.
  *
  * @author Emanuel Rabina
  */
-class SoundEffectScript extends Script<Sound> {
+class SoundTrackScript extends Script<Sound> {
 
 	@Delegate
 	private Sound applyDelegate() {
@@ -39,8 +39,13 @@ class SoundEffectScript extends Script<Sound> {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play', { ->
-			play()
+		scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			if (!playing || paused) {
+				play()
+			}
+			else if (!paused) {
+				pause()
+			}
 		}))
 
 		play()

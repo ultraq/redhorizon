@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.audio.Buffer
 import nz.net.ultraq.redhorizon.engine.audio.Source
 
 import static org.lwjgl.openal.AL10.*
+import static org.lwjgl.openal.AL11.AL_UNDETERMINED
 
 /**
  * OpenAL-specific source implementation.
@@ -45,9 +46,8 @@ class OpenALSource extends Source {
 	@Override
 	void attachBuffer(Buffer buffer) {
 
-		var bufferId = ((OpenALBuffer)buffer).bufferId
-		if (alGetSourcei(sourceId, AL_BUFFER) != bufferId) {
-			alSourcei(sourceId, AL_BUFFER, bufferId)
+		if (alGetSourcei(sourceId, AL_BUFFER) == 0) {
+			alSourcei(sourceId, AL_BUFFER, ((OpenALBuffer)buffer).bufferId)
 		}
 	}
 
@@ -97,8 +97,18 @@ class OpenALSource extends Source {
 	void play() {
 
 		if (!playing) {
-			alSourcePlay(sourceId)
+			// Once a buffer is attached or several queued, the source state is one of
+			// AL_STATIC or AL_STREAMING.  Disallow playing until this is known
+			if (alGetSourcei(sourceId, AL_SOURCE_TYPE) != AL_UNDETERMINED) {
+				alSourcePlay(sourceId)
+			}
 		}
+	}
+
+	@Override
+	void queueBuffers(Buffer... buffers) {
+
+		alSourceQueueBuffers(sourceId, ((OpenALBuffer[])buffers)*.bufferId as int[])
 	}
 
 	@Override

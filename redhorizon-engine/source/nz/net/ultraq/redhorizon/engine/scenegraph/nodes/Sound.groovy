@@ -26,22 +26,33 @@ import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.Executors
 
 /**
- * A simple piece of short audio that can be loaded entirely into memory for
- * multiple playbacks.
+ * An emitter of sound in the scene.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(includes = ['soundFile'])
-class SoundEffect implements Node<SoundEffect>, AudioElement, Playable {
+class Sound implements Node<Sound>, AudioElement, Playable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
 	final SoundFile soundFile
 
 	private Source source
-	private Buffer buffer
+	private Buffer staticBuffer
+	private BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
+	private final List<Buffer> streamedBuffers = []
 
 	@Override
 	void delete(AudioRenderer renderer) {
@@ -57,37 +68,78 @@ class SoundEffect implements Node<SoundEffect>, AudioElement, Playable {
 		source = scene
 			.requestCreateOrGet(new SourceRequest())
 			.get()
-		buffer = scene
-			.requestCreateOrGet(new BufferRequest(soundFile.bits, soundFile.channels, soundFile.frequency, soundFile.soundData))
-			.get()
+
+		var bits = soundFile.bits
+		var channels = soundFile.channels
+		var frequency = soundFile.frequency
+
+		if (soundFile.forStreaming) {
+			assert soundFile instanceof Streaming
+			var decoder = soundFile.streamingDecoder
+			decoder.on(StreamingSampleEvent) { event ->
+				streamingBuffers << scene
+					.requestCreateOrGet(new BufferRequest(bits, channels, frequency, event.sample))
+					.get()
+			}
+			Executors.newVirtualThreadPerTaskExecutor().execute(decoder)
+
+			// TODO: Delete streamed buffers to free up memory
+		}
+		else {
+			staticBuffer = scene
+				.requestCreateOrGet(new BufferRequest(bits, channels, frequency, soundFile.soundData))
+				.get()
+		}
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(buffer, source)
+		scene.requestDelete(source)
+		if (staticBuffer) {
+			scene.requestDelete(staticBuffer)
+		}
+		if (streamingBuffers) {
+			scene.requestDelete(*streamedBuffers)
+		}
 	}
 
 	@Override
 	void render(AudioRenderer renderer) {
 
-		if (!source || !buffer) {
+		if (!source) {
 			return
 		}
 
-		source.attachBuffer(buffer)
+		if (staticBuffer) {
+			source.attachBuffer(staticBuffer)
+		}
+		else if (streamingBuffers) {
+			var newBuffers = streamingBuffers.drain()
+			source.queueBuffers(*newBuffers)
+			streamedBuffers.addAll(newBuffers)
+		}
 
 		if (playing) {
 			if (source.stopped) {
+				logger.debug("Buffer exhausted, stopping")
 				source.rewind()
 				stop()
 			}
 			else if (!source.playing) {
+				logger.debug("Playing")
 				source.play()
+			}
+		}
+		else if (paused) {
+			if (!source.paused) {
+				logger.debug("Pausing")
+				source.pause()
 			}
 		}
 		else {
 			if (source.playing) {
+				logger.debug("Stopping")
 				source.stop()
 			}
 		}

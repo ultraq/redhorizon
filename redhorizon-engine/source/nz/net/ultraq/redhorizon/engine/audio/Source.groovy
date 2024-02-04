@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 abstract class Source implements AudioResource {
 
 	/**
-	 * Attach a sound buffer to this source for playback.
+	 * Attach a static buffer to this source for playback.
 	 *
 	 * @param buffer
 	 */
@@ -60,6 +60,15 @@ abstract class Source implements AudioResource {
 	 * Start playing sound through this source.
 	 */
 	abstract void play()
+
+	/**
+	 * Queue buffers on to this source, making this source one that streams sound
+	 * instead of having a single buffer.
+	 *
+	 * @param buffers
+	 * @see Source#attachBuffer(Buffer)
+	 */
+	abstract void queueBuffers(Buffer... buffers)
 
 	/**
 	 * Rewind a source, resetting its state.

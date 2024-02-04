@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.media.SoundTrack
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.SoundEffect
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 
@@ -58,7 +58,7 @@ class SoundLoader extends MediaLoader<SoundFile, Playable> {
 	@Override
 	Playable load() {
 
-		media = file.forStreaming ? new SoundTrack(file) : new SoundEffect(file)
+		media = file.forStreaming ? new SoundTrack(file) : new Sound(file)
 		scene << media
 
 		removePlayPauseControl = inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
