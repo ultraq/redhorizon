@@ -71,8 +71,7 @@ class MediaPlayer extends Application {
 
 		var media = switch (mediaFile) {
 			case ImageFile -> new Sprite(mediaFile).attachScript(new ImageScript())
-			case SoundFile -> new Sound(mediaFile)
-				.attachScript(mediaFile.forStreaming ? new SoundTrackScript() : new SoundEffectScript())
+			case SoundFile -> new Sound(mediaFile).attachScript(new SoundPlaybackScript())
 			default -> throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
 		}
 

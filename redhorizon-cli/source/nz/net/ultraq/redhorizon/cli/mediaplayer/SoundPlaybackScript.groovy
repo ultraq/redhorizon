@@ -24,12 +24,11 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
- * A script to control playback of a sound effect.  This script will stream the
- * data to the sound during playback.
+ * A script to control playback of a sound effect or track.
  *
  * @author Emanuel Rabina
  */
-class SoundTrackScript extends Script<Sound> {
+class SoundPlaybackScript extends Script<Sound> {
 
 	@Delegate
 	private Sound applyDelegate() {
