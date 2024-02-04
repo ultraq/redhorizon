@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
-import nz.net.ultraq.redhorizon.engine.scripting.Script
+import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 /**
  * A script to make a sprite node behave as a full-screen image.

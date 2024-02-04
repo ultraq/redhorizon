@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
-import nz.net.ultraq.redhorizon.engine.scripting.Scriptable
+import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
 import org.joml.Matrix4f
 import org.joml.Vector2f

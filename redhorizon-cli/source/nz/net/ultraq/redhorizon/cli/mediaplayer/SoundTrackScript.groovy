@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
-import nz.net.ultraq.redhorizon.engine.scripting.Script
+import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 

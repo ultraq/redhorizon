@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scripting
+package nz.net.ultraq.redhorizon.engine.scenegraph.scripting
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 
