@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.geometry.Orientation
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3f
 
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface AudioRenderer {
+interface AudioRenderer extends EventTarget {
 
 	/**
 	 * Creates and fills a sound buffer with the given data.

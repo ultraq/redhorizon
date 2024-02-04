@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.audio
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Event for the creation of a framebuffer.
+ * Common type for all audio renderer events.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class FramebufferCreatedEvent extends GraphicsRendererEvent {
-
-	final Framebuffer framebuffer
+abstract class AudioRendererEvent extends Event {
 }

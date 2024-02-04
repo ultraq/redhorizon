@@ -56,6 +56,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	private OpenGLContext context
 	private OpenGLCamera camera
+	private OpenGLRenderer renderer
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
@@ -104,6 +105,16 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	Camera getCamera() {
 
 		return camera
+	}
+
+	/**
+	 * Return the renderer.
+	 *
+	 * @return
+	 */
+	GraphicsRenderer getRenderer() {
+
+		return renderer
 	}
 
 	/**
@@ -209,7 +220,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			context.withCurrent { ->
 				trigger(new WindowCreatedEvent(window))
 
-				new OpenGLRenderer(config, window).withCloseable { renderer ->
+				renderer = new OpenGLRenderer(config, window)
+				renderer.withCloseable { renderer ->
 					scene.graphicsRequestHandler = this
 
 					camera = new OpenGLCamera(window.renderResolution)

@@ -20,11 +20,11 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.engine.audio.Buffer
 import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.audio.BufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.audio.Source
 import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 import nz.net.ultraq.redhorizon.engine.geometry.Orientation
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3f
 import org.lwjgl.openal.AL
@@ -39,7 +39,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenALRenderer implements AudioRenderer, EventTarget {
+class OpenALRenderer implements AudioRenderer {
 
 	private final AudioConfiguration config
 
@@ -93,7 +93,10 @@ class OpenALRenderer implements AudioRenderer, EventTarget {
 	@Override
 	void deleteBuffers(Buffer... buffers) {
 
-		buffers*.close()
+		buffers.each { buffer ->
+			buffer.close()
+			trigger(new BufferDeletedEvent(buffer))
+		}
 	}
 
 	@Override

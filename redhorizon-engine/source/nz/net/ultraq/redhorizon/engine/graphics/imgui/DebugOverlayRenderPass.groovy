@@ -16,14 +16,20 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
+import nz.net.ultraq.redhorizon.engine.audio.AudioRendererEvent
+import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.audio.BufferDeletedEvent
+import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
+import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
@@ -52,6 +58,8 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	private AtomicInteger activeFramebuffers = new AtomicInteger()
 	private AtomicInteger activeMeshes = new AtomicInteger()
 	private AtomicInteger activeTextures = new AtomicInteger()
+	private AtomicInteger activeSources = new AtomicInteger()
+	private AtomicInteger activeBuffers = new AtomicInteger()
 	private int debugWindowSizeX = 350
 	private int debugWindowSizeY = 200
 
@@ -59,32 +67,30 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	 * Constructor, tie the debug overlay to the renderer so it can get the
 	 * information it needs to build the display.
 	 *
-	 * @param renderer
+	 * @param audioRenderer
+	 * @param graphicsRenderer
 	 * @param enabled
 	 */
-	DebugOverlayRenderPass(GraphicsRenderer renderer, boolean enabled) {
+	DebugOverlayRenderPass(AudioRenderer audioRenderer, GraphicsRenderer graphicsRenderer, boolean enabled) {
 
-		renderer.on(RendererEvent) { event ->
-			if (event instanceof DrawEvent) {
-				drawCalls.incrementAndGet()
+		audioRenderer.on(AudioRendererEvent) { event ->
+			switch (event) {
+				case BufferCreatedEvent -> activeBuffers.incrementAndGet()
+				case BufferDeletedEvent -> activeBuffers.decrementAndGet()
+				case SourceCreatedEvent -> activeSources.incrementAndGet()
+				case SourceDeletedEvent -> activeSources.decrementAndGet()
 			}
-			else if (event instanceof FramebufferCreatedEvent) {
-				activeFramebuffers.incrementAndGet()
-			}
-			else if (event instanceof FramebufferDeletedEvent) {
-				activeFramebuffers.decrementAndGet()
-			}
-			else if (event instanceof MeshCreatedEvent) {
-				activeMeshes.incrementAndGet()
-			}
-			else if (event instanceof MeshDeletedEvent) {
-				activeMeshes.decrementAndGet()
-			}
-			else if (event instanceof TextureCreatedEvent) {
-				activeTextures.incrementAndGet()
-			}
-			else if (event instanceof TextureDeletedEvent) {
-				activeTextures.decrementAndGet()
+		}
+
+		graphicsRenderer.on(GraphicsRendererEvent) { event ->
+			switch (event) {
+				case DrawEvent -> drawCalls.incrementAndGet()
+				case FramebufferCreatedEvent -> activeFramebuffers.incrementAndGet()
+				case FramebufferDeletedEvent -> activeFramebuffers.decrementAndGet()
+				case MeshCreatedEvent -> activeMeshes.incrementAndGet()
+				case MeshDeletedEvent -> activeMeshes.decrementAndGet()
+				case TextureCreatedEvent -> activeTextures.incrementAndGet()
+				case TextureDeletedEvent -> activeTextures.decrementAndGet()
 			}
 		}
 
@@ -119,6 +125,8 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 		ImGui.text("Active meshes: ${activeMeshes}")
 		ImGui.text("Active textures: ${activeTextures}")
 		ImGui.text("Active framebuffers: ${activeFramebuffers}")
+		ImGui.text("Active sources: ${activeSources}")
+		ImGui.text("Active buffers: ${activeBuffers}")
 		drawCalls.set(0)
 
 		ImGui.separator()

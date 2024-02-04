@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -86,7 +85,6 @@ class RenderPipeline implements AutoCloseable {
 			surface: new Rectanglef(-1, -1, 1, 1)
 		)
 
-		overlayPasses << new DebugOverlayRenderPass(renderer, config.debug).toggleWith(inputEventStream, GLFW_KEY_D)
 		overlayPasses << new ControlsOverlayRenderPass(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
 
 		// Allow for changes to the pipeline from the GUI

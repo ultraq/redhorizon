@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.events.Event
-
 import groovy.transform.TupleConstructor
 
 /**
@@ -26,7 +24,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class SourceCreatedEvent extends Event {
+class SourceCreatedEvent extends AudioRendererEvent {
 
 	final Source source
 }

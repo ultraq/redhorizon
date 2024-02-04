@@ -19,11 +19,10 @@ package nz.net.ultraq.redhorizon.engine.time
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
-import groovy.transform.InheritConstructors
 
 /**
  * A separate time source from the usual system time, allowing game time to flow
@@ -31,13 +30,17 @@ import groovy.transform.InheritConstructors
  *
  * @author Emanuel Rabina
  */
-@InheritConstructors
 class GameClock extends EngineSystem {
 
 	private static Logger logger = LoggerFactory.getLogger(GameClock)
 
 	private float speed = 1.0f
 	private float lastSpeed
+
+	GameClock(Scene scene) {
+
+		super(scene)
+	}
 
 	/**
 	 * Return whether or not time has been paused.

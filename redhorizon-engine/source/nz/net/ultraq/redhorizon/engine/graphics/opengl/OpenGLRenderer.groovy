@@ -25,12 +25,12 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
-import nz.net.ultraq.redhorizon.engine.graphics.RendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
@@ -39,7 +39,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4f
@@ -67,7 +66,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenGLRenderer implements GraphicsRenderer, Closeable, EventTarget {
+class OpenGLRenderer implements GraphicsRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
@@ -337,7 +336,7 @@ class OpenGLRenderer implements GraphicsRenderer, Closeable, EventTarget {
 			Closure closure) {
 
 		def materialBuilder = new OpenGLMaterialBundler(this)
-		materialBuilder.relay(RendererEvent, this)
+		materialBuilder.relay(GraphicsRendererEvent, this)
 		closure(materialBuilder)
 		return materialBuilder.bundle()
 	}

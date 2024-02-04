@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface GraphicsRenderer extends EventTarget {
+interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Clears the buffer.

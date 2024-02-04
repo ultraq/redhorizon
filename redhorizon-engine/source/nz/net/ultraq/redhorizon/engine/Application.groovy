@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -29,6 +30,7 @@ import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D
 
 import java.util.concurrent.Semaphore
 
@@ -119,6 +121,12 @@ abstract class Application {
 		// Start the application
 		logger.debug('Starting application...')
 		engine.start()
+
+		graphicsSystem.renderPipeline.addOverlayPass(
+			new DebugOverlayRenderPass(audioSystem.renderer, graphicsSystem.renderer, graphicsConfig.debug)
+				.toggleWith(inputEventStream, GLFW_KEY_D)
+		)
+
 		applicationStart()
 
 		engine.waitUntilStopped()

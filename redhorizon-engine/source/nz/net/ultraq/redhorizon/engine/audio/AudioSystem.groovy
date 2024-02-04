@@ -41,10 +41,11 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
+	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<AudioResource> deletionRequests = new LinkedBlockingQueue<>()
 
-	final AudioConfiguration config
+	private OpenALRenderer renderer
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -56,6 +57,16 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 		super(scene)
 		this.config = config ?: new AudioConfiguration()
+	}
+
+	/**
+	 * Return the audio renderer.
+	 *
+	 * @return
+	 */
+	AudioRenderer getRenderer() {
+
+		return renderer
 	}
 
 	/**
@@ -117,7 +128,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 		// Initialization
 		new OpenALContext().withCloseable { context ->
 			context.withCurrent { ->
-				def renderer = new OpenALRenderer(config)
+				renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
 
 				scene.audioRequestsHandler = this
