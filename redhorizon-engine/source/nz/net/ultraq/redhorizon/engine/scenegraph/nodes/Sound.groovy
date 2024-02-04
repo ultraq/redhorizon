@@ -36,6 +36,7 @@ import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * An emitter of sound in the scene.
@@ -52,7 +53,7 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 	private Source source
 	private Buffer staticBuffer
 	private BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
-	private final List<Buffer> streamedBuffers = []
+	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 
 	@Override
 	void delete(AudioRenderer renderer) {
@@ -82,8 +83,6 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 					.get()
 			}
 			Executors.newVirtualThreadPerTaskExecutor().execute(decoder)
-
-			// TODO: Delete streamed buffers to free up memory
 		}
 		else {
 			staticBuffer = scene
@@ -99,7 +98,7 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 		if (staticBuffer) {
 			scene.requestDelete(staticBuffer)
 		}
-		if (streamingBuffers) {
+		if (streamedBuffers) {
 			scene.requestDelete(*streamedBuffers)
 		}
 	}
@@ -111,6 +110,7 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 			return
 		}
 
+		// Add static or streaming buffers to the source
 		if (staticBuffer) {
 			source.attachBuffer(staticBuffer)
 		}
@@ -120,6 +120,7 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 			streamedBuffers.addAll(newBuffers)
 		}
 
+		// Control playback
 		if (playing) {
 			if (source.stopped) {
 				logger.debug("Buffer exhausted, stopping")
@@ -141,6 +142,16 @@ class Sound implements Node<Sound>, AudioElement, Playable {
 			if (source.playing) {
 				logger.debug("Stopping")
 				source.stop()
+			}
+		}
+
+		// Clean up used buffers for a streaming source
+		if (soundFile.forStreaming) {
+			var buffersProcessed = source.buffersProcessed()
+			if (buffersProcessed) {
+				var processedBuffers = streamedBuffers.drain(buffersProcessed)
+				source.unqueueBuffers(*processedBuffers)
+				renderer.deleteBuffers(*processedBuffers)
 			}
 		}
 	}

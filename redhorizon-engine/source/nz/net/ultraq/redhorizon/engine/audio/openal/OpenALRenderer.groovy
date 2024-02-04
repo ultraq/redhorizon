@@ -75,12 +75,6 @@ class OpenALRenderer implements AudioRenderer, EventTarget {
 	}
 
 	@Override
-	int buffersProcessed(int sourceId) {
-
-		return checkForError { -> alGetSourcei(sourceId, AL_BUFFERS_PROCESSED) }
-	}
-
-	@Override
 	Buffer createBuffer(int bits, int channels, int frequency, ByteBuffer data) {
 
 		var buffer = new OpenALBuffer(bits, channels, frequency, data)
@@ -109,12 +103,6 @@ class OpenALRenderer implements AudioRenderer, EventTarget {
 		trigger(new SourceDeletedEvent(source))
 	}
 
-	@Override
-	void queueBuffers(int sourceId, int ... bufferIds) {
-
-		checkForError { -> alSourceQueueBuffers(sourceId, bufferIds) }
-	}
-
 	/**
 	 * Emit some information about the OpenAL rendering device.
 	 *
@@ -129,12 +117,6 @@ class OpenALRenderer implements AudioRenderer, EventTarget {
 			 - Device name: ${alGetString(AL_RENDERER)}
 			 - OpenAL version: ${alGetString(AL_VERSION)}
 		""".stripIndent()
-	}
-
-	@Override
-	void unqueueBuffers(int sourceId, int ... bufferIds) {
-
-		checkForError { -> alSourceUnqueueBuffers(sourceId, bufferIds) }
 	}
 
 	@Override

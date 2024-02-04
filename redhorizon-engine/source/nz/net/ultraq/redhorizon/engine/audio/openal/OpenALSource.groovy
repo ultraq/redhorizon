@@ -52,6 +52,12 @@ class OpenALSource extends Source {
 	}
 
 	@Override
+	int buffersProcessed() {
+
+		return alGetSourcei(sourceId, AL_BUFFERS_PROCESSED)
+	}
+
+	@Override
 	void close() {
 
 		alDeleteSources(sourceId)
@@ -108,7 +114,7 @@ class OpenALSource extends Source {
 	@Override
 	void queueBuffers(Buffer... buffers) {
 
-		alSourceQueueBuffers(sourceId, ((OpenALBuffer[])buffers)*.bufferId as int[])
+		alSourceQueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
 	}
 
 	@Override
@@ -123,5 +129,11 @@ class OpenALSource extends Source {
 		if (!stopped) {
 			alSourceStop(sourceId)
 		}
+	}
+
+	@Override
+	void unqueueBuffers(Buffer... buffers) {
+
+		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
 	}
 }

@@ -31,6 +31,14 @@ abstract class Source implements AudioResource {
 	abstract void attachBuffer(Buffer buffer)
 
 	/**
+	 * Return the number of queued buffers that have been processed for this
+	 * source.
+	 *
+	 * @return Number of processed buffers.
+	 */
+	abstract int buffersProcessed()
+
+	/**
 	 * Rether whether this source is currently paused.
 	 *
 	 * @return
@@ -79,4 +87,9 @@ abstract class Source implements AudioResource {
 	 * Stop playing the sound through this source.
 	 */
 	abstract void stop()
+
+	/**
+	 * Unqueue buffers from this source.
+	 */
+	abstract void unqueueBuffers(Buffer... buffers)
 }

@@ -31,15 +31,6 @@ import java.nio.ByteBuffer
 interface AudioRenderer {
 
 	/**
-	 * Return the number of buffers that have been processed for the given source,
-	 * which is the number of buffers that can be safely unqueued from the source.
-	 *
-	 * @param sourceId
-	 * @return Number of processed buffers.
-	 */
-	int buffersProcessed(int sourceId)
-
-	/**
 	 * Creates and fills a sound buffer with the given data.
 	 *
 	 * @param data
@@ -70,22 +61,6 @@ interface AudioRenderer {
 	 * @param source
 	 */
 	void deleteSource(Source source)
-
-	/**
-	 * Queue some buffers to an existing source.
-	 *
-	 * @param sourceId
-	 * @param bufferIds
-	 */
-	void queueBuffers(int sourceId, int ... bufferId)
-
-	/**
-	 * Unqueue some buffers from an existing source.
-	 *
-	 * @param sourceId
-	 * @param bufferIds
-	 */
-	void unqueueBuffers(int sourceId, int ... bufferId)
 
 	/**
 	 * Update details about the listener.
