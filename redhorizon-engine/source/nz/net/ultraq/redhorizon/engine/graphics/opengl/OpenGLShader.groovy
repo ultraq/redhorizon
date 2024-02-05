@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@ class OpenGLShader extends Shader {
 
 		super(name, uniforms)
 
-		/* 
+		/*
 		 * Create a shader of the specified name and type, running a compilation
 		 * check to make sure it all went OK.
 		 */
@@ -73,7 +73,7 @@ class OpenGLShader extends Shader {
 			return shaderId
 		}
 
-		/* 
+		/*
 		 * Link multiple shader parts together into a shader program.
 		 */
 		var linkShaderProgram = { int vertexShaderId, int fragmentShaderId ->
@@ -149,7 +149,7 @@ class OpenGLShader extends Shader {
 	}
 
 	@Override
-	void setUniformMatrix(String name, Matrix4f matrix) {
+	void setUniform(String name, Matrix4f matrix) {
 
 		stackPush().withCloseable { stack ->
 			glUniformMatrix4fv(getUniformLocation(name), false, matrix.get(stack.mallocFloat(16)))

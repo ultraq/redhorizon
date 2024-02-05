@@ -38,7 +38,7 @@ class SpriteShader extends ShaderConfig {
 				shader.setUniformTexture(UNIFORM_MAIN_TEXTURE, 0, material.texture)
 			},
 			{ shader, material, window ->
-				shader.setUniformMatrix(UNIFORM_MODEL, material.transform)
+				shader.setUniform(UNIFORM_MODEL, material.transform)
 			}
 		)
 	}

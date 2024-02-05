@@ -44,7 +44,7 @@ class PalettedSpriteShader extends ShaderConfig {
 				shader.setUniform('factionColours', material.faction.colours)
 			},
 			{ Shader shader, Material material, Window window ->
-				shader.setUniformMatrix('model', material.transform)
+				shader.setUniform('model', material.transform)
 			}
 		)
 	}

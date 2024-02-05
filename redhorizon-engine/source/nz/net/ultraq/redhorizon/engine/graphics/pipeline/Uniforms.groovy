@@ -37,7 +37,7 @@ class Uniforms {
 	}
 
 	static final Uniform modelUniform = { Shader shader, Material material, Window window ->
-		shader.setUniformMatrix('model', material.transform)
+		shader.setUniform('model', material.transform)
 	}
 
 	static final Uniform textureTargetSizeUniform = { Shader shader, Material material, Window window ->

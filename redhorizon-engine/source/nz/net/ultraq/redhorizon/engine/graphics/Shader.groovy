@@ -63,7 +63,7 @@ abstract class Shader implements GraphicsResource {
 	 * @param name
 	 * @param matrix
 	 */
-	abstract void setUniformMatrix(String name, Matrix4f matrix)
+	abstract void setUniform(String name, Matrix4f matrix)
 
 	/**
 	 * Apply a texture uniform using the given texture ID.
