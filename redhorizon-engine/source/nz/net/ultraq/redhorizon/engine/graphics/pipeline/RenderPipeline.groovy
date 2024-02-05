@@ -40,8 +40,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 /**
  * A render pipeline contains all of the configured rendering passes and
  * executes them so that objects are drawn to a screen.  These passes can be
@@ -167,10 +165,10 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		imGuiLayer.frame { ->
 			renderer.clear()
-			var cameraMoved = camera.update()
+			camera.update()
 
 			// Perform all rendering passes
-			def sceneResult = renderPasses.inject(cameraMoved) { lastResult, renderPass ->
+			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
 				if (renderPass.enabled) {
 					renderer.setRenderTarget(renderPass.framebuffer)
 					renderer.clear()
@@ -195,14 +193,13 @@ class RenderPipeline implements AutoCloseable {
 	 * The render pass for drawing the scene to a framebuffer at the rendering
 	 * resolution.
 	 */
-	private class SceneRenderPass implements RenderPass<Boolean> {
+	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Scene scene
 		final Framebuffer framebuffer
 
 		// For object culling
 		private final List<GraphicsElement> visibleElements = []
-		private final AtomicBoolean sceneChanged = new AtomicBoolean(true)
 
 		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
 
@@ -212,19 +209,16 @@ class RenderPipeline implements AutoCloseable {
 		}
 
 		@Override
-		void render(GraphicsRenderer renderer, Boolean cameraMoved) {
+		void render(GraphicsRenderer renderer, Void unused) {
 
 			// Cull the list of renderable items to those just visible in the scene
 			averageNanos('objectCulling', 1f, logger) { ->
-				if (sceneChanged.get() || cameraMoved) {
-					visibleElements.clear()
-					def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-					scene.accept { element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
-							visibleElements << element
-						}
+				visibleElements.clear()
+				def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+				scene.accept { element ->
+					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+						visibleElements << element
 					}
-					sceneChanged.compareAndSet(true, false)
 				}
 			}
 
