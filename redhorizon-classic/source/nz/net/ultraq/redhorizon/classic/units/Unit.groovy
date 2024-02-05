@@ -37,7 +37,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-abstract class Unit implements GraphicsElement, Node, Rotatable, Temporal {
+abstract class Unit extends Node<Unit> implements GraphicsElement, Rotatable, Temporal {
 
 	private static Logger logger = LoggerFactory.getLogger(Unit)
 

@@ -35,7 +35,7 @@ import org.joml.Vector2f
  *
  * @author Emanuel Rabina
  */
-class MapLines implements GraphicsElement, Node {
+class MapLines extends Node<MapLines> implements GraphicsElement {
 
 	private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
 	private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)

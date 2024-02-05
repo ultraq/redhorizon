@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Image implements Resource, GraphicsElement, Node<Image> {
+class Image extends Node<Image> implements Resource, GraphicsElement {
 
 	final int width
 	final int height

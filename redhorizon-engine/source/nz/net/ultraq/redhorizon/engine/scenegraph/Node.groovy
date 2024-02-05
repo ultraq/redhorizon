@@ -24,11 +24,11 @@ import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
 /**
- * Interface for an element that can be a part of a scene.
+ * An element of a scene, nodes are used to build and organize scene trees.
  *
  * @author Emanuel Rabina
  */
-trait Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
+class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 	final Vector3f position = new Vector3f()
 	final Matrix4f transform = new Matrix4f()

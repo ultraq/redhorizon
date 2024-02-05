@@ -41,7 +41,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(includes = ['imageFile'])
-class Sprite implements Node<Sprite>, GraphicsElement {
+class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	final ImageFile imageFile
 

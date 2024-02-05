@@ -32,7 +32,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class MapElement implements GraphicsElement, Node {
+class MapElement extends Node<MapElement> implements GraphicsElement {
 
 	final TileSet tileSet
 	final ImagesFile tileFile

@@ -48,7 +48,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
-class Animation implements GraphicsElement, Playable, Node, Temporal {
+class Animation extends Node<Animation> implements GraphicsElement, Playable, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 

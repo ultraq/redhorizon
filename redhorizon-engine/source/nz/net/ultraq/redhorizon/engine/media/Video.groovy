@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.media
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioElement
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneVisitor
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
-
-import org.joml.Matrix4f
-import org.joml.primitives.Rectanglef
 
 import java.util.concurrent.Executors
 
@@ -35,11 +34,9 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Video implements AudioElement, GraphicsElement, Playable, Node {
+class Video extends Node<Video> implements AudioElement, GraphicsElement, Playable {
 
-	@Delegate
 	private final Animation animation
-	@Delegate
 	private final SoundTrack soundTrack
 
 	/**
@@ -79,15 +76,23 @@ class Video implements AudioElement, GraphicsElement, Playable, Node {
 	}
 
 	@Override
-	Rectanglef getBounds() {
+	void delete(AudioRenderer renderer) {
 
-		return Node.super.bounds
 	}
 
 	@Override
-	Matrix4f getTransform() {
+	void delete(GraphicsRenderer renderer) {
 
-		return Node.super.transform
+	}
+
+	@Override
+	void init(AudioRenderer renderer) {
+
+	}
+
+	@Override
+	void init(GraphicsRenderer renderer) {
+
 	}
 
 	@Override
@@ -104,10 +109,19 @@ class Video implements AudioElement, GraphicsElement, Playable, Node {
 	}
 
 	@Override
+	void render(AudioRenderer renderer) {
+
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+	}
+
+	@Override
 	Video scale(float x, float y, float z) {
 
 		[animation, soundTrack]*.scale(x, y, z)
-		Node.super.scale(x, y, z)
 		return this
 	}
 
@@ -115,14 +129,12 @@ class Video implements AudioElement, GraphicsElement, Playable, Node {
 	void stop() {
 
 		[animation, soundTrack]*.stop()
-		Playable.super.stop()
 	}
 
 	@Override
 	Video translate(float x, float y, float z) {
 
 		[animation, soundTrack]*.translate(x, y, z)
-		Node.super.translate(x, y, z)
 		return this
 	}
 }

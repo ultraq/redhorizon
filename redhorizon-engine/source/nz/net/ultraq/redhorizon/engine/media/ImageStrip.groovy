@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
  *
  * @author Emanuel Rabina
  */
-class ImageStrip implements Node {
+class ImageStrip extends Node<ImageStrip> {
 
 	final List<Image> images = []
 

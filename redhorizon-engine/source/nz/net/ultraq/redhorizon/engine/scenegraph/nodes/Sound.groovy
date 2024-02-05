@@ -44,7 +44,7 @@ import java.util.concurrent.LinkedBlockingQueue
  * @author Emanuel Rabina
  */
 @TupleConstructor(includes = ['soundFile'])
-class Sound implements Node<Sound>, AudioElement, Playable {
+class Sound extends Node<Sound> implements AudioElement, Playable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sound)
 

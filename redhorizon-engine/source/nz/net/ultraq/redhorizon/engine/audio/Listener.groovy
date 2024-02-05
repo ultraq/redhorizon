@@ -26,7 +26,7 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Listener implements AudioElement, Node {
+class Listener extends Node<Listener> implements AudioElement {
 
 	final Vector3f velocity = new Vector3f(0, 0, 0)
 	final Orientation orientation = new Orientation()

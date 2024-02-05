@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class MapBackground implements GraphicsElement, Node {
+class MapBackground extends Node<MapBackground> implements GraphicsElement {
 
 	final int width
 	final int height

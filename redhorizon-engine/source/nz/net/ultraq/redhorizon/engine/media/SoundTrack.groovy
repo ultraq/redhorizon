@@ -41,7 +41,7 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
-class SoundTrack implements AudioElement, Playable, Node, Temporal {
+class SoundTrack extends Node<SoundTrack> implements AudioElement, Playable, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(SoundTrack)
 

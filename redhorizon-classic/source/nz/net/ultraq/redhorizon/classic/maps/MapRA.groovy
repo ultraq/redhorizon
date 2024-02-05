@@ -48,7 +48,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class MapRA implements Node, GraphicsElement {
+class MapRA extends Node<MapRA> implements GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapRA)
 
@@ -155,7 +155,7 @@ class MapRA implements Node, GraphicsElement {
 	/**
 	 * Special layer for the background image.
 	 */
-	private class BackgroundLayer implements Node {
+	private class BackgroundLayer extends Node<BackgroundLayer> {
 
 		private final MapBackground background
 
@@ -192,7 +192,7 @@ class MapRA implements Node, GraphicsElement {
 	/**
 	 * Common code for rendering a map layer consisting of multiple elements.
 	 */
-	private abstract class MapLayer implements Node {
+	private abstract class MapLayer extends Node<MapLayer> {
 
 		protected final List<Node> elements = []
 
