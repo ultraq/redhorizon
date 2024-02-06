@@ -90,20 +90,8 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Set a rectangle's points by copying them from another.
-	 * 
-	 * @param self
-	 * @param r
-	 * @return
-	 */
-	static Rectanglef set(Rectanglef self, Rectanglef r) {
-
-		return self.set(r.minX, r.minY, r.maxX, r.maxY)
-	}
-
-	/**
-	 * Set a rectangle to represent the given dimensions extended from the origin.
-	 * 
+	 * Set a rectangle to represent the given values.
+	 *
 	 * @param self
 	 * @param minX
 	 * @param minY
