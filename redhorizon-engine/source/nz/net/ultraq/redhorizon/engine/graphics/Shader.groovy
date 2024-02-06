@@ -28,13 +28,18 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 abstract class Shader implements GraphicsResource {
 
+	static final String UNIFORM_MODEL = 'model'
+
 	final String name
 	final Uniform[] uniforms
 
 	/**
-	 * Update a shader's uniforms using the given material and window context.
+	 * Update a shader's uniforms using the given context.
 	 */
-	void applyMaterial(Material material, Window window) {
+	void applyUniforms(Matrix4f transform, Material material, Window window) {
+
+		// Model uniform is universal, so bake this here
+		setUniform(UNIFORM_MODEL, transform)
 
 		uniforms*.apply(this, material, window)
 	}

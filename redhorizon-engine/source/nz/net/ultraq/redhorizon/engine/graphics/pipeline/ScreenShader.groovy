@@ -34,8 +34,7 @@ class ScreenShader extends ShaderConfig {
 			'Screen',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
-			Uniforms.framebufferUniform,
-			Uniforms.modelUniform
+			Uniforms.framebufferUniform
 		)
 	}
 }

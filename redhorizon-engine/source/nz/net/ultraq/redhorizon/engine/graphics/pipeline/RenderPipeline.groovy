@@ -128,7 +128,6 @@ class RenderPipeline implements AutoCloseable {
 		// Sharp upscaling post-processing pass
 		renderPasses << new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
-			renderer.createMaterial(),
 			renderer.createShader(new SharpUpscalingShader()),
 			true
 		)
@@ -139,7 +138,6 @@ class RenderPipeline implements AutoCloseable {
 		// Scanline post-processing pass
 		renderPasses << new PostProcessingRenderPass(
 			renderer.createFramebuffer(window.targetResolution, false),
-			renderer.createMaterial(),
 			renderer.createShader(new ScanlinesShader()),
 			config.scanlines
 		)
@@ -149,7 +147,6 @@ class RenderPipeline implements AutoCloseable {
 
 		// Final pass to emit the result to the screen
 		renderPasses << new ScreenRenderPass(
-			renderer.createMaterial(),
 			renderer.createShader(new ScreenShader()),
 			!config.startWithChrome,
 			window
@@ -234,14 +231,14 @@ class RenderPipeline implements AutoCloseable {
 	 */
 	private class PostProcessingRenderPass implements RenderPass<Framebuffer> {
 
+		final Matrix4f transform = new Matrix4f()
+		final Material material = new Material()
 		final Framebuffer framebuffer
-		final Material material
 		final Shader shader
 
-		PostProcessingRenderPass(Framebuffer framebuffer, Material material, Shader shader, boolean enabled) {
+		PostProcessingRenderPass(Framebuffer framebuffer, Shader shader, boolean enabled) {
 
 			this.framebuffer = framebuffer
-			this.material = material
 			this.shader = shader
 			this.enabled = enabled
 		}
@@ -250,14 +247,13 @@ class RenderPipeline implements AutoCloseable {
 		void delete(GraphicsRenderer renderer) {
 
 			renderer.deleteFramebuffer(framebuffer)
-			renderer.deleteMaterial(material)
 		}
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer previous) {
 
 			material.texture = previous.texture
-			renderer.draw(fullScreenQuad, shader, material)
+			renderer.draw(fullScreenQuad, transform, shader, material)
 		}
 	}
 
@@ -268,27 +264,26 @@ class RenderPipeline implements AutoCloseable {
 	private class ScreenRenderPass implements RenderPass<Framebuffer> {
 
 		final Framebuffer framebuffer = null
-		final Material material
+		final Matrix4f transform = new Matrix4f()
+		final Material material = new Material()
 		final Shader shader
 
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
 		 * to changes in output/window resolution.
 		 *
-		 * @param material
 		 * @param shader
 		 * @param enabled
 		 * @param window
 		 */
-		ScreenRenderPass(Material material, Shader shader, boolean enabled, Window window) {
+		ScreenRenderPass(Shader shader, boolean enabled, Window window) {
 
-			this.material = material
 			this.shader = shader
 			this.enabled = enabled
 
-			material.transform.set(calculateScreenModelMatrix(window.framebufferSize, window.targetResolution))
+			transform.set(calculateScreenModelMatrix(window.framebufferSize, window.targetResolution))
 			window.on(FramebufferSizeEvent) { event ->
-				material.transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
+				transform.set(calculateScreenModelMatrix(event.framebufferSize, event.targetResolution))
 			}
 		}
 
@@ -317,15 +312,13 @@ class RenderPipeline implements AutoCloseable {
 
 		@Override
 		void delete(GraphicsRenderer renderer) {
-
-			renderer.deleteMaterial(material)
 		}
 
 		@Override
 		void render(GraphicsRenderer renderer, Framebuffer previous) {
 
 			material.texture = previous.texture
-			renderer.draw(fullScreenQuad, shader, material)
+			renderer.draw(fullScreenQuad, transform, shader, material)
 		}
 	}
 }

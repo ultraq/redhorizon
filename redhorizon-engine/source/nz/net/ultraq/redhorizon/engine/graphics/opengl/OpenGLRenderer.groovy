@@ -181,13 +181,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	@NamedVariant
-	Material createMaterial(Texture texture = null, Matrix4f transform = new Matrix4f()) {
-
-		return new Material(texture, transform)
-	}
-
-	@Override
-	@NamedVariant
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
 		Vector2f[] textureUVs = null, int[] indices = null) {
 
@@ -250,12 +243,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void deleteMaterial(Material material) {
-
-		material?.close()
-	}
-
-	@Override
 	void deleteMesh(Mesh mesh) {
 
 		if (mesh) {
@@ -275,12 +262,12 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	@NamedVariant
-	void draw(Mesh mesh, Shader shader, Material material = null) {
+	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()
 			if (material) {
-				shader.applyMaterial(material, window)
+				shader.applyUniforms(transform, material, window)
 			}
 
 			mesh.bind()

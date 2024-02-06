@@ -38,7 +38,6 @@ class SharpUpscalingShader extends ShaderConfig {
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl',
 			Uniforms.framebufferUniform,
-			Uniforms.modelUniform,
 			{ shader, material, window ->
 				shader.setUniform(UNIFORM_TEXTURE_SOURCE_SIZE, window.renderResolution as float[])
 			},

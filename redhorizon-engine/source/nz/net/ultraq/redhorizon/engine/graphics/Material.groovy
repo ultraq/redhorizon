@@ -16,28 +16,16 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Matrix4f
-
-import groovy.transform.TupleConstructor
-
 /**
- * A material defines how a shape should be rendered.  A {@link Mesh} already
- * covers the shape part, so a material covers the uniform values that go into
- * configuring a shader.  These values are stored as a general-purpose
- * {@code Map}, with extensions used to simplify access to that map.
+ * A material defines special properties to how a shape should be rendered.
+ * These are often uniform values that go into configuring a shader, stored as a
+ * general-purpose {@code Map}, with extensions used to simplify access to that
+ * map.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(includes = ['texture', 'transform'])
-class Material implements GraphicsResource {
+class Material {
 
 	final Map<String, Object> attributes = [:]
 	Texture texture
-	Matrix4f transform
-
-	@Override
-	void close() {
-
-		texture?.close()
-	}
 }

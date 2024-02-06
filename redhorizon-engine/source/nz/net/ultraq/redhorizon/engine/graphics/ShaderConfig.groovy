@@ -24,8 +24,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
  */
 class ShaderConfig {
 
-	static final String UNIFORM_MODEL = 'model'
-
 	final String name
 	final String vertexShaderSource
 	final String fragmentShaderSource

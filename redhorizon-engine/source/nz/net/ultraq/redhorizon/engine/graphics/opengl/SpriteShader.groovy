@@ -36,9 +36,6 @@ class SpriteShader extends ShaderConfig {
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl',
 			{ shader, material, window ->
 				shader.setUniformTexture(UNIFORM_MAIN_TEXTURE, 0, material.texture)
-			},
-			{ shader, material, window ->
-				shader.setUniform(UNIFORM_MODEL, material.transform)
 			}
 		)
 	}

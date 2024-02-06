@@ -37,7 +37,6 @@ class ScanlinesShader extends ShaderConfig {
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.frag.glsl',
 			Uniforms.framebufferUniform,
-			Uniforms.modelUniform,
 			{ shader, material, window ->
 				def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
 				shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])

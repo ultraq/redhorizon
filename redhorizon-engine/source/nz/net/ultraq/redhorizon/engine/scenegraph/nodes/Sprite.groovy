@@ -74,8 +74,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 		material = new Material(
 			texture: scene
 				.requestCreateOrGet(new TextureRequest(width, height, format, imageFile.imageData.flipVertical(width, height, format)))
-				.get(),
-			transform: transform
+				.get()
 		)
 		region = new Rectanglef(0, 0, width, height)
 	}
@@ -83,7 +82,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh, shader, material)
+		scene.requestDelete(mesh, shader)
 	}
 
 	@Override
@@ -93,6 +92,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 			return
 		}
 
-		renderer.draw(mesh, shader, material)
+		renderer.draw(mesh, transform, shader, material)
 	}
 }

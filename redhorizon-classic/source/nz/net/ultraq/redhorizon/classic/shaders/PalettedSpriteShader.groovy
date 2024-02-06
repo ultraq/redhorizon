@@ -16,10 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
-import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-import nz.net.ultraq.redhorizon.engine.graphics.Window
 
 /**
  * A 2D sprite shader for palette-based sprites.
@@ -34,17 +31,14 @@ class PalettedSpriteShader extends ShaderConfig {
 			'PalettedSprite',
 			'nz/net/ultraq/redhorizon/classic/shaders/PalettedSprite.vert.glsl',
 			'nz/net/ultraq/redhorizon/classic/shaders/PalettedSprite.frag.glsl',
-			{ Shader shader, Material material, Window window ->
+			{ shader, material, window ->
 				shader.setUniformTexture('indexTexture', 0, material.texture)
 			},
-			{ Shader shader, Material material, Window window ->
+			{ shader, material, window ->
 				shader.setUniformTexture('paletteTexture', 1, material.palette)
 			},
-			{ Shader shader, Material material, Window window ->
+			{ shader, material, window ->
 				shader.setUniform('factionColours', material.faction.colours)
-			},
-			{ Shader shader, Material material, Window window ->
-				shader.setUniform('model', material.transform)
 			}
 		)
 	}

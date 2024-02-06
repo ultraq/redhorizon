@@ -36,10 +36,6 @@ class Uniforms {
 		shader.setUniformTexture('framebuffer', 0, material.texture)
 	}
 
-	static final Uniform modelUniform = { Shader shader, Material material, Window window ->
-		shader.setUniform('model', material.transform)
-	}
-
 	static final Uniform textureTargetSizeUniform = { Shader shader, Material material, Window window ->
 		shader.setUniform('textureTargetSize', window.targetResolution as float[])
 	}

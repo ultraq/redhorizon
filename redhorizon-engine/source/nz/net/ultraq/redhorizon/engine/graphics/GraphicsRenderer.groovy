@@ -65,18 +65,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	Framebuffer createFramebuffer(int width, int height, boolean filter)
 
 	/**
-	 * Create a material out of the given component parts.
-	 *
-	 * @param mesh
-	 * @param texture
-	 * @param shader
-	 * @param transform
-	 * @return
-	 */
-	@NamedVariant
-	Material createMaterial(Texture texture, Matrix4f transform)
-
-	/**
 	 * Create a mesh with all of the mesh parts.
 	 *
 	 * @param type
@@ -143,13 +131,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	void deleteFramebuffer(Framebuffer framebuffer)
 
 	/**
-	 * Delete all of the items tied to the material.
-	 *
-	 * @param material
-	 */
-	void deleteMaterial(Material material)
-
-	/**
 	 * Delete mesh data.
 	 *
 	 * @param mesh
@@ -164,14 +145,23 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	void deleteTexture(Texture texture)
 
 	/**
+	 * Draw a mesh using the given shader.
+	 *
+	 * @param mesh
+	 * @param transform
+	 * @param shader
+	 */
+	void draw(Mesh mesh, Matrix4f transform, Shader shader)
+
+	/**
 	 * Draw a mesh using a shader and material to configure the shader.
 	 *
 	 * @param mesh
+	 * @param transform
 	 * @param shader
 	 * @param material
 	 */
-	@NamedVariant
-	void draw(Mesh mesh, Shader shader, Material material)
+	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material)
 
 	/**
 	 * Return the maximum size that any dimension of a texture can be for the
