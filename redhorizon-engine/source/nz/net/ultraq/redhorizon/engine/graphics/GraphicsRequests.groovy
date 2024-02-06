@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
+import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
 import groovy.transform.ImmutableOptions
@@ -34,6 +35,10 @@ interface GraphicsRequests {
 	static interface Request<T extends GraphicsResource> {}
 
 	static record ShaderRequest(String name) implements Request<Shader> {}
+
+	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
+	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices)
+		implements Request<Mesh> {}
 
 	@ImmutableOptions(knownImmutables = ['surface'])
 	static record SpriteMeshRequest(Rectanglef surface) implements Request<Mesh> {}
