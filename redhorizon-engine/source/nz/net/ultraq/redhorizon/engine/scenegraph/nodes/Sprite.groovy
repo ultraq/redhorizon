@@ -31,8 +31,6 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.TupleConstructor
-
 /**
  * A simple 2D sprite node.  Contains a texture and coordinate data for what
  * parts of that texture to render (ie: the texture represents a larger sprite
@@ -40,7 +38,6 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(includes = ['imageFile'])
 class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	final ImageFile imageFile
@@ -49,6 +46,12 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	private Shader shader
 	private Material material
 	private Rectanglef region
+
+	Sprite(ImageFile imageFile) {
+
+		bounds.set(0, 0, imageFile.width, imageFile.height)
+		this.imageFile = imageFile
+	}
 
 	@Override
 	void delete(GraphicsRenderer renderer) {

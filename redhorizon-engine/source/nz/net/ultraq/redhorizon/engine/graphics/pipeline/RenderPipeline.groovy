@@ -31,6 +31,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.FrustumIntersection
@@ -211,9 +212,9 @@ class RenderPipeline implements AutoCloseable {
 			// Cull the list of renderable items to those just visible in the scene
 			averageNanos('objectCulling', 1f, logger) { ->
 				visibleElements.clear()
-				def frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-				scene.accept { element ->
-					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.bounds)) {
+				var frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+				scene.accept { Node element ->
+					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
 						visibleElements << element
 					}
 				}

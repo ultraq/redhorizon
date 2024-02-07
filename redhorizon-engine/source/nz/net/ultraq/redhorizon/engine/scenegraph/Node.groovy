@@ -34,7 +34,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	final Rectanglef bounds = new Rectanglef()
 
 	protected Node parent
-	protected final List<Node> children = []
+	protected List<Node> children = []
+
+	private final Rectanglef globalBounds = new Rectanglef()
+	private final Matrix4f globalTransform = new Matrix4f()
+	private final Vector3f globalScale = new Vector3f()
+	private final Vector3f globalTranslate = new Vector3f()
 
 	@Override
 	void accept(SceneVisitor visitor) {
@@ -54,6 +59,40 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 		children << child
 		child.parent = this
 		return this
+	}
+
+	/**
+	 * Return the world-space bounds of this node.  ie: the local bounds, then
+	 * taking into account local and all parent/ancestor transforms along the path
+	 * to this node.
+	 *
+	 * @return
+	 */
+	// TODO: Surely this is inefficient having to calculate this each time? 🤔
+	Rectanglef getGlobalBounds() {
+
+		getGlobalTransform()
+		var scale = globalTransform.getScale(globalScale)
+		var translate = globalTransform.getTranslation(globalTranslate)
+		return globalBounds.set(bounds)
+			.scale(scale.x, scale.y)
+			.translate(translate.x, translate.y)
+	}
+
+	/**
+	 * Get the world-space transform of this node.  ie: the local transform, then
+	 * modified by all of the ancestor transforms along the path to this node.
+	 * The result is stored in the private {@code globalTransform} property, and
+	 * returned.
+	 *
+	 * @return
+	 */
+	// TODO: Surely this is inefficient having to calculate this each time? 🤔
+	private Matrix4f getGlobalTransform() {
+
+		return parent != null ?
+			globalTransform.mul(parent.globalTransform) :
+			globalTransform.set(transform)
 	}
 
 	/**
