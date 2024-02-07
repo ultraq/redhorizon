@@ -34,10 +34,52 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
 
+	protected Node parent
+	protected final List<Node> children = []
+
 	@Override
 	void accept(SceneVisitor visitor) {
 
 		visitor.visit(this)
+		children*.accept(visitor)
+	}
+
+	/**
+	 * Adds a child node to this node.
+	 *
+	 * @param child
+	 * @return
+	 */
+	T addChild(Node child) {
+
+		children << child
+		child.parent = this
+		return this
+	}
+
+	/**
+	 * An alias for {@link #addChild(Node)}
+	 *
+	 * @param child
+	 */
+	void leftShift(Node child) {
+
+		addChild(child)
+	}
+
+	/**
+	 * Default implementation of the scene added event to notify any attached
+	 * script, then this node's children.
+	 *
+	 * @param scene
+	 */
+	@Override
+	void onSceneAdded(Scene scene) {
+
+		script?.onSceneAdded(scene)
+		children.each { child ->
+			child.onSceneAdded(scene)
+		}
 	}
 
 	/**

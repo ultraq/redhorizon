@@ -63,7 +63,6 @@ class Scene implements EventTarget, Visitable {
 
 		nodes << node
 		node.onSceneAdded(this)
-		node.script?.onSceneAdded(this)
 		trigger(new NodeAddedEvent(node))
 		return this
 	}
