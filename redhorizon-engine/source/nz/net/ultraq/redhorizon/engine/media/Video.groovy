@@ -118,12 +118,12 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 
 	}
 
-	@Override
-	Video scale(float x, float y, float z) {
-
-		[animation, soundTrack]*.scale(x, y, z)
-		return this
-	}
+//	@Override
+//	Video scale(float x, float y, float z) {
+//
+//		[animation, soundTrack]*.scale(x, y, z)
+//		return this
+//	}
 
 	@Override
 	void stop() {
@@ -131,10 +131,10 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 		[animation, soundTrack]*.stop()
 	}
 
-	@Override
-	Video translate(float x, float y, float z) {
-
-		[animation, soundTrack]*.translate(x, y, z)
-		return this
-	}
+//	@Override
+//	Video translate(float x, float y, float z) {
+//
+//		[animation, soundTrack]*.translate(x, y, z)
+//		return this
+//	}
 }

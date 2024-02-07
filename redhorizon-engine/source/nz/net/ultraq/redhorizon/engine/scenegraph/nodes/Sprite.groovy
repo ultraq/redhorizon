@@ -77,6 +77,8 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 				.get()
 		)
 		region = new Rectanglef(0, 0, width, height)
+
+		super.onSceneAdded(scene)
 	}
 
 	@Override

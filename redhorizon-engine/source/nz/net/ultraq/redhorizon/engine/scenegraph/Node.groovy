@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
 import org.joml.Matrix4f
-import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
@@ -80,64 +79,5 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 		children.each { child ->
 			child.onSceneAdded(scene)
 		}
-	}
-
-	/**
-	 * Scale this element by the given values.
-	 */
-	T scale(float x, float y, float z) {
-
-		transform.scale(x, y, z)
-		bounds.scale(x, y, z)
-		return this
-	}
-
-	/**
-	 * Scale the X and Y values of this element.
-	 *
-	 * @param factor
-	 * @return
-	 */
-	T scaleXY(float factor) {
-
-		return scale(factor, factor, 1)
-	}
-
-	/**
-	 * Translate the position of this element.
-	 *
-	 * @param offset
-	 * @return
-	 */
-	T translate(Vector3f offset) {
-
-		return translate(offset.x, offset.y, offset.z)
-	}
-
-	/**
-	 * Translate the position of this element.
-	 *
-	 * @param xyOffset
-	 * @param z
-	 * @return
-	 */
-	T translate(Vector2f xyOffset, float z = 0) {
-
-		return translate(xyOffset.x, xyOffset.y, z)
-	}
-
-	/**
-	 * Translate the position of this element.
-	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return
-	 */
-	T translate(float x, float y, float z = 0) {
-
-		transform.translate(x, y, z)
-		bounds.translate(x, y)
-		return this
 	}
 }

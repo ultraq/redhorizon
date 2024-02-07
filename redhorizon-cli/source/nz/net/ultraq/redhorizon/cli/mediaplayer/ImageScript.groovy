@@ -37,7 +37,7 @@ class ImageScript extends Script<Sprite> {
 
 		var width = imageFile.width
 		var height = imageFile.height
-		scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
-		translate(-width / 2, -height / 2)
+		transform.scaleXY(scene.window.renderResolution.calculateScaleToFit(width, height))
+		transform.translate(-width / 2, -height / 2)
 	}
 }

@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import org.joml.primitives.Rectanglef
 
 /**
  * Extensions to JOMLs objects to work with Red Horizon.
- * 
+ *
  * @author Emanuel Rabina
  */
 class JomlExtensions {
@@ -32,7 +32,7 @@ class JomlExtensions {
 	/**
 	 * Return an array of points {@code Vector2f}s, each representing a point of
 	 * this rectangle.
-	 * 
+	 *
 	 * @param self
 	 * @param clazz
 	 * @return An array of 4 vectors, one for each x/y point around the rectangle.
@@ -53,7 +53,7 @@ class JomlExtensions {
 	/**
 	 * Overload the {@code -} operator to perform vector subtraction.  Note that
 	 * this creates a new object to store the result and is returned.
-	 * 
+	 *
 	 * @param self
 	 * @param v
 	 * @return
@@ -66,7 +66,7 @@ class JomlExtensions {
 	/**
 	 * Overload the {@code *} operator to perform matrix multiplication.  Note
 	 * that this creates a new object to store the result and is returned.
-	 * 
+	 *
 	 * @param self
 	 * @param right
 	 * @return
@@ -79,7 +79,7 @@ class JomlExtensions {
 	/**
 	 * Overload the {@code +} operator to perform vector addition.  Note that
 	 * this creates a new object to store the result and is returned.
-	 * 
+	 *
 	 * @param self
 	 * @param v
 	 * @return
@@ -87,6 +87,18 @@ class JomlExtensions {
 	static Vector3f plus(Vector3f self, Vector3f v) {
 
 		return self.add(v, new Vector3f())
+	}
+
+	/**
+	 * Scale just the X and Y components of a matrix by the same value.
+	 *
+	 * @param self
+	 * @param factor
+	 * @return
+	 */
+	static Matrix4f scaleXY(Matrix4f self, float factor) {
+
+		return self.scaleXY(factor, factor)
 	}
 
 	/**
@@ -110,7 +122,7 @@ class JomlExtensions {
 
 	/**
 	 * Test whether an XY plane represented by a rectangle is within this frustum.
-	 * 
+	 *
 	 * @param self
 	 * @param plane
 	 * @return
@@ -118,5 +130,18 @@ class JomlExtensions {
 	static boolean testPlaneXY(FrustumIntersection self, Rectanglef plane) {
 
 		return self.testPlaneXY(plane.minX, plane.minY, plane.maxX, plane.maxY)
+	}
+
+	/**
+	 * Translate this matrix by just an X and Y component.
+	 *
+	 * @param self
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static Matrix4f translate(Matrix4f self, float x, float y) {
+
+		return self.translate(x, y, 0)
 	}
 }
