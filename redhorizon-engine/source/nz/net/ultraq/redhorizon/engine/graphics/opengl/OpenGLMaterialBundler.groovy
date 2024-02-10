@@ -16,11 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -28,10 +26,7 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.joml.primitives.Rectanglef
-import static org.lwjgl.opengl.GL11C.*
 
-import groovy.transform.NamedVariant
 import groovy.transform.TupleConstructor
 
 /**
@@ -44,12 +39,12 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
 	// TODO: Derive the layout from the materials being bundled, not hard-coded in this class
 	private static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
-		VertexBufferLayoutPart.COLOUR,
 		VertexBufferLayoutPart.POSITION,
+		VertexBufferLayoutPart.COLOUR,
 		VertexBufferLayoutPart.TEXTURE_UVS
 	)
 
-	@Delegate(excludes = ['createMesh', 'createSpriteMesh'])
+	@Delegate
 	final OpenGLRenderer renderer
 
 	// This currently works because meshes and materials are created in pairs, so
@@ -101,32 +96,4 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 //		return material
 //	}
 //
-	@Override
-	@NamedVariant
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
-		Vector2f[] textureUVs = null, int[] indices = null) {
-
-		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
-			layout, colour, vertices, textureUVs, indices)
-		meshes << mesh
-		return mesh
-	}
-
-	@Override
-	@NamedVariant
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
-
-		return createMesh(
-			type: MeshType.TRIANGLES,
-			layout: new VertexBufferLayout(
-				VertexBufferLayoutPart.COLOUR,
-				VertexBufferLayoutPart.POSITION,
-				VertexBufferLayoutPart.TEXTURE_UVS
-			),
-			colour: Colour.WHITE,
-			vertices: surface as Vector2f[],
-			textureUVs: textureUVs as Vector2f[],
-			indices: [0, 1, 3, 1, 2, 3] as int[]
-		)
-	}
 }

@@ -2,8 +2,8 @@
 
 #define pi 3.141592654
 
-in vec4 colour;
 in vec4 position;
+in vec4 colour;
 in vec2 textureUVs;
 
 out vec4 v_vertexColour;

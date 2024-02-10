@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,13 +57,16 @@ class OpenGLMesh extends Mesh {
 		stackPush().withCloseable { stack ->
 			var vertexBuffer = stack.mallocFloat(layout.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
-				vertexBuffer.put(
-					colour.r, colour.g, colour.b, colour.a,
-					vertex.x, vertex.y
-				)
-				if (layout.parts.contains(VertexBufferLayoutPart.TEXTURE_UVS)) {
-					var textureUV = textureUVs[index]
-					vertexBuffer.put(textureUV.x, textureUV.y)
+				layout.parts.each { layoutPart ->
+					switch (layoutPart) {
+						case VertexBufferLayoutPart.POSITION -> vertexBuffer.put(vertex.x, vertex.y)
+						case VertexBufferLayoutPart.COLOUR -> vertexBuffer.put(colour.r, colour.g, colour.b, colour.a)
+						case VertexBufferLayoutPart.TEXTURE_UVS -> {
+							var textureUV = textureUVs[index]
+							vertexBuffer.put(textureUV.x, textureUV.y)
+						}
+						default -> throw new IllegalArgumentException("Unhandled vertex layout part ${layoutPart.name()}")
+					}
 				}
 			}
 			vertexBuffer.flip()

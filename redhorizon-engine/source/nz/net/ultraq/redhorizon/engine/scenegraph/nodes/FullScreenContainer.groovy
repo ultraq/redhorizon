@@ -111,7 +111,7 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 			mesh = scene
 				.requestCreateOrGet(new MeshRequest(
 					MeshType.LINE_LOOP,
-					new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+					new VertexBufferLayout(VertexBufferLayoutPart.POSITION, VertexBufferLayoutPart.COLOUR),
 					Colour.GREEN,
 					bounds as Vector2f[]
 				))

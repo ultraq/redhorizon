@@ -180,9 +180,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	@NamedVariant
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
-		Vector2f[] textureUVs = null, int[] indices = null) {
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs, int[] indices) {
 
 		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
 			layout, colour, vertices, textureUVs, indices)
@@ -208,20 +206,19 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	@NamedVariant
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
 
 		return createMesh(
-			type: MeshType.TRIANGLES,
-			layout: new VertexBufferLayout(
-				VertexBufferLayoutPart.COLOUR,
+			MeshType.TRIANGLES,
+			new VertexBufferLayout(
 				VertexBufferLayoutPart.POSITION,
+				VertexBufferLayoutPart.COLOUR,
 				VertexBufferLayoutPart.TEXTURE_UVS
 			),
-			colour: Colour.WHITE,
-			vertices: surface as Vector2f[],
-			textureUVs: textureUVs as Vector2f[],
-			indices: [0, 1, 3, 1, 2, 3] as int[]
+			Colour.WHITE,
+			surface as Vector2f[],
+			textureUVs as Vector2f[],
+			[0, 1, 3, 1, 2, 3] as int[]
 		)
 	}
 

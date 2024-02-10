@@ -80,9 +80,7 @@ class RenderPipeline implements AutoCloseable {
 		this.imGuiLayer = imGuiLayer
 		this.camera = camera
 
-		fullScreenQuad = renderer.createSpriteMesh(
-			surface: new Rectanglef(-1, -1, 1, 1)
-		)
+		fullScreenQuad = renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 
 		overlayPasses << new ControlsOverlayRenderPass(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
 

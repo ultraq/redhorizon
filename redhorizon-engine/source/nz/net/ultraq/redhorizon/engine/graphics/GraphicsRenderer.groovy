@@ -24,7 +24,6 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.NamedVariant
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
@@ -65,6 +64,21 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	Framebuffer createFramebuffer(int width, int height, boolean filter)
 
 	/**
+	 * Create a mesh without indices or textureUVs.
+	 *
+	 * @param type
+	 * @param layout
+	 * @param colour
+	 * @param vertices
+	 * @return
+	 */
+	default Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices) {
+
+		return createMesh(type, layout, colour, vertices, null, null)
+	}
+
+
+	/**
 	 * Create a mesh with all of the mesh parts.
 	 *
 	 * @param type
@@ -75,9 +89,7 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * @param indices
 	 * @return
 	 */
-	@NamedVariant
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
-		int[] indices)
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs, int[] indices)
 
 	/**
 	 * Create a new shader program from the given configuration, or return the
@@ -106,10 +118,21 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * a convenience method for {@link #createMesh}.
 	 *
 	 * @param surface
+	 * @return
+	 */
+	default Mesh createSpriteMesh(Rectanglef surface) {
+
+		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
+	}
+
+	/**
+	 * Create a mesh to represent a surface onto which a texture will go.  This is
+	 * a convenience method for {@link #createMesh}.
+	 *
+	 * @param surface
 	 * @param textureUVs
 	 * @return
 	 */
-	@NamedVariant
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**

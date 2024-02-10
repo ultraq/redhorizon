@@ -161,7 +161,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				var resource = switch (request) {
 					case ShaderRequest -> renderer.getShader(request.name())
 					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.colour(), request.vertices(), null, request.indices())
-					case SpriteMeshRequest -> renderer.createSpriteMesh(surface: request.surface())
+					case SpriteMeshRequest -> renderer.createSpriteMesh(request.surface())
 					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
 					default -> throw new IllegalArgumentException("Cannot create resource from type ${request}")
 				}

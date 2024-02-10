@@ -1,7 +1,7 @@
 #version 410 core
 
-in vec4 colour;
 in vec4 position;
+in vec4 colour;
 
 out vec4 v_vertexColour;
 
