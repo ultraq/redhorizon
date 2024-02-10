@@ -49,7 +49,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	Sprite(ImageFile imageFile) {
 
-		bounds.set(0, 0, imageFile.width, imageFile.height)
+		bounds
+			.set(0, 0, imageFile.width, imageFile.height)
+			.center()
 		this.imageFile = imageFile
 	}
 
@@ -69,7 +71,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 		var format = imageFile.format
 
 		mesh = scene
-			.requestCreateOrGet(new SpriteMeshRequest(new Rectanglef(0, 0, width, height)))
+			.requestCreateOrGet(new SpriteMeshRequest(bounds))
 			.get()
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(SpriteShader.NAME))
@@ -97,6 +99,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 			return
 		}
 
-		renderer.draw(mesh, transform, shader, material)
+		var globalTransform = getGlobalTransform()
+		renderer.draw(mesh, globalTransform, shader, material)
 	}
 }

@@ -89,7 +89,7 @@ abstract class Shader implements GraphicsResource {
 
 		def string = "${name} shader program"
 		if (uniforms) {
-			string += " (${uniforms.length}, uniforms)"
+			string += " (${uniforms.length}, uniform(s))"
 		}
 		return string
 	}

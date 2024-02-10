@@ -88,10 +88,10 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 * @return
 	 */
 	// TODO: Surely this is inefficient having to calculate this each time? 🤔
-	private Matrix4f getGlobalTransform() {
+	protected Matrix4f getGlobalTransform() {
 
 		return parent != null ?
-			globalTransform.mul(parent.globalTransform) :
+			transform.mul(parent.globalTransform, globalTransform) :
 			globalTransform.set(transform)
 	}
 

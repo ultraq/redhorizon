@@ -148,7 +148,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
 				switch (deletionRequest) {
-					case Material -> renderer.deleteMaterial(deletionRequest)
 					case Mesh -> renderer.deleteMesh(deletionRequest)
 					case Texture -> renderer.deleteTexture(deletionRequest)
 					default -> throw new IllegalArgumentException("Cannot delete resource of type ${deletionRequest}")

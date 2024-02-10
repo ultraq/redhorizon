@@ -51,6 +51,32 @@ class JomlExtensions {
 	}
 
 	/**
+	 * Calculate the scale factor for a rectangle to fit into the current one
+	 * while maintaining its aspect ratio.
+	 *
+	 * @param rectangle
+	 * @return
+	 */
+	static float calculateScaleToFit(Rectanglef self, Rectanglef other) {
+
+		return Math.min(self.lengthX() / other.lengthX(), self.lengthY() / other.lengthY())
+	}
+
+	/**
+	 * Update a rectangle's values so each point is equidistant from an 0,0 point
+	 * as if on a plot.
+	 *
+	 * @param self
+	 * @return
+	 */
+	static Rectanglef center(Rectanglef self) {
+
+		var halfLengthX = self.lengthX() / 2 as float
+		var halfLengthY = self.lengthY() / 2 as float
+		return self.set(-halfLengthX, -halfLengthY, halfLengthX, halfLengthY)
+	}
+
+	/**
 	 * Overload the {@code -} operator to perform vector subtraction.  Note that
 	 * this creates a new object to store the result and is returned.
 	 *
