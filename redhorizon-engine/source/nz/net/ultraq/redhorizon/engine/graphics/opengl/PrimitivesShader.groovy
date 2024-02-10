@@ -32,10 +32,7 @@ class PrimitivesShader extends ShaderConfig {
 		super(
 			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl',
-			{ shader, material, window ->
-				shader.setUniform(UNIFORM_MODEL, material.transform)
-			}
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl'
 		)
 	}
 }
