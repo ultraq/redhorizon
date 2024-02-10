@@ -16,21 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.MeshType
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.PrimitivesShader
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
-import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
 /**
@@ -83,61 +73,5 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 
 	@Override
 	void render(GraphicsRenderer renderer) {
-	}
-
-	// TODO: Make this a primitives node
-	static class Outline extends Node<Outline> implements GraphicsElement {
-
-		private Mesh mesh
-		private Shader shader
-
-		@Override
-		void delete(GraphicsRenderer renderer) {
-		}
-
-		@Override
-		void init(GraphicsRenderer renderer) {
-		}
-
-		@Override
-		void onSceneAdded(Scene scene) {
-
-			bounds.set(
-				parent.bounds.minX + 5 as float,
-				parent.bounds.minY + 5 as float,
-				parent.bounds.maxX - 5 as float,
-				parent.bounds.maxY - 5 as float
-			)
-			mesh = scene
-				.requestCreateOrGet(new MeshRequest(
-					MeshType.LINE_LOOP,
-					new VertexBufferLayout(VertexBufferLayoutPart.POSITION, VertexBufferLayoutPart.COLOUR),
-					Colour.GREEN,
-					bounds as Vector2f[]
-				))
-				.get()
-			shader = scene
-				.requestCreateOrGet(new ShaderRequest(PrimitivesShader.NAME))
-				.get()
-
-			super.onSceneAdded(scene)
-		}
-
-		@Override
-		void onSceneRemoved(Scene scene) {
-
-			scene.requestDelete(mesh)
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			if (!mesh || !shader) {
-				return
-			}
-
-			var globalTransform = getGlobalTransform()
-			renderer.draw(mesh, globalTransform, shader)
-		}
 	}
 }

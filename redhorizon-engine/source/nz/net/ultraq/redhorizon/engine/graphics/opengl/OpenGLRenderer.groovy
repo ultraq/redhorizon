@@ -263,10 +263,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()
-			if (material) {
-				shader.applyUniforms(transform, material, window)
-			}
-
+			shader.applyUniforms(transform, material, window)
 			mesh.bind()
 			if (mesh.indices) {
 				glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
