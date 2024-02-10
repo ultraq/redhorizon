@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer.FillMode
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -72,7 +71,7 @@ class MediaPlayer extends Application {
 		logger.info('File details: {}', mediaFile)
 
 		var mediaNode = switch (mediaFile) {
-			case ImageFile -> new FullScreenContainer(fillMode: FillMode.ASPECT_RATIO).addChild(new Sprite(mediaFile))
+			case ImageFile -> new FullScreenContainer().addChild(new Sprite(mediaFile))
 			case SoundFile -> new Sound(mediaFile).attachScript(new SoundPlaybackScript())
 			default -> throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
 		}

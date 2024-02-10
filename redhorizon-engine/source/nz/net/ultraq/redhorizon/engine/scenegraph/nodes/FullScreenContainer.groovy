@@ -61,7 +61,6 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 		bounds
 			.set(scene.window.renderResolution as Rectanglef)
 			.center()
-//		transform.translate(-bounds.lengthX() / 2 as float, -bounds.lengthY() / 2 as float)
 
 		// Update children to take up the full screen
 		children.each { child ->
@@ -103,13 +102,12 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 		@Override
 		void onSceneAdded(Scene scene) {
 
-//			bounds.set(
-//				parent.bounds.minX + 5 as float,
-//				parent.bounds.minY + 5 as float,
-//				parent.bounds.maxX - 5 as float,
-//				parent.bounds.maxY - 5 as float
-//			)
-			bounds.set(0, 0, 10, 10)
+			bounds.set(
+				parent.bounds.minX + 5 as float,
+				parent.bounds.minY + 5 as float,
+				parent.bounds.maxX - 5 as float,
+				parent.bounds.maxY - 5 as float
+			)
 			mesh = scene
 				.requestCreateOrGet(new MeshRequest(
 					MeshType.LINE_LOOP,
@@ -138,7 +136,8 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 				return
 			}
 
-			renderer.draw(mesh, transform, shader)
+			var globalTransform = getGlobalTransform()
+			renderer.draw(mesh, globalTransform, shader)
 		}
 	}
 }
