@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
@@ -28,7 +26,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsElement {
+class FullScreenContainer extends Node<FullScreenContainer> {
 
 	static enum FillMode {
 		STRETCH,
@@ -36,14 +34,6 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 	}
 
 	FillMode fillMode = FillMode.ASPECT_RATIO
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
@@ -68,9 +58,5 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 		}
 
 		addChild(new Outline())
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
 	}
 }
