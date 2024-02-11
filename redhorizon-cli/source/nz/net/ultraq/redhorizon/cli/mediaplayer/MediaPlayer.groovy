@@ -55,7 +55,7 @@ class MediaPlayer extends Application {
 
 	private final ResourceFile mediaFile
 	private final Palette palette
-	private Node media
+	private Node mediaNode
 
 	/**
 	 * Constructor, create a new application around the given media file.
@@ -72,7 +72,7 @@ class MediaPlayer extends Application {
 
 		logger.info('File details: {}', mediaFile)
 
-		var mediaNode = switch (mediaFile) {
+		mediaNode = switch (mediaFile) {
 			case ImageFile ->
 				new FullScreenContainer().addChild(new Sprite(mediaFile))
 			case AnimationFile ->
@@ -113,6 +113,6 @@ class MediaPlayer extends Application {
 	@Override
 	protected void applicationStop() {
 
-		scene.removeNode(media)
+		scene.removeNode(mediaNode)
 	}
 }
