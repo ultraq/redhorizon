@@ -80,6 +80,7 @@ class GameClock extends EngineSystem {
 		Thread.currentThread().name = 'Game clock'
 		logger.debug('Starting game clock')
 
+		scene.gameClock = this
 		trigger(new SystemReadyEvent())
 
 		var lastSystemTimeMillis = System.currentTimeMillis()

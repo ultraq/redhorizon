@@ -104,19 +104,4 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 		addChild(child)
 	}
-
-	/**
-	 * Default implementation of the scene added event to notify any attached
-	 * script, then this node's children.
-	 *
-	 * @param scene
-	 */
-	@Override
-	void onSceneAdded(Scene scene) {
-
-		script?.onSceneAdded(scene)
-		children.each { child ->
-			child.onSceneAdded(scene)
-		}
-	}
 }

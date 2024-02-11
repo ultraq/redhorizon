@@ -25,12 +25,10 @@ import nz.net.ultraq.redhorizon.engine.audio.Source
 import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
@@ -44,15 +42,13 @@ import java.util.concurrent.LinkedBlockingQueue
  * @author Emanuel Rabina
  */
 @TupleConstructor(includes = ['soundFile'])
-class Sound extends Node<Sound> implements AudioElement, Playable {
-
-	private static final Logger logger = LoggerFactory.getLogger(Sound)
+class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 
 	final SoundFile soundFile
 
 	private Source source
 	private Buffer staticBuffer
-	private BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
+	private final BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 
 	@Override
@@ -106,53 +102,60 @@ class Sound extends Node<Sound> implements AudioElement, Playable {
 	@Override
 	void render(AudioRenderer renderer) {
 
-		if (!source) {
-			return
-		}
+		if (source) {
 
-		// Add static or streaming buffers to the source
-		if (staticBuffer) {
-			source.attachBuffer(staticBuffer)
-		}
-		else if (streamingBuffers) {
-			var newBuffers = streamingBuffers.drain()
-			source.queueBuffers(*newBuffers)
-			streamedBuffers.addAll(newBuffers)
-		}
+			// Add static or streaming buffers to the source
+			if (staticBuffer) {
+				source.attachBuffer(staticBuffer)
+			}
+			else if (streamingBuffers) {
+				var newBuffers = streamingBuffers.drain()
+				source.queueBuffers(*newBuffers)
+				streamedBuffers.addAll(newBuffers)
+			}
 
-		// Control playback
-		if (playing) {
-			if (source.stopped) {
-				logger.debug("Buffer exhausted, stopping")
-				source.rewind()
-				stop()
+			// Control playback
+			if (playing) {
+				if (source.stopped) {
+					source.rewind()
+					stop()
+				}
+				else if (!source.playing) {
+					source.play()
+				}
 			}
-			else if (!source.playing) {
-				logger.debug("Playing")
-				source.play()
+			else if (paused) {
+				if (!source.paused) {
+					source.pause()
+				}
 			}
-		}
-		else if (paused) {
-			if (!source.paused) {
-				logger.debug("Pausing")
-				source.pause()
+			else {
+				if (source.playing) {
+					source.stop()
+				}
 			}
-		}
-		else {
-			if (source.playing) {
-				logger.debug("Stopping")
-				source.stop()
-			}
-		}
 
-		// Clean up used buffers for a streaming source
-		if (soundFile.forStreaming) {
-			var buffersProcessed = source.buffersProcessed()
-			if (buffersProcessed) {
-				var processedBuffers = streamedBuffers.drain(buffersProcessed)
-				source.unqueueBuffers(*processedBuffers)
-				renderer.deleteBuffers(*processedBuffers)
+			// Clean up used buffers for a streaming source
+			if (soundFile.forStreaming) {
+				var buffersProcessed = source.buffersProcessed()
+				if (buffersProcessed) {
+					var processedBuffers = streamedBuffers.drain(buffersProcessed)
+					source.unqueueBuffers(*processedBuffers)
+					renderer.deleteBuffers(*processedBuffers)
+				}
 			}
 		}
+	}
+
+	@Override
+	void tick(long updatedTimeMs) {
+
+		if (playing && currentTimeMs == updatedTimeMs) {
+			pause()
+		}
+		else if (paused && currentTimeMs != updatedTimeMs) {
+			play()
+		}
+		currentTimeMs = updatedTimeMs
 	}
 }

@@ -65,7 +65,7 @@ class OpenGLMesh extends Mesh {
 							var textureUV = textureUVs[index]
 							vertexBuffer.put(textureUV.x, textureUV.y)
 						}
-						default -> throw new IllegalArgumentException("Unhandled vertex layout part ${layoutPart.name()}")
+						default -> throw new UnsupportedOperationException("Unhandled vertex layout part ${layoutPart.name()}")
 					}
 				}
 			}

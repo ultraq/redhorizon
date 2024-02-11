@@ -21,9 +21,11 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
@@ -71,9 +73,14 @@ class MediaPlayer extends Application {
 		logger.info('File details: {}', mediaFile)
 
 		var mediaNode = switch (mediaFile) {
-			case ImageFile -> new FullScreenContainer().addChild(new Sprite(mediaFile))
-			case SoundFile -> new Sound(mediaFile).attachScript(new SoundPlaybackScript())
-			default -> throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
+			case ImageFile ->
+				new FullScreenContainer().addChild(new Sprite(mediaFile))
+			case AnimationFile ->
+				new FullScreenContainer().addChild(new Animation(mediaFile).attachScript(new PlaybackScript(this, true)))
+			case SoundFile ->
+				new Sound(mediaFile).attachScript(new PlaybackScript(this, mediaFile.forStreaming))
+			default ->
+				throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
 		}
 
 		scene << mediaNode

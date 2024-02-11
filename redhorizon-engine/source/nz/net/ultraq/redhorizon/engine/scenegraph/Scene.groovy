@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.time.GameClock
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -38,6 +39,7 @@ class Scene implements EventTarget, Visitable {
 	AudioRequests audioRequestsHandler
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
+	GameClock gameClock
 	// TODO: A better name for this or way for nodes to have access to inputs?
 	InputEventStream inputEventStream
 
@@ -62,9 +64,25 @@ class Scene implements EventTarget, Visitable {
 	Scene addNode(Node node) {
 
 		nodes << node
-		node.onSceneAdded(this)
-		trigger(new NodeAddedEvent(node))
+		addNodeAndChildren(node)
 		return this
+	}
+
+	/**
+	 * Trigger the {@code onSceneAdded} event for this node and all its children.
+	 * Each node triggers a {@link NodeAddedEvent} event.
+	 *
+	 * @param node
+	 */
+	private void addNodeAndChildren(Node node) {
+
+		node.onSceneAdded(this)
+		node.script?.onSceneAdded(this)
+		trigger(new NodeAddedEvent(node))
+
+		node.children.each { childNode ->
+			addNodeAndChildren(childNode)
+		}
 	}
 
 	/**

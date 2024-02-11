@@ -82,24 +82,19 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 				.get()
 		)
 		region = new Rectanglef(0, 0, width, height)
-
-		super.onSceneAdded(scene)
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh, shader)
+		scene.requestDelete(mesh, shader, material.texture)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (!mesh || !shader || !material) {
-			return
+		if (mesh && shader && material) {
+			renderer.draw(mesh, getGlobalTransform(), shader, material)
 		}
-
-		var globalTransform = getGlobalTransform()
-		renderer.draw(mesh, globalTransform, shader, material)
 	}
 }

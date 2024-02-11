@@ -70,8 +70,6 @@ class Outline extends Node<Outline> implements GraphicsElement {
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(PrimitivesShader.NAME))
 			.get()
-
-		super.onSceneAdded(scene)
 	}
 
 	@Override

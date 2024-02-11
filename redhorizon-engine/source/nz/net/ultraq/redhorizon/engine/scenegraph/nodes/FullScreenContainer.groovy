@@ -68,7 +68,6 @@ class FullScreenContainer extends Node<FullScreenContainer> implements GraphicsE
 		}
 
 		addChild(new Outline())
-		super.onSceneAdded(scene)
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
+import java.text.DecimalFormat
 
 /**
  * Implementation of the WSA file format as used in Tiberium Dawn and Red Alert.
@@ -146,7 +147,7 @@ class WsaFile implements AnimationFile, Streaming {
 
 		return [
 			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}",
-			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps"
+			"Contains ${numFrames} frames to run at ${new DecimalFormat('0.#').format(frameRate)}fps"
 		].join(', ')
 	}
 
