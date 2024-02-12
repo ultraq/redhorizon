@@ -161,7 +161,24 @@ class Scene implements EventTarget, Visitable {
 	Scene removeNode(Node node) {
 
 		nodes.remove(node)
-		trigger(new NodeRemovedEvent(node))
+		removeNodeAndChildren(node)
 		return this
+	}
+
+	/**
+	 * Trigger the {@code onSceneRemoved} event for this node and all its
+	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
+	 *
+	 * @param node
+	 */
+	private void removeNodeAndChildren(Node node) {
+
+		node.onSceneRemoved(this)
+		node.script?.onSceneRemoved(this)
+		trigger(new NodeRemovedEvent(node))
+
+		node.children.each { childNode ->
+			removeNodeAndChildren(childNode)
+		}
 	}
 }
