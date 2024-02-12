@@ -22,6 +22,8 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 /**
  * An element of a scene, nodes are used to build and organize scene trees.
  *
@@ -34,7 +36,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	final Rectanglef bounds = new Rectanglef()
 
 	protected Node parent
-	protected List<Node> children = []
+	protected CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
 	private final Rectanglef globalBounds = new Rectanglef()
 	private final Matrix4f globalTransform = new Matrix4f()
