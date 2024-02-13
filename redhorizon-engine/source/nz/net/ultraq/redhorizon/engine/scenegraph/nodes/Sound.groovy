@@ -65,14 +65,6 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	}
 
 	@Override
-	void delete(AudioRenderer renderer) {
-	}
-
-	@Override
-	void init(AudioRenderer renderer) {
-	}
-
-	@Override
 	void onSceneAdded(Scene scene) {
 
 		if (!soundFile && !streamingDecoder) {

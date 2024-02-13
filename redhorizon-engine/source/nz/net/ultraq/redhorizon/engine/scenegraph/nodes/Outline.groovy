@@ -43,14 +43,6 @@ class Outline extends Node<Outline> implements GraphicsElement {
 	private Shader shader
 
 	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-	}
-
-	@Override
 	void onSceneAdded(Scene scene) {
 
 		bounds.set(

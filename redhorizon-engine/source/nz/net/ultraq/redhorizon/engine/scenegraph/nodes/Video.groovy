@@ -59,22 +59,6 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 	}
 
 	@Override
-	void delete(AudioRenderer renderer) {
-	}
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(AudioRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-	}
-
-	@Override
 	void onSceneAdded(Scene scene) {
 
 		var executor = Executors.newVirtualThreadPerTaskExecutor()

@@ -80,14 +80,6 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	}
 
 	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-	}
-
-	@Override
 	void onSceneAdded(Scene scene) {
 
 		if (!animationFile && !streamingDecoder) {

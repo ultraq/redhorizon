@@ -32,13 +32,6 @@ class Listener extends Node<Listener> implements AudioElement {
 	final Orientation orientation = new Orientation()
 
 	/**
-	 * Does nothing.
-	 */
-	@Override
-	void delete(AudioRenderer renderer) {
-	}
-
-	/**
 	 * Sets up initial listener properties, like volume.
 	 */
 	@Override

@@ -56,14 +56,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	@Override
-	void init(GraphicsRenderer renderer) {
-	}
-
-	@Override
 	void onSceneAdded(Scene scene) {
 
 		var width = imageFile.width
