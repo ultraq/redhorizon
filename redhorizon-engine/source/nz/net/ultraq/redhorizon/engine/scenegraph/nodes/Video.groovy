@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioElement
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder

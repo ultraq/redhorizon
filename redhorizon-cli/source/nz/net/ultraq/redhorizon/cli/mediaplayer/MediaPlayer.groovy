@@ -89,23 +89,6 @@ class MediaPlayer extends Application {
 
 		scene << mediaNode
 
-//		mediaLoader = switch (mediaFile) {
-//			case VideoFile -> new VideoLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
-//			case AnimationFile -> new AnimationLoader(mediaFile, scene, graphicsSystem, gameClock, inputEventStream)
-//			case SoundFile -> new SoundLoader(mediaFile, scene, gameClock, inputEventStream)
-//			case ImageFile -> new ImageLoader(mediaFile, scene)
-//			case ImagesFile -> new ImagesLoader(mediaFile, palette, scene, graphicsSystem, inputEventStream)
-//			default -> throw new UnsupportedOperationException("No media player for the associated file class of ${mediaFile}")
-//		}
-//
-//		var media = mediaLoader.load()
-//		if (media instanceof Playable) {
-//			media.on(StopEvent) { event ->
-//				stop()
-//			}
-//			media.play()
-//		}
-
 		// Universal quit on exit
 		inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {

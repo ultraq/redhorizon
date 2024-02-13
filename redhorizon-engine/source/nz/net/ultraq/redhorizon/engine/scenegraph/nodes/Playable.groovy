@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.media
+package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 

@@ -24,19 +24,8 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.media.Playable
-import nz.net.ultraq.redhorizon.explorer.medialoaders.AnimationLoader
-import nz.net.ultraq.redhorizon.explorer.medialoaders.ImageLoader
-import nz.net.ultraq.redhorizon.explorer.medialoaders.ImagesLoader
-import nz.net.ultraq.redhorizon.explorer.medialoaders.MediaLoader
-import nz.net.ultraq.redhorizon.explorer.medialoaders.SoundLoader
-import nz.net.ultraq.redhorizon.explorer.medialoaders.VideoLoader
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile
-import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Playable
 import nz.net.ultraq.redhorizon.filetypes.Palette
-import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.joml.Vector3f
 import org.slf4j.Logger
@@ -64,7 +53,7 @@ class Explorer extends Application {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private Object selectedFile
-	private MediaLoader selectedLoader
+//	private MediaLoader selectedLoader
 	private Palette palette
 
 	/**
@@ -243,11 +232,11 @@ class Explorer extends Application {
 		selectedFile = file
 
 		selectedLoader = switch (file) {
-			case VideoFile -> new VideoLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
-			case AnimationFile -> new AnimationLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
-			case ImageFile -> new ImageLoader(file, scene, graphicsSystem)
-			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsSystem, inputEventStream)
-			case SoundFile -> new SoundLoader(file, scene, gameClock, inputEventStream)
+//			case VideoFile -> new VideoLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
+//			case AnimationFile -> new AnimationLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
+//			case ImageFile -> new ImageLoader(file, scene, graphicsSystem)
+//			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsSystem, inputEventStream)
+//			case SoundFile -> new SoundLoader(file, scene, gameClock, inputEventStream)
 			default -> logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
 		}
 

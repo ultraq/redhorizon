@@ -18,10 +18,10 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
-import nz.net.ultraq.redhorizon.engine.media.Playable
-import nz.net.ultraq.redhorizon.engine.media.StopEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.PlaybackReadyEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.StopEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.slf4j.Logger
