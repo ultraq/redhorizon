@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
+import java.text.DecimalFormat
 
 /**
  * Implementation of a VQA file, which is the video format used in Red Alert and
@@ -214,7 +215,7 @@ class VqaFile implements VideoFile {
 
 		return [
 			"VQA file, ${width}x${height} 18-bit w/ 256 colour palette",
-			"Contains ${numFrames} frames to run at ${String.format('%.2f', frameRate)}fps",
+			"Contains ${numFrames} frames to run at ${new DecimalFormat('0.#').format(frameRate)}fps",
 			"Sound data of ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}"
 		].join(', ')
 	}
@@ -366,7 +367,7 @@ class VqaFile implements VideoFile {
 				// Decode sound data
 					case ~/SND./:
 						def sample = decodeSound(chunkHeader, ByteBuffer.wrapNative(input.readNBytes(chunkHeader.length)))
-						trigger(new StreamingSampleEvent(sample))
+						trigger(new StreamingSampleEvent(bits, channels, frequency, sample))
 						break
 
 						// Decode image and image-related data
@@ -398,7 +399,7 @@ class VqaFile implements VideoFile {
 									def frame = average('Decoding frame', 1f, logger) { ->
 										return decodeFrame(readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 									}
-									trigger(new StreamingFrameEvent(frame))
+									trigger(new StreamingFrameEvent(width, height, format, frame))
 									break
 
 								default:

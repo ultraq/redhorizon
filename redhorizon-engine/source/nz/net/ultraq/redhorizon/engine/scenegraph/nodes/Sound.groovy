@@ -28,9 +28,9 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.time.Temporal
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
+import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 
-import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
@@ -41,15 +41,29 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(includes = ['soundFile'])
 class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 
-	final SoundFile soundFile
+	SoundFile soundFile
+	StreamingDecoder streamingDecoder
 
 	private Source source
 	private Buffer staticBuffer
 	private final BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
+
+	Sound(SoundFile soundFile) {
+
+		this.soundFile = soundFile
+		if (soundFile.forStreaming) {
+			assert soundFile instanceof Streaming
+			streamingDecoder = soundFile.streamingDecoder
+		}
+	}
+
+	Sound(StreamingDecoder streamingDecoder) {
+
+		this.streamingDecoder = streamingDecoder
+	}
 
 	@Override
 	void delete(AudioRenderer renderer) {
@@ -62,27 +76,37 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	@Override
 	void onSceneAdded(Scene scene) {
 
+		if (!soundFile && !streamingDecoder) {
+			throw new IllegalStateException('Cannot add a Sound node to a scene without a streaming or file source')
+		}
+
 		source = scene
 			.requestCreateOrGet(new SourceRequest())
 			.get()
 
-		var bits = soundFile.bits
-		var channels = soundFile.channels
-		var frequency = soundFile.frequency
-
-		if (soundFile.forStreaming) {
-			assert soundFile instanceof Streaming
-			var decoder = soundFile.streamingDecoder
-			decoder.on(StreamingSampleEvent) { event ->
+		if (streamingDecoder) {
+			var buffersAdded = 0
+			streamingDecoder.on(StreamingSampleEvent) { event ->
 				streamingBuffers << scene
-					.requestCreateOrGet(new BufferRequest(bits, channels, frequency, event.sample))
+					.requestCreateOrGet(new BufferRequest(event.bits, event.channels, event.frequency, event.sample))
 					.get()
+				buffersAdded++
+				if (buffersAdded == 10) {
+					trigger(new PlaybackReadyEvent())
+				}
 			}
-			Executors.newVirtualThreadPerTaskExecutor().execute(decoder)
+
+			// Run ourselves, otherwise expect the source to run this
+			if (soundFile) {
+				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+			}
+			else {
+				trigger(new StreamingReadyEvent())
+			}
 		}
-		else {
+		else if (soundFile) {
 			staticBuffer = scene
-				.requestCreateOrGet(new BufferRequest(bits, channels, frequency, soundFile.soundData))
+				.requestCreateOrGet(new BufferRequest(soundFile.bits, soundFile.channels, soundFile.frequency, soundFile.soundData))
 				.get()
 		}
 	}
@@ -95,7 +119,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 			scene.requestDelete(staticBuffer)
 		}
 		if (streamedBuffers) {
-			scene.requestDelete(*streamedBuffers)
+			scene.requestDelete(*streamedBuffers.drain())
 		}
 	}
 
@@ -136,7 +160,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 			}
 
 			// Clean up used buffers for a streaming source
-			if (soundFile.forStreaming) {
+			if (streamingDecoder) {
 				var buffersProcessed = source.buffersProcessed()
 				if (buffersProcessed) {
 					var processedBuffers = streamedBuffers.drain(buffersProcessed)

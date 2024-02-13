@@ -168,7 +168,7 @@ class AudFile implements SoundFile, Streaming {
 						ByteBuffer.allocateNative(uncompressedSize)
 					)
 				}
-				trigger(new StreamingSampleEvent(sample))
+				trigger(new StreamingSampleEvent(bits, channels, frequency, sample))
 
 				if (rateLimit) {
 					Thread.sleep(20)

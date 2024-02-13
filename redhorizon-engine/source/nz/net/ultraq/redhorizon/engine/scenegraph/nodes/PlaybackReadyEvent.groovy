@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes
+package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.events.Event
 
-import groovy.transform.TupleConstructor
-import java.nio.ByteBuffer
-
 /**
- * Event for the streaming of a sample of sound data.
+ * Fired when a streaming source has filled its buffers and is ready for
+ * playback.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class StreamingSampleEvent extends Event {
-
-	final int bits
-	final int channels
-	final int frequency
-	final ByteBuffer sample
+class PlaybackReadyEvent extends Event {
 }

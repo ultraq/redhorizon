@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.media.Playable
 import nz.net.ultraq.redhorizon.engine.media.StopEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.PlaybackReadyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.slf4j.Logger
@@ -63,9 +64,10 @@ class PlaybackScript extends Script {
 			}
 		}))
 
-		Thread.sleep(1000)
-		logger.debug('Beginning playback')
-		play()
+		on(PlaybackReadyEvent) { event ->
+			logger.debug('Beginning playback')
+			play()
+		}
 
 		on(StopEvent) { event ->
 			if (runOnce) {

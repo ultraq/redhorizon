@@ -25,11 +25,13 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -75,6 +77,8 @@ class MediaPlayer extends Application {
 		mediaNode = switch (mediaFile) {
 			case ImageFile ->
 				new FullScreenContainer().addChild(new Sprite(mediaFile))
+			case VideoFile ->
+				new FullScreenContainer().addChild(new Video(mediaFile).attachScript(new PlaybackScript(this, true)))
 			case AnimationFile ->
 				new FullScreenContainer().addChild(new Animation(mediaFile).attachScript(new PlaybackScript(this, true)))
 			case SoundFile ->

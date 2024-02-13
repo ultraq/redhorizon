@@ -182,7 +182,7 @@ class WsaFile implements AnimationFile, Streaming {
 					)
 					return indexedFrame.applyPalette(palette)
 				}
-				trigger(new StreamingFrameEvent(colouredFrame))
+				trigger(new StreamingFrameEvent(width, height, format, colouredFrame))
 				frame++
 
 				if (rateLimit) {
