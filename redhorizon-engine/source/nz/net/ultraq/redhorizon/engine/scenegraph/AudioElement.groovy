@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,39 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.engine.scenegraph
+
+import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
 
 /**
- * Interface for graphical elements rendered to the graphics hardware.
+ * Interface for audio objects 'rendered' to the audio hardware.
  *
  * @author Emanuel Rabina
  */
-interface GraphicsElement {
+interface AudioElement {
 
 	/**
 	 * Perform any cleanup for this element.
 	 *
-	 * @param renderer
+	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	@Deprecated
-	default void delete(GraphicsRenderer renderer) {
+	default void delete(AudioRenderer renderer) {
 	}
 
 	/**
 	 * Perform any setup for this element.
 	 *
-	 * @param renderer
+	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
 	@Deprecated
-	default void init(GraphicsRenderer renderer) {
+	default void init(AudioRenderer renderer) {
 	}
 
 	/**
-	 * Render the element for display.
+	 * Update the element within a render loop.
 	 *
-	 * @param renderer
+	 * @param renderer Audio renderer for the underlying audio subsystem.
 	 */
-	void render(GraphicsRenderer renderer)
+	void render(AudioRenderer renderer)
 }

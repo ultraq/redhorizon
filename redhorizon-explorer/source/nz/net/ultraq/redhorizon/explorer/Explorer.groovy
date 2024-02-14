@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Playable
+import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector3f

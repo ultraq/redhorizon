@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED

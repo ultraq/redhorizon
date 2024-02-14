@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

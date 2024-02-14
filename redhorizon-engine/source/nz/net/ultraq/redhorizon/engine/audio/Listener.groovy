@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.geometry.Orientation
+import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.joml.Vector3f

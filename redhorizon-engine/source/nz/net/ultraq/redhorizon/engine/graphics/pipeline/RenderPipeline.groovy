@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -31,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 

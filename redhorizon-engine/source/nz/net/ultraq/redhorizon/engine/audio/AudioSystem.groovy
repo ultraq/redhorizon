@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
+import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger

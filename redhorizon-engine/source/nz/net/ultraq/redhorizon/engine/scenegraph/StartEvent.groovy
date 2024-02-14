@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
+package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Event for stopping a piece of media.
+ * Event for starting a piece of media.
  *
  * @author Emanuel Rabina
  */
-class StopEvent extends Event {
+class StartEvent extends Event {
 }
