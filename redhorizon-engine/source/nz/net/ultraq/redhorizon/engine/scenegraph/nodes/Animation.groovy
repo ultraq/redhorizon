@@ -149,13 +149,15 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 			}
 
 			// Delete used frames as the animation progresses to free up memory
-			// NOTE: This basically ties this class to play-once streaming animations only 🤔
-			if (currentFrame > 0) {
-				for (var i = lastFrame; i < currentFrame; i++) {
-					renderer.deleteTexture(frames[i])
-					frames[i] = null
+			if (streamingDecoder) {
+				if (currentFrame > 0) {
+					for (var i = lastFrame; i < currentFrame; i++) {
+						renderer.deleteTexture(frames[i])
+						frames[i] = null
+					}
 				}
 			}
+
 			lastFrame = currentFrame
 		}
 	}
