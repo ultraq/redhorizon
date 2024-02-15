@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -56,7 +55,6 @@ class RenderPipeline implements AutoCloseable {
 
 	final GraphicsRenderer renderer
 	final ImGuiLayer imGuiLayer
-	final Camera camera
 
 	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
@@ -71,14 +69,12 @@ class RenderPipeline implements AutoCloseable {
 	 * @param imGuiLayer
 	 * @param inputEventStream
 	 * @param scene
-	 * @param camera
 	 */
-	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer,
-		ImGuiLayer imGuiLayer, InputEventStream inputEventStream, Scene scene, Camera camera) {
+	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer, ImGuiLayer imGuiLayer,
+		InputEventStream inputEventStream, Scene scene) {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
-		this.camera = camera
 
 		fullScreenQuad = renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 
@@ -161,7 +157,6 @@ class RenderPipeline implements AutoCloseable {
 		// Start a new frame
 		imGuiLayer.frame { ->
 			renderer.clear()
-			camera.update()
 
 			// Perform all rendering passes
 			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
@@ -207,6 +202,9 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
+			var camera = scene.camera
+			camera.update()
+
 			// Cull the list of renderable items to those just visible in the scene
 			averageNanos('objectCulling', 1f, logger) { ->
 				visibleElements.clear()
@@ -245,7 +243,7 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void delete(GraphicsRenderer renderer) {
 
-			renderer.deleteFramebuffer(framebuffer)
+			renderer.delete(framebuffer)
 		}
 
 		@Override

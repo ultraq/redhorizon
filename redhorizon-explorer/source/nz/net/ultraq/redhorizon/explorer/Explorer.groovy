@@ -208,7 +208,7 @@ class Explorer extends Application {
 	private void clearPreview() {
 
 		scene.clear()
-		graphicsSystem.camera.center(new Vector3f())
+		scene.camera.center(new Vector3f())
 	}
 
 	/**

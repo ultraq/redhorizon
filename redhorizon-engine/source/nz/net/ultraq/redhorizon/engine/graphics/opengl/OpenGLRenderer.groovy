@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRendererEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
@@ -231,29 +232,16 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void deleteFramebuffer(Framebuffer framebuffer) {
+	void delete(GraphicsResource resource) {
 
-		if (framebuffer) {
-			framebuffer.close()
-			trigger(new FramebufferDeletedEvent(framebuffer))
-		}
-	}
-
-	@Override
-	void deleteMesh(Mesh mesh) {
-
-		if (mesh) {
-			mesh.close()
-			trigger(new MeshDeletedEvent(mesh))
-		}
-	}
-
-	@Override
-	void deleteTexture(Texture texture) {
-
-		if (texture) {
-			texture.close()
-			trigger(new TextureDeletedEvent(texture))
+		if (resource) {
+			resource.close()
+			switch (resource) {
+				case Framebuffer -> trigger(new FramebufferDeletedEvent(resource))
+				case Mesh -> trigger(new MeshDeletedEvent(resource))
+				case Texture -> trigger(new TextureDeletedEvent(resource))
+				default -> throw new IllegalArgumentException("Cannot delete resource of type ${resource}")
+			}
 		}
 	}
 

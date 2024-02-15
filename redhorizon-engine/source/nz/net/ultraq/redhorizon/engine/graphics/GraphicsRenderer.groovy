@@ -77,7 +77,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 		return createMesh(type, layout, colour, vertices, null, null)
 	}
 
-
 	/**
 	 * Create a mesh with all of the mesh parts.
 	 *
@@ -147,25 +146,9 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data)
 
 	/**
-	 * Delete framebuffer data.
-	 *
-	 * @param framebuffer
+	 * Delete a graphics resource.
 	 */
-	void deleteFramebuffer(Framebuffer framebuffer)
-
-	/**
-	 * Delete mesh data.
-	 *
-	 * @param mesh
-	 */
-	void deleteMesh(Mesh mesh)
-
-	/**
-	 * Delete texture data.
-	 *
-	 * @param texture
-	 */
-	void deleteTexture(Texture texture)
+	void delete(GraphicsResource resource)
 
 	/**
 	 * Draw a mesh using the given shader.

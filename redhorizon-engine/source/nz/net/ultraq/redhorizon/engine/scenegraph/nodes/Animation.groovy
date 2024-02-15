@@ -153,7 +153,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 			if (streamingDecoder) {
 				if (currentFrame > 0) {
 					for (var i = lastFrame; i < currentFrame; i++) {
-						renderer.deleteTexture(frames[i])
+						renderer.delete(frames[i])
 						frames[i] = null
 					}
 				}

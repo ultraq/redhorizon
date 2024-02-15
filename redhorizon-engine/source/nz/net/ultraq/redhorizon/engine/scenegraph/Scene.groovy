@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
+import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
@@ -44,6 +45,7 @@ class Scene implements EventTarget, Visitable {
 	InputEventStream inputEventStream
 
 	Window window
+	Camera camera
 
 	/**
 	 * Allow visitors into the scene for traversal.

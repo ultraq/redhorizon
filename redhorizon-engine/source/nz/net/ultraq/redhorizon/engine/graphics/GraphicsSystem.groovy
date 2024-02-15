@@ -55,7 +55,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
-	private OpenGLCamera camera
 	private OpenGLRenderer renderer
 	private RenderPipeline renderPipeline
 
@@ -98,16 +97,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	}
 
 	/**
-	 * Return the current camera.
-	 *
-	 * @return
-	 */
-	Camera getCamera() {
-
-		return camera
-	}
-
-	/**
 	 * Return the renderer.
 	 *
 	 * @return
@@ -147,11 +136,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
-				switch (deletionRequest) {
-					case Mesh -> renderer.deleteMesh(deletionRequest)
-					case Texture -> renderer.deleteTexture(deletionRequest)
-					default -> throw new IllegalArgumentException("Cannot delete resource of type ${deletionRequest}")
-				}
+				renderer.delete(deletionRequest)
 			}
 		}
 
@@ -224,13 +209,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				renderer.withCloseable { renderer ->
 					scene.graphicsRequestHandler = this
 
-					camera = new OpenGLCamera(window.renderResolution)
-					camera.withCloseable { camera ->
+					new OpenGLCamera(window.renderResolution).withCloseable { camera ->
+						scene.camera = camera
+
 						new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
 							logger.debug(renderer.toString())
 							imGuiLayer.relay(FramebufferSizeEvent, this)
 
-							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene, camera)
+							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene)
 							renderPipeline.withCloseable { pipeline ->
 								trigger(new SystemReadyEvent())
 
