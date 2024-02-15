@@ -106,6 +106,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
+		streamingDecoder?.cancel(true)
 		scene.requestDelete(source)
 		if (staticBuffer) {
 			scene.requestDelete(staticBuffer)

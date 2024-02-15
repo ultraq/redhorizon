@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.StopEvent
@@ -40,8 +40,9 @@ class PlaybackScript extends Script {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlaybackScript)
 
-	final Application application
 	final boolean runOnce
+
+	private RemoveControlFunction removePlaybackControl
 
 	@Delegate
 	private Playable applyDelegate() {
@@ -51,7 +52,7 @@ class PlaybackScript extends Script {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+		removePlaybackControl = scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
 			if (runOnce) {
 				logger.debug('Pausing/Resuming playback')
 				scene.gameClock.togglePause()
@@ -70,13 +71,13 @@ class PlaybackScript extends Script {
 		}
 
 		on(StopEvent) { event ->
-			if (runOnce) {
-				logger.debug('Playback complete and script configured for runOnce behaviour - shutting down')
-				application.stop()
-			}
-			else {
-				logger.debug('Playback complete')
-			}
+			logger.debug('Playback complete')
 		}
+	}
+
+	@Override
+	void onSceneRemoved(Scene scene) {
+
+		removePlaybackControl.apply(null)
 	}
 }

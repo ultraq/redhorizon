@@ -132,7 +132,8 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh, shader, *(frames.findAll { frame -> frame }))
+		streamingDecoder?.cancel(true)
+		scene.requestDelete(mesh, *(frames.findAll { frame -> frame }))
 	}
 
 	@Override

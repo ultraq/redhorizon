@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
-import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 
 /**
@@ -44,15 +43,13 @@ class OpenGLWindow extends Window {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
-	@PackageScope
-	final long window
-
 	final float monitorScale
 	final Dimension renderResolution
 	Dimension size
 	Dimension framebufferSize
 	Dimension targetResolution
 
+	private final long window
 	private final Dimension windowedSize
 	private boolean fullScreen
 	private boolean vsync
@@ -92,7 +89,6 @@ class OpenGLWindow extends Window {
 		// Set OpenGL config for the window we want
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_REFRESH_RATE, videoMode.refreshRate())
-
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
@@ -165,6 +161,16 @@ class OpenGLWindow extends Window {
 		glfwDestroyWindow(window)
 	}
 
+	/**
+	 * Control whether vertical sync is anabled/disabled.  This operation needs to
+	 * happen within the scope of a current OpenGL context.
+	 */
+	void configureVsync(boolean newVsync) {
+
+		glfwSwapInterval(newVsync ? 1 : 0)
+		vsync = newVsync
+	}
+
 	@Override
 	long getHandle() {
 
@@ -174,7 +180,7 @@ class OpenGLWindow extends Window {
 	/**
 	 * Return dimensions of the largest window that can be created from the user's
 	 * monitor setup.  This is so that we don't create a window that exceeds any
-	 * monitor
+	 * monitor size.
 	 *
 	 * @param targetAspectRatio
 	 * @return
@@ -196,13 +202,6 @@ class OpenGLWindow extends Window {
 	void pollEvents() {
 
 		glfwPollEvents()
-	}
-
-	@Override
-	void setVsync(boolean newVsync) {
-
-		glfwSwapInterval(newVsync ? 1 : 0)
-		vsync = newVsync
 	}
 
 	@Override

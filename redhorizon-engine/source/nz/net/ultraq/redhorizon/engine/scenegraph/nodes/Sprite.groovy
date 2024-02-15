@@ -79,7 +79,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh, shader, material.texture)
+		scene.requestDelete(mesh, material.texture)
 	}
 
 	@Override

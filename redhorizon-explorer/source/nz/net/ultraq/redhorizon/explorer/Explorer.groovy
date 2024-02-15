@@ -24,8 +24,16 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
+import nz.net.ultraq.redhorizon.filetypes.AnimationFile
+import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.filetypes.SoundFile
+import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.joml.Vector3f
 import org.slf4j.Logger
@@ -52,8 +60,6 @@ class Explorer extends Application {
 
 	private File currentDirectory
 	private InputStream selectedFileInputStream
-	private Object selectedFile
-//	private MediaLoader selectedLoader
 	private Palette palette
 
 	/**
@@ -87,10 +93,8 @@ class Explorer extends Application {
 
 		// Include the explorer GUI in the render pipeline
 		inputEventStream.on(KeyEvent) { keyEvent ->
-			if (keyEvent.action == GLFW_PRESS) {
-				if (keyEvent.key == GLFW_KEY_O) {
-					entryList.toggle()
-				}
+			if (keyEvent.action == GLFW_PRESS && keyEvent.key == GLFW_KEY_O) {
+				entryList.toggle()
 			}
 		}
 		graphicsSystem.renderPipeline.addOverlayPass(entryList)
@@ -136,7 +140,7 @@ class Explorer extends Application {
 	@Override
 	protected void applicationStop() {
 
-		clearCurrentFile()
+		scene.clear()
 	}
 
 	/**
@@ -199,56 +203,38 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Finish all tasks associated with the current file so that we can exit the
-	 * application or make way for another file.
-	 */
-	private void clearCurrentFile() {
-
-		selectedLoader?.unload()
-	}
-
-	/**
 	 * Clear the current entry in preview and reset the preview scene.
 	 */
 	private void clearPreview() {
-
-		clearCurrentFile()
-
-		// TODO: Wait for stop event before proceeding.  Need to allow the engines
-		//       to clean up the item before clearing the scene
-		Thread.sleep(100)
 
 		scene.clear()
 		graphicsSystem.camera.center(new Vector3f())
 	}
 
 	/**
-	 * Update the preview are for the given file data and type.
+	 * Update the preview area for the given file data and type.
 	 *
 	 * @param file
 	 */
 	private void preview(Object file) {
 
-		selectedFile = file
+		logger.info('File details: {}', file)
 
-		selectedLoader = switch (file) {
-//			case VideoFile -> new VideoLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
-//			case AnimationFile -> new AnimationLoader(file, scene, graphicsSystem, gameClock, inputEventStream)
-//			case ImageFile -> new ImageLoader(file, scene, graphicsSystem)
-//			case ImagesFile -> new ImagesLoader(file, palette, scene, graphicsSystem, inputEventStream)
-//			case SoundFile -> new SoundLoader(file, scene, gameClock, inputEventStream)
-			default -> logger.info('Filetype of {} not yet configured', selectedFile.class.simpleName)
+		var mediaNode = switch (file) {
+			case ImageFile ->
+				new FullScreenContainer().addChild(new Sprite(file))
+			case VideoFile ->
+				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
+			case AnimationFile ->
+				new FullScreenContainer().addChild(new Animation(file).attachScript(new PlaybackScript(true)))
+			case SoundFile ->
+				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
+			default ->
+				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
 
-		if (selectedLoader) {
-			var media = selectedLoader.load()
-			if (media instanceof Playable) {
-				media.play()
-			}
-
-			// TODO: Display selected file info elsewhere?  Currently these are long
-			//       lines of text 🤔
-//			logger.info('{}', selectedFileClass)
+		if (mediaNode) {
+			scene << mediaNode
 		}
 	}
 
