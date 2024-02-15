@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio.openal
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
+import nz.net.ultraq.redhorizon.engine.audio.AudioResource
 import nz.net.ultraq.redhorizon.engine.audio.Buffer
 import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.BufferDeletedEvent
@@ -91,19 +92,14 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void deleteBuffers(Buffer... buffers) {
+	void delete(AudioResource resource) {
 
-		buffers.each { buffer ->
-			buffer.close()
-			trigger(new BufferDeletedEvent(buffer))
+		resource.close()
+		switch (resource) {
+			case Buffer -> trigger(new BufferDeletedEvent(resource))
+			case Source -> trigger(new SourceDeletedEvent(resource))
+			default -> throw new IllegalArgumentException("Cannot delete resource of type ${resource}")
 		}
-	}
-
-	@Override
-	void deleteSource(Source source) {
-
-		source.close()
-		trigger(new SourceDeletedEvent(source))
 	}
 
 	/**

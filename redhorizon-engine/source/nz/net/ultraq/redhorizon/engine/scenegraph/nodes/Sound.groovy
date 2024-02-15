@@ -158,7 +158,9 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 				if (buffersProcessed) {
 					var processedBuffers = streamedBuffers.drain(buffersProcessed)
 					source.unqueueBuffers(*processedBuffers)
-					renderer.deleteBuffers(*processedBuffers)
+					processedBuffers.each { processedBuffer ->
+						renderer.delete(processedBuffer)
+					}
 				}
 			}
 		}

@@ -50,18 +50,9 @@ interface AudioRenderer extends EventTarget {
 	Source createSource()
 
 	/**
-	 * Delete multiple buffers at once.
-	 *
-	 * @param buffers
+	 * Delete an audio resource.
 	 */
-	void deleteBuffers(Buffer... buffers)
-
-	/**
-	 * Delete a source.
-	 *
-	 * @param source
-	 */
-	void deleteSource(Source source)
+	void delete(AudioResource resource)
 
 	/**
 	 * Update details about the listener.

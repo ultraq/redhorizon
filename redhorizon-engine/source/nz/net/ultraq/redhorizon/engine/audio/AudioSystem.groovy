@@ -80,11 +80,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
-				switch (deletionRequest) {
-					case Source -> renderer.deleteSource(deletionRequest)
-					case Buffer -> renderer.deleteBuffers(deletionRequest)
-					default -> throw new IllegalArgumentException("Cannot delete resource of type ${deletionRequest}")
-				}
+				renderer.delete(deletionRequest)
 			}
 		}
 
