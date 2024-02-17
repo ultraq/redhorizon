@@ -33,7 +33,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -190,12 +189,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Shader createShader(ShaderConfig config) {
-
-		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.uniforms)
-	}
-
-	@Override
 	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms) {
 
 		var shader = shaders.find { shader -> shader.name == name }
@@ -262,12 +255,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 			trigger(new DrawEvent())
 		}
-	}
-
-	@Override
-	Shader getShader(String name) {
-
-		return shaders.find { shader -> shader.name == name }
 	}
 
 	@Override

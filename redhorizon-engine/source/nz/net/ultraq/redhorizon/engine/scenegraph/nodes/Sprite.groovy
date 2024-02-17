@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.SpriteShader
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -66,7 +66,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 			.requestCreateOrGet(new SpriteMeshRequest(bounds))
 			.get()
 		shader = scene
-			.requestCreateOrGet(new ShaderRequest(SpriteShader.NAME))
+			.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
 			.get()
 		material = new Material(
 			texture: scene

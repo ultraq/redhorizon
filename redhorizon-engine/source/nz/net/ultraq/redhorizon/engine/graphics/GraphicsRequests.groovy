@@ -34,7 +34,8 @@ interface GraphicsRequests {
 
 	static interface Request<T extends GraphicsResource> {}
 
-	static record ShaderRequest(String name) implements Request<Shader> {}
+	@ImmutableOptions(knownImmutables = ['shaderConfig'])
+	static record ShaderRequest(ShaderConfig shaderConfig) implements Request<Shader> {}
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
 	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, int[] indices = null)

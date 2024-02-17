@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.PrimitivesShader
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -60,7 +60,7 @@ class Outline extends Node<Outline> implements GraphicsElement {
 			))
 			.get()
 		shader = scene
-			.requestCreateOrGet(new ShaderRequest(PrimitivesShader.NAME))
+			.requestCreateOrGet(new ShaderRequest(Shaders.primitivesShader))
 			.get()
 	}
 

@@ -97,7 +97,10 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * @param config
 	 * @return
 	 */
-	Shader createShader(ShaderConfig config)
+	default Shader createShader(ShaderConfig config) {
+
+		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.uniforms)
+	}
 
 	/**
 	 * Create a new shader program from a pair of vertex and fragment shader
@@ -176,11 +179,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * @return
 	 */
 	int getMaxTextureSize()
-
-	/**
-	 * Return the shader with the matching name.
-	 */
-	Shader getShader(String name)
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
