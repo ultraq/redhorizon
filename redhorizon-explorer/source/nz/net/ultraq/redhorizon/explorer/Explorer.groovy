@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
@@ -29,8 +31,11 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
+import nz.net.ultraq.redhorizon.explorer.objects.Unit
+import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
@@ -40,6 +45,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -112,7 +119,7 @@ class Explorer extends Application {
 					buildList(currentDirectory)
 				}
 				else {
-					previewEntry(entry)
+					preview(entry)
 				}
 			}
 			else if (entry instanceof FileEntry) {
@@ -124,7 +131,7 @@ class Explorer extends Application {
 					buildList(new MixFile(file))
 				}
 				else {
-					previewFile(file)
+					preview(file)
 				}
 			}
 		}
@@ -212,15 +219,60 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Update the preview area for the given file data and type.
-	 *
-	 * @param file
+	 * Update the preview area with the media for the selected mix file entry.
 	 */
-	private void preview(Object file) {
+	private void preview(MixEntry entry) {
+
+		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
+
+		var file = entry.file
+		var fileClass = entry.fileClass
+		var entryId = entry.name.substring(0, entry.name.indexOf('.'))
+
+		if (file) {
+			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			preview(file, entryId)
+		}
+		else if (fileClass) {
+			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			preview(fileClass.newInstance(selectedFileInputStream), entryId)
+		}
+		else {
+			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
+		}
+	}
+
+	/**
+	 * Update the preview area with the media for the selected file.
+	 */
+	private void preview(File file) {
+
+		logger.info('Loading {}...', file.name)
+
+		def fileClass = file.name.fileClass
+		if (fileClass) {
+			selectedFileInputStream = file.newInputStream()
+			preview(fileClass.newInstance(selectedFileInputStream), file.nameWithoutExtension)
+		}
+		else {
+			logger.info('No filetype implementation for {}', file.name)
+		}
+	}
+
+	/**
+	 * Update the preview area for the given file data and type.
+	 */
+	private void preview(Object file, String objectId) {
 
 		logger.info('File details: {}', file)
 
 		var mediaNode = switch (file) {
+		// Objects
+			case ShpFile -> {
+				preview(file, objectId)
+			}
+
+				// Media
 			case ImageFile ->
 				new FullScreenContainer().addChild(new Sprite(file))
 			case VideoFile ->
@@ -229,6 +281,8 @@ class Explorer extends Application {
 				new FullScreenContainer().addChild(new Animation(file).attachScript(new PlaybackScript(true)))
 			case SoundFile ->
 				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
+
+				// 🤷
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
@@ -239,46 +293,33 @@ class Explorer extends Application {
 	}
 
 	/**
-	 * Update the preview area with the media for the selected mix file entry.
-	 *
-	 * @param entry
+	 * Attempt to load up an object from its corresponding SHP file.
 	 */
-	private void previewEntry(MixEntry entry) {
+	private void preview(ShpFile shpFile, String objectId) {
 
-		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
-
-		def file = entry.file
-		def fileClass = entry.fileClass
-
-		if (file) {
-			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
-			preview(file)
+		var unitConfig
+		try {
+			unitConfig = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectId.toLowerCase()}.json")
+			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
-		else if (fileClass) {
-			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
-			preview(fileClass.newInstance(selectedFileInputStream))
+		catch (IllegalArgumentException ignored) {
+			logger.info('No configuration available for {}', objectId)
+			return
 		}
-		else {
-			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
-		}
-	}
 
-	/**
-	 * Update the preview area with the media for the selected file.
-	 *
-	 * @param file
-	 */
-	private void previewFile(File file) {
-
-		logger.info('Loading {}...', file.name)
-
-		def fileClass = file.name.fileClass
-		if (fileClass) {
-			selectedFileInputStream = file.newInputStream()
-			preview(fileClass.newInstance(selectedFileInputStream))
+		var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
+		var targetClass = switch (unitData.type) {
+//			case 'infantry' -> Infantry
+			case 'vehicle' -> Unit
+//			case 'structure' -> Structure
+			default -> logger.info('Unit type {} not supported', unitData.type)
 		}
-		else {
-			logger.info('No filetype implementation for {}', file.name)
-		}
+
+		// Add the unit to the scene
+		var unit = targetClass
+			.getDeclaredConstructor(ImagesFile, Palette, UnitData)
+			.newInstance(shpFile, palette, unitData)
+			.attachScript(new UnitShowcaseScript(unitData))
+		scene << unit
 	}
 }

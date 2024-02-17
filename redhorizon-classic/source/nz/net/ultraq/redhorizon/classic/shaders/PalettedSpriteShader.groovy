@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
+import nz.net.ultraq.redhorizon.classic.units.Faction
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -38,7 +39,7 @@ class PalettedSpriteShader extends ShaderConfig {
 				shader.setUniformTexture('paletteTexture', 1, material.palette)
 			},
 			{ shader, material, window ->
-				shader.setUniform('factionColours', material.faction.colours)
+				shader.setUniform('factionColours', material.faction?.colours ?: Faction.GOLD.colours)
 			}
 		)
 	}

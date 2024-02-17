@@ -138,6 +138,11 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
 	/**
+	 * Create a sprite sheet from a series of image data.
+	 */
+	SpriteSheet createSpriteSheet(int width, int height, ColourFormat format, ByteBuffer[] data)
+
+	/**
 	 * Create and fill a texture with the given image data.
 	 *
 	 * @param width
@@ -171,14 +176,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * @param material
 	 */
 	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material)
-
-	/**
-	 * Return the maximum size that any dimension of a texture can be for the
-	 * current platform.
-	 *
-	 * @return
-	 */
-	int getMaxTextureSize()
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use

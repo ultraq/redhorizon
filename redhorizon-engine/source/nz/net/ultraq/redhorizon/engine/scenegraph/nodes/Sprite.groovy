@@ -29,8 +29,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 
-import org.joml.primitives.Rectanglef
-
 /**
  * A simple 2D sprite node.  Contains a texture and coordinate data for what
  * parts of that texture to render (ie: the texture represents a larger sprite
@@ -40,19 +38,26 @@ import org.joml.primitives.Rectanglef
  */
 class Sprite extends Node<Sprite> implements GraphicsElement {
 
-	final ImageFile imageFile
+	ImageFile imageFile
 
-	private Mesh mesh
-	private Shader shader
-	private Material material
-	private Rectanglef region
+	protected Mesh mesh
+	protected Shader shader
+	protected Material material
 
+	/**
+	 * Constructor, build a sprite from an image file.
+	 */
 	Sprite(ImageFile imageFile) {
 
-		bounds
-			.set(0, 0, imageFile.width, imageFile.height)
-			.center()
+		this(imageFile.width, imageFile.height)
 		this.imageFile = imageFile
+	}
+
+	protected Sprite(int width, int height) {
+
+		bounds
+			.set(0, 0, width, height)
+			.center()
 	}
 
 	@Override
@@ -73,7 +78,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 				.requestCreateOrGet(new TextureRequest(width, height, format, imageFile.imageData.flipVertical(width, height, format)))
 				.get()
 		)
-		region = new Rectanglef(0, 0, width, height)
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
@@ -69,8 +70,6 @@ import java.nio.ByteBuffer
 class OpenGLRenderer implements GraphicsRenderer {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
-
-	final int maxTextureSize
 
 	protected final GraphicsConfiguration config
 	protected final OpenGLWindow window
@@ -123,8 +122,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 		// Create the default shader programs used by this renderer
 		createShader(new SpriteShader())
 		createShader(new PrimitivesShader())
-
-		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
 	}
 
 	/**
@@ -214,6 +211,31 @@ class OpenGLRenderer implements GraphicsRenderer {
 			textureUVs as Vector2f[],
 			[0, 1, 3, 1, 2, 3] as int[]
 		)
+	}
+
+	@Override
+	SpriteSheet createSpriteSheet(int width, int height, ColourFormat format, ByteBuffer[] data) {
+
+		var maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
+		logger.debug('Max supported texture size: {}', maxTextureSize)
+
+		var framesHorizontal = Math.min(data.length, maxTextureSize / width as int)
+		var framesVertical = Math.ceil(data.length / framesHorizontal) as int
+		var spriteSheetWidth = framesHorizontal * width
+		var spriteSheetHeight = framesVertical * height
+		logger.debug('Sprite sheet - across: {}, down: {}, width: {}, height: {}',
+			framesHorizontal, framesVertical, spriteSheetWidth, spriteSheetHeight)
+
+		var frameStepX = 1 / framesHorizontal
+		var frameStepY = 1 / framesVertical
+		logger.debug('Texture UV steps for sprite sheet: {}x{}', frameStepX, frameStepY)
+
+		var imagesAsSpriteSheet = data
+			.flipVertical(width, height, format)
+			.combineImages(width, height, framesHorizontal)
+		var texture = createTexture(spriteSheetWidth, spriteSheetHeight, format, imagesAsSpriteSheet)
+
+		return new SpriteSheet(texture, framesHorizontal, framesVertical, frameStepX, frameStepY)
 	}
 
 	@Override

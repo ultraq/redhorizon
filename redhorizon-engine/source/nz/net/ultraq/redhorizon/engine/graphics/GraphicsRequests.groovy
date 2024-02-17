@@ -41,11 +41,18 @@ interface GraphicsRequests {
 	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, int[] indices = null)
 		implements Request<Mesh> {}
 
-	@ImmutableOptions(knownImmutables = ['surface'])
-	static record SpriteMeshRequest(Rectanglef surface) implements Request<Mesh> {}
+	@ImmutableOptions(knownImmutables = ['surface', 'textureUVs'])
+	static record SpriteMeshRequest(Rectanglef surface, Rectanglef textureUVs) implements Request<Mesh> {
+		SpriteMeshRequest(Rectanglef surface) {
+			this(surface, null)
+		}
+	}
 
 	@ImmutableOptions(knownImmutables = ['data'])
 	static record TextureRequest(int width, int height, ColourFormat format, ByteBuffer data) implements Request<Texture> {
+	}
+
+	static record SpriteSheetRequest(int width, int height, ColourFormat format, ByteBuffer[] data) implements Request<SpriteSheet> {
 	}
 
 	/**
