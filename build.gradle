@@ -53,14 +53,12 @@ subprojects {
 	ext.targetPlatform = targetPlatform
 
 	dependencies {
-		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.2.0'
-		implementation 'nz.net.ultraq.groovy:groovy-io-extensions:0.1.4-SNAPSHOT'
+		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.3.0-SNAPSHOT'
 		implementation 'nz.net.ultraq.groovy:groovy-profiling-extensions:0.7.0'
 		implementation "org.apache.groovy:groovy:${groovyVersion}"
 		implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
 		testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
-		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	}
 
 	java {
@@ -70,7 +68,11 @@ subprojects {
 		}
 	}
 
-	test {
-		useJUnitPlatform()
+	testing {
+		suites {
+			test {
+				useJUnitJupiter()
+			}
+		}
 	}
 }
