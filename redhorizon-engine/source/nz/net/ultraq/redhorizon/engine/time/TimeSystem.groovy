@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.time
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 
 import org.slf4j.Logger
@@ -31,16 +30,17 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class GameClock extends EngineSystem {
+class TimeSystem extends EngineSystem {
 
-	private static Logger logger = LoggerFactory.getLogger(GameClock)
+	private static Logger logger = LoggerFactory.getLogger(TimeSystem)
 
 	private float speed = 1.0f
 	private float lastSpeed
 
-	GameClock(Scene scene) {
+	@Override
+	void configureScene() {
 
-		super(scene)
+		scene.gameClock = this
 	}
 
 	/**
@@ -78,16 +78,15 @@ class GameClock extends EngineSystem {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Game clock'
-		logger.debug('Starting game clock')
+		Thread.currentThread().name = 'Time system'
+		logger.debug('Starting time system')
 
-		scene.gameClock = this
 		trigger(new SystemReadyEvent())
 
 		var lastSystemTimeMillis = System.currentTimeMillis()
 		long currentTimeMillis = lastSystemTimeMillis
 
-		logger.debug('Game clock in update loop')
+		logger.debug('Time system in update loop')
 		while (!Thread.interrupted()) {
 			try {
 				rateLimit(100) { ->
@@ -104,7 +103,7 @@ class GameClock extends EngineSystem {
 					}
 
 					// Update time with scene objects
-					scene.accept { element ->
+					scene?.accept { element ->
 						if (element instanceof Temporal) {
 							element.tick(currentTimeMillis)
 						}
@@ -119,7 +118,7 @@ class GameClock extends EngineSystem {
 		}
 
 		trigger(new SystemStoppedEvent())
-		logger.debug('Game clock stopped')
+		logger.debug('Time system stopped')
 	}
 
 	/**

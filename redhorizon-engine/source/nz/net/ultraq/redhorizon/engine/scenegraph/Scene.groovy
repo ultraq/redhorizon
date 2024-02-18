@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
-import nz.net.ultraq.redhorizon.engine.time.GameClock
+import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -40,7 +40,7 @@ class Scene implements EventTarget, Visitable {
 	AudioRequests audioRequestsHandler
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
-	GameClock gameClock
+	TimeSystem gameClock
 	// TODO: A better name for this or way for nodes to have access to inputs?
 	InputEventStream inputEventStream
 

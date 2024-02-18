@@ -88,7 +88,7 @@ class Explorer extends Application {
 		this.palette = palette
 	}
 
-	@Override
+//	@Override
 	protected void applicationStart() {
 
 		// Include the explorer GUI in the render pipeline
@@ -137,7 +137,7 @@ class Explorer extends Application {
 		}
 	}
 
-	@Override
+//	@Override
 	protected void applicationStop() {
 
 		scene.clear()

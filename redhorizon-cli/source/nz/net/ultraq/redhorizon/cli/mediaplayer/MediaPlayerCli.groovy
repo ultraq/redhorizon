@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 import nz.net.ultraq.redhorizon.cli.AudioOptions
 import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
-import nz.net.ultraq.redhorizon.cli.PaletteOptions
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 
 import org.slf4j.Logger
@@ -64,9 +63,6 @@ class MediaPlayerCli implements Callable<Integer> {
 	@Mixin
 	AudioOptions audioOptions
 
-	@Mixin
-	PaletteOptions paletteOptions
-
 	/**
 	 * Launch the media player and present the given file in the most appropriate
 	 * manner.
@@ -85,7 +81,7 @@ class MediaPlayerCli implements Callable<Integer> {
 		)
 
 		fileOptions.useFile(logger) { resourceFile ->
-			new MediaPlayer(resourceFile, audioConfig, graphicsConfig, paletteOptions.loadPalette()).start()
+			new MediaPlayer(resourceFile, audioConfig, graphicsConfig)
 		}
 
 		return 0

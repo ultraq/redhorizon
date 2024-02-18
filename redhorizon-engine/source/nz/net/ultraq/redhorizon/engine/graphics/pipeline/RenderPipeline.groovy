@@ -62,16 +62,9 @@ class RenderPipeline implements AutoCloseable {
 
 	/**
 	 * Constructor, configure the rendering pipeline.
-	 *
-	 * @param config
-	 * @param window
-	 * @param renderer
-	 * @param imGuiLayer
-	 * @param inputEventStream
-	 * @param scene
 	 */
 	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer, ImGuiLayer imGuiLayer,
-		InputEventStream inputEventStream, Scene scene) {
+		InputEventStream inputEventStream) {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
@@ -91,7 +84,7 @@ class RenderPipeline implements AutoCloseable {
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
 		// development
-		configurePipeline(scene, config, window, inputEventStream)
+		configurePipeline(config, window, inputEventStream)
 	}
 
 	/**
@@ -109,16 +102,16 @@ class RenderPipeline implements AutoCloseable {
 	void close() {
 
 		renderPasses*.delete(renderer)
-		renderer.deleteMesh(fullScreenQuad)
+		renderer.delete(fullScreenQuad)
 	}
 
 	/**
 	 * Build out the rendering pipeline.
 	 */
-	private void configurePipeline(Scene scene, GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
+	private void configurePipeline(GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
 
 		// Scene render pass
-		renderPasses << new SceneRenderPass(scene, renderer.createFramebuffer(window.renderResolution, true))
+		renderPasses << new SceneRenderPass(renderer.createFramebuffer(window.renderResolution, true))
 
 		// Sharp upscaling post-processing pass
 		renderPasses << new PostProcessingRenderPass(
@@ -180,21 +173,26 @@ class RenderPipeline implements AutoCloseable {
 		}
 	}
 
+	void setScene(Scene scene) {
+
+		var sceneRenderPass = renderPasses.find { it instanceof SceneRenderPass } as SceneRenderPass
+		sceneRenderPass.scene = scene
+	}
+
 	/**
 	 * The render pass for drawing the scene to a framebuffer at the rendering
 	 * resolution.
 	 */
 	private class SceneRenderPass implements RenderPass<Void> {
 
-		final Scene scene
 		final Framebuffer framebuffer
+		Scene scene
 
 		// For object culling
 		private final List<GraphicsElement> visibleElements = []
 
-		SceneRenderPass(Scene scene, Framebuffer framebuffer) {
+		SceneRenderPass(Framebuffer framebuffer) {
 
-			this.scene = scene
 			this.framebuffer = framebuffer
 			this.enabled = true
 		}
@@ -202,22 +200,24 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
-			var camera = scene.camera
-			camera.update()
+			if (scene) {
+				var camera = scene.camera
+				camera.update()
 
-			// Cull the list of renderable items to those just visible in the scene
-			averageNanos('objectCulling', 1f, logger) { ->
-				visibleElements.clear()
-				var frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
-				scene.accept { Node element ->
-					if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
-						visibleElements << element
+				// Cull the list of renderable items to those just visible in the scene
+				averageNanos('objectCulling', 1f, logger) { ->
+					visibleElements.clear()
+					var frustumIntersection = new FrustumIntersection(camera.projection * camera.view)
+					scene.accept { Node element ->
+						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
+							visibleElements << element
+						}
 					}
 				}
-			}
 
-			visibleElements.each { element ->
-				element.render(renderer)
+				visibleElements.each { element ->
+					element.render(renderer)
+				}
 			}
 		}
 	}

@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.cli.mediaplayer
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
@@ -28,22 +28,19 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 /**
  * Media player application for watching media files.
  *
  * @author Emanuel Rabina
  */
-class MediaPlayer extends Application {
+class MediaPlayer {
 
 	// List of hi-res PCX images used: aftr_hi, alipaper, aly1, apc_hi, aphi0049,
 	// bnhi0020, dchi0040, frhi0166, lab, landsbrg, mahi0107, mig_hi, mtfacthi,
@@ -55,51 +52,40 @@ class MediaPlayer extends Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
-	private final ResourceFile mediaFile
-	private final Palette palette
-	private Node mediaNode
-
 	/**
 	 * Constructor, create a new application around the given media file.
 	 */
-	MediaPlayer(ResourceFile resourceFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig, Palette palette) {
+	MediaPlayer(ResourceFile resourceFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
 
-		super('Media Player', audioConfig, graphicsConfig)
-		this.mediaFile = resourceFile
-		this.palette = palette
-	}
+		var scene = new Scene()
+		Node mediaNode = null
 
-	@Override
-	protected void applicationStart() {
+		new Application('Media Player')
+			.addAudioSystem(audioConfig)
+			.addGraphicsSystem(graphicsConfig)
+			.addTimeSystem()
+			.useScene(scene)
+			.onApplicationStart(application -> {
+				logger.info('File details: {}', resourceFile)
 
-		logger.info('File details: {}', mediaFile)
+				mediaNode = switch (resourceFile) {
+					case ImageFile ->
+						new FullScreenContainer().addChild(new Sprite(resourceFile))
+					case VideoFile ->
+						new FullScreenContainer().addChild(new Video(resourceFile).attachScript(new PlaybackScript(application, true)))
+					case AnimationFile ->
+						new FullScreenContainer().addChild(new Animation(resourceFile).attachScript(new PlaybackScript(application, true)))
+					case SoundFile ->
+						new Sound(resourceFile).attachScript(new PlaybackScript(application, resourceFile.forStreaming))
+					default ->
+						throw new UnsupportedOperationException("No media script for the associated file class of ${resourceFile}")
+				}
 
-		mediaNode = switch (mediaFile) {
-			case ImageFile ->
-				new FullScreenContainer().addChild(new Sprite(mediaFile))
-			case VideoFile ->
-				new FullScreenContainer().addChild(new Video(mediaFile).attachScript(new PlaybackScript(this, true)))
-			case AnimationFile ->
-				new FullScreenContainer().addChild(new Animation(mediaFile).attachScript(new PlaybackScript(this, true)))
-			case SoundFile ->
-				new Sound(mediaFile).attachScript(new PlaybackScript(this, mediaFile.forStreaming))
-			default ->
-				throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
-		}
-
-		scene << mediaNode
-
-		// Universal quit on exit
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
-				stop()
-			}
-		}
-	}
-
-	@Override
-	protected void applicationStop() {
-
-		scene.removeNode(mediaNode)
+				scene << mediaNode
+			})
+			.onApplicationStop(application -> {
+				scene.removeNode(mediaNode)
+			})
+			.start()
 	}
 }

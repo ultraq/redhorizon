@@ -28,15 +28,15 @@ import nz.net.ultraq.redhorizon.events.EventTarget
  */
 abstract class EngineSystem implements Runnable, EventTarget {
 
-	final Scene scene
-
-	protected EngineSystem(Scene scene) {
-
-		this.scene = scene
-	}
+	Scene scene
 
 	/**
-	 * Execute an action and optionally wait, such that, if repeated, it would run
+	 * Configure the current scene with this system.
+	 */
+	abstract void configureScene()
+
+	/**
+	 * Execute an action and optionally wait such that, if repeated, it would run
 	 * no faster than the given frequency.
 	 *
 	 * @param frequency
@@ -52,5 +52,14 @@ abstract class EngineSystem implements Runnable, EventTarget {
 		if (waitTime > 0) {
 			Thread.sleep((long)waitTime)
 		}
+	}
+
+	/**
+	 * Set and configure the scene with this system
+	 */
+	void setScene(Scene scene) {
+
+		this.scene = scene
+		configureScene()
 	}
 }
