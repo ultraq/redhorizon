@@ -48,8 +48,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
 	private final String windowTitle
-	private final GraphicsConfiguration config
 	private final InputEventStream inputEventStream
+	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
@@ -69,7 +69,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 		this.windowTitle = windowTitle
 		this.inputEventStream = inputEventStream
-		this.config = config ?: new GraphicsConfiguration()
+		this.config = config
 	}
 
 	/**

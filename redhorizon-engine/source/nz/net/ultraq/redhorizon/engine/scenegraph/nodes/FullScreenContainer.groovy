@@ -56,7 +56,5 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 				}
 			}
 		}
-
-		addChild(new Outline())
 	}
 }

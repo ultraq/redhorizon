@@ -53,7 +53,6 @@ class MediaPlayer {
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
 	private ResourceFile mediaFile
-	private Scene scene
 	private Node mediaNode
 
 	/**
@@ -62,13 +61,11 @@ class MediaPlayer {
 	MediaPlayer(ResourceFile resourceFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
 
 		mediaFile = resourceFile
-		scene = new Scene()
 
 		new Application('Media Player')
 			.addAudioSystem(audioConfig)
 			.addGraphicsSystem(graphicsConfig)
 			.addTimeSystem()
-			.useScene(scene)
 			.onApplicationStart(this::onApplicationStart)
 			.onApplicationStop(this::onApplicationStop)
 			.start()
@@ -78,7 +75,7 @@ class MediaPlayer {
 	 * Create the appropriate media node for the media file, adding it to the
 	 * scene.
 	 */
-	private void onApplicationStart(Application application) {
+	private void onApplicationStart(Application application, Scene scene) {
 
 		logger.info('File details: {}', mediaFile)
 
@@ -101,7 +98,7 @@ class MediaPlayer {
 	/**
 	 * Remove the media node on cleanup.
 	 */
-	private void onApplicationStop() {
+	private void onApplicationStop(Application application, Scene scene) {
 
 		scene.removeNode(mediaNode)
 	}

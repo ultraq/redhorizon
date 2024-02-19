@@ -21,12 +21,15 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
+import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import org.slf4j.Logger
@@ -35,7 +38,6 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
-import java.util.function.Function
 
 /**
  * A base for developing an application that uses the Red Horizon engine and
@@ -56,7 +58,7 @@ import java.util.function.Function
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class Application {
+class Application implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
@@ -66,8 +68,8 @@ class Application {
 	private final InputEventStream inputEventStream = new InputEventStream()
 
 	private Scene scene
-	private Function<Application, Void> applicationStart
-	private Function<Application, Void> applicationStop
+	private ApplicationEventHandler applicationStart
+	private ApplicationEventHandler applicationStop
 	private boolean applicationStopped
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
 
@@ -75,7 +77,7 @@ class Application {
 	 * Add the audio system to this application.  The audio system will run on its
 	 * own thread.
 	 */
-	Application addAudioSystem(AudioConfiguration config) {
+	Application addAudioSystem(AudioConfiguration config = new AudioConfiguration()) {
 
 		engine << new AudioSystem(config)
 		return this
@@ -86,7 +88,8 @@ class Application {
 	 * on its own thread, and the window it creates will be the source of user
 	 * input into the application.
 	 */
-	Application addGraphicsSystem(GraphicsConfiguration config) {
+	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
+		OverlayRenderPass... overlayRenderPasses) {
 
 		var graphicsSystem = new GraphicsSystem(windowTitle, inputEventStream, config)
 		graphicsSystem.on(WindowCreatedEvent) { event ->
@@ -95,10 +98,16 @@ class Application {
 		graphicsSystem.on(SystemReadyEvent) { event ->
 			var audioSystem = engine.systems.find { it instanceof AudioSystem } as AudioSystem
 			graphicsSystem.renderPipeline.addOverlayPass(
-				new DebugOverlayRenderPass(audioSystem.renderer, graphicsSystem.renderer, config.debug)
+				new DebugOverlayRenderPass(config.debug)
+					.addAudioRenderer(audioSystem.renderer)
+					.addGraphicsRenderer(graphicsSystem.renderer)
 					.toggleWith(inputEventStream, GLFW_KEY_D)
 			)
+			overlayRenderPasses.each { overlayRenderPass ->
+				graphicsSystem.renderPipeline.addOverlayPass(overlayRenderPass)
+			}
 		}
+		graphicsSystem.relay(WindowMaximizedEvent, this)
 		engine << graphicsSystem
 		return this
 	}
@@ -109,13 +118,13 @@ class Application {
 	 */
 	Application addTimeSystem() {
 
-		var timeSystem = new TimeSystem()
-		engine << timeSystem
+		engine << new TimeSystem()
 		return this
 	}
 
 	/**
-	 * Use this application with the given scene.
+	 * Use this application with the given scene.  If this method is never used,
+	 * then an empty scene will be created during startup.
 	 */
 	Application useScene(Scene scene) {
 
@@ -129,6 +138,10 @@ class Application {
 	final void start() {
 
 		logger.debug('Initializing application...')
+
+		if (!scene) {
+			scene = new Scene()
+		}
 
 		// Universal quit on exit
 		inputEventStream.on(KeyEvent) { event ->
@@ -147,7 +160,7 @@ class Application {
 		engine.start()
 		engine.systems*.scene = scene
 		scene.inputEventStream = inputEventStream
-		applicationStart.apply(this)
+		applicationStart.apply(this, scene)
 
 		engine.waitUntilStopped()
 	}
@@ -160,7 +173,7 @@ class Application {
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!applicationStopped) {
 				logger.debug('Stopping application...')
-				applicationStop.apply(this)
+				applicationStop.apply(this, scene)
 				engine.stop()
 				applicationStopped = true
 			}
@@ -170,7 +183,7 @@ class Application {
 	/**
 	 * Configure some code to run after engine startup.
 	 */
-	Application onApplicationStart(Function<Application, Void> handler) {
+	Application onApplicationStart(ApplicationEventHandler handler) {
 
 		applicationStart = handler
 		return this
@@ -179,9 +192,20 @@ class Application {
 	/**
 	 * Configure some code to run before engine shutdown.
 	 */
-	Application onApplicationStop(Function<Application, Void> handler) {
+	Application onApplicationStop(ApplicationEventHandler handler) {
 
 		applicationStop = handler
 		return this
+	}
+
+	/**
+	 * The functional interface called for each application lifecycle event.  It
+	 * is provided the application itself, plus either the configured or default
+	 * scene, whichever is current at that point in time.
+	 */
+	@FunctionalInterface
+	static interface ApplicationEventHandler {
+
+		void apply(Application application, Scene scene);
 	}
 }

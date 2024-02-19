@@ -64,35 +64,11 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	private int debugWindowSizeY = 200
 
 	/**
-	 * Constructor, tie the debug overlay to the renderer so it can get the
-	 * information it needs to build the display.
-	 *
-	 * @param audioRenderer
-	 * @param graphicsRenderer
-	 * @param enabled
+	 * Constructor, create a new blank overlay.  This is made more useful by
+	 * adding the renderers via the {@code add*} methods to get stats on their
+	 * use.
 	 */
-	DebugOverlayRenderPass(AudioRenderer audioRenderer, GraphicsRenderer graphicsRenderer, boolean enabled) {
-
-		audioRenderer.on(AudioRendererEvent) { event ->
-			switch (event) {
-				case BufferCreatedEvent -> activeBuffers.incrementAndGet()
-				case BufferDeletedEvent -> activeBuffers.decrementAndGet()
-				case SourceCreatedEvent -> activeSources.incrementAndGet()
-				case SourceDeletedEvent -> activeSources.decrementAndGet()
-			}
-		}
-
-		graphicsRenderer.on(GraphicsRendererEvent) { event ->
-			switch (event) {
-				case DrawEvent -> drawCalls.incrementAndGet()
-				case FramebufferCreatedEvent -> activeFramebuffers.incrementAndGet()
-				case FramebufferDeletedEvent -> activeFramebuffers.decrementAndGet()
-				case MeshCreatedEvent -> activeMeshes.incrementAndGet()
-				case MeshDeletedEvent -> activeMeshes.decrementAndGet()
-				case TextureCreatedEvent -> activeTextures.incrementAndGet()
-				case TextureDeletedEvent -> activeTextures.decrementAndGet()
-			}
-		}
+	DebugOverlayRenderPass(boolean enabled) {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
@@ -106,6 +82,41 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 		}
 
 		this.enabled = enabled
+	}
+
+	/**
+	 * Add the audio renderer to get stats on audio sources, buffers, etc.
+	 */
+	DebugOverlayRenderPass addAudioRenderer(AudioRenderer audioRenderer) {
+
+		audioRenderer.on(AudioRendererEvent) { event ->
+			switch (event) {
+				case BufferCreatedEvent -> activeBuffers.incrementAndGet()
+				case BufferDeletedEvent -> activeBuffers.decrementAndGet()
+				case SourceCreatedEvent -> activeSources.incrementAndGet()
+				case SourceDeletedEvent -> activeSources.decrementAndGet()
+			}
+		}
+		return this
+	}
+
+	/**
+	 * Add the graphics renderer to get status on draws, textures, etc.
+	 */
+	DebugOverlayRenderPass addGraphicsRenderer(GraphicsRenderer graphicsRenderer) {
+
+		graphicsRenderer.on(GraphicsRendererEvent) { event ->
+			switch (event) {
+				case DrawEvent -> drawCalls.incrementAndGet()
+				case FramebufferCreatedEvent -> activeFramebuffers.incrementAndGet()
+				case FramebufferDeletedEvent -> activeFramebuffers.decrementAndGet()
+				case MeshCreatedEvent -> activeMeshes.incrementAndGet()
+				case MeshDeletedEvent -> activeMeshes.decrementAndGet()
+				case TextureCreatedEvent -> activeTextures.incrementAndGet()
+				case TextureDeletedEvent -> activeTextures.decrementAndGet()
+			}
+		}
+		return this
 	}
 
 	@Override

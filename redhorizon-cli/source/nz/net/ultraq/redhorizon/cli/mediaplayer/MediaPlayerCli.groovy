@@ -75,13 +75,14 @@ class MediaPlayerCli implements Callable<Integer> {
 		Thread.currentThread().name = 'Media Player [main]'
 		logger.info('Red Horizon Media Player {}', commandSpec.parent().version()[0])
 
-		def audioConfig = audioOptions.asAudioConfiguration()
-		def graphicsConfig = graphicsOptions.asGraphicsConfiguration(
-			renderResolution: new Dimension(1280, 800)
-		)
-
 		fileOptions.useFile(logger) { resourceFile ->
-			new MediaPlayer(resourceFile, audioConfig, graphicsConfig)
+			new MediaPlayer(
+				resourceFile,
+				audioOptions.asAudioConfiguration(),
+				graphicsOptions.asGraphicsConfiguration(
+					renderResolution: new Dimension(1280, 800)
+				)
+			)
 		}
 
 		return 0

@@ -52,7 +52,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	 */
 	AudioSystem(AudioConfiguration config) {
 
-		this.config = config ?: new AudioConfiguration()
+		this.config = config
 	}
 
 	@Override
