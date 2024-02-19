@@ -52,40 +52,57 @@ class MediaPlayer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaPlayer)
 
+	private ResourceFile mediaFile
+	private Scene scene
+	private Node mediaNode
+
 	/**
 	 * Constructor, create a new application around the given media file.
 	 */
 	MediaPlayer(ResourceFile resourceFile, AudioConfiguration audioConfig, GraphicsConfiguration graphicsConfig) {
 
-		var scene = new Scene()
-		Node mediaNode = null
+		mediaFile = resourceFile
+		scene = new Scene()
 
 		new Application('Media Player')
 			.addAudioSystem(audioConfig)
 			.addGraphicsSystem(graphicsConfig)
 			.addTimeSystem()
 			.useScene(scene)
-			.onApplicationStart(application -> {
-				logger.info('File details: {}', resourceFile)
-
-				mediaNode = switch (resourceFile) {
-					case ImageFile ->
-						new FullScreenContainer().addChild(new Sprite(resourceFile))
-					case VideoFile ->
-						new FullScreenContainer().addChild(new Video(resourceFile).attachScript(new PlaybackScript(application, true)))
-					case AnimationFile ->
-						new FullScreenContainer().addChild(new Animation(resourceFile).attachScript(new PlaybackScript(application, true)))
-					case SoundFile ->
-						new Sound(resourceFile).attachScript(new PlaybackScript(application, resourceFile.forStreaming))
-					default ->
-						throw new UnsupportedOperationException("No media script for the associated file class of ${resourceFile}")
-				}
-
-				scene << mediaNode
-			})
-			.onApplicationStop(application -> {
-				scene.removeNode(mediaNode)
-			})
+			.onApplicationStart(this::onApplicationStart)
+			.onApplicationStop(this::onApplicationStop)
 			.start()
+	}
+
+	/**
+	 * Create the appropriate media node for the media file, adding it to the
+	 * scene.
+	 */
+	private void onApplicationStart(Application application) {
+
+		logger.info('File details: {}', mediaFile)
+
+		mediaNode = switch (mediaFile) {
+			case ImageFile ->
+				new FullScreenContainer().addChild(new Sprite(mediaFile))
+			case VideoFile ->
+				new FullScreenContainer().addChild(new Video(mediaFile).attachScript(new PlaybackScript(application, true)))
+			case AnimationFile ->
+				new FullScreenContainer().addChild(new Animation(mediaFile).attachScript(new PlaybackScript(application, true)))
+			case SoundFile ->
+				new Sound(mediaFile).attachScript(new PlaybackScript(application, mediaFile.forStreaming))
+			default ->
+				throw new UnsupportedOperationException("No media script for the associated file class of ${mediaFile}")
+		}
+
+		scene << mediaNode
+	}
+
+	/**
+	 * Remove the media node on cleanup.
+	 */
+	private void onApplicationStop() {
+
+		scene.removeNode(mediaNode)
 	}
 }

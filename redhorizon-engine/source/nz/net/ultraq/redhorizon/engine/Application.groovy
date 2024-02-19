@@ -38,16 +38,18 @@ import java.util.concurrent.Semaphore
 import java.util.function.Function
 
 /**
- * A base for developing an application that uses the Red Horizon engine.  This
- * class uses a builder-like setup for creating new applications, eg:
+ * A base for developing an application that uses the Red Horizon engine and
+ * various systems.  This class uses a builder-like API to let you pick what
+ * goes into the application, as well as customize it at certain event
+ * lifecycles, eg:
  * <p>
  * <pre>{@code
  * new Application("Window title")
  *   .addGraphicsSystem(myGraphicsConfig)
  *   .useScene(scene)
- *   .withSetup { ->
+ *   .onApplicationStart(application -> {
  *     // Setup here
- *   }
+ *   })
  *   .start()
  *}</pre>
  *
