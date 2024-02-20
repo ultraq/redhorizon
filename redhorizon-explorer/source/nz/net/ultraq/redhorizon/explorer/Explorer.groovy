@@ -21,11 +21,10 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
-import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
@@ -43,7 +42,7 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -55,16 +54,17 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Explorer extends Application {
+class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
-	private final EntryList entryList
-	private final MixDatabase mixDatabase
+	private final EntryList entryList = new EntryList(entries)
+	private final MixDatabase mixDatabase = new MixDatabase()
 
+	private Scene scene
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private Palette palette
@@ -77,77 +77,20 @@ class Explorer extends Application {
 	 */
 	Explorer(String version, Palette palette) {
 
-		super("Explorer - ${version}",
-			new AudioConfiguration(),
-			new GraphicsConfiguration(
+		// TODO: Be able to choose which palette to apply to a paletted file
+		this.palette = palette
+
+		new Application("Explorer - ${version}")
+			.addAudioSystem()
+			.addGraphicsSystem(new GraphicsConfiguration(
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
 				renderResolution: renderResolution,
 				startWithChrome: true
-			)
-		)
-
-		entryList = new EntryList(entries)
-		mixDatabase = new MixDatabase()
-
-		buildList(new File(System.getProperty("user.dir")))
-
-		// TODO: Be able to choose which palette to apply to a paletted file
-		this.palette = palette
-	}
-
-	@Override
-	protected void applicationStart() {
-
-		// Include the explorer GUI in the render pipeline
-		inputEventStream.on(KeyEvent) { keyEvent ->
-			if (keyEvent.action == GLFW_PRESS && keyEvent.key == GLFW_KEY_O) {
-				entryList.toggle()
-			}
-		}
-		graphicsSystem.renderPipeline.addOverlayPass(entryList)
-
-		graphicsSystem.on(WindowMaximizedEvent) { event ->
-			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
-		}
-
-		// Handle events from the explorer GUI
-		entryList.on(EntrySelectedEvent) { event ->
-			clearPreview()
-			def entry = event.entry
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
-				}
-				else {
-					preview(entry)
-				}
-			}
-			else if (entry instanceof FileEntry) {
-				def file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				else {
-					preview(file)
-				}
-			}
-		}
-
-		// Universal quit on exit
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
-				stop()
-			}
-		}
-	}
-
-	@Override
-	protected void applicationStop() {
-
-		scene.clear()
+			), entryList)
+			.addTimeSystem()
+			.onApplicationStart(this::onApplicationStart)
+			.onApplicationStop(this::onApplicationStop)
+			.start()
 	}
 
 	/**
@@ -162,7 +105,8 @@ class Explorer extends Application {
 		if (directory.parent) {
 			entries << new FileEntry(directory.parentFile, '/..')
 		}
-		directory.listFiles()
+		directory
+			.listFiles()
 			.sort { file1, file2 ->
 				file1.directory && !file2.directory ? -1 :
 					!file1.directory && file2.directory ? 1 :
@@ -214,8 +158,55 @@ class Explorer extends Application {
 	 */
 	private void clearPreview() {
 
+		selectedFileInputStream?.close()
 		scene.clear()
 		scene.camera.center(new Vector3f())
+	}
+
+	private void onApplicationStart(Application application, Scene scene) {
+
+		this.scene = scene
+
+		application.on(WindowMaximizedEvent) { event ->
+			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
+		}
+
+		// Also toggle the explorer GUI with the same key for toggling the ImGui chrome
+		entryList.toggleWith(scene.inputEventStream, GLFW_KEY_O)
+
+		buildList(new File(System.getProperty("user.dir")))
+
+		// Handle events from the explorer GUI
+		entryList.on(EntrySelectedEvent) { event ->
+			clearPreview()
+			def entry = event.entry
+			if (entry instanceof MixEntry) {
+				if (entry.name == '..') {
+					buildList(currentDirectory)
+				}
+				else {
+					preview(entry)
+				}
+			}
+			else if (entry instanceof FileEntry) {
+				def file = entry.file
+				if (file.directory) {
+					buildList(file)
+				}
+				else if (file.name.endsWith('.mix')) {
+					buildList(new MixFile(file))
+				}
+				else {
+					preview(file)
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings('unused')
+	private void onApplicationStop(Application application, Scene scene) {
+
+		clearPreview()
 	}
 
 	/**

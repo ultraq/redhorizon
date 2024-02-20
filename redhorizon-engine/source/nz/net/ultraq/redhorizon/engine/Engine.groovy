@@ -39,11 +39,12 @@ class Engine {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
-	private final List<EngineSystem> systems = []
-	private List<Future<?>> systemTasks
+	final List<EngineSystem> systems = []
 
+	private final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final Semaphore enginesStoppingSemaphore = new Semaphore(1)
+
+	private List<Future<?>> systemTasks
 	private boolean engineStopped
 
 	/**

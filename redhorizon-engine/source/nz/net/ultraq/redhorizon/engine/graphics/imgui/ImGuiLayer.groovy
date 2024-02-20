@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ScanlinesShader
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.SharpUpscalingShader
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
@@ -88,12 +87,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	/**
 	 * Create a new ImGui renderer to work with an existing OpenGL window and
 	 * renderer.
-	 *
-	 * @param config
-	 * @param window
-	 * @param inputEventStream
 	 */
-	ImGuiLayer(GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
+	ImGuiLayer(GraphicsConfiguration config, Window window) {
 
 		this.config = config
 		debugOverlay = config.debug
@@ -125,8 +120,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 				}
 			}
 		}
-
-		inputEventStream.addInputSource(this)
 	}
 
 	@Override
@@ -211,7 +204,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		}
 
 		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(((OpenGLTexture) sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
+		ImGui.image(((OpenGLTexture)sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
 			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
 
 		ImGui.end()

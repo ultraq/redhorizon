@@ -78,6 +78,6 @@ class PlaybackScript extends Script {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		removePlaybackControl.apply(null)
+		removePlaybackControl.remove()
 	}
 }

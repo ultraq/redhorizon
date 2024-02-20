@@ -60,7 +60,7 @@ class Sandbox extends Application {
 		this.touchpadInput = touchpadInput
 	}
 
-	@Override
+//	@Override
 	protected void applicationStart() {
 
 		var scaleIndex = scaleRange.findIndexOf { it == initialScale }

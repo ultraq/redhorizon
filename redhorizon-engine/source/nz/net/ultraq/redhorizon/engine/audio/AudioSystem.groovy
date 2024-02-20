@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,14 +49,16 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
-	 *
-	 * @param scene
-	 * @param config
 	 */
-	AudioSystem(Scene scene, AudioConfiguration config) {
+	AudioSystem(AudioConfiguration config) {
 
-		super(scene)
-		this.config = config ?: new AudioConfiguration()
+		this.config = config
+	}
+
+	@Override
+	void configureScene() {
+
+		scene.audioRequestsHandler = this
 	}
 
 	/**
@@ -128,7 +129,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 				renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
 
-				scene.audioRequestsHandler = this
+				if (scene) {
+					configureScene()
+				}
 				trigger(new SystemReadyEvent())
 
 				// Rendering loop
@@ -140,7 +143,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 							processRequests(renderer)
 
 							// Run the audio elements
-							scene.accept { element ->
+							scene?.accept { element ->
 								if (element instanceof AudioElement) {
 									element.render(renderer)
 								}

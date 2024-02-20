@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,13 +48,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
 	private final String windowTitle
-	private final GraphicsConfiguration config
 	private final InputEventStream inputEventStream
+	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLContext context
 	private OpenGLRenderer renderer
+	private OpenGLCamera camera
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
@@ -64,18 +64,12 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	/**
 	 * Constructor, build a new system for rendering graphics.
-	 *
-	 * @param scene
-	 * @param windowTitle
-	 * @param inputEventStream
-	 * @param config
 	 */
-	GraphicsSystem(Scene scene, String windowTitle, InputEventStream inputEventStream, GraphicsConfiguration config) {
+	GraphicsSystem(String windowTitle, InputEventStream inputEventStream, GraphicsConfiguration config) {
 
-		super(scene)
 		this.windowTitle = windowTitle
 		this.inputEventStream = inputEventStream
-		this.config = config ?: new GraphicsConfiguration()
+		this.config = config
 	}
 
 	/**
@@ -96,6 +90,15 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		}
 	}
 
+	@Override
+	void configureScene() {
+
+		scene.window = context.window
+		scene.graphicsRequestHandler = this
+		scene.camera = camera
+		renderPipeline.scene = scene
+	}
+
 	/**
 	 * Return the renderer.
 	 *
@@ -114,16 +117,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	RenderPipeline getRenderPipeline() {
 
 		return renderPipeline
-	}
-
-	/**
-	 * Return the window that is the target for rendering.
-	 *
-	 * @return
-	 */
-	Window getWindow() {
-
-		return context.window
 	}
 
 	/**
@@ -193,7 +186,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			var window = context.window
 			window.relay(FramebufferSizeEvent, this)
 			window.relay(WindowMaximizedEvent, this)
-			scene.window = window
 
 			// Only do quick window mode switching on Windows - the macOS experience
 			// is quite different from using the fullscreen button which assigns the
@@ -215,16 +207,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 				renderer = new OpenGLRenderer(config, window)
 				renderer.withCloseable { renderer ->
-					scene.graphicsRequestHandler = this
 
-					new OpenGLCamera(window.renderResolution).withCloseable { camera ->
-						scene.camera = camera
-
-						new ImGuiLayer(config, window, inputEventStream).withCloseable { imGuiLayer ->
+					camera = new OpenGLCamera(window.renderResolution)
+					camera.withCloseable { camera ->
+						new ImGuiLayer(config, window).withCloseable { imGuiLayer ->
 							logger.debug(renderer.toString())
 							imGuiLayer.relay(FramebufferSizeEvent, this)
 
-							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream, scene)
+							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
 							renderPipeline.withCloseable { pipeline ->
 								trigger(new SystemReadyEvent())
 

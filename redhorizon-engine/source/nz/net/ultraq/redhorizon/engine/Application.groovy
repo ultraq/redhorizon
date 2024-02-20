@@ -21,71 +21,115 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.time.GameClock
+import nz.net.ultraq.redhorizon.engine.time.TimeSystem
+import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_D
+import static org.lwjgl.glfw.GLFW.*
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
 
 /**
- * A base for developing an application that uses the Red Horizon engine, this
- * class sets up the engine components and provides access to those and the
- * scene the engine was created to render.
+ * A base for developing an application that uses the Red Horizon engine and
+ * various systems.  This class uses a builder-like API to let you pick what
+ * goes into the application, as well as customize it at certain event
+ * lifecycles, eg:
+ * <p>
+ * <pre>{@code
+ * new Application("Window title")
+ *   .addGraphicsSystem(myGraphicsConfig)
+ *   .useScene(scene)
+ *   .onApplicationStart(application -> {
+ *     // Setup here
+ *   })
+ *   .start()
+ *}</pre>
  *
  * @author Emanuel Rabina
  */
-abstract class Application {
+@TupleConstructor(defaults = false)
+class Application implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
-	protected Engine engine
-	protected AudioSystem audioSystem
-	protected GameClock gameClock
-	protected GraphicsSystem graphicsSystem
-	protected InputEventStream inputEventStream
-	protected Scene scene = new Scene()
-	protected boolean applicationStopped
+	final String windowTitle
 
-	private final String windowTitle
-	private final AudioConfiguration audioConfig
-	private final GraphicsConfiguration graphicsConfig
-	private final Semaphore applicationStoppingSemaphore = new Semaphore(1)
+	private final Engine engine = new Engine()
+	private final InputEventStream inputEventStream = new InputEventStream()
+
+	private Scene scene
+	private ApplicationEventHandler applicationStart
+	private ApplicationEventHandler applicationStop
+	private boolean applicationStopped
+	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
 
 	/**
-	 * Constructor, creates an application with the title suffix and
-	 * configuration.
-	 *
-	 * @param windowTitle
-	 * @param audioConfig
-	 * @param graphicsConfig
+	 * Add the audio system to this application.  The audio system will run on its
+	 * own thread.
 	 */
-	Application(String windowTitle, AudioConfiguration audioConfig = new AudioConfiguration(),
-		GraphicsConfiguration graphicsConfig = new GraphicsConfiguration()) {
+	Application addAudioSystem(AudioConfiguration config = new AudioConfiguration()) {
 
-		this.windowTitle = windowTitle ? "Red Horizon - ${windowTitle}" : null
-		this.audioConfig = audioConfig
-		this.graphicsConfig = graphicsConfig
+		engine << new AudioSystem(config)
+		return this
 	}
 
 	/**
-	 * Called when all the application setup has completed and it's time for the
-	 * application itself to run.
+	 * Add the graphics system to this application.  The graphics system will run
+	 * on its own thread, and the window it creates will be the source of user
+	 * input into the application.
 	 */
-	protected void applicationStart() {
+	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
+		OverlayRenderPass... overlayRenderPasses) {
+
+		var graphicsSystem = new GraphicsSystem(windowTitle, inputEventStream, config)
+		graphicsSystem.on(WindowCreatedEvent) { event ->
+			inputEventStream.addInputSource(event.window)
+		}
+		graphicsSystem.on(SystemReadyEvent) { event ->
+			var audioSystem = engine.systems.find { it instanceof AudioSystem } as AudioSystem
+			graphicsSystem.renderPipeline.addOverlayPass(
+				new DebugOverlayRenderPass(config.debug)
+					.addAudioRenderer(audioSystem.renderer)
+					.addGraphicsRenderer(graphicsSystem.renderer)
+					.toggleWith(inputEventStream, GLFW_KEY_D)
+			)
+			overlayRenderPasses.each { overlayRenderPass ->
+				graphicsSystem.renderPipeline.addOverlayPass(overlayRenderPass)
+			}
+		}
+		graphicsSystem.relay(WindowMaximizedEvent, this)
+		engine << graphicsSystem
+		return this
 	}
 
 	/**
-	 * Called when the application is stopping and before the engines are shut
-	 * down.  Ideal for performing any cleanup tasks.
+	 * Add a managed time system to this application.  The time system will update
+	 * objects in the scene on its own thread.
 	 */
-	protected void applicationStop() {
+	Application addTimeSystem() {
+
+		engine << new TimeSystem()
+		return this
+	}
+
+	/**
+	 * Use this application with the given scene.  If this method is never used,
+	 * then an empty scene will be created during startup.
+	 */
+	Application useScene(Scene scene) {
+
+		this.scene = scene
+		return this
 	}
 
 	/**
@@ -95,39 +139,28 @@ abstract class Application {
 
 		logger.debug('Initializing application...')
 
-		// Create the necessary systems
-		engine = new Engine()
+		if (!scene) {
+			scene = new Scene()
+		}
 
-		inputEventStream = new InputEventStream()
+		// Universal quit on exit
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+				stop()
+			}
+		}
 		inputEventStream.on(GuiEvent) { event ->
 			if (event.type == EVENT_TYPE_STOP) {
 				stop()
 			}
 		}
-		scene.inputEventStream = inputEventStream
-
-		audioSystem = new AudioSystem(scene, audioConfig)
-		engine << audioSystem
-
-		graphicsSystem = new GraphicsSystem(scene, windowTitle, inputEventStream, graphicsConfig)
-		graphicsSystem.on(WindowCreatedEvent) { event ->
-			inputEventStream.addInputSource(event.window)
-		}
-		engine << graphicsSystem
-
-		gameClock = new GameClock(scene)
-		engine << gameClock
 
 		// Start the application
 		logger.debug('Starting application...')
 		engine.start()
-
-		graphicsSystem.renderPipeline.addOverlayPass(
-			new DebugOverlayRenderPass(audioSystem.renderer, graphicsSystem.renderer, graphicsConfig.debug)
-				.toggleWith(inputEventStream, GLFW_KEY_D)
-		)
-
-		applicationStart()
+		engine.systems*.scene = scene
+		scene.inputEventStream = inputEventStream
+		applicationStart.apply(this, scene)
 
 		engine.waitUntilStopped()
 	}
@@ -140,10 +173,39 @@ abstract class Application {
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!applicationStopped) {
 				logger.debug('Stopping application...')
-				applicationStop()
+				applicationStop.apply(this, scene)
 				engine.stop()
 				applicationStopped = true
 			}
 		}
+	}
+
+	/**
+	 * Configure some code to run after engine startup.
+	 */
+	Application onApplicationStart(ApplicationEventHandler handler) {
+
+		applicationStart = handler
+		return this
+	}
+
+	/**
+	 * Configure some code to run before engine shutdown.
+	 */
+	Application onApplicationStop(ApplicationEventHandler handler) {
+
+		applicationStop = handler
+		return this
+	}
+
+	/**
+	 * The functional interface called for each application lifecycle event.  It
+	 * is provided the application itself, plus either the configured or default
+	 * scene, whichever is current at that point in time.
+	 */
+	@FunctionalInterface
+	static interface ApplicationEventHandler {
+
+		void apply(Application application, Scene scene);
 	}
 }
