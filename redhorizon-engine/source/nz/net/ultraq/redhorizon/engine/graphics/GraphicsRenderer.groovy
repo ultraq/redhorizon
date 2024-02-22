@@ -65,30 +65,17 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Create a mesh without indices or textureUVs.
-	 *
-	 * @param type
-	 * @param layout
-	 * @param colour
-	 * @param vertices
-	 * @return
 	 */
 	default Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices) {
 
-		return createMesh(type, layout, colour, vertices, null, null)
+		return createMesh(type, layout, colour, vertices, null, null, false)
 	}
 
 	/**
 	 * Create a mesh with all of the mesh parts.
-	 *
-	 * @param type
-	 * @param layout
-	 * @param colour
-	 * @param vertices
-	 * @param textureUVs
-	 * @param indices
-	 * @return
 	 */
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs, int[] indices)
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
+		int[] indices, boolean dynamic)
 
 	/**
 	 * Create a new shader program from the given configuration, or return the

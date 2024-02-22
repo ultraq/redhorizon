@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.UnitData
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
@@ -29,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
+import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer
 
 /**
@@ -44,6 +46,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	final ImagesFile imagesFile
 	final Palette palette
 	final UnitData unitData
+
+	PalettedSprite body
 
 	private SpriteSheet spriteSheet
 	private Texture paletteAsTexture
@@ -67,13 +71,29 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
 			.get()
 
-		// TODO: Pick first frame for now, expecting to be able to change on render
-		addChild(new PalettedSprite(imagesFile.width, imagesFile.height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0)))
+		body = new UnitBody(imagesFile.width, imagesFile.height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0))
+		addChild(body)
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
 		scene.requestDelete(spriteSheet, paletteAsTexture)
+	}
+
+	@InheritConstructors
+	class UnitBody extends PalettedSprite {
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			// Update region in spritesheet
+			var headings = unitData.shpFile.parts.body.headings
+			var degreesPerHeading = (360f / headings) as float
+			var frameForHeading = headings - (heading / degreesPerHeading as int)
+			region.set(spriteSheet.getFrame(frameForHeading))
+
+			super.render(renderer)
+		}
 	}
 }

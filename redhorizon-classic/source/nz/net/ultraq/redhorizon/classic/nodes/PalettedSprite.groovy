@@ -37,17 +37,15 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 	final SpriteSheet spriteSheet
 	final Texture palette
-	final Rectanglef region
 
 	/**
 	 * Constructor, build this sprite from a region on a sprite sheet
 	 */
 	PalettedSprite(int width, int height, SpriteSheet spriteSheet, Texture palette, Rectanglef region) {
 
-		super(width, height)
+		super(width, height, region)
 		this.spriteSheet = spriteSheet
 		this.palette = palette
-		this.region = region
 	}
 
 	@Override
@@ -72,7 +70,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 		scene.requestDelete(mesh)
 	}
 
-	// TODO: Copy code from dynamic-textureuvs branch so we can modify those on render
 	@Override
 	void render(GraphicsRenderer renderer) {
 

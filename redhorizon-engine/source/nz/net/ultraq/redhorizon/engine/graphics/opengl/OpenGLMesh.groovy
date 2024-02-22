@@ -36,18 +36,23 @@ import static org.lwjgl.system.MemoryStack.stackPush
  */
 class OpenGLMesh extends Mesh {
 
+	final VertexBufferLayout layout
 	final int vertexArrayId
 	final int vertexBufferId
 	final int elementBufferId
+	final boolean dynamic
+
+	private Vector2f[] lastTextureUVs
 
 	/**
 	 * Constructor, creates a new OpenGL mesh.
 	 */
 	OpenGLMesh(int type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
-		int[] indices) {
+		int[] indices, boolean dynamic) {
 
 		super(type, colour, vertices, textureUVs, indices)
 
+		this.layout = layout
 		vertexArrayId = glGenVertexArrays()
 		glBindVertexArray(vertexArrayId)
 
@@ -70,7 +75,7 @@ class OpenGLMesh extends Mesh {
 				}
 			}
 			vertexBuffer.flip()
-			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW)
+			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW)
 
 			layout.parts.each { part ->
 				glEnableVertexAttribArray(part.location)
@@ -92,6 +97,9 @@ class OpenGLMesh extends Mesh {
 		else {
 			elementBufferId = 0
 		}
+
+		this.dynamic = dynamic
+		lastTextureUVs = textureUVs
 	}
 
 	@Override
@@ -108,5 +116,25 @@ class OpenGLMesh extends Mesh {
 		}
 		glDeleteBuffers(vertexBufferId)
 		glDeleteVertexArrays(vertexArrayId)
+	}
+
+	@Override
+	void updateTextureUvs(Vector2f[] textureUVs) {
+
+		if (!dynamic) {
+			throw new IllegalStateException('Cannot update textureUVs on a mesh that was created without a dynamic buffer')
+		}
+
+		if (textureUVs != lastTextureUVs) {
+			stackPush().withCloseable { stack ->
+				glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
+				textureUVs.eachWithIndex { textureUv, index ->
+					glBufferSubData(GL_ARRAY_BUFFER,
+						(layout.sizeInBytes() * index) + layout.offsetOfInBytes(VertexBufferLayoutPart.TEXTURE_UVS),
+						textureUv.get(stack.mallocFloat(Vector2f.FLOATS)))
+				}
+			}
+			lastTextureUVs = textureUVs
+		}
 	}
 }
