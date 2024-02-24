@@ -74,6 +74,12 @@ class OpenALSource extends Source {
 	}
 
 	@Override
+	boolean isBufferAttached() {
+
+		return alGetSourcei(sourceId, AL_BUFFER) != 0
+	}
+
+	@Override
 	boolean isPaused() {
 
 		return sourceState == AL_PAUSED

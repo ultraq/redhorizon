@@ -39,6 +39,11 @@ abstract class Source implements AudioResource {
 	abstract int buffersProcessed()
 
 	/**
+	 * Return whether this source has an attached static buffer.
+	 */
+	abstract boolean isBufferAttached()
+
+	/**
 	 * Rether whether this source is currently paused.
 	 *
 	 * @return

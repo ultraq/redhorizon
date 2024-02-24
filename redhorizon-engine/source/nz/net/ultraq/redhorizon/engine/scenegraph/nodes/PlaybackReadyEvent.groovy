@@ -19,8 +19,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Fired when a streaming source has filled its buffers and is ready for
- * playback.
+ * Fired when a media source is ready for playback.
  *
  * @author Emanuel Rabina
  */

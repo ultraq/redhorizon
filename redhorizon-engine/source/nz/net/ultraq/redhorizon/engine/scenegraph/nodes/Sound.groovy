@@ -25,12 +25,16 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
+import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.Executors
@@ -43,32 +47,35 @@ import java.util.concurrent.LinkedBlockingQueue
  */
 class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 
-	SoundFile soundFile
-	StreamingDecoder streamingDecoder
+	private final SoundSource soundSource
 
 	private Source source
-	private Buffer staticBuffer
-	private final BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
-	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 
+	/**
+	 * Constructor, create a sound using data straight from a file.
+	 */
 	Sound(SoundFile soundFile) {
 
-		this.soundFile = soundFile
-		if (soundFile.forStreaming) {
-			assert soundFile instanceof Streaming
-			streamingDecoder = soundFile.streamingDecoder
-		}
+		this(soundFile.forStreaming ?
+			new StreamingSoundSource(((Streaming)soundFile).streamingDecoder, true) :
+			new StaticSoundSource(soundFile)
+		)
 	}
 
-	Sound(StreamingDecoder streamingDecoder) {
+	/**
+	 * Constructor, create a sound using any implementation of the
+	 * {@link SoundSource} interface.
+	 */
+	Sound(SoundSource soundSource) {
 
-		this.streamingDecoder = streamingDecoder
+		this.soundSource = soundSource
+		soundSource.relay(Event, this)
 	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		if (!soundFile && !streamingDecoder) {
+		if (!soundSource) {
 			throw new IllegalStateException('Cannot add a Sound node to a scene without a streaming or file source')
 		}
 
@@ -76,60 +83,21 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 			.requestCreateOrGet(new SourceRequest())
 			.get()
 
-		if (streamingDecoder) {
-			var buffersAdded = 0
-			streamingDecoder.on(StreamingSampleEvent) { event ->
-				streamingBuffers << scene
-					.requestCreateOrGet(new BufferRequest(event.bits, event.channels, event.frequency, event.sample))
-					.get()
-				buffersAdded++
-				if (buffersAdded == 10) {
-					trigger(new PlaybackReadyEvent())
-				}
-			}
-
-			// Run ourselves, otherwise expect the source to run this
-			if (soundFile) {
-				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
-			}
-			else {
-				trigger(new StreamingReadyEvent())
-			}
-		}
-		else if (soundFile) {
-			staticBuffer = scene
-				.requestCreateOrGet(new BufferRequest(soundFile.bits, soundFile.channels, soundFile.frequency, soundFile.soundData))
-				.get()
-		}
+		soundSource.onSceneAdded(scene)
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		streamingDecoder?.cancel(true)
+		soundSource.onSceneRemoved(scene)
 		scene.requestDelete(source)
-		if (staticBuffer) {
-			scene.requestDelete(staticBuffer)
-		}
-		if (streamedBuffers) {
-			scene.requestDelete(*streamedBuffers.drain())
-		}
 	}
 
 	@Override
 	void render(AudioRenderer renderer) {
 
 		if (source) {
-
-			// Add static or streaming buffers to the source
-			if (staticBuffer) {
-				source.attachBuffer(staticBuffer)
-			}
-			else if (streamingBuffers) {
-				var newBuffers = streamingBuffers.drain()
-				source.queueBuffers(*newBuffers)
-				streamedBuffers.addAll(newBuffers)
-			}
+			soundSource.prepareSource(renderer, source)
 
 			// Control playback
 			if (playing) {
@@ -151,18 +119,6 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 					source.stop()
 				}
 			}
-
-			// Clean up used buffers for a streaming source
-			if (streamingDecoder) {
-				var buffersProcessed = source.buffersProcessed()
-				if (buffersProcessed) {
-					var processedBuffers = streamedBuffers.drain(buffersProcessed)
-					source.unqueueBuffers(*processedBuffers)
-					processedBuffers.each { processedBuffer ->
-						renderer.delete(processedBuffer)
-					}
-				}
-			}
 		}
 	}
 
@@ -176,5 +132,111 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 			play()
 		}
 		currentTimeMs = updatedTimeMs
+	}
+
+	/**
+	 * Interface for any source from which sound data can be obtained.
+	 */
+	static interface SoundSource extends EventTarget, SceneEvents {
+
+		/**
+		 * Called during {@code render}, prepare the sound source for playback.
+		 */
+		void prepareSource(AudioRenderer renderer, Source source)
+	}
+
+	/**
+	 * A sound source using static buffers.
+	 */
+	@TupleConstructor(defaults = false)
+	static class StaticSoundSource implements SoundSource {
+
+		final SoundFile soundFile
+
+		private Buffer staticBuffer
+
+		@Override
+		void onSceneAdded(Scene scene) {
+
+			staticBuffer = scene
+				.requestCreateOrGet(new BufferRequest(soundFile.bits, soundFile.channels, soundFile.frequency, soundFile.soundData))
+				.get()
+
+			trigger(new PlaybackReadyEvent())
+		}
+
+		@Override
+		void onSceneRemoved(Scene scene) {
+
+			scene.requestDelete(staticBuffer)
+		}
+
+		@Override
+		void prepareSource(AudioRenderer renderer, Source source) {
+
+			if (!source.bufferAttached && staticBuffer) {
+				source.attachBuffer(staticBuffer)
+			}
+		}
+	}
+
+	/**
+	 * A sound source using streaming buffers.
+	 */
+	@TupleConstructor(defaults = false)
+	static class StreamingSoundSource implements SoundSource {
+
+		final StreamingDecoder streamingDecoder
+		final boolean autoStream
+
+		private final BlockingQueue<Buffer> streamingBuffers = new ArrayBlockingQueue<>(10)
+		private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
+
+		@Override
+		void onSceneAdded(Scene scene) {
+
+			var buffersAdded = 0
+			streamingDecoder.on(StreamingSampleEvent) { event ->
+				streamingBuffers << scene
+					.requestCreateOrGet(new BufferRequest(event.bits, event.channels, event.frequency, event.sample))
+					.get()
+				buffersAdded++
+				if (buffersAdded == 10) {
+					trigger(new PlaybackReadyEvent())
+				}
+			}
+
+			// Run ourselves, otherwise expect the owner of this source to run this
+			if (autoStream) {
+				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+			}
+			else {
+				trigger(new StreamingReadyEvent())
+			}
+		}
+
+		@Override
+		void onSceneRemoved(Scene scene) {
+
+			streamingDecoder?.cancel(true)
+			scene.requestDelete(*streamedBuffers.drain())
+		}
+
+		@Override
+		void prepareSource(AudioRenderer renderer, Source source) {
+
+			var newBuffers = streamingBuffers.drain()
+			source.queueBuffers(*newBuffers)
+			streamedBuffers.addAll(newBuffers)
+
+			var buffersProcessed = source.buffersProcessed()
+			if (buffersProcessed) {
+				var processedBuffers = streamedBuffers.drain(buffersProcessed)
+				source.unqueueBuffers(*processedBuffers)
+				processedBuffers.each { processedBuffer ->
+					renderer.delete(processedBuffer)
+				}
+			}
+		}
 	}
 }

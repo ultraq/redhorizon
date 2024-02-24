@@ -29,12 +29,19 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
+import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 
+import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
+
+import groovy.transform.TupleConstructor
 import java.util.concurrent.Executors
 
 /**
@@ -44,46 +51,40 @@ import java.util.concurrent.Executors
  */
 class Animation extends Node<Animation> implements GraphicsElement, Playable, Temporal {
 
-	AnimationFile animationFile
-	StreamingDecoder streamingDecoder
+	private final AnimationSource animationSource
 
-	// TODO: Maybe remove the need for these copies of animation properties if we
-	//       have the streaming decoder carry them as well, ie: make both file and
-	//       decoder an `AnimationSource` with those properties 🤔
-	private final float frameRate
-	private final int numFrames
-
-	private final List<Texture> frames = []
 	private long startTimeMs
 	private int currentFrame = -1
-	private int lastFrame = -1
 	private Mesh mesh
 	private Shader shader
 	private Material material
 
+	/**
+	 * Constructor, create an animation using data straight from an animation file.
+	 */
 	Animation(AnimationFile animationFile) {
 
-		this(animationFile.width, animationFile.height, animationFile.forVgaMonitors, animationFile.frameRate,
-			animationFile.numFrames, animationFile instanceof Streaming ? animationFile.streamingDecoder : null)
-
-		this.animationFile = animationFile
+		this(animationFile.width, animationFile.height, animationFile.forVgaMonitors,
+			new StreamingAnimationSource(((Streaming)animationFile).streamingDecoder, animationFile.frameRate, animationFile.numFrames, true))
 	}
 
-	Animation(int width, int height, boolean forVgaMonitors, float frameRate, int numFrames, StreamingDecoder streamingDecoder) {
+	/**
+	 * Constructor, create an animation using any implementation of the
+	 * {@link AnimationSource} interface.
+	 */
+	Animation(int width, int height, boolean forVgaMonitors = false, AnimationSource animationSource) {
 
+		this.animationSource = animationSource
+		animationSource.relay(Event, this)
 		bounds
 			.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
 			.center()
-
-		this.frameRate = frameRate
-		this.numFrames = numFrames
-		this.streamingDecoder = streamingDecoder
 	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		if (!animationFile && !streamingDecoder) {
+		if (!animationSource) {
 			throw new IllegalStateException('Cannot add an Animation node to a scene without a streaming or file source')
 		}
 
@@ -95,71 +96,28 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 			.get()
 		material = new Material()
 
-		if (streamingDecoder) {
-			var buffersAdded = 0
-			streamingDecoder.on(StreamingFrameEvent) { event ->
-				frames << scene
-					.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
-					.get()
-				buffersAdded++
-				if (buffersAdded == Math.ceil(frameRate) as int) {
-					trigger(new PlaybackReadyEvent())
-				}
-			}
-
-			// Run ourselves, otherwise expect the source to run this
-			if (animationFile) {
-				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
-			}
-			else {
-				trigger(new StreamingReadyEvent())
-			}
-		}
-		else {
-			Executors.newVirtualThreadPerTaskExecutor().execute { ->
-				var width = animationFile.width
-				var height = animationFile.height
-				var format = animationFile.format
-				animationFile.frameData.each { frame ->
-					frames << scene
-						.requestCreateOrGet(new TextureRequest(width, height, format, frame.flipVertical(width, height, format)))
-						.get()
-				}
-			}
-		}
+		animationSource.onSceneAdded(scene)
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		streamingDecoder?.cancel(true)
-		scene.requestDelete(mesh, *(frames.findAll { frame -> frame }))
+		animationSource.onSceneRemoved(scene)
+		scene.requestDelete(mesh)
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
 		if (mesh && shader && material && currentFrame != -1) {
-
-			// Draw the current frame if available
-			var currentFrameTexture = frames[currentFrame]
-			if (currentFrameTexture) {
-				material.texture = currentFrameTexture
-				var globalTransform = getGlobalTransform()
+			def (texture, region) = animationSource.getFrame(renderer, currentFrame)
+			if (texture) {
+				material.texture = texture
+				if (region) {
+					mesh.updateTextureUvs(region as Vector2f[])
+				}
 				renderer.draw(mesh, globalTransform, shader, material)
 			}
-
-			// Delete used frames as the animation progresses to free up memory
-			if (streamingDecoder) {
-				if (currentFrame > 0) {
-					for (var i = lastFrame; i < currentFrame; i++) {
-						renderer.delete(frames[i])
-						frames[i] = null
-					}
-				}
-			}
-
-			lastFrame = currentFrame
 		}
 	}
 
@@ -173,13 +131,91 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 				startTimeMs = currentTimeMs
 			}
 
-			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
-			if (nextFrame < numFrames) {
+			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * animationSource.frameRate) as int
+			if (nextFrame < animationSource.numFrames) {
 				currentFrame = nextFrame
 			}
 			else {
 				stop()
 			}
+		}
+	}
+
+	/**
+	 * Interface for any source from which frames of animation can be obtained.
+	 */
+	static interface AnimationSource extends EventTarget, SceneEvents {
+
+		/**
+		 * Called during {@code render}, return the texture and an optional region
+		 * to be used for rendering the given frame of animation.
+		 */
+		Tuple2<Texture, Rectanglef> getFrame(GraphicsRenderer renderer, int frameNumber)
+
+		float getFrameRate()
+
+		int getNumFrames()
+	}
+
+	/**
+	 * An animation source using a streaming animation file.
+	 */
+	@TupleConstructor(defaults = false)
+	static class StreamingAnimationSource implements AnimationSource {
+
+		final StreamingDecoder streamingDecoder
+		final float frameRate
+		final int numFrames
+		final boolean autoStream
+
+		private List<Texture> frames = []
+		private int lastFrame = -1
+
+		@Override
+		Tuple2<Texture, Rectanglef> getFrame(GraphicsRenderer renderer, int frameNumber) {
+
+			var currentFrameTexture = frames[frameNumber]
+
+			// Delete used frames as the animation progresses to free up memory
+			if (frameNumber > 0) {
+				for (var i = lastFrame; i < frameNumber; i++) {
+					renderer.delete(frames[i])
+					frames[i] = null
+				}
+			}
+			lastFrame = frameNumber
+
+			return new Tuple2<>(currentFrameTexture, null)
+		}
+
+		@Override
+		void onSceneAdded(Scene scene) {
+
+			var buffersAdded = 0
+			streamingDecoder.on(StreamingFrameEvent) { event ->
+				frames << scene
+					.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
+					.get()
+				buffersAdded++
+				if (buffersAdded == Math.ceil(frameRate) as int) {
+					trigger(new PlaybackReadyEvent())
+				}
+			}
+
+			// Run ourselves, otherwise expect the owner of this source to run this
+			if (autoStream) {
+				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+			}
+			else {
+				trigger(new StreamingReadyEvent())
+			}
+		}
+
+		@Override
+		void onSceneRemoved(Scene scene) {
+
+			streamingDecoder?.cancel(true)
+			scene.requestDelete(*(frames.findAll { frame -> frame }))
 		}
 	}
 }

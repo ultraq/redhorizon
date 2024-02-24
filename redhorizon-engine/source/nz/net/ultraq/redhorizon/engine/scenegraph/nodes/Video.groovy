@@ -23,6 +23,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation.StreamingAnimationSource
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound.StreamingSoundSource
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
@@ -48,12 +50,12 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 
 		streamingDecoder = videoFile.streamingDecoder
 
-		animation = new Animation(videoFile.width, videoFile.height, videoFile.forVgaMonitors, videoFile.frameRate,
-			videoFile.numFrames, streamingDecoder)
+		animation = new Animation(videoFile.width, videoFile.height, videoFile.forVgaMonitors,
+			new StreamingAnimationSource(streamingDecoder, videoFile.frameRate, videoFile.numFrames, false))
 		bounds.set(animation.bounds)
 		addChild(animation)
 
-		sound = new Sound(streamingDecoder)
+		sound = new Sound(new StreamingSoundSource(streamingDecoder, false))
 		addChild(sound)
 
 		this.videoFile = videoFile
