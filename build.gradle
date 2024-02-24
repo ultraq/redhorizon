@@ -53,7 +53,7 @@ subprojects {
 	ext.targetPlatform = targetPlatform
 
 	dependencies {
-		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.3.0-SNAPSHOT'
+		implementation 'nz.net.ultraq.groovy:groovy-extensions:2.3.0'
 		implementation 'nz.net.ultraq.groovy:groovy-profiling-extensions:0.7.0'
 		implementation "org.apache.groovy:groovy:${groovyVersion}"
 		implementation "org.slf4j:slf4j-api:${slf4jVersion}"

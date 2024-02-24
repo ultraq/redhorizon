@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.units.Faction
-import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -29,19 +28,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.TupleConstructor
-
 /**
  * Controls a unit for showcasing in the explorer.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class UnitShowcaseScript extends Script<Unit> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitShowcaseScript)
-
-	final UnitData unitData
 
 	private final List<RemoveControlFunction> removeControlFunctions = []
 
@@ -53,47 +47,32 @@ class UnitShowcaseScript extends Script<Unit> {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		var states = unitData.shpFile.states?.size() ?: 0
-		var stateIndex = -1
-
 		// TODO: Have it so that the render window is the desktop resolution and the
 		//       camera scales things so that things are the size they were back
 		//       when the game was 640x480
 		scene.camera.scale(2.0f)
+		logger.info("Showing ${state} state")
 
-		// Adjust the heading of the unit such that it's rotated left enough to
-		// utilize its next state/animation in that direction.
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
-			var headings = stateIndex == -1 ?
-				unitData.shpFile.parts.body.headings :
-				unitData.shpFile.states[stateIndex].headings
-			var degreesPerHeading = (360f / headings) as float
-			heading -= degreesPerHeading
+			rotateLeft()
 		}))
-
-		// Adjust the heading of the unit such that it's rotated right enough to
-		// utilize its next state/animation in that direction.
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
-			var headings = stateIndex == -1 ?
-				unitData.shpFile.parts.body.headings :
-				unitData.shpFile.states[stateIndex].headings
-			var degreesPerHeading = (360f / headings) as float
-			heading += degreesPerHeading
+			rotateRight()
 		}))
 
-//		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
-//			previousState()
-//			startAnimation()
-//			stateIndex = Math.wrap(stateIndex - 1, -1, states)
-//		}))
-//		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
-//			nextState()
-//			startAnimation()
-//			stateIndex = Math.wrap(stateIndex + 1, -1, states)
-//		}))
-//		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
-//			scene.gameClock.togglePause()
-//		}))
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
+			previousState()
+			logger.info("Showing ${state} state")
+			startAnimation()
+		}))
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
+			nextState()
+			logger.info("Showing ${state} state")
+			startAnimation()
+		}))
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
+			scene.gameClock.togglePause()
+		}))
 
 		var Faction[] factions = Faction.values()
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_P, 'Cycle faction colours', { ->

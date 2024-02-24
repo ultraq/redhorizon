@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -40,15 +41,23 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Unit extends Node<Unit> implements FactionColours, Rotatable {
+class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
+
+	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
+
+	/**
+	 * The state value used for the not-animating / doing nothing state
+	 */
+	static final String DEFAULT_STATE = "default"
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
 	final ImagesFile imagesFile
 	final Palette palette
 	final UnitData unitData
 
-	PalettedSprite body
-
+	private PalettedSprite body
+	private int stateIndex = 0
+	private long animationStartTime
 	private SpriteSheet spriteSheet
 	private Texture paletteAsTexture
 
@@ -57,6 +66,32 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		this.imagesFile = imagesFile
 		this.palette = palette
 		this.unitData = unitData
+	}
+
+	/**
+	 * Return the number of degrees it takes to rotate the unit left/right in
+	 * either direction for the current state of the unit.
+	 */
+	private float getDegreesPerHeading() {
+
+		return 360f / (stateIndex == 0 ? unitData.shpFile.parts.body.headings : unitData.shpFile.states[stateIndex - 1].headings)
+	}
+
+	/**
+	 * Return the name of the current state of the unit.
+	 */
+	String getState() {
+
+		return stateIndex == 0 ? DEFAULT_STATE : unitData.shpFile.states[stateIndex - 1].name
+	}
+
+	/**
+	 * Cycle to the previous unit state, looping forward to the first one if we
+	 * reach the end of the unit's states list.
+	 */
+	void nextState() {
+
+		stateIndex = Math.wrap(stateIndex + 1, 0, unitData.shpFile.states.length + 1)
 	}
 
 	@Override
@@ -81,17 +116,73 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		scene.requestDelete(spriteSheet, paletteAsTexture)
 	}
 
+	/**
+	 * Cycle to the previous unit state, looping back to the last one if we reach
+	 * the beginning of the unit's states list.
+	 */
+	void previousState() {
+
+		stateIndex = Math.wrap(stateIndex - 1, 0, unitData.shpFile.states.length + 1)
+	}
+
+	/**
+	 * Adjust the heading of the unit counter-clockwise enough to utilize its next
+	 * state/animation in that direction.
+	 */
+	void rotateLeft() {
+
+		heading -= degreesPerHeading
+	}
+
+	/**
+	 * Adjust the heading of the unit clockwise enough to utilize its next
+	 * state/animation in that direction.
+	 */
+	void rotateRight() {
+
+		heading += degreesPerHeading
+	}
+
+	/**
+	 * (Re)start playing the current animation.
+	 */
+	void startAnimation() {
+
+		animationStartTime = currentTimeMs
+	}
+
 	@InheritConstructors
 	class UnitBody extends PalettedSprite {
 
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			// Update region in spritesheet
-			var headings = unitData.shpFile.parts.body.headings
-			var degreesPerHeading = (360f / headings) as float
-			var frameForHeading = headings - (heading / degreesPerHeading as int)
-			region.set(spriteSheet.getFrame(frameForHeading))
+			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
+			//       reverse from how we normally define rotation.
+
+			// Update region in spritesheet to match heading and currently-playing animation
+			if (stateIndex == 0) {
+				var headings = unitData.shpFile.parts.body.headings
+				var rotationFrame = heading ? headings - (heading / degreesPerHeading) as int : 0
+				region.set(spriteSheet.getFrame(rotationFrame))
+			}
+			else {
+				// TODO: Maybe body information can be set as a default state, then we
+				//       don't need to have 2 branches like this 🤔
+				var currentState = unitData.shpFile.states[stateIndex - 1]
+				var headings = currentState.headings
+				var rotationFrame = heading ? (headings - (heading / degreesPerHeading)) * currentState.frames as int : 0
+				var animationFrame = Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % currentState.frames as int
+
+				// Figure out how many frames before this current state
+				var priorFrames = unitData.shpFile.parts.body.headings
+				for (var i = 0; i < stateIndex - 1; i++) {
+					var priorStates = unitData.shpFile.states[i]
+					priorFrames += (priorStates.frames * priorStates.headings)
+				}
+
+				region.set(spriteSheet.getFrame(priorFrames + rotationFrame + animationFrame))
+			}
 
 			super.render(renderer)
 		}

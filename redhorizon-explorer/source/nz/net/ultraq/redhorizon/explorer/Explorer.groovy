@@ -306,11 +306,13 @@ class Explorer {
 			default -> logger.info('Unit type {} not supported', unitData.type)
 		}
 
-		// Add the unit to the scene
-		var unit = targetClass
-			.getDeclaredConstructor(ImagesFile, Palette, UnitData)
-			.newInstance(shpFile, palette, unitData)
-			.attachScript(new UnitShowcaseScript(unitData))
-		scene << unit
+		if (targetClass) {
+			// Add the unit to the scene
+			var unit = targetClass
+				.getDeclaredConstructor(ImagesFile, Palette, UnitData)
+				.newInstance(shpFile, palette, unitData)
+				.attachScript(new UnitShowcaseScript())
+			scene << unit
+		}
 	}
 }
