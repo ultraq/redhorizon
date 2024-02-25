@@ -56,6 +56,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final UnitData unitData
 
 	private PalettedSprite body
+	private PalettedSprite turret
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
@@ -88,17 +89,25 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	@Override
 	void onSceneAdded(Scene scene) {
 
+		var width = imagesFile.width
+		var height = imagesFile.height
+
 		// TODO: Load the palette once
 		paletteAsTexture = scene
 			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
 			.get()
 
 		spriteSheet = scene
-			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
+			.requestCreateOrGet(new SpriteSheetRequest(width, height, imagesFile.format, imagesFile.imagesData))
 			.get()
 
-		body = new UnitBody(imagesFile.width, imagesFile.height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0))
+		body = new UnitBody(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0))
 		addChild(body)
+
+		if (unitData.shpFile.parts.turret) {
+			turret = new UnitTurret(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(unitData.shpFile.parts.body.headings))
+			addChild(turret)
+		}
 	}
 
 	@Override
@@ -155,24 +164,35 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 			// TODO: If this animation region picking gets more complicated, it might
 			//       be worth making an 'animation library' for units
+
+			// Update region in spritesheet to match heading and currently-playing animation
 			var currentState = unitData.shpFile.states[stateIndex]
-			updateRegion(currentState.headings, currentState.frames, unitData.shpFile.getStateFramesOffset(currentState))
-
-			super.render(renderer)
-		}
-
-		/**
-		 * Update region in spritesheet to match heading and currently-playing
-		 * animation.
-		 */
-		private void updateRegion(int headings, int frames, int stateFramesOffset) {
+			var headings = currentState.headings
+			var frames = currentState.frames
 
 			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
 			//       reverse from how we normally define rotation.
 			var closestHeading = Math.round(heading / degreesPerHeading)
 			var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
 			var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
-			region.set(spriteSheet.getFrame(stateFramesOffset + rotationFrame + animationFrame))
+			region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
+
+			super.render(renderer)
+		}
+	}
+
+	@InheritConstructors
+	class UnitTurret extends PalettedSprite {
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			var headings = unitData.shpFile.parts.turret.headings
+			var closestHeading = Math.round(heading / degreesPerHeading)
+			var rotationFrame = closestHeading ? headings - closestHeading as int : 0
+			region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + rotationFrame))
+
+			super.render(renderer)
 		}
 	}
 }

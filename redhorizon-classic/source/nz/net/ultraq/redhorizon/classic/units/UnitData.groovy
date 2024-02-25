@@ -53,7 +53,7 @@ class UnitData {
 	}
 
 	static class ShpFilePart {
-		int headings
+		int headings = 1
 	}
 
 	static class ShpFileState {

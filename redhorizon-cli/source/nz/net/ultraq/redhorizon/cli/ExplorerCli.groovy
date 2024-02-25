@@ -42,7 +42,7 @@ class ExplorerCli implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		new Explorer(commandSpec.parent().version()[0], paletteOptions.loadPalette())
+		new Explorer(commandSpec.parent().version()[0], paletteOptions.loadPalette(true))
 		return 0
 	}
 }

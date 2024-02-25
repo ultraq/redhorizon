@@ -2,19 +2,22 @@
 	"type": "structure",
 	"shpFile": {
 		"parts": {
-			"body": {
-				"headings": 1
-			}
+			"body": {}
 		},
 		"states": [
 			{
-				"name": "default",
-				"headings": 1
+				"name": "default"
 			},
 			{
 				"name": "construction-complete",
-				"frames": 25,
-				"headings": 1
+				"frames": 25
+			},
+			{
+				"name": "default-damaged"
+			},
+			{
+				"name": "construction-complete-damaged",
+				"frames": 25
 			}
 		]
 	}

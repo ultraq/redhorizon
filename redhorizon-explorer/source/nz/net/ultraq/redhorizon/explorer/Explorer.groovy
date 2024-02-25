@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -83,6 +84,7 @@ class Explorer {
 		new Application("Explorer - ${version}")
 			.addAudioSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
+				clearColour: Colour.GREY,
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
 				renderResolution: renderResolution,
 				startWithChrome: true
@@ -300,9 +302,7 @@ class Explorer {
 
 		var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
 		var targetClass = switch (unitData.type) {
-//			case 'infantry' -> Infantry
-			case 'vehicle' -> Unit
-//			case 'structure' -> Structure
+			case 'infantry', 'structure', 'vehicle' -> Unit
 			default -> logger.info('Unit type {} not supported', unitData.type)
 		}
 
