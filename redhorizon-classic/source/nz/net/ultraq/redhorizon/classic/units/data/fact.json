@@ -8,6 +8,10 @@
 		},
 		"states": [
 			{
+				"name": "default",
+				"headings": 1
+			},
+			{
 				"name": "construction-complete",
 				"frames": 25,
 				"headings": 1

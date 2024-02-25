@@ -74,7 +74,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	private float getDegreesPerHeading() {
 
-		return 360f / (stateIndex == 0 ? unitData.shpFile.parts.body.headings : unitData.shpFile.states[stateIndex - 1].headings)
+		return 360f / unitData.shpFile.states[stateIndex].headings
 	}
 
 	/**
@@ -82,16 +82,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	String getState() {
 
-		return stateIndex == 0 ? DEFAULT_STATE : unitData.shpFile.states[stateIndex - 1].name
-	}
-
-	/**
-	 * Cycle to the previous unit state, looping forward to the first one if we
-	 * reach the end of the unit's states list.
-	 */
-	void nextState() {
-
-		stateIndex = Math.wrap(stateIndex + 1, 0, unitData.shpFile.states.length + 1)
+		return unitData.shpFile.states[stateIndex].name
 	}
 
 	@Override
@@ -117,15 +108,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	/**
-	 * Cycle to the previous unit state, looping back to the last one if we reach
-	 * the beginning of the unit's states list.
-	 */
-	void previousState() {
-
-		stateIndex = Math.wrap(stateIndex - 1, 0, unitData.shpFile.states.length + 1)
-	}
-
-	/**
 	 * Adjust the heading of the unit counter-clockwise enough to utilize its next
 	 * state/animation in that direction.
 	 */
@@ -144,6 +126,20 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	/**
+	 * Put the unit into the given state.
+	 */
+	void setState(String state) {
+
+		var foundStateIndex = unitData.shpFile.states.findIndexOf { it.name == state }
+		if (foundStateIndex != -1) {
+			stateIndex = foundStateIndex
+		}
+		else {
+			stateIndex = 0
+		}
+	}
+
+	/**
 	 * (Re)start playing the current animation.
 	 */
 	void startAnimation() {
@@ -159,13 +155,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 			// TODO: If this animation region picking gets more complicated, it might
 			//       be worth making an 'animation library' for units
-			if (stateIndex == 0) {
-				updateRegion(unitData.shpFile.parts.body.headings, 1, 0)
-			}
-			else {
-				var currentState = unitData.shpFile.states[stateIndex - 1]
-				updateRegion(currentState.headings, currentState.frames, unitData.shpFile.getStateFramesOffset(currentState))
-			}
+			var currentState = unitData.shpFile.states[stateIndex]
+			updateRegion(currentState.headings, currentState.frames, unitData.shpFile.getStateFramesOffset(currentState))
 
 			super.render(renderer)
 		}

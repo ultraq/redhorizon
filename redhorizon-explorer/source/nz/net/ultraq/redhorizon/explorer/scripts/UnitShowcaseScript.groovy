@@ -60,13 +60,17 @@ class UnitShowcaseScript extends Script<Unit> {
 			rotateRight()
 		}))
 
+		var states = unitData.shpFile.states
+
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
-			previousState()
+			var currentStateIndex = states.findIndexOf { it.name == state }
+			setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
 			logger.info("Showing ${state} state")
 			startAnimation()
 		}))
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
-			nextState()
+			var currentStateIndex = states.findIndexOf { it.name == state }
+			setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
 			logger.info("Showing ${state} state")
 			startAnimation()
 		}))

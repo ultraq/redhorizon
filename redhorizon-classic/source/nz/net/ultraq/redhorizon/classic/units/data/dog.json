@@ -8,6 +8,10 @@
 		},
 		"states": [
 			{
+				"name": "default",
+				"headings": 8
+			},
+			{
 				"name": "walking",
 				"frames": 6,
 				"headings": 8

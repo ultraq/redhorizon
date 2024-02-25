@@ -8,6 +8,12 @@
 			"turret": {
 				"headings": 32
 			}
-		}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			}
+		]
 	}
 }

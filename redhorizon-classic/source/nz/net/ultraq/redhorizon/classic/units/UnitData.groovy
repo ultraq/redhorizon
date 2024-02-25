@@ -36,7 +36,7 @@ class UnitData {
 		 */
 		int getStateFramesOffset(ShpFileState state) {
 
-			var priorFrames = parts.body.headings
+			var priorFrames = 0
 			var stateIndex = states.findIndexOf { it.name == state.name }
 			for (var i = 0; i < stateIndex; i++) {
 				var priorStates = states[i]
@@ -58,7 +58,7 @@ class UnitData {
 
 	static class ShpFileState {
 		String name
-		int frames
-		int headings
+		int frames = 1
+		int headings = 1
 	}
 }

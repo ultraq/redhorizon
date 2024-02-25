@@ -8,6 +8,10 @@
 		},
 		"states": [
 			{
+				"name": "default",
+				"headings": 32
+			},
+			{
 				"name": "harvesting",
 				"frames": 8,
 				"headings": 8

@@ -8,6 +8,10 @@
 		},
 		"states": [
 			{
+				"name": "default",
+				"headings": 8
+			},
+			{
 				"name": "body-alt",
 				"frames": 1,
 				"headings": 8
