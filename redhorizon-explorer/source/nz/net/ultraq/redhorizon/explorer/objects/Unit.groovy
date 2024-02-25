@@ -157,34 +157,31 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
-			//       reverse from how we normally define rotation.
-
-			// Update region in spritesheet to match heading and currently-playing animation
+			// TODO: If this animation region picking gets more complicated, it might
+			//       be worth making an 'animation library' for units
 			if (stateIndex == 0) {
-				var headings = unitData.shpFile.parts.body.headings
-				var rotationFrame = heading ? headings - (heading / degreesPerHeading) as int : 0
-				region.set(spriteSheet.getFrame(rotationFrame))
+				updateRegion(unitData.shpFile.parts.body.headings, 1, 0)
 			}
 			else {
-				// TODO: Maybe body information can be set as a default state, then we
-				//       don't need to have 2 branches like this 🤔
 				var currentState = unitData.shpFile.states[stateIndex - 1]
-				var headings = currentState.headings
-				var rotationFrame = heading ? (headings - (heading / degreesPerHeading)) * currentState.frames as int : 0
-				var animationFrame = Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % currentState.frames as int
-
-				// Figure out how many frames before this current state
-				var priorFrames = unitData.shpFile.parts.body.headings
-				for (var i = 0; i < stateIndex - 1; i++) {
-					var priorStates = unitData.shpFile.states[i]
-					priorFrames += (priorStates.frames * priorStates.headings)
-				}
-
-				region.set(spriteSheet.getFrame(priorFrames + rotationFrame + animationFrame))
+				updateRegion(currentState.headings, currentState.frames, unitData.shpFile.getStateFramesOffset(currentState))
 			}
 
 			super.render(renderer)
+		}
+
+		/**
+		 * Update region in spritesheet to match heading and currently-playing
+		 * animation.
+		 */
+		private void updateRegion(int headings, int frames, int stateFramesOffset) {
+
+			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
+			//       reverse from how we normally define rotation.
+			var closestHeading = Math.round(heading / degreesPerHeading)
+			var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
+			var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+			region.set(spriteSheet.getFrame(stateFramesOffset + rotationFrame + animationFrame))
 		}
 	}
 }

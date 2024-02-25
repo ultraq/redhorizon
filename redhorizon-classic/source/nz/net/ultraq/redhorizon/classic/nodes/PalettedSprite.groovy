@@ -39,7 +39,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	final Texture palette
 
 	/**
-	 * Constructor, build this sprite from a region on a sprite sheet
+	 * Constructor, build this sprite from a region on a sprite sheet.
 	 */
 	PalettedSprite(int width, int height, SpriteSheet spriteSheet, Texture palette, Rectanglef region) {
 

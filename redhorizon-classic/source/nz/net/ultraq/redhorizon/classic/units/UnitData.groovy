@@ -29,7 +29,21 @@ class UnitData {
 
 	static class ShpFile {
 		ShpFileParts parts
-		ShpFileState[] states
+		ShpFileState[] states = []
+
+		/**
+		 * Get the number of frames from prior states before the given state.
+		 */
+		int getStateFramesOffset(ShpFileState state) {
+
+			var priorFrames = parts.body.headings
+			var stateIndex = states.findIndexOf { it.name == state.name }
+			for (var i = 0; i < stateIndex; i++) {
+				var priorStates = states[i]
+				priorFrames += (priorStates.frames * priorStates.headings)
+			}
+			return priorFrames
+		}
 	}
 
 	static class ShpFileParts {

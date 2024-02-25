@@ -85,4 +85,10 @@ class UnitShowcaseScript extends Script<Unit> {
 			}
 		}))
 	}
+
+	@Override
+	void onSceneRemoved(Scene scene) {
+
+		scene.camera.resetScale()
+	}
 }

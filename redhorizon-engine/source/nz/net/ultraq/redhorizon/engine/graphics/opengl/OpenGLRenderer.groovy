@@ -257,6 +257,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 				case Framebuffer -> trigger(new FramebufferDeletedEvent(resource))
 				case Mesh -> trigger(new MeshDeletedEvent(resource))
 				case Texture -> trigger(new TextureDeletedEvent(resource))
+				case SpriteSheet -> trigger(new TextureDeletedEvent(resource.texture))
 				default -> throw new IllegalArgumentException("Cannot delete resource of type ${resource}")
 			}
 		}
