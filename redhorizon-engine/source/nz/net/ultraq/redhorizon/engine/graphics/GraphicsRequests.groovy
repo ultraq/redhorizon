@@ -38,15 +38,11 @@ interface GraphicsRequests {
 	static record ShaderRequest(ShaderConfig shaderConfig) implements Request<Shader> {}
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
-	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, int[] indices = null)
-		implements Request<Mesh> {}
+	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
+		int[] indices = null, boolean dynamic = false) implements Request<Mesh> {}
 
 	@ImmutableOptions(knownImmutables = ['surface', 'textureUVs'])
-	static record SpriteMeshRequest(Rectanglef surface, Rectanglef textureUVs) implements Request<Mesh> {
-		SpriteMeshRequest(Rectanglef surface) {
-			this(surface, null)
-		}
-	}
+	static record SpriteMeshRequest(Rectanglef surface, Rectanglef textureUVs = null) implements Request<Mesh> {}
 
 	@ImmutableOptions(knownImmutables = ['data'])
 	static record TextureRequest(int width, int height, ColourFormat format, ByteBuffer data) implements Request<Texture> {

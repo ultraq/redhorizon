@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -53,7 +54,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
 
-	private OpenGLContext context
+	private OpenGLWindow window
 	private OpenGLRenderer renderer
 	private OpenGLCamera camera
 	private RenderPipeline renderPipeline
@@ -93,8 +94,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	void configureScene() {
 
-		scene.window = context.window
 		scene.graphicsRequestHandler = this
+		scene.window = window
 		scene.camera = camera
 		renderPipeline.scene = scene
 	}
@@ -138,7 +139,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				def (request, future) = creationRequest
 				var resource = switch (request) {
 					case ShaderRequest -> renderer.createShader(request.shaderConfig())
-					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.colour(), request.vertices(), null, request.indices())
+					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.colour(), request.vertices(),
+						null, request.indices(), request.dynamic())
 					case SpriteMeshRequest -> {
 						if (request.textureUVs() != null) {
 							yield renderer.createSpriteMesh(request.surface(), request.textureUVs())
@@ -181,9 +183,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		logger.debug('Starting graphics system')
 
 		// Initialization
-		context = new OpenGLContext(windowTitle, config)
-		context.withCloseable { context ->
-			var window = context.window
+		new OpenGLContext(windowTitle, config).withCloseable { context ->
+			window = context.window
 			window.relay(FramebufferSizeEvent, this)
 			window.relay(WindowMaximizedEvent, this)
 
