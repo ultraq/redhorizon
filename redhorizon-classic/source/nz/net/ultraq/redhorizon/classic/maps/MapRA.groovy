@@ -21,9 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.units.Faction
-import nz.net.ultraq.redhorizon.classic.units.Infantry
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.classic.units.Vehicle
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh

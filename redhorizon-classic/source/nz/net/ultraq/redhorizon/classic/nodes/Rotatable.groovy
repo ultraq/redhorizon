@@ -14,28 +14,38 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.units
-
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.classic.nodes
 
 /**
- * Base type for any separate component of a unit.
+ * Trait for an independent rotation property indicating heading.  Note that
+ * this is different from the {@code transform} rotation, and instead used to
+ * control which sprite animation to display.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class UnitPart implements GraphicsElement {
+trait Rotatable {
 
-	final Unit unit
-	final int width
-	final int height
+	private float heading
 
 	/**
-	 * Returns the name of this type of part.
+	 * Return this object's heading.  The value will be within the range 0 - 360
+	 * degrees.
 	 *
 	 * @return
 	 */
-	abstract String getType()
+	float getHeading() {
+
+		return heading
+	}
+
+	/**
+	 * Update this object's heading.  The value is clamped to the range 0 - 360
+	 * degrees.
+	 *
+	 * @param newHeading
+	 */
+	void setHeading(float newHeading) {
+
+		heading = Math.wrap(newHeading, 0f, 360f)
+	}
 }

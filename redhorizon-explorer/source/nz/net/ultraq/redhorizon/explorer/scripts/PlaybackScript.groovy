@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction

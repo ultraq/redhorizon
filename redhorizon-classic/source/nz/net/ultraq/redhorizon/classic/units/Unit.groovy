@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,168 +16,134 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
-import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
+import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
+import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
+import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer
 
 /**
- * The unit that gets displayed on the screen.
+ * A unit is a controllable object in the game.  As part of the Explorer
+ * project, it is only stationary and used for showcasing the various
+ * animations/states that it has.
  *
  * @author Emanuel Rabina
  */
-abstract class Unit extends Node<Unit> implements GraphicsElement, Rotatable, Temporal {
+class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
-	private static Logger logger = LoggerFactory.getLogger(Unit)
-
-	final int width
-	final int height
-	final ImagesFile imagesFile
-	final Palette palette
-	final List<UnitPart> parts = []
-	final List<UnitState> states = []
-
-	Faction faction = Faction.GOLD
-
-	protected Shader shader
-	protected Texture texture
-	protected int spritesHorizontal
-	protected int spritesVertical
-	protected int spriteSheetWidth
-	protected int spriteSheetHeight
-	protected float frameStepX
-	protected float frameStepY
-	protected Material material
-	// TODO: State machine for transitioning between states?
-	protected int stateIndex
-	protected long animationStartTime
+	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
 	/**
-	 * Constructor, create a new basic unit.
-	 *
-	 * @param imagesFile
-	 * @param palette
+	 * The state value used for the not-animating / doing nothing state
 	 */
-	protected Unit(ImagesFile imagesFile, Palette palette) {
+	static final String DEFAULT_STATE = "default"
 
-		this.width = imagesFile.width
-		this.height = imagesFile.height
-		bounds.set(0, 0, width, height)
+	// TODO: Should this type of file be renamed to better reflect its purpose?
+	final ImagesFile imagesFile
+	final Palette palette
+	final UnitData unitData
+
+	private PalettedSprite body
+	private PalettedSprite turret
+	private int stateIndex = 0
+	private long animationStartTime
+	private SpriteSheet spriteSheet
+	private Texture paletteAsTexture
+
+	Unit(ImagesFile imagesFile, Palette palette, UnitData unitData) {
 
 		this.imagesFile = imagesFile
 		this.palette = palette
-	}
-
-	@Override
-	void delete(GraphicsRenderer renderer) {
+		this.unitData = unitData
 	}
 
 	/**
-	 * A shortcut to retrieving the {@code UnitBody} part of a unit.
-	 *
-	 * @return
+	 * Return the number of degrees it takes to rotate the unit left/right in
+	 * either direction for the current state of the unit.
 	 */
-	UnitBody getBody() {
+	private float getDegreesPerHeading() {
 
-		return parts.find { it instanceof UnitBody } as UnitBody
+		return 360f / unitData.shpFile.states[stateIndex].headings
+	}
+
+	/**
+	 * Return the name of the current state of the unit.
+	 */
+	String getState() {
+
+		return unitData.shpFile.states[stateIndex].name
 	}
 
 	@Override
-	void init(GraphicsRenderer renderer) {
+	void onSceneAdded(Scene scene) {
 
-		shader = renderer.createShader(Shaders.palettedSpriteShader)
+		var width = imagesFile.width
+		var height = imagesFile.height
 
 		// TODO: Load the palette once
-		var paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
+		paletteAsTexture = scene
+			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
+			.get()
 
-		spritesHorizontal = Math.min(imagesFile.numImages, renderer.maxTextureSize / imagesFile.width as int)
-		spritesVertical = Math.ceil(imagesFile.numImages / spritesHorizontal) as int
-		spriteSheetWidth = spritesHorizontal * imagesFile.width
-		spriteSheetHeight = spritesVertical * imagesFile.height
-		logger.debug('Sprite sheet - across: {}, down: {}, width: {}, height: {}',
-			spritesHorizontal, spritesVertical, spriteSheetWidth, spriteSheetHeight)
+		spriteSheet = scene
+			.requestCreateOrGet(new SpriteSheetRequest(width, height, imagesFile.format, imagesFile.imagesData))
+			.get()
 
-		frameStepX = 1 / spritesHorizontal
-		frameStepY = 1 / spritesVertical
-		logger.debug('Texture UV steps for sprite sheet: {}x{}', frameStepX, frameStepY)
+		body = new UnitBody(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0))
+		addChild(body)
 
-		var imagesAsSpriteSheet = imagesFile.imagesData
-			.flipVertical(imagesFile.width, imagesFile.height, imagesFile.format)
-			.combineImages(imagesFile.width, imagesFile.height, spritesHorizontal)
-		texture = renderer.createTexture(spriteSheetWidth, spriteSheetHeight, imagesFile.format, imagesAsSpriteSheet)
-		material = renderer.createMaterial(texture, transform)
-		material.palette = paletteAsTexture
-		material.faction = faction
-
-		parts*.init(renderer)
-		states*.init(renderer)
-	}
-
-	/**
-	 * Selects this unit's next state for rendering.
-	 */
-	void nextState() {
-
-		setState(+1)
-	}
-
-	/**
-	 * Selects this unit's previous animation for rendering.
-	 */
-	void previousState() {
-
-		setState(-1)
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		parts*.render(renderer)
-	}
-
-	/**
-	 * Select the next animation either next or previously in the sequence.
-	 *
-	 * @param next
-	 */
-	private void setState(int next) {
-
-		if (states.size()) {
-			stateIndex = Math.wrap(stateIndex + next, 0, states.size())
-			logger.debug("${stateIndex == -1 ? 'body' : states[stateIndex].name} state selected")
+		if (unitData.shpFile.parts.turret) {
+			turret = new UnitTurret(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(unitData.shpFile.parts.body.headings))
+			addChild(turret)
 		}
 	}
 
-	/**
-	 * Update this unit's faction.
-	 *
-	 * @param newFaction
-	 */
-	void setFaction(Faction newFaction) {
+	@Override
+	void onSceneRemoved(Scene scene) {
 
-		faction = newFaction
-		material?.faction = newFaction
+		scene.requestDelete(spriteSheet, paletteAsTexture)
 	}
 
-	@Override
-	void setHeading(float newHeading) {
+	/**
+	 * Adjust the heading of the unit counter-clockwise enough to utilize its next
+	 * state/animation in that direction.
+	 */
+	void rotateLeft() {
 
-		Rotatable.super.setHeading(newHeading)
-		parts.each { part ->
-			if (part instanceof Rotatable) {
-				part.heading = newHeading
-			}
+		heading -= degreesPerHeading
+	}
+
+	/**
+	 * Adjust the heading of the unit clockwise enough to utilize its next
+	 * state/animation in that direction.
+	 */
+	void rotateRight() {
+
+		heading += degreesPerHeading
+	}
+
+	/**
+	 * Put the unit into the given state.
+	 */
+	void setState(String state) {
+
+		var foundStateIndex = unitData.shpFile.states.findIndexOf { it.name == state }
+		if (foundStateIndex != -1) {
+			stateIndex = foundStateIndex
+		}
+		else {
+			stateIndex = 0
 		}
 	}
 
@@ -187,5 +153,45 @@ abstract class Unit extends Node<Unit> implements GraphicsElement, Rotatable, Te
 	void startAnimation() {
 
 		animationStartTime = currentTimeMs
+	}
+
+	@InheritConstructors
+	class UnitBody extends PalettedSprite {
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			// TODO: If this animation region picking gets more complicated, it might
+			//       be worth making an 'animation library' for units
+
+			// Update region in spritesheet to match heading and currently-playing animation
+			var currentState = unitData.shpFile.states[stateIndex]
+			var headings = currentState.headings
+			var frames = currentState.frames
+
+			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
+			//       reverse from how we normally define rotation.
+			var closestHeading = Math.round(heading / degreesPerHeading)
+			var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
+			var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+			region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
+
+			super.render(renderer)
+		}
+	}
+
+	@InheritConstructors
+	class UnitTurret extends PalettedSprite {
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			var headings = unitData.shpFile.parts.turret.headings
+			var closestHeading = Math.round(heading / degreesPerHeading)
+			var rotationFrame = closestHeading ? headings - closestHeading as int : 0
+			region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + rotationFrame))
+
+			super.render(renderer)
+		}
 	}
 }

@@ -18,11 +18,11 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.explorer.objects.Unit
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

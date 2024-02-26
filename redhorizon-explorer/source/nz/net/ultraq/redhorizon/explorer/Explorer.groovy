@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
@@ -31,7 +32,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
-import nz.net.ultraq.redhorizon.explorer.objects.Unit
+import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
 import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
