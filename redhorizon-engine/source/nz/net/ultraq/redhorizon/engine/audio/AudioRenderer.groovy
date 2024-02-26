@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.geometry.Orientation
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3f
@@ -33,12 +32,6 @@ interface AudioRenderer extends EventTarget {
 
 	/**
 	 * Creates and fills a sound buffer with the given data.
-	 *
-	 * @param data
-	 * @param bits
-	 * @param channels
-	 * @param frequency
-	 * @return Buffer
 	 */
 	Buffer createBuffer(int bits, int channels, int frequency, ByteBuffer data)
 
@@ -55,28 +48,7 @@ interface AudioRenderer extends EventTarget {
 	void delete(AudioResource resource)
 
 	/**
-	 * Update details about the listener.
-	 *
-	 * @param position
-	 * @param velocity
-	 * @param orientation
+	 * Set updated autio properties of a source.
 	 */
-	void updateListener(Vector3f position, Vector3f velocity, Orientation orientation)
-
-	/**
-	 * Update details about the source.
-	 *
-	 * @param sourceId
-	 * @param position
-	 * @param direction
-	 * @param velocity
-	 */
-	void updateSource(int sourceId, Vector3f position, Vector3f direction, Vector3f velocity)
-
-	/**
-	 * Update the volume of the listener.
-	 *
-	 * @param volume
-	 */
-	void updateVolume(float volume)
+	void updateSource(Source source, Vector3f position)
 }

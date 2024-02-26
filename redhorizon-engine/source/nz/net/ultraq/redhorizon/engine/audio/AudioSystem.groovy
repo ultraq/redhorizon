@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
+import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALListener
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 
@@ -46,6 +47,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	private final BlockingQueue<AudioResource> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenALRenderer renderer
+	private OpenALListener listener
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -59,6 +61,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	void configureScene() {
 
 		scene.audioRequestsHandler = this
+		scene.listener = listener
 	}
 
 	/**
@@ -129,9 +132,8 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 				renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
 
-				if (scene) {
-					configureScene()
-				}
+				listener = new OpenALListener(config.volume)
+
 				trigger(new SystemReadyEvent())
 
 				// Rendering loop
@@ -141,6 +143,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 						rateLimit(100) { ->
 
 							processRequests(renderer)
+							listener.render(renderer)
 
 							// Run the audio elements
 							scene?.accept { element ->

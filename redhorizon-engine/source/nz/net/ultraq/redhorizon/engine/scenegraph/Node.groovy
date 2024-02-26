@@ -31,7 +31,6 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
-	final Vector3f position = new Vector3f()
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
 
@@ -40,8 +39,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 	private final Rectanglef globalBounds = new Rectanglef()
 	private final Matrix4f globalTransform = new Matrix4f()
+	private final Vector3f globalPosition = new Vector3f()
 	private final Vector3f globalScale = new Vector3f()
-	private final Vector3f globalTranslate = new Vector3f()
 
 	@Override
 	void accept(SceneVisitor visitor) {
@@ -67,34 +66,43 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 * Return the world-space bounds of this node.  ie: the local bounds, then
 	 * taking into account local and all parent/ancestor transforms along the path
 	 * to this node.
-	 *
-	 * @return
 	 */
-	// TODO: Surely this is inefficient having to calculate this each time? 🤔
 	Rectanglef getGlobalBounds() {
 
-		getGlobalTransform()
-		var scale = globalTransform.getScale(globalScale)
-		var translate = globalTransform.getTranslation(globalTranslate)
+		var scale = getGlobalScale()
+		var translate = getGlobalPosition()
 		return globalBounds.set(bounds)
 			.scale(scale.x, scale.y)
 			.translate(translate.x, translate.y)
 	}
 
 	/**
+	 * Get the world-space position of this node.  ie: the local position, then
+	 * modified by all of the ancestor transforms along the path to this node.
+	 */
+	protected Vector3f getGlobalPosition() {
+
+		return getGlobalTransform().getTranslation(globalPosition)
+	}
+
+	/**
+	 * Get the world-space scale of this node.  ie: the local scale, then modified
+	 * by all of the ancestor transforms along the path to this node.
+	 */
+	protected Vector3f getGlobalScale() {
+
+		return getGlobalTransform().getScale(globalScale)
+	}
+
+	/**
 	 * Get the world-space transform of this node.  ie: the local transform, then
 	 * modified by all of the ancestor transforms along the path to this node.
-	 * The result is stored in the private {@code globalTransform} property, and
-	 * returned.
-	 *
-	 * @return
 	 */
-	// TODO: Surely this is inefficient having to calculate this each time? 🤔
 	protected Matrix4f getGlobalTransform() {
 
 		return parent != null ?
 			transform.mul(parent.globalTransform, globalTransform) :
-			globalTransform.set(transform)
+			transform.get(globalTransform)
 	}
 
 	/**

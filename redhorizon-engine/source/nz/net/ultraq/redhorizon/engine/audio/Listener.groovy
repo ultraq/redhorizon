@@ -27,28 +27,8 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Listener extends Node<Listener> implements AudioElement {
+abstract class Listener extends Node<Listener> implements AudioElement {
 
 	final Vector3f velocity = new Vector3f(0, 0, 0)
 	final Orientation orientation = new Orientation()
-
-	/**
-	 * Sets up initial listener properties, like volume.
-	 */
-	@Override
-	void init(AudioRenderer renderer) {
-
-		renderer.updateVolume(1.0)
-	}
-
-	/**
-	 * Update the listener in the environment.
-	 *
-	 * @param renderer
-	 */
-	@Override
-	void render(AudioRenderer renderer) {
-
-		renderer.updateListener(position, velocity, orientation)
-	}
 }

@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.extensions
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
 /**
@@ -84,10 +83,10 @@ class JomlExtensions {
 	 * @param v
 	 * @return
 	 */
-	static Vector3f minus(Vector3f self, Vector3f v) {
-
-		return self.sub(v, new Vector3f())
-	}
+//	static Vector3f minus(Vector3f self, Vector3f v) {
+//
+//		return self.sub(v, new Vector3f())
+//	}
 
 	/**
 	 * Overload the {@code *} operator to perform matrix multiplication.  Note
@@ -97,10 +96,10 @@ class JomlExtensions {
 	 * @param right
 	 * @return
 	 */
-	static Matrix4f multiply(Matrix4f self, Matrix4f right) {
-
-		return self.mul(right, new Matrix4f())
-	}
+//	static Matrix4f multiply(Matrix4f self, Matrix4f right) {
+//
+//		return self.mul(right, new Matrix4f())
+//	}
 
 	/**
 	 * Overload the {@code +} operator to perform vector addition.  Note that
@@ -110,10 +109,10 @@ class JomlExtensions {
 	 * @param v
 	 * @return
 	 */
-	static Vector3f plus(Vector3f self, Vector3f v) {
-
-		return self.add(v, new Vector3f())
-	}
+//	static Vector3f plus(Vector3f self, Vector3f v) {
+//
+//		return self.add(v, new Vector3f())
+//	}
 
 	/**
 	 * Scale just the X and Y components of a matrix by the same value.

@@ -98,6 +98,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 
 		if (source) {
 			soundSource.prepareSource(renderer, source)
+			renderer.updateSource(source, globalPosition)
 
 			// Control playback
 			if (playing) {

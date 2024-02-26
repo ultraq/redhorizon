@@ -22,11 +22,13 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.StopEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.PlaybackReadyEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 
@@ -63,6 +65,17 @@ class PlaybackScript extends Script {
 				}
 			}
 		}))
+
+		if (scriptable instanceof Sound) {
+			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', { ->
+				scriptable.transform.translate(-0.25, 0)
+				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+			}))
+			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
+				scriptable.transform.translate(0.25, 0)
+				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+			}))
+		}
 
 		on(PlaybackReadyEvent) { event ->
 			logger.debug('Beginning playback')
