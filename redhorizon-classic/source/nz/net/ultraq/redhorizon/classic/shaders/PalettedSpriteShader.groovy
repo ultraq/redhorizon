@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
-import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**

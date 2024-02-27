@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.nodes
 
-import nz.net.ultraq.redhorizon.classic.units.Faction
+import nz.net.ultraq.redhorizon.classic.Faction
 
 /**
  * Any paletted item in the C&C classic games where a faction colour can be

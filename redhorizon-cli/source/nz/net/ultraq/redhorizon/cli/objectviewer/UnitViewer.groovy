@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.objectviewer
 
+import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.classic.units.Faction
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
