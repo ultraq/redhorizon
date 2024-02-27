@@ -66,8 +66,8 @@ class MediaPlayer {
 			.addAudioSystem(audioConfig)
 			.addGraphicsSystem(graphicsConfig)
 			.addTimeSystem()
-			.onApplicationStart(this::onApplicationStart)
-			.onApplicationStop(this::onApplicationStop)
+			.onApplicationStart(this::applicationStart)
+			.onApplicationStop(this::applicationStop)
 			.start()
 	}
 
@@ -75,7 +75,7 @@ class MediaPlayer {
 	 * Create the appropriate media node for the media file, adding it to the
 	 * scene.
 	 */
-	private void onApplicationStart(Application application, Scene scene) {
+	private void applicationStart(Application application, Scene scene) {
 
 		logger.info('File details: {}', mediaFile)
 
@@ -98,7 +98,7 @@ class MediaPlayer {
 	/**
 	 * Remove the media node on cleanup.
 	 */
-	private void onApplicationStop(Application application, Scene scene) {
+	private void applicationStop(Application application, Scene scene) {
 
 		scene.removeNode(mediaNode)
 	}

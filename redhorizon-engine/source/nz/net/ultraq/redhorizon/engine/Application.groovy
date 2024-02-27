@@ -160,7 +160,7 @@ class Application implements EventTarget {
 		engine.start()
 		engine.systems*.scene = scene
 		scene.inputEventStream = inputEventStream
-		applicationStart.apply(this, scene)
+		applicationStart?.apply(this, scene)
 
 		engine.waitUntilStopped()
 	}
@@ -173,7 +173,7 @@ class Application implements EventTarget {
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!applicationStopped) {
 				logger.debug('Stopping application...')
-				applicationStop.apply(this, scene)
+				applicationStop?.apply(this, scene)
 				engine.stop()
 				applicationStopped = true
 			}

@@ -91,9 +91,55 @@ class Explorer {
 				startWithChrome: true
 			), entryList)
 			.addTimeSystem()
-			.onApplicationStart(this::onApplicationStart)
-			.onApplicationStop(this::onApplicationStop)
+			.onApplicationStart(this::applicationStart)
+			.onApplicationStop(this::applicationStop)
 			.start()
+	}
+
+	private void applicationStart(Application application, Scene scene) {
+
+		this.scene = scene
+
+		application.on(WindowMaximizedEvent) { event ->
+			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
+		}
+
+		// Also toggle the explorer GUI with the same key for toggling the ImGui chrome
+		entryList.toggleWith(scene.inputEventStream, GLFW_KEY_O)
+
+		buildList(new File(System.getProperty("user.dir")))
+
+		// Handle events from the explorer GUI
+		entryList.on(EntrySelectedEvent) { event ->
+			clearPreview()
+			def entry = event.entry
+			if (entry instanceof MixEntry) {
+				if (entry.name == '..') {
+					buildList(currentDirectory)
+				}
+				else {
+					preview(entry)
+				}
+			}
+			else if (entry instanceof FileEntry) {
+				def file = entry.file
+				if (file.directory) {
+					buildList(file)
+				}
+				else if (file.name.endsWith('.mix')) {
+					buildList(new MixFile(file))
+				}
+				else {
+					preview(file)
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings('unused')
+	private void applicationStop(Application application, Scene scene) {
+
+		clearPreview()
 	}
 
 	/**
@@ -164,52 +210,6 @@ class Explorer {
 		selectedFileInputStream?.close()
 		scene.clear()
 		scene.camera.center(new Vector3f())
-	}
-
-	private void onApplicationStart(Application application, Scene scene) {
-
-		this.scene = scene
-
-		application.on(WindowMaximizedEvent) { event ->
-			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
-		}
-
-		// Also toggle the explorer GUI with the same key for toggling the ImGui chrome
-		entryList.toggleWith(scene.inputEventStream, GLFW_KEY_O)
-
-		buildList(new File(System.getProperty("user.dir")))
-
-		// Handle events from the explorer GUI
-		entryList.on(EntrySelectedEvent) { event ->
-			clearPreview()
-			def entry = event.entry
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
-				}
-				else {
-					preview(entry)
-				}
-			}
-			else if (entry instanceof FileEntry) {
-				def file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				else {
-					preview(file)
-				}
-			}
-		}
-	}
-
-	@SuppressWarnings('unused')
-	private void onApplicationStop(Application application, Scene scene) {
-
-		clearPreview()
 	}
 
 	/**
