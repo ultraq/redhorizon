@@ -419,19 +419,19 @@ class MapRA extends Node<MapRA> implements GraphicsElement {
 						}
 					var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
 
-					var unit = new Vehicle(unitConfig, unitImages, palette)
-
-					// TODO: Country to faction map
-					unit.faction = switch (unitLine.faction) {
-						case "Greece" -> Faction.BLUE
-						case "USSR" -> Faction.RED
-						default -> Faction.GOLD
-					}
-
-					unit.heading = unitLine.heading
-					unit.translate(unitLine.coords.asWorldCoords())
-
-					elements << unit
+//					var unit = new Vehicle(unitConfig, unitImages, palette)
+//
+//					// TODO: Country to faction map
+//					unit.faction = switch (unitLine.faction) {
+//						case "Greece" -> Faction.BLUE
+//						case "USSR" -> Faction.RED
+//						default -> Faction.GOLD
+//					}
+//
+//					unit.heading = unitLine.heading
+//					unit.translate(unitLine.coords.asWorldCoords())
+//
+//					elements << unit
 				}
 				catch (IllegalArgumentException ignored) {
 					// Ignore unknown units
@@ -462,21 +462,21 @@ class MapRA extends Node<MapRA> implements GraphicsElement {
 					var unitConfig = jsonSlurper.parseText(unitConfigJson) as UnitData
 					var infantryImages = resourceManager.loadFile("${infantryLine.type}.shp", ShpFile)
 
-					var infantry = new Infantry(unitConfig, infantryImages, palette).tap { it ->
-
-						// TODO: Country to faction map
-						it.faction = switch (infantryLine.faction) {
-							case "Greece" -> Faction.BLUE
-							case "USSR" -> Faction.RED
-							default -> Faction.GOLD
-						}
-						it.heading = infantryLine.heading
-
-						// TODO: Sub positions within cells
-						it.translate(infantryLine.coords.asWorldCoords())
-					}
-
-					elements << infantry
+//					var infantry = new Infantry(unitConfig, infantryImages, palette).tap { it ->
+//
+//						// TODO: Country to faction map
+//						it.faction = switch (infantryLine.faction) {
+//							case "Greece" -> Faction.BLUE
+//							case "USSR" -> Faction.RED
+//							default -> Faction.GOLD
+//						}
+//						it.heading = infantryLine.heading
+//
+//						// TODO: Sub positions within cells
+//						it.translate(infantryLine.coords.asWorldCoords())
+//					}
+//
+//					elements << infantry
 				}
 				catch (IllegalArgumentException ignored) {
 					// Ignore unknown units

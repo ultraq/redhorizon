@@ -33,14 +33,15 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import org.joml.Vector2f
 
 /**
- * A node for the {@code LINES} primitive of OpenGL.
+ * A node for creating a mesh using any of the OpenGL primitives.
  *
  * @author Emanuel Rabina
  */
-class Lines extends Node<Lines> implements GraphicsElement {
+class Primitive extends Node<Primitive> implements GraphicsElement {
 
+	final MeshType type
 	final Colour colour
-	final Vector2f[] lines
+	final Vector2f[] points
 
 	private Mesh mesh
 	private Shader shader
@@ -50,23 +51,22 @@ class Lines extends Node<Lines> implements GraphicsElement {
 	 * method.  The first describes the line start, the second describes the line
 	 * end.
 	 */
-	Lines(Colour colour, Vector2f... lines) {
+	Primitive(MeshType type, Colour colour, Vector2f... points) {
 
+		this.type = type
 		this.colour = colour
+		this.points = points
 
-		assert lines.length % 2 == 0 : 'Uneven number of points provided'
-		this.lines = lines
-
-		// Set bounds to the min/max X/Y points across all lines
+		// Set bounds to the min/max X/Y points
 		var minX = Float.MAX_VALUE
 		var minY = Float.MAX_VALUE
 		var maxX = Float.MIN_VALUE
 		var maxY = Float.MIN_VALUE
-		lines.each { line ->
-			minX = Math.min(minX, line.x())
-			minY = Math.min(minY, line.y())
-			maxX = Math.max(maxX, line.x())
-			maxY = Math.max(maxY, line.y())
+		points.each { point ->
+			minX = Math.min(minX, point.x())
+			minY = Math.min(minY, point.y())
+			maxX = Math.max(maxX, point.x())
+			maxY = Math.max(maxY, point.y())
 		}
 		bounds.set(minX, minY, maxX, maxY)
 	}
@@ -75,8 +75,8 @@ class Lines extends Node<Lines> implements GraphicsElement {
 	void onSceneAdded(Scene scene) {
 
 		mesh = scene
-			.requestCreateOrGet(new MeshRequest(MeshType.LINES,
-				new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION), colour, lines))
+			.requestCreateOrGet(new MeshRequest(type,
+				new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION), colour, this.points))
 			.get()
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.primitivesShader))

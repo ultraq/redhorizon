@@ -49,7 +49,7 @@ class SandboxCli implements Callable<Integer> {
 		Thread.currentThread().name = 'Sandbox [main]'
 		logger.info('Red Horizon Sandbox {}', commandSpec.parent().version()[0])
 
-		new Sandbox(touchpadInput).start()
+		new Sandbox(touchpadInput)
 
 		return 0
 	}

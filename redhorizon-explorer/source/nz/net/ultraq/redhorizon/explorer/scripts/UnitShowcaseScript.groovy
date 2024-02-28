@@ -50,7 +50,7 @@ class UnitShowcaseScript extends Script<Unit> {
 		// TODO: Have it so that the render window is the desktop resolution and the
 		//       camera scales things so that things are the size they were back
 		//       when the game was 640x480
-		scene.camera.scale(2.0f)
+		scene.camera.scale(4.0f)
 		logger.info("Showing ${state} state")
 
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
@@ -94,5 +94,6 @@ class UnitShowcaseScript extends Script<Unit> {
 	void onSceneRemoved(Scene scene) {
 
 		scene.camera.resetScale()
+		removeControlFunctions*.remove()
 	}
 }

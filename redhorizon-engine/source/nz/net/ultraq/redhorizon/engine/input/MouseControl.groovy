@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,53 +16,50 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
-
 import java.lang.reflect.Modifier
 
 /**
- * Keyboard-specific control class.
+ * Mouse-specific control class.
  *
  * @author Emanuel Rabina
  */
-class KeyControl extends Control<KeyEvent> {
+class MouseControl extends Control<MouseButtonEvent> {
 
 	private final int modifier
-	private final int key
+	private final int button
 	private Closure handler
 
-	KeyControl(int key, String name, Closure handler) {
+	MouseControl(int button, String name, Closure handler) {
 
-		this(-1, key, name, handler)
+		this(-1, button, name, handler)
 	}
 
-	KeyControl(int modifier, int key, String name, Closure handler) {
+	MouseControl(int modifier, int button, String name, Closure handler) {
 
-		super(KeyEvent, name, determineBindingName(modifier, key))
+		super(MouseButtonEvent, name, determineBindingName(modifier, button))
 		this.modifier = modifier
-		this.key = key
+		this.button = button
 		this.handler = handler
 	}
 
 	/**
 	 * Return a string representing the name of the key binding.
 	 */
-	private static String determineBindingName(int modifier, int key) {
+	private static String determineBindingName(int modifier, int button) {
 
 		var modifierName = determineModifierName(modifier)
 		var buttonField = glfwFields.find { field ->
-			return Modifier.isStatic(field.modifiers) && field.name.startsWith("GLFW_KEY_") && field.getInt(null) == key
+			return Modifier.isStatic(field.modifiers) && field.name.startsWith("GLFW_MOUSE_BUTTON_") && field.getInt(null) == button
 		}
 		return buttonField ?
-			modifierName + buttonField.name.substring(9).toLowerCase().capitalize() :
-			key.toString()
+			"${modifierName}Mouse ${buttonField.name.substring(18).toLowerCase().capitalize()}" :
+			button.toString()
 	}
 
 	@Override
-	void handleEvent(KeyEvent event) {
+	void handleEvent(MouseButtonEvent event) {
 
-		if ((event.action == GLFW_PRESS || event.action == GLFW_REPEAT) && event.key == key) {
+		if (event.button == button && event.mods == modifier) {
 			handler()
 		}
 	}

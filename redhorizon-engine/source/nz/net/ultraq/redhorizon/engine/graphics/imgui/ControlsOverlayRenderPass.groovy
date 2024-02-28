@@ -27,6 +27,8 @@ import imgui.ImGui
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 /**
  * Small overlay for displaying registered controls in the application.
  *
@@ -34,7 +36,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  */
 class ControlsOverlayRenderPass implements OverlayRenderPass {
 
-	private List<String> controls = []
+	private List<String> controls = new CopyOnWriteArrayList<>()
 	private int controlsWindowSizeX = 350
 	private int controlsWindowSizeY = 200
 

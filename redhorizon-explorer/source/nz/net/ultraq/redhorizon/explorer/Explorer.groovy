@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
+import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.units.Unit
@@ -26,12 +27,15 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
+import nz.net.ultraq.redhorizon.explorer.objects.Map
+import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
 import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
@@ -261,10 +265,12 @@ class Explorer {
 		logger.info('File details: {}', file)
 
 		var mediaNode = switch (file) {
+
 		// Objects
-			case ShpFile -> {
+			case ShpFile ->
 				preview(file, objectId)
-			}
+			case MapFile ->
+				preview(file, objectId)
 
 				// Media
 			case ImageFile ->
@@ -314,6 +320,20 @@ class Explorer {
 				.newInstance(shpFile, palette, unitData)
 				.attachScript(new UnitShowcaseScript())
 			scene << unit
+		}
+	}
+
+	/**
+	 * Attempt to load up a map from its map file.
+	 */
+	private void preview(MapFile mapFile, String objectId) {
+
+		// Assume the directory in which file resides is where we can search for items
+		new ResourceManager(currentDirectory,
+			'nz.net.ultraq.redhorizon.filetypes',
+			'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+
+			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(true))
 		}
 	}
 }
