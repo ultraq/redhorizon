@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GameMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
@@ -45,6 +46,7 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
+import imgui.ImGui
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -74,6 +76,8 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private Palette palette
+	private boolean touchpadInput
+	private MenuItem touchpadInputMenuItem
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -135,6 +139,22 @@ class Explorer {
 				}
 				else {
 					preview(file)
+				}
+			}
+		}
+
+		// Add a menu item for touchpad input
+		scene.gameMenu.additionalOptionsItems << new MenuItem() {
+
+			@Override
+			void render() {
+
+				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
+					touchpadInput = !touchpadInput
+					var mapNode = scene.findNode { node -> node instanceof Map } as Map
+					if (mapNode) {
+						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput
+					}
 				}
 			}
 		}
@@ -333,7 +353,7 @@ class Explorer {
 			'nz.net.ultraq.redhorizon.filetypes',
 			'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
 
-			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(true))
+			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
 		}
 	}
 }

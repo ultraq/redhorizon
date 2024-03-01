@@ -17,13 +17,13 @@
 package nz.net.ultraq.redhorizon.events
 
 /**
- * A function that can be used to deregister an event listener added via
+ * A function that can be used to remove an event listener added via
  * {@link EventTarget#on}.
  *
  * @author Emanuel Rabina
  */
 @FunctionalInterface
-interface DeregisterEventFunction {
+interface RemoveEventFunction {
 
-	void deregister()
+	void remove()
 }

@@ -16,7 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
+import nz.net.ultraq.redhorizon.engine.graphics.Camera
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -25,7 +28,7 @@ import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.events.DeregisterEventFunction
+import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 import nz.net.ultraq.redhorizon.explorer.objects.Map
 
 import org.joml.Vector2f
@@ -43,24 +46,27 @@ class MapViewerScript extends Script<Map> {
 
 	private static final int TICK = 48
 
+	boolean touchpadInput
+
 	private final float initialScale = 1.0f
 	private final float[] scaleRange = (1.0..2.0).by(0.1)
-	private final List<DeregisterEventFunction> deregisterEventFunctions = []
+	private final List<RemoveEventFunction> removeEventFunctions = []
 	private final List<RemoveControlFunction> removeControlFunctions = []
 
-	final boolean touchpadInput
+	private InputEventStream inputEventStream
+	private Window window
+	private Camera camera
 
 	@Delegate
 	Map applyDelegate() {
 		return scriptable
 	}
 
-	@Override
-	void onSceneAdded(Scene scene) {
-
-		var inputEventStream = scene.inputEventStream
-		var window = scene.window
-		var camera = scene.camera
+	/**
+	 * Apply all of the controls based on whether we are using touchpad input or
+	 * not.
+	 */
+	private void addControls() {
 
 		var scaleIndex = scaleRange.findIndexOf { it == initialScale }
 		var mouseMovementModifier = 1f
@@ -71,12 +77,12 @@ class MapViewerScript extends Script<Map> {
 		// Add options so it's not hard-coded to my weird inverted setup 😅
 		if (touchpadInput) {
 			var ctrl = false
-			deregisterEventFunctions << inputEventStream.on(KeyEvent) { event ->
+			removeEventFunctions << inputEventStream.on(KeyEvent) { event ->
 				if (event.key == GLFW_KEY_LEFT_CONTROL) {
 					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
 				}
 			}
-			deregisterEventFunctions << inputEventStream.on(ScrollEvent) { event ->
+			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
 
 				// Zoom in/out using CTRL + scroll up/down
 				if (ctrl) {
@@ -104,7 +110,7 @@ class MapViewerScript extends Script<Map> {
 			// Use click-and-drag to move around
 			var cursorPosition = new Vector2f()
 			var dragging = false
-			deregisterEventFunctions << inputEventStream.on(CursorPositionEvent) { event ->
+			removeEventFunctions << inputEventStream.on(CursorPositionEvent) { event ->
 				if (dragging) {
 					var diffX = (cursorPosition.x - event.xPos) * mouseMovementModifier as float
 					var diffY = (cursorPosition.y - event.yPos) * mouseMovementModifier as float
@@ -112,7 +118,7 @@ class MapViewerScript extends Script<Map> {
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)
 			}
-			deregisterEventFunctions << inputEventStream.on(MouseButtonEvent) { event ->
+			removeEventFunctions << inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
 						dragging = true
@@ -124,7 +130,7 @@ class MapViewerScript extends Script<Map> {
 			}
 
 			// Zoom in/out using the scroll wheel
-			deregisterEventFunctions << inputEventStream.on(ScrollEvent) { event ->
+			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
 				if (event.yOffset < 0) {
 					scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
 				}
@@ -134,7 +140,7 @@ class MapViewerScript extends Script<Map> {
 				camera.scale(scaleRange[scaleIndex])
 			}
 			removeControlFunctions << inputEventStream.addControl(
-				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_MIDDLE, 'Reset scale', { ->
+				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
 					camera.resetScale()
 				})
 			)
@@ -158,10 +164,34 @@ class MapViewerScript extends Script<Map> {
 		}))
 	}
 
+	/**
+	 * Clear all registered controls.
+	 */
+	private void clearControls() {
+
+		removeEventFunctions*.remove()
+		removeControlFunctions*.remove()
+	}
+
+	@Override
+	void onSceneAdded(Scene scene) {
+
+		inputEventStream = scene.inputEventStream
+		window = scene.window
+		camera = scene.camera
+		addControls()
+	}
+
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		deregisterEventFunctions*.deregister()
-		removeControlFunctions*.remove()
+		clearControls()
+	}
+
+	void setTouchpadInput(boolean touchpadInput) {
+
+		this.touchpadInput = touchpadInput
+		clearControls()
+		addControls()
 	}
 }

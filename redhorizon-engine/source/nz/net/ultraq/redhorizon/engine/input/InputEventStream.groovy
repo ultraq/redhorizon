@@ -41,11 +41,11 @@ class InputEventStream implements EventTarget {
 	 */
 	RemoveControlFunction addControl(Control control) {
 
-		var deregisterEventFunction = on(control.event, control)
+		var removeEventFunction = on(control.event, control)
 		trigger(new ControlAddedEvent(control))
 
 		return { ->
-			deregisterEventFunction.deregister()
+			removeEventFunction.remove()
 			trigger(new ControlRemovedEvent(control))
 		}
 	}

@@ -19,13 +19,13 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
+import nz.net.ultraq.redhorizon.engine.graphics.GameMenu
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ScanlinesShader
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFontConfig
@@ -56,6 +56,10 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
 
+	static final String OPTIONS_DEBUG_OVERLAY = 'options/debug-overlay'
+	static final String OPTIONS_SHADER_SCANLINES = 'options/scanlines-shader'
+	static final String OPTIONS_SHADER_SHARP_UPSCALING = 'options/sharp-upscaling-shader'
+
 	static {
 
 		// Extract and use the locally built natives for macOS running M1 processors
@@ -69,6 +73,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			}
 		}
 	}
+
+	final ImGuiGameMenu gameMenu
 
 	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
@@ -113,6 +119,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGlfw.init(window.handle, true)
 		imGuiGl3.init('#version 410 core')
 
+		gameMenu = new ImGuiGameMenu()
+
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
 				if (event.key == GLFW_KEY_O) {
@@ -128,39 +136,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGl3.dispose()
 		imGuiGlfw.dispose()
 		ImGui.destroyContext()
-	}
-
-	/**
-	 * Draw the main menubar which will reduce available content space a bit.
-	 */
-	private void drawMenu() {
-
-		if (ImGui.beginMainMenuBar()) {
-
-			if (ImGui.beginMenu('File')) {
-				if (ImGui.menuItem('Exit')) {
-					trigger(new GuiEvent(EVENT_TYPE_STOP))
-				}
-				ImGui.endMenu()
-			}
-
-			if (ImGui.beginMenu('Options')) {
-				if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
-					debugOverlay = !debugOverlay
-				}
-				if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
-					shaderScanlines = !shaderScanlines
-					trigger(new ChangeEvent(ScanlinesShader.NAME, shaderScanlines))
-				}
-				if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
-					shaderSharpUpscaling = !shaderSharpUpscaling
-					trigger(new ChangeEvent(SharpUpscalingShader.NAME, shaderSharpUpscaling))
-				}
-				ImGui.endMenu()
-			}
-
-			ImGui.endMainMenuBar()
-		}
 	}
 
 	/**
@@ -237,13 +212,11 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	/**
 	 * Draw all of the ImGui elements to the screen.
-	 *
-	 * @param sceneFramebufferResult
 	 */
 	void render(Framebuffer sceneFramebufferResult) {
 
 		if (drawChrome) {
-			drawMenu()
+			gameMenu.render()
 			setUpDockspace()
 			drawScene(sceneFramebufferResult)
 		}
@@ -269,5 +242,48 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
 
 		ImGui.end()
+	}
+
+	/**
+	 * An ImGUI implementation of the main menu bar.
+	 */
+	private class ImGuiGameMenu extends GameMenu implements EventTarget {
+
+		/**
+		 * Draw the menu.
+		 */
+		void render() {
+
+			if (ImGui.beginMainMenuBar()) {
+
+				if (ImGui.beginMenu('File')) {
+					if (ImGui.menuItem('Exit')) {
+						trigger(new GuiEvent(EVENT_TYPE_STOP))
+					}
+					ImGui.endMenu()
+				}
+
+				if (ImGui.beginMenu('Options')) {
+					if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
+						debugOverlay = !debugOverlay
+						trigger(new ChangeEvent(OPTIONS_DEBUG_OVERLAY, null))
+					}
+					if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
+						shaderScanlines = !shaderScanlines
+						trigger(new ChangeEvent(OPTIONS_SHADER_SCANLINES, shaderScanlines))
+					}
+					if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
+						shaderSharpUpscaling = !shaderSharpUpscaling
+						trigger(new ChangeEvent(OPTIONS_SHADER_SHARP_UPSCALING, shaderSharpUpscaling))
+					}
+
+					additionalOptionsItems*.render()
+
+					ImGui.endMenu()
+				}
+
+				ImGui.endMainMenuBar()
+			}
+		}
 	}
 }

@@ -57,6 +57,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private OpenGLWindow window
 	private OpenGLRenderer renderer
 	private OpenGLCamera camera
+	private ImGuiLayer imGuiLayer
 	private RenderPipeline renderPipeline
 
 	private boolean shouldToggleFullScreen
@@ -97,6 +98,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		scene.graphicsRequestHandler = this
 		scene.window = window
 		scene.camera = camera
+		scene.gameMenu = imGuiLayer.gameMenu
 		renderPipeline.scene = scene
 	}
 
@@ -211,7 +213,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 					camera = new OpenGLCamera(window.renderResolution)
 					camera.withCloseable { camera ->
-						new ImGuiLayer(config, window).withCloseable { imGuiLayer ->
+						imGuiLayer = new ImGuiLayer(config, window)
+						imGuiLayer.withCloseable { imGuiLayer ->
 							logger.debug(renderer.toString())
 							imGuiLayer.relay(FramebufferSizeEvent, this)
 
