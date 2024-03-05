@@ -22,17 +22,9 @@ package nz.net.ultraq.redhorizon.engine.graphics
  *
  * @author Emanuel Rabina
  */
-abstract class GameMenu {
+interface MainMenu {
 
-	final List<MenuItem> additionalOptionsItems = []
-
-	/**
-	 * Add a menu item that'll appear in the Options menu.
-	 */
-	void addOptionsItem(MenuItem menuItem) {
-
-		additionalOptionsItems << menuItem
-	}
+	final List<MenuItem> optionsMenu = []
 
 	/**
 	 * An additional menu item and the behaviour behind it.

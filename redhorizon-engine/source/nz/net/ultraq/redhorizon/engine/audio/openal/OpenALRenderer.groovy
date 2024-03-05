@@ -28,6 +28,8 @@ import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 
 import org.joml.Vector3f
 import org.lwjgl.openal.AL
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.lwjgl.openal.AL10.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
@@ -40,6 +42,8 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 class OpenALRenderer implements AudioRenderer {
+
+	private static Logger logger = LoggerFactory.getLogger(OpenALRenderer)
 
 	private final AudioConfiguration config
 
@@ -67,7 +71,7 @@ class OpenALRenderer implements AudioRenderer {
 			var errorCode = AL.getFields().find { field ->
 				return Modifier.isStatic(field.modifiers) && field.name.startsWith("AL_") && field.getInt(null) == error
 			}
-			throw new Exception("OpenAL error: ${errorCode}")
+			logger.error("OpenAL error: ${errorCode}")
 		}
 		return result
 	}

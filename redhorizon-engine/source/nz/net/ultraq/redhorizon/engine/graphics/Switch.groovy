@@ -16,13 +16,21 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * The trait for something being in an enabled/disabled state, with operations
  * to flip between the 2.
  *
  * @author Emanuel Rabina
  */
-trait Switch {
+trait Switch<T extends Switch> {
 
 	boolean enabled
 
@@ -32,5 +40,23 @@ trait Switch {
 	void toggle() {
 
 		enabled = !enabled
+	}
+
+	/**
+	 * Toggle the state of this render pass with the given key.
+	 */
+	T toggleWith(InputEventStream inputEventStream, int key,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPass') Closure closure = null) {
+
+		inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == key) {
+				toggle()
+				if (closure) {
+					closure(this)
+				}
+			}
+		}
+
+		return (T)this
 	}
 }

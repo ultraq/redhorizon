@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -58,7 +58,7 @@ class RenderPipeline implements AutoCloseable {
 
 	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
-	private final List<OverlayRenderPass> overlayPasses = []
+	private final List<ImGuiElement> imGuiElements = []
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -71,7 +71,7 @@ class RenderPipeline implements AutoCloseable {
 
 		fullScreenQuad = renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 
-		overlayPasses << new ControlsOverlayRenderPass(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
+		imGuiElements << new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
 
 		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
@@ -88,14 +88,12 @@ class RenderPipeline implements AutoCloseable {
 	}
 
 	/**
-	 * Register an overlay rendering pass with the rendering pipeline.  Overlays
-	 * are drawn after the scene and use the target resolution of the window.
-	 *
-	 * @param overlayPass
+	 * Register an ImGui element with the rendering pipeline.  These are drawn
+	 * after the scene and use the target resolution of the window.
 	 */
-	void addOverlayPass(OverlayRenderPass overlayPass) {
+	void addImGuiElement(ImGuiElement imGuiElement) {
 
-		overlayPasses << overlayPass
+		imGuiElements << imGuiElement
 	}
 
 	@Override
@@ -163,11 +161,11 @@ class RenderPipeline implements AutoCloseable {
 			} as Framebuffer
 			renderer.setRenderTarget(null)
 
-			// Draw overlays
-			imGuiLayer.render(sceneResult)
-			overlayPasses.each { overlayPass ->
-				if (overlayPass.enabled) {
-					overlayPass.render(renderer, sceneResult)
+			// Draw ImGui objects
+			var dockspaceId = imGuiLayer.render(sceneResult)
+			imGuiElements.each { imGuiElement ->
+				if (imGuiElement.enabled) {
+					imGuiElement.render(dockspaceId, sceneResult)
 				}
 			}
 		}

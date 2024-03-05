@@ -32,7 +32,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * @author Emanuel Rabina
  */
-class DebugOverlayRenderPass implements OverlayRenderPass {
+class DebugOverlay implements ImGuiElement<DebugOverlay> {
 
 	private static final int MAX_DEBUG_LINES = 10
 
@@ -68,7 +68,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	 * adding the renderers via the {@code add*} methods to get stats on their
 	 * use.
 	 */
-	DebugOverlayRenderPass(boolean enabled) {
+	DebugOverlay(boolean enabled) {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
@@ -87,7 +87,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	/**
 	 * Add the audio renderer to get stats on audio sources, buffers, etc.
 	 */
-	DebugOverlayRenderPass addAudioRenderer(AudioRenderer audioRenderer) {
+	DebugOverlay addAudioRenderer(AudioRenderer audioRenderer) {
 
 		audioRenderer.on(AudioRendererEvent) { event ->
 			switch (event) {
@@ -103,7 +103,7 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	/**
 	 * Add the graphics renderer to get status on draws, textures, etc.
 	 */
-	DebugOverlayRenderPass addGraphicsRenderer(GraphicsRenderer graphicsRenderer) {
+	DebugOverlay addGraphicsRenderer(GraphicsRenderer graphicsRenderer) {
 
 		graphicsRenderer.on(GraphicsRendererEvent) { event ->
 			switch (event) {
@@ -120,9 +120,9 @@ class DebugOverlayRenderPass implements OverlayRenderPass {
 	}
 
 	@Override
-	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult) {
+	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
 
-		def viewport = ImGui.getMainViewport()
+		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.setNextWindowPos(viewport.sizeX - debugWindowSizeX - 10 as float, viewport.workPosY + 10 as float)
 

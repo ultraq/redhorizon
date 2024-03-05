@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.audio.Listener
 import nz.net.ultraq.redhorizon.engine.graphics.Camera
-import nz.net.ultraq.redhorizon.engine.graphics.GameMenu
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
+import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
@@ -36,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Scene implements EventTarget, Visitable {
 
-	private final List<Node> nodes = new CopyOnWriteArrayList<>()
+	final List<Node> nodes = new CopyOnWriteArrayList<>()
 
 	@Delegate
 	AudioRequests audioRequestsHandler
@@ -49,7 +49,7 @@ class Scene implements EventTarget, Visitable {
 	Window window
 	Camera camera
 	Listener listener
-	GameMenu gameMenu
+	MainMenu gameMenu
 
 	/**
 	 * Allow visitors into the scene for traversal.
@@ -110,7 +110,7 @@ class Scene implements EventTarget, Visitable {
 	 */
 	<T extends Node> T findNode(Closure predicate) {
 
-		return nodes.find(predicate)
+		return (T)nodes.find(predicate)
 	}
 
 	/**

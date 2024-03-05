@@ -34,8 +34,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
 
-	protected Node parent
-	protected CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
+	Node parent
+	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
 	private final Rectanglef globalBounds = new Rectanglef()
 	private final Matrix4f globalTransform = new Matrix4f()
@@ -106,9 +106,17 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
-	 * An alias for {@link #addChild(Node)}
-	 *
-	 * @param child
+	 * Returns this node's name.  Used for the scene overview and debugging,
+	 * defaults to the class name of the node.
+	 */
+	String getName() {
+
+		return this.class.simpleName
+	}
+
+	/**
+	 * Overload of the {@code <<} operator as an alias for
+	 * {@link #addChild(Node)}.
 	 */
 	void leftShift(Node child) {
 

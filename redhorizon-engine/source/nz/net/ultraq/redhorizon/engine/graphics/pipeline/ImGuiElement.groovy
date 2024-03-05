@@ -17,38 +17,17 @@
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.graphics.Switch
 
 /**
- * A rendering pass for drawing overlay content to the game viewport.
+ * A object that contains ImGui content to render.
  *
  * @author Emanuel Rabina
  */
-interface OverlayRenderPass extends RenderPass<Framebuffer> {
+interface ImGuiElement<T> extends Switch<ImGuiElement<T>> {
 
 	/**
-	 * Returns {@code null} for overlay render passes.
-	 *
-	 * @return {@code null}
+	 * Draw the ImGui content.
 	 */
-	@Override
-	default Framebuffer getFramebuffer() {
-
-		return null
-	}
-
-	/**
-	 * Render the overlay.
-	 *
-	 * @param renderer
-	 * @param sceneFramebufferResult
-	 */
-	void render(GraphicsRenderer renderer, Framebuffer sceneFramebufferResult)
-
-	@Override
-	default OverlayRenderPass toggleWith(InputEventStream inputEventStream, int key) {
-
-		return super.toggleWith(inputEventStream, key) as OverlayRenderPass
-	}
+	void render(int dockspaceId, Framebuffer sceneFramebufferResult)
 }

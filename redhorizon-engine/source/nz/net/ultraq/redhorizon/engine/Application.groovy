@@ -22,9 +22,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -89,7 +89,7 @@ class Application implements EventTarget {
 	 * input into the application.
 	 */
 	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
-		OverlayRenderPass... overlayRenderPasses) {
+		ImGuiElement... overlayRenderPasses) {
 
 		var graphicsSystem = new GraphicsSystem(windowTitle, inputEventStream, config)
 		graphicsSystem.on(WindowCreatedEvent) { event ->
@@ -97,14 +97,14 @@ class Application implements EventTarget {
 		}
 		graphicsSystem.on(SystemReadyEvent) { event ->
 			var audioSystem = engine.systems.find { it instanceof AudioSystem } as AudioSystem
-			graphicsSystem.renderPipeline.addOverlayPass(
-				new DebugOverlayRenderPass(config.debug)
+			graphicsSystem.renderPipeline.addImGuiElement(
+				new DebugOverlay(config.debug)
 					.addAudioRenderer(audioSystem.renderer)
 					.addGraphicsRenderer(graphicsSystem.renderer)
 					.toggleWith(inputEventStream, GLFW_KEY_D)
 			)
 			overlayRenderPasses.each { overlayRenderPass ->
-				graphicsSystem.renderPipeline.addOverlayPass(overlayRenderPass)
+				graphicsSystem.renderPipeline.addImGuiElement(overlayRenderPass)
 			}
 		}
 		graphicsSystem.relay(WindowMaximizedEvent, this)

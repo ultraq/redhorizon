@@ -19,10 +19,10 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
-import nz.net.ultraq.redhorizon.engine.graphics.GameMenu
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -35,6 +35,7 @@ import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static imgui.flag.ImGuiCond.FirstUseEver
 import static imgui.flag.ImGuiConfigFlags.DockingEnable
 import static imgui.flag.ImGuiDockNodeFlags.NoResize
 import static imgui.flag.ImGuiDockNodeFlags.PassthruCentralNode
@@ -43,6 +44,7 @@ import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
+import groovy.transform.TupleConstructor
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -62,30 +64,26 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	static {
 
-		// Extract and use the locally built natives for macOS running M1 processors
+		// Extract and use the locally built natives for macOS running M processors
 		if (System.isMacOs() && System.isArm64()) {
 			ImGuiLayer.classLoader.getResourceAsStream('io/imgui/java/native-bin/libimgui-javaarm64.dylib').withStream { inputStream ->
-				def tmpDir = File.createTempDir('imgui-java-natives-macos-arm64')
+				var tmpDir = File.createTempDir('imgui-java-natives-macos-arm64')
 				tmpDir.deleteOnExit()
-				def libFile = new File(tmpDir, 'libimgui-javaarm64.dylib')
+				var libFile = new File(tmpDir, 'libimgui-javaarm64.dylib')
 				Files.copy(inputStream, libFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
 				System.load(libFile.absolutePath)
 			}
 		}
 	}
 
-	final ImGuiGameMenu gameMenu
+	final MainMenu mainMenu
 
 	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
+	private final GameWindow gameWindow
 
 	private boolean drawChrome
-	private Dimension lastWindowSize
-	private int dockspaceId
-	private boolean docked
-
-	// Options
 	private boolean debugOverlay
 	private boolean shaderScanlines
 	private boolean shaderSharpUpscaling
@@ -102,16 +100,15 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		shaderScanlines = config.scanlines
 		shaderSharpUpscaling = true
 
-		// TODO: Split the ImGui setup from the debug overlay
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
 		ImGui.createContext()
 
-		def io = ImGui.getIO()
+		var io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
 
 		getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			def fontConfig = new ImFontConfig()
+			var fontConfig = new ImFontConfig()
 			io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float, fontConfig)
 			fontConfig.destroy()
 		}
@@ -119,7 +116,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGlfw.init(window.handle, true)
 		imGuiGl3.init('#version 410 core')
 
-		gameMenu = new ImGuiGameMenu()
+		mainMenu = new MainMenu()
+		gameWindow = new GameWindow(config.targetAspectRatio)
 
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -139,65 +137,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
-	 * Draw the scene from the given framebuffer into an ImGui window that will
-	 * take up the whole screen by default.
-	 *
-	 * @param sceneFramebufferResult
-	 */
-	private void drawScene(Framebuffer sceneFramebufferResult) {
-
-		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.begin("Scene", new ImBoolean(true), NoCollapse | NoScrollbar)
-		ImGui.popStyleVar()
-
-		if (!docked && drawChrome) {
-			imgui.internal.ImGui.dockBuilderDockWindow('Scene', dockspaceId)
-			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
-			docked = true
-		}
-
-		def framebufferSize = sceneFramebufferResult.texture.size
-		def windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
-		def imageSizeX = windowSize.width
-		def imageSizeY = windowSize.height
-		def uvX = 0f
-		def uvY = 0f
-		def cursorX = 0
-		def cursorY = ImGui.getCursorPosY()
-
-		// Window is wider
-		if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
-			uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
-			imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
-			cursorX = (windowSize.width - imageSizeX) * 0.5f as float
-		}
-		// Window is taller
-		else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
-			uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
-			imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
-			cursorY = cursorY + (windowSize.height - imageSizeY) * 0.5f as float
-		}
-
-		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(((OpenGLTexture)sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
-			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
-
-		ImGui.end()
-
-		if (windowSize != lastWindowSize) {
-			logger.debug('Scene window changed to {}', windowSize)
-			def targetResolution = windowSize.calculateFit(config.targetAspectRatio)
-			logger.debug('Target resolution changed to {}', targetResolution)
-			trigger(new FramebufferSizeEvent(windowSize, windowSize, targetResolution))
-			lastWindowSize = windowSize
-		}
-	}
-
-	/**
 	 * Automatically mark the beginning and end of a frame as before and after the
 	 * execution of the given closure.
-	 *
-	 * @param closure
 	 */
 	void frame(Closure closure) {
 
@@ -213,21 +154,24 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	/**
 	 * Draw all of the ImGui elements to the screen.
 	 */
-	void render(Framebuffer sceneFramebufferResult) {
+	int render(Framebuffer sceneFramebufferResult) {
 
 		if (drawChrome) {
-			gameMenu.render()
-			setUpDockspace()
-			drawScene(sceneFramebufferResult)
+			var dockspaceId = setUpDockspace()
+			mainMenu.render(dockspaceId, sceneFramebufferResult)
+			gameWindow.render(dockspaceId, sceneFramebufferResult)
+			return dockspaceId
 		}
+
+		return -1
 	}
 
 	/**
 	 * Build the docking window into which the app will be rendered.
 	 */
-	private void setUpDockspace() {
+	private static int setUpDockspace() {
 
-		def viewport = ImGui.getMainViewport()
+		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowPos(0, 0)
 		ImGui.setNextWindowSize(viewport.sizeX, viewport.sizeY)
 		ImGui.pushStyleVar(WindowBorderSize, 0)
@@ -238,21 +182,23 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			NoTitleBar | NoCollapse | NoResize | NoMove | NoBringToFrontOnFocus | NoNavFocus | MenuBar | NoDocking | NoBackground)
 		ImGui.popStyleVar(3)
 
-		dockspaceId = ImGui.getID('MyDockspace')
+		var dockspaceId = ImGui.getID('MyDockspace')
 		ImGui.dockSpace(dockspaceId, viewport.workSizeX, viewport.workSizeY, PassthruCentralNode)
 
 		ImGui.end()
+
+		return dockspaceId
 	}
 
 	/**
 	 * An ImGUI implementation of the main menu bar.
+	 *
+	 * @author Emanuel Rabina
 	 */
-	private class ImGuiGameMenu extends GameMenu implements EventTarget {
+	private class MainMenu implements nz.net.ultraq.redhorizon.engine.graphics.MainMenu, ImGuiElement, EventTarget {
 
-		/**
-		 * Draw the menu.
-		 */
-		void render() {
+		@Override
+		void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
 
 			if (ImGui.beginMainMenuBar()) {
 
@@ -277,12 +223,74 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 						trigger(new ChangeEvent(OPTIONS_SHADER_SHARP_UPSCALING, shaderSharpUpscaling))
 					}
 
-					additionalOptionsItems*.render()
+					optionsMenu*.render()
 
 					ImGui.endMenu()
 				}
 
 				ImGui.endMainMenuBar()
+			}
+		}
+	}
+
+	/**
+	 * When window chrome is enabled, the scene will be rendered to an ImGui image
+	 * texture held by this class.
+	 *
+	 * @author Emanuel Rabina
+	 */
+	@TupleConstructor
+	private class GameWindow implements ImGuiElement, EventTarget {
+
+		final float targetAspectRatio
+
+		private Dimension lastWindowSize
+
+		@Override
+		void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
+
+			ImGui.setNextWindowSize(800, 600, FirstUseEver)
+			ImGui.pushStyleVar(WindowPadding, 0, 0)
+			ImGui.begin('Game', new ImBoolean(true), NoCollapse | NoScrollbar)
+			ImGui.popStyleVar()
+
+			imgui.internal.ImGui.dockBuilderDockWindow('Game', dockspaceId)
+			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
+
+			var framebufferSize = sceneFramebufferResult.texture.size
+			var windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
+			var imageSizeX = windowSize.width
+			var imageSizeY = windowSize.height
+			var uvX = 0f
+			var uvY = 0f
+			var cursorX = 0
+			var cursorY = ImGui.getCursorPosY()
+
+			// Window is wider
+			if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
+				uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
+				imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
+				cursorX = (windowSize.width - imageSizeX) * 0.5f as float
+			}
+			// Window is taller
+			else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
+				uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
+				imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
+				cursorY = cursorY + (windowSize.height - imageSizeY) * 0.5f as float
+			}
+
+			ImGui.setCursorPos(cursorX, cursorY)
+			ImGui.image(((OpenGLTexture)sceneFramebufferResult.texture).textureId, imageSizeX, imageSizeY,
+				uvX, 1 - uvY as float, 1 - uvX as float, uvY)
+
+			ImGui.end()
+
+			if (windowSize != lastWindowSize) {
+				logger.debug('Scene window changed to {}', windowSize)
+				var targetResolution = windowSize.calculateFit(targetAspectRatio)
+				logger.debug('Target resolution changed to {}', targetResolution)
+				trigger(new FramebufferSizeEvent(windowSize, windowSize, targetResolution))
+				lastWindowSize = windowSize
 			}
 		}
 	}

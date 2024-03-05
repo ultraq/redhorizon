@@ -17,8 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.OverlayRenderPass
+import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
@@ -31,7 +30,7 @@ import static imgui.flag.ImGuiStyleVar.WindowPadding
  *
  * @author Emanuel Rabina
  */
-class EntryList implements EventTarget, OverlayRenderPass {
+class EntryList implements EventTarget, ImGuiElement {
 
 	final List<Entry> entries
 
@@ -44,7 +43,7 @@ class EntryList implements EventTarget, OverlayRenderPass {
 	}
 
 	@Override
-	void render(GraphicsRenderer renderer, Framebuffer sceneResult) {
+	void render(int dockspaceId, Framebuffer sceneResult) {
 
 		ImGui.setNextWindowSize(300, 500, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)

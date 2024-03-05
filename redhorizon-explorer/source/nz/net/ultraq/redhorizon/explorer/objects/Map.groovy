@@ -42,7 +42,7 @@ class Map extends Node<Map> {
 	private static final int TILE_HEIGHT = 24
 
 	final MapFile mapFile
-	final String name
+	final String name = "Map - ${mapFile.name}"
 	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
@@ -55,8 +55,6 @@ class Map extends Node<Map> {
 	Map(MapFile mapFile, ResourceManager resourceManager) {
 
 		this.mapFile = mapFile
-
-		name = mapFile.name
 
 		var mapSection = mapFile.mapSection
 		theater = Theater.valueOf(mapSection.theater())
@@ -89,7 +87,7 @@ class Map extends Node<Map> {
 
 		return """
 			Red Alert map
-			 - Name: ${name}
+			 - Name: ${mapFile.name}
 			 - Theater: ${theater}
 			 - Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
 		""".stripIndent()

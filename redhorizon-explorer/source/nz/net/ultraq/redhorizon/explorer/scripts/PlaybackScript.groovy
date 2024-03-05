@@ -44,7 +44,7 @@ class PlaybackScript extends Script {
 
 	final boolean runOnce
 
-	private RemoveControlFunction removePlaybackControl
+	private List<RemoveControlFunction> removeControlFunctions = []
 
 	@Delegate
 	private Playable applyDelegate() {
@@ -54,7 +54,7 @@ class PlaybackScript extends Script {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		removePlaybackControl = scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
 			if (runOnce) {
 				logger.debug('Pausing/Resuming playback')
 				scene.gameClock.togglePause()
@@ -68,14 +68,19 @@ class PlaybackScript extends Script {
 		}))
 
 		if (scriptable instanceof Sound) {
-			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', { ->
-				scriptable.transform.translate(-0.25, 0)
-				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
-			}))
-			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
-				scriptable.transform.translate(0.25, 0)
-				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
-			}))
+			removeControlFunctions << scene.inputEventStream.addControl(
+				new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', {
+					->
+					scriptable.transform.translate(-0.25, 0)
+					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+				})
+			)
+			removeControlFunctions << scene.inputEventStream.addControl(
+				new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
+					scriptable.transform.translate(0.25, 0)
+					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+				})
+			)
 		}
 
 		on(PlaybackReadyEvent) { event ->
@@ -91,6 +96,9 @@ class PlaybackScript extends Script {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
-		removePlaybackControl.remove()
+		removeControlFunctions*.remove()
+		if (scene.gameClock.paused) {
+			scene.gameClock.resume()
+		}
 	}
 }

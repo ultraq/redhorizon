@@ -25,8 +25,8 @@ import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.GameMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -77,7 +77,7 @@ class Explorer {
 	private InputStream selectedFileInputStream
 	private Palette palette
 	private boolean touchpadInput
-	private MenuItem touchpadInputMenuItem
+	private NodeList nodeList
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -114,7 +114,6 @@ class Explorer {
 
 		// Also toggle the explorer GUI with the same key for toggling the ImGui chrome
 		entryList.toggleWith(scene.inputEventStream, GLFW_KEY_O)
-
 		buildList(new File(System.getProperty("user.dir")))
 
 		// Handle events from the explorer GUI
@@ -143,15 +142,16 @@ class Explorer {
 			}
 		}
 
-		// Add a menu item for touchpad input
-		scene.gameMenu.additionalOptionsItems << new MenuItem() {
+		nodeList = new NodeList(scene)
+		scene.addImGuiElement(nodeList)
 
+		// Add a menu item for touchpad input
+		scene.gameMenu.optionsMenu << new MenuItem() {
 			@Override
 			void render() {
-
 				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
 					touchpadInput = !touchpadInput
-					var mapNode = scene.findNode { node -> node instanceof Map } as Map
+					Map mapNode = scene.findNode { node -> node instanceof Map }
 					if (mapNode) {
 						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput
 					}
