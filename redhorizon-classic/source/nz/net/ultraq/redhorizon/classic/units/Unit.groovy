@@ -54,8 +54,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final Palette palette
 	final UnitData unitData
 
-	private PalettedSprite body
-	private PalettedSprite turret
+	private UnitBody body
+	private UnitTurret turret
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet

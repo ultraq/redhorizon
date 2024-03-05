@@ -36,8 +36,10 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.explorer.objects.Map
+import nz.net.ultraq.redhorizon.explorer.objects.SpriteFrames
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
+import nz.net.ultraq.redhorizon.explorer.scripts.SpriteShowcaseScript
 import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
@@ -317,29 +319,36 @@ class Explorer {
 	 */
 	private void preview(ShpFile shpFile, String objectId) {
 
-		var unitConfig
+		String unitConfig
 		try {
 			unitConfig = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectId.toLowerCase()}.json")
 			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
 		catch (IllegalArgumentException ignored) {
 			logger.info('No configuration available for {}', objectId)
-			return
 		}
 
-		var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
-		var targetClass = switch (unitData.type) {
-			case 'infantry', 'structure', 'vehicle' -> Unit
-			default -> logger.info('Unit type {} not supported', unitData.type)
+		// Found a unit config, use it to view the file
+		if (unitConfig) {
+			var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
+			var targetClass = switch (unitData.type) {
+				case 'infantry', 'structure', 'vehicle' -> Unit
+				default -> logger.info('Unit type {} not supported', unitData.type)
+			}
+			if (targetClass) {
+				var unit = targetClass
+					.getDeclaredConstructor(ImagesFile, Palette, UnitData)
+					.newInstance(shpFile, palette, unitData)
+					.attachScript(new UnitShowcaseScript())
+				scene << unit
+			}
 		}
 
-		if (targetClass) {
-			// Add the unit to the scene
-			var unit = targetClass
-				.getDeclaredConstructor(ImagesFile, Palette, UnitData)
-				.newInstance(shpFile, palette, unitData)
-				.attachScript(new UnitShowcaseScript())
-			scene << unit
+		// No config found, fall back to viewing a SHP file as media
+		else {
+			var palettedSprite = new SpriteFrames(shpFile, palette)
+				.attachScript(new SpriteShowcaseScript())
+			scene << palettedSprite
 		}
 	}
 

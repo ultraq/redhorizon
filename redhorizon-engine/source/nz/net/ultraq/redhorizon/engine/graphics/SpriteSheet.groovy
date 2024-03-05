@@ -43,6 +43,14 @@ class SpriteSheet implements GraphicsResource {
 	}
 
 	/**
+	 * Overload for the {@code []} operator, an alias for {@link #getFrame(int)}.
+	 */
+	Rectanglef getAt(int index) {
+
+		return getFrame(index)
+	}
+
+	/**
 	 * Return coordinates on the sprite sheet that would locate the sprite with
 	 * the corresponding index from the raw data.
 	 */
