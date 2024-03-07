@@ -84,10 +84,6 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		if (!animationSource) {
-			throw new IllegalStateException('Cannot add an Animation node to a scene without a streaming or file source')
-		}
-
 		mesh = scene
 			.requestCreateOrGet(new SpriteMeshRequest(bounds))
 			.get()

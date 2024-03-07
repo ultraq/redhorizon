@@ -100,11 +100,11 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 			.requestCreateOrGet(new SpriteSheetRequest(width, height, imagesFile.format, imagesFile.imagesData))
 			.get()
 
-		body = new UnitBody(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(0))
+		body = new UnitBody(width, height, imagesFile.numImages, spriteSheet, palette)
 		addChild(body)
 
 		if (unitData.shpFile.parts.turret) {
-			turret = new UnitTurret(width, height, spriteSheet, paletteAsTexture, spriteSheet.getFrame(unitData.shpFile.parts.body.headings))
+			turret = new UnitTurret(width, height, imagesFile.numImages, spriteSheet, palette)
 			addChild(turret)
 		}
 	}
@@ -164,19 +164,21 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 			// TODO: If this animation region picking gets more complicated, it might
 			//       be worth making an 'animation library' for units
 
-			// Update region in spritesheet to match heading and currently-playing animation
-			var currentState = unitData.shpFile.states[stateIndex]
-			var headings = currentState.headings
-			var frames = currentState.frames
+			if (spriteSheet && material?.palette) {
+				// Update region in spritesheet to match heading and currently-playing animation
+				var currentState = unitData.shpFile.states[stateIndex]
+				var headings = currentState.headings
+				var frames = currentState.frames
 
-			// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
-			//       reverse from how we normally define rotation.
-			var closestHeading = Math.round(heading / degreesPerHeading)
-			var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
-			var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
-			region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
+				// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
+				//       reverse from how we normally define rotation.
+				var closestHeading = Math.round(heading / degreesPerHeading)
+				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
+				var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+				region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
 
-			super.render(renderer)
+				super.render(renderer)
+			}
 		}
 	}
 
@@ -186,12 +188,14 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			var headings = unitData.shpFile.parts.turret.headings
-			var closestHeading = Math.round(heading / degreesPerHeading)
-			var rotationFrame = closestHeading ? headings - closestHeading as int : 0
-			region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + rotationFrame))
+			if (spriteSheet && material?.palette) {
+				var headings = unitData.shpFile.parts.turret.headings
+				var closestHeading = Math.round(heading / degreesPerHeading)
+				var rotationFrame = closestHeading ? headings - closestHeading as int : 0
+				region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + rotationFrame))
 
-			super.render(renderer)
+				super.render(renderer)
+			}
 		}
 	}
 }

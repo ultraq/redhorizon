@@ -234,7 +234,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		var imagesAsSpriteSheet = data
 			.flipVertical(width, height, format)
-			.combineImages(width, height, framesHorizontal)
+			.combineImages(width, height, format, framesHorizontal)
 		var texture = createTexture(spriteSheetWidth, spriteSheetHeight, format, imagesAsSpriteSheet)
 
 		return new SpriteSheet(texture, framesHorizontal, framesVertical, frameStepX, frameStepY)

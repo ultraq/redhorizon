@@ -76,10 +76,6 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		if (!soundSource) {
-			throw new IllegalStateException('Cannot add a Sound node to a scene without a streaming or file source')
-		}
-
 		source = scene
 			.requestCreateOrGet(new SourceRequest())
 			.get()

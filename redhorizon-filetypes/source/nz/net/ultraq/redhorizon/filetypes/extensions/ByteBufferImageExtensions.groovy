@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,13 +55,14 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width   Width of each image.
 	 * @param height  Height of each image
+	 * @param format
 	 * @param imagesX Number of images to fit on the X axis.
 	 * @return Single combined image buffer.
 	 */
-	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, int imagesX) {
+	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, ColourFormat format, int imagesX) {
 
 		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
-		var compileWidth = width * imagesX as int
+		var compileWidth = width * format.value * imagesX as int
 		var compileHeight = height * imagesY
 		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
 
@@ -73,7 +74,7 @@ class ByteBufferImageExtensions {
 			height.times { y ->
 				compilation
 					.position(compilationPointer)
-					.put(image, width)
+					.put(image, width * format.value)
 				compilationPointer += compileWidth
 			}
 			image.rewind()

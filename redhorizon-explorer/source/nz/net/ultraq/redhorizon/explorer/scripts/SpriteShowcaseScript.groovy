@@ -18,11 +18,12 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
+import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.explorer.objects.SpriteFrames
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,15 +34,22 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class SpriteShowcaseScript extends Script<SpriteFrames> {
+class SpriteShowcaseScript extends Script<PalettedSprite> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SpriteShowcaseScript)
 
+	private int currentFrame
 	private final List<RemoveControlFunction> removeControlFunctions = []
 
 	@Delegate
-	SpriteFrames applyDelegate() {
+	PalettedSprite applyDelegate() {
 		return scriptable
+	}
+
+	void delete(GraphicsRenderer renderer) {
+	}
+
+	void init(GraphicsRenderer renderer) {
 	}
 
 	@Override
@@ -50,12 +58,12 @@ class SpriteShowcaseScript extends Script<SpriteFrames> {
 		scene.camera.scale(4.0f)
 
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Previous frame', { ->
-			Math.wrap(currentFrame--, 0, shpFile.numImages)
-			palettedSprite.region.set(spriteSheet[currentFrame])
+			Math.wrap(currentFrame--, 0, numImages)
+			region.set(spriteSource.spriteSheet[currentFrame])
 		}))
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Next frame', { ->
-			Math.wrap(currentFrame++, 0, shpFile.numImages)
-			palettedSprite.region.set(spriteSheet[currentFrame])
+			Math.wrap(currentFrame++, 0, numImages)
+			region.set(spriteSource.spriteSheet[currentFrame])
 		}))
 
 		var Faction[] factions = Faction.values()

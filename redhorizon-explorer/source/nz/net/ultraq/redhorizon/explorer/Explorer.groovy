@@ -20,6 +20,7 @@ import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Application
@@ -36,7 +37,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.explorer.objects.Map
-import nz.net.ultraq.redhorizon.explorer.objects.SpriteFrames
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
 import nz.net.ultraq.redhorizon.explorer.scripts.SpriteShowcaseScript
@@ -346,7 +346,7 @@ class Explorer {
 
 		// No config found, fall back to viewing a SHP file as media
 		else {
-			var palettedSprite = new SpriteFrames(shpFile, palette)
+			var palettedSprite = new PalettedSprite(shpFile, palette)
 				.attachScript(new SpriteShowcaseScript())
 			scene << palettedSprite
 		}

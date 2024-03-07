@@ -19,14 +19,15 @@ package nz.net.ultraq.redhorizon.classic.nodes
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import org.joml.primitives.Rectanglef
+import java.nio.ByteBuffer
 
 /**
  * A sprite that requires a palette to fully realize its image.
@@ -35,47 +36,50 @@ import org.joml.primitives.Rectanglef
  */
 class PalettedSprite extends Sprite implements FactionColours {
 
-	final SpriteSheet spriteSheet
-	final Texture palette
+	private final Palette palette
+
+	private Texture paletteAsTexture
 
 	/**
-	 * Constructor, build this sprite from a region on a sprite sheet.
+	 * Constructor, build this sprite from a sprite sheet file.
 	 */
-	PalettedSprite(int width, int height, SpriteSheet spriteSheet, Texture palette, Rectanglef region) {
+	PalettedSprite(ImagesFile imagesFile, Palette palette) {
 
-		super(width, height, region)
-		this.spriteSheet = spriteSheet
+		super(imagesFile)
+		this.palette = palette
+	}
+
+	/**
+	 * Constructor, build this sprite from an existing sprite sheet.
+	 */
+	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, Palette palette) {
+
+		super(width, height, numImages, spriteSheet)
 		this.palette = palette
 	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		mesh = scene
-			.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
-			.get()
+		super.onSceneAdded(scene)
+
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
 			.get()
-		material = new Material(
-			texture: spriteSheet.texture,
-			palette: palette,
-			faction: faction
-		)
-	}
-
-	@Override
-	void onSceneRemoved(Scene scene) {
-
-		scene.requestDelete(mesh)
+		// TODO: Load the palette once
+		paletteAsTexture = scene
+			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
+			.get()
+		material.palette = paletteAsTexture
+		material.faction = faction
 	}
 
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (material) {
+		if (material?.palette) {
 			material.faction = faction
+			super.render(renderer)
 		}
-		super.render(renderer)
 	}
 }
