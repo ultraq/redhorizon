@@ -26,24 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 interface GraphicsElement {
 
 	/**
-	 * Perform any cleanup for this element.
-	 *
-	 * @param renderer
-	 */
-	@Deprecated
-	default void delete(GraphicsRenderer renderer) {
-	}
-
-	/**
-	 * Perform any setup for this element.
-	 *
-	 * @param renderer
-	 */
-	@Deprecated
-	default void init(GraphicsRenderer renderer) {
-	}
-
-	/**
 	 * Render the element for display.
 	 *
 	 * @param renderer

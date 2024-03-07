@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -44,12 +43,6 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	@Delegate
 	PalettedSprite applyDelegate() {
 		return scriptable
-	}
-
-	void delete(GraphicsRenderer renderer) {
-	}
-
-	void init(GraphicsRenderer renderer) {
 	}
 
 	@Override

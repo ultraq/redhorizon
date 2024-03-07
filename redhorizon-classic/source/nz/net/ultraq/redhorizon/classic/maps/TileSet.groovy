@@ -94,7 +94,6 @@ class TileSet implements GraphicsElement {
 		tileFileMap << [(tilesFile): yStart]
 	}
 
-	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteTexture(texture)
@@ -130,7 +129,6 @@ class TileSet implements GraphicsElement {
 		return texture
 	}
 
-	@Override
 	void init(GraphicsRenderer renderer) {
 
 		texture = renderer.createTexture(tilesetWidth, tilesetHeight, palette.format,

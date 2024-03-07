@@ -70,14 +70,12 @@ class MapBackground extends Node<MapBackground> implements GraphicsElement {
 		this.bounds.set(0, 0, width * repeatX as float, height * repeatY as float)
 	}
 
-	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteMaterial(material)
 		renderer.deleteMesh(mesh)
 	}
 
-	@Override
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(

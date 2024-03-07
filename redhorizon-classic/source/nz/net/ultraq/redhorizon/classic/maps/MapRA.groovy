@@ -117,13 +117,11 @@ class MapRA extends Node<MapRA> implements GraphicsElement {
 		layers*.accept(visitor)
 	}
 
-	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		tileSet.delete(renderer)
 	}
 
-	@Override
 	void init(GraphicsRenderer renderer) {
 
 		tileSet.init(renderer)
@@ -259,13 +257,11 @@ class MapRA extends Node<MapRA> implements GraphicsElement {
 			visitor.visit(this)
 		}
 
-		@Override
 		void delete(GraphicsRenderer renderer) {
 
 			renderer.deleteMaterial(material)
 		}
 
-		@Override
 		void init(GraphicsRenderer renderer) {
 
 			shader = renderer.getShader(SpriteShader.NAME)

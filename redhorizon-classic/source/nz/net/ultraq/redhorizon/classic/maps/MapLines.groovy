@@ -60,7 +60,6 @@ class MapLines extends Node<MapLines> implements GraphicsElement {
 		bounds.set(X_AXIS_MIN.x, Y_AXIS_MIN.y, X_AXIS_MAX.x, Y_AXIS_MAX.y)
 	}
 
-	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteMesh(axisLinesMesh)
@@ -69,7 +68,6 @@ class MapLines extends Node<MapLines> implements GraphicsElement {
 		renderer.deleteMaterial(boundaryLinesMaterial)
 	}
 
-	@Override
 	void init(GraphicsRenderer renderer) {
 
 		shader = renderer.getShader(PrimitivesShader.NAME)

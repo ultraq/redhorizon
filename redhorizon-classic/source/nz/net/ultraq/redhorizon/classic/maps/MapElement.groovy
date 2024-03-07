@@ -59,13 +59,11 @@ class MapElement extends Node<MapElement> implements GraphicsElement {
 		this.bounds.set(0, 0, tileFile.width, tileFile.height)
 	}
 
-	@Override
 	void delete(GraphicsRenderer renderer) {
 
 		renderer.deleteMaterial(material)
 	}
 
-	@Override
 	void init(GraphicsRenderer renderer) {
 
 		mesh = renderer.createSpriteMesh(
