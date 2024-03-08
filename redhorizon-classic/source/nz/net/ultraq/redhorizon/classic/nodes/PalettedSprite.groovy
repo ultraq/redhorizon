@@ -36,9 +36,10 @@ import java.nio.ByteBuffer
  */
 class PalettedSprite extends Sprite implements FactionColours {
 
-	private final Palette palette
+	Palette palette
 
 	private Texture paletteAsTexture
+	private boolean paletteChanged
 
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.
@@ -75,11 +76,31 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
+	void onSceneRemoved(Scene scene) {
+
+		scene.requestDelete(material.palette)
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 
 		if (material?.palette) {
 			material.faction = faction
+
+			if (paletteChanged) {
+				renderer.delete(material.palette)
+				paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
+				material.palette = paletteAsTexture
+				paletteChanged = false
+			}
+
 			super.render(renderer)
 		}
+	}
+
+	void setPalette(Palette palette) {
+
+		this.palette = palette
+		paletteChanged = true
 	}
 }

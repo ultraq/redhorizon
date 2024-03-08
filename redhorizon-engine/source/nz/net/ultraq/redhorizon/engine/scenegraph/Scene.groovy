@@ -38,6 +38,8 @@ class Scene implements EventTarget, Visitable {
 
 	final List<Node> nodes = new CopyOnWriteArrayList<>()
 
+	// TODO: This stuff is really all 'scene/application context' objects, so
+	//       should be moved to something as such 🤔
 	@Delegate
 	AudioRequests audioRequestsHandler
 	@Delegate

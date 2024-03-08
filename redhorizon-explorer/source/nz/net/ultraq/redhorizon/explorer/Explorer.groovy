@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
@@ -29,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
@@ -36,6 +38,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
+import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 import nz.net.ultraq.redhorizon.explorer.objects.Map
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
@@ -52,7 +55,7 @@ import imgui.ImGui
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -67,6 +70,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
+	private static final String[] paletteNames = ['ra-temperate', 'ra-snow', 'td-temperate']
 	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 
@@ -78,18 +82,16 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private Palette palette
+	private int paletteIndex
 	private boolean touchpadInput
 	private NodeList nodeList
+	private List<RemoveEventFunction> removeEventFunctions = []
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
-	 *
-	 * @param version
-	 * @param palette
 	 */
 	Explorer(String version, Palette palette) {
 
-		// TODO: Be able to choose which palette to apply to a paletted file
 		this.palette = palette
 
 		new Application("Explorer - ${version}")
@@ -160,18 +162,30 @@ class Explorer {
 				}
 			}
 		}
+		scene.gameMenu.optionsMenu << new MenuItem() {
+			@Override
+			void render() {
+				if (ImGui.menuItem('Cycle palette', 'O')) {
+					cyclePalette()
+				}
+			}
+		}
+		removeEventFunctions << scene.inputEventStream.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_L) {
+				cyclePalette()
+			}
+		}
 	}
 
 	@SuppressWarnings('unused')
 	private void applicationStop(Application application, Scene scene) {
 
+		removeEventFunctions*.remove()
 		clearPreview()
 	}
 
 	/**
 	 * Update the contents of the list from the current directory.
-	 *
-	 * @param directory
 	 */
 	private void buildList(File directory) {
 
@@ -196,8 +210,6 @@ class Explorer {
 
 	/**
 	 * Update the contents of the list from the current mix file.
-	 *
-	 * @param mixFile
 	 */
 	private void buildList(MixFile mixFile) {
 
@@ -239,6 +251,28 @@ class Explorer {
 	}
 
 	/**
+	 * Cycle through the available palettes and apply to any paletted objects in
+	 * the scene.
+	 */
+	private void cyclePalette() {
+
+		paletteIndex = Math.wrap(paletteIndex + 1, 0, paletteNames.length)
+
+		var paletteName = paletteNames[paletteIndex]
+		logger.info("Using ${paletteName} palette")
+
+		palette = getResourceAsStream("${paletteName}.pal").withBufferedStream { inputStream ->
+			return new PalFile(inputStream).withAlphaMask()
+		}
+
+		scene.accept { node ->
+			if (node instanceof PalettedSprite) {
+				node.palette = palette
+			}
+		}
+	}
+
+	/**
 	 * Update the preview area with the media for the selected mix file entry.
 	 */
 	private void preview(MixEntry entry) {
@@ -247,7 +281,7 @@ class Explorer {
 
 		var file = entry.file
 		var fileClass = entry.fileClass
-		var entryId = entry.name.substring(0, entry.name.indexOf('.'))
+		var entryId = fileClass ? entry.name.substring(0, entry.name.indexOf('.')) : '(unknown)'
 
 		if (file) {
 			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)

@@ -203,27 +203,30 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			if (ImGui.beginMainMenuBar()) {
 
 				if (ImGui.beginMenu('File')) {
-					if (ImGui.menuItem('Exit')) {
+					if (ImGui.menuItem('Exit', 'Esc')) {
 						trigger(new GuiEvent(EVENT_TYPE_STOP))
 					}
 					ImGui.endMenu()
 				}
 
 				if (ImGui.beginMenu('Options')) {
-					if (ImGui.menuItem('Debug overlay', null, debugOverlay)) {
+					if (ImGui.menuItem('Debug overlay', 'D', debugOverlay)) {
 						debugOverlay = !debugOverlay
 						trigger(new ChangeEvent(OPTIONS_DEBUG_OVERLAY, null))
 					}
-					if (ImGui.menuItem('Scanlines', null, shaderScanlines)) {
+					if (ImGui.menuItem('Scanlines', 'S', shaderScanlines)) {
 						shaderScanlines = !shaderScanlines
 						trigger(new ChangeEvent(OPTIONS_SHADER_SCANLINES, shaderScanlines))
 					}
-					if (ImGui.menuItem('Sharp upscaling', null, shaderSharpUpscaling)) {
+					if (ImGui.menuItem('Sharp upscaling', 'U', shaderSharpUpscaling)) {
 						shaderSharpUpscaling = !shaderSharpUpscaling
 						trigger(new ChangeEvent(OPTIONS_SHADER_SHARP_UPSCALING, shaderSharpUpscaling))
 					}
 
-					optionsMenu*.render()
+					if (optionsMenu) {
+						ImGui.separator()
+						optionsMenu*.render()
+					}
 
 					ImGui.endMenu()
 				}
