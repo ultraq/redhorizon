@@ -23,7 +23,7 @@ import groovy.transform.TupleConstructor
 
 /**
  * Metadata for entries in a mix file.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor
@@ -35,6 +35,7 @@ class MixEntry implements Entry<MixEntry> {
 	String name
 	Class<?> fileClass
 	Object file
+	long size
 	boolean unknown
 
 	@Override
@@ -42,9 +43,15 @@ class MixEntry implements Entry<MixEntry> {
 
 		return name == '..' ? -1 :
 			other.name == '..' ? 1 :
-			!unknown && other.unknown ? -1 :
-			unknown && !other.unknown ? 1 :
-			unknown && other.unknown ? 0 :
-			name <=> other.name			
+				!unknown && other.unknown ? -1 :
+					unknown && !other.unknown ? 1 :
+						unknown && other.unknown ? 0 :
+							name <=> other.name
+	}
+
+	@Override
+	String getType() {
+
+		return fileClass?.simpleName
 	}
 }

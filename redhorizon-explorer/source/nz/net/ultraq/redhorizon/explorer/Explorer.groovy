@@ -123,7 +123,7 @@ class Explorer {
 		// Handle events from the explorer GUI
 		entryList.on(EntrySelectedEvent) { event ->
 			clearPreview()
-			def entry = event.entry
+			var entry = event.entry
 			if (entry instanceof MixEntry) {
 				if (entry.name == '..') {
 					buildList(currentDirectory)
@@ -133,7 +133,7 @@ class Explorer {
 				}
 			}
 			else if (entry instanceof FileEntry) {
-				def file = entry.file
+				var file = entry.file
 				if (file.directory) {
 					buildList(file)
 				}
@@ -192,7 +192,10 @@ class Explorer {
 		entries.clear()
 
 		if (directory.parent) {
-			entries << new FileEntry(directory.parentFile, '/..')
+			entries << new FileEntry(
+				file: directory.parentFile,
+				name: '/..'
+			)
 		}
 		directory
 			.listFiles()
@@ -202,7 +205,10 @@ class Explorer {
 						file1.name <=> file2.name
 			}
 			.each { fileOrDirectory ->
-				entries << new FileEntry(fileOrDirectory)
+				entries << new FileEntry(
+					file: fileOrDirectory,
+					type: fileOrDirectory.file ? fileOrDirectory.name.fileClass?.simpleName : null
+				)
 			}
 
 		currentDirectory = directory
@@ -216,23 +222,23 @@ class Explorer {
 		entries.clear()
 		entries << new MixEntry(mixFile, null, '..')
 
-		def mixEntryTester = new MixEntryTester(mixFile)
+		var mixEntryTester = new MixEntryTester(mixFile)
 		mixFile.entries.each { entry ->
 
 			// Perform a lookup to see if we know about this file already, getting both a name and class
-			def matchingData = mixDatabase.find(entry.id)
+			var matchingData = mixDatabase.find(entry.id)
 			if (matchingData) {
-				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass)
+				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass, null, entry.size)
 			}
 
 			// Otherwise try determine what kind of file this is, getting only a class
 			else {
-				def testerResult = mixEntryTester.test(entry)
+				var testerResult = mixEntryTester.test(entry)
 				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, null, testerResult.file, true)
+					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, testerResult.file, entry.size, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, true)
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, entry.size, true)
 				}
 			}
 		}
@@ -281,7 +287,8 @@ class Explorer {
 
 		var file = entry.file
 		var fileClass = entry.fileClass
-		var entryId = fileClass ? entry.name.substring(0, entry.name.indexOf('.')) : '(unknown)'
+		var fileName = entry.name
+		var entryId = !fileName.contains('unknown') ? fileName.substring(0, fileName.indexOf('.')) : '(unknown)'
 
 		if (file) {
 			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
@@ -303,7 +310,7 @@ class Explorer {
 
 		logger.info('Loading {}...', file.name)
 
-		def fileClass = file.name.fileClass
+		var fileClass = file.name.fileClass
 		if (fileClass) {
 			selectedFileInputStream = file.newInputStream()
 			preview(fileClass.newInstance(selectedFileInputStream), file.nameWithoutExtension)

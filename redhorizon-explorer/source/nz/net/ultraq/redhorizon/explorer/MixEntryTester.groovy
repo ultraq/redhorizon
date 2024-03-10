@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,32 +49,32 @@ class MixEntryTester {
 	 */
 	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry) {
 
-		def hexId = Integer.toHexString(mixEntry.id)
+		var hexId = Integer.toHexString(mixEntry.id)
 		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)
 
 		// Try a VQA file
 		try {
-			def vqaFile = new VqaFile(mixFile.getEntryData(mixEntry))
+			var vqaFile = new VqaFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing VQA file')
-			return new MixEntryTesterResult(vqaFile, "(unknown VQA file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(vqaFile, "(unknown, 0x${hexId})", VqaFile)
 		}
 		catch (AssertionError ignored) {
 		}
 
 		// Try a SHP file
 		try {
-			def shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
+			var shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing SHP file')
-			return new MixEntryTesterResult(shpFile, "(unknown SHP file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(shpFile, "(unknown, 0x${hexId})", ShpFile)
 		}
 		catch (AssertionError ignored) {
 		}
 
 		// Try an AUD file
 		try {
-			def audFile = new AudFile(mixFile.getEntryData(mixEntry))
+			var audFile = new AudFile(mixFile.getEntryData(mixEntry))
 			logger.debug('Guessing AUD file')
-			return new MixEntryTesterResult(audFile, "(unknown AUD file, ID: 0x${hexId})")
+			return new MixEntryTesterResult(audFile, "(unknown, 0x${hexId})", AudFile)
 		}
 		catch (AssertionError ignored) {
 		}

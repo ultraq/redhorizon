@@ -28,7 +28,7 @@ import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
-import imgui.ImFontConfig
+import imgui.ImFont
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
@@ -61,6 +61,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	static final String OPTIONS_DEBUG_OVERLAY = 'options/debug-overlay'
 	static final String OPTIONS_SHADER_SCANLINES = 'options/scanlines-shader'
 	static final String OPTIONS_SHADER_SHARP_UPSCALING = 'options/sharp-upscaling-shader'
+
+	static ImFont robotoFont
+	static ImFont robotoMonoFont
 
 	static {
 
@@ -107,10 +110,11 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		var io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
 
-		getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			var fontConfig = new ImFontConfig()
-			io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float, fontConfig)
-			fontConfig.destroy()
+		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float)
+		}
+		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float)
 		}
 
 		imGuiGlfw.init(window.handle, true)
