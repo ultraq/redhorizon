@@ -291,11 +291,11 @@ class Explorer {
 		var entryId = !fileName.contains('unknown') ? fileName.substring(0, fileName.indexOf('.')) : '(unknown)'
 
 		if (file) {
-			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
 			preview(file, entryId)
 		}
 		else if (fileClass) {
-			selectedFileInputStream = entry.mixFile.getEntryData(entry.mixEntry)
+			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
 			preview(fileClass.newInstance(selectedFileInputStream), entryId)
 		}
 		else {

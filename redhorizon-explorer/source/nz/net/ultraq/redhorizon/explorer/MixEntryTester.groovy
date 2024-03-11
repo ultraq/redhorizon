@@ -52,34 +52,40 @@ class MixEntryTester {
 		var hexId = Integer.toHexString(mixEntry.id)
 		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)
 
-		// Try a VQA file
-		try {
-			var vqaFile = new VqaFile(mixFile.getEntryData(mixEntry))
-			logger.debug('Guessing VQA file')
-			return new MixEntryTesterResult(vqaFile, "(unknown, 0x${hexId})", VqaFile)
-		}
-		catch (AssertionError ignored) {
-		}
+		return mixFile.getEntryData(mixEntry).withBufferedStream { bufferedInputStream ->
 
-		// Try a SHP file
-		try {
-			var shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
-			logger.debug('Guessing SHP file')
-			return new MixEntryTesterResult(shpFile, "(unknown, 0x${hexId})", ShpFile)
-		}
-		catch (AssertionError ignored) {
-		}
+			// Try a VQA file
+			bufferedInputStream.mark(mixEntry.size)
+			try {
+				var vqaFile = new VqaFile(bufferedInputStream)
+				logger.debug('Guessing VQA file')
+				return new MixEntryTesterResult(vqaFile, "(unknown, 0x${hexId})", VqaFile)
+			}
+			catch (AssertionError ignored) {
+			}
 
-		// Try an AUD file
-		try {
-			var audFile = new AudFile(mixFile.getEntryData(mixEntry))
-			logger.debug('Guessing AUD file')
-			return new MixEntryTesterResult(audFile, "(unknown, 0x${hexId})", AudFile)
-		}
-		catch (AssertionError ignored) {
-		}
+			// Try a SHP file
+			bufferedInputStream.reset()
+			try {
+				var shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
+				logger.debug('Guessing SHP file')
+				return new MixEntryTesterResult(shpFile, "(unknown, 0x${hexId})", ShpFile)
+			}
+			catch (AssertionError ignored) {
+			}
 
-		logger.debug('Could not determine type')
-		return null
+			// Try an AUD file
+			bufferedInputStream.reset()
+			try {
+				var audFile = new AudFile(mixFile.getEntryData(mixEntry))
+				logger.debug('Guessing AUD file')
+				return new MixEntryTesterResult(audFile, "(unknown, 0x${hexId})", AudFile)
+			}
+			catch (AssertionError ignored) {
+			}
+
+			logger.debug('Could not determine type')
+			return null
+		}
 	}
 }
