@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class MixEntryTesterResult {
 
-	final Object file
 	final String name
 	final Class<?> fileClass
 }

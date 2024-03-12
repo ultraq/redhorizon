@@ -34,7 +34,6 @@ class MixEntry implements Entry<MixEntry> {
 	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
 	String name
 	Class<?> fileClass
-	Object file
 	long size
 	boolean unknown
 

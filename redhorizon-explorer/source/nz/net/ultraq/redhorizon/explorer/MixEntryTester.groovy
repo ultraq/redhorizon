@@ -47,6 +47,7 @@ class MixEntryTester {
 	 *   A best guess of the class to use to load the entry, or {@code null} if
 	 *   the type could not be determined.
 	 */
+	@SuppressWarnings('GroovyResultOfObjectAllocationIgnored')
 	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry) {
 
 		var hexId = Integer.toHexString(mixEntry.id)
@@ -57,9 +58,9 @@ class MixEntryTester {
 			// Try a VQA file
 			bufferedInputStream.mark(mixEntry.size)
 			try {
-				var vqaFile = new VqaFile(bufferedInputStream)
+				new VqaFile(bufferedInputStream)
 				logger.debug('Guessing VQA file')
-				return new MixEntryTesterResult(vqaFile, "(unknown, 0x${hexId})", VqaFile)
+				return new MixEntryTesterResult("(unknown, 0x${hexId})", VqaFile)
 			}
 			catch (AssertionError ignored) {
 			}
@@ -67,9 +68,9 @@ class MixEntryTester {
 			// Try a SHP file
 			bufferedInputStream.reset()
 			try {
-				var shpFile = new ShpFile(mixFile.getEntryData(mixEntry))
+				new ShpFile(mixFile.getEntryData(mixEntry))
 				logger.debug('Guessing SHP file')
-				return new MixEntryTesterResult(shpFile, "(unknown, 0x${hexId})", ShpFile)
+				return new MixEntryTesterResult("(unknown, 0x${hexId})", ShpFile)
 			}
 			catch (AssertionError ignored) {
 			}
@@ -77,9 +78,9 @@ class MixEntryTester {
 			// Try an AUD file
 			bufferedInputStream.reset()
 			try {
-				var audFile = new AudFile(mixFile.getEntryData(mixEntry))
+				new AudFile(mixFile.getEntryData(mixEntry))
 				logger.debug('Guessing AUD file')
-				return new MixEntryTesterResult(audFile, "(unknown, 0x${hexId})", AudFile)
+				return new MixEntryTesterResult("(unknown, 0x${hexId})", AudFile)
 			}
 			catch (AssertionError ignored) {
 			}

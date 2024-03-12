@@ -37,7 +37,6 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.CancellationException
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -217,11 +216,6 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		void onSceneRemoved(Scene scene) {
 
 			streamingDecoder.cancel(true)
-			try {
-				streamingDecoder.get()
-			}
-			catch (CancellationException ignored) {
-			}
 			scene.requestDelete(*streamedBuffers.drain())
 		}
 

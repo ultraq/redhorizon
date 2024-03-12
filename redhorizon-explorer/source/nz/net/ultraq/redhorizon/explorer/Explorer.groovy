@@ -122,13 +122,13 @@ class Explorer {
 
 		// Handle events from the explorer GUI
 		entryList.on(EntrySelectedEvent) { event ->
-			clearPreview()
 			var entry = event.entry
 			if (entry instanceof MixEntry) {
 				if (entry.name == '..') {
 					buildList(currentDirectory)
 				}
 				else {
+					clearPreview()
 					preview(entry)
 				}
 			}
@@ -141,6 +141,7 @@ class Explorer {
 					buildList(new MixFile(file))
 				}
 				else {
+					clearPreview()
 					preview(file)
 				}
 			}
@@ -228,17 +229,17 @@ class Explorer {
 			// Perform a lookup to see if we know about this file already, getting both a name and class
 			var matchingData = mixDatabase.find(entry.id)
 			if (matchingData) {
-				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass, null, entry.size)
+				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass, entry.size)
 			}
 
 			// Otherwise try determine what kind of file this is, getting only a class
 			else {
 				var testerResult = mixEntryTester.test(entry)
 				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, testerResult.file, entry.size, true)
+					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, entry.size, true)
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
 				}
 			}
 		}
@@ -285,16 +286,11 @@ class Explorer {
 
 		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
-		var file = entry.file
 		var fileClass = entry.fileClass
 		var fileName = entry.name
 		var entryId = !fileName.contains('unknown') ? fileName.substring(0, fileName.indexOf('.')) : '(unknown)'
 
-		if (file) {
-			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
-			preview(file, entryId)
-		}
-		else if (fileClass) {
+		if (fileClass) {
 			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
 			preview(fileClass.newInstance(selectedFileInputStream), entryId)
 		}
