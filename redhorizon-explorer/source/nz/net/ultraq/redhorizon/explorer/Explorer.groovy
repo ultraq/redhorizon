@@ -77,6 +77,7 @@ class Explorer {
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
+	private final NodeList nodeList = new NodeList()
 
 	private Scene scene
 	private File currentDirectory
@@ -84,7 +85,6 @@ class Explorer {
 	private Palette palette
 	private int paletteIndex
 	private boolean touchpadInput
-	private NodeList nodeList
 	private List<RemoveEventFunction> removeEventFunctions = []
 
 	/**
@@ -101,7 +101,7 @@ class Explorer {
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
 				renderResolution: renderResolution,
 				startWithChrome: true
-			), entryList)
+			), entryList, nodeList)
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
 			.onApplicationStop(this::applicationStop)
@@ -147,8 +147,7 @@ class Explorer {
 			}
 		}
 
-		nodeList = new NodeList(scene)
-		scene.addImGuiElement(nodeList)
+		nodeList.scene = scene
 
 		// Add a menu item for touchpad input
 		scene.gameMenu.optionsMenu << new MenuItem() {

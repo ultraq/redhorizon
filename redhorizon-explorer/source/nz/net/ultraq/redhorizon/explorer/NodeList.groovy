@@ -34,13 +34,8 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  */
 class NodeList implements ImGuiElement {
 
-	final Scene scene
-
-	NodeList(Scene scene) {
-
-		this.scene = scene
-		enabled = true
-	}
+	boolean enabled = true
+	Scene scene
 
 	@Override
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
@@ -52,8 +47,10 @@ class NodeList implements ImGuiElement {
 
 		// File list
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
-			scene.nodes.each { node ->
-				renderNodeAndChildren(node)
+			if (scene) {
+				scene.nodes.each { node ->
+					renderNodeAndChildren(node)
+				}
 			}
 			ImGui.endListBox()
 		}
