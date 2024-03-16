@@ -122,7 +122,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 		if (mesh && shader && material) {
 			mesh.updateTextureUvs(region as Vector2f[])
-			renderer.draw(mesh, getGlobalTransform(), shader, material)
+			renderer.draw(mesh, globalTransform, shader, material)
 		}
 	}
 

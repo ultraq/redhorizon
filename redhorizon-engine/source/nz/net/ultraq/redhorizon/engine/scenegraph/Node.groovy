@@ -82,7 +82,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	protected Vector3f getGlobalPosition() {
 
-		return getGlobalTransform().getTranslation(globalPosition)
+		return globalTransform.getTranslation(globalPosition)
 	}
 
 	/**
@@ -91,7 +91,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	protected Vector3f getGlobalScale() {
 
-		return getGlobalTransform().getScale(globalScale)
+		return globalTransform.getScale(globalScale)
 	}
 
 	/**
