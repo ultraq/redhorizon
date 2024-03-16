@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -36,6 +37,7 @@ class ScanlinesShader extends ShaderConfig {
 			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.frag.glsl',
+			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
 			Uniforms.framebufferUniform,
 			{ shader, material, window ->
 				def scale = window.renderResolution.height / window.targetResolution.height / 2 as float

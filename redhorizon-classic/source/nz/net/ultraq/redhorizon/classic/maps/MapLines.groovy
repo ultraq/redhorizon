@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Material
@@ -23,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.PrimitivesShader
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -74,7 +74,7 @@ class MapLines extends Node<MapLines> implements GraphicsElement {
 
 		axisLinesMesh = renderer.createMesh(
 			type: MeshType.LINES,
-			layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+			layout: new VertexBufferLayout(Attribute.COLOUR, Attribute.POSITION),
 			colour: Colour.RED.withAlpha(0.5),
 			vertices: [X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX] as Vector2f[]
 		)
@@ -84,7 +84,7 @@ class MapLines extends Node<MapLines> implements GraphicsElement {
 
 		boundaryLinesMesh = renderer.createMesh(
 			type: MeshType.LINE_LOOP,
-			layout: new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION),
+			layout: new VertexBufferLayout(Attribute.COLOUR, Attribute.POSITION),
 			colour: Colour.YELLOW.withAlpha(0.5),
 			vertices: mapBoundary
 		)

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -32,7 +33,8 @@ class PrimitivesShader extends ShaderConfig {
 		super(
 			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl'
+			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl',
+			[Attribute.POSITION, Attribute.COLOUR]
 		)
 	}
 }

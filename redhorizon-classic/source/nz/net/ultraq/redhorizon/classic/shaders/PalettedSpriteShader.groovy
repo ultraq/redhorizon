@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.shaders
 
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -32,6 +33,7 @@ class PalettedSpriteShader extends ShaderConfig {
 			'PalettedSprite',
 			'nz/net/ultraq/redhorizon/classic/shaders/PalettedSprite.vert.glsl',
 			'nz/net/ultraq/redhorizon/classic/shaders/PalettedSprite.frag.glsl',
+			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
 			{ shader, material, window ->
 				shader.setUniformTexture('indexTexture', 0, material.texture)
 			},

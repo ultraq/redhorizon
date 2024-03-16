@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 
 import org.joml.Vector2f
 import static org.lwjgl.opengl.GL11C.GL_FLOAT
@@ -60,22 +60,22 @@ class OpenGLMesh extends Mesh {
 		stackPush().withCloseable { stack ->
 			var vertexBuffer = stack.mallocFloat(layout.size() * vertices.size())
 			vertices.eachWithIndex { vertex, index ->
-				layout.parts.each { layoutPart ->
-					switch (layoutPart) {
-						case VertexBufferLayoutPart.POSITION -> vertexBuffer.put(vertex.x, vertex.y)
-						case VertexBufferLayoutPart.COLOUR -> vertexBuffer.put(colour.r, colour.g, colour.b, colour.a)
-						case VertexBufferLayoutPart.TEXTURE_UVS -> {
+				layout.attributes.each { attribute ->
+					switch (attribute) {
+						case Attribute.POSITION -> vertexBuffer.put(vertex.x, vertex.y)
+						case Attribute.COLOUR -> vertexBuffer.put(colour.r, colour.g, colour.b, colour.a)
+						case Attribute.TEXTURE_UVS -> {
 							var textureUV = textureUVs[index]
 							vertexBuffer.put(textureUV.x, textureUV.y)
 						}
-						default -> throw new UnsupportedOperationException("Unhandled vertex layout part ${layoutPart.name()}")
+						default -> throw new UnsupportedOperationException("Unhandled vertex layout part ${attribute.name()}")
 					}
 				}
 			}
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW)
 
-			layout.parts.each { part ->
+			layout.attributes.each { part ->
 				glEnableVertexAttribArray(part.location)
 				glVertexAttribPointer(part.location, part.size, GL_FLOAT, false, layout.sizeInBytes(), layout.offsetOfInBytes(part))
 			}
@@ -128,7 +128,7 @@ class OpenGLMesh extends Mesh {
 				glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 				textureUVs.eachWithIndex { textureUv, index ->
 					glBufferSubData(GL_ARRAY_BUFFER,
-						(layout.sizeInBytes() * index) + layout.offsetOfInBytes(VertexBufferLayoutPart.TEXTURE_UVS),
+						(layout.sizeInBytes() * index) + layout.offsetOfInBytes(Attribute.TEXTURE_UVS),
 						textureUv.get(stack.mallocFloat(Vector2f.FLOATS)))
 				}
 			}

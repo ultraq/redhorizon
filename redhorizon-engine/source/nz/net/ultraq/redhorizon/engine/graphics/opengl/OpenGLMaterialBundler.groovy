@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Matrix4f
@@ -39,9 +39,9 @@ class OpenGLMaterialBundler implements MaterialBundler, EventTarget {
 
 	// TODO: Derive the layout from the materials being bundled, not hard-coded in this class
 	private static final VertexBufferLayout VERTEX_BUFFER_LAYOUT = new VertexBufferLayout(
-		VertexBufferLayoutPart.POSITION,
-		VertexBufferLayoutPart.COLOUR,
-		VertexBufferLayoutPart.TEXTURE_UVS
+		Attribute.POSITION,
+		Attribute.COLOUR,
+		Attribute.TEXTURE_UVS
 	)
 
 	@Delegate

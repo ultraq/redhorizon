@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -34,6 +35,7 @@ class ScreenShader extends ShaderConfig {
 			'Screen',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
+			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
 			Uniforms.framebufferUniform
 		)
 	}

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
 /**
@@ -34,6 +35,7 @@ class SpriteShader extends ShaderConfig {
 			NAME,
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl',
 			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl',
+			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
 			{ shader, material, window ->
 				shader.setUniformTexture(UNIFORM_MAIN_TEXTURE, 0, material.texture)
 			}

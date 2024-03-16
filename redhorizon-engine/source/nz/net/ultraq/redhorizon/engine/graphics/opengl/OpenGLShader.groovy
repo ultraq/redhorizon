@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
@@ -45,9 +46,9 @@ class OpenGLShader extends Shader {
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shaders.
 	 */
-	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms) {
+	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform... uniforms) {
 
-		super(name, uniforms)
+		super(name, attributes, uniforms)
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation
@@ -75,6 +76,12 @@ class OpenGLShader extends Shader {
 			var programId = glCreateProgram()
 			glAttachShader(programId, vertexShaderId)
 			glAttachShader(programId, fragmentShaderId)
+
+			// Control binding points for attributes in our shaders
+			attributes.each { attribute ->
+				glBindAttribLocation(programId, attribute.location, attribute.name)
+			}
+
 			glLinkProgram(programId)
 			glValidateProgram(programId)
 

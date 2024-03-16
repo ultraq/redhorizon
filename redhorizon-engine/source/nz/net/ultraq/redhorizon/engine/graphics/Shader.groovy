@@ -31,6 +31,7 @@ abstract class Shader implements GraphicsResource {
 	static final String UNIFORM_MODEL = 'model'
 
 	final String name
+	final Attribute[] attributes
 	final Uniform[] uniforms
 
 	/**

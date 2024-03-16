@@ -43,10 +43,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Create a framebuffer that can be rendered to.
-	 *
-	 * @param resolution
-	 * @param filter
-	 * @return
 	 */
 	default Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
 
@@ -55,11 +51,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Create a framebuffer that can be rendered to.
-	 *
-	 * @param width
-	 * @param height
-	 * @param filter
-	 * @return
 	 */
 	Framebuffer createFramebuffer(int width, int height, boolean filter)
 
@@ -80,34 +71,22 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	/**
 	 * Create a new shader program from the given configuration, or return the
 	 * existing shader program if one has already been created from the config.
-	 *
-	 * @param config
-	 * @return
 	 */
 	default Shader createShader(ShaderConfig config) {
 
-		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.uniforms)
+		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.attributes, config.uniforms)
 	}
 
 	/**
 	 * Create a new shader program from a pair of vertex and fragment shader
 	 * scripts, or return the existing shader program if one has already been
 	 * created with the given name.
-	 *
-	 * @param name
-	 * @param vertexShaderSource
-	 * @param fragmentShaderSource
-	 * @param uniforms
-	 * @return
 	 */
-	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms)
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
 	 * a convenience method for {@link #createMesh}.
-	 *
-	 * @param surface
-	 * @return
 	 */
 	default Mesh createSpriteMesh(Rectanglef surface) {
 
@@ -117,10 +96,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
 	 * a convenience method for {@link #createMesh}.
-	 *
-	 * @param surface
-	 * @param textureUVs
-	 * @return
 	 */
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs)
 
@@ -131,12 +106,6 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Create and fill a texture with the given image data.
-	 *
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param data
-	 * @return New texture object.
 	 */
 	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data)
 
@@ -147,28 +116,17 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 
 	/**
 	 * Draw a mesh using the given shader.
-	 *
-	 * @param mesh
-	 * @param transform
-	 * @param shader
 	 */
 	void draw(Mesh mesh, Matrix4f transform, Shader shader)
 
 	/**
 	 * Draw a mesh using a shader and material to configure the shader.
-	 *
-	 * @param mesh
-	 * @param transform
-	 * @param shader
-	 * @param material
 	 */
 	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material)
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use
 	 * {@code null} to set the render target as the screen.
-	 *
-	 * @param framebuffer
 	 */
 	void setRenderTarget(Framebuffer framebuffer)
 

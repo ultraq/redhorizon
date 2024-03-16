@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
@@ -39,7 +40,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4f
@@ -187,11 +187,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms) {
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms) {
 
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
-			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, uniforms)
+			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
 			shaders << shader
 		}
 		return shader
@@ -202,11 +202,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		return createMesh(
 			MeshType.TRIANGLES,
-			new VertexBufferLayout(
-				VertexBufferLayoutPart.POSITION,
-				VertexBufferLayoutPart.COLOUR,
-				VertexBufferLayoutPart.TEXTURE_UVS
-			),
+			new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
 			surface as Vector2f[],
 			Colour.WHITE,
 			textureUVs as Vector2f[],

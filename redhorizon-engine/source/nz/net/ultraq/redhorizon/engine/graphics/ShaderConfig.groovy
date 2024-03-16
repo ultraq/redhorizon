@@ -27,21 +27,18 @@ class ShaderConfig {
 	final String name
 	final String vertexShaderSource
 	final String fragmentShaderSource
+	final Attribute[] attributes
 	final Uniform[] uniforms
 
 	/**
 	 * Constructor, create a shader config for building a shader program later.
-	 *
-	 * @param name
-	 * @param vertexShaderResourcePath
-	 * @param fragmentShaderResourcePath
-	 * @param uniforms
 	 */
-	ShaderConfig(String name, String vertexShaderResourcePath, String fragmentShaderResourcePath, Uniform... uniforms) {
+	ShaderConfig(String name, String vertexShaderResourcePath, String fragmentShaderResourcePath, List<Attribute> attributes, Uniform... uniforms) {
 
 		this.name = name
 		this.vertexShaderSource = getResourceAsStream(vertexShaderResourcePath).text
 		this.fragmentShaderSource = getResourceAsStream(fragmentShaderResourcePath).text
+		this.attributes = attributes
 		this.uniforms = uniforms
 	}
 }

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
@@ -24,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayoutPart
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -76,7 +76,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 		mesh = scene
 			.requestCreateOrGet(new MeshRequest(type,
-				new VertexBufferLayout(VertexBufferLayoutPart.POSITION, VertexBufferLayoutPart.COLOUR), this.points, colour))
+				new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour))
 			.get()
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.primitivesShader))
