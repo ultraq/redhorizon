@@ -28,9 +28,19 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 enum VertexBufferLayoutPart {
 
+	// NOTE: The location values should line up with what's in the shaders as that
+	//       is what's needed for the index param in glEnableVertexAttribArray and
+	//       glVertexAttribPointer.  If we want to stop having to keep these all
+	//       in sync, then alternatives would be to:
+	//        - assign these ourselves when shaders are created, after
+	//          glAttachShader and before glLinkProgram, using glBindAttribLocation
+	//        - use a query to look these up using glGetAttribLocation, only doing
+	//          this once per vertex buffer otherwise it can crash on Windows
+	// @formatter:off
 	POSITION    ('position',   0, Vector2f.FLOATS),
 	COLOUR      ('colour',     1, Colour.FLOATS),
 	TEXTURE_UVS ('textureUVs', 2, Vector2f.FLOATS)
+	// @formatter:on
 
 	final String name
 	final int location
