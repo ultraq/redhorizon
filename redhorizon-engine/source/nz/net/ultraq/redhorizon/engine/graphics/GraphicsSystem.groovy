@@ -148,7 +148,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				def (request, future) = creationRequest
 				var resource = switch (request) {
 					case ShaderRequest -> renderer.createShader(request.shaderConfig())
-					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.colour(), request.vertices(),
+					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.vertices(), request.colour(),
 						null, request.indices(), request.dynamic())
 					case SpriteMeshRequest -> {
 						if (request.textureUVs() != null) {

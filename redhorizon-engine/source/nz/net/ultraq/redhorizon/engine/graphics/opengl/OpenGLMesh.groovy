@@ -36,7 +36,6 @@ import static org.lwjgl.system.MemoryStack.stackPush
  */
 class OpenGLMesh extends Mesh {
 
-	final VertexBufferLayout layout
 	final int vertexArrayId
 	final int vertexBufferId
 	final int elementBufferId
@@ -47,12 +46,11 @@ class OpenGLMesh extends Mesh {
 	/**
 	 * Constructor, creates a new OpenGL mesh.
 	 */
-	OpenGLMesh(int type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
+	OpenGLMesh(int type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
 		int[] indices, boolean dynamic) {
 
-		super(type, colour, vertices, textureUVs, indices)
+		super(type, layout, vertices, colour, textureUVs, indices)
 
-		this.layout = layout
 		vertexArrayId = glGenVertexArrays()
 		glBindVertexArray(vertexArrayId)
 

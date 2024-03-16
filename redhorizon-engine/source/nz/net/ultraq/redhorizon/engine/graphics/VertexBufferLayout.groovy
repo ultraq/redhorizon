@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ import groovy.transform.TupleConstructor
 
 /**
  * Representation of the layout of a vertex buffer.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
@@ -30,15 +30,12 @@ class VertexBufferLayout {
 
 	/**
 	 * Return the offset value of the given layout part, in floats.
-	 * 
-	 * @param layoutPart
-	 * @return
 	 */
 	int offsetOf(VertexBufferLayoutPart layoutPart) {
 
-		def offset = 0
-		for (def i = 0; i < parts.size(); i++) {
-			def part = parts[i]
+		var offset = 0
+		for (var i = 0; i < parts.size(); i++) {
+			var part = parts[i]
 			if (part == layoutPart) {
 				return offset
 			}
@@ -48,20 +45,17 @@ class VertexBufferLayout {
 	}
 
 	/**
-	 * Return the offset value of the given layout part, in floats.
-	 * 
-	 * @param layoutPart
-	 * @return
+	 * Return the offset value of the given layout part, in bytes.
 	 */
 	int offsetOfInBytes(VertexBufferLayoutPart layoutPart) {
 
-		def offset = offsetOf(layoutPart)
+		var offset = offsetOf(layoutPart)
 		return offset != -1 ? offset * Float.BYTES : -1
 	}
 
 	/**
 	 * Return the size of this layout in floats.
-	 * 
+	 *
 	 * @return
 	 */
 	int size() {
@@ -71,7 +65,7 @@ class VertexBufferLayout {
 
 	/**
 	 * Return the size of this layout in bytes.
-	 * 
+	 *
 	 * @return
 	 */
 	int sizeInBytes() {

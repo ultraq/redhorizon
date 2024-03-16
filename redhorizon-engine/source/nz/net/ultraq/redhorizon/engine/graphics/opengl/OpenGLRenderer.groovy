@@ -177,11 +177,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices, Vector2f[] textureUVs,
+	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
 		int[] indices, boolean dynamic) {
 
 		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
-			layout, colour, vertices, textureUVs, indices, dynamic)
+			layout, vertices, colour, textureUVs, indices, dynamic)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
 	}
@@ -207,8 +207,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 				VertexBufferLayoutPart.COLOUR,
 				VertexBufferLayoutPart.TEXTURE_UVS
 			),
-			Colour.WHITE,
 			surface as Vector2f[],
+			Colour.WHITE,
 			textureUVs as Vector2f[],
 			[0, 1, 3, 1, 2, 3] as int[],
 			true

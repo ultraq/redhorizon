@@ -39,10 +39,10 @@ interface GraphicsRequests {
 	static record ShaderRequest(ShaderConfig shaderConfig) implements Request<Shader> {}
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
-	static record MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices,
+	static record MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour,
 		int[] indices, boolean dynamic) implements Request<Mesh> {
-		MeshRequest(MeshType type, VertexBufferLayout layout, Colour colour, Vector2f[] vertices) {
-			this(type, layout, colour, vertices, null, false)
+		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
+			this(type, layout, vertices, colour, null, false)
 		}
 	}
 

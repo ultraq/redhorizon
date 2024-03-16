@@ -76,7 +76,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 		mesh = scene
 			.requestCreateOrGet(new MeshRequest(type,
-				new VertexBufferLayout(VertexBufferLayoutPart.COLOUR, VertexBufferLayoutPart.POSITION), colour, this.points))
+				new VertexBufferLayout(VertexBufferLayoutPart.POSITION, VertexBufferLayoutPart.COLOUR), this.points, colour))
 			.get()
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.primitivesShader))

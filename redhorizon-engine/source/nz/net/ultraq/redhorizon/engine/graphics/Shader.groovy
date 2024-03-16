@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
+@TupleConstructor(defaults = false)
 abstract class Shader implements GraphicsResource {
 
 	static final String UNIFORM_MODEL = 'model'

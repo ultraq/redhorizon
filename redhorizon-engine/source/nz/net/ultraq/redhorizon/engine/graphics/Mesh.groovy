@@ -30,8 +30,9 @@ import groovy.transform.TupleConstructor
 abstract class Mesh implements GraphicsResource {
 
 	final int vertexType
-	final Colour colour
+	final VertexBufferLayout layout
 	final Vector2f[] vertices
+	final Colour colour
 	final Vector2f[] textureUVs
 	final int[] indices
 

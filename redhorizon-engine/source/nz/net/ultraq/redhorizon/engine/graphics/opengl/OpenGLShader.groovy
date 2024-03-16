@@ -39,16 +39,11 @@ class OpenGLShader extends Shader {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
 
-	private final int programId
+	final int programId
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shaders.
-	 *
-	 * @param name
-	 * @param vertexShaderSource
-	 * @param fragmentShaderSource
-	 * @param uniforms
 	 */
 	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform... uniforms) {
 
