@@ -69,12 +69,10 @@ class MapViewerScript extends Script<Map> {
 	private void addControls() {
 
 		var scaleIndex = scaleRange.findIndexOf { it == initialScale }
-		var mouseMovementModifier = 1f
 		var renderResolution = window.renderResolution
 		var targetResolution = window.targetResolution
-		mouseMovementModifier = renderResolution.width / targetResolution.width
 
-		// Add options so it's not hard-coded to my weird inverted setup 😅
+		// Use touchpad to move around
 		if (touchpadInput) {
 			var ctrl = false
 			removeEventFunctions << inputEventStream.on(KeyEvent) { event ->
@@ -105,15 +103,14 @@ class MapViewerScript extends Script<Map> {
 				})
 			)
 		}
+		// Use click-and-drag to move around
 		else {
-
-			// Use click-and-drag to move around
 			var cursorPosition = new Vector2f()
 			var dragging = false
 			removeEventFunctions << inputEventStream.on(CursorPositionEvent) { event ->
 				if (dragging) {
-					var diffX = (cursorPosition.x - event.xPos) * mouseMovementModifier as float
-					var diffY = (cursorPosition.y - event.yPos) * mouseMovementModifier as float
+					var diffX = (cursorPosition.x - event.xPos) as float
+					var diffY = (cursorPosition.y - event.yPos) as float
 					camera.translate(-diffX, diffY)
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)

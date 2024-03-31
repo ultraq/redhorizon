@@ -36,6 +36,8 @@ import java.nio.ByteBuffer
  */
 class PalettedSprite extends Sprite implements FactionColours {
 
+	final float repeatX
+	final float repeatY
 	Palette palette
 
 	private Texture paletteAsTexture
@@ -53,9 +55,12 @@ class PalettedSprite extends Sprite implements FactionColours {
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.
 	 */
-	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, Palette palette) {
+	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, float repeatX, float repeatY,
+		Palette palette) {
 
 		super(width, height, numImages, spriteSheet)
+		this.repeatX = repeatX
+		this.repeatY = repeatY
 		this.palette = palette
 	}
 
@@ -63,6 +68,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	void onSceneAdded(Scene scene) {
 
 		super.onSceneAdded(scene)
+		region.setMax(repeatX, repeatY)
 
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
