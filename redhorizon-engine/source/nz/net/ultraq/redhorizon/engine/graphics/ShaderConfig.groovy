@@ -36,6 +36,7 @@ class ShaderConfig {
 	ShaderConfig(String name, String vertexShaderResourcePath, String fragmentShaderResourcePath, List<Attribute> attributes, Uniform... uniforms) {
 
 		this.name = name
+		// TODO: I think these need to use closeable methods as getText() won't be doing that for us right?
 		this.vertexShaderSource = getResourceAsStream(vertexShaderResourcePath).text
 		this.fragmentShaderSource = getResourceAsStream(fragmentShaderResourcePath).text
 		this.attributes = attributes

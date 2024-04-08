@@ -59,6 +59,8 @@ subprojects {
 		implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
 		testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+		testImplementation 'net.bytebuddy:byte-buddy:1.14.13'
+		testImplementation 'org.objenesis:objenesis:3.3'
 	}
 
 	java {
