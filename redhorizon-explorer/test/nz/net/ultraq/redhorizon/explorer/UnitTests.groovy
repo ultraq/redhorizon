@@ -42,7 +42,7 @@ class UnitTests extends Specification {
 		given:
 			// Epic scene mocking 😅
 			var scene = new Scene().tap {
-				it.graphicsRequestHandler = Mock(GraphicsRequests) {
+				graphicsRequestHandler = Mock(GraphicsRequests) {
 					requestCreateOrGet(_) >> { args ->
 						return args[0].class == SpriteSheetRequest ?
 							Mock(Future) {
@@ -56,13 +56,8 @@ class UnitTests extends Specification {
 					}
 				}
 			}
-			// TODO: Definitely need a resource loader extension
-			var spriteFile = getResourceAsStream("nz/net/ultraq/redhorizon/explorer/harv.shp").withBufferedStream { stream ->
-				return new ShpFile(stream)
-			}
-			var palette = getResourceAsStream("nz/net/ultraq/redhorizon/explorer/ra-temperate.pal").withBufferedStream { stream ->
-				return new PalFile(stream)
-			}
+			var spriteFile = loadResource("nz/net/ultraq/redhorizon/explorer/harv.shp", ShpFile)
+			var palette = loadResource("nz/net/ultraq/redhorizon/explorer/ra-temperate.pal", PalFile)
 			var unitData = getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/data/harv.json').withBufferedReader { reader ->
 				return new JsonSlurper().parseText(reader.text) as UnitData
 			}
@@ -71,5 +66,9 @@ class UnitTests extends Specification {
 			scene << unit
 		then:
 			notThrown(Exception)
+	}
+
+	private <T> T loadResource(String path, Class<T> clazz) {
+		return getResourceAsStream(path).withBufferedStream { stream -> clazz.newInstance(stream) }
 	}
 }
