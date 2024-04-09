@@ -23,6 +23,5 @@ include(
 	'redhorizon-events',
 	'redhorizon-explorer',
 	'redhorizon-filetypes',
-	'redhorizon-sandbox',
-	'redhorizon-scenarioeditor'
+	'redhorizon-sandbox'
 )
