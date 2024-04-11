@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.io
+package nz.net.ultraq.redhorizon.converter
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 /**
- * Take an object and write it out to a file stream.
+ * PNG -> SHP file converter.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class FileWriter<TSource, TOptions> {
+class Png2ShpConverter extends Converter<PngFile, ShpFileWriterOptions> {
 
-	final TSource source
+	Png2ShpConverter(InputStream inputStream) {
 
-	/**
-	 * Write the given object to the current output stream.
-	 */
-	abstract void write(OutputStream outputStream, TOptions options = null)
+		super(new PngFile(inputStream))
+	}
+
+	@Override
+	void convert(OutputStream outputStream, ShpFileWriterOptions options) {
+
+		new ShpFileWriter(inputFile).write(outputStream, options)
+	}
 }

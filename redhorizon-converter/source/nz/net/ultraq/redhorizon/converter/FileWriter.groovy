@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+package nz.net.ultraq.redhorizon.converter
 
-include(
-	'redhorizon-classic',
-	'redhorizon-cli',
-	'redhorizon-converter',
-	'redhorizon-engine',
-	'redhorizon-events',
-	'redhorizon-explorer',
-	'redhorizon-filetypes',
-	'redhorizon-sandbox'
-)
+import groovy.transform.TupleConstructor
+
+/**
+ * Take an object and write it out to a file stream.
+ *
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+abstract class FileWriter<TSource, TOptions> {
+
+	final TSource source
+
+	/**
+	 * Write the given object to the current output stream.
+	 */
+	abstract void write(OutputStream outputStream, TOptions options = null)
+}

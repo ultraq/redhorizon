@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filetypes
+package nz.net.ultraq.redhorizon.converter
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
-import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.*
 

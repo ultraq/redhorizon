@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.converter
+package nz.net.ultraq.redhorizon.converter
 
-import picocli.CommandLine.Command
+import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 /**
- * CLI tool for converting from one file format to another.
+ * PNG -> SHP (Dune 2) file converter.
  *
  * @author Emanuel Rabina
  */
-@Command(
-	name = 'convert',
-	header = [
-		'',
-		'Red Horizon - File Converter',
-		'============================',
-		''
-	],
-	mixinStandardHelpOptions = true,
-	subcommands = [
-		Pcx2CpsConverterCli,
-		Png2ShpConverterCli,
-		Png2ShpDune2ConverterCli
-	],
-	synopsisSubcommandLabel = 'COMMAND'
-)
-class ConverterCli {
+class Png2ShpDune2Converter extends Converter<PngFile, ShpFileWriterDune2Options> {
+
+	Png2ShpDune2Converter(InputStream inputStream) {
+
+		super(new PngFile(inputStream))
+	}
+
+	@Override
+	void convert(OutputStream outputStream, ShpFileWriterDune2Options options) {
+
+		new ShpFileWriterDune2(inputFile).write(outputStream, options)
+	}
 }

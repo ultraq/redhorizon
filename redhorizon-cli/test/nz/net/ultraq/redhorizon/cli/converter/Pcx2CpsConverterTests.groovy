@@ -16,48 +16,22 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
-
 import com.github.valfirst.slf4jtest.TestLoggerFactory
-import spock.lang.Ignore
 import spock.lang.Specification
 import static com.github.valfirst.slf4jtest.Assertions.assertThat
 
 /**
- * Tests for the PCX -> CPS converter.
+ * Tests for the PCX -> CPS file converter CLI.
  *
  * @author Emanuel Rabina
  */
 class Pcx2CpsConverterTests extends Specification {
 
-	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverter)
-
-	@Ignore("CPS conversion got busted somewhere along the way 😢")
-	def "Converts a PCX file to a CPS file"() {
-		given:
-			var pcxPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.pcx'
-			var cpsPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.cps'
-			var converter = new Pcx2CpsConverter(
-				sourceFile: getResourceAsFile(pcxPath),
-				destFile: new File("${System.getProperty('user.dir')}/build/classes/test/${cpsPath}"),
-				overwrite: true
-			)
-
-		when:
-			var exitCode = converter.call()
-
-		then:
-			exitCode == 0
-
-			// File must be able to be read back
-			var cpsFile = new CpsFile(getResourceAsStream(cpsPath))
-			cpsFile.palette != null
-			cpsFile.imageData != null
-	}
+	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverterCli)
 
 	def "Source file not found"() {
 		given:
-			var converter = new Pcx2CpsConverter(
+			var converter = new Pcx2CpsConverterCli(
 				sourceFile: Mock(File) {
 					toString() >> 'not-a-file.pcx'
 				}
@@ -73,7 +47,7 @@ class Pcx2CpsConverterTests extends Specification {
 
 	def "Destination file already exists"() {
 		given:
-			var converter = new Pcx2CpsConverter(
+			var converter = new Pcx2CpsConverterCli(
 				sourceFile: Mock(File) {
 					exists() >> true
 				},

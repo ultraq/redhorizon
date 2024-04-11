@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filetypes
+package nz.net.ultraq.redhorizon.converter
 
 import nz.net.ultraq.redhorizon.classic.codecs.RLEZero
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpImageInfoDune2
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDune2.getMAX_HEIGHT
 import static nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDune2.getMAX_WIDTH

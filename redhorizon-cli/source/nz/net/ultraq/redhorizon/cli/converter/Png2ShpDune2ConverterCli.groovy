@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileWriter
-import nz.net.ultraq.redhorizon.filetypes.PcxFile
+import nz.net.ultraq.redhorizon.converter.Png2ShpDune2Converter
+import nz.net.ultraq.redhorizon.converter.ShpFileWriterDune2Options
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,26 +28,37 @@ import picocli.CommandLine.Parameters
 import java.util.concurrent.Callable
 
 /**
- * Converter subcommand for converting PCX files to C&C CPS files.
+ * Subcommand for converting PNG files to the Dune 2 SHP format.
  *
  * @author Emanuel Rabina
  */
 @Command(
-	name = 'pcx2cps',
-	description = 'Convert a PCX file to a Command & Conquer CPS file'
+	name = 'png2shpd2',
+	description = 'Convert a paletted PNG file to a Dune 2 SHP file'
 )
-class Pcx2CpsConverter implements Callable<Integer> {
+class Png2ShpDune2ConverterCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Pcx2CpsConverter)
+	private static final Logger logger = LoggerFactory.getLogger(Png2ShpDune2ConverterCli)
 
-	@Parameters(index = '0', description = 'A 320x200 PCX image.  If creating a paletted CPS, then the PCX file must have an internal palette.')
+	@Parameters(index = '0', description = 'The sounce PNG image.')
 	File sourceFile
 
-	@Parameters(index = '1', description = 'Path for the CPS file to be written to.')
+	@Parameters(index = '1', description = 'Path for the SHP file to be written to.')
 	File destFile
 
-	@Option(names = ['-o', '--overwrite'], description = 'Overwrite the destination file if it already exists')
-	boolean overwrite
+	@Option(names = ['--width', '-w'], required = true, description = 'Width of each SHP image')
+	int width
+
+	@Option(names = ['--height', '-h'], required = true, description = 'Height of each SHP image')
+	int height
+
+	@Option(names = ['--numImages', '-n'], required = true, description = 'The number of images for the SHP file')
+	int numImages
+
+	@Option(
+		names = ['--faction'],
+		description = 'Generate a SHP file whose red-palette colours (indexes 144-150) will be exchanged for the proper faction colours in-game.')
+	boolean faction
 
 	/**
 	 * Perform the file conversion.
@@ -57,14 +68,10 @@ class Pcx2CpsConverter implements Callable<Integer> {
 
 		logger.info('Loading {}...', sourceFile)
 		if (sourceFile.exists()) {
-			if (destFile.exists() && overwrite) {
-				destFile.delete()
-			}
 			if (!destFile.exists()) {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
-						def pcxFile = new PcxFile(inputStream)
-						new CpsFileWriter(pcxFile).write(outputStream)
+						new Png2ShpDune2Converter(inputStream).convert(outputStream, new ShpFileWriterDune2Options(width, height, numImages, faction))
 					}
 				}
 				return 0

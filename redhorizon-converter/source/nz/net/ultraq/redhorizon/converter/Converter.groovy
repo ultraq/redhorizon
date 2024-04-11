@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+package nz.net.ultraq.redhorizon.converter
 
-include(
-	'redhorizon-classic',
-	'redhorizon-cli',
-	'redhorizon-converter',
-	'redhorizon-engine',
-	'redhorizon-events',
-	'redhorizon-explorer',
-	'redhorizon-filetypes',
-	'redhorizon-sandbox'
-)
+import groovy.transform.TupleConstructor
+
+/**
+ * Converts one file type to another.
+ *
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+abstract class Converter<I, O> {
+
+	final I inputFile
+
+	/**
+	 * Perform conversion of the input file data to the output stream.
+	 */
+	abstract void convert(OutputStream outputStream, O options = null)
+}
