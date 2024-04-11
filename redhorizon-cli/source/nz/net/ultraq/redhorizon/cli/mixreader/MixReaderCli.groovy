@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.cli.mixreader
 
-import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.mixreader.MixReader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ import java.util.concurrent.Callable
 /**
  * Write the data for a named entry in a MIX file, used primarily for testing
  * purposes.
- * 
+ *
  * @author Emanuel Rabina
  */
 @Command(
@@ -66,20 +66,9 @@ class MixReaderCli implements Callable<Integer> {
 
 		logger.info('Red Horizon Mix Reader {}', commandSpec.parent().version()[0])
 
-		logger.info('Loading {}...', mixFile)
-		new MixFile(new File(mixFile)).withCloseable { mix ->
-			def entry = mix.getEntry(entryName)
-			if (entry) {
-				logger.info('{} found, writing to file...', entryName)
-				mix.getEntryData(entry).withBufferedStream { entryInputStream ->
-					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
-						entryInputStream.transferTo(entryOutputStream)
-					}
-				}
-			}
-			else {
-				logger.error('{} not found in {}', entryName, mixFile)
-				throw new IllegalArgumentException()
+		new MixReader(new File(mixFile)).withCloseable { mixReader ->
+			new FileOutputStream(entryName).withCloseable { entryOutputStream ->
+				mixReader.extract(entryName, entryOutputStream)
 			}
 		}
 
