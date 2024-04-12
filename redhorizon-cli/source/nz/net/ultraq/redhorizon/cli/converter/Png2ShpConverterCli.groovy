@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterDune2
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterDune2Options
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriter
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterOptions
 import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 import org.slf4j.Logger
@@ -29,17 +29,17 @@ import picocli.CommandLine.Parameters
 import java.util.concurrent.Callable
 
 /**
- * Subcommand for converting PNG files to the Dune 2 SHP format.
+ * Subcommand for converting PNG files to the C&C SHP format.
  *
  * @author Emanuel Rabina
  */
 @Command(
-	name = 'png2shpd2',
-	description = 'Convert a paletted PNG file to a Dune 2 SHP file'
+	name = 'png2shp',
+	description = 'Convert a paletted PNG file to a Command & Conquer SHP file'
 )
-class Png2ShpDune2Converter implements Callable<Integer> {
+class Png2ShpConverterCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Png2ShpDune2Converter)
+	private static final Logger logger = LoggerFactory.getLogger(Png2ShpConverterCli)
 
 	@Parameters(index = '0', description = 'The sounce PNG image.')
 	File sourceFile
@@ -56,11 +56,6 @@ class Png2ShpDune2Converter implements Callable<Integer> {
 	@Option(names = ['--numImages', '-n'], required = true, description = 'The number of images for the SHP file')
 	int numImages
 
-	@Option(
-		names = ['--faction'],
-		description = 'Generate a SHP file whose red-palette colours (indexes 144-150) will be exchanged for the proper faction colours in-game.')
-	boolean faction
-
 	/**
 	 * Perform the file conversion.
 	 */
@@ -73,7 +68,7 @@ class Png2ShpDune2Converter implements Callable<Integer> {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
 						def pngFile = new PngFile(inputStream)
-						new ShpFileWriterDune2(pngFile).write(outputStream, new ShpFileWriterDune2Options(width, height, numImages, faction))
+						new ShpFileWriter(pngFile).write(outputStream, new ShpFileWriterOptions(width, height, numImages))
 					}
 				}
 				return 0
