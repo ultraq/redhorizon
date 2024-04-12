@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.input.KeyControl

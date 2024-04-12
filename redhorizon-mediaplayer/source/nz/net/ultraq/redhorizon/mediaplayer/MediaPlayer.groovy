@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mediaplayer
+package nz.net.ultraq.redhorizon.mediaplayer
 
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer

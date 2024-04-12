@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.cli.AudioOptions
 import nz.net.ultraq.redhorizon.cli.FileOptions
 import nz.net.ultraq.redhorizon.cli.GraphicsOptions
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.mediaplayer.MediaPlayer
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
