@@ -55,8 +55,6 @@ class Scene implements EventTarget, Visitable {
 
 	/**
 	 * Allow visitors into the scene for traversal.
-	 *
-	 * @param visitor
 	 */
 	@Override
 	void accept(SceneVisitor visitor) {
@@ -79,8 +77,6 @@ class Scene implements EventTarget, Visitable {
 	/**
 	 * Trigger the {@code onSceneAdded} event for this node and all its children.
 	 * Each node triggers a {@link NodeAddedEvent} event.
-	 *
-	 * @param node
 	 */
 	private void addNodeAndChildren(Node node) {
 
@@ -117,9 +113,6 @@ class Scene implements EventTarget, Visitable {
 
 	/**
 	 * Overloads the {@code <<} operator to add elements to this scene.
-	 *
-	 * @param element
-	 * @return
 	 */
 	Scene leftShift(Node element) {
 
@@ -162,9 +155,6 @@ class Scene implements EventTarget, Visitable {
 
 	/**
 	 * Removes a node from the scene.
-	 *
-	 * @param node
-	 * @return
 	 */
 	Scene removeNode(Node node) {
 
@@ -176,8 +166,6 @@ class Scene implements EventTarget, Visitable {
 	/**
 	 * Trigger the {@code onSceneRemoved} event for this node and all its
 	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
-	 *
-	 * @param node
 	 */
 	private void removeNodeAndChildren(Node node) {
 

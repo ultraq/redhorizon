@@ -40,6 +40,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 import nz.net.ultraq.redhorizon.explorer.objects.Map
+import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
 import nz.net.ultraq.redhorizon.explorer.scripts.SpriteShowcaseScript
@@ -47,7 +48,6 @@ import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
@@ -82,7 +82,7 @@ class Explorer {
 	private Scene scene
 	private File currentDirectory
 	private InputStream selectedFileInputStream
-	private Palette palette
+	private nz.net.ultraq.redhorizon.filetypes.Palette palette
 	private int paletteIndex
 	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
@@ -90,7 +90,7 @@ class Explorer {
 	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
-	Explorer(String version, Palette palette) {
+	Explorer(String version, nz.net.ultraq.redhorizon.filetypes.Palette palette) {
 
 		this.palette = palette
 
@@ -341,6 +341,8 @@ class Explorer {
 				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
 
 				// 🤷
+			case PalFile ->
+				new Palette(file)
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
@@ -373,7 +375,7 @@ class Explorer {
 			}
 			if (targetClass) {
 				var unit = targetClass
-					.getDeclaredConstructor(ImagesFile, Palette, UnitData)
+					.getDeclaredConstructor(ImagesFile, nz.net.ultraq.redhorizon.filetypes.Palette, UnitData)
 					.newInstance(shpFile, palette, unitData)
 					.attachScript(new UnitShowcaseScript())
 				scene << unit

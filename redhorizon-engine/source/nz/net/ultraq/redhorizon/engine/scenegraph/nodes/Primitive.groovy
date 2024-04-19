@@ -75,8 +75,10 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	void onSceneAdded(Scene scene) {
 
 		mesh = scene
-			.requestCreateOrGet(new MeshRequest(type,
-				new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour))
+			.requestCreateOrGet(type == MeshType.TRIANGLES ?
+				new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour,
+					[0, 1, 3, 1, 2, 3] as int[], false) :
+				new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour))
 			.get()
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.primitivesShader))
@@ -92,10 +94,8 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (!mesh || !shader) {
-			return
+		if (mesh && shader) {
+			renderer.draw(mesh, globalTransform, shader)
 		}
-
-		renderer.draw(mesh, globalTransform, shader)
 	}
 }
