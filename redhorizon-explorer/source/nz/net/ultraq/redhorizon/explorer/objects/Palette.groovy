@@ -39,16 +39,15 @@ class Palette extends Node<Palette> {
 
 		for (var i = 0; i < palFile.size; i++) {
 			var colour = palFile[i]
+			var r = colour[0] & 0xff
+			var g = colour[1] & 0xff
+			var b = colour[2] & 0xff
 			var swatch = new Primitive(
 				MeshType.TRIANGLES,
-				new Colour(
-					"Palette-${i}",
-					(colour[0] & 0xff) / 256,
-					(colour[1] & 0xff) / 256,
-					(colour[2] & 0xff) / 256
-				),
+				new Colour("Palette-${i}", r / 256, g / 256, b / 256),
 				new Rectanglef(0, 0, SWATCH_WIDTH, SWATCH_HEIGHT) as Vector2f[]
 			)
+			swatch.name = "Colour${i} (${r},${g},${b})"
 			var offsetX = (i % 16) * SWATCH_WIDTH
 			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT
 			swatch.transform.translate(offsetX, offsetY as float)

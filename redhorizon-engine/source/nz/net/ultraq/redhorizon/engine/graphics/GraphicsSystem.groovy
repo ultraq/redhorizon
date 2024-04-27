@@ -111,8 +111,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	/**
 	 * Return the renderer.
-	 *
-	 * @return
 	 */
 	GraphicsRenderer getRenderer() {
 
@@ -121,8 +119,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	/**
 	 * Return the rendering pipeline.
-	 *
-	 * @return
 	 */
 	RenderPipeline getRenderPipeline() {
 
@@ -130,18 +126,27 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	}
 
 	/**
-	 * Run through all of the queued requests for the creation and deletion of
-	 * graphics resources.
-	 *
-	 * @param renderer
+	 * Run through and complete any registered deletions, returning whether or not
+	 * there were items to process.
 	 */
-	void processRequests(GraphicsRenderer renderer) {
+	private boolean processDeletions(GraphicsRenderer renderer) {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
 				renderer.delete(deletionRequest)
 			}
+			return true
 		}
+		return false
+	}
+
+	/**
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
+	 */
+	void processRequests(GraphicsRenderer renderer) {
+
+		processDeletions(renderer)
 
 		if (creationRequests) {
 			creationRequests.drain().each { creationRequest ->
@@ -255,6 +260,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 								logger.debug('Shutting down graphics system')
 							}
 						}
+					}
+					while (processDeletions(renderer)) {
+						// Do nothing, will continue until processDeletions returns false
 					}
 				}
 			}

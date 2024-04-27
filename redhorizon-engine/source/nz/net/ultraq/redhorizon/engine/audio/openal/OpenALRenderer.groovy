@@ -49,8 +49,6 @@ class OpenALRenderer implements AudioRenderer {
 
 	/**
 	 * Constructor, create an OpenAL renderer with the given configuration.
-	 *
-	 * @param config
 	 */
 	OpenALRenderer(AudioConfiguration config) {
 
@@ -60,8 +58,6 @@ class OpenALRenderer implements AudioRenderer {
 	/**
 	 * Check for any OpenAL errors created by the OpenAL call in the given
 	 * closure, throwing them if they occur.
-	 *
-	 * @param closure
 	 */
 	private static <T> T checkForError(Closure<T> closure) {
 
@@ -105,8 +101,6 @@ class OpenALRenderer implements AudioRenderer {
 
 	/**
 	 * Emit some information about the OpenAL rendering device.
-	 *
-	 * @return
 	 */
 	@Override
 	String toString() {

@@ -66,8 +66,6 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	/**
 	 * Return the audio renderer.
-	 *
-	 * @return
 	 */
 	AudioRenderer getRenderer() {
 
@@ -75,18 +73,27 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	}
 
 	/**
-	 * Run through all of the queued requests for the creation and deletion of
-	 * graphics resources.
-	 *
-	 * @param renderer
+	 * Run through and complete any registered deletions, returning whether or not
+	 * there were items to process.
 	 */
-	private void processRequests(AudioRenderer renderer) {
+	private boolean processDeletions(AudioRenderer renderer) {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
 				renderer.delete(deletionRequest)
 			}
+			return true
 		}
+		return false
+	}
+
+	/**
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
+	 */
+	private void processRequests(AudioRenderer renderer) {
+
+		processDeletions(renderer)
 
 		if (creationRequests) {
 			creationRequests.drain().each { creationRequest ->
@@ -160,6 +167,10 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 				// Shutdown
 				logger.debug('Shutting down audio system')
+
+				while (processDeletions(renderer)) {
+					// Do nothing, will continue until processDeletions returns false
+				}
 			}
 		}
 		trigger(new SystemStoppedEvent())

@@ -34,6 +34,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
 
+	String name
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
@@ -111,7 +112,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	String getName() {
 
-		return this.class.simpleName
+		return name ?: this.class.simpleName
 	}
 
 	/**
