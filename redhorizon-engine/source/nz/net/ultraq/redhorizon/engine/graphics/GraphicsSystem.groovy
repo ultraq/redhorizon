@@ -261,9 +261,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 							}
 						}
 					}
-					while (processDeletions(renderer)) {
-						// Do nothing, will continue until processDeletions returns false
-					}
 				}
 			}
 		}

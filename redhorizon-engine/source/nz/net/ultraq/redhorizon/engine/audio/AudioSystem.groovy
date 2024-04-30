@@ -167,10 +167,6 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 				// Shutdown
 				logger.debug('Shutting down audio system')
-
-				while (processDeletions(renderer)) {
-					// Do nothing, will continue until processDeletions returns false
-				}
 			}
 		}
 		trigger(new SystemStoppedEvent())

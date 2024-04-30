@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.CancellationException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -43,9 +42,10 @@ class Engine {
 
 	private final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final Semaphore enginesStoppingSemaphore = new Semaphore(1)
+	private CountDownLatch engineStoppedLatch
 
 	private List<Future<?>> systemTasks
-	private boolean engineStopped
+	private boolean engineStopping
 
 	/**
 	 * Add a system to the engine.
@@ -76,12 +76,15 @@ class Engine {
 
 		logger.debug('Starting engine...')
 
+		engineStoppedLatch = new CountDownLatch(systems.size())
+
 		var engineReadyLatch = new CountDownLatch(systems.size())
 		systemTasks = systems.collect() { system ->
 			system.on(SystemReadyEvent) { event ->
 				engineReadyLatch.countDown()
 			}
 			system.on(SystemStoppedEvent) { event ->
+				engineStoppedLatch.countDown()
 				stop()
 			}
 			return executorService.submit(system)
@@ -110,10 +113,9 @@ class Engine {
 	void stop() {
 
 		enginesStoppingSemaphore.tryAcquireAndRelease { ->
-			if (!engineStopped) {
+			if (!engineStopping) {
 				systemTasks*.cancel(true)
-				engineStopped = true
-				logger.debug('Engine stopped')
+				engineStopping = true
 			}
 		}
 	}
@@ -123,14 +125,20 @@ class Engine {
 	 */
 	void waitUntilStopped() {
 
-		systemTasks.each { systemTask ->
-			try {
-				systemTask.get()
+		logger.debug('Waiting for each system to signal completion')
+		while (true) {
+			engineStoppedLatch.await(1, TimeUnit.SECONDS)
+			if (engineStoppedLatch.count == 0) {
+				break
 			}
-			catch (CancellationException ignored) {
-				// Do nothing
+			var failedTasks = systemTasks.findAll { task -> task.state() == State.FAILED }
+			if (failedTasks) {
+				failedTasks.each { failedTask ->
+					logger.error('An error occurred during engine shutdown', failedTask)
+				}
+				break
 			}
 		}
-		logger.debug('All systems stopped')
+		logger.debug('Engine stopped')
 	}
 }

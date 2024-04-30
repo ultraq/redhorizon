@@ -70,8 +70,9 @@ class Application implements EventTarget {
 	private Scene scene
 	private ApplicationEventHandler applicationStart
 	private ApplicationEventHandler applicationStop
-	private boolean applicationStopped
+	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
+	private DebugOverlay debugOverlay
 
 	/**
 	 * Add the audio system to this application.  The audio system will run on its
@@ -97,12 +98,11 @@ class Application implements EventTarget {
 		}
 		graphicsSystem.on(SystemReadyEvent) { event ->
 			var audioSystem = engine.systems.find { it instanceof AudioSystem } as AudioSystem
-			graphicsSystem.renderPipeline.addImGuiElement(
-				new DebugOverlay(config.debug)
-					.addAudioRenderer(audioSystem.renderer)
-					.addGraphicsRenderer(graphicsSystem.renderer)
-					.toggleWith(inputEventStream, GLFW_KEY_D)
-			)
+			debugOverlay = new DebugOverlay(config.debug)
+				.addAudioRenderer(audioSystem.renderer)
+				.addGraphicsRenderer(graphicsSystem.renderer)
+				.toggleWith(inputEventStream, GLFW_KEY_D)
+			graphicsSystem.renderPipeline.addImGuiElement(debugOverlay)
 			overlayRenderPasses.each { overlayRenderPass ->
 				graphicsSystem.renderPipeline.addImGuiElement(overlayRenderPass)
 			}
@@ -163,6 +163,28 @@ class Application implements EventTarget {
 		applicationStart?.apply(this, scene)
 
 		engine.waitUntilStopped()
+
+		// Check we closed everything
+		var activeFramebuffers = debugOverlay.activeFramebuffers.get()
+		if (activeFramebuffers > 0) {
+			logger.debug('Not all active framebuffers closed')
+		}
+		var activeMeshes = debugOverlay.activeMeshes.get()
+		if (activeMeshes > 0) {
+			logger.debug('Not all meshes closed, {} remaining', activeMeshes)
+		}
+		var activeTextures = debugOverlay.activeTextures.get()
+		if (activeMeshes > 0) {
+			logger.debug('Not all textures closed, {} remaining', activeTextures)
+		}
+		var activeSources = debugOverlay.activeSources.get()
+		if (activeMeshes > 0) {
+			logger.debug('Not all sources closed, {} remaining', activeSources)
+		}
+		var activeBuffers = debugOverlay.activeBuffers.get()
+		if (activeMeshes > 0) {
+			logger.debug('Not all buffers closed, {} remaining', activeBuffers)
+		}
 	}
 
 	/**
@@ -171,11 +193,11 @@ class Application implements EventTarget {
 	final void stop() {
 
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
-			if (!applicationStopped) {
+			if (!applicationStopping) {
 				logger.debug('Stopping application...')
 				applicationStop?.apply(this, scene)
 				engine.stop()
-				applicationStopped = true
+				applicationStopping = true
 			}
 		}
 	}

@@ -55,13 +55,15 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String, String> persistentLines = [:]
 	private AtomicInteger drawCalls = new AtomicInteger()
-	private AtomicInteger activeFramebuffers = new AtomicInteger()
-	private AtomicInteger activeMeshes = new AtomicInteger()
-	private AtomicInteger activeTextures = new AtomicInteger()
-	private AtomicInteger activeSources = new AtomicInteger()
-	private AtomicInteger activeBuffers = new AtomicInteger()
 	private int debugWindowSizeX = 350
 	private int debugWindowSizeY = 200
+
+	// TODO: These stats can probably live outside of this object?
+	final AtomicInteger activeFramebuffers = new AtomicInteger()
+	final AtomicInteger activeMeshes = new AtomicInteger()
+	final AtomicInteger activeTextures = new AtomicInteger()
+	final AtomicInteger activeSources = new AtomicInteger()
+	final AtomicInteger activeBuffers = new AtomicInteger()
 
 	/**
 	 * Constructor, create a new blank overlay.  This is made more useful by

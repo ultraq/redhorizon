@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFont
+import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
@@ -110,12 +111,18 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		var io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
 
+		var fontConfig1 = new ImFontConfig()
 		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float, fontConfig1)
 		}
+		fontConfig1.destroy()
+		io.setFontDefault(robotoFont)
+
+		var fontConfig2 = new ImFontConfig()
 		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/engine/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.monitorScale as float, fontConfig2)
 		}
+		fontConfig2.destroy()
 
 		imGuiGlfw.init(window.handle, true)
 		imGuiGl3.init('#version 410 core')

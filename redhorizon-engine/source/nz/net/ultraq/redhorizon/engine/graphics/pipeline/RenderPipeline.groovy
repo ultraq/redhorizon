@@ -49,7 +49,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class RenderPipeline implements AutoCloseable {
+class RenderPipeline implements Closeable {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 
@@ -99,6 +99,7 @@ class RenderPipeline implements AutoCloseable {
 	@Override
 	void close() {
 
+		logger.debug('Closing RenderPipeline')
 		renderPasses*.delete(renderer)
 		renderer.delete(fullScreenQuad)
 	}
