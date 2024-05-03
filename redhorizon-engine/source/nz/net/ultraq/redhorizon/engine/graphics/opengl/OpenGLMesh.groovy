@@ -75,9 +75,9 @@ class OpenGLMesh extends Mesh {
 			vertexBuffer.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW)
 
-			layout.attributes.each { part ->
-				glEnableVertexAttribArray(part.location)
-				glVertexAttribPointer(part.location, part.size, GL_FLOAT, false, layout.sizeInBytes(), layout.offsetOfInBytes(part))
+			layout.attributes.each { attribute ->
+				glEnableVertexAttribArray(attribute.location)
+				glVertexAttribPointer(attribute.location, attribute.size, GL_FLOAT, false, layout.sizeInBytes(), layout.offsetOfInBytes(attribute))
 			}
 		}
 
@@ -118,6 +118,10 @@ class OpenGLMesh extends Mesh {
 
 	@Override
 	void updateTextureUvs(Vector2f[] textureUVs) {
+
+		if (!this.textureUVs) {
+			throw new IllegalStateException('Cannot update textureUVs on a mesh that has no textureUVs to begin with')
+		}
 
 		if (!dynamic) {
 			throw new IllegalStateException('Cannot update textureUVs on a mesh that was created without a dynamic buffer')
