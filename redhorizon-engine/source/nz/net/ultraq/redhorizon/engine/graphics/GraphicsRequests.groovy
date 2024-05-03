@@ -24,7 +24,7 @@ import org.joml.primitives.Rectanglef
 
 import groovy.transform.ImmutableOptions
 import java.nio.ByteBuffer
-import java.util.concurrent.Future
+import java.util.concurrent.CompletableFuture
 
 /**
  * Interface to make requests of the graphics system.
@@ -70,7 +70,7 @@ interface GraphicsRequests {
 	 * graphics system, which will eventually be resolved in the returned
 	 * {@code Future}.
 	 */
-	<V extends GraphicsResource, R extends Request<V>> Future<V> requestCreateOrGet(R request)
+	<V extends GraphicsResource, R extends Request<V>> CompletableFuture<V> requestCreateOrGet(R request)
 
 	/**
 	 * Request the graphics system to delete a resource.

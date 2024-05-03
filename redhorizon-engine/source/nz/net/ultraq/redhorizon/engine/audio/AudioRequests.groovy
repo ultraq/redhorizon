@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import groovy.transform.ImmutableOptions
 import java.nio.ByteBuffer
-import java.util.concurrent.Future
+import java.util.concurrent.CompletableFuture
 
 /**
  * Interface to make requests of the audio system.
@@ -38,7 +38,7 @@ interface AudioRequests {
 	 * Request the creation or retrieval of the given resource type from the audio
 	 * system, which will eventually be resolved in the returned {@code Future}.
 	 */
-	<V extends AudioResource, R extends Request<V>> Future<V> requestCreateOrGet(R request)
+	<V extends AudioResource, R extends Request<V>> CompletableFuture<V> requestCreateOrGet(R request)
 
 	/**
 	 * Request the audio system to delete a resource.

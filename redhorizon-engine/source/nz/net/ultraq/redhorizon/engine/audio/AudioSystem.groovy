@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -109,7 +108,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	}
 
 	@Override
-	<V extends AudioResource, R extends Request<V>> Future<V> requestCreateOrGet(R request) {
+	<V extends AudioResource, R extends Request<V>> CompletableFuture<V> requestCreateOrGet(R request) {
 
 		var future = new CompletableFuture<V>()
 		creationRequests << new Tuple2(request, future)

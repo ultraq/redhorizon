@@ -36,7 +36,6 @@ import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -173,7 +172,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	}
 
 	@Override
-	<V extends GraphicsResource, R extends Request<V>> Future<V> requestCreateOrGet(R request) {
+	<V extends GraphicsResource, R extends Request<V>> CompletableFuture<V> requestCreateOrGet(R request) {
 
 		var future = new CompletableFuture<V>()
 		creationRequests << new Tuple2(request, future)
