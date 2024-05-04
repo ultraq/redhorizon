@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.AudFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.VqaFile
+import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -35,7 +36,11 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class MixEntryTester {
 
-	private final Logger logger = LoggerFactory.getLogger(MixEntryTester)
+	private static final Logger logger = LoggerFactory.getLogger(MixEntryTester)
+
+	// Any file in this list should only load the header data and lazily load their
+	// main data so that testing can be fast
+	private static final FileClasses = [VqaFile, ShpFile, AudFile] as List<Class<? extends ResourceFile>>
 
 	final MixFile mixFile
 
@@ -47,46 +52,43 @@ class MixEntryTester {
 	 *   A best guess of the class to use to load the entry, or {@code null} if
 	 *   the type could not be determined.
 	 */
-	@SuppressWarnings('GroovyResultOfObjectAllocationIgnored')
 	MixEntryTesterResult test(nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry) {
 
 		var hexId = Integer.toHexString(mixEntry.id)
 		logger.debug('Attempting to determine type of entry w/ ID of {}', hexId)
 
-		return mixFile.getEntryData(mixEntry).withBufferedStream { bufferedInputStream ->
-
-			// Try a VQA file
-			bufferedInputStream.mark(mixEntry.size)
-			try {
-				new VqaFile(bufferedInputStream)
-				logger.debug('Guessing VQA file')
-				return new MixEntryTesterResult("(unknown, 0x${hexId})", VqaFile)
+		return mixFile.getEntryData(mixEntry).withBufferedStream { stream ->
+			stream.mark(mixEntry.size)
+			var result = FileClasses.inject(null) { acc, fileClass ->
+				if (acc) {
+					return acc
+				}
+				stream.reset()
+				return testFileType(stream, fileClass, hexId)
 			}
-			catch (AssertionError ignored) {
+			if (!result) {
+				logger.debug('Could not determine type')
 			}
-
-			// Try a SHP file
-			bufferedInputStream.reset()
-			try {
-				new ShpFile(mixFile.getEntryData(mixEntry))
-				logger.debug('Guessing SHP file')
-				return new MixEntryTesterResult("(unknown, 0x${hexId})", ShpFile)
-			}
-			catch (AssertionError ignored) {
-			}
-
-			// Try an AUD file
-			bufferedInputStream.reset()
-			try {
-				new AudFile(mixFile.getEntryData(mixEntry))
-				logger.debug('Guessing AUD file')
-				return new MixEntryTesterResult("(unknown, 0x${hexId})", AudFile)
-			}
-			catch (AssertionError ignored) {
-			}
-
-			logger.debug('Could not determine type')
-			return null
+			return result
 		}
+	}
+
+	/**
+	 * Test the entry data as the given type.
+	 *
+	 * @return A result if the type matches the next entry, {@code null} otherwise.
+	 */
+	private static MixEntryTesterResult testFileType(BufferedInputStream stream, Class<? extends ResourceFile> fileClass, String hexId) {
+
+		try {
+			fileClass.newInstance(stream)
+			logger.debug("Guessing ${fileClass.simpleName}")
+			return new MixEntryTesterResult("(unknown, 0x${hexId})", fileClass)
+		}
+		catch (AssertionError ignored) {
+			// Do nothing
+		}
+
+		return null
 	}
 }

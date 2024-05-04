@@ -33,6 +33,8 @@ import java.nio.ByteBuffer
  * <p>
  * The CPS file is only used for the conversion utility, and does not take part
  * in the Red Horizon game.
+ * <p>
+ * NOTE: Implementation doesn't seem to work on C&C files 😭
  *
  * @author Emanuel Rabina
  */
@@ -45,10 +47,9 @@ class CpsFile implements ImageFile, InternalPalette {
 	public static final int PALETTE_SIZE = 768
 
 	// File header
-	final short fileSize
+	final short fileSize // Excludes the 2 bytes for this value
 	final short compression
-	final int imageSize // Stored in file as short
-	final short unknown
+	final int imageSize
 	final short paletteSize
 
 	final int width
@@ -70,10 +71,8 @@ class CpsFile implements ImageFile, InternalPalette {
 		compression = input.readShort()
 		assert compression == COMPRESSION_LCW : 'Only LCW compression supported'
 
-		imageSize = input.readShort() & 0x00ffff
+		imageSize = input.readInt()
 		assert imageSize == IMAGE_SIZE : "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
-
-		unknown = input.readShort()
 
 		paletteSize = input.readShort()
 		assert paletteSize == 0 || paletteSize == PALETTE_SIZE : "CPS palette size isn't 0 or 768"
@@ -85,7 +84,7 @@ class CpsFile implements ImageFile, InternalPalette {
 
 		// Image data
 		imageData = new LCW().decode(
-			ByteBuffer.wrapNative(input.readNBytes(fileSize - 8)), // Subtract header parts excluding the 2 bytes for fileSize itself
+			ByteBuffer.wrapNative(input.readNBytes(fileSize - 10 - paletteSize)),
 			ByteBuffer.allocateNative(imageSize)
 		)
 	}
