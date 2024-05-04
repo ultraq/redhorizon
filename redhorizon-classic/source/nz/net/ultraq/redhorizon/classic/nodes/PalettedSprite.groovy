@@ -49,6 +49,8 @@ class PalettedSprite extends Sprite implements FactionColours {
 	PalettedSprite(ImagesFile imagesFile, Palette palette) {
 
 		super(imagesFile)
+		this.repeatX = 1f
+		this.repeatY = 1f
 		this.palette = palette
 	}
 
@@ -76,7 +78,11 @@ class PalettedSprite extends Sprite implements FactionColours {
 	void onSceneAdded(Scene scene) {
 
 		super.onSceneAdded(scene)
-		region.setMax(repeatX, repeatY)
+
+		// TODO: Some uses are a repeating tile, others aren't.  There should be a unified way of doing this 🤔
+		if (repeatX != 1f || repeatY != 1f) {
+			region.setMax(repeatX, repeatY)
+		}
 
 		shader = scene
 			.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
@@ -86,7 +92,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
 			.get()
 		material.palette = paletteAsTexture
-		material.faction = faction
 	}
 
 	@Override
