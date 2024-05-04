@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGBA
 /**
  * Implementation of the PAL file, which is an array of 256 colours (in VGA
  * 6-bits-per-channel format).
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions('pal')
@@ -34,7 +34,7 @@ class PalFile extends VgaPalette {
 
 	/**
 	 * Constructor, builds a PAL file from an input stream.
-	 * 
+	 *
 	 * @param input
 	 */
 	PalFile(InputStream inputStream) {
@@ -42,10 +42,16 @@ class PalFile extends VgaPalette {
 		super(PALETTE_SIZE, FORMAT_RGB, inputStream)
 	}
 
+	@Override
+	String toString() {
+
+		return "PAL file, 256 colour VGA palette (6 bits per pixel)"
+	}
+
 	/**
 	 * Return a modification of this palette with the given alpha mask for a new
 	 * 32-bit colour palette.
-	 * 
+	 *
 	 * @return
 	 */
 	Palette withAlphaMask() {
@@ -55,8 +61,8 @@ class PalFile extends VgaPalette {
 			def colour = this[i]
 			def colourWithAlpha =
 				i === 0 ? [0, 0, 0, 0] :
-				i === 4 ? [0, 0, 0, 127] :
-				[colour[0], colour[1], colour[2], 255]
+					i === 4 ? [0, 0, 0, 127] :
+						[colour[0], colour[1], colour[2], 255]
 			paletteWithAlpha[i] = colourWithAlpha
 		}
 		return new Palette(size, FORMAT_RGBA, paletteWithAlpha)

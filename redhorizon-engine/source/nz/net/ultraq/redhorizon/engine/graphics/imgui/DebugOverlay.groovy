@@ -38,8 +38,6 @@ import imgui.ImGui
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
 
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -49,10 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class DebugOverlay implements ImGuiElement<DebugOverlay> {
 
-	private static final int MAX_DEBUG_LINES = 10
-
 	// Debug information
-	private final BlockingQueue<String> debugLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 	private final Map<String, String> persistentLines = [:]
 	private AtomicInteger drawCalls = new AtomicInteger()
 	private int debugWindowSizeX = 350
@@ -75,11 +70,6 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
 				persistentLines[event.persistentKey] = event.message
-			}
-			else {
-				while (!debugLines.offer(event.message)) {
-					debugLines.poll()
-				}
 			}
 		}
 
@@ -145,13 +135,6 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		ImGui.separator()
 		persistentLines.keySet().sort().each { key ->
 			ImGui.text(persistentLines[key])
-		}
-
-		if (debugLines.size()) {
-			ImGui.separator()
-			debugLines.each { line ->
-				ImGui.textWrapped(line)
-			}
 		}
 
 		ImGui.end()

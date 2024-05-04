@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -103,6 +104,9 @@ class Application implements EventTarget {
 				.addGraphicsRenderer(graphicsSystem.renderer)
 				.toggleWith(inputEventStream, GLFW_KEY_D)
 			graphicsSystem.renderPipeline.addImGuiElement(debugOverlay)
+
+			graphicsSystem.renderPipeline.addImGuiElement(new LogPanel(config.debug))
+
 			overlayRenderPasses.each { overlayRenderPass ->
 				graphicsSystem.renderPipeline.addImGuiElement(overlayRenderPass)
 			}
