@@ -99,7 +99,6 @@ class RenderPipeline implements Closeable {
 	@Override
 	void close() {
 
-		logger.debug('Closing RenderPipeline')
 		renderPasses*.delete(renderer)
 		renderer.delete(fullScreenQuad)
 	}
