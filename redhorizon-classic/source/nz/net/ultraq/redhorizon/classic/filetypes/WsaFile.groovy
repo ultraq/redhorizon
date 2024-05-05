@@ -85,20 +85,25 @@ class WsaFile implements AnimationFile, Streaming {
 		input = new NativeDataInputStream(inputStream)
 
 		// File header
-		numFrames = input.readShort()
+		numFrames = input.readShort() & 0xffff
 		assert numFrames > 0
 
 		x = input.readShort()
-		y = input.readShort()
+		assert x == 0
 
-		width = input.readShort()
+		y = input.readShort()
+		assert y == 0
+
+		width = input.readShort() & 0xffff
 		assert width > 0
 
-		height = input.readShort()
+		height = input.readShort() & 0xffff
 		assert height > 0
 
 		delta = input.readUnsignedShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
+
 		flags = input.readShort()
+		assert (flags & 0x0001) == flags
 
 		// Frame offsets
 		frameOffsets = new int[numFrames + 2]
@@ -165,15 +170,15 @@ class WsaFile implements AnimationFile, Streaming {
 			Thread.currentThread().name = 'WsaFile :: Decoding'
 			logger.debug('Decoding started')
 
-			def frameSize = width * height
-			def xorDelta = new XORDelta(frameSize)
-			def lcw = new LCW()
+			var frameSize = width * height
+			var xorDelta = new XORDelta(frameSize)
+			var lcw = new LCW()
 
 			// Decode frame by frame
-			def frame = 0
+			var frame = 0
 			while (frame < numFrames && !Thread.interrupted()) {
-				def colouredFrame = average('Decoding frame', 1f, logger) { ->
-					def indexedFrame = xorDelta.decode(
+				var colouredFrame = average('Decoding frame', 1f, logger) { ->
+					var indexedFrame = xorDelta.decode(
 						lcw.decode(
 							ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
 							ByteBuffer.allocateNative(delta)
