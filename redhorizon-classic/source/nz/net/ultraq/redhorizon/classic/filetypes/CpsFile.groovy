@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.InternalPalette
 import nz.net.ultraq.redhorizon.filetypes.Palette
@@ -33,18 +34,26 @@ import java.nio.ByteBuffer
  * <p>
  * The CPS file is only used for the conversion utility, and does not take part
  * in the Red Horizon game.
- * <p>
- * NOTE: Implementation doesn't seem to work on C&C files 😭
  *
  * @author Emanuel Rabina
  */
+@FileExtensions('cps')
 @SuppressWarnings('GrFinalVariableAccess')
 class CpsFile implements ImageFile, InternalPalette {
 
 	// Header constants
-	public static final int COMPRESSION_LCW = 0x0004
-	public static final int IMAGE_SIZE = 64000  // 320x200
-	public static final int PALETTE_SIZE = 768
+	// @formatter:off
+	static final short COMPRESSION_NONE  = 0x0000
+	static final short COMPRESSION_LZW12 = 0x0001
+	static final short COMPRESSION_LZW14 = 0x0002
+	static final short COMPRESSION_RLE   = 0x0003
+	static final short COMPRESSION_LCW   = 0x0004
+
+	static final int IMAGE_SIZE = 64000  // 320x200
+	static final int PALETTE_SIZE = 768
+	// @formatter:on
+
+	private final NativeDataInputStream input
 
 	// File header
 	final short fileSize // Excludes the 2 bytes for this value
@@ -52,18 +61,19 @@ class CpsFile implements ImageFile, InternalPalette {
 	final int imageSize
 	final short paletteSize
 
-	final int width
-	final int height
+	final int width = 320
+	final int height = 200
 	final ColourFormat format = FORMAT_RGB
-	final Palette palette
-	final ByteBuffer imageData
+
+	private Palette palette
+	private ByteBuffer imageData
 
 	/**
 	 * Constructor, creates a new CPS file from data in the given input stream.
 	 */
 	CpsFile(InputStream inputStream) {
 
-		def input = new NativeDataInputStream(inputStream)
+		input = new NativeDataInputStream(inputStream)
 
 		// File header
 		fileSize = input.readShort()
@@ -76,17 +86,33 @@ class CpsFile implements ImageFile, InternalPalette {
 
 		paletteSize = input.readShort()
 		assert paletteSize == 0 || paletteSize == PALETTE_SIZE : "CPS palette size isn't 0 or 768"
+	}
 
-		// Optional palette
-		if (paletteSize) {
-			palette = new VgaPalette(paletteSize, FORMAT_RGB, input)
+	@Override
+	ByteBuffer getImageData() {
+
+		if (!imageData) {
+			var palette = getPalette()
+			imageData = new LCW().decode(
+				ByteBuffer.wrapNative(input.readNBytes((fileSize & 0xffff) - 8 - paletteSize)),
+				ByteBuffer.allocateNative(imageSize)
+			)
+			if (palette) {
+				imageData = imageData.applyPalette(palette)
+			}
 		}
 
-		// Image data
-		imageData = new LCW().decode(
-			ByteBuffer.wrapNative(input.readNBytes(fileSize - 10 - paletteSize)),
-			ByteBuffer.allocateNative(imageSize)
-		)
+		return imageData
+	}
+
+	@Override
+	Palette getPalette() {
+
+		// Optional palette
+		if (!palette && paletteSize) {
+			palette = new VgaPalette(256, FORMAT_RGB, input)
+		}
+		return palette
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.classic.filetypes.AudFile
+import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.VqaFile
@@ -40,7 +41,7 @@ class MixEntryTester {
 
 	// Any file in this list should only load the header data and lazily load their
 	// main data so that testing can be fast
-	private static final List<Class<? extends ResourceFile>> fileClasses = [VqaFile, ShpFile, AudFile]
+	private static final List<Class<? extends ResourceFile>> fileClasses = [AudFile, CpsFile, ShpFile, VqaFile]
 
 	final MixFile mixFile
 

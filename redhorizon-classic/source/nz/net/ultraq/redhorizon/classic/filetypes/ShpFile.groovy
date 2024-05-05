@@ -54,7 +54,6 @@ class ShpFile implements ImagesFile {
 	// @formatter:on
 
 	private final NativeDataInputStream input
-	private ByteBuffer[] imagesData
 
 	// File header
 	final int numImages // Stored in file as short
@@ -68,10 +67,10 @@ class ShpFile implements ImagesFile {
 
 	final ColourFormat format = FORMAT_INDEXED
 
+	private ByteBuffer[] imagesData
+
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
-	 *
-	 * @param inputStream
 	 */
 	ShpFile(InputStream inputStream) {
 
