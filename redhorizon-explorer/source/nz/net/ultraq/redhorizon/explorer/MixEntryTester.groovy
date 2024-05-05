@@ -40,7 +40,7 @@ class MixEntryTester {
 
 	// Any file in this list should only load the header data and lazily load their
 	// main data so that testing can be fast
-	private static final FileClasses = [VqaFile, ShpFile, AudFile] as List<Class<? extends ResourceFile>>
+	private static final List<Class<? extends ResourceFile>> fileClasses = [VqaFile, ShpFile, AudFile]
 
 	final MixFile mixFile
 
@@ -59,7 +59,7 @@ class MixEntryTester {
 
 		return mixFile.getEntryData(mixEntry).withBufferedStream { stream ->
 			stream.mark(mixEntry.size)
-			var result = FileClasses.inject(null) { acc, fileClass ->
+			var result = fileClasses.inject(null) { acc, fileClass ->
 				if (acc) {
 					return acc
 				}

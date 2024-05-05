@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,23 +33,28 @@ import java.nio.ByteBuffer
  * <p>
  * For more information about the C&C SHP file, see:
  * <a href="http://vladan.bato.net/cnc/ccfiles4.txt" target="_top">http://vladan.bato.net/cnc/ccfiles4.txt</a>
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions('shp')
 @SuppressWarnings('GrFinalVariableAccess')
 class ShpFile implements ImagesFile {
 
+	// @formatter:off
 	static final int HEADER_SIZE = 14
 	static final int OFFSET_SIZE = 8
-	static final int MAX_WIDTH = 65535
-	static final int MAX_HEIGHT = 65535
+	static final int MAX_WIDTH   = 65535
+	static final int MAX_HEIGHT  = 65535
 
 	// Header flags
 	static final byte FORMAT_LCW       = (byte)0x80
 	static final byte FORMAT_XOR_BASE  = (byte)0x40
 	static final byte FORMAT_XOR_CHAIN = (byte)0x20
 	private static final byte[] FORMATS = [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
+	// @formatter:on
+
+	private final NativeDataInputStream input
+	private ByteBuffer[] imagesData
 
 	// File header
 	final int numImages // Stored in file as short
@@ -59,32 +64,30 @@ class ShpFile implements ImagesFile {
 	final int height    // Stored in file as short
 	final short delta
 	final short flags
+	final ShpImageInfo[] imageOffsets
 
 	final ColourFormat format = FORMAT_INDEXED
 
-	final ShpImageInfo[] imageOffsets
-	final ByteBuffer[] imagesData
-
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
-	 * 
+	 *
 	 * @param inputStream
 	 */
 	ShpFile(InputStream inputStream) {
 
-		def input = new NativeDataInputStream(inputStream)
+		input = new NativeDataInputStream(inputStream)
 
 		// File header
-		numImages = input.readShort()
+		numImages = input.readShort() & 0xffff
 		assert numImages > 0
 
 		x = input.readShort()
 		y = input.readShort()
 
-		width = input.readShort()
+		width = input.readShort() & 0xffff
 		assert width > 0
 
-		height = input.readShort()
+		height = input.readShort() & 0xffff
 		assert height > 0
 
 		delta = input.readShort()
@@ -95,48 +98,49 @@ class ShpFile implements ImagesFile {
 		// numImages() + 2 for the 0 offset and EOF pointer
 		imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->
-			def imageInfo = new ShpImageInfo(input)
+			var imageInfo = new ShpImageInfo(input)
 			assert imageInfo.offsetFormat == 0 || imageInfo.offsetFormat in FORMATS
 			imageOffsets[i] = imageInfo
 		}
+	}
+
+	@Override
+	ByteBuffer[] getImagesData() {
 
 		// Decompresses the raw SHP data into palette-index data
-		def lcw = new LCW()
-		def xorDelta = new XORDelta(delta)
+		if (!imagesData) {
+			var lcw = new LCW()
+			var xorDelta = new XORDelta(delta)
 
-		imagesData = new ByteBuffer[numImages]
-		imagesData.length.times { i ->
-			def imageOffset = imageOffsets[i]
+			imagesData = new ByteBuffer[numImages]
+			imagesData.length.times { i ->
+				var imageOffset = imageOffsets[i]
 
-			// Format conversion buffers
-			def compressedImageSize = imageOffsets[i + 1].offset - imageOffset.offset
-			def compressedImage = ByteBuffer.wrapNative(input.readNBytes(compressedImageSize))
+				// Format conversion buffers
+				var compressedImageSize = imageOffsets[i + 1].offset - imageOffset.offset
+				var compressedImage = ByteBuffer.wrapNative(input.readNBytes(compressedImageSize))
+				var uncompressedImage = ByteBuffer.allocateNative(width * height)
 
-			def dest = ByteBuffer.allocateNative(width * height)
-
-			switch (imageOffset.offsetFormat) {
-				case FORMAT_LCW:
-					lcw.decode(compressedImage, dest)
-					break
-				case FORMAT_XOR_BASE:
-					xorDelta
-						.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
-						.decode(compressedImage, dest)
-					break
-				case FORMAT_XOR_CHAIN:
-					xorDelta
+				imagesData[i] = switch (imageOffset.offsetFormat) {
+					case FORMAT_LCW ->
+						lcw.decode(compressedImage, uncompressedImage)
+					case FORMAT_XOR_BASE ->
+						xorDelta
+							.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
+							.decode(compressedImage, uncompressedImage)
+					case FORMAT_XOR_CHAIN ->
+						xorDelta
 //						.deltaSource(imagesData[i - 1])
-						.decode(compressedImage, dest)
-					break
+							.decode(compressedImage, uncompressedImage)
+				}
 			}
-
-			imagesData[i] = dest
 		}
+		return imagesData
 	}
 
 	/**
 	 * Returns some information on this SHP file.
-	 * 
+	 *
 	 * @return SHP file info.
 	 */
 	@Override
