@@ -77,19 +77,19 @@ class AudFile implements SoundFile, Streaming {
 
 		// File header
 		frequency = input.readShort()
-		assert 0 < frequency && frequency <= 48000
+		assert frequency in [22050, 44100]
 
 		compressedSize = input.readInt()
 		assert compressedSize > 0
 
 		uncompressedSize = input.readInt()
-		assert uncompressedSize > 0
-		assert compressedSize < uncompressedSize
+		assert 0 < compressedSize && compressedSize < uncompressedSize
 
 		flags = input.readByte()
+		assert (flags & 0x03) == flags
 
 		type = input.readByte()
-		assert type == TYPE_IMA_ADPCM || type == TYPE_WS_ADPCM
+		assert type in [TYPE_IMA_ADPCM, TYPE_WS_ADPCM]
 
 		bits = (flags & FLAG_16BIT) ? 16 : 8
 		channels = (flags & FLAG_STEREO) ? 2 : 1
@@ -131,7 +131,7 @@ class AudFile implements SoundFile, Streaming {
 
 		return [
 			"AUD file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
-			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : type == TYPE_IMA_ADPCM ? 'IMA ADPCM' : '(unknown)'} algorithm",
+			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : 'IMA ADPCM'} algorithm",
 			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
 		].join(', ')
 	}
@@ -150,16 +150,16 @@ class AudFile implements SoundFile, Streaming {
 			Thread.currentThread().name = "AudFile :: Decoding"
 			logger.debug('Decoding started')
 
-			def decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
+			var decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
 
 			// Decompress the aud file data by chunks
-			def headerSize = input.bytesRead
+			var headerSize = input.bytesRead
 			while (input.bytesRead < headerSize + compressedSize && !Thread.interrupted()) {
-				def sample = average('Decoding sample', 1f, logger) { ->
+				var sample = average('Decoding sample', 1f, logger) { ->
 
 					// Chunk header
-					def compressedSize = input.readShort()
-					def uncompressedSize = input.readShort()
+					var compressedSize = input.readShort()
+					var uncompressedSize = input.readShort()
 					assert input.readInt() == 0x0000deaf : 'AUD chunk header ID should be "0x0000deaf"'
 
 					// Decode

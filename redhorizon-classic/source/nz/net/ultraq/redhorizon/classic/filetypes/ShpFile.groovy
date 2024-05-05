@@ -80,7 +80,10 @@ class ShpFile implements ImagesFile {
 		assert numImages > 0
 
 		x = input.readShort()
+		assert x == 0
+
 		y = input.readShort()
+		assert y == 0
 
 		width = input.readShort() & 0xffff
 		assert width > 0

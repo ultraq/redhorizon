@@ -88,6 +88,12 @@ class PlaybackScript extends Script {
 			play()
 		}
 
+		// Static sound sources will have fired the above already, so start playback of them here
+		if (!runOnce) {
+			logger.debug('Beginning playback')
+			play()
+		}
+
 		on(StopEvent) { event ->
 			logger.debug('Playback complete')
 		}
