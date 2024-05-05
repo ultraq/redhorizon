@@ -50,7 +50,6 @@ class ShpFile implements ImagesFile {
 	static final byte FORMAT_LCW       = (byte)0x80
 	static final byte FORMAT_XOR_BASE  = (byte)0x40
 	static final byte FORMAT_XOR_CHAIN = (byte)0x20
-	private static final byte[] FORMATS = [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 	// @formatter:on
 
 	private final NativeDataInputStream input
@@ -98,7 +97,7 @@ class ShpFile implements ImagesFile {
 		imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->
 			var imageInfo = new ShpImageInfo(input)
-			assert imageInfo.offsetFormat == 0 || imageInfo.offsetFormat in FORMATS
+			assert imageInfo.offsetFormat == 0 || imageInfo.offsetFormat in [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 			imageOffsets[i] = imageInfo
 		}
 	}

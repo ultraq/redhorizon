@@ -37,26 +37,27 @@ class CpsFileWriter extends FileWriter<ImageFile, Void> {
 	@Override
 	void write(OutputStream outputStream, Void options) {
 
-		def output = new NativeDataOutputStream(outputStream)
-		def lcw = new LCW()
-		def palette = source instanceof InternalPalette ? source.palette : null
+		var output = new NativeDataOutputStream(outputStream)
+		var lcw = new LCW()
+		var palette = source instanceof InternalPalette ? source.palette : null
 
 		// Encode image
-		def encodedImage = lcw.encode(source.imageData, ByteBuffer.allocateNative(source.imageData.capacity()))
+		var encodedImage = lcw.encode(source.imageData, ByteBuffer.allocateNative(source.imageData.capacity()))
 
 		// Write header
 		output.writeShort(8 + encodedImage.limit()) // (Header - this value) + image
 		output.writeShort(COMPRESSION_LCW)
-		output.writeShort(IMAGE_SIZE)
-		output.writeShort(0)
+		output.writeInt(IMAGE_SIZE)
 		output.writeShort(palette ? PALETTE_SIZE : 0)
 
-		// Write optional palette and image data
+		// Write optional palette
 		if (palette) {
 			palette.size.times { i ->
 				output.write(palette[i])
 			}
 		}
+
+		// Write image data
 		output.write(encodedImage.array(), 0, encodedImage.limit())
 	}
 }

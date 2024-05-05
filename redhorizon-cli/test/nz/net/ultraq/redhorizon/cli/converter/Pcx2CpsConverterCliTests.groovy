@@ -35,8 +35,8 @@ class Pcx2CpsConverterCliTests extends Specification {
 	@Ignore("CPS conversion got busted somewhere along the way 😢")
 	def "Converts a PCX file to a CPS file"() {
 		given:
-			var pcxPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.pcx'
-			var cpsPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.cps'
+			var pcxPath = 'alipaper.pcx'
+			var cpsPath = 'alipaper.cps'
 			var converter = new Pcx2CpsConverterCli(
 				sourceFile: getResourceAsFile(pcxPath),
 				destFile: new File("${System.getProperty('user.dir')}/build/classes/test/${cpsPath}"),

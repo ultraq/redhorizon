@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.filetypes
 
 import nz.net.ultraq.redhorizon.filetypes.codecs.RunLengthEncoding
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
+import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 import java.nio.ByteBuffer
 
@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * but for the purpose of Red Horizon, PCX files will be of the type used in the
  * Command & Conquer games: a 256-colour file with an internal palette located
  * at the tail of the file.
- * 
+ *
  * @author Emanuel Rabina.
  */
 @FileExtensions('pcx')
@@ -38,6 +38,7 @@ import java.nio.ByteBuffer
 class PcxFile implements ImageFile, InternalPalette {
 
 	// Header constants
+	// @formatter:off
 	static final int  HEADER_PALETTE_SIZE  = 48
 	static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
 	static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
@@ -51,6 +52,7 @@ class PcxFile implements ImageFile, InternalPalette {
 	static final int PALETTE_COLOURS      = 256
 	static final int PALETTE_SIZE         = PALETTE_COLOURS * FORMAT_RGB.value
 	static final int PALETTE_PADDING_SIZE = 1
+	// @formatter:on
 
 	// Header data
 	final byte manufacturer
@@ -80,23 +82,19 @@ class PcxFile implements ImageFile, InternalPalette {
 
 	/**
 	 * Constructor, creates a new PCX file from data in the given input stream.
-	 * 
+	 *
 	 * @param inputStream Input stream of the PCX file data.
 	 */
 	PcxFile(InputStream inputStream) {
 
-		def input = new NativeDataInputStream(inputStream)
+		var input = new NativeDataInputStream(inputStream)
 
 		// File header
 		manufacturer = input.readByte()
 		assert manufacturer == MANUFACTURER_ZSOFT
 
 		version = input.readByte()
-		assert version == VERSION_PCP25 ||
-		       version == VERSION_PCP28_PAL ||
-		       version == VERSION_PCP28_NO_PAL ||
-		       version == VERSION_PCP4WIN ||
-		       version == VERSION_PCPPLUS
+		assert version in [VERSION_PCP25, VERSION_PCP28_PAL, VERSION_PCP28_NO_PAL, VERSION_PCP4WIN, VERSION_PCPPLUS]
 
 		encoding = input.readByte()
 		assert encoding == ENCODING_RLE
@@ -111,41 +109,41 @@ class PcxFile implements ImageFile, InternalPalette {
 		hdpi = input.readShort()
 		vdpi = input.readShort()
 
-		egaPalette   = input.readNBytes(HEADER_PALETTE_SIZE)
-		reserved     = input.readByte()
-		planes       = input.readByte()
+		egaPalette = input.readNBytes(HEADER_PALETTE_SIZE)
+		reserved = input.readByte()
+		planes = input.readByte()
 		bytesPerLine = input.readShort()
-		paletteInfo  = input.readShort()
-		hScreenSize  = input.readShort()
-		vScreenSize  = input.readShort()
-		filler       = input.readNBytes(54)
+		paletteInfo = input.readShort()
+		hScreenSize = input.readShort()
+		vScreenSize = input.readShort()
+		filler = input.readNBytes(54)
 
 		width = xMax - xMin + 1
 		height = yMax - yMin + 1
 
 		// Read the rest of the stream
-		def imageAndPalette = input.readAllBytes()
-		def encodedImage = ByteBuffer.wrapNative(imageAndPalette, 0, imageAndPalette.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
+		var imageAndPalette = input.readAllBytes()
+		var encodedImage = ByteBuffer.wrapNative(imageAndPalette, 0, imageAndPalette.length - PALETTE_SIZE - PALETTE_PADDING_SIZE)
 
 		// Build up the raw image data for use with a palette later
 		// NOTE: The below is for the case when the scanline data exceeds the
 		//       width/height data, but have I ever encountered that?  Otherwise
 		//       this is double-handling the same data.
-		def scanLines = new ArrayList<ByteBuffer>()
-		def runLengthEncoding = new RunLengthEncoding((byte)0xc0)
+		var scanLines = new ArrayList<ByteBuffer>()
+		var runLengthEncoding = new RunLengthEncoding((byte)0xc0)
 		while (encodedImage.hasRemaining()) {
 			scanLines << runLengthEncoding.decode(encodedImage, ByteBuffer.allocateNative(planes * bytesPerLine))
 		}
-		def indexedData = ByteBuffer.allocateNative(width * height)
+		var indexedData = ByteBuffer.allocateNative(width * height)
 		(yMin..yMax).each { y ->
-			def scanLine = scanLines[y]
+			var scanLine = scanLines[y]
 			(xMin..xMax).each { x ->
 				indexedData.put(scanLine.get(x))
 			}
 		}
 		indexedData.flip()
 
-		def paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
+		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 		palette = new Palette(PALETTE_COLOURS, FORMAT_RGB, paletteData)
 
 		// Apply palette to raw image data to create the final image
@@ -154,7 +152,7 @@ class PcxFile implements ImageFile, InternalPalette {
 
 	/**
 	 * Returns some information on this PCX file.
-	 * 
+	 *
 	 * @return PCX file info.
 	 */
 	@Override

@@ -63,7 +63,7 @@ class Pcx2CpsConverterCli implements Callable<Integer> {
 			if (!destFile.exists()) {
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
-						def pcxFile = new PcxFile(inputStream)
+						var pcxFile = new PcxFile(inputStream)
 						new CpsFileWriter(pcxFile).write(outputStream)
 					}
 				}
