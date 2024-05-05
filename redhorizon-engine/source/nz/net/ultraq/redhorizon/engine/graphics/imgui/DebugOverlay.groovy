@@ -32,7 +32,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 
 import imgui.ImGui
 import imgui.type.ImBoolean

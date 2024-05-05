@@ -55,7 +55,8 @@ import imgui.ImGui
 import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -116,8 +117,6 @@ class Explorer {
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
 		}
 
-		// Also toggle the explorer GUI with the same key for toggling the ImGui chrome
-		entryList.toggleWith(scene.inputEventStream, GLFW_KEY_O)
 		buildList(new File(System.getProperty("user.dir")))
 
 		// Handle events from the explorer GUI
@@ -165,13 +164,13 @@ class Explorer {
 		scene.gameMenu.optionsMenu << new MenuItem() {
 			@Override
 			void render() {
-				if (ImGui.menuItem('Cycle palette', 'O')) {
+				if (ImGui.menuItem('Cycle palette', 'P')) {
 					cyclePalette()
 				}
 			}
 		}
 		removeEventFunctions << scene.inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_L) {
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_P) {
 				cyclePalette()
 			}
 		}

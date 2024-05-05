@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -38,7 +37,8 @@ import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_U
 
 /**
  * A render pipeline contains all of the configured rendering passes and
@@ -58,7 +58,6 @@ class RenderPipeline implements Closeable {
 
 	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
-	private final List<ImGuiElement> imGuiElements = []
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -71,11 +70,9 @@ class RenderPipeline implements Closeable {
 
 		fullScreenQuad = renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 
-		imGuiElements << new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C)
-
 		// Allow for changes to the pipeline from the GUI
 		imGuiLayer.on(ChangeEvent) { event ->
-			def postProcessingRenderPass = renderPasses.find { renderPass ->
+			var postProcessingRenderPass = renderPasses.find { renderPass ->
 				return renderPass instanceof PostProcessingRenderPass && renderPass.shader.name == event.name
 			}
 			postProcessingRenderPass.enabled = event.value
@@ -85,15 +82,6 @@ class RenderPipeline implements Closeable {
 		// overlays as they'll be standard for as long as this thing is in
 		// development
 		configurePipeline(config, window, inputEventStream)
-	}
-
-	/**
-	 * Register an ImGui element with the rendering pipeline.  These are drawn
-	 * after the scene and use the target resolution of the window.
-	 */
-	void addImGuiElement(ImGuiElement imGuiElement) {
-
-		imGuiElements << imGuiElement
 	}
 
 	@Override
@@ -137,7 +125,6 @@ class RenderPipeline implements Closeable {
 			!config.startWithChrome,
 			window
 		)
-			.toggleWith(inputEventStream, GLFW_KEY_O)
 	}
 
 	/**
@@ -150,7 +137,7 @@ class RenderPipeline implements Closeable {
 			renderer.clear()
 
 			// Perform all rendering passes
-			def sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
+			var sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
 				if (renderPass.enabled) {
 					renderer.setRenderTarget(renderPass.framebuffer)
 					renderer.clear()
@@ -160,14 +147,7 @@ class RenderPipeline implements Closeable {
 				return lastResult
 			} as Framebuffer
 			renderer.setRenderTarget(null)
-
-			// Draw ImGui objects
-			var dockspaceId = imGuiLayer.render(sceneResult)
-			imGuiElements.each { imGuiElement ->
-				if (imGuiElement.enabled) {
-					imGuiElement.render(dockspaceId, sceneResult)
-				}
-			}
+			return sceneResult
 		}
 	}
 

@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -42,8 +41,7 @@ import static imgui.flag.ImGuiDockNodeFlags.NoResize
 import static imgui.flag.ImGuiDockNodeFlags.PassthruCentralNode
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.nio.file.Files
@@ -85,9 +83,11 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
-	private final GameWindow gameWindow
+	private final List<ImGuiElement> uiElements = []
+	private final List<ImGuiElement> overlays = []
 
-	private boolean drawChrome
+	private boolean drawUiElements
+	private boolean drawOverlays
 	private boolean debugOverlay
 	private boolean shaderScanlines
 	private boolean shaderSharpUpscaling
@@ -100,7 +100,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		this.config = config
 		debugOverlay = config.debug
-		drawChrome = config.startWithChrome
+		drawUiElements = config.startWithChrome
+		drawOverlays = config.startWithChrome
 		shaderScanlines = config.scanlines
 		shaderSharpUpscaling = true
 
@@ -128,15 +129,34 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGl3.init('#version 410 core')
 
 		mainMenu = new MainMenu()
-		gameWindow = new GameWindow(config.targetAspectRatio)
+		addUiElement(mainMenu)
+		addUiElement(new GameWindow(config.targetAspectRatio))
 
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
-				if (event.key == GLFW_KEY_O) {
-					drawChrome = !drawChrome
+				switch (event.key) {
+					case GLFW_KEY_I -> drawUiElements = !drawUiElements
+					case GLFW_KEY_O -> drawOverlays = !drawOverlays
 				}
 			}
 		}
+	}
+
+	/**
+	 * Register an ImGui overlay to be drawn.
+	 */
+	void addOverlay(ImGuiElement overlay) {
+
+		overlays << overlay
+	}
+
+	/**
+	 * Register an ImGui element (that is not an overlay, use {@link #addOverlay}
+	 * for that instead) to be drawn.
+	 */
+	void addUiElement(ImGuiElement uiElement) {
+
+		uiElements << uiElement
 	}
 
 	@Override
@@ -151,30 +171,25 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 * Automatically mark the beginning and end of a frame as before and after the
 	 * execution of the given closure.
 	 */
-	void frame(Closure closure) {
+	void frame(Closure<Framebuffer> closure) {
 
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
 
-		closure()
+		// Draw scene
+		var sceneResult = closure()
+
+		// Draw ImGui objects
+		if (drawUiElements) {
+			var dockspaceId = setUpDockspace()
+			uiElements*.render(dockspaceId, sceneResult)
+		}
+		if (drawOverlays) {
+			overlays*.render(-1, null)
+		}
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
-	}
-
-	/**
-	 * Draw all of the ImGui elements to the screen.
-	 */
-	int render(Framebuffer sceneFramebufferResult) {
-
-		if (drawChrome) {
-			var dockspaceId = setUpDockspace()
-			mainMenu.render(dockspaceId, sceneFramebufferResult)
-			gameWindow.render(dockspaceId, sceneFramebufferResult)
-			return dockspaceId
-		}
-
-		return -1
 	}
 
 	/**

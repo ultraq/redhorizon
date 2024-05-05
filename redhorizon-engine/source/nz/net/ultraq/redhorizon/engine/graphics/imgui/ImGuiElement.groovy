@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.pipeline
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Switch
  *
  * @author Emanuel Rabina
  */
-interface ImGuiElement<T> extends Switch<ImGuiElement<T>> {
+interface ImGuiElement<T extends Switch> extends Switch<T> {
 
 	/**
 	 * Draw the ImGui content.

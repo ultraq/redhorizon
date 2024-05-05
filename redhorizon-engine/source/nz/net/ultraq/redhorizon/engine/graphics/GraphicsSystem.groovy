@@ -19,12 +19,12 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -106,6 +106,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		scene.camera = camera
 		scene.gameMenu = imGuiLayer.mainMenu
 		renderPipeline.scene = scene
+	}
+
+	/**
+	 * Return the ImGui layer.
+	 */
+	ImGuiLayer getImGuiLayer() {
+
+		return imGuiLayer
 	}
 
 	/**

@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 
 import imgui.ImGui
 import imgui.type.ImBoolean

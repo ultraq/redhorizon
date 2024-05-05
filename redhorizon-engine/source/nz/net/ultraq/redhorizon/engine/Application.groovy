@@ -22,10 +22,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -91,7 +92,7 @@ class Application implements EventTarget {
 	 * input into the application.
 	 */
 	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
-		ImGuiElement... overlayRenderPasses) {
+		ImGuiElement... uiElements) {
 
 		var graphicsSystem = new GraphicsSystem(windowTitle, inputEventStream, config)
 		graphicsSystem.on(WindowCreatedEvent) { event ->
@@ -103,12 +104,12 @@ class Application implements EventTarget {
 				.addAudioRenderer(audioSystem.renderer)
 				.addGraphicsRenderer(graphicsSystem.renderer)
 				.toggleWith(inputEventStream, GLFW_KEY_D)
-			graphicsSystem.renderPipeline.addImGuiElement(debugOverlay)
+			graphicsSystem.imGuiLayer.addOverlay(debugOverlay)
+			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
+			graphicsSystem.imGuiLayer.addUiElement(new LogPanel(config.debug))
 
-			graphicsSystem.renderPipeline.addImGuiElement(new LogPanel(config.debug))
-
-			overlayRenderPasses.each { overlayRenderPass ->
-				graphicsSystem.renderPipeline.addImGuiElement(overlayRenderPass)
+			uiElements.each { overlayRenderPass ->
+				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)
 			}
 		}
 		graphicsSystem.relay(WindowMaximizedEvent, this)

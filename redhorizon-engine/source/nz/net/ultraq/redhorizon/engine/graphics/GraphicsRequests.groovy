@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.graphics.pipeline.ImGuiElement
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Vector2f
