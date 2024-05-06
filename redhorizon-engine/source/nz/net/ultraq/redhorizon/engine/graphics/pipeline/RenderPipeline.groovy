@@ -58,6 +58,7 @@ class RenderPipeline implements Closeable {
 
 	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
+	private ScreenRenderPass screenRenderPass
 
 	/**
 	 * Constructor, configure the rendering pipeline.
@@ -120,11 +121,11 @@ class RenderPipeline implements Closeable {
 			}
 
 		// Final pass to emit the result to the screen
-		renderPasses << new ScreenRenderPass(
+		screenRenderPass = new ScreenRenderPass(
 			renderer.createShader(new ScreenShader()),
-			!config.startWithChrome,
 			window
 		)
+		renderPasses << screenRenderPass
 	}
 
 	/**
@@ -135,6 +136,8 @@ class RenderPipeline implements Closeable {
 		// Start a new frame
 		imGuiLayer.frame { ->
 			renderer.clear()
+
+			screenRenderPass.enabled = !imGuiLayer.enabled
 
 			// Perform all rendering passes
 			var sceneResult = renderPasses.inject(null) { lastResult, renderPass ->
@@ -247,15 +250,10 @@ class RenderPipeline implements Closeable {
 		/**
 		 * Constructor, create a basic material that covers the screen yet responds
 		 * to changes in output/window resolution.
-		 *
-		 * @param shader
-		 * @param enabled
-		 * @param window
 		 */
-		ScreenRenderPass(Shader shader, boolean enabled, Window window) {
+		ScreenRenderPass(Shader shader, Window window) {
 
 			this.shader = shader
-			this.enabled = enabled
 
 			transform.set(calculateScreenModelMatrix(window.framebufferSize, window.targetResolution))
 			window.on(FramebufferSizeEvent) { event ->

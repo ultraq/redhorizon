@@ -170,26 +170,16 @@ class Application implements EventTarget {
 		engine.waitUntilStopped()
 
 		// Check we closed everything
-		var activeFramebuffers = debugOverlay.activeFramebuffers.get()
-		if (activeFramebuffers > 0) {
-			logger.debug('Not all active framebuffers closed')
+		var check = { int resourceCount, String resourceName ->
+			if (resourceCount > 0) {
+				logger.warn("Not all ${resourceName} closed, {} remaining", resourceCount)
+			}
 		}
-		var activeMeshes = debugOverlay.activeMeshes.get()
-		if (activeMeshes > 0) {
-			logger.debug('Not all meshes closed, {} remaining', activeMeshes)
-		}
-		var activeTextures = debugOverlay.activeTextures.get()
-		if (activeMeshes > 0) {
-			logger.debug('Not all textures closed, {} remaining', activeTextures)
-		}
-		var activeSources = debugOverlay.activeSources.get()
-		if (activeMeshes > 0) {
-			logger.debug('Not all sources closed, {} remaining', activeSources)
-		}
-		var activeBuffers = debugOverlay.activeBuffers.get()
-		if (activeMeshes > 0) {
-			logger.debug('Not all buffers closed, {} remaining', activeBuffers)
-		}
+		check(debugOverlay.activeFramebuffers.get(), 'framebuffers')
+		check(debugOverlay.activeMeshes.get(), 'meshes')
+		check(debugOverlay.activeTextures.get(), 'textures')
+		check(debugOverlay.activeSources.get(), 'sources')
+		check(debugOverlay.activeBuffers.get(), 'buffers')
 	}
 
 	/**

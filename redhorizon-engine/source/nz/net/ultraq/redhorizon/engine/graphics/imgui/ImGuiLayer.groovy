@@ -193,6 +193,14 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
+	 * Return whether or not ImGui is the render target.
+	 */
+	boolean isEnabled() {
+
+		return drawUiElements
+	}
+
+	/**
 	 * Build the docking window into which the app will be rendered.
 	 */
 	private static int setUpDockspace() {
