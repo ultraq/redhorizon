@@ -23,20 +23,20 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequ
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
+import java.util.concurrent.CompletableFuture
 
 /**
  * A simple 2D sprite node.  Contains a texture and coordinate data for what
@@ -48,7 +48,7 @@ import java.nio.ByteBuffer
 class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	final int numImages
-	final SpriteSource spriteSource
+	final SpriteSheetGenerator spriteSheetGenerator
 	final Rectanglef region = new Rectanglef(0, 0, 1, 1)
 
 	/**
@@ -57,7 +57,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	int initialFrame = 0
 
 	protected Mesh mesh
+	protected ShaderConfig spriteShaderName = Shaders.spriteShader
 	protected Shader shader
+	protected SpriteSheet spriteSheet
 	protected Material material
 
 	/**
@@ -65,7 +67,10 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(ImageFile imageFile) {
 
-		this(imageFile.width, imageFile.height, 1, new ImageFileSpriteSource(imageFile))
+		this(imageFile.width, imageFile.height, 1, { scene ->
+			return scene.requestCreateOrGet(new SpriteSheetRequest(imageFile.width, imageFile.height, imageFile.format,
+				new ByteBuffer[]{ imageFile.imageData }))
+		})
 	}
 
 	/**
@@ -73,7 +78,10 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(ImagesFile imagesFile) {
 
-		this(imagesFile.width, imagesFile.height, imagesFile.numImages, new SpriteSheetFileSpriteSource(imagesFile))
+		this(imagesFile.width, imagesFile.height, imagesFile.numImages, { scene ->
+			return scene.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format,
+				imagesFile.imagesData))
+		})
 	}
 
 	/**
@@ -81,45 +89,55 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(int width, int height, int numImages, SpriteSheet spriteSheet) {
 
-		this(width, height, numImages, new SpriteSheetSpriteSource(spriteSheet))
+		this(width, height, numImages, { scene ->
+			return CompletableFuture.completedFuture(spriteSheet)
+		})
 	}
 
 	/**
 	 * Constructor, create a sprite using any implementation of the
-	 * {@link SpriteSource} interface.
+	 * {@link SpriteSheetGenerator} interface.
 	 */
-	protected Sprite(int width, int height, int numImages, SpriteSource spriteSource) {
+	protected Sprite(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
 
 		bounds
 			.set(0, 0, width, height)
 			.center()
 		this.numImages = numImages
-		this.spriteSource = spriteSource
+		this.spriteSheetGenerator = spriteSheetGenerator
 	}
 
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		spriteSource.onSceneAdded(scene)
-		var spriteSheet = spriteSource.spriteSheet
-		region.set(spriteSheet[initialFrame])
+		spriteSheetGenerator.generate(scene)
+			.thenAcceptAsync { newSpriteSheet ->
+				spriteSheet = newSpriteSheet
 
-		mesh = scene
-			.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+				region.set(spriteSheet[initialFrame])
+
+				scene
+					.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+					.thenAcceptAsync { newMesh ->
+						mesh = newMesh
+					}
+				scene
+					.requestCreateOrGet(new ShaderRequest(spriteShaderName))
+					.thenAcceptAsync { requestedShader ->
+						shader = requestedShader
+					}
+				material = new Material(
+					texture: spriteSheet.texture
+				)
+			}
 			.get()
-		shader = scene
-			.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
-			.get()
-		material = new Material(
-			texture: spriteSheet.texture
-		)
 	}
 
 	@Override
 	void onSceneRemoved(Scene scene) {
 
 		scene.requestDelete(mesh)
-		spriteSource.onSceneRemoved(scene)
+		scene.requestDelete(spriteSheet)
 	}
 
 	@Override
@@ -134,70 +152,12 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	/**
 	 * Interface for any source from which sprite data can be obtained.
 	 */
-	static interface SpriteSource extends SceneEvents {
+	@FunctionalInterface
+	private static interface SpriteSheetGenerator {
 
 		/**
 		 * Called during setup, returns the sprite sheet to use for the sprite.
 		 */
-		SpriteSheet getSpriteSheet()
-	}
-
-	/**
-	 * A sprite source using a single image.
-	 */
-	@TupleConstructor(defaults = false, includes = 'imageFile')
-	static class ImageFileSpriteSource implements SpriteSource {
-
-		final ImageFile imageFile
-		SpriteSheet spriteSheet
-
-		@Override
-		void onSceneAdded(Scene scene) {
-
-			spriteSheet = scene
-				.requestCreateOrGet(new SpriteSheetRequest(imageFile.width, imageFile.height, imageFile.format,
-					new ByteBuffer[]{ imageFile.imageData }))
-				.get()
-		}
-
-		@Override
-		void onSceneRemoved(Scene scene) {
-
-			scene.requestDelete(spriteSheet)
-		}
-	}
-
-	/**
-	 * A sprite source using a sprite sheet.
-	 */
-	@TupleConstructor(defaults = false, includes = 'imagesFile')
-	static class SpriteSheetFileSpriteSource implements SpriteSource {
-
-		final ImagesFile imagesFile
-		SpriteSheet spriteSheet
-
-		@Override
-		void onSceneAdded(Scene scene) {
-
-			spriteSheet = scene
-				.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format,
-					imagesFile.imagesData))
-				.get()
-		}
-
-		@Override
-		void onSceneRemoved(Scene scene) {
-
-			scene.requestDelete(spriteSheet)
-		}
-	}
-
-	/**
-	 * A sprite source using an existing sprite sheet.
-	 */
-	@TupleConstructor(defaults = false)
-	static class SpriteSheetSpriteSource implements SpriteSource {
-
-		final SpriteSheet spriteSheet
+		CompletableFuture<SpriteSheet> generate(Scene scene)
 	}
 }

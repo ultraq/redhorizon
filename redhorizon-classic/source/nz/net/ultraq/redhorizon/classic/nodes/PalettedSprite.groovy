@@ -18,10 +18,8 @@ package nz.net.ultraq.redhorizon.classic.nodes
 
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -40,7 +38,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 	final float repeatY
 	Palette palette
 
-	private Texture paletteAsTexture
 	private boolean paletteChanged
 
 	/**
@@ -52,11 +49,13 @@ class PalettedSprite extends Sprite implements FactionColours {
 		this.repeatX = 1f
 		this.repeatY = 1f
 		this.palette = palette
+		spriteShaderName = Shaders.palettedSpriteShader
 	}
 
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.
 	 */
+	// This constructor is inherited, so check subclasses for its use before deleting
 	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, Palette palette) {
 
 		this(width, height, numImages, spriteSheet, 1f, 1f, palette)
@@ -72,6 +71,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 		this.repeatX = repeatX
 		this.repeatY = repeatY
 		this.palette = palette
+		spriteShaderName = Shaders.palettedSpriteShader
 	}
 
 	@Override
@@ -84,14 +84,12 @@ class PalettedSprite extends Sprite implements FactionColours {
 			region.setMax(repeatX, repeatY)
 		}
 
-		shader = scene
-			.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
-			.get()
 		// TODO: Load the palette once
-		paletteAsTexture = scene
+		scene
 			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.get()
-		material.palette = paletteAsTexture
+			.thenAcceptAsync { newTexture ->
+				material.palette = newTexture
+			}
 	}
 
 	@Override
@@ -109,8 +107,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 			if (paletteChanged) {
 				renderer.delete(material.palette)
-				paletteAsTexture = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
-				material.palette = paletteAsTexture
+				material.palette = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
 				paletteChanged = false
 			}
 
@@ -118,6 +115,9 @@ class PalettedSprite extends Sprite implements FactionColours {
 		}
 	}
 
+	/**
+	 * Update the palette being applied to this sprite.
+	 */
 	void setPalette(Palette palette) {
 
 		this.palette = palette
