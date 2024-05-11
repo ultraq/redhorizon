@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
@@ -74,12 +73,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		this.config = config
 	}
 
-	@Override
-	void addImGuiElement(ImGuiElement overlayRenderPass) {
-
-		renderPipeline.addImGuiElement(overlayRenderPass)
-	}
-
 	/**
 	 * Implementation of double-click being used to toggle between windowed and
 	 * full screen modes.  This isn't natively supported in GLFW given platform
@@ -105,6 +98,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		scene.window = window
 		scene.camera = camera
 		scene.gameMenu = imGuiLayer.mainMenu
+		scene.gameWindow = imGuiLayer.gameWindow
 		renderPipeline.scene = scene
 	}
 

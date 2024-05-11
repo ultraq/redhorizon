@@ -151,6 +151,8 @@ class Map extends Node<Map> {
 	 */
 	private class MapBackground extends Node<MapBackground> {
 
+		String name = theater.label
+
 		private SpriteSheet background
 
 		@Override
@@ -219,6 +221,7 @@ class Map extends Node<Map> {
 						// TODO: Restore the ability to read this texture from the tileset
 //						tileSet.addTiles(tileFile)
 						addChild(new PalettedSprite(tileFile, palette).tap {
+							name = "MapTile @ ${x},${y} (${tile.name}[${tilePic}])"
 							initialFrame = tilePic
 							transform.translate(new Vector2f(x, y).asWorldCoords(1))
 						})

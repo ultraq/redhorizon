@@ -31,7 +31,7 @@ class MouseControl extends Control<MouseButtonEvent> {
 
 	MouseControl(int button, String name, Closure handler) {
 
-		this(-1, button, name, handler)
+		this(0, button, name, handler)
 	}
 
 	MouseControl(int modifier, int button, String name, Closure handler) {

@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Vector2f
@@ -59,11 +58,6 @@ interface GraphicsRequests {
 
 	static record SpriteSheetRequest(int width, int height, ColourFormat format, ByteBuffer[] data) implements Request<SpriteSheet> {
 	}
-
-	/**
-	 * Add an ImGui element to the render pipeline.
-	 */
-	void addImGuiElement(ImGuiElement overlayRenderPass)
 
 	/**
 	 * Request the creation or retrieval of the given resource type from the

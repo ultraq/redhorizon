@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
@@ -56,6 +57,7 @@ class MapViewerScript extends Script<Map> {
 	private InputEventStream inputEventStream
 	private Window window
 	private Camera camera
+	private GameWindow gameWindow
 
 	@Delegate
 	Map applyDelegate() {
@@ -81,25 +83,29 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
+				if (gameWindow.hovered) {
 
-				// Zoom in/out using CTRL + scroll up/down
-				if (ctrl) {
-					if (event.yOffset < 0) {
-						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+					// Zoom in/out using CTRL + scroll up/down
+					if (ctrl) {
+						if (event.yOffset < 0) {
+							scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+						}
+						else if (event.yOffset > 0) {
+							scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
+						}
+						camera.scale(scaleRange[scaleIndex])
 					}
-					else if (event.yOffset > 0) {
-						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
+					// Use scroll input to move around the map
+					else {
+						camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
 					}
-					camera.scale(scaleRange[scaleIndex])
-				}
-				// Use scroll input to move around the map
-				else {
-					camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
-					camera.resetScale()
+					if (gameWindow.hovered) {
+						camera.resetScale()
+					}
 				})
 			)
 		}
@@ -118,7 +124,9 @@ class MapViewerScript extends Script<Map> {
 			removeEventFunctions << inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
-						dragging = true
+						if (gameWindow.hovered) {
+							dragging = true
+						}
 					}
 					else if (event.action == GLFW_RELEASE) {
 						dragging = false
@@ -128,17 +136,21 @@ class MapViewerScript extends Script<Map> {
 
 			// Zoom in/out using the scroll wheel
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
-				if (event.yOffset < 0) {
-					scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+				if (gameWindow.hovered) {
+					if (event.yOffset < 0) {
+						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+					}
+					else if (event.yOffset > 0) {
+						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
+					}
+					camera.scale(scaleRange[scaleIndex])
 				}
-				else if (event.yOffset > 0) {
-					scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
-				}
-				camera.scale(scaleRange[scaleIndex])
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
-					camera.resetScale()
+					if (gameWindow.hovered) {
+						camera.resetScale()
+					}
 				})
 			)
 		}
@@ -176,6 +188,7 @@ class MapViewerScript extends Script<Map> {
 		inputEventStream = scene.inputEventStream
 		window = scene.window
 		camera = scene.camera
+		gameWindow = scene.gameWindow
 		addControls()
 	}
 

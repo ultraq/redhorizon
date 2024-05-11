@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -52,6 +53,7 @@ class Scene implements EventTarget, Visitable {
 	Camera camera
 	Listener listener
 	MainMenu gameMenu
+	GameWindow gameWindow
 
 	/**
 	 * Allow visitors into the scene for traversal.

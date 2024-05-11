@@ -79,6 +79,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	final MainMenu mainMenu
+	final GameWindow gameWindow
 
 	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
@@ -130,7 +131,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		mainMenu = new MainMenu()
 		addUiElement(mainMenu)
-		addUiElement(new GameWindow(config.targetAspectRatio))
+
+		gameWindow = new GameWindow(config.targetAspectRatio)
+		addUiElement(gameWindow)
 
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -277,9 +280,12 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 * @author Emanuel Rabina
 	 */
 	@TupleConstructor
-	private class GameWindow implements ImGuiElement, EventTarget {
+	class GameWindow implements ImGuiElement, EventTarget {
 
 		final float targetAspectRatio
+
+		boolean focused
+		boolean hovered
 
 		private Dimension lastWindowSize
 
@@ -290,6 +296,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 			ImGui.pushStyleVar(WindowPadding, 0, 0)
 			ImGui.begin('Game', new ImBoolean(true), NoCollapse | NoScrollbar)
 			ImGui.popStyleVar()
+
+			focused = ImGui.isWindowFocused()
+			hovered = ImGui.isWindowHovered()
 
 			imgui.internal.ImGui.dockBuilderDockWindow('Game', dockspaceId)
 			imgui.internal.ImGui.dockBuilderFinish(dockspaceId)

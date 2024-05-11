@@ -97,6 +97,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	@Override
 	void onSceneRemoved(Scene scene) {
 
+		super.onSceneRemoved(scene)
 		scene.requestDelete(material.palette)
 	}
 
