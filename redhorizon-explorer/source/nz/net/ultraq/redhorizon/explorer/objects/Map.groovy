@@ -23,13 +23,17 @@ import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
 import nz.net.ultraq.redhorizon.classic.maps.Theater
 import nz.net.ultraq.redhorizon.classic.maps.TileSet
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
+import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector2f
@@ -94,8 +98,10 @@ class Map extends Node<Map> {
 
 		tileSet = new TileSet(palette)
 
-		addChild(new BackgroundLayer())
-		addChild(new MapLines(this))
+		addChild(new MapBackground())
+		addChild(new MapPack())
+//		addChild(tileSet)
+		addChild(new MapLines())
 	}
 
 	@Override
@@ -124,9 +130,27 @@ class Map extends Node<Map> {
 	}
 
 	/**
+	 * Map overlays and lines to help with debugging maps.
+	 */
+	private class MapLines extends Node<MapLines> {
+
+		private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
+		private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)
+		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
+		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
+
+		@Override
+		void onSceneAdded(Scene scene) {
+
+			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX))
+			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.5), boundary as Vector2f[]))
+		}
+	}
+
+	/**
 	 * Special layer for the background image.
 	 */
-	private class BackgroundLayer extends Node<BackgroundLayer> {
+	private class MapBackground extends Node<MapBackground> {
 
 		private SpriteSheet background
 
@@ -157,5 +181,100 @@ class Map extends Node<Map> {
 
 			scene.requestDelete(background)
 		}
+	}
+
+	/**
+	 * The "MapPack" layer of a Red Alert map.
+	 */
+	private class MapPack extends Node<MapPack> {
+
+		@Override
+		void onSceneAdded(Scene scene) {
+
+			var tileData = mapFile.mapPackData
+
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+
+					// Get the byte representing the tile
+					var tileValOffset = y * TILES_Y + x
+					var tileVal = tileData.getShort(tileValOffset * 2) & 0xffff
+					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
+
+					// Retrieve the appropriate tile, skip empty tiles
+					if (tileVal != 0xff && tileVal != -1) {
+						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
+
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn("Skipping unknown mappack tile type: ${tileVal}")
+							return
+						}
+						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
+
+						// Skip references to invalid tiles
+						if (tilePic >= tileFile.imagesData.length) {
+							return
+						}
+
+						// TODO: Restore the ability to read this texture from the tileset
+//						tileSet.addTiles(tileFile)
+						var mapPackTile = new MapPackTile(tileFile, palette, tilePic)
+						mapPackTile.transform.translate(new Vector2f(x, y).asWorldCoords(1))
+						addChild(mapPackTile)
+					}
+				}
+			}
+		}
+
+		/**
+		 * A single MapPack tile.
+		 *
+		 * TODO: This can be a standard sprite if we make the initial frame in the
+		 *       sprite configurable.
+		 */
+		private class MapPackTile extends PalettedSprite {
+
+			private final int tileFrame
+
+			MapPackTile(ImagesFile imagesFile, Palette palette, int tileFrame) {
+
+				super(imagesFile, palette)
+				this.tileFrame = tileFrame
+			}
+
+			@Override
+			void onSceneAdded(Scene scene) {
+
+				super.onSceneAdded(scene)
+				region.set(spriteSource.spriteSheet[tileFrame])
+			}
+		}
+
+		// Material bundling code below
+//		@Override
+//		void onSceneRemoved(Scene scene) {
+//
+//
+//			renderer.deleteMaterial(material)
+//		}
+//
+//		void init(GraphicsRenderer renderer) {
+//
+//			shader = renderer.getShader(SpriteShader.NAME)
+//			(mesh, material) = renderer.withMaterialBundler { bundler ->
+//				elements.each { element ->
+//					if (element instanceof GraphicsElement) {
+//						element.init(bundler)
+//					}
+//				}
+//			}
+//		}
+//
+//		@Override
+//		void render(GraphicsRenderer renderer) {
+//
+//			renderer.draw(mesh, shader, material)
+//		}
 	}
 }

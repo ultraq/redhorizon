@@ -56,9 +56,6 @@ class OpenGLWindow extends Window {
 
 	/**
 	 * Constructor, create a new OpenGL window.
-	 *
-	 * @param size
-	 * @param title
 	 */
 	OpenGLWindow(String title, GraphicsConfiguration config) {
 

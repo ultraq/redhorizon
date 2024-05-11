@@ -138,7 +138,8 @@ class Application implements EventTarget {
 	}
 
 	/**
-	 * Start the application.
+	 * Begin the application and wait until completion.  An exit code is returned
+	 * once the application has finished.
 	 */
 	final void start() {
 
