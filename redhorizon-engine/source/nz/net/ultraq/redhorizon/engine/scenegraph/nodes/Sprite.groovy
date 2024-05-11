@@ -51,6 +51,11 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	final SpriteSource spriteSource
 	final Rectanglef region = new Rectanglef(0, 0, 1, 1)
 
+	/**
+	 * The frame to load from the sprite sheet in {@link #onSceneAdded}.
+	 */
+	int initialFrame = 0
+
 	protected Mesh mesh
 	protected Shader shader
 	protected Material material
@@ -97,7 +102,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 		spriteSource.onSceneAdded(scene)
 		var spriteSheet = spriteSource.spriteSheet
-		region.set(spriteSheet[0])
+		region.set(spriteSheet[initialFrame])
 
 		mesh = scene
 			.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
@@ -151,7 +156,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 			spriteSheet = scene
 				.requestCreateOrGet(new SpriteSheetRequest(imageFile.width, imageFile.height, imageFile.format,
-					new ByteBuffer[] { imageFile.imageData }))
+					new ByteBuffer[]{ imageFile.imageData }))
 				.get()
 		}
 

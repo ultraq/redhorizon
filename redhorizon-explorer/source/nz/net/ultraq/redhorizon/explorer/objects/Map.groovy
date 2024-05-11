@@ -33,7 +33,6 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector2f
@@ -219,62 +218,13 @@ class Map extends Node<Map> {
 
 						// TODO: Restore the ability to read this texture from the tileset
 //						tileSet.addTiles(tileFile)
-						var mapPackTile = new MapPackTile(tileFile, palette, tilePic)
-						mapPackTile.transform.translate(new Vector2f(x, y).asWorldCoords(1))
-						addChild(mapPackTile)
+						addChild(new PalettedSprite(tileFile, palette).tap {
+							initialFrame = tilePic
+							transform.translate(new Vector2f(x, y).asWorldCoords(1))
+						})
 					}
 				}
 			}
 		}
-
-		/**
-		 * A single MapPack tile.
-		 *
-		 * TODO: This can be a standard sprite if we make the initial frame in the
-		 *       sprite configurable.
-		 */
-		private class MapPackTile extends PalettedSprite {
-
-			private final int tileFrame
-
-			MapPackTile(ImagesFile imagesFile, Palette palette, int tileFrame) {
-
-				super(imagesFile, palette)
-				this.tileFrame = tileFrame
-			}
-
-			@Override
-			void onSceneAdded(Scene scene) {
-
-				super.onSceneAdded(scene)
-				region.set(spriteSource.spriteSheet[tileFrame])
-			}
-		}
-
-		// Material bundling code below
-//		@Override
-//		void onSceneRemoved(Scene scene) {
-//
-//
-//			renderer.deleteMaterial(material)
-//		}
-//
-//		void init(GraphicsRenderer renderer) {
-//
-//			shader = renderer.getShader(SpriteShader.NAME)
-//			(mesh, material) = renderer.withMaterialBundler { bundler ->
-//				elements.each { element ->
-//					if (element instanceof GraphicsElement) {
-//						element.init(bundler)
-//					}
-//				}
-//			}
-//		}
-//
-//		@Override
-//		void render(GraphicsRenderer renderer) {
-//
-//			renderer.draw(mesh, shader, material)
-//		}
 	}
 }
