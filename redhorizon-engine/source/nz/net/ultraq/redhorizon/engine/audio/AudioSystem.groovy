@@ -43,7 +43,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
-	private final BlockingQueue<AudioResource> deletionRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenALRenderer renderer
 	private OpenALListener listener
@@ -79,7 +79,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
-				renderer.delete(deletionRequest)
+				def (resource, future) = deletionRequest
+				renderer.delete(resource)
+				future.complete(null)
 			}
 			return true
 		}
@@ -116,9 +118,14 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	}
 
 	@Override
-	void requestDelete(AudioResource... resources) {
+	CompletableFuture<Void> requestDelete(AudioResource... resources) {
 
-		deletionRequests.addAll(resources)
+		var futures = resources.collect { resource ->
+			var future = new CompletableFuture<Void>()
+			deletionRequests << new Tuple2(resource, future)
+			return future
+		}
+		return CompletableFuture.allOf(*futures)
 	}
 
 	/**

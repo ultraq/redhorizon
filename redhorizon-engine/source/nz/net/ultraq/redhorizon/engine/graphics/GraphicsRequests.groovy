@@ -69,5 +69,5 @@ interface GraphicsRequests {
 	/**
 	 * Request the graphics system to delete a resource.
 	 */
-	void requestDelete(GraphicsResource... resources)
+	CompletableFuture<Void> requestDelete(GraphicsResource... resources)
 }

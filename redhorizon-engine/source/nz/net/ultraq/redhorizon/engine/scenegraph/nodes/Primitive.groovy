@@ -32,6 +32,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.Vector2f
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * A node for creating a mesh using any of the OpenGL primitives.
  *
@@ -90,9 +92,9 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh)
+		return scene.requestDelete(mesh)
 	}
 
 	@Override

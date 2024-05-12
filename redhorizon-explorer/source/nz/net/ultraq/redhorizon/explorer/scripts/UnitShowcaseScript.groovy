@@ -28,6 +28,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * Controls a unit for showcasing in the explorer.
  *
@@ -91,9 +93,11 @@ class UnitShowcaseScript extends Script<Unit> {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		scene.camera.resetScale()
-		removeControlFunctions*.remove()
+		return CompletableFuture.runAsync { ->
+			scene.camera.resetScale()
+			removeControlFunctions*.remove()
+		}
 	}
 }

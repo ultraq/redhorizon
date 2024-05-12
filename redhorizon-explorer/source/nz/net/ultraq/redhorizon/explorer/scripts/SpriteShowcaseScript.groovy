@@ -28,6 +28,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * Script for going forwards/backwards through a sprite files frames.
  *
@@ -72,9 +74,11 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		scene.camera.resetScale()
-		removeControlFunctions*.remove()
+		return CompletableFuture.runAsync { ->
+			scene.camera.resetScale()
+			removeControlFunctions*.remove()
+		}
 	}
 }

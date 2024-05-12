@@ -43,5 +43,5 @@ interface AudioRequests {
 	/**
 	 * Request the audio system to delete a resource.
 	 */
-	void requestDelete(AudioResource... resources)
+	CompletableFuture<Void> requestDelete(AudioResource... resources)
 }

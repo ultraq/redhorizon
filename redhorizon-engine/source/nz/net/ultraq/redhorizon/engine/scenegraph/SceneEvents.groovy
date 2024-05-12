@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * Interface for all of the scene events a node will encounter during its
  * lifetime in a scene.
@@ -33,6 +35,8 @@ interface SceneEvents {
 	/**
 	 * Called when the node is removed from the scene.
 	 */
-	default void onSceneRemoved(Scene scene) {
+	default CompletableFuture<Void> onSceneRemoved(Scene scene) {
+
+		return CompletableFuture<Void>.completedFuture(null)
 	}
 }

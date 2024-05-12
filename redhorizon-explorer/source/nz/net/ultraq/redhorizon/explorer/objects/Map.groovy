@@ -41,6 +41,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
+import java.util.concurrent.CompletableFuture
 
 /**
  * A map on which a mission or skirmish can take place.
@@ -178,9 +179,9 @@ class Map extends Node<Map> {
 		}
 
 		@Override
-		void onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-			scene.requestDelete(background)
+			return scene.requestDelete(background)
 		}
 	}
 

@@ -134,10 +134,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(mesh)
-		scene.requestDelete(spriteSheet)
+		return scene.requestDelete(mesh, spriteSheet)
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 
 /**
  * Controls for viewing a map in the explorer.
@@ -193,9 +194,11 @@ class MapViewerScript extends Script<Map> {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		clearControls()
+		return CompletableFuture.runAsync { ->
+			clearControls()
+		}
 	}
 
 	void setTouchpadInput(boolean touchpadInput) {

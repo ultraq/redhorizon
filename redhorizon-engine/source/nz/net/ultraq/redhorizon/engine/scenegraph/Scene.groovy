@@ -27,6 +27,10 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -36,6 +40,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * @author Emanuel Rabina
  */
 class Scene implements EventTarget, Visitable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Scene)
 
 	final List<Node> nodes = new CopyOnWriteArrayList<>()
 
@@ -96,8 +102,10 @@ class Scene implements EventTarget, Visitable {
 	 */
 	void clear() {
 
-		nodes.each { node ->
-			removeNode(node)
+		time('Clearing scene', logger) { ->
+			nodes.each { node ->
+				removeNode(node)
+			}
 		}
 	}
 
@@ -161,7 +169,7 @@ class Scene implements EventTarget, Visitable {
 	Scene removeNode(Node node) {
 
 		nodes.remove(node)
-		removeNodeAndChildren(node)
+		removeNodeAndChildren(node).join()
 		return this
 	}
 
@@ -169,14 +177,21 @@ class Scene implements EventTarget, Visitable {
 	 * Trigger the {@code onSceneRemoved} event for this node and all its
 	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
 	 */
-	private void removeNodeAndChildren(Node node) {
+	private CompletableFuture<Void> removeNodeAndChildren(Node node) {
 
-		node.onSceneRemoved(this)
-		node.script?.onSceneRemoved(this)
-		trigger(new NodeRemovedEvent(node))
+		return CompletableFuture.allOf(
+			node.onSceneRemoved(this),
+			node.script?.onSceneRemoved(this) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRun { ->
+				trigger(new NodeRemovedEvent(node))
+			}
+			.thenCompose { _ ->
+				var futures = node.children.collect { childNode -> removeNodeAndChildren(childNode) }
 
-		node.children.each { childNode ->
-			removeNodeAndChildren(childNode)
-		}
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
 	}
 }

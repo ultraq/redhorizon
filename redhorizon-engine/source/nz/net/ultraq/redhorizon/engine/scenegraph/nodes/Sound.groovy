@@ -37,6 +37,7 @@ import nz.net.ultraq.redhorizon.filetypes.StreamingSampleEvent
 import groovy.transform.TupleConstructor
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -83,10 +84,12 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		soundSource.onSceneRemoved(scene)
-		scene.requestDelete(source)
+		return CompletableFuture.allOf(
+			soundSource.onSceneRemoved(scene),
+			scene.requestDelete(source)
+		)
 	}
 
 	@Override
@@ -163,9 +166,9 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		}
 
 		@Override
-		void onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-			scene.requestDelete(staticBuffer)
+			return scene.requestDelete(staticBuffer)
 		}
 
 		@Override
@@ -213,10 +216,10 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		}
 
 		@Override
-		void onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 			streamingDecoder.cancel(true)
-			scene.requestDelete(*streamedBuffers.drain())
+			return scene.requestDelete(*streamedBuffers.drain())
 		}
 
 		@Override

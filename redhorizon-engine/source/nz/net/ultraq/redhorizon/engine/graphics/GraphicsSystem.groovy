@@ -51,7 +51,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final InputEventStream inputEventStream
 	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
-	private final BlockingQueue<GraphicsResource> deletionRequests = new LinkedBlockingQueue<>()
+	private final BlockingQueue<Tuple2<GraphicsResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 
 	private OpenGLWindow window
 	private OpenGLRenderer renderer
@@ -134,7 +134,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
-				renderer.delete(deletionRequest)
+				def (resource, future) = deletionRequest
+				renderer.delete(resource)
+				future.complete(null)
 			}
 			return true
 		}
@@ -182,9 +184,14 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	}
 
 	@Override
-	void requestDelete(GraphicsResource... resource) {
+	CompletableFuture<Void> requestDelete(GraphicsResource... resources) {
 
-		deletionRequests.addAll(resource)
+		var futures = resources.collect { resource ->
+			var future = new CompletableFuture<Void>()
+			deletionRequests << new Tuple2(resource, future)
+			return future
+		}
+		return CompletableFuture.allOf(*futures)
 	}
 
 	/**

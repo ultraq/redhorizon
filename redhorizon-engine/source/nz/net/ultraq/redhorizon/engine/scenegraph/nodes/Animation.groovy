@@ -42,6 +42,7 @@ import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
 /**
@@ -96,10 +97,12 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		animationSource.onSceneRemoved(scene)
-		scene.requestDelete(mesh)
+		return CompletableFuture.allOf(
+			animationSource.onSceneRemoved(scene),
+			scene.requestDelete(mesh)
+		)
 	}
 
 	@Override
@@ -208,10 +211,10 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		}
 
 		@Override
-		void onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 			streamingDecoder?.cancel(true)
-			scene.requestDelete(*(frames.findAll { frame -> frame }))
+			return scene.requestDelete(*frames)
 		}
 	}
 }

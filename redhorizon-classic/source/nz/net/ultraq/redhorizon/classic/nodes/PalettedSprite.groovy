@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.nio.ByteBuffer
+import java.util.concurrent.CompletableFuture
 
 /**
  * A sprite that requires a palette to fully realize its image.
@@ -93,10 +94,12 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		super.onSceneRemoved(scene)
-		scene.requestDelete(material.palette)
+		return CompletableFuture.allOf(
+			super.onSceneRemoved(scene),
+			scene.requestDelete(material.palette)
+		)
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer
+import java.util.concurrent.CompletableFuture
 
 /**
  * A unit is a controllable object in the game.  As part of the Explorer
@@ -110,9 +111,9 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		scene.requestDelete(spriteSheet, paletteAsTexture)
+		return scene.requestDelete(spriteSheet, paletteAsTexture)
 	}
 
 	/**

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 
 /**
  * A script to control playback of a playable media node.
@@ -100,11 +101,13 @@ class PlaybackScript extends Script {
 	}
 
 	@Override
-	void onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		removeControlFunctions*.remove()
-		if (scene.gameClock.paused) {
-			scene.gameClock.resume()
+		return CompletableFuture.runAsync { ->
+			removeControlFunctions*.remove()
+			if (scene.gameClock.paused) {
+				scene.gameClock.resume()
+			}
 		}
 	}
 }
