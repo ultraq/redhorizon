@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequ
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -56,10 +55,10 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	int initialFrame = 0
 
+	SpriteSheet spriteSheet
+
 	protected Mesh mesh
-	protected ShaderConfig spriteShaderName = Shaders.spriteShader
 	protected Shader shader
-	protected SpriteSheet spriteSheet
 	protected Material material
 
 	/**
@@ -85,16 +84,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	/**
-	 * Constructor, build a sprite from an existing sprite sheet.
-	 */
-	Sprite(int width, int height, int numImages, SpriteSheet spriteSheet) {
-
-		this(width, height, numImages, { scene ->
-			return CompletableFuture.completedFuture(spriteSheet)
-		})
-	}
-
-	/**
 	 * Constructor, create a sprite using any implementation of the
 	 * {@link SpriteSheetGenerator} interface.
 	 */
@@ -108,29 +97,28 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		spriteSheetGenerator.generate(scene)
-			.thenAcceptAsync { newSpriteSheet ->
-				spriteSheet = newSpriteSheet
-
-				region.set(spriteSheet[initialFrame])
-
-				scene
-					.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
-					.thenAcceptAsync { newMesh ->
-						mesh = newMesh
-					}
-				scene
-					.requestCreateOrGet(new ShaderRequest(spriteShaderName))
-					.thenAcceptAsync { requestedShader ->
-						shader = requestedShader
-					}
-				material = new Material(
-					texture: spriteSheet.texture
-				)
-			}
-			.get()
+		return CompletableFuture.allOf(
+			scene
+				.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+				.thenAcceptAsync { newMesh ->
+					mesh = newMesh
+				},
+			scene
+				.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
+				.thenAcceptAsync { requestedShader ->
+					shader = requestedShader
+				},
+			spriteSheetGenerator.generate(scene)
+				.thenAcceptAsync { newSpriteSheet ->
+					spriteSheet = newSpriteSheet
+					material = new Material(
+						texture: spriteSheet.texture
+					)
+					region.set(spriteSheet[initialFrame])
+				}
+		)
 	}
 
 	@Override
@@ -143,8 +131,15 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		if (mesh && shader && material) {
-			mesh.updateTextureUvs(region as Vector2f[])
 			renderer.draw(mesh, globalTransform, shader, material)
+		}
+	}
+
+	@Override
+	void update() {
+
+		if (mesh) {
+			mesh.updateTextureUvs(region as Vector2f[])
 		}
 	}
 
@@ -152,7 +147,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 * Interface for any source from which sprite data can be obtained.
 	 */
 	@FunctionalInterface
-	private static interface SpriteSheetGenerator {
+	protected static interface SpriteSheetGenerator {
 
 		/**
 		 * Called during setup, returns the sprite sheet to use for the sprite.

@@ -19,9 +19,7 @@ package nz.net.ultraq.redhorizon.classic.units
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -30,8 +28,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
-import groovy.transform.InheritConstructors
-import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -55,8 +51,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final Palette palette
 	final UnitData unitData
 
-	private UnitBody body
-	private UnitTurret turret
+	private PalettedSprite body
+	private PalettedSprite turret
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
@@ -67,6 +63,18 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		this.imagesFile = imagesFile
 		this.palette = palette
 		this.unitData = unitData
+
+		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, palette, { _ ->
+			return CompletableFuture.completedFuture(spriteSheet)
+		})
+		addChild(body)
+
+		if (unitData.shpFile.parts.turret) {
+			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, palette, { _ ->
+				return CompletableFuture.completedFuture(spriteSheet)
+			})
+			addChild(turret)
+		}
 	}
 
 	/**
@@ -87,27 +95,13 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		var width = imagesFile.width
-		var height = imagesFile.height
-
-		// TODO: Load the palette once
-		paletteAsTexture = scene
-			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.get()
-
-		spriteSheet = scene
-			.requestCreateOrGet(new SpriteSheetRequest(width, height, imagesFile.format, imagesFile.imagesData))
-			.get()
-
-		body = new UnitBody(width, height, imagesFile.numImages, spriteSheet, palette)
-		addChild(body)
-
-		if (unitData.shpFile.parts.turret) {
-			turret = new UnitTurret(width, height, imagesFile.numImages, spriteSheet, palette)
-			addChild(turret)
-		}
+		return scene
+			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
+			.thenAcceptAsync { newSpriteSheet ->
+				spriteSheet = newSpriteSheet
+			}
 	}
 
 	@Override
@@ -156,16 +150,22 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		animationStartTime = currentTimeMs
 	}
 
-	@InheritConstructors
-	class UnitBody extends PalettedSprite {
+	/**
+	 * Script to control the sprite representing the unit's main body.
+	 */
+	private class UnitBody extends PalettedSprite {
+
+		UnitBody(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
+			super(width, height, numImages, 1f, 1f, palette, spriteSheetGenerator)
+		}
 
 		@Override
-		void render(GraphicsRenderer renderer) {
+		void update() {
 
 			// TODO: If this animation region picking gets more complicated, it might
 			//       be worth making an 'animation library' for units
 
-			if (spriteSheet && material?.palette) {
+			if (spriteSheet) {
 				// Update region in spritesheet to match heading and currently-playing animation
 				var currentState = unitData.shpFile.states[stateIndex]
 				var headings = currentState.headings
@@ -177,26 +177,32 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
 				var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
 				region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
-
-				super.render(renderer)
 			}
+
+			super.update()
 		}
 	}
 
-	@InheritConstructors
-	class UnitTurret extends PalettedSprite {
+	/**
+	 * Script to control the sprite representing the unit's turret.
+	 */
+	private class UnitTurret extends PalettedSprite {
+
+		UnitTurret(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
+			super(width, height, numImages, 1f, 1f, palette, spriteSheetGenerator)
+		}
 
 		@Override
-		void render(GraphicsRenderer renderer) {
+		void update() {
 
-			if (spriteSheet && material?.palette) {
-				var headings = unitData.shpFile.parts.turret.headings
-				var closestHeading = Math.round(heading / degreesPerHeading)
-				var rotationFrame = closestHeading ? headings - closestHeading as int : 0
-				region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + rotationFrame))
-
-				super.render(renderer)
+			if (spriteSheet) {
+				var turretHeadings = unitData.shpFile.parts.turret.headings
+				var closestTurretHeading = Math.round(heading / degreesPerHeading)
+				var turretRotationFrame = closestTurretHeading ? turretHeadings - closestTurretHeading as int : 0
+				region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + turretRotationFrame))
 			}
+
+			super.update()
 		}
 	}
 }

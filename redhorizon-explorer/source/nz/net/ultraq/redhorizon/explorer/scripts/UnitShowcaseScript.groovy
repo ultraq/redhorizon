@@ -47,49 +47,53 @@ class UnitShowcaseScript extends Script<Unit> {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		// TODO: Have it so that the render window is the desktop resolution and the
-		//       camera scales things so that things are the size they were back
-		//       when the game was 640x480
-		scene.camera.scale(4.0f)
-		logger.info("Showing ${state} state")
+		return CompletableFuture.runAsync { ->
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
-			rotateLeft()
-		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
-			rotateRight()
-		}))
-
-		var states = unitData.shpFile.states
-
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
-			var currentStateIndex = states.findIndexOf { it.name == state }
-			setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
+			// TODO: Have it so that the render window is the desktop resolution and the
+			//       camera scales things so that things are the size they were back
+			//       when the game was 640x480
+			scene.camera.scale(4.0f)
 			logger.info("Showing ${state} state")
-			startAnimation()
-		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
-			var currentStateIndex = states.findIndexOf { it.name == state }
-			setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
-			logger.info("Showing ${state} state")
-			startAnimation()
-		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
-			scene.gameClock.togglePause()
-		}))
 
-		var Faction[] factions = Faction.values()
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', { ->
-			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
-			logger.info("Viewing with ${selectedFaction.name()} faction colours")
-			accept { node ->
-				if (node instanceof FactionColours) {
-					node.faction = selectedFaction
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
+				rotateLeft()
+			}))
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
+				rotateRight()
+			}))
+
+			var states = unitData.shpFile.states
+
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
+				var currentStateIndex = states.findIndexOf { it.name == state }
+				setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
+				logger.info("Showing ${state} state")
+				startAnimation()
+			}))
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
+				var currentStateIndex = states.findIndexOf { it.name == state }
+				setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
+				logger.info("Showing ${state} state")
+				startAnimation()
+			}))
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
+				scene.gameClock.togglePause()
+			}))
+
+			var Faction[] factions = Faction.values()
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
+				->
+				var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
+				logger.info("Viewing with ${selectedFaction.name()} faction colours")
+				accept { node ->
+					if (node instanceof FactionColours) {
+						node.faction = selectedFaction
+					}
 				}
-			}
-		}))
+			}))
+		}
 	}
 
 	@Override

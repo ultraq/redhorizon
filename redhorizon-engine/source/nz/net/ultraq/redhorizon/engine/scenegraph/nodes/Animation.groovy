@@ -83,17 +83,25 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		mesh = scene
-			.requestCreateOrGet(new SpriteMeshRequest(bounds))
-			.get()
-		shader = scene
-			.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
-			.get()
-		material = new Material()
+		return CompletableFuture.allOf(
+			scene
+				.requestCreateOrGet(new SpriteMeshRequest(bounds))
+				.thenAcceptAsync { newMesh ->
+					mesh = newMesh
+				},
+			scene
+				.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
+				.thenAcceptAsync { requestedShader ->
+					shader = requestedShader
+				}
+		)
+			.thenComposeAsync { _ ->
+				material = new Material()
 
-		animationSource.onSceneAdded(scene)
+				return animationSource.onSceneAdded(scene)
+			}
 	}
 
 	@Override
@@ -142,6 +150,8 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 	/**
 	 * Interface for any source from which frames of animation can be obtained.
+	 *
+	 * TODO: This could be replaced w/ update() methods right?
 	 */
 	static interface AnimationSource extends EventTarget, SceneEvents {
 
@@ -188,25 +198,27 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		}
 
 		@Override
-		void onSceneAdded(Scene scene) {
+		CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-			var buffersAdded = 0
-			streamingDecoder.on(StreamingFrameEvent) { event ->
-				frames << scene
-					.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
-					.get()
-				buffersAdded++
-				if (buffersAdded == Math.ceil(frameRate) as int) {
-					trigger(new PlaybackReadyEvent())
+			return CompletableFuture.runAsync { ->
+				var buffersAdded = 0
+				streamingDecoder.on(StreamingFrameEvent) { event ->
+					frames << scene
+						.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
+						.get()
+					buffersAdded++
+					if (buffersAdded == Math.ceil(frameRate) as int) {
+						trigger(new PlaybackReadyEvent())
+					}
 				}
-			}
 
-			// Run ourselves, otherwise expect the owner of this source to run this
-			if (autoStream) {
-				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
-			}
-			else {
-				trigger(new StreamingReadyEvent())
+				// Run ourselves, otherwise expect the owner of this source to run this
+				if (autoStream) {
+					Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+				}
+				else {
+					trigger(new StreamingReadyEvent())
+				}
 			}
 		}
 

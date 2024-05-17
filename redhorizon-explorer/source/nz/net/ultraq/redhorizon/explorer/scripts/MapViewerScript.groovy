@@ -184,13 +184,15 @@ class MapViewerScript extends Script<Map> {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		inputEventStream = scene.inputEventStream
-		window = scene.window
-		camera = scene.camera
-		gameWindow = scene.gameWindow
-		addControls()
+		return CompletableFuture.runAsync { ->
+			inputEventStream = scene.inputEventStream
+			window = scene.window
+			camera = scene.camera
+			gameWindow = scene.gameWindow
+			addControls()
+		}
 	}
 
 	@Override

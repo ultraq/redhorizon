@@ -53,50 +53,52 @@ class PlaybackScript extends Script {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
-			if (runOnce) {
-				logger.debug('Pausing/Resuming playback')
-				scene.gameClock.togglePause()
-			}
-			else {
-				if (!playing || paused) {
-					logger.debug('Playing')
-					play()
+		return CompletableFuture.runAsync { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+				if (runOnce) {
+					logger.debug('Pausing/Resuming playback')
+					scene.gameClock.togglePause()
 				}
+				else {
+					if (!playing || paused) {
+						logger.debug('Playing')
+						play()
+					}
+				}
+			}))
+
+			if (scriptable instanceof Sound) {
+				removeControlFunctions << scene.inputEventStream.addControl(
+					new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', {
+						->
+						scriptable.transform.translate(-0.25, 0)
+						logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+					})
+				)
+				removeControlFunctions << scene.inputEventStream.addControl(
+					new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
+						scriptable.transform.translate(0.25, 0)
+						logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+					})
+				)
 			}
-		}))
 
-		if (scriptable instanceof Sound) {
-			removeControlFunctions << scene.inputEventStream.addControl(
-				new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', {
-					->
-					scriptable.transform.translate(-0.25, 0)
-					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
-				})
-			)
-			removeControlFunctions << scene.inputEventStream.addControl(
-				new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
-					scriptable.transform.translate(0.25, 0)
-					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
-				})
-			)
-		}
+			on(PlaybackReadyEvent) { event ->
+				logger.debug('Beginning playback')
+				play()
+			}
 
-		on(PlaybackReadyEvent) { event ->
-			logger.debug('Beginning playback')
-			play()
-		}
+			// Static sound sources will have fired the above already, so start playback of them here
+			if (!runOnce) {
+				logger.debug('Beginning playback')
+				play()
+			}
 
-		// Static sound sources will have fired the above already, so start playback of them here
-		if (!runOnce) {
-			logger.debug('Beginning playback')
-			play()
-		}
-
-		on(StopEvent) { event ->
-			logger.debug('Playback complete')
+			on(StopEvent) { event ->
+				logger.debug('Playback complete')
+			}
 		}
 	}
 

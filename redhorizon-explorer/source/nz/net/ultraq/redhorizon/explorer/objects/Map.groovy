@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -105,12 +104,20 @@ class Map extends Node<Map> {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		// TODO: Load the palette once
-		paletteAsTexture = scene
+		return scene
 			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.get()
+			.thenAcceptAsync { newTexture ->
+				paletteAsTexture = newTexture
+			}
+	}
+
+	@Override
+	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+
+		return scene.requestDelete(paletteAsTexture)
 	}
 
 	/**
@@ -139,8 +146,7 @@ class Map extends Node<Map> {
 		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
 		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
 
-		@Override
-		void onSceneAdded(Scene scene) {
+		MapLines() {
 
 			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX))
 			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.5), boundary as Vector2f[]))
@@ -152,12 +158,9 @@ class Map extends Node<Map> {
 	 */
 	private class MapBackground extends Node<MapBackground> {
 
-		String name = theater.label
+		String name = "MapBackground - ${theater.label}"
 
-		private SpriteSheet background
-
-		@Override
-		void onSceneAdded(Scene scene) {
+		MapBackground() {
 
 			var clearTileName = MapRAMapPackTile.DEFAULT.name + theater.ext
 			var tileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
@@ -166,22 +169,16 @@ class Map extends Node<Map> {
 			var imageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, theater.clearX)
 			var spriteWidth = tileFile.width * theater.clearX
 			var spriteHeight = tileFile.height * theater.clearY
-			background = scene
-				.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
-				.get()
 
 			// Use the sprite sheet and repeat it over the entire map area
 			var backgroundWidth = TILES_X * TILE_WIDTH
 			var backgroundHeight = TILES_Y * TILE_HEIGHT
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
-			addChild(new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, background, repeatX, repeatY, palette))
-		}
 
-		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
-
-			return scene.requestDelete(background)
+			addChild(new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, palette, { scene ->
+				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
+			}))
 		}
 	}
 
@@ -190,8 +187,7 @@ class Map extends Node<Map> {
 	 */
 	private class MapPack extends Node<MapPack> {
 
-		@Override
-		void onSceneAdded(Scene scene) {
+		MapPack() {
 
 			var tileData = mapFile.mapPackData
 
@@ -200,10 +196,10 @@ class Map extends Node<Map> {
 
 					// Get the byte representing the tile
 					var tileValOffset = y * TILES_Y + x
-					var tileVal = tileData.getShort(tileValOffset * 2) & 0xffff
+					var tileVal = tileData.getShort(tileValOffset * 2)
 					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
 
-					// Retrieve the appropriate tile, skip empty tiles
+					// Retrieve the appropriate tile, skip empty and default tiles
 					if (tileVal != 0xff && tileVal != -1) {
 						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
 

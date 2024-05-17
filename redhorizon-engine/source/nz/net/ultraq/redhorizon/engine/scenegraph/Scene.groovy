@@ -77,24 +77,33 @@ class Scene implements EventTarget, Visitable {
 	 */
 	Scene addNode(Node node) {
 
-		nodes << node
-		addNodeAndChildren(node)
-		return this
+		return time('Adding node', logger) { ->
+			nodes << node
+			addNodeAndChildren(node).join()
+			return this
+		}
 	}
 
 	/**
 	 * Trigger the {@code onSceneAdded} event for this node and all its children.
 	 * Each node triggers a {@link NodeAddedEvent} event.
 	 */
-	private void addNodeAndChildren(Node node) {
+	private CompletableFuture<Void> addNodeAndChildren(Node node) {
 
-		node.onSceneAdded(this)
-		node.script?.onSceneAdded(this)
-		trigger(new NodeAddedEvent(node))
+		return CompletableFuture.allOf(
+			node.onSceneAdded(this),
+			node.script?.onSceneAdded(this) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRun { ->
+				trigger(new NodeAddedEvent(node))
+			}
+			.thenCompose { _ ->
+				var futures = node.children.collect { childNode -> addNodeAndChildren(childNode) }
 
-		node.children.each { childNode ->
-			addNodeAndChildren(childNode)
-		}
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
 	}
 
 	/**

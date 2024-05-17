@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.primitives.Rectanglef
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * A node used for making its children take up the whole screen.
  *
@@ -36,23 +38,25 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 	FillMode fillMode = FillMode.ASPECT_RATIO
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		bounds
-			.set(scene.window.renderResolution as Rectanglef)
-			.center()
+		return CompletableFuture.runAsync { ->
+			bounds
+				.set(scene.window.renderResolution as Rectanglef)
+				.center()
 
-		// Update children to take up the full screen
-		children.each { child ->
-			switch (fillMode) {
-				case FillMode.ASPECT_RATIO -> {
-					child.transform.scaleXY(bounds.calculateScaleToFit(child.bounds))
-				}
-				case FillMode.STRETCH -> {
-					child.transform.scaleXY(
-						bounds.lengthX() / child.bounds.lengthX() as float,
-						bounds.lengthY() / child.bounds.lengthY() as float
-					)
+			// Update children to take up the full screen
+			children.each { child ->
+				switch (fillMode) {
+					case FillMode.ASPECT_RATIO -> {
+						child.transform.scaleXY(bounds.calculateScaleToFit(child.bounds))
+					}
+					case FillMode.STRETCH -> {
+						child.transform.scaleXY(
+							bounds.lengthX() / child.bounds.lengthX() as float,
+							bounds.lengthY() / child.bounds.lengthY() as float
+						)
+					}
 				}
 			}
 		}

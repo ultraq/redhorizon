@@ -77,7 +77,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 	protected final GLCapabilities capabilities
 
 	private Dimension framebufferSize
-	private final List<Shader> shaders = []
+	private List<Shader> shaders = []
+	private int maxTextureSize
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -215,8 +216,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	SpriteSheet createSpriteSheet(int width, int height, ColourFormat format, ByteBuffer[] data) {
 
-		var maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
-		logger.debug('Max supported texture size: {}', maxTextureSize)
+		if (!maxTextureSize) {
+			maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
+			logger.debug('Max supported texture size: {}', maxTextureSize)
+		}
 
 		var framesHorizontal = Math.min(data.length, maxTextureSize / width as int)
 		var framesVertical = Math.ceil(data.length / framesHorizontal) as int

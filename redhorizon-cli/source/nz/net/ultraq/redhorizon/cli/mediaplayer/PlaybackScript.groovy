@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 
 /**
  * A script to control playback of a playable media node.
@@ -51,44 +52,46 @@ class PlaybackScript extends Script {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
-			if (runOnce) {
-				logger.debug('Pausing/Resuming playback')
-				scene.gameClock.togglePause()
-			}
-			else {
-				if (!playing || paused) {
-					logger.debug('Playing')
-					play()
+		return CompletableFuture.runAsync { ->
+			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+				if (runOnce) {
+					logger.debug('Pausing/Resuming playback')
+					scene.gameClock.togglePause()
 				}
-			}
-		}))
-
-		if (scriptable instanceof Sound) {
-			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', { ->
-				scriptable.transform.translate(-0.25, 0)
-				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+				else {
+					if (!playing || paused) {
+						logger.debug('Playing')
+						play()
+					}
+				}
 			}))
-			scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
-				scriptable.transform.translate(0.25, 0)
-				logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
-			}))
-		}
 
-		on(PlaybackReadyEvent) { event ->
-			logger.debug('Beginning playback')
-			play()
-		}
-
-		on(StopEvent) { event ->
-			if (runOnce) {
-				logger.debug('Playback complete and script configured for runOnce behaviour - shutting down')
-				application.stop()
+			if (scriptable instanceof Sound) {
+				scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', { ->
+					scriptable.transform.translate(-0.25, 0)
+					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+				}))
+				scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
+					scriptable.transform.translate(0.25, 0)
+					logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
+				}))
 			}
-			else {
-				logger.debug('Playback complete')
+
+			on(PlaybackReadyEvent) { event ->
+				logger.debug('Beginning playback')
+				play()
+			}
+
+			on(StopEvent) { event ->
+				if (runOnce) {
+					logger.debug('Playback complete and script configured for runOnce behaviour - shutting down')
+					application.stop()
+				}
+				else {
+					logger.debug('Playback complete')
+				}
 			}
 		}
 	}

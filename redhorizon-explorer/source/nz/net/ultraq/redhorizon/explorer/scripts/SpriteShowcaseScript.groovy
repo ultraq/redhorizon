@@ -48,29 +48,32 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		scene.camera.scale(4.0f)
+		return CompletableFuture.runAsync { ->
+			scene.camera.scale(4.0f)
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Previous frame', { ->
-			Math.wrap(currentFrame--, 0, numImages)
-			region.set(spriteSource.spriteSheet[currentFrame])
-		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Next frame', { ->
-			Math.wrap(currentFrame++, 0, numImages)
-			region.set(spriteSource.spriteSheet[currentFrame])
-		}))
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Previous frame', { ->
+				Math.wrap(currentFrame--, 0, numImages)
+				region.set(spriteSheet[currentFrame])
+			}))
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Next frame', { ->
+				Math.wrap(currentFrame++, 0, numImages)
+				region.set(spriteSheet[currentFrame])
+			}))
 
-		var Faction[] factions = Faction.values()
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', { ->
-			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
-			logger.info("Viewing with ${selectedFaction.name()} faction colours")
-			accept { node ->
-				if (node instanceof FactionColours) {
-					node.faction = selectedFaction
+			var Faction[] factions = Faction.values()
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
+				->
+				var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
+				logger.info("Viewing with ${selectedFaction.name()} faction colours")
+				accept { node ->
+					if (node instanceof FactionColours) {
+						node.faction = selectedFaction
+					}
 				}
-			}
-		}))
+			}))
+		}
 	}
 
 	@Override

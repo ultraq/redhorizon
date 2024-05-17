@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 
 /**
- * Interface for graphical elements rendered to the graphics hardware.
+ * Interface for elements rendered by the graphics hardware.
  *
  * @author Emanuel Rabina
  */
@@ -27,8 +27,6 @@ interface GraphicsElement {
 
 	/**
 	 * Render the element for display.
-	 *
-	 * @param renderer
 	 */
 	void render(GraphicsRenderer renderer)
 }

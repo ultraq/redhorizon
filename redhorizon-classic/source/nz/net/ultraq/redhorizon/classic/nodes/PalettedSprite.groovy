@@ -18,8 +18,10 @@ package nz.net.ultraq.redhorizon.classic.nodes
 
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -50,47 +52,56 @@ class PalettedSprite extends Sprite implements FactionColours {
 		this.repeatX = 1f
 		this.repeatY = 1f
 		this.palette = palette
-		spriteShaderName = Shaders.palettedSpriteShader
 	}
 
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.
 	 */
-	// This constructor is inherited, so check subclasses for its use before deleting
-	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, Palette palette) {
+	PalettedSprite(int width, int height, int numImages, float repeatX, float repeatY, Palette palette,
+		SpriteSheetGenerator spriteSheetGenerator) {
 
-		this(width, height, numImages, spriteSheet, 1f, 1f, palette)
-	}
-
-	/**
-	 * Constructor, build this sprite from an existing sprite sheet.
-	 */
-	PalettedSprite(int width, int height, int numImages, SpriteSheet spriteSheet, float repeatX, float repeatY,
-		Palette palette) {
-
-		super(width, height, numImages, spriteSheet)
+		super(width, height, numImages, spriteSheetGenerator)
 		this.repeatX = repeatX
 		this.repeatY = repeatY
 		this.palette = palette
-		spriteShaderName = Shaders.palettedSpriteShader
 	}
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		super.onSceneAdded(scene)
+		material = new Material()
 
-		// TODO: Some uses are a repeating tile, others aren't.  There should be a unified way of doing this 🤔
-		if (repeatX != 1f || repeatY != 1f) {
-			region.setMax(repeatX, repeatY)
-		}
+		return CompletableFuture.allOf(
+			scene
+				.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+				.thenAcceptAsync { newMesh ->
+					mesh = newMesh
+				},
+			scene
+				.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
+				.thenAcceptAsync { requestedShader ->
+					shader = requestedShader
+				},
+			spriteSheetGenerator.generate(scene)
+				.thenApplyAsync { newSpriteSheet ->
+					spriteSheet = newSpriteSheet
+					material.texture = spriteSheet.texture
 
-		// TODO: Load the palette once
-		scene
-			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.thenAcceptAsync { newTexture ->
-				material.palette = newTexture
-			}
+					// TODO: Some uses are a repeating tile, others aren't.  There should be a unified way of doing this 🤔
+					if (repeatX != 1f || repeatY != 1f) {
+						region.setMax(repeatX, repeatY)
+					}
+					else {
+						region.set(spriteSheet[initialFrame])
+					}
+				},
+			// TODO: Load the palette once
+			scene
+				.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
+				.thenAcceptAsync { newTexture ->
+					material.palette = newTexture
+				}
+		)
 	}
 
 	@Override
@@ -106,14 +117,11 @@ class PalettedSprite extends Sprite implements FactionColours {
 	void render(GraphicsRenderer renderer) {
 
 		if (material?.palette) {
-			material.faction = faction
-
 			if (paletteChanged) {
 				renderer.delete(material.palette)
 				material.palette = renderer.createTexture(256, 1, palette.format, palette as ByteBuffer)
 				paletteChanged = false
 			}
-
 			super.render(renderer)
 		}
 	}
@@ -125,5 +133,14 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 		this.palette = palette
 		paletteChanged = true
+	}
+
+	@Override
+	void update() {
+
+		if (material) {
+			material.faction = faction
+		}
+		super.update()
 	}
 }
