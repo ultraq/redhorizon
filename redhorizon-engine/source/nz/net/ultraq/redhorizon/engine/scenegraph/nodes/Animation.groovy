@@ -74,9 +74,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 		this.animationSource = animationSource
 		animationSource.relay(Event, this)
-		bounds
-			.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
-			.center()
+		bounds.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
 	}
 
 	@Override

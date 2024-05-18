@@ -47,6 +47,7 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 
 			// Update children to take up the full screen
 			children.each { child ->
+				child.bounds.center()
 				switch (fillMode) {
 					case FillMode.ASPECT_RATIO -> {
 						child.transform.scaleXY(bounds.calculateScaleToFit(child.bounds))

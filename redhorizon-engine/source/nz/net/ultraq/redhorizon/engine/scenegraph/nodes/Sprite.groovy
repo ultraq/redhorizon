@@ -89,9 +89,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	protected Sprite(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
 
-		bounds
-			.set(0, 0, width, height)
-			.center()
+		bounds.set(0, 0, width, height)
 		this.numImages = numImages
 		this.spriteSheetGenerator = spriteSheetGenerator
 	}

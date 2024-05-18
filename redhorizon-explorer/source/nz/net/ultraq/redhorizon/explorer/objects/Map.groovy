@@ -176,9 +176,11 @@ class Map extends Node<Map> {
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
 
-			addChild(new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, palette, { scene ->
+			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, palette, { scene ->
 				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
-			}))
+			})
+			backgroundSprite.bounds.center()
+			addChild(backgroundSprite)
 		}
 	}
 
