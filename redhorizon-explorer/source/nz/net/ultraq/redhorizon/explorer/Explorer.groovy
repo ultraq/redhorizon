@@ -379,15 +379,17 @@ class Explorer {
 					.getDeclaredConstructor(ImagesFile, nz.net.ultraq.redhorizon.filetypes.Palette, UnitData)
 					.newInstance(shpFile, palette, unitData)
 					.attachScript(new UnitShowcaseScript())
+				unit.body.bounds.center()
+				unit.turret?.bounds?.center()
 				scene << unit
 			}
 		}
 
 		// No config found, fall back to viewing a SHP file as media
 		else {
-			var palettedSprite = new PalettedSprite(shpFile, palette)
-				.attachScript(new SpriteShowcaseScript())
-			scene << palettedSprite
+			var sprite = new PalettedSprite(shpFile, palette).attachScript(new SpriteShowcaseScript())
+			sprite.bounds.center()
+			scene << sprite
 		}
 	}
 

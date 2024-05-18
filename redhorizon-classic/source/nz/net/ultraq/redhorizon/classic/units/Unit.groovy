@@ -50,9 +50,9 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final ImagesFile imagesFile
 	final Palette palette
 	final UnitData unitData
+	final PalettedSprite body
+	final PalettedSprite turret
 
-	private PalettedSprite body
-	private PalettedSprite turret
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
@@ -74,6 +74,9 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				return CompletableFuture.completedFuture(spriteSheet)
 			})
 			addChild(turret)
+		}
+		else {
+			turret = null
 		}
 	}
 

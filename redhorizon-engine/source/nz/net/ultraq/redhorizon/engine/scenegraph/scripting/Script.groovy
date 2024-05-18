@@ -39,4 +39,11 @@ abstract class Script<T extends Scriptable> implements SceneEvents {
 		this.scriptable = scriptable
 		return this
 	}
+
+	/**
+	 * Called on every frame before the node is rendered, allowing it to perform
+	 * any processing as a response to changes in the scene.
+	 */
+	void update() {
+	}
 }

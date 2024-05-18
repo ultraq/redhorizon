@@ -51,6 +51,8 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 	private final AnimationSource animationSource
 
+	private final int numFrames
+	private final float frameRate
 	private long startTimeMs
 	private int currentFrame = -1
 	private Mesh mesh
@@ -62,19 +64,23 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	 */
 	Animation(AnimationFile animationFile) {
 
-		this(animationFile.width, animationFile.height, animationFile.forVgaMonitors,
-			new StreamingAnimationSource(((Streaming)animationFile).streamingDecoder, animationFile.frameRate, animationFile.numFrames, true))
+		this(animationFile.width, animationFile.height, animationFile.numFrames, animationFile.frameRate,
+			animationFile.forVgaMonitors, new StreamingAnimationSource(((Streaming)animationFile).streamingDecoder, true))
 	}
 
 	/**
 	 * Constructor, create an animation using any implementation of the
 	 * {@link AnimationSource} interface.
 	 */
-	Animation(int width, int height, boolean forVgaMonitors = false, AnimationSource animationSource) {
+	Animation(int width, int height, int numFrames, float frameRate, boolean forVgaMonitors = false,
+		AnimationSource animationSource) {
+
+		bounds.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
+		this.numFrames = numFrames
+		this.frameRate = frameRate
 
 		this.animationSource = animationSource
 		animationSource.relay(Event, this)
-		bounds.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
 	}
 
 	@Override
@@ -135,8 +141,8 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	void update() {
 
-		var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * animationSource.frameRate) as int
-		if (nextFrame < animationSource.numFrames) {
+		var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
+		if (nextFrame < numFrames) {
 			currentFrame = nextFrame
 		}
 		else {
@@ -147,11 +153,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	/**
 	 * Interface for any source from which frames of animation can be obtained.
 	 */
-	interface AnimationSource extends EventTarget, SceneEvents {
-
-		float getFrameRate()
-
-		int getNumFrames()
+	static interface AnimationSource extends EventTarget, SceneEvents {
 
 		/**
 		 * Called during {@code render}, return the texture to be used for rendering
@@ -167,8 +169,6 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	static class StreamingAnimationSource implements AnimationSource {
 
 		final StreamingDecoder streamingDecoder
-		final float frameRate
-		final int numFrames
 		final boolean autoStream
 
 		private List<Texture> frames = []
@@ -197,7 +197,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 						.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
 						.get()
 					buffersAdded++
-					if (buffersAdded == Math.ceil(frameRate) as int) {
+					if (buffersAdded == 10) {
 						trigger(new PlaybackReadyEvent())
 					}
 				}

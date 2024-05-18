@@ -51,8 +51,8 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 
 		streamingDecoder = videoFile.streamingDecoder
 
-		animation = new Animation(videoFile.width, videoFile.height, videoFile.forVgaMonitors,
-			new StreamingAnimationSource(streamingDecoder, videoFile.frameRate, videoFile.numFrames, false))
+		animation = new Animation(videoFile.width, videoFile.height, videoFile.numFrames, videoFile.frameRate,
+			videoFile.forVgaMonitors, new StreamingAnimationSource(streamingDecoder, false))
 		bounds.set(animation.bounds)
 		addChild(animation)
 

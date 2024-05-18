@@ -29,7 +29,8 @@ import org.joml.primitives.Rectanglef
 import spock.lang.Specification
 
 import groovy.json.JsonSlurper
-import java.util.concurrent.Future
+import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
 
 /**
  * Tests for the Unit class.
@@ -45,19 +46,29 @@ class UnitTests extends Specification {
 				graphicsRequestHandler = Mock(GraphicsRequests) {
 					requestCreateOrGet(_) >> { args ->
 						return args[0].class == SpriteSheetRequest ?
-							Mock(Future) {
-								get() >> Mock(SpriteSheet) {
-									getAt(0) >> new Rectanglef(0, 0, 1, 1)
+							Mock(CompletableFuture) {
+								thenAcceptAsync(_ as Consumer) >> { Consumer action ->
+									return CompletableFuture.runAsync { ->
+										action(Mock(SpriteSheet) {
+											getAt(0) >> new Rectanglef(0, 0, 1, 1)
+										})
+									}
 								}
 							} :
-							Mock(Future) {
-								get() >> null
+							Mock(CompletableFuture) {
+								thenAcceptAsync(_ as Consumer) >> { Consumer action ->
+									return CompletableFuture.runAsync { ->
+										action(null)
+									}
+								}
 							}
 					}
 				}
 			}
-			var spriteFile = loadResource("nz/net/ultraq/redhorizon/explorer/harv.shp", ShpFile)
-			var palette = loadResource("nz/net/ultraq/redhorizon/explorer/ra-temperate.pal", PalFile)
+			var spriteStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/explorer/harv.shp'))
+			var paletteStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/explorer/ra-temperate.pal'))
+			var spriteFile = new ShpFile(spriteStream)
+			var palette = new PalFile(paletteStream)
 			var unitData = getResourceAsStream('nz/net/ultraq/redhorizon/classic/units/data/harv.json').withBufferedReader { reader ->
 				return new JsonSlurper().parseText(reader.text) as UnitData
 			}
@@ -66,9 +77,8 @@ class UnitTests extends Specification {
 			scene << unit
 		then:
 			notThrown(Exception)
-	}
-
-	private <T> T loadResource(String path, Class<T> clazz) {
-		return getResourceAsStream(path).withBufferedStream { stream -> clazz.newInstance(stream) }
+		cleanup:
+			spriteStream?.close()
+			paletteStream?.close()
 	}
 }

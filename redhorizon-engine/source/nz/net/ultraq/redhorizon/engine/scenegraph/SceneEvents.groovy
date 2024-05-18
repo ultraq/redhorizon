@@ -41,11 +41,4 @@ interface SceneEvents {
 
 		return CompletableFuture<Void>.completedFuture(null)
 	}
-
-	/**
-	 * Called on every frame before the node is rendered, allowing it to perform
-	 * any processing as a response to changes in the scene.
-	 */
-	default void update() {
-	}
 }

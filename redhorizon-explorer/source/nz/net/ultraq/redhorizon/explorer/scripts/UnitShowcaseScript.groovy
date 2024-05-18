@@ -50,10 +50,6 @@ class UnitShowcaseScript extends Script<Unit> {
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-
-			// TODO: Have it so that the render window is the desktop resolution and the
-			//       camera scales things so that things are the size they were back
-			//       when the game was 640x480
 			scene.camera.scale(4.0f)
 			logger.info("Showing ${state} state")
 
