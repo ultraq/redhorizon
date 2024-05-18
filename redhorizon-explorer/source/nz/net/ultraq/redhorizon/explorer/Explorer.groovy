@@ -94,6 +94,7 @@ class Explorer {
 	Explorer(String version, nz.net.ultraq.redhorizon.filetypes.Palette palette) {
 
 		this.palette = palette
+		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
 
 		new Application("Explorer - ${version}")
 			.addAudioSystem()
@@ -154,6 +155,7 @@ class Explorer {
 			void render() {
 				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
 					touchpadInput = !touchpadInput
+					userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
 					Map mapNode = scene.findNode { node -> node instanceof Map }
 					if (mapNode) {
 						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput

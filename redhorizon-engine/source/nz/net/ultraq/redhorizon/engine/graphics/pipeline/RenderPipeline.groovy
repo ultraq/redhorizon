@@ -192,11 +192,8 @@ class RenderPipeline implements Closeable {
 					var frustumIntersection = new FrustumIntersection(camera.projection.mul(camera.view, viewProjection))
 					scene.accept { Node element ->
 						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
-							// TODO: Object updates can be performed w/ a fork/join before hitting rendering
 							element.update()
-							if (element.script) {
-								element.script.update()
-							}
+							element.script?.update()
 							visibleElements << element
 						}
 					}
