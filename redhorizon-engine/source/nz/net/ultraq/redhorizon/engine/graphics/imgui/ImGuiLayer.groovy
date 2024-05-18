@@ -294,7 +294,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 			ImGui.setNextWindowSize(800, 600, FirstUseEver)
 			ImGui.pushStyleVar(WindowPadding, 0, 0)
-			ImGui.begin('Game', new ImBoolean(true), NoCollapse | NoScrollbar)
+			ImGui.begin('Game', new ImBoolean(true), NoCollapse | NoScrollbar | NoScrollWithMouse)
 			ImGui.popStyleVar()
 
 			focused = ImGui.isWindowFocused()
