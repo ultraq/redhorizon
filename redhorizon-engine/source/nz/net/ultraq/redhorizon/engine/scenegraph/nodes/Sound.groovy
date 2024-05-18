@@ -98,6 +98,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	@Override
 	void render(AudioRenderer renderer) {
 
+		// TODO: A lot of this should occur in an audio equivalent of the update() method
 		if (source) {
 			soundSource.prepareSource(renderer, source)
 			renderer.updateSource(source, globalPosition)

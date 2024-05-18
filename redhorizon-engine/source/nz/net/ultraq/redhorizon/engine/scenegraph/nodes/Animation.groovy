@@ -38,9 +38,6 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 
-import org.joml.Vector2f
-import org.joml.primitives.Rectanglef
-
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -117,12 +114,9 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	void render(GraphicsRenderer renderer) {
 
 		if (mesh && shader && material && currentFrame != -1) {
-			def (texture, region) = animationSource.getFrame(renderer, currentFrame)
-			if (texture) {
-				material.texture = texture
-				if (region) {
-					mesh.updateTextureUvs(region as Vector2f[])
-				}
+			var frame = animationSource.prepareFrame(renderer, currentFrame)
+			if (frame) {
+				material.texture = frame
 				renderer.draw(mesh, globalTransform, shader, material)
 			}
 		}
@@ -137,33 +131,35 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 			if (!startTimeMs) {
 				startTimeMs = currentTimeMs
 			}
+		}
+	}
 
-			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * animationSource.frameRate) as int
-			if (nextFrame < animationSource.numFrames) {
-				currentFrame = nextFrame
-			}
-			else {
-				stop()
-			}
+	@Override
+	void update() {
+
+		var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * animationSource.frameRate) as int
+		if (nextFrame < animationSource.numFrames) {
+			currentFrame = nextFrame
+		}
+		else {
+			stop()
 		}
 	}
 
 	/**
 	 * Interface for any source from which frames of animation can be obtained.
-	 *
-	 * TODO: This could be replaced w/ update() methods right?
 	 */
-	static interface AnimationSource extends EventTarget, SceneEvents {
-
-		/**
-		 * Called during {@code render}, return the texture and an optional region
-		 * to be used for rendering the given frame of animation.
-		 */
-		Tuple2<Texture, Rectanglef> getFrame(GraphicsRenderer renderer, int frameNumber)
+	interface AnimationSource extends EventTarget, SceneEvents {
 
 		float getFrameRate()
 
 		int getNumFrames()
+
+		/**
+		 * Called during {@code render}, return the texture to be used for rendering
+		 * the given frame of animation.
+		 */
+		Texture prepareFrame(GraphicsRenderer renderer, int frameNumber)
 	}
 
 	/**
@@ -178,23 +174,19 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		final boolean autoStream
 
 		private List<Texture> frames = []
-		private int lastFrame = -1
+		private int lastFrame = 0
 
 		@Override
-		Tuple2<Texture, Rectanglef> getFrame(GraphicsRenderer renderer, int frameNumber) {
-
-			var currentFrameTexture = frames[frameNumber]
+		Texture prepareFrame(GraphicsRenderer renderer, int frameNumber) {
 
 			// Delete used frames as the animation progresses to free up memory
-			if (frameNumber > 0) {
-				for (var i = lastFrame; i < frameNumber; i++) {
-					renderer.delete(frames[i])
-					frames[i] = null
-				}
+			while (lastFrame < frameNumber) {
+				renderer.delete(frames[lastFrame])
+				frames[lastFrame] = null
+				lastFrame++
 			}
-			lastFrame = frameNumber
 
-			return new Tuple2<>(currentFrameTexture, null)
+			return frames[frameNumber]
 		}
 
 		@Override
@@ -225,7 +217,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		@Override
 		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-			streamingDecoder?.cancel(true)
+			streamingDecoder.cancel(true)
 			return scene.requestDelete(*frames)
 		}
 	}
