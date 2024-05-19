@@ -77,6 +77,7 @@ class PcxFile implements ImageFile, InternalPalette {
 	final int width
 	final int height
 	final ColourFormat format = FORMAT_RGB
+	final ByteBuffer indexData
 	final ByteBuffer imageData
 	final Palette palette
 
@@ -134,20 +135,20 @@ class PcxFile implements ImageFile, InternalPalette {
 		while (encodedImage.hasRemaining()) {
 			scanLines << runLengthEncoding.decode(encodedImage, ByteBuffer.allocateNative(planes * bytesPerLine))
 		}
-		var indexedData = ByteBuffer.allocateNative(width * height)
+		indexData = ByteBuffer.allocateNative(width * height)
 		(yMin..yMax).each { y ->
 			var scanLine = scanLines[y]
 			(xMin..xMax).each { x ->
-				indexedData.put(scanLine.get(x))
+				indexData.put(scanLine.get(x))
 			}
 		}
-		indexedData.flip()
+		indexData.flip()
 
 		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 		palette = new Palette(PALETTE_COLOURS, FORMAT_RGB, paletteData)
 
 		// Apply palette to raw image data to create the final image
-		imageData = indexedData.applyPalette(palette)
+		imageData = indexData.applyPalette(palette)
 	}
 
 	/**

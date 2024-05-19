@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,12 +39,13 @@ import java.nio.ByteBuffer
  *   <li>11111110 c c v = Write c bytes with v</li>
  *   <li>11111111 c c p p = Copy c bytes from p</li>
  * </ol>
- * 
+ *
  * @author Emanuel Rabina
  */
 @CompileStatic
 class LCW implements Encoder, Decoder {
 
+	// @formatter:off
 	// Transfer command
 	private static final byte CMD_TRANSFER       = (byte)0x80 // 10000000
 	private static final int  CMD_TRANSFER_MAX	 = 63         // 00111111, 0x3f
@@ -69,6 +70,7 @@ class LCW implements Encoder, Decoder {
 	private static final byte CMD_FILL             = (byte)0xfe // 11111110
 	private static final int  CMD_FILL_MAX         = 65535      // 11111111 11111111, 0xffff
 	private static final int  CMD_FILL_THRESHOLD   = 3
+	// @formatter:on
 
 	@Override
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
@@ -149,58 +151,58 @@ class LCW implements Encoder, Decoder {
 		while (source.hasRemaining()) {
 
 			// Select the method that provdes the best results for the coming bytes
-			int[] offsetpart = isCandidateForOffsetCopyCommand(source)
-			int[] copypart = isCandidateForCopyCommand(source)
-			int filllength = isCandidateForFillCommand(source)
-			int xferlength = isCandidateForTransferCommand(source)
+			var offsetPart = isCandidateForOffsetCopyCommand(source)
+			var copyPart = isCandidateForCopyCommand(source)
+			var fillLength = isCandidateForFillCommand(source)
+			var xferLength = isCandidateForTransferCommand(source)
 
-			int bestmethod = Math.max(offsetpart[0], Math.max(copypart[0], Math.max(filllength, xferlength)))
+			var bestMethod = Math.max(offsetPart[0], Math.max(copyPart[0], Math.max(fillLength, xferLength)))
 
 			// Command #4 - run-length encoding, aka: fill
-			if (bestmethod == filllength) {
-				byte colourval = source.get()
+			if (bestMethod == fillLength) {
+				var colourVal = source.get()
 
 				dest.put(CMD_FILL)
-				dest.putShort((short)filllength)
-				dest.put(colourval)
+				dest.putShort((short)fillLength)
+				dest.put(colourVal)
 
-				source.position(source.position() - 1 + filllength)
+				source.position(source.position() - 1 + fillLength)
 			}
 
 			// Command #1 - offset copy
-			else if (bestmethod == offsetpart[0]) {
-				dest.put((byte)(CMD_OFFSET | ((offsetpart[0] - 3) << 4) | (offsetpart[1] >>> 8)))
-				dest.put((byte)offsetpart[1])
+			else if (bestMethod == offsetPart[0]) {
+				dest.put((byte)(CMD_OFFSET | ((offsetPart[0] - 3) << 4) | (offsetPart[1] >>> 8)))
+				dest.put((byte)offsetPart[1])
 
-				source.position(source.position() + offsetpart[0])
+				source.position(source.position() + offsetPart[0])
 			}
 
 			// Either small or large copy
-			else if (bestmethod == copypart[0]) {
+			else if (bestMethod == copyPart[0]) {
 
 				// Command #3 - small copy
-				if (copypart[0] <= CMD_COPY_S_MAX) {
-					dest.put((byte)(CMD_COPY_S | (copypart[0] - 3)))
-					dest.putShort((short)copypart[1])
+				if (copyPart[0] <= CMD_COPY_S_MAX) {
+					dest.put((byte)(CMD_COPY_S | (copyPart[0] - 3)))
+					dest.putShort((short)copyPart[1])
 				}
 
 				// Command #5 - large copy
 				else {
 					dest.put(CMD_COPY_L)
-					dest.putShort((short)copypart[0])
-					dest.putShort((short)copypart[1])
+					dest.putShort((short)copyPart[0])
+					dest.putShort((short)copyPart[1])
 				}
 
-				source.position(source.position() + copypart[0])
+				source.position(source.position() + copyPart[0])
 			}
 
 			// Command #2 - straight transfer of bytes from source to dest
 			else {
-				byte[] xferbytes = new byte[xferlength]
-				source.get(xferbytes)
+				var xferBytes = new byte[xferLength]
+				source.get(xferBytes)
 
-				dest.put((byte)(CMD_TRANSFER | xferlength))
-				dest.put(xferbytes)
+				dest.put((byte)(CMD_TRANSFER | xferLength))
+				dest.put(xferBytes)
 			}
 		}
 
@@ -217,9 +219,7 @@ class LCW implements Encoder, Decoder {
 	 * <ul>
 	 *   <li>1) 0cccpppp p = Copy c + 3 bytes from dest.pos - p to dest.pos</li>
 	 * </ul>
-	 * Buffer positions are restored after this method is through, and no
-	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
 	 * @return The first element indicates that this number of bytes can be
 	 * 		   encoded using the offset copy command, or 0 if the following
@@ -230,49 +230,47 @@ class LCW implements Encoder, Decoder {
 	 */
 	private static int[] isCandidateForOffsetCopyCommand(ByteBuffer source) {
 
-		return source.markAndReset {
+		// For traversing the source data for matching patterns
+		var sourceCompareCopy = source.duplicate()
+		sourceCompareCopy.mark()
 
-			// Copy of the bytes read thus far and within the offset range limit
-			ByteBuffer sourcecopy = source.duplicate()
-			sourcecopy.limit(source.position())
-			sourcecopy.position(Math.max(0, source.position() - CMD_OFFSET_RANGE))
+		// Copy of the bytes read thus far and within the offset range limit
+		var sourceCopy = source.duplicate()
+		sourceCopy.limit(source.position())
+		sourceCopy.position(Math.max(0, source.position() - CMD_OFFSET_RANGE))
 
-			int candidatelength   = 0
-			int candidateposition = -1
+		var candidateLength = 0
+		var candidatePosition = -1
 
-			// Search for instances of the remaining bytes in the source range
-			int copypos = sourcecopy.position()
-			while (source.hasRemaining() && sourcecopy.hasRemaining()) {
-				sourcecopy.mark()
+		// Search for instances of the remaining bytes in the source range
+		var copyPos = sourceCopy.position()
+		while (sourceCompareCopy.hasRemaining() && sourceCopy.hasRemaining()) {
+			sourceCopy.mark()
 
-				// Potential match
-				int runlength = 0
-				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_OFFSET_MAX) {
-					if (source.get() == sourcecopy.get()) {
-						runlength++
-					}
-					else {
-						break
-					}
+			// Potential match
+			var runLength = 0
+			while (sourceCompareCopy.hasRemaining() && sourceCopy.hasRemaining() && runLength < CMD_OFFSET_MAX) {
+				if (sourceCompareCopy.get() == sourceCopy.get()) {
+					runLength++
 				}
-				source.reset()
-				sourcecopy.reset()
-
-				// Update candidate length and position?
-				if (runlength > candidatelength) {
-					candidatelength = runlength
-					candidateposition = source.position() - copypos
+				else {
+					break
 				}
+			}
+			sourceCompareCopy.reset()
+			sourceCopy.reset()
 
-				sourcecopy.position(++copypos)
+			// Update candidate length and position?
+			if (runLength > candidateLength) {
+				candidateLength = runLength
+				candidatePosition = sourceCompareCopy.position() - copyPos
 			}
 
-			// Evaluate offset copy command candidacy
-			return [
-				candidatelength > CMD_OFFSET_THRESHOLD ? candidatelength : 0,
-				candidateposition
-			] as int[]
+			sourceCopy.position(++copyPos)
 		}
+
+		// Evaluate offset copy command candidacy
+		return [candidateLength > CMD_OFFSET_THRESHOLD ? candidateLength : 0, candidatePosition] as int[]
 	}
 
 	/**
@@ -282,61 +280,57 @@ class LCW implements Encoder, Decoder {
 	 *   <li>3) 11cccccc p p = Copy c + 3 bytes from p</li>
 	 *   <li>5) 11111111 c c p p = Copy c bytes from p</li>
 	 * </ul>
-	 * Buffer positions are restored after this method is through, and no
-	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @return The first element indicates that this number of bytes can be
-	 * 		   encoded using the copy command, or 0 if the following bytes
-	 * 		   aren't good for the copy command.  The second integer is the
-	 * 		   position in the source buffer that these bytes occur, if
-	 * 		   the first is not 0.
+	 * @return
+	 *   The first element indicates that this number of bytes can be encoded
+	 *   using the copy command, or 0 if the following bytes aren't good for the
+	 *   copy command.  The second integer is the position in the source buffer
+	 *   that these bytes occur, if the first is not 0.
 	 */
 	private static int[] isCandidateForCopyCommand(ByteBuffer source) {
 
-		return source.markAndReset {
+		// For traversing the source data for matching patterns
+		var sourceCompareCopy = source.duplicate()
+		sourceCompareCopy.mark()
 
-			// Copy of the bytes read thus far
-			ByteBuffer sourcecopy = source.duplicate()
-			sourcecopy.limit(Math.min(source.position(), CMD_COPY_L_MAX * 2))
-			sourcecopy.position(0)
+		// Copy of the bytes read thus far
+		var sourceCopy = source.duplicate()
+		sourceCopy.limit(Math.min(source.position(), CMD_COPY_L_MAX * 2))
+		sourceCopy.position(0)
 
-			int candidatelength   = 0
-			int candidateposition = -1
+		var candidatelength = 0
+		var candidateposition = -1
 
-			// Search for instances of the remaining bytes in the source so far
-			int copypos = 0
-			while (source.hasRemaining() && sourcecopy.hasRemaining() && copypos < CMD_COPY_L_MAX) {
-				sourcecopy.mark()
+		// Search for instances of the remaining bytes in the source so far
+		var copyPos = 0
+		while (sourceCompareCopy.hasRemaining() && sourceCopy.hasRemaining() && copyPos < CMD_COPY_L_MAX) {
+			sourceCopy.mark()
 
-				// Potential match
-				int runlength = 0
-				while (source.hasRemaining() && sourcecopy.hasRemaining() && runlength < CMD_COPY_L_MAX) {
-					if (source.get() == sourcecopy.get()) {
-						runlength++
-					}
-					else {
-						break
-					}
+			// Potential match
+			var runLength = 0
+			while (sourceCompareCopy.hasRemaining() && sourceCopy.hasRemaining() && runLength < CMD_COPY_L_MAX) {
+				if (sourceCompareCopy.get() == sourceCopy.get()) {
+					runLength++
 				}
-				source.reset()
-				sourcecopy.reset()
-
-				// Update candidate length and position?
-				if (runlength > candidatelength) {
-					candidatelength = runlength
-					candidateposition = copypos
+				else {
+					break
 				}
+			}
+			sourceCompareCopy.reset()
+			sourceCopy.reset()
 
-				sourcecopy.position(++copypos)
+			// Update candidate length and position?
+			if (runLength > candidatelength) {
+				candidatelength = runLength
+				candidateposition = copyPos
 			}
 
-			// Evaluate copy command candidacy
-			return [
-				candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0,
-				candidateposition
-			] as int[]
+			sourceCopy.position(++copyPos)
 		}
+
+		// Evaluate copy command candidacy
+		return [candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0, candidateposition] as int[]
 	}
 
 	/**
@@ -345,32 +339,30 @@ class LCW implements Encoder, Decoder {
 	 * <ul>
 	 *   <li>4) 11111110 c c v = Write c bytes with v</li>
 	 * </ul>
-	 * Buffer positions are restored after this method is through, and no
-	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @return An integer value indicating that this number of bytes can be
-	 * 		   encoded using the fill command, with 0 indicating that the
-	 * 		   following bytes aren't good for the fill command.
+	 * @return
+	 *   An integer value indicating that this number of bytes can be encoded
+	 *   using the fill command, with 0 indicating that the following bytes aren't
+	 *   good for the fill command.
 	 */
 	private static int isCandidateForFillCommand(ByteBuffer source) {
 
-		return source.markAndReset {
+		var sourceCopy = source.duplicate()
 
-			// Find out how many bytes ahead have the same value as the starting byte
-			int candidatelength = 1
-			byte fillbyte = source.get()
+		// Find out how many bytes ahead have the same value as the starting byte
+		var candidateLength = 1
+		var fillByte = sourceCopy.get()
 
-			while (source.hasRemaining() && candidatelength < CMD_FILL_MAX) {
-				if (fillbyte != source.get()) {
-					break
-				}
-				candidatelength++
+		while (sourceCopy.hasRemaining() && candidateLength < CMD_FILL_MAX) {
+			if (fillByte != sourceCopy.get()) {
+				break
 			}
-
-			// Evaluate fill command candidacy
-			return candidatelength > CMD_FILL_THRESHOLD ? candidatelength : 0
+			candidateLength++
 		}
+
+		// Evaluate fill command candidacy
+		return candidateLength > CMD_FILL_THRESHOLD ? candidateLength : 0
 	}
 
 	/**
@@ -379,41 +371,39 @@ class LCW implements Encoder, Decoder {
 	 * <ul>
 	 *   <li>2) 10cccccc = Copy next c bytes from source to dest</li>
 	 * </ul>
-	 * Buffer positions are restored after this method is through, and no
-	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @return An integer value indicating that this number of bytes can be
-	 * 		   encoded using the transfer command.  Unlike other methods,
-	 * 		   this test always returns a positive result.
+	 * @return
+	 *   An integer value indicating that this number of bytes can be encoded
+	 *   using the transfer command.  Unlike other methods, this test always
+	 *   returns a positive result.
 	 */
 	private static int isCandidateForTransferCommand(ByteBuffer source) {
 
-		return source.markAndReset {
+		var sourceCopy = source.duplicate()
 
-			// Find out the longest stretch of dissimilar bytes
-			int candidatelength = 1
-			int runlength = 1
-			byte lastbyte = source.get()
+		// Find out the longest stretch of dissimilar bytes
+		var candidateLength = 1
+		var runLength = 1
+		var lastbyte = sourceCopy.get()
 
-			while (source.hasRemaining() && candidatelength < CMD_TRANSFER_MAX) {
-				byte nextbyte = source.get()
-				if (nextbyte == lastbyte) {
-					runlength++
-					if (runlength > CMD_FILL_THRESHOLD) {
-						candidatelength -= runlength - 2
-						break
-					}
+		while (sourceCopy.hasRemaining() && candidateLength < CMD_TRANSFER_MAX) {
+			var nextByte = sourceCopy.get()
+			if (nextByte == lastbyte) {
+				runLength++
+				if (runLength > CMD_FILL_THRESHOLD) {
+					candidateLength -= runLength - 2
+					break
 				}
-				else {
-					runlength = 1
-				}
-				candidatelength++
-				lastbyte = nextbyte
 			}
-
-			// Transfer command candidacy is always valid
-			return candidatelength
+			else {
+				runLength = 1
+			}
+			candidateLength++
+			lastbyte = nextByte
 		}
+
+		// Transfer command candidacy is always valid
+		return candidateLength
 	}
 }

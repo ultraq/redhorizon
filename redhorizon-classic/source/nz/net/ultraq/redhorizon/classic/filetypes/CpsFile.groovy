@@ -66,6 +66,7 @@ class CpsFile implements ImageFile, InternalPalette {
 	final ColourFormat format = FORMAT_RGB
 
 	private Palette palette
+	private ByteBuffer indexData
 	private ByteBuffer imageData
 
 	/**
@@ -91,18 +92,26 @@ class CpsFile implements ImageFile, InternalPalette {
 	@Override
 	ByteBuffer getImageData() {
 
-		if (!imageData) {
-			var palette = getPalette()
-			imageData = new LCW().decode(
-				ByteBuffer.wrapNative(input.readNBytes((fileSize & 0xffff) - 8 - paletteSize)),
-				ByteBuffer.allocateNative(imageSize)
-			)
-			if (palette) {
-				imageData = imageData.applyPalette(palette)
-			}
+		if (!getPalette()) {
+			throw new IllegalStateException('Cannot retrieve image data from a file without a palette')
 		}
 
+		if (!imageData) {
+			imageData = getIndexData().applyPalette(palette)
+		}
 		return imageData
+	}
+
+	@Override
+	ByteBuffer getIndexData() {
+
+		if (!indexData) {
+			getPalette() // Load palette data first to advance input stream
+			var source = ByteBuffer.wrapNative(input.readNBytes((fileSize & 0xffff) - 8 - paletteSize))
+			var dest = ByteBuffer.allocateNative(imageSize)
+			indexData = new LCW().decode(source, dest)
+		}
+		return indexData
 	}
 
 	@Override

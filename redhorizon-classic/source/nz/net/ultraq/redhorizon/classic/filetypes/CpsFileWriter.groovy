@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.filetypes.io.FileWriter
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataOutputStream
 import static nz.net.ultraq.redhorizon.classic.filetypes.CpsFile.*
 
-import groovy.transform.InheritConstructors
 import java.nio.ByteBuffer
 
 /**
@@ -31,21 +30,28 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-@InheritConstructors
 class CpsFileWriter extends FileWriter<ImageFile, Void> {
+
+	CpsFileWriter(ImageFile source) {
+
+		super(source)
+		assert source.width == 320 && source.height == 200 : 'Source file does not match CPS dimensions, which are only 320x200'
+		assert source instanceof InternalPalette : 'Source file must contain an internal palette'
+	}
 
 	@Override
 	void write(OutputStream outputStream, Void options) {
 
 		var output = new NativeDataOutputStream(outputStream)
 		var lcw = new LCW()
-		var palette = source instanceof InternalPalette ? source.palette : null
+		var sourceWithInternalPalette = source as InternalPalette
+		var palette = sourceWithInternalPalette.palette
 
 		// Encode image
-		var encodedImage = lcw.encode(source.imageData, ByteBuffer.allocateNative(source.imageData.capacity()))
+		var encodedImage = lcw.encode(sourceWithInternalPalette.indexData, ByteBuffer.allocateNative(IMAGE_SIZE))
 
 		// Write header
-		output.writeShort(8 + encodedImage.limit()) // (Header - this value) + image
+		output.writeShort(8 + encodedImage.limit() + (palette ? PALETTE_SIZE : 0)) // (Header - this value) + image
 		output.writeShort(COMPRESSION_LCW)
 		output.writeInt(IMAGE_SIZE)
 		output.writeShort(palette ? PALETTE_SIZE : 0)

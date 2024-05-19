@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.cli.converter
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
 
 import com.github.valfirst.slf4jtest.TestLoggerFactory
-import spock.lang.Ignore
 import spock.lang.Specification
 import static com.github.valfirst.slf4jtest.Assertions.assertThat
 
@@ -32,11 +31,10 @@ class Pcx2CpsConverterCliTests extends Specification {
 
 	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverterCli)
 
-	@Ignore("CPS conversion got busted somewhere along the way 😢")
 	def "Converts a PCX file to a CPS file"() {
 		given:
-			var pcxPath = 'alipaper.pcx'
-			var cpsPath = 'alipaper.cps'
+			var pcxPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.pcx'
+			var cpsPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.cps'
 			var converter = new Pcx2CpsConverterCli(
 				sourceFile: getResourceAsFile(pcxPath),
 				destFile: new File("${System.getProperty('user.dir')}/build/classes/test/${cpsPath}"),
