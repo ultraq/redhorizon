@@ -34,10 +34,10 @@ class Pcx2CpsConverterCliTests extends Specification {
 	def "Converts a PCX file to a CPS file"() {
 		given:
 			var pcxPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.pcx'
-			var cpsPath = 'nz/net/ultraq/redhorizon/cli/converter/alipaper.cps'
+			var cpsTempFile = File.createTempFile('alipaper', '.cps')
 			var converter = new Pcx2CpsConverterCli(
 				sourceFile: getResourceAsFile(pcxPath),
-				destFile: new File("${System.getProperty('user.dir')}/build/classes/test/${cpsPath}"),
+				destFile: cpsTempFile,
 				overwrite: true
 			)
 
@@ -48,9 +48,11 @@ class Pcx2CpsConverterCliTests extends Specification {
 			exitCode == 0
 
 			// File must be able to be read back
-			var cpsFile = new CpsFile(getResourceAsStream(cpsPath))
-			cpsFile.palette != null
-			cpsFile.imageData != null
+			cpsTempFile.withInputStream { stream ->
+				var cpsFile = new CpsFile(stream)
+				cpsFile.palette != null
+				cpsFile.imageData != null
+			}
 	}
 
 	def "Source file not found"() {

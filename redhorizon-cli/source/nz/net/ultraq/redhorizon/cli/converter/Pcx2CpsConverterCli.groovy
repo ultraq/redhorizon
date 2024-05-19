@@ -61,6 +61,7 @@ class Pcx2CpsConverterCli implements Callable<Integer> {
 				destFile.delete()
 			}
 			if (!destFile.exists()) {
+				destFile.createNewFile()
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
 						var pcxFile = new PcxFile(inputStream)
