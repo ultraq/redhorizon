@@ -19,6 +19,9 @@ package nz.net.ultraq.redhorizon.classic.codecs
 import nz.net.ultraq.redhorizon.filetypes.codecs.Decoder
 import nz.net.ultraq.redhorizon.filetypes.codecs.Encoder
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
@@ -45,6 +48,8 @@ import java.nio.ByteBuffer
 @CompileStatic
 class LCW implements Encoder, Decoder {
 
+	private static final Logger logger = LoggerFactory.getLogger(LCW)
+
 	// @formatter:off
 	// Transfer command
 	private static final byte CMD_TRANSFER       = (byte)0x80 // 10000000
@@ -66,7 +71,7 @@ class LCW implements Encoder, Decoder {
 	private static final int  CMD_COPY_L_MAX       = 65535      // 11111111 11111111, 0xffff
 //	private static final int  CMD_COPY_L_THRESHOLD = 4
 
-	// Colour command
+	// Fill command
 	private static final byte CMD_FILL             = (byte)0xfe // 11111110
 	private static final int  CMD_FILL_MAX         = 65535      // 11111111 11111111, 0xffff
 	private static final int  CMD_FILL_THRESHOLD   = 3
@@ -143,6 +148,8 @@ class LCW implements Encoder, Decoder {
 	@Override
 	ByteBuffer encode(ByteBuffer source, ByteBuffer dest) {
 
+		logger.info('Starting LCW compression of {} bytes...', sprintf('%,d', source.capacity()))
+
 		// Format80 data must be opened by the transfer command
 		dest.put((byte)(CMD_TRANSFER | 1))
 		dest.put(source.get())
@@ -210,7 +217,12 @@ class LCW implements Encoder, Decoder {
 		dest.put(CMD_TRANSFER)
 
 		source.rewind()
-		return dest.flip()
+		dest.flip()
+
+		logger.info("Compression complete, resulting in {} bytes ({}% size reduction)",
+			sprintf('%,d', dest.limit()),
+			sprintf('%.2f', (1 - (dest.limit() / source.capacity())) * 100))
+		return dest
 	}
 
 	/**
@@ -299,8 +311,8 @@ class LCW implements Encoder, Decoder {
 		sourceCopy.limit(Math.min(source.position(), CMD_COPY_L_MAX * 2))
 		sourceCopy.position(0)
 
-		var candidatelength = 0
-		var candidateposition = -1
+		var candidateLength = 0
+		var candidatePosition = -1
 
 		// Search for instances of the remaining bytes in the source so far
 		var copyPos = 0
@@ -321,16 +333,16 @@ class LCW implements Encoder, Decoder {
 			sourceCopy.reset()
 
 			// Update candidate length and position?
-			if (runLength > candidatelength) {
-				candidatelength = runLength
-				candidateposition = copyPos
+			if (runLength > candidateLength) {
+				candidateLength = runLength
+				candidatePosition = copyPos
 			}
 
 			sourceCopy.position(++copyPos)
 		}
 
 		// Evaluate copy command candidacy
-		return [candidatelength > CMD_COPY_S_THRESHOLD ? candidatelength : 0, candidateposition] as int[]
+		return [candidateLength > CMD_COPY_S_THRESHOLD ? candidateLength : 0, candidatePosition] as int[]
 	}
 
 	/**

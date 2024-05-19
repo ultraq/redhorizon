@@ -66,6 +66,7 @@ class Pcx2CpsConverterCli implements Callable<Integer> {
 					destFile.withOutputStream { outputStream ->
 						var pcxFile = new PcxFile(inputStream)
 						new CpsFileWriter(pcxFile).write(outputStream)
+						logger.info('{} written', destFile)
 					}
 				}
 				return 0
