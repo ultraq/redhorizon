@@ -200,6 +200,7 @@ class MapViewerScript extends Script<Map> {
 
 		return CompletableFuture.runAsync { ->
 			clearControls()
+			camera.resetScale()
 		}
 	}
 
