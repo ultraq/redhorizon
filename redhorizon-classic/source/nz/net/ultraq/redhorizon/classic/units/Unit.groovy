@@ -159,7 +159,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	private class UnitBody extends PalettedSprite {
 
 		UnitBody(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
-			super(width, height, numImages, 1f, 1f, palette, spriteSheetGenerator)
+			super(width, height, numImages, palette, spriteSheetGenerator)
 		}
 
 		@Override
@@ -192,7 +192,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	private class UnitTurret extends PalettedSprite {
 
 		UnitTurret(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
-			super(width, height, numImages, 1f, 1f, palette, spriteSheetGenerator)
+			super(width, height, numImages, palette, spriteSheetGenerator)
 		}
 
 		@Override

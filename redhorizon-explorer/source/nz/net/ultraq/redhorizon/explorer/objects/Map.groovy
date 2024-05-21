@@ -21,17 +21,29 @@ import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
 import nz.net.ultraq.redhorizon.classic.maps.Theater
-import nz.net.ultraq.redhorizon.classic.maps.TileSet
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
+import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
+import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
+import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector2f
@@ -65,7 +77,9 @@ class Map extends Node<Map> {
 	private final TileSet tileSet
 	private final ResourceManager resourceManager
 
+	private CompletableFuture<Texture> paletteAsTextureFuture
 	private Texture paletteAsTexture
+	private CompletableFuture<SpriteSheet> tileSetSpriteSheetFuture
 
 	/**
 	 * Constructor, create a new map from a map file.
@@ -95,29 +109,44 @@ class Map extends Node<Map> {
 		var halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
 		bounds.set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
 
-		tileSet = new TileSet(palette)
+		tileSet = new TileSet()
 
 		addChild(new MapBackground())
 		addChild(new MapPack())
-//		addChild(tileSet)
 		addChild(new MapLines())
 	}
 
 	@Override
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
-		// TODO: Load the palette once
-		return scene
-			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.thenAcceptAsync { newTexture ->
-				paletteAsTexture = newTexture
+		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
+			return tileSet.tileFileList
+				.collect { tileFile -> tileFile.imagesData }
+				.flatten()
+				.toArray(new ByteBuffer[0])
+		}
+			.thenComposeAsync { allTileImageData ->
+				return scene
+					.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
+					.thenApplyAsync { newSpriteSheet ->
+						tileSet.spriteSheet = newSpriteSheet
+						return newSpriteSheet
+					}
 			}
+		paletteAsTextureFuture = scene
+			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
+			.thenApplyAsync { newTexture ->
+				paletteAsTexture = newTexture
+				return newTexture
+			}
+
+		return CompletableFuture.allOf(tileSetSpriteSheetFuture, paletteAsTextureFuture)
 	}
 
 	@Override
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		return scene.requestDelete(paletteAsTexture)
+		return scene.requestDelete(tileSet.spriteSheet, paletteAsTexture)
 	}
 
 	/**
@@ -137,6 +166,37 @@ class Map extends Node<Map> {
 	}
 
 	/**
+	 * A specialized spritesheet that holds all of the tiles used in the map.
+	 */
+	private class TileSet {
+
+		private final List<ImagesFile> tileFileList = []
+		private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
+		private int numTiles = 0
+		private SpriteSheet spriteSheet
+
+		/**
+		 * Add more tiles to the tileset.
+		 */
+		void addTiles(ImagesFile tilesFile) {
+
+			if (!tileFileList.contains(tilesFile)) {
+				tileFileList << tilesFile
+				tileFileMap << [(tilesFile): numTiles]
+				numTiles += tilesFile.numImages
+			}
+		}
+
+		/**
+		 * Return the index into the spritesheet for the given tile file and frame.
+		 */
+		int getFrame(ImagesFile tileFile, int tileIndex) {
+
+			return tileFileMap[tileFile] + tileIndex
+		}
+	}
+
+	/**
 	 * Map overlays and lines to help with debugging maps.
 	 */
 	private class MapLines extends Node<MapLines> {
@@ -148,8 +208,12 @@ class Map extends Node<Map> {
 
 		MapLines() {
 
-			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX))
-			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.5), boundary as Vector2f[]))
+			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
+				name = "XY axis (red)"
+			})
+			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.5), boundary as Vector2f[]).tap {
+				name = "Map boundary (yellow)"
+			})
 		}
 	}
 
@@ -185,9 +249,21 @@ class Map extends Node<Map> {
 	}
 
 	/**
+	 * Representation of a single tile on the map, used for combining with other
+	 * tiles to create a single large mesh for rendering a whole layer in a single
+	 * draw call.
+	 */
+	private static record MapTile(Vector2f position, int frameInTileSet) {}
+
+	/**
 	 * The "MapPack" layer of a Red Alert map.
 	 */
-	private class MapPack extends Node<MapPack> {
+	private class MapPack extends Node<MapPack> implements GraphicsElement {
+
+		private final List<MapTile> mapTiles = []
+		private Mesh fullMesh
+		private Shader shader
+		private Material material
 
 		MapPack() {
 
@@ -217,15 +293,86 @@ class Map extends Node<Map> {
 							return
 						}
 
-						// TODO: Restore the ability to read this texture from the tileset
-//						tileSet.addTiles(tileFile)
-						addChild(new PalettedSprite(tileFile, palette).tap {
-							name = "MapTile @ ${x},${y} (${tile.name}[${tilePic}])"
-							initialFrame = tilePic
-							transform.translate(new Vector2f(x, y).asWorldCoords(1))
-						})
+						tileSet.addTiles(tileFile)
+						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
+						mapTiles << mapTile
+
+						bounds.setMin(
+							Math.min(bounds.minX, mapTile.position().x),
+							Math.min(bounds.minY, mapTile.position().y)
+						)
+						bounds.setMax(
+							Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
+							Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
+						)
 					}
 				}
+			}
+		}
+
+		@Override
+		String getName() {
+
+			return "MapPack - ${mapTiles.size()} tiles"
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneAdded(Scene scene) {
+
+			material = new Material()
+
+			return CompletableFuture.allOf(
+				CompletableFuture.supplyAsync { ->
+					List<Vector2f> allVertices = []
+					List<Vector2f> allTextureUVs = []
+					List<Integer> allIndices = []
+					var indexOffset = 0
+					mapTiles.each { mapTile ->
+						allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
+						allTextureUVs.addAll(tileSet.spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
+						allIndices.addAll([0, 1, 3, 1, 2, 3].collect { index -> index + indexOffset })
+						indexOffset += 4
+					}
+					return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+				}
+					.thenAcceptAsync { meshData ->
+						def (allVertices, allTextureUVs, allIndices) = meshData
+						return scene
+							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
+								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
+								allVertices, Colour.WHITE, allTextureUVs, allIndices, false))
+							.thenApplyAsync { newMesh ->
+								fullMesh = newMesh
+								return newMesh
+							}
+					},
+				scene
+					.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
+					.thenAcceptAsync { requestedShader ->
+						shader = requestedShader
+					},
+				tileSetSpriteSheetFuture.thenApplyAsync { spriteSheet ->
+					material.texture = spriteSheet.texture
+					return spriteSheet
+				},
+				paletteAsTextureFuture.thenApplyAsync { palette ->
+					material.palette = palette
+					return palette
+				}
+			)
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+
+			return scene.requestDelete(fullMesh)
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+
+			if (fullMesh && shader && material) {
+				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
 		}
 	}
