@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
@@ -144,6 +145,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 			context.withCurrent { ->
 				renderer = new OpenALRenderer(config)
 				logger.debug(renderer.toString())
+				EngineStats.instance.attachAudioRenderer(renderer)
 
 				listener = new OpenALListener(config.volume)
 

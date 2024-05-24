@@ -108,6 +108,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
+		stop()
 		return CompletableFuture.allOf(
 			animationSource.onSceneRemoved(scene),
 			scene.requestDelete(mesh)

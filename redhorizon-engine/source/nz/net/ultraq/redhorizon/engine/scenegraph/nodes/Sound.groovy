@@ -89,6 +89,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	@Override
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
+		stop()
 		return CompletableFuture.allOf(
 			soundSource.onSceneRemoved(scene),
 			scene.requestDelete(source)
@@ -101,7 +102,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		// TODO: A lot of this should occur in an audio equivalent of the update() method
 		if (source) {
 			soundSource.prepareSource(renderer, source)
-			renderer.updateSource(source, globalPosition)
+			renderer.updateSource(source, getGlobalPosition())
 
 			// Control playback
 			if (playing) {
@@ -230,7 +231,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 			streamingDecoder.cancel(true)
-			return scene.requestDelete(*streamedBuffers.drain())
+			return scene.requestDelete(streamedBuffers.drain().toArray(new Buffer[0]))
 		}
 
 		@Override

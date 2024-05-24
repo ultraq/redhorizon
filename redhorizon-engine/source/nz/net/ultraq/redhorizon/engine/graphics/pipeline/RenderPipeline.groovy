@@ -88,7 +88,7 @@ class RenderPipeline implements Closeable {
 	@Override
 	void close() {
 
-		renderPasses*.delete(renderer)
+		renderPasses*.close()
 		renderer.delete(fullScreenQuad)
 	}
 
@@ -180,6 +180,12 @@ class RenderPipeline implements Closeable {
 		}
 
 		@Override
+		void close() {
+
+			renderer.delete(framebuffer)
+		}
+
+		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			if (scene) {
@@ -225,7 +231,7 @@ class RenderPipeline implements Closeable {
 		}
 
 		@Override
-		void delete(GraphicsRenderer renderer) {
+		void close() {
 
 			renderer.delete(framebuffer)
 		}
@@ -287,7 +293,7 @@ class RenderPipeline implements Closeable {
 		}
 
 		@Override
-		void delete(GraphicsRenderer renderer) {
+		void close() {
 		}
 
 		@Override

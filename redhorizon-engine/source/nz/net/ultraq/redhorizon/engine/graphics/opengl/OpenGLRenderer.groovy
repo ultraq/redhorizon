@@ -251,7 +251,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 		if (resource) {
 			resource.close()
 			switch (resource) {
-				case Framebuffer -> trigger(new FramebufferDeletedEvent(resource))
+				case Framebuffer -> {
+					trigger(new TextureDeletedEvent(resource.texture))
+					trigger(new FramebufferDeletedEvent(resource))
+				}
 				case Mesh -> trigger(new MeshDeletedEvent(resource))
 				case Texture -> trigger(new TextureDeletedEvent(resource))
 				case SpriteSheet -> trigger(new TextureDeletedEvent(resource.texture))

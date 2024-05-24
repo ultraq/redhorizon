@@ -74,7 +74,6 @@ class Application implements EventTarget {
 	private ApplicationEventHandler applicationStop
 	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
-	private DebugOverlay debugOverlay
 
 	/**
 	 * Add the audio system to this application.  The audio system will run on its
@@ -82,7 +81,8 @@ class Application implements EventTarget {
 	 */
 	Application addAudioSystem(AudioConfiguration config = new AudioConfiguration()) {
 
-		engine << new AudioSystem(config)
+		var audioSystem = new AudioSystem(config)
+		engine << audioSystem
 		return this
 	}
 
@@ -99,15 +99,9 @@ class Application implements EventTarget {
 			inputEventStream.addInputSource(event.window)
 		}
 		graphicsSystem.on(SystemReadyEvent) { event ->
-			var audioSystem = engine.systems.find { it instanceof AudioSystem } as AudioSystem
-			debugOverlay = new DebugOverlay(config.debug)
-				.addAudioRenderer(audioSystem.renderer)
-				.addGraphicsRenderer(graphicsSystem.renderer)
-				.toggleWith(inputEventStream, GLFW_KEY_D)
-			graphicsSystem.imGuiLayer.addOverlay(debugOverlay)
+			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
 			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
 			graphicsSystem.imGuiLayer.addUiElement(new LogPanel(config.debug))
-
 			uiElements.each { overlayRenderPass ->
 				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)
 			}
@@ -176,11 +170,12 @@ class Application implements EventTarget {
 				logger.warn("Not all ${resourceName} closed, {} remaining", resourceCount)
 			}
 		}
-		check(debugOverlay.activeFramebuffers.get(), 'framebuffers')
-		check(debugOverlay.activeMeshes.get(), 'meshes')
-		check(debugOverlay.activeTextures.get(), 'textures')
-		check(debugOverlay.activeSources.get(), 'sources')
-		check(debugOverlay.activeBuffers.get(), 'buffers')
+		var engineStats = EngineStats.instance
+		check(engineStats.activeFramebuffers.get(), 'framebuffers')
+		check(engineStats.activeMeshes.get(), 'meshes')
+		check(engineStats.activeTextures.get(), 'textures')
+		check(engineStats.activeSources.get(), 'sources')
+		check(engineStats.activeBuffers.get(), 'buffers')
 	}
 
 	/**

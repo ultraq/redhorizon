@@ -27,29 +27,16 @@ import nz.net.ultraq.redhorizon.engine.graphics.Switch
  *   The expected type of input data from a prior rendering pass.
  * @author Emanuel Rabina
  */
-interface RenderPass<T> extends Switch<RenderPass<T>> {
-
-	/**
-	 * Perform any cleanup for this render pass.
-	 *
-	 * @param renderer
-	 */
-	default void delete(GraphicsRenderer renderer) {
-	}
+interface RenderPass<T> extends Switch<RenderPass<T>>, AutoCloseable {
 
 	/**
 	 * Return the target framebuffer for this rendering pass.
-	 *
-	 * @return
 	 */
 	Framebuffer getFramebuffer()
 
 	/**
 	 * Perform the render pass, using the expected result of any previous render
 	 * pass.
-	 *
-	 * @param renderer
-	 * @param previous
 	 */
 	void render(GraphicsRenderer renderer, T previous)
 }

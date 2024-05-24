@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
@@ -116,14 +117,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	GraphicsRenderer getRenderer() {
 
 		return renderer
-	}
-
-	/**
-	 * Return the rendering pipeline.
-	 */
-	RenderPipeline getRenderPipeline() {
-
-		return renderPipeline
 	}
 
 	/**
@@ -230,6 +223,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 				renderer = new OpenGLRenderer(config, window)
 				renderer.withCloseable { renderer ->
+					EngineStats.instance.attachGraphicsRenderer(renderer)
 
 					camera = new OpenGLCamera(window.renderResolution)
 					camera.withCloseable { camera ->
