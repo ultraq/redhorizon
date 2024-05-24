@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRendererEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -58,8 +57,6 @@ import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.KHRDebug.*
 
 import groovy.transform.NamedVariant
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 import java.lang.reflect.Modifier
 import java.nio.ByteBuffer
 
@@ -319,16 +316,5 @@ class OpenGLRenderer implements GraphicsRenderer {
 			 - Device name: ${glGetString(GL_RENDERER)}
 			 - OpenGL version: ${glGetString(GL_VERSION)}
 		""".stripIndent()
-	}
-
-	@Override
-	Tuple2<Mesh, Material> withMaterialBundler(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
-			Closure closure) {
-
-		def materialBuilder = new OpenGLMaterialBundler(this)
-		materialBuilder.relay(GraphicsRendererEvent, this)
-		closure(materialBuilder)
-		return materialBuilder.bundle()
 	}
 }

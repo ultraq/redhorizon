@@ -24,8 +24,6 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 import java.nio.ByteBuffer
 
 /**
@@ -129,19 +127,4 @@ interface GraphicsRenderer extends Closeable, EventTarget {
 	 * {@code null} to set the render target as the screen.
 	 */
 	void setRenderTarget(Framebuffer framebuffer)
-
-	/**
-	 * Use a batching material builder within the context of the given closure
-	 * that will return a single renderable material that is the sum of all the
-	 * materials initialized within the closure.
-	 *
-	 * @param closure
-	 * @return
-	 *   A material that represents all of the materials created within the
-	 *   closure.  This material can then be rendered as normal to render all of
-	 *   the created materials at once.
-	 */
-	Tuple2<Mesh, Material> withMaterialBundler(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.MaterialBundler')
-			Closure closure)
 }
