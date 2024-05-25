@@ -18,8 +18,10 @@ package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
+import nz.net.ultraq.redhorizon.classic.maps.MapRAOverlayPackTile
 import nz.net.ultraq.redhorizon.classic.maps.Theater
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
@@ -113,6 +115,7 @@ class Map extends Node<Map> {
 
 		addChild(new MapBackground())
 		addChild(new MapPack())
+		addChild(new OverlayPack())
 		addChild(new MapLines())
 	}
 
@@ -122,8 +125,7 @@ class Map extends Node<Map> {
 		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
 			return tileSet.tileFileList
 				.collect { tileFile -> tileFile.imagesData }
-				.flatten()
-				.toArray(new ByteBuffer[0])
+				.flatten() as ByteBuffer[]
 		}
 			.thenComposeAsync { allTileImageData ->
 				return scene
@@ -256,65 +258,15 @@ class Map extends Node<Map> {
 	private static record MapTile(Vector2f position, int frameInTileSet) {}
 
 	/**
-	 * The "MapPack" layer of a Red Alert map.
+	 * Common class for the *Pack layers of the map, which use 24x24 map tiles and
+	 * can be optimized with a spritesheet.
 	 */
-	private class MapPack extends Node<MapPack> implements GraphicsElement {
+	private abstract class Pack<T extends Pack> extends Node<T> implements GraphicsElement {
 
-		private final List<MapTile> mapTiles = []
-		private Mesh fullMesh
-		private Shader shader
-		private Material material
-
-		MapPack() {
-
-			var tileData = mapFile.mapPackData
-
-			TILES_X.times { y ->
-				TILES_Y.times { x ->
-
-					// Get the byte representing the tile
-					var tileValOffset = y * TILES_Y + x
-					var tileVal = tileData.getShort(tileValOffset * 2)
-					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
-
-					// Retrieve the appropriate tile, skip empty and default tiles
-					if (tileVal != 0xff && tileVal != -1) {
-						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
-
-						// Some unknown tile types still coming through?
-						if (!tile) {
-							logger.warn("Skipping unknown mappack tile type: ${tileVal}")
-							return
-						}
-						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
-
-						// Skip references to invalid tiles
-						if (tilePic >= tileFile.imagesData.length) {
-							return
-						}
-
-						tileSet.addTiles(tileFile)
-						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
-						mapTiles << mapTile
-
-						bounds.setMin(
-							Math.min(bounds.minX, mapTile.position().x),
-							Math.min(bounds.minY, mapTile.position().y)
-						)
-						bounds.setMax(
-							Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
-							Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
-						)
-					}
-				}
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "MapPack - ${mapTiles.size()} tiles"
-		}
+		protected final List<MapTile> mapTiles = []
+		protected Mesh fullMesh
+		protected Shader shader
+		protected Material material
 
 		@Override
 		CompletableFuture<Void> onSceneAdded(Scene scene) {
@@ -341,9 +293,8 @@ class Map extends Node<Map> {
 							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
 								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
 								allVertices, Colour.WHITE, allTextureUVs, allIndices, false))
-							.thenApplyAsync { newMesh ->
+							.thenAcceptAsync { newMesh ->
 								fullMesh = newMesh
-								return newMesh
 							}
 					},
 				scene
@@ -374,6 +325,164 @@ class Map extends Node<Map> {
 			if (fullMesh && shader && material) {
 				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
+		}
+	}
+
+	/**
+	 * The "MapPack" layer of a Red Alert map.
+	 */
+	private class MapPack extends Pack<MapPack> {
+
+		MapPack() {
+
+			var tileData = mapFile.mapPackData
+
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+
+					// Get the byte representing the tile
+					var tileValOffset = y * TILES_Y + x
+					var tileVal = tileData.getShort(tileValOffset * 2)
+					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
+
+					// Retrieve the appropriate tile, skip empty and default tiles
+					if (tileVal != 0xff && tileVal != -1) {
+						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
+
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn('Skipping unknown mappack tile type: {}', tileVal)
+							return
+						}
+						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
+
+						// Skip references to invalid tiles
+						if (tilePic >= tileFile.numImages) {
+							logger.warn('Skipping unknown mappack tile image: {} pic: {}', tileVal, tilePic)
+							return
+						}
+
+						tileSet.addTiles(tileFile)
+						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
+						mapTiles << mapTile
+
+						bounds.setMin(
+							Math.min(bounds.minX, mapTile.position().x),
+							Math.min(bounds.minY, mapTile.position().y)
+						)
+						bounds.setMax(
+							Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
+							Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
+						)
+					}
+				}
+			}
+		}
+
+		@Override
+		String getName() {
+
+			return "MapPack - ${mapTiles.size()} tiles"
+		}
+	}
+
+	/**
+	 * The "OverlayPack" layer of a Red Alert map.
+	 */
+	private class OverlayPack extends Pack<OverlayPack> {
+
+		OverlayPack() {
+
+			var tileData = mapFile.overlayPackData
+			java.util.Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
+
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+
+					// Get the byte representing the tile
+					var tileVal = tileData.get()
+
+					// Retrieve the appropriate tile, skip empty tiles
+					if (tileVal != -1) {
+						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
+
+						// TODO: The current spritesheet only works if all images are the
+						//       same dimensions, but the CRATE item is 10x11 instead of
+						//       24x24.  Ignore these for now, but find some way to support
+						//       these odd image sizes
+						if (tile in [MapRAOverlayPackTile.CRATE_WOOD, MapRAOverlayPackTile.CRATE_SILVER, MapRAOverlayPackTile.CRATE_WATER]) {
+							logger.warn('Skipping over CRATE overlay due to differing dimensions')
+							return
+						}
+
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
+							return
+						}
+
+						tileTypes << [(new Vector2f(x, y)): tile]
+					}
+				}
+			}
+
+			// Now that the tiles are all assembled, build the appropriate image
+			// representation for them
+			tileTypes.each { tilePos, tile ->
+				var tileFile = tile.isWall || tile.useShp ?
+					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
+					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
+				var imageVariant = 0
+
+				// Select the proper orientation for wall tiles
+				if (tile.isWall) {
+					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
+						imageVariant |= 0x01
+					}
+					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
+						imageVariant |= 0x02
+					}
+					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
+						imageVariant |= 0x04
+					}
+					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
+						imageVariant |= 0x08
+					}
+				}
+				// Select the proper density for resources
+				else if (tile.isResource) {
+					var adjacent = (-1..1).inject(0) { accY, y ->
+						return accY + (-1..1).inject(0) { accX, x ->
+							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
+								return accX + 1
+							}
+							return accX
+						}
+					}
+					imageVariant = tile.name().startsWith('GEM') ?
+						adjacent / 3 as int :
+						3 + adjacent
+				}
+
+				tileSet.addTiles(tileFile)
+				var mapTile = new MapTile(new Vector2f(tilePos).asWorldCoords(1), tileSet.getFrame(tileFile, imageVariant))
+				mapTiles << mapTile
+
+				bounds.setMin(
+					Math.min(bounds.minX, mapTile.position().x),
+					Math.min(bounds.minY, mapTile.position().y)
+				)
+				bounds.setMax(
+					Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
+					Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
+				)
+			}
+		}
+
+		@Override
+		String getName() {
+
+			return "OverlayPack - ${mapTiles.size()} tiles"
 		}
 	}
 }
