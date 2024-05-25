@@ -52,8 +52,6 @@ class ShpFile implements ImagesFile {
 	static final byte FORMAT_XOR_CHAIN = (byte)0x20
 	// @formatter:on
 
-	private final NativeDataInputStream input
-
 	// File header
 	final int numImages // Stored in file as short
 	final short x
@@ -66,6 +64,7 @@ class ShpFile implements ImagesFile {
 
 	final ColourFormat format = FORMAT_INDEXED
 
+	private final NativeDataInputStream input
 	private ByteBuffer[] imagesData
 
 	/**

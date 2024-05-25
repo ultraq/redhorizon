@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
  *       (see the RMT files section)</li>
  *   <li><a href="https://web.archive.org/web/20070812201106/http://freecnc.org:80/dev/template-format/" target="_top">https://web.archive.org/web/20070812201106/http://freecnc.org:80/dev/template-format/</a></li>
  * </ul>
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions(['int', 'sno', 'tem'])
@@ -57,16 +57,16 @@ class TmpFileRA implements ImagesFile {
 	final int tileIndexOffset
 
 	final ColourFormat format = FORMAT_INDEXED
-	final ByteBuffer[] imagesData
+
+	private final NativeDataInputStream input
+	private ByteBuffer[] imagesData
 
 	/**
 	 * Constructor, create a new RA template file from data in the input stream.
-	 * 
-	 * @param inputStream
 	 */
 	TmpFileRA(InputStream inputStream) {
 
-		def input = new NativeDataInputStream(inputStream)
+		input = new NativeDataInputStream(inputStream)
 
 		// File header
 		width = input.readShort()
@@ -75,6 +75,7 @@ class TmpFileRA implements ImagesFile {
 		height = input.readShort()
 		assert height == 24 : 'Tile height should be 24 pixels'
 
+		// @formatter:off
 		numImages   = input.readShort()
 		zero1       = input.readShort()
 		tileWidth   = input.readShort()
@@ -87,31 +88,39 @@ class TmpFileRA implements ImagesFile {
 		imageIndexOffset = input.readInt()
 		unknown4         = input.readInt()
 		tileIndexOffset  = input.readInt()
+		// @formatter:on
+	}
 
-		// Image data follows the header and up to the tile index.  Not every tile
-		// has an image (some are empty), so read all the image data for now and
-		// spread them out according to the tile index afterwards.
-		def imageBytes = ByteBuffer.wrapNative(input.readNBytes(tileIndexOffset - imageOffset))
-		imagesData = new ByteBuffer[numImages]
+	@Override
+	ByteBuffer[] getImagesData() {
 
-		// Tile placement
-		def imageSize = width * height
-		numImages.times { i ->
-			def tile = input.readByte()
-			if (tile != (byte)0xff) {
-				imagesData[i] = ByteBuffer.allocateNative(imageSize)
-					.put(imageBytes.array(), tile * imageSize, imageSize)
-					.rewind()
-			}
-			else {
-				imagesData[i] = ByteBuffer.allocateNative(width * height)
+		if (!imagesData) {
+			// Image data follows the header and up to the tile index.  Not every tile
+			// has an image (some are empty), so read all the image data for now and
+			// spread them out according to the tile index afterwards.
+			var imageBytes = ByteBuffer.wrapNative(input.readNBytes(tileIndexOffset - imageOffset))
+			imagesData = new ByteBuffer[numImages]
+
+			// Tile placement
+			var imageSize = width * height
+			numImages.times { i ->
+				var tile = input.readByte()
+				if (tile != (byte)0xff) {
+					imagesData[i] = ByteBuffer.allocateNative(imageSize)
+						.put(imageBytes.array(), tile * imageSize, imageSize)
+						.rewind()
+				}
+				else {
+					imagesData[i] = ByteBuffer.allocateNative(width * height)
+				}
 			}
 		}
+		return imagesData
 	}
 
 	/**
 	 * Emit some information about this template file.
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
