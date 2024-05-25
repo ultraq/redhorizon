@@ -116,6 +116,7 @@ class Map extends Node<Map> {
 		addChild(new MapBackground())
 		addChild(new MapPack())
 		addChild(new OverlayPack())
+		addChild(new Terrain())
 		addChild(new MapLines())
 	}
 
@@ -366,13 +367,11 @@ class Map extends Node<Map> {
 						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
 						mapTiles << mapTile
 
-						bounds.setMin(
-							Math.min(bounds.minX, mapTile.position().x),
-							Math.min(bounds.minY, mapTile.position().y)
-						)
-						bounds.setMax(
-							Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
-							Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
+						bounds.expand(
+							mapTile.position().x,
+							mapTile.position().y,
+							mapTile.position().x + TILE_WIDTH as float,
+							mapTile.position().y + TILE_HEIGHT as float
 						)
 					}
 				}
@@ -468,13 +467,11 @@ class Map extends Node<Map> {
 				var mapTile = new MapTile(new Vector2f(tilePos).asWorldCoords(1), tileSet.getFrame(tileFile, imageVariant))
 				mapTiles << mapTile
 
-				bounds.setMin(
-					Math.min(bounds.minX, mapTile.position().x),
-					Math.min(bounds.minY, mapTile.position().y)
-				)
-				bounds.setMax(
-					Math.max(bounds.maxX, mapTile.position().x + TILE_WIDTH) as float,
-					Math.max(bounds.maxY, mapTile.position().y + TILE_HEIGHT as float)
+				bounds.expand(
+					mapTile.position().x,
+					mapTile.position().y,
+					mapTile.position().x + TILE_WIDTH as float,
+					mapTile.position().y + TILE_HEIGHT as float
 				)
 			}
 		}
@@ -483,6 +480,51 @@ class Map extends Node<Map> {
 		String getName() {
 
 			return "OverlayPack - ${mapTiles.size()} tiles"
+		}
+	}
+
+	/**
+	 * The "Terrain" layer of a Red Alert map.
+	 */
+	private class Terrain extends Node<Terrain> {
+
+		private final TileSet tileSet
+		private final List<MapTile> mapTiles = []
+
+		Terrain() {
+
+			var terrainData = mapFile.terrainData
+			tileSet = new TileSet()
+
+			terrainData.each { cell, terrainType ->
+				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
+				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
+				tileSet.addTiles(terrainFile)
+
+				// TODO: Get TileSets to work with any sized sprites, then terrain can
+				//       be included in super map tileset
+//				var mapTile = new MapTile(cellPosXY, tileSet.getFrame(terrainFile, 0))
+//				mapTiles << mapTile
+
+//				bounds.expand(
+//					mapTile.position().x,
+//					mapTile.position().y,
+//					mapTile.position().x + TILE_WIDTH as float,
+//					mapTile.position().y + TILE_HEIGHT as float
+//				)
+
+				addChild(new PalettedSprite(terrainFile, palette).tap {
+					name = "Terrain ${terrainType}"
+					transform.translate(cellPosXY)
+				})
+			}
+
+			// Sort the terrain elements so that ones lower down the map render "over"
+			// those higher up the map
+//			elements.sort { imageA, imageB ->
+//				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
+//				       imageB.dimensions.minX - imageA.dimensions.minX
+//			}
 		}
 	}
 }

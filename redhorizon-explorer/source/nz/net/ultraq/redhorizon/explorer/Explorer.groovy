@@ -72,7 +72,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
-	private static final String[] paletteNames = ['ra-temperate', 'ra-snow', 'td-temperate']
+	private static final String[] paletteNames = ['ra-temperate', 'ra-snow', 'ra-interior', 'td-temperate']
 	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 
@@ -80,6 +80,9 @@ class Explorer {
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
 	private final NodeList nodeList = new NodeList()
+	private final ResourceManager resourceManager = new ResourceManager(new File(System.getProperty('user.dir'), 'mix'),
+		'nz.net.ultraq.redhorizon.filetypes',
+		'nz.net.ultraq.redhorizon.classic.filetypes')
 
 	private Scene scene
 	private File currentDirectory
@@ -88,7 +91,6 @@ class Explorer {
 	private int paletteIndex
 	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
-	private ResourceManager resourceManager
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -188,6 +190,7 @@ class Explorer {
 		removeEventFunctions*.remove()
 		clearPreview()
 		scene.clear()
+		resourceManager.close()
 	}
 
 	/**
@@ -257,7 +260,6 @@ class Explorer {
 	 */
 	private void clearPreview() {
 
-		resourceManager?.close()
 		selectedFileInputStream?.close()
 		scene.removeNode(scene.findNode { node -> node.class != GridLines })
 		scene.camera.center(new Vector3f())
@@ -298,7 +300,10 @@ class Explorer {
 
 		if (fileClass) {
 			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
-			preview(fileClass.newInstance(selectedFileInputStream), entryId)
+			var fileInstance = time("Reading file ${fileName} from Mix file", logger) { ->
+				return fileClass.newInstance(selectedFileInputStream)
+			}
+			preview(fileInstance, entryId)
 		}
 		else {
 			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
@@ -315,7 +320,10 @@ class Explorer {
 		var fileClass = file.name.fileClass
 		if (fileClass) {
 			selectedFileInputStream = file.newInputStream()
-			preview(fileClass.newInstance(selectedFileInputStream), file.nameWithoutExtension)
+			var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
+				return fileClass.newInstance(selectedFileInputStream)
+			}
+			preview(fileInstance, file.nameWithoutExtension)
 		}
 		else {
 			logger.info('No filetype implementation for {}', file.name)
@@ -404,11 +412,8 @@ class Explorer {
 	 */
 	private void preview(MapFile mapFile, String objectId) {
 
-		// Assume the directory in which file resides is where we can search for items
-		resourceManager = new ResourceManager(currentDirectory,
-			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes')
-
-		scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+		time("Loading map ${objectId}", logger) { ->
+			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+		}
 	}
 }

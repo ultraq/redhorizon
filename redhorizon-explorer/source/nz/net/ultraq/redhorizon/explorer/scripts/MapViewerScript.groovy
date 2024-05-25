@@ -170,7 +170,7 @@ class MapViewerScript extends Script<Map> {
 			camera.translate(-TICK, 0)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
-			camera.center(initialPosition.x(), initialPosition.y())
+			viewInitialPosition()
 		}))
 	}
 
@@ -192,6 +192,7 @@ class MapViewerScript extends Script<Map> {
 			camera = scene.camera
 			gameWindow = scene.gameWindow
 			addControls()
+			viewInitialPosition()
 		}
 	}
 
@@ -209,5 +210,10 @@ class MapViewerScript extends Script<Map> {
 		this.touchpadInput = touchpadInput
 		clearControls()
 		addControls()
+	}
+
+	private void viewInitialPosition() {
+
+		camera.center(initialPosition.x(), initialPosition.y())
 	}
 }

@@ -66,6 +66,16 @@ class JomlExtensions {
 	}
 
 	/**
+	 * Expand the borders of a rectangle to include a given points representing
+	 * another rectangle.
+	 */
+	static Rectanglef expand(Rectanglef self, float minX, float minY, float maxX, float maxY) {
+
+		self.setMin(Math.min(self.minX, minX), Math.min(self.minY, minY))
+		self.setMax(Math.max(self.maxX, maxX), Math.max(self.maxY, maxY))
+	}
+
+	/**
 	 * Scale just the X and Y components of a matrix by the same value.
 	 */
 	static Matrix4f scaleXY(Matrix4f self, float factor) {
