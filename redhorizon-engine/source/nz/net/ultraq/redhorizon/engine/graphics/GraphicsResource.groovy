@@ -22,5 +22,5 @@ package nz.net.ultraq.redhorizon.engine.graphics
  *
  * @author Emanuel Rabina
  */
-interface GraphicsResource extends Closeable {
+interface GraphicsResource extends AutoCloseable {
 }

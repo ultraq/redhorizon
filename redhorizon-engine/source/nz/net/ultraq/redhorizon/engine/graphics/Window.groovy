@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.engine.input.InputSource
  *
  * @author Emanuel Rabina
  */
-abstract class Window implements Closeable, InputSource {
+abstract class Window implements AutoCloseable, InputSource {
 
 	/**
 	 * Return the current window handle.

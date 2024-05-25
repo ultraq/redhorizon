@@ -49,7 +49,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_U
  *
  * @author Emanuel Rabina
  */
-class RenderPipeline implements Closeable {
+class RenderPipeline implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenderPipeline)
 

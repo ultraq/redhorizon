@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-abstract class Camera implements Closeable {
+abstract class Camera implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 

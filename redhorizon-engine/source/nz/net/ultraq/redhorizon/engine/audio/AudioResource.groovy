@@ -22,5 +22,5 @@ package nz.net.ultraq.redhorizon.engine.audio
  *
  * @author Emanuel Rabina
  */
-interface AudioResource extends Closeable {
+interface AudioResource extends AutoCloseable {
 }

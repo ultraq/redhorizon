@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ import java.nio.ShortBuffer
  * From what I've gathered, it converts the public key string and source data
  * found in the MIX files into "big numbers" (arbitrary precision integers) and
  * performs a bunch of big number math on those values to get our 56 byte key.
- * 
+ *
  * @author Emanuel Rabina
  */
 class MixFileKey {
@@ -78,7 +78,6 @@ class MixFileKey {
 
 		publicKey = new BigInteger(publicKeyBytes.array(), publicKeyBytes.position(), keyLength)
 
-
 		// Initializes several temporary variables derived from the public key
 		// -------------------------------------------------------------------------
 
@@ -101,7 +100,7 @@ class MixFileKey {
 	 * because it wasn't following any definition of "inverse" I knew or could
 	 * find.  As such, I'm keeping it mostly intact and translating it to
 	 * Java/Groovy so it can continue working.
-	 * 
+	 *
 	 * @param value The original value to be inverted.
 	 * @return The "inverse" of {@code value}.
 	 */
@@ -140,7 +139,7 @@ class MixFileKey {
 	/**
 	 * Calculates the 56-byte Blowfish key from the 80-byte key source found in
 	 * Red Alert's MIX files.
-	 * 
+	 *
 	 * @param source A buffer containing the 80-byte key source.
 	 * @return A buffer containing the 56-byte Blowfish key.
 	 */
@@ -176,7 +175,7 @@ class MixFileKey {
 	 * <p>
 	 * This method had some rather complicated C++ code, so I've mostly kept it
 	 * intact and translated it to Java/Groovy to keep it working.
-	 * 
+	 *
 	 * @param source1
 	 * @param source2
 	 * @return Key value calculated from the 2 sources.
@@ -195,7 +194,7 @@ class MixFileKey {
 			def lengthDiff = partialKey.shortLength() + 1 - publicKey.shortLength()
 			def partialKeyBytes = asNativeBigInteger(partialKey)
 			def partialKeyShorts = partialKeyBytes.asShortBuffer()
-			partialKeyShorts.position(partialKeyShorts.limit() - 2) // To position it at the int-sized sign value 
+			partialKeyShorts.position(partialKeyShorts.limit() - 2) // To position it at the int-sized sign value
 
 			while (lengthDiff--) {
 				def offset = lengthDiff * 2
@@ -225,7 +224,7 @@ class MixFileKey {
 	 * No damn idea as to what this does except to look confusing as hell.  Looks
 	 * to be some modification of the current position of the buffer against the
 	 * public key inverse lo/hi values.
-	 * 
+	 *
 	 * @param values
 	 * @return
 	 */
@@ -247,7 +246,7 @@ class MixFileKey {
 	 * Convert a {@code BigInteger} to its byte representation equivalent as in
 	 * the original C++ code, which is a little endian byte array filled to the
 	 * nearest int size, padding with sign bytes if necessary.
-	 * 
+	 *
 	 * @param source
 	 * @return
 	 */
@@ -271,7 +270,7 @@ class MixFileKey {
 	 * buffer.  The bytes comprising the section will be passed to the given
 	 * closure as a {@code BigInteger}, and the returned result will then be used
 	 * to replace those bytes, padding out any remaining space with the sign byte.
-	 * 
+	 *
 	 * @param buffer
 	 * @param offset
 	 * @param length
@@ -279,7 +278,7 @@ class MixFileKey {
 	 * @return
 	 */
 	private static BigInteger forRange(ByteBuffer buffer, int offset, int length,
-		@ClosureParams(value = SimpleType, options = 'java.math.BigInteger') Closure<BigInteger> closure) {
+		@ClosureParams(value = SimpleType, options = 'BigInteger') Closure<BigInteger> closure) {
 
 		def rangeBytes = new byte[length]
 		System.arraycopy(buffer.array(), offset, rangeBytes, 0, length)
