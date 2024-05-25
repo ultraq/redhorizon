@@ -76,7 +76,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 	 * @param filename The original filename of the item in the MIX body.
 	 * @return The ID of the entry from the filename.
 	 */
-	private static int calculateId(String filename) {
+	static int calculateId(String filename) {
 
 		def name = filename.toUpperCase()
 		def id = 0
