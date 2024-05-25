@@ -235,15 +235,15 @@ class Map extends Node<Map> {
 			var spriteHeight = tileFile.height * theater.clearY
 
 			// Use the sprite sheet and repeat it over the entire map area
-			var backgroundWidth = TILES_X * TILE_WIDTH
-			var backgroundHeight = TILES_Y * TILE_HEIGHT
+			var backgroundWidth = boundary.lengthX()
+			var backgroundHeight = boundary.lengthY()
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
 
 			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, palette, { scene ->
 				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
 			})
-			backgroundSprite.bounds.center()
+			backgroundSprite.transform.translate(boundary.minX, boundary.minY)
 			addChild(backgroundSprite)
 		}
 	}

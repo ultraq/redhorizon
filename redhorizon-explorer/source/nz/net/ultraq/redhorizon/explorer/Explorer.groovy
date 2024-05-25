@@ -35,10 +35,12 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
+import nz.net.ultraq.redhorizon.explorer.objects.GridLines
 import nz.net.ultraq.redhorizon.explorer.objects.Map
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
@@ -81,6 +83,7 @@ class Explorer {
 	private final NodeList nodeList = new NodeList()
 
 	private Scene scene
+	private Primitive gridLines
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private nz.net.ultraq.redhorizon.filetypes.Palette palette
@@ -176,6 +179,8 @@ class Explorer {
 				cyclePalette()
 			}
 		}
+
+		scene.addNode(new GridLines())
 	}
 
 	@SuppressWarnings('unused')
@@ -183,6 +188,7 @@ class Explorer {
 
 		removeEventFunctions*.remove()
 		clearPreview()
+		scene.clear()
 	}
 
 	/**
@@ -253,7 +259,7 @@ class Explorer {
 	private void clearPreview() {
 
 		selectedFileInputStream?.close()
-		scene.clear()
+		scene.removeNode(scene.findNode { node -> node.class != GridLines })
 		scene.camera.center(new Vector3f())
 	}
 

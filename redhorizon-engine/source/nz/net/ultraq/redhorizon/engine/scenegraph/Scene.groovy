@@ -30,6 +30,8 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -73,7 +75,7 @@ class Scene implements EventTarget, Visitable {
 	}
 
 	/**
-	 * Add a node to this scene.
+	 * Add a top-level node to this scene.
 	 */
 	Scene addNode(Node node) {
 
@@ -123,9 +125,9 @@ class Scene implements EventTarget, Visitable {
 	 *
 	 * @param predicate
 	 * @return
-	 *   The matching node, or {code null} if no node satisfies {@code predicate}.
+	 *   The matching node, or {@code null} if no match is found.
 	 */
-	<T extends Node> T findNode(Closure predicate) {
+	<T extends Node> T findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
 
 		return (T)nodes.find(predicate)
 	}
@@ -173,12 +175,19 @@ class Scene implements EventTarget, Visitable {
 //	}
 
 	/**
-	 * Removes a node from the scene.
+	 * Removes a top-level node from the scene.
+	 *
+	 * @param node
+	 *   The node to remove.  If {@code null}, then this method does nothing.
+	 * @return
+	 *   This scene so it can be chained.
 	 */
 	Scene removeNode(Node node) {
 
-		nodes.remove(node)
-		removeNodeAndChildren(node).join()
+		if (node) {
+			nodes.remove(node)
+			removeNodeAndChildren(node).join()
+		}
 		return this
 	}
 

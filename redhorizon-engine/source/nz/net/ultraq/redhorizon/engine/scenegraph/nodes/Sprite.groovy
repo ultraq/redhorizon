@@ -87,7 +87,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 * Constructor, create a sprite using any implementation of the
 	 * {@link SpriteSheetGenerator} interface.
 	 */
-	protected Sprite(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
+	protected Sprite(float width, float height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
 
 		bounds.set(0, 0, width, height)
 		this.numImages = numImages

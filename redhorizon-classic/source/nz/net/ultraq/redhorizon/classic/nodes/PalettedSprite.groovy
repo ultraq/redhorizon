@@ -57,7 +57,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.
 	 */
-	PalettedSprite(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
+	PalettedSprite(float width, float height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
 
 		this(width, height, numImages, 1f, 1f, palette, spriteSheetGenerator)
 	}
@@ -65,7 +65,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.
 	 */
-	PalettedSprite(int width, int height, int numImages, float repeatX, float repeatY, Palette palette,
+	PalettedSprite(float width, float height, int numImages, float repeatX, float repeatY, Palette palette,
 		SpriteSheetGenerator spriteSheetGenerator) {
 
 		super(width, height, numImages, spriteSheetGenerator)
