@@ -27,6 +27,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class PalettedSpriteShader extends ShaderConfig {
 
+	// TODO: Have this shader take a faction map and alpha mask so we can remove
+	//       the branching statement in the fragment shader
 	PalettedSpriteShader() {
 
 		super(
