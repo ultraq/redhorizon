@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.resources
 
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 import org.reflections.Reflections
 
@@ -36,10 +37,10 @@ class ResourceManager implements Closeable {
 
 	@Lazy
 	private Map<String, Class<? extends ArchiveFile>> knownArchiveTypes = {
-		def archiveTypes = new Reflections(packageNames)
+		var archiveTypes = new Reflections(packageNames)
 			.getSubTypesOf(ArchiveFile)
 			.inject(new LinkedHashMap<String, Class<? extends ArchiveFile>>()) { acc, type ->
-				def fileExtensionsAnnotation = type.getDeclaredAnnotation(FileExtensions)
+				var fileExtensionsAnnotation = type.getDeclaredAnnotation(FileExtensions)
 				fileExtensionsAnnotation.value().each { extension ->
 					acc << [(extension): type]
 				}
@@ -52,6 +53,7 @@ class ResourceManager implements Closeable {
 	final String[] packageNames
 
 	private final Map<String, ArchiveFile> archiveFiles = [:]
+	private final List<InputStream> inputStreams = []
 
 	/**
 	 * Close any archive files that have been opened during the life time of this
@@ -60,6 +62,7 @@ class ResourceManager implements Closeable {
 	@Override
 	void close() {
 
+		inputStreams*.close()
 		archiveFiles.values()*.close()
 	}
 
@@ -68,28 +71,28 @@ class ResourceManager implements Closeable {
 	 * files encountered.  If found, an attempt is made to load it into the target
 	 * class.
 	 *
-	 * @param resourceName
-	 * @param targetType
-	 * @return
+	 * The {@code InputStream}
 	 */
 	@Memoized
-	<T> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
+	<T extends ResourceFile> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
 
 		return directory.listFiles().sort().findResult { file ->
 			if (file.file) {
-				def fileName = file.name
+				var fileName = file.name
 				if (fileName == resourceName) {
-					return file.withInputStream { targetType.newInstance(it) }
+					var inputStream = file.newInputStream()
+					inputStreams << inputStream
+					return targetType.newInstance(inputStream)
 				}
-				def fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
+				var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
 				if (knownArchiveTypes.containsKey(fileExtension)) {
-					def archiveType = knownArchiveTypes[fileExtension]
-					def archive = archiveFiles.getOrCreate(file.path) { ->
+					var archiveType = knownArchiveTypes[fileExtension]
+					var archive = archiveFiles.getOrCreate(file.path) { ->
 						return archiveType.newInstance(file)
 					}
-					def entry = archive.getEntry(resourceName)
+					var entry = archive.getEntry(resourceName)
 					if (entry) {
-						return archive.getEntryData(entry).withBufferedStream { targetType.newInstance(it) }
+						return targetType.newInstance(new BufferedInputStream(archive.getEntryData(entry)))
 					}
 				}
 				return null

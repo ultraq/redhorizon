@@ -35,7 +35,6 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
@@ -83,13 +82,13 @@ class Explorer {
 	private final NodeList nodeList = new NodeList()
 
 	private Scene scene
-	private Primitive gridLines
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private nz.net.ultraq.redhorizon.filetypes.Palette palette
 	private int paletteIndex
 	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
+	private ResourceManager resourceManager
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -258,6 +257,7 @@ class Explorer {
 	 */
 	private void clearPreview() {
 
+		resourceManager?.close()
 		selectedFileInputStream?.close()
 		scene.removeNode(scene.findNode { node -> node.class != GridLines })
 		scene.camera.center(new Vector3f())
@@ -405,11 +405,10 @@ class Explorer {
 	private void preview(MapFile mapFile, String objectId) {
 
 		// Assume the directory in which file resides is where we can search for items
-		new ResourceManager(currentDirectory,
+		resourceManager = new ResourceManager(currentDirectory,
 			'nz.net.ultraq.redhorizon.filetypes',
-			'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
+			'nz.net.ultraq.redhorizon.classic.filetypes')
 
-			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
-		}
+		scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
 	}
 }
