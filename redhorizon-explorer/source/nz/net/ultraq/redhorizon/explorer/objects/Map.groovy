@@ -21,8 +21,11 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
 import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
 import nz.net.ultraq.redhorizon.classic.maps.MapRAOverlayPackTile
+import nz.net.ultraq.redhorizon.classic.maps.ObjectLine
+import nz.net.ultraq.redhorizon.classic.maps.StructureLine
 import nz.net.ultraq.redhorizon.classic.maps.Theater
 import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
@@ -125,6 +128,7 @@ class Map extends Node<Map> {
 		addChild(new MapLines())
 		addChild(new Units())
 		addChild(new Infantry())
+		addChild(new Structures())
 	}
 
 	@Override
@@ -536,25 +540,25 @@ class Map extends Node<Map> {
 	/**
 	 * Common class for the faction units/structures of the map.
 	 */
-	private abstract class FactionObjects<T extends FactionObjects> extends Node<T> {
+	private abstract class FactionObjects<T extends FactionObjects, L extends ObjectLine> extends Node<T> {
 
-		Unit createObject(UnitLine unitLine) {
+		Unit createObject(L objectLine) {
 
-			var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
-			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
+			var unitImages = resourceManager.loadFile("${objectLine.type}.shp", ShpFile)
+			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
 
 			return new Unit(unitImages, palette, unitData).tap {
 
 				// TODO: Country to faction map
-				faction = switch (unitLine.faction) {
+				faction = switch (objectLine.faction) {
 					case "Greece" -> Faction.BLUE
 					case "USSR" -> Faction.RED
 					default -> Faction.GOLD
 				}
 
-				heading = unitLine.heading
-				transform.translate((unitLine.coords as Vector2f).asWorldCoords())
+				heading = objectLine.heading
+				transform.translate((objectLine.coords as Vector2f).asWorldCoords())
 			}
 		}
 	}
@@ -562,7 +566,7 @@ class Map extends Node<Map> {
 	/**
 	 * The "Units" section of a Red Alert map.
 	 */
-	private class Units extends FactionObjects<Units> {
+	private class Units extends FactionObjects<Units, UnitLine> {
 
 		Units() {
 
@@ -581,7 +585,7 @@ class Map extends Node<Map> {
 	/**
 	 * The "Infantry" section of a Red Alert map.
 	 */
-	private class Infantry extends FactionObjects<Infantry> {
+	private class Infantry extends FactionObjects<Infantry, InfantryLine> {
 
 		Infantry() {
 
@@ -599,6 +603,26 @@ class Map extends Node<Map> {
 				catch (IllegalArgumentException ignored) {
 					// Ignore unknown units
 					logger.warn('Unhandled unit line encountered, line {}, type: {}', index, infantryLine.type)
+				}
+			}
+		}
+	}
+
+	/**
+	 * The "Structures" section of a Red Alert map.
+	 */
+	private class Structures extends FactionObjects<Structures, StructureLine> {
+
+		Structures() {
+
+			mapFile.structuresData.eachWithIndex { structureLine, index ->
+				try {
+					var structure = createObject(structureLine)
+					addChild(structure)
+				}
+				catch (IllegalArgumentException ignored) {
+					// Ignore unknown units
+					logger.warn('Unhandled unit line encountered, line {}, type: {}', index, structureLine.type)
 				}
 			}
 		}

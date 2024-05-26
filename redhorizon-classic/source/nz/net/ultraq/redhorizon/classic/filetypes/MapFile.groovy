@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
+import nz.net.ultraq.redhorizon.classic.maps.StructureLine
 import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 
 import java.nio.ByteBuffer
@@ -53,6 +54,12 @@ interface MapFile extends nz.net.ultraq.redhorizon.filetypes.MapFile {
 	 * Returns the base64-encoded {@code [OverlayPack]} data as binary data.
 	 */
 	ByteBuffer getOverlayPackData()
+
+	/**
+	 * Returns the list of structure data in the {@code [STRUCTURES]} section.
+	 * @return
+	 */
+	List<StructureLine> getStructuresData()
 
 	/**
 	 * Returns the list of cell coordinates to terrain object data in the

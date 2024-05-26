@@ -1,0 +1,24 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			},
+			{
+				"name": "firing",
+				"frames": 9
+			},
+			{
+				"name": "default-damages"
+			},
+			{
+				"name": "firing-damages",
+				"frames": 9
+			}
+		]
+	}
+}

@@ -32,7 +32,7 @@ import java.util.concurrent.BlockingQueue
  */
 class LogPanel implements ImGuiElement<LogPanel> {
 
-	private static final int MAX_DEBUG_LINES = 100
+	private static final int MAX_DEBUG_LINES = 500
 
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 

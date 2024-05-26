@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.codecs.PackData
 import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
+import nz.net.ultraq.redhorizon.classic.maps.StructureLine
 import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 
@@ -114,6 +115,12 @@ class IniFile implements MapFile {
 	ByteBuffer getOverlayPackData() {
 
 		return mapDataToBytes(this['OverlayPack'], 2)
+	}
+
+	@Override
+	List<StructureLine> getStructuresData() {
+
+		return this['STRUCTURES'].collect { index, lineData -> StructureLine.parse(lineData) }
 	}
 
 	@Override

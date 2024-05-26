@@ -53,6 +53,7 @@ class UnitData {
 	}
 
 	static class ShpFilePart {
+		String combineWith
 		int headings = 1
 	}
 

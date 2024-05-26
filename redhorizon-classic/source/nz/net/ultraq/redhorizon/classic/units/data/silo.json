@@ -1,0 +1,40 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "empty"
+			},
+			{
+				"name": "quarter"
+			},
+			{
+				"name": "half"
+			},
+			{
+				"name": "three-quarters"
+			},
+			{
+				"name": "full"
+			},
+			{
+				"name": "empty-damaged"
+			},
+			{
+				"name": "quarter-damaged"
+			},
+			{
+				"name": "half-damaged"
+			},
+			{
+				"name": "three-quarters-damaged"
+			},
+			{
+				"name": "full-damaged"
+			}
+		]
+	}
+}

@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class UnitLine {
+class UnitLine implements ObjectLine {
 
 	final String faction
 	final String type
