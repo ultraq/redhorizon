@@ -43,9 +43,9 @@ import java.util.concurrent.Callable
 	description = 'Calculate the mix entry ID of a file name',
 	mixinStandardHelpOptions = true
 )
-class MixIdCli implements Callable<Integer> {
+class IdCalculatorCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(MixIdCli)
+	private static final Logger logger = LoggerFactory.getLogger(IdCalculatorCli)
 
 	@Spec
 	CommandSpec commandSpec

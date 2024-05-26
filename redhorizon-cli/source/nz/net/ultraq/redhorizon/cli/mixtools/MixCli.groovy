@@ -34,8 +34,8 @@ import picocli.CommandLine.Command
 	description = 'Tools related to C&C mix files',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-		MixExtractorCli,
-		MixIdCli
+		ExtractorCli,
+		IdCalculatorCli
 	]
 )
 class MixCli {

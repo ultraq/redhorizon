@@ -44,9 +44,9 @@ import java.util.concurrent.Callable
 	description = 'Extract an entry from a mix file, saving it to disk with the same name.',
 	mixinStandardHelpOptions = true
 )
-class MixExtractorCli implements Callable<Integer> {
+class ExtractorCli implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(MixExtractorCli)
+	private static final Logger logger = LoggerFactory.getLogger(ExtractorCli)
 
 	@Spec
 	CommandSpec commandSpec
@@ -54,8 +54,8 @@ class MixExtractorCli implements Callable<Integer> {
 	@Parameters(index = '0', description = 'Path to the mix file to read')
 	String mixFile
 
-	@Parameters(index = '1', description = 'Name of the entry in the mix file')
-	String entryName
+	@Parameters(index = '1..*', description = 'Name of the entry/entries in the mix file')
+	String[] entryNames
 
 	/**
 	 * Read from a MIX file the entry with the given name, writing it out to the
@@ -66,20 +66,22 @@ class MixExtractorCli implements Callable<Integer> {
 
 		logger.info('Red Horizon Mix Extractor {}', commandSpec.parent().parent().version()[0])
 
-		logger.info('Loading {}...', mixFile)
+		println("Loading ${mixFile}...")
 		new MixFile(new File(mixFile)).withCloseable { mix ->
-			def entry = mix.getEntry(entryName)
-			if (entry) {
-				logger.info('{} found, writing to file...', entryName)
-				mix.getEntryData(entry).withBufferedStream { entryInputStream ->
-					new FileOutputStream(entryName).withCloseable { entryOutputStream ->
-						entryInputStream.transferTo(entryOutputStream)
+			entryNames.each { entryName ->
+				var entry = mix.getEntry(entryName)
+				if (entry) {
+					println("${entryName} found, writing to file...")
+					mix.getEntryData(entry).withBufferedStream { entryInputStream ->
+						new FileOutputStream(entryName).withCloseable { entryOutputStream ->
+							entryInputStream.transferTo(entryOutputStream)
+						}
 					}
 				}
-			}
-			else {
-				logger.error('{} not found in {}', entryName, mixFile)
-				throw new IllegalArgumentException()
+				else {
+					println("${entryName} not found in ${mixFile}")
+					return 1
+				}
 			}
 		}
 
