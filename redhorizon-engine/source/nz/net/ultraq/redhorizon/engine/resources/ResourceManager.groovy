@@ -54,6 +54,7 @@ class ResourceManager implements Closeable {
 
 	private final Map<String, ArchiveFile> archiveFiles = [:]
 	private final List<InputStream> inputStreams = []
+	private File customDirectory
 
 	/**
 	 * Close any archive files that have been opened during the life time of this
@@ -67,14 +68,28 @@ class ResourceManager implements Closeable {
 	}
 
 	/**
-	 * Search for a file in the base directory, subdirectories, and any archive
-	 * files encountered.  If found, an attempt is made to load it into the target
-	 * class.
-	 *
-	 * The {@code InputStream}
+	 * If a search directory has been configured via {@link #withDirectory}, check
+	 * that directory first for the resource, before falling back to searching the
+	 * directory this resource manager was launched with.
+	 */
+	<T extends ResourceFile> T loadFile(String resourceName, Class<T> targetType) {
+
+		if (customDirectory) {
+			var result = loadFile(resourceName, targetType, customDirectory, false)
+			if (result) {
+				return result
+			}
+		}
+		return loadFile(resourceName, targetType, baseDirectory, true)
+	}
+
+	/**
+	 * Search for a file in the given directory and any subdirectories if {@code
+	 * recursive} is {@code true}.  If found, an attempt is made to load it into
+	 * the target class.
 	 */
 	@Memoized
-	<T extends ResourceFile> T loadFile(String resourceName, Class<T> targetType, File directory = baseDirectory) {
+	<T extends ResourceFile> T loadFile(String resourceName, Class<T> targetType, File directory, boolean recursive) {
 
 		return directory.listFiles().sort().findResult { file ->
 			if (file.file) {
@@ -97,7 +112,19 @@ class ResourceManager implements Closeable {
 				}
 				return null
 			}
-			return loadFile(resourceName, targetType, file)
-		} as T
+			return recursive ? loadFile(resourceName, targetType, file, true) : null
+		}
+	}
+
+	/**
+	 * Use this directory as the basis for loading files with {@link #loadFile}
+	 * without having to specify it all the time.  Only lasts for as long as the
+	 * scope of the closure.
+	 */
+	void withDirectory(File directory, Closure closure) {
+
+		customDirectory = directory
+		closure()
+		customDirectory = null
 	}
 }

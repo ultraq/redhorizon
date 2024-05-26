@@ -32,6 +32,7 @@ enum MapRAOverlayPackTile {
 	WALL_SANDBAGS    ('SBAG', 0x00, true, false),
 	WALL_CHAINLINK   ('CYCL', 0x01, true, false),
 	WALL_CONCRETE    ('BRIK', 0x02, true, false),
+	WALL_LOWBARB     ('BARB', 0x03, true, false),
 	WALL_BARBEDWIRE  ('FENC', 0x17, true, false),
 	WALL_WOODENFENCE ('WOOD', 0x04, true, false),
 

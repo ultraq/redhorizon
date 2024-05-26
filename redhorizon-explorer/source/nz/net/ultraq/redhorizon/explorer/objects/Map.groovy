@@ -347,7 +347,7 @@ class Map extends Node<Map> {
 					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
 
 					// Retrieve the appropriate tile, skip empty and default tiles
-					if (tileVal != 0xff && tileVal != -1) {
+					if (tileVal != 0xff && tileVal != -1 && tileVal != 0) {
 						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
 
 						// Some unknown tile types still coming through?

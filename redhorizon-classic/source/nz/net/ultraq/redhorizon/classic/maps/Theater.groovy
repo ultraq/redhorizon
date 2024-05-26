@@ -29,7 +29,7 @@ enum Theater {
 	// @formatter:off
 	// Available theater types
 	DESERT    ('Desert',    '.des'),
-	INTERIOR  ('Interior',  '.int'),
+	INTERIOR  ('Interior',  '.int', 4, 4),
 	SNOW      ('Snow',      '.sno', 5, 4),
 	TEMPERATE ('Temperate', '.tem', 4, 4),
 	WINTER    ('Winter',    '.win')

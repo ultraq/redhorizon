@@ -413,7 +413,9 @@ class Explorer {
 	private void preview(MapFile mapFile, String objectId) {
 
 		time("Loading map ${objectId}", logger) { ->
-			scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+			resourceManager.withDirectory(currentDirectory) { ->
+				scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+			}
 		}
 	}
 }
