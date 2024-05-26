@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.objects
 
+import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
@@ -23,8 +24,11 @@ import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
 import nz.net.ultraq.redhorizon.classic.maps.MapRAOverlayPackTile
 import nz.net.ultraq.redhorizon.classic.maps.Theater
+import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.classic.units.Unit
+import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
@@ -53,6 +57,7 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.json.JsonSlurper
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
@@ -118,6 +123,8 @@ class Map extends Node<Map> {
 		addChild(new OverlayPack())
 		addChild(new Terrain())
 		addChild(new MapLines())
+		addChild(new Units())
+		addChild(new Infantry())
 	}
 
 	@Override
@@ -488,14 +495,12 @@ class Map extends Node<Map> {
 	 */
 	private class Terrain extends Node<Terrain> {
 
-		private final TileSet tileSet
+		private final TileSet tileSet = new TileSet()
 		private final List<MapTile> mapTiles = []
 
 		Terrain() {
 
 			var terrainData = mapFile.terrainData
-			tileSet = new TileSet()
-
 			terrainData.each { cell, terrainType ->
 				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
@@ -525,6 +530,77 @@ class Map extends Node<Map> {
 //				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
 //				       imageB.dimensions.minX - imageA.dimensions.minX
 //			}
+		}
+	}
+
+	/**
+	 * Common class for the faction units/structures of the map.
+	 */
+	private abstract class FactionObjects<T extends FactionObjects> extends Node<T> {
+
+		Unit createObject(UnitLine unitLine) {
+
+			var unitImages = resourceManager.loadFile("${unitLine.type}.shp", ShpFile)
+			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${unitLine.type.toLowerCase()}.json")
+			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
+
+			return new Unit(unitImages, palette, unitData).tap {
+
+				// TODO: Country to faction map
+				faction = switch (unitLine.faction) {
+					case "Greece" -> Faction.BLUE
+					case "USSR" -> Faction.RED
+					default -> Faction.GOLD
+				}
+
+				heading = unitLine.heading
+				transform.translate((unitLine.coords as Vector2f).asWorldCoords())
+			}
+		}
+	}
+
+	/**
+	 * The "Units" section of a Red Alert map.
+	 */
+	private class Units extends FactionObjects<Units> {
+
+		Units() {
+
+			mapFile.unitsData.eachWithIndex { unitLine, index ->
+				try {
+					addChild(createObject(unitLine))
+				}
+				catch (IllegalArgumentException ignored) {
+					// Ignore unknown units
+					logger.warn('Unhandled unit line encountered, line {}, type: {}', index, unitLine.type)
+				}
+			}
+		}
+	}
+
+	/**
+	 * The "Infantry" section of a Red Alert map.
+	 */
+	private class Infantry extends FactionObjects<Infantry> {
+
+		Infantry() {
+
+			mapFile.infantryData.eachWithIndex { infantryLine, index ->
+				try {
+					var infantry = createObject(infantryLine)
+					switch (infantryLine.cellPos) {
+						case 1 -> infantry.transform.translate(-8, 8)
+						case 2 -> infantry.transform.translate(8, 8)
+						case 3 -> infantry.transform.translate(-8, -8)
+						case 4 -> infantry.transform.translate(8, -8)
+					}
+					addChild(infantry)
+				}
+				catch (IllegalArgumentException ignored) {
+					// Ignore unknown units
+					logger.warn('Unhandled unit line encountered, line {}, type: {}', index, infantryLine.type)
+				}
+			}
 		}
 	}
 }

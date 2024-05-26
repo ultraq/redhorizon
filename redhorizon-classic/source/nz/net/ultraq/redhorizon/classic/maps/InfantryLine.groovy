@@ -16,34 +16,27 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import org.joml.Vector2f
-
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.engine.geometry.Point
 
 /**
  * A line in a map file that represents an infantry unit on the map.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class InfantryLine {
+class InfantryLine extends UnitLine {
 
-	final String faction
-	final String type
-	final float health
-	final Vector2f coords
 	final int cellPos
-	final String action
-	final float heading
-	final String trigger
+
+	InfantryLine(String faction, String type, float health, Point coords, int cellPos, String action, float heading, String trigger) {
+
+		super(faction, type, health, coords, heading, action, trigger)
+		this.cellPos = cellPos
+	}
 
 	/**
 	 * Create an {@code InfantryLine} record from the infantry data in a map file.
-	 *
-	 * @param line
-	 * @return
 	 */
-	static InfantryLine fromString(String line) {
+	static InfantryLine parse(String line) {
 
 		var lineParts = line.split(',')
 		var triggerName = lineParts[7]
@@ -52,7 +45,7 @@ class InfantryLine {
 			lineParts[0],
 			lineParts[1],
 			100 / 256 * Integer.parseInt(lineParts[2]) as float,
-			Integer.parseInt(lineParts[3]).asCellCoords(),
+			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
 			Integer.parseInt(lineParts[4]),
 			lineParts[5],
 			360 / 256 * Float.parseFloat(lineParts[6]) as float,

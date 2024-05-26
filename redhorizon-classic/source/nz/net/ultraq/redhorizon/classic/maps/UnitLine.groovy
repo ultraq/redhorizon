@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import org.joml.Vector2f
+import nz.net.ultraq.redhorizon.engine.geometry.Point
 
 import groovy.transform.TupleConstructor
 
@@ -31,18 +31,15 @@ class UnitLine {
 	final String faction
 	final String type
 	final float health
-	final Vector2f coords
+	final Point coords
 	final float heading
 	final String action
 	final String trigger
 
 	/**
 	 * Create a {@code UnitLine} record from the unit data in a map file.
-	 *
-	 * @param line
-	 * @return
 	 */
-	static UnitLine fromString(String line) {
+	static UnitLine parse(String line) {
 
 		var lineParts = line.split(',')
 		var triggerName = lineParts[6]
@@ -51,7 +48,7 @@ class UnitLine {
 			lineParts[0],
 			lineParts[1],
 			100 / 256 * Integer.parseInt(lineParts[2]) as float,
-			Integer.parseInt(lineParts[3]).asCellCoords(),
+			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
 			360 / 256 * Float.parseFloat(lineParts[4]) as float,
 			lineParts[5],
 			triggerName != "None" ? triggerName : null

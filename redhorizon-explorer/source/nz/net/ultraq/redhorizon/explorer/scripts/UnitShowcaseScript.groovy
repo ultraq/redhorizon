@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
@@ -82,12 +81,8 @@ class UnitShowcaseScript extends Script<Unit> {
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
 				->
 				var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
-				logger.info("Viewing with ${selectedFaction.name()} faction colours")
-				accept { node ->
-					if (node instanceof FactionColours) {
-						node.faction = selectedFaction
-					}
-				}
+				logger.info('Viewing with {} faction colours', selectedFaction.name())
+				faction = selectedFaction
 			}))
 		}
 	}

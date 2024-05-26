@@ -39,9 +39,6 @@ class CoordinateExtensions {
 
 	/**
 	 * Convert a number representing a cell value into a cell coordinates.
-	 *
-	 * @param self
-	 * @return
 	 */
 	static Vector2f asCellCoords(Integer self) {
 

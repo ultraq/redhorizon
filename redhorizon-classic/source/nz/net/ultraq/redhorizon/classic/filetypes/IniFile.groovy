@@ -88,7 +88,7 @@ class IniFile implements MapFile {
 	@Override
 	List<InfantryLine> getInfantryData() {
 
-		return this['INFANTRY'].collect { index, lineData -> InfantryLine.fromString(lineData) }
+		return this['INFANTRY'].collect { index, lineData -> InfantryLine.parse(lineData) }
 	}
 
 	@Override
@@ -125,7 +125,7 @@ class IniFile implements MapFile {
 	@Override
 	List<UnitLine> getUnitsData() {
 
-		return this['UNITS'].collect { index, lineData -> UnitLine.fromString(lineData) }
+		return this['UNITS'].collect { index, lineData -> UnitLine.parse(lineData) }
 	}
 
 	@Override

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.units
 
+import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
@@ -129,6 +130,14 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	void rotateRight() {
 
 		heading += degreesPerHeading
+	}
+
+	@Override
+	void setFaction(Faction faction) {
+
+		FactionColours.super.faction = faction
+		body.faction = faction
+		turret?.faction = faction
 	}
 
 	/**
