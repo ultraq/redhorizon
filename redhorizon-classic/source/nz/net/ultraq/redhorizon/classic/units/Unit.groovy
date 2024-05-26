@@ -54,6 +54,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final PalettedSprite body
 	final PalettedSprite turret
 
+	private PalettedSprite body2
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
@@ -67,7 +68,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, palette, { _ ->
 			return CompletableFuture.completedFuture(spriteSheet)
-		})
+		}, unitData)
 		addChild(body)
 
 		if (unitData.shpFile.parts.turret) {
@@ -79,6 +80,20 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		else {
 			turret = null
 		}
+	}
+
+	/**
+	 * Adds a second body to this unit.  Used for special cases like the weapons
+	 * factory where the garage door is a separate sprite file.
+	 */
+	void addBody(ImagesFile imagesFile, Palette palette, UnitData unitData) {
+
+		body2 = new UnitBody(imagesFile, palette, unitData).tap {
+			name = "UnitBody2"
+		}
+//		body2.transform.translate(0, 0, -1)
+//		addChildBefore(body2, body)
+		addChild(body2)
 	}
 
 	/**
@@ -137,6 +152,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 		FactionColours.super.faction = faction
 		body.faction = faction
+		body2?.faction = faction
 		turret?.faction = faction
 	}
 
@@ -167,8 +183,18 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	private class UnitBody extends PalettedSprite {
 
-		UnitBody(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
+		private final UnitData unitData
+
+		UnitBody(ImagesFile imagesFile, Palette palette, UnitData unitData) {
+
+			super(imagesFile, palette)
+			this.unitData = unitData
+		}
+
+		UnitBody(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
+
 			super(width, height, numImages, palette, spriteSheetGenerator)
+			this.unitData = unitData
 		}
 
 		@Override

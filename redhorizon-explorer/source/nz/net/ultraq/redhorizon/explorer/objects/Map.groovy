@@ -61,6 +61,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.json.JsonSlurper
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.FromString
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
@@ -542,13 +544,17 @@ class Map extends Node<Map> {
 	 */
 	private abstract class FactionObjects<T extends FactionObjects, L extends ObjectLine> extends Node<T> {
 
-		Unit createObject(L objectLine) {
+		Unit createObject(L objectLine,
+			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
+				Closure configure) {
 
 			var unitImages = resourceManager.loadFile("${objectLine.type}.shp", ShpFile)
 			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
 
 			return new Unit(unitImages, palette, unitData).tap {
+
+				configure(it, unitData)
 
 				// TODO: Country to faction map
 				faction = switch (objectLine.faction) {
@@ -572,7 +578,10 @@ class Map extends Node<Map> {
 
 			mapFile.unitsData.eachWithIndex { unitLine, index ->
 				try {
-					addChild(createObject(unitLine))
+					var unit = createObject(unitLine) { unit, unitData ->
+						unit.name = "Vehicle - ${unitLine.faction}, ${unitLine.type}"
+					}
+					addChild(unit)
 				}
 				catch (IllegalArgumentException ignored) {
 					// Ignore unknown units
@@ -591,12 +600,14 @@ class Map extends Node<Map> {
 
 			mapFile.infantryData.eachWithIndex { infantryLine, index ->
 				try {
-					var infantry = createObject(infantryLine)
-					switch (infantryLine.cellPos) {
-						case 1 -> infantry.transform.translate(-8, 8)
-						case 2 -> infantry.transform.translate(8, 8)
-						case 3 -> infantry.transform.translate(-8, -8)
-						case 4 -> infantry.transform.translate(8, -8)
+					var infantry = createObject(infantryLine) { infantry, infantryData ->
+						switch (infantryLine.cellPos) {
+							case 1 -> infantry.transform.translate(-8, 8)
+							case 2 -> infantry.transform.translate(8, 8)
+							case 3 -> infantry.transform.translate(-8, -8)
+							case 4 -> infantry.transform.translate(8, -8)
+						}
+						infantry.name = "Infantry - ${infantryLine.faction}, ${infantryLine.type}"
 					}
 					addChild(infantry)
 				}
@@ -617,7 +628,20 @@ class Map extends Node<Map> {
 
 			mapFile.structuresData.eachWithIndex { structureLine, index ->
 				try {
-					var structure = createObject(structureLine)
+					var structure = createObject(structureLine) { structure, structureData ->
+						structure.name = "Structure - ${structureLine.faction}, ${structureLine.type}"
+
+						// Push down 1 cell to account for bib placement
+//						structure.transform.translate(0, -TILE_HEIGHT)
+
+						var combineWith = structureData.shpFile.parts.body.combineWith
+						if (combineWith) {
+							var combinedImages = resourceManager.loadFile("${combineWith}.shp", ShpFile)
+							var combinedJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${combineWith.toLowerCase()}.json")
+							var combinedData = new JsonSlurper().parseText(combinedJson) as UnitData
+							structure.addBody(combinedImages, palette, combinedData)
+						}
+					}
 					addChild(structure)
 				}
 				catch (IllegalArgumentException ignored) {
