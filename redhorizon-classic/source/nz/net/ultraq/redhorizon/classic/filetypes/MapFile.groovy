@@ -27,11 +27,15 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface MapFile extends nz.net.ultraq.redhorizon.filetypes.MapFile {
+interface MapFile {
+
+	/**
+	 * Returns the {@code [Basic]} section of data.
+	 */
+	BasicSection getBasicSection()
 
 	/**
 	 * Returns the list of infantry data in the {@code [INFANTRY]} section.
-	 * @return
 	 */
 	List<InfantryLine> getInfantryData()
 
@@ -46,18 +50,12 @@ interface MapFile extends nz.net.ultraq.redhorizon.filetypes.MapFile {
 	MapSection getMapSection()
 
 	/**
-	 * Returns the name of the map.
-	 */
-	String getName()
-
-	/**
 	 * Returns the base64-encoded {@code [OverlayPack]} data as binary data.
 	 */
 	ByteBuffer getOverlayPackData()
 
 	/**
 	 * Returns the list of structure data in the {@code [STRUCTURES]} section.
-	 * @return
 	 */
 	List<StructureLine> getStructuresData()
 
@@ -77,6 +75,11 @@ interface MapFile extends nz.net.ultraq.redhorizon.filetypes.MapFile {
 	 * {@code [Waypoints]} section.
 	 */
 	Map<Integer, Integer> getWaypointsData()
+
+	/**
+	 * The {@code [Basic]} section of data.
+	 */
+	record BasicSection(String name) {}
 
 	/**
 	 * The {@code [Map]} section of data.

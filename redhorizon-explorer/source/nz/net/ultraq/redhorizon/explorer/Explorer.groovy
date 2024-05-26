@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
@@ -342,8 +343,8 @@ class Explorer {
 		// Objects
 			case ShpFile ->
 				preview(file, objectId)
-			case MapFile ->
-				preview(file, objectId)
+			case IniFile ->
+				preview(file as MapFile, objectId)
 
 				// Media
 			case ImageFile ->

@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
 import nz.net.ultraq.redhorizon.classic.maps.StructureLine
 import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
+import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 import java.nio.ByteBuffer
 import java.util.regex.Pattern
@@ -33,7 +34,7 @@ import java.util.regex.Pattern
  * @author Emanuel Rabina
  */
 @FileExtensions('ini')
-class IniFile implements MapFile {
+class IniFile implements ResourceFile {
 
 	private static final Pattern COMMENT_PATTERN = ~/^\s*;.*/
 	private static final Pattern SECTION_PATTERN = ~/\[(.+)\](\s*;.*)?/
@@ -42,31 +43,28 @@ class IniFile implements MapFile {
 	private final Map<String, Map<String, String>> sections = [:]
 
 	/**
-	 * Constructor, build a new INI file from the given input stream.
-	 *
-	 * @param inputStream
+	 * Constructor, read the INI file from the given input stream.
 	 */
 	IniFile(InputStream inputStream) {
 
-		def currentSection
-
+		var currentSection
 		inputStream.withReader { reader ->
 			reader.eachLine { line ->
 				if (line) {
 					if (line.matches(COMMENT_PATTERN)) {
 						return
 					}
-					def sectionMatcher = SECTION_PATTERN.matcher(line)
+					var sectionMatcher = SECTION_PATTERN.matcher(line)
 					if (sectionMatcher.matches()) {
-						def sectionHeader = sectionMatcher.group(1)
+						var sectionHeader = sectionMatcher.group(1)
 						currentSection = [:]
 						sections << [(sectionHeader): currentSection]
 					}
 					else {
-						def lineMatcher = LINE_PATTERN.matcher(line)
+						var lineMatcher = LINE_PATTERN.matcher(line)
 						if (lineMatcher.matches()) {
-							def lineKey = lineMatcher.group(1).trim()
-							def lineValue = lineMatcher.group(2).trim()
+							var lineKey = lineMatcher.group(1).trim()
+							var lineValue = lineMatcher.group(2).trim()
 							currentSection << [(lineKey): lineValue]
 						}
 					}
@@ -76,10 +74,21 @@ class IniFile implements MapFile {
 	}
 
 	/**
+	 * Convert this INI file to a more-specific type.
+	 */
+	Object asType(Class clazz) {
+
+		if (clazz == MapFile) {
+			return new IniMapFile()
+		}
+		if (clazz == RulesFile) {
+			return new IniRulesFile()
+		}
+		throw new IllegalArgumentException("Cannot convert IniFile to ${clazz}")
+	}
+
+	/**
 	 * Retrieve the key/value map of data for the given section in the file.
-	 *
-	 * @param section
-	 * @return
 	 */
 	Map<String, String> getAt(String section) {
 
@@ -87,89 +96,113 @@ class IniFile implements MapFile {
 	}
 
 	@Override
-	List<InfantryLine> getInfantryData() {
-
-		return this['INFANTRY'].collect { index, lineData -> InfantryLine.parse(lineData) }
-	}
-
-	@Override
-	ByteBuffer getMapPackData() {
-
-		return mapDataToBytes(this['MapPack'], 6)
-	}
-
-	@Override
-	MapSection getMapSection() {
-
-		var mapData = this['Map']
-		return new MapSection(mapData['Theater'], mapData['X'] as int, mapData['Y'] as int, mapData['Width'] as int, mapData['Height'] as int)
-	}
-
-	@Override
-	String getName() {
-
-		return this['Basic']['Name']
-	}
-
-	@Override
-	ByteBuffer getOverlayPackData() {
-
-		return mapDataToBytes(this['OverlayPack'], 2)
-	}
-
-	@Override
-	List<StructureLine> getStructuresData() {
-
-		return this['STRUCTURES'].collect { index, lineData -> StructureLine.parse(lineData) }
-	}
-
-	@Override
-	Map<String, String> getTerrainData() {
-
-		return this['TERRAIN']
-	}
-
-	@Override
-	List<UnitLine> getUnitsData() {
-
-		return this['UNITS'].collect { index, lineData -> UnitLine.parse(lineData) }
-	}
-
-	@Override
-	Map<Integer, Integer> getWaypointsData() {
-
-		return this['Waypoints'].collectEntries { index, cellCoord -> [index as int, cellCoord as int] }
-	}
-
-	/**
-	 * Converts a map's character data into bytes that represent the tiles used
-	 * throughout the map.
-	 *
-	 * @param data
-	 *   A map section containing the character data to decode.
-	 * @param chunks
-	 *   Number of chunks to allocate the pack data during the decoding process.
-	 * @return The converted map data.
-	 */
-	private static ByteBuffer mapDataToBytes(Map<String, String> data, int chunks) {
-
-		// Turn the section into 8-bit chars
-		def sourceBytes = ByteBuffer.allocateNative(data.size() * 70) // Lines are only ever 70 characters long
-		(1..data.size()).each { i ->
-			def line = data[i.toString()]
-			line.chars.each { c ->
-				sourceBytes.put(c as byte)
-			}
-		}
-		sourceBytes.flip()
-
-		// Decode section bytes
-		return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
-	}
-
-	@Override
 	String toString() {
 
 		return "INI/Configuration file"
+	}
+
+	/**
+	 * A map file backed by this INI file.
+	 */
+	private class IniMapFile implements MapFile {
+
+		@Override
+		BasicSection getBasicSection() {
+			var basicData = sections['Basic']
+			return new BasicSection(
+				basicData['Name']
+			)
+		}
+
+		@Override
+		List<InfantryLine> getInfantryData() {
+			return sections['INFANTRY'].collect { index, lineData -> InfantryLine.parse(lineData) }
+		}
+
+		@Override
+		ByteBuffer getMapPackData() {
+			return mapDataToBytes(sections['MapPack'], 6)
+		}
+
+		@Override
+		MapSection getMapSection() {
+			var mapData = sections['Map']
+			return new MapSection(
+				mapData['Theater'],
+				mapData['X'] as int,
+				mapData['Y'] as int,
+				mapData['Width'] as int,
+				mapData['Height'] as int
+			)
+		}
+
+		@Override
+		ByteBuffer getOverlayPackData() {
+			return mapDataToBytes(sections['OverlayPack'], 2)
+		}
+
+		@Override
+		List<StructureLine> getStructuresData() {
+			return sections['STRUCTURES'].collect { index, lineData -> StructureLine.parse(lineData) }
+		}
+
+		@Override
+		Map<String, String> getTerrainData() {
+			return sections['TERRAIN']
+		}
+
+		@Override
+		List<UnitLine> getUnitsData() {
+			return sections['UNITS'].collect { index, lineData -> UnitLine.parse(lineData) }
+		}
+
+		@Override
+		Map<Integer, Integer> getWaypointsData() {
+			return sections['Waypoints'].collectEntries { index, cellCoord -> [index as int, cellCoord as int] }
+		}
+
+		/**
+		 * Converts a map's character data into bytes that represent the tiles used
+		 * throughout the map.
+		 *
+		 * @param data
+		 *   A map section containing the character data to decode.
+		 * @param chunks
+		 *   Number of chunks to allocate the pack data during the decoding process.
+		 * @return The converted map data.
+		 */
+		private static ByteBuffer mapDataToBytes(Map<String, String> data, int chunks) {
+
+			// Turn the section into 8-bit chars
+			def sourceBytes = ByteBuffer.allocateNative(data.size() * 70) // Lines are only ever 70 characters long
+			(1..data.size()).each { i ->
+				def line = data[i.toString()]
+				line.chars.each { c ->
+					sourceBytes.put(c as byte)
+				}
+			}
+			sourceBytes.flip()
+
+			// Decode section bytes
+			return new PackData(chunks).decode(sourceBytes, ByteBuffer.allocateNative(49152)) // 128x128x3 bytes max
+		}
+	}
+
+	/**
+	 * A rules file backed by this INI file.
+	 */
+	private class IniRulesFile implements RulesFile {
+
+		boolean asBoolean(String value) {
+			return value == "yes" || value == "true"
+		}
+
+		@Override
+		StructureConfig getStructureConfig(String name) {
+			var unitData = sections[name]
+			return new StructureConfig(
+				asBoolean(unitData['Bib'])
+			)
+		}
 	}
 }
