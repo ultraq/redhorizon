@@ -37,7 +37,6 @@ import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_S
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_U
 
 /**
@@ -111,14 +110,14 @@ class RenderPipeline implements AutoCloseable {
 			}
 
 		// Scanline post-processing pass
-		renderPasses << new PostProcessingRenderPass(
-			renderer.createFramebuffer(window.targetResolution, false),
-			renderer.createShader(new ScanlinesShader()),
-			config.scanlines
-		)
-			.toggleWith(inputEventStream, GLFW_KEY_S) { renderPass ->
-				logger.debug("Scanlines ${renderPass.enabled ? 'enabled' : 'disabled'}")
-			}
+//		renderPasses << new PostProcessingRenderPass(
+//			renderer.createFramebuffer(window.targetResolution, false),
+//			renderer.createShader(new ScanlinesShader()),
+//			config.scanlines
+//		)
+//			.toggleWith(inputEventStream, GLFW_KEY_S) { renderPass ->
+//				logger.debug("Scanlines ${renderPass.enabled ? 'enabled' : 'disabled'}")
+//			}
 
 		// Final pass to emit the result to the screen
 		screenRenderPass = new ScreenRenderPass(

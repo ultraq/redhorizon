@@ -157,16 +157,16 @@ class MapViewerScript extends Script<Map> {
 		}
 
 		// Custom inputs
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Scroll up', { ->
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
 			camera.translate(0, -TICK)
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Scroll down', { ->
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Scroll down', { ->
 			camera.translate(0, TICK)
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Scroll left', { ->
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Scroll left', { ->
 			camera.translate(TICK, 0)
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Scroll right', { ->
+		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Scroll right', { ->
 			camera.translate(-TICK, 0)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
