@@ -32,10 +32,11 @@ class MixEntry implements Entry<MixEntry> {
 
 	final MixFile mixFile
 	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
-	String name
-	Class<?> fileClass
-	long size
-	boolean unknown
+	final String name
+	final Class<?> fileClass
+	final long size
+	final boolean unknown
+	final String description
 
 	@Override
 	int compareTo(MixEntry other) {

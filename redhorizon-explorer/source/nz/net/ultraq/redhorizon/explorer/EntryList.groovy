@@ -58,11 +58,12 @@ class EntryList implements EventTarget, ImGuiElement {
 		ImGui.popStyleVar()
 
 		// File list
-		if (ImGui.beginTable('FileTable', 3, BordersV | Resizable | RowBg | ScrollY)) {
+		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY)) {
 			ImGui.tableSetupScrollFreeze(0, 1)
 			ImGui.tableSetupColumn('Name')
 			ImGui.tableSetupColumn('Type')
 			ImGui.tableSetupColumn('Size')
+			ImGui.tableSetupColumn('Description')
 			ImGui.tableHeadersRow()
 
 			entries.each { entry ->
@@ -86,6 +87,11 @@ class EntryList implements EventTarget, ImGuiElement {
 				ImGui.pushFont(ImGuiLayer.robotoMonoFont)
 				ImGui.text(String.format('%12s', numberFormat.format(entry.size)))
 				ImGui.popFont()
+
+				if (entry instanceof MixEntry && entry.description) {
+					ImGui.tableSetColumnIndex(3)
+					ImGui.text(entry.description)
+				}
 			}
 
 			ImGui.endTable()

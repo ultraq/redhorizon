@@ -106,6 +106,15 @@ class MixFile implements ArchiveFile<MixEntry> {
 	}
 
 	/**
+	 * Returns the entry with the matching ID, or {@code null} if it doesn't
+	 * exist.
+	 */
+	MixEntry getEntry(int id) {
+
+		return entries.find { entry -> entry.id == id }
+	}
+
+	/**
 	 * Returns an entry which describes an item's place in the MIX file.
 	 *
 	 * @param name Name of the item and the record.

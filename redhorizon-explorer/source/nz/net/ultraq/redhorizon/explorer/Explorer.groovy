@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
@@ -232,24 +233,45 @@ class Explorer {
 		entries.clear()
 		entries << new MixEntry(mixFile, null, '..')
 
+		// RA-MIXer built-in database, if available
+		var raMixDbEntry = mixFile.getEntry(0x7fffffff)
+		RaMixDatabase raMixDb
+		if (raMixDbEntry) {
+			raMixDb = new RaMixDatabase(mixFile.getEntryData(raMixDbEntry))
+		}
+
+		// TODO: Also support XCC local database
+
 		var mixEntryTester = new MixEntryTester(mixFile)
 		mixFile.entries.each { entry ->
 
+			if (raMixDb) {
+				if (entry.id == 0x7fffffff) {
+					entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size, false, 'Local database created by the RA-MIXer tool')
+					return
+				}
+
+				var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
+				if (dbEntry) {
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.name().fileClass, entry.size, false, dbEntry.description())
+					return
+				}
+			}
+
 			// Perform a lookup to see if we know about this file already, getting both a name and class
-			var matchingData = mixDatabase.find(entry.id)
-			if (matchingData) {
-				entries << new MixEntry(mixFile, entry, matchingData.name, matchingData.name.fileClass, entry.size)
+			var dbEntry = mixDatabase.find(entry.id)
+			if (dbEntry) {
+				entries << new MixEntry(mixFile, entry, dbEntry.name, dbEntry.name.fileClass, entry.size)
+				return
 			}
 
 			// Otherwise try determine what kind of file this is, getting only a class
+			var testerResult = mixEntryTester.test(entry)
+			if (testerResult) {
+				entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
+			}
 			else {
-				var testerResult = mixEntryTester.test(entry)
-				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
-				}
-				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
-				}
+				entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
 			}
 		}
 
