@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import groovy.transform.TupleConstructor
+
 /**
  * Interface for working with the Red Alert {@code rules.ini} file.
  *
@@ -28,5 +30,17 @@ interface RulesFile {
 	 */
 	StructureConfig getStructureConfig(String name)
 
-	record StructureConfig(boolean bib) {}
+	/**
+	 * Returns the section of the rules file as a unit configuration record.
+	 */
+	UnitConfig getUnitConfig(String name)
+
+	record StructureConfig(String image, boolean bib) {}
+
+	// TODO: There seems to be some bug here when using a record and a single null
+	//       value.  Once we get a second value, try a record again.
+	@TupleConstructor(defaults = false)
+	class UnitConfig {
+		final String image
+	}
 }

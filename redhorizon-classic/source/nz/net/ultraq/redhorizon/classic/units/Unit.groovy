@@ -93,8 +93,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		body2 = new UnitBody(imagesFile, palette, unitData).tap {
 			name = "UnitBody2"
 		}
-//		body2.transform.translate(0, 0, -1)
-//		addChildBefore(body2, body)
 		addChild(body2)
 	}
 

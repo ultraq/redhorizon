@@ -555,7 +555,8 @@ class Map extends Node<Map> {
 			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
 				Closure configure) {
 
-			var unitImages = resourceManager.loadFile("${objectLine.type}.shp", ShpFile)
+			var unitConfig = rules.getUnitConfig(objectLine.type)
+			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}.shp", ShpFile)
 			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
 

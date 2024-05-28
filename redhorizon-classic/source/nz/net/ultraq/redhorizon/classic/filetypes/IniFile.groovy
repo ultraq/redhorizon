@@ -201,8 +201,15 @@ class IniFile implements ResourceFile {
 		StructureConfig getStructureConfig(String name) {
 			var unitData = sections[name]
 			return new StructureConfig(
+				unitData['Image'],
 				asBoolean(unitData['Bib'])
 			)
+		}
+
+		@Override
+		UnitConfig getUnitConfig(String name) {
+			var unitData = sections[name]
+			return new UnitConfig(unitData['Image'])
 		}
 	}
 }
