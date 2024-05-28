@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.explorer
  */
 class MixDatabase {
 
-	private static final String[] sources = ['ra-conquer.csv', 'ra-missions.csv', 'ra-videos.csv']
+	private static final String[] sources = ['ra-config.csv', 'ra-conquer.csv', 'ra-missions.csv', 'ra-videos.csv']
 
 	private final List<MixData> data = []
 

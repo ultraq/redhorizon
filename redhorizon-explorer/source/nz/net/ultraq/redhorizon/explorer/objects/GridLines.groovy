@@ -31,8 +31,8 @@ import org.joml.Vector2f
  */
 class GridLines extends Node<GridLines> {
 
-	private static final int COORD_MIN = -2400
-	private static final int COORD_MAX = 2400
+	private static final int COORD_MIN = -1536 // The max area a Red Alert map can be
+	private static final int COORD_MAX = 1536
 
 	GridLines() {
 

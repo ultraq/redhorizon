@@ -17,8 +17,10 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
@@ -80,7 +82,7 @@ class Map extends Node<Map> {
 	private static final int TILE_HEIGHT = 24
 
 	final MapFile mapFile
-	final String name = "Map - ${mapFile.name}"
+	final String name = "Map - ${mapFile.basicSection.name()}"
 	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
@@ -88,6 +90,7 @@ class Map extends Node<Map> {
 	private final Palette palette
 	private final TileSet tileSet
 	private final ResourceManager resourceManager
+	private final RulesFile rules
 
 	private CompletableFuture<Texture> paletteAsTextureFuture
 	private Texture paletteAsTexture
@@ -115,7 +118,7 @@ class Map extends Node<Map> {
 
 		var waypoints = mapFile.waypointsData
 		var waypoint98 = waypoints[98]
-		initialPosition = waypoint98.asCellCoords().asWorldCoords()
+		initialPosition = waypoint98.asCellCoords().asWorldCoords(1)
 
 		var halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		var halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
@@ -123,14 +126,18 @@ class Map extends Node<Map> {
 
 		tileSet = new TileSet()
 
+		// Rules file needed for some object configuration
+		var rulesIni = resourceManager.loadFile('rules.ini', IniFile)
+		rules = rulesIni as RulesFile
+
 		addChild(new MapBackground())
 		addChild(new MapPack())
 		addChild(new OverlayPack())
 		addChild(new Terrain())
-		addChild(new MapLines())
 		addChild(new Units())
 		addChild(new Infantry())
 		addChild(new Structures())
+		addChild(new MapLines())
 	}
 
 	@Override
@@ -217,17 +224,17 @@ class Map extends Node<Map> {
 	 */
 	private class MapLines extends Node<MapLines> {
 
-		private static final Vector2f X_AXIS_MIN = new Vector2f(-3600, 0)
-		private static final Vector2f X_AXIS_MAX = new Vector2f(3600, 0)
-		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3600)
-		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3600)
+		private static final Vector2f X_AXIS_MIN = new Vector2f(-3072, 0)
+		private static final Vector2f X_AXIS_MAX = new Vector2f(3072, 0)
+		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3072)
+		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3072)
 
 		MapLines() {
 
-			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.5), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
+			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
 				name = "XY axis (red)"
 			})
-			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.5), boundary as Vector2f[]).tap {
+			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.8), boundary as Vector2f[]).tap {
 				name = "Map boundary (yellow)"
 			})
 		}
@@ -509,7 +516,7 @@ class Map extends Node<Map> {
 			var terrainData = mapFile.terrainData
 			terrainData.each { cell, terrainType ->
 				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
-				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT - 1 as int)
+				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT as int)
 				tileSet.addTiles(terrainFile)
 
 				// TODO: Get TileSets to work with any sized sprites, then terrain can
@@ -553,7 +560,6 @@ class Map extends Node<Map> {
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
 
 			return new Unit(unitImages, palette, unitData).tap {
-
 				configure(it, unitData)
 
 				// TODO: Country to faction map
@@ -562,9 +568,7 @@ class Map extends Node<Map> {
 					case "USSR" -> Faction.RED
 					default -> Faction.GOLD
 				}
-
 				heading = objectLine.heading
-				transform.translate((objectLine.coords as Vector2f).asWorldCoords())
 			}
 		}
 	}
@@ -580,6 +584,9 @@ class Map extends Node<Map> {
 				try {
 					var unit = createObject(unitLine) { unit, unitData ->
 						unit.name = "Vehicle - ${unitLine.faction}, ${unitLine.type}"
+						unit.transform.translate((unitLine.coords as Vector2f)
+							.asWorldCoords(1)
+							.centerInCell(unit.width, unit.height))
 					}
 					addChild(unit)
 				}
@@ -601,13 +608,16 @@ class Map extends Node<Map> {
 			mapFile.infantryData.eachWithIndex { infantryLine, index ->
 				try {
 					var infantry = createObject(infantryLine) { infantry, infantryData ->
+						infantry.name = "Infantry - ${infantryLine.faction}, ${infantryLine.type}"
+						infantry.transform.translate((infantryLine.coords as Vector2f)
+							.asWorldCoords(1)
+							.centerInCell(infantry.width, infantry.height))
 						switch (infantryLine.cellPos) {
 							case 1 -> infantry.transform.translate(-8, 8)
 							case 2 -> infantry.transform.translate(8, 8)
 							case 3 -> infantry.transform.translate(-8, -8)
 							case 4 -> infantry.transform.translate(8, -8)
 						}
-						infantry.name = "Infantry - ${infantryLine.faction}, ${infantryLine.type}"
 					}
 					addChild(infantry)
 				}
@@ -630,10 +640,14 @@ class Map extends Node<Map> {
 				try {
 					var structure = createObject(structureLine) { structure, structureData ->
 						structure.name = "Structure - ${structureLine.faction}, ${structureLine.type}"
+						var translate = (structureLine.coords as Vector2f).asWorldCoords(Math.ceil(structure.height / TILE_HEIGHT) as int)
+						if (structure.width < TILE_WIDTH || structure.height < TILE_HEIGHT) {
+							translate.centerInCell(structure.width, structure.height)
+						}
+						structure.transform.translate(translate)
 
-						// Push down 1 cell to account for bib placement
-//						structure.transform.translate(0, -TILE_HEIGHT)
-
+						// A special case for structures with secondary parts, namely the
+						// weapons factory for its garage door
 						var combineWith = structureData.shpFile.parts.body.combineWith
 						if (combineWith) {
 							var combinedImages = resourceManager.loadFile("${combineWith}.shp", ShpFile)

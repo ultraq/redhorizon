@@ -42,7 +42,7 @@ class CoordinateExtensions {
 	 */
 	static Vector2f asCellCoords(Integer self) {
 
-		return new Vector2f(self % TILES_Y, Math.ceil(self / TILES_Y) as float)
+		return new Vector2f(self % TILES_Y, Math.floor(self / TILES_Y) as float)
 	}
 
 	/**
@@ -66,7 +66,7 @@ class CoordinateExtensions {
 	 *
 	 * @param self
 	 * @param objectHeightInCells
-	 *   Optional, height of the object whose coordinates are being translated.
+	 *   Vertical space occupied by the objheheight of the object whose coordinates are being translated.
 	 * @return
 	 */
 	static Vector2f asWorldCoords(Vector2f self, int objectHeightInCells = 0) {
@@ -74,6 +74,15 @@ class CoordinateExtensions {
 		return self
 			.asModelCoords(objectHeightInCells)
 			.add(WORLD_OFFSET)
+	}
+
+	/**
+	 * Adjust a vector enough so that an arbitrary-sized sprite is centered in a
+	 * map cell.
+	 */
+	static Vector2f centerInCell(Vector2f self, float spriteWidth, float spriteHeight) {
+
+		return self.sub((spriteWidth - TILE_WIDTH) / 2 as float, (spriteHeight - TILE_HEIGHT) / 2 as float)
 	}
 
 	/**
