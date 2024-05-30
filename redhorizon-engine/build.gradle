@@ -26,7 +26,7 @@ dependencies {
 		implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
 	}
 	else {
-		implementation files("../libraries/imgui-java-binding-${imguiVersion}.jar")
+		implementation files("../libraries/imgui-java-binding-with-tablesortspecs-${imguiVersion}.jar")
 		implementation("io.github.spair:imgui-java-lwjgl3:${imguiVersion}") {
 			exclude group: 'io.github.spair', module: 'imgui-java-binding'
 		}
@@ -38,10 +38,10 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-openal'
 	implementation 'org.lwjgl:lwjgl-opengl'
 
-	runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
-	runtimeOnly files("../libraries/imgui-java-natives-macos-arm64-${imguiVersion}.jar")
-	runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
-	['natives-macos', 'natives-macos-arm64', 'natives-windows'].each { natives ->
+	runtimeOnly files("../libraries/imgui-java-natives-with-tablesortspecs-macos-arm64-${imguiVersion}.jar")
+	// TODO: Windows build
+//	runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
+	['natives-macos-arm64', 'natives-windows'].each { natives ->
 		runtimeOnly "org.lwjgl:lwjgl::${natives}"
 		runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
 		runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"

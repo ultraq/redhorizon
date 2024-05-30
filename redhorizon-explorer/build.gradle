@@ -27,7 +27,7 @@ dependencies {
 		implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 	}
 	else {
-		implementation files("../libraries/imgui-java-binding-${imguiVersion}.jar")
+		implementation files("../libraries/imgui-java-binding-with-tablesortspecs-${imguiVersion}.jar")
 	}
 	implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
 	implementation "org.apache.groovy:groovy-json:${groovyVersion}"

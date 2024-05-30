@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
+import imgui.flag.ImGuiSortDirection
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiCond.FirstUseEver
 import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
@@ -58,13 +59,35 @@ class EntryList implements EventTarget, ImGuiElement {
 		ImGui.popStyleVar()
 
 		// File list
-		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY)) {
+		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
 			ImGui.tableSetupScrollFreeze(0, 1)
 			ImGui.tableSetupColumn('Name')
 			ImGui.tableSetupColumn('Type')
 			ImGui.tableSetupColumn('Size')
 			ImGui.tableSetupColumn('Description')
 			ImGui.tableHeadersRow()
+
+			var tableSortSpecs = ImGui.tableGetSortSpecs()
+			if (tableSortSpecs.specsDirty) {
+
+				// Take the special .. entry out to put back at the top after
+				var specialEntry = entries.remove(entries.findIndexOf { e -> e.name == '/..' || e.name == '..' })
+
+				var sortingColumn = tableSortSpecs.specs.columnIndex
+				switch (sortingColumn) {
+					case 0 -> entries.sort { it.name }
+					case 1 -> entries.sort { it.type }
+					case 2 -> entries.sort { it.size }
+					case 3 -> entries.sort { it.description }
+				}
+				if (tableSortSpecs.specs.sortDirection == ImGuiSortDirection.Descending) {
+					entries.reverse(true)
+				}
+
+				entries.add(0, specialEntry)
+
+				tableSortSpecs.specsDirty = false
+			}
 
 			entries.each { entry ->
 				ImGui.tableNextRow()

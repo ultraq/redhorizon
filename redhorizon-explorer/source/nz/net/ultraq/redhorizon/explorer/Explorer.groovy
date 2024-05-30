@@ -235,10 +235,7 @@ class Explorer {
 
 		// RA-MIXer built-in database, if available
 		var raMixDbEntry = mixFile.getEntry(0x7fffffff)
-		RaMixDatabase raMixDb
-		if (raMixDbEntry) {
-			raMixDb = new RaMixDatabase(mixFile.getEntryData(raMixDbEntry))
-		}
+		var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
 
 		// TODO: Also support XCC local database
 
