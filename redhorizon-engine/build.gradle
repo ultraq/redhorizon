@@ -21,16 +21,10 @@ dependencies {
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
-	if (System.getenv('CI')) {
-		implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-		implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
+	implementation("io.github.spair:imgui-java-lwjgl3:${imguiVersion}") {
+		exclude group: 'io.github.spair', module: 'imgui-java-binding'
 	}
-	else {
-		implementation files("../libraries/imgui-java-binding-with-tablesortspecs-${imguiVersion}.jar")
-		implementation("io.github.spair:imgui-java-lwjgl3:${imguiVersion}") {
-			exclude group: 'io.github.spair', module: 'imgui-java-binding'
-		}
-	}
+	implementation files("../libraries/imgui-java-binding-with-tablesortspecs-${imguiVersion}.jar")
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation 'org.lwjgl:lwjgl'
