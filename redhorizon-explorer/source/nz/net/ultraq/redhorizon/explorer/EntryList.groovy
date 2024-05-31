@@ -75,10 +75,10 @@ class EntryList implements EventTarget, ImGuiElement {
 
 				var sortingColumn = tableSortSpecs.specs.columnIndex
 				switch (sortingColumn) {
-					case 0 -> entries.sort { it.name }
 					case 1 -> entries.sort { it.type }
 					case 2 -> entries.sort { it.size }
-					case 3 -> entries.sort { it.description }
+					case 3 && entries[0] instanceof MixEntry -> entries.sort { it.description }
+					default -> entries.sort { it.name }
 				}
 				if (tableSortSpecs.specs.sortDirection == ImGuiSortDirection.Descending) {
 					entries.reverse(true)
