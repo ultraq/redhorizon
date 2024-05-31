@@ -39,8 +39,7 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-opengl'
 
 	runtimeOnly files("../libraries/imgui-java-natives-with-tablesortspecs-macos-arm64-${imguiVersion}.jar")
-	// TODO: Windows build
-//	runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
+	runtimeOnly files("../libraries/imgui-java-natives-with-tablesortspecs-windows-${imguiVersion}.jar")
 	['natives-macos-arm64', 'natives-windows'].each { natives ->
 		runtimeOnly "org.lwjgl:lwjgl::${natives}"
 		runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"

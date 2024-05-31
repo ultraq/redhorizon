@@ -18,7 +18,7 @@ import org.gradle.internal.os.OperatingSystem
 
 def os = OperatingSystem.current()
 def targetPlatform = findProperty('targetPlatform') ?:
-	os == OperatingSystem.MAC_OS ? System.getProperty('os.arch').startsWith('aarch64') ? 'macos-arm64' : 'macos' : 'windows'
+	os == OperatingSystem.MAC_OS && System.getProperty('os.arch').startsWith('aarch64') ? 'macos-arm64' : 'windows'
 
 // Global configuration
 allprojects {
