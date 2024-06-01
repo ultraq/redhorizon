@@ -17,9 +17,7 @@
 package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.cli.converter.ConverterCli
-import nz.net.ultraq.redhorizon.cli.mediaplayer.MediaPlayerCli
 import nz.net.ultraq.redhorizon.cli.mixtools.MixCli
-import nz.net.ultraq.redhorizon.cli.objectviewer.ObjectViewerCli
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -43,10 +41,7 @@ import picocli.CommandLine.IVersionProvider
 	subcommands = [
 		ConverterCli,
 		ExplorerCli,
-		MediaPlayerCli,
-		MixCli,
-		ObjectViewerCli,
-		SandboxCli
+		MixCli
 	],
 	versionProvider = VersionProvider
 )
