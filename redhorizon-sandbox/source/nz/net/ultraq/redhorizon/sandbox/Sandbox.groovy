@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.sandbox
 
-import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
@@ -28,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.explorer.PaletteType
+import nz.net.ultraq.redhorizon.explorer.objects.GridLines
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory
 class Sandbox {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sandbox)
-	private static final Preferences userPreferences = new Preferences()
 	private static final String mapFileName = 'scr01ea.ini'
 
 	final Palette palette
@@ -55,27 +54,25 @@ class Sandbox {
 		'nz.net.ultraq.redhorizon.classic.filetypes')
 
 	static void main(String[] args) {
-		new Sandbox()
+		new Sandbox(args.length > 0 && args[0] == '--touchpad-input')
 		System.exit(0)
 	}
 
 	/**
 	 * Constructor, build the sandbox.
 	 */
-	Sandbox() {
+	Sandbox(boolean touchpadInput) {
 
 		palette = getResourceAsStream(PaletteType.RA_TEMPERATE.file).withBufferedStream { inputStream ->
 			return new PalFile(inputStream).withAlphaMask()
 		}
-		touchpadInput = userPreferences.get(SandboxPreferences.TOUCHPAD_INPUT)
+		this.touchpadInput = touchpadInput
 
 		new Application('Sandbox', '0.1.0')
 			.addAudioSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
-				maximized: userPreferences.get(SandboxPreferences.WINDOW_MAXIMIZED),
-				renderResolution: new Dimension(1280, 800),
-				startWithChrome: true
+				renderResolution: new Dimension(1280, 800)
 			))
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
@@ -84,6 +81,8 @@ class Sandbox {
 	}
 
 	private void applicationStart(Application application, Scene scene) {
+
+		scene << new GridLines()
 
 		logger.info('Loading sandbox map, {}', mapFileName)
 

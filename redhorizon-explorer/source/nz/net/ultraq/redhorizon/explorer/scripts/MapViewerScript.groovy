@@ -84,7 +84,7 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
-				if (gameWindow.hovered) {
+				if (gameWindow ? gameWindow.hovered : true) {
 
 					// Zoom in/out using CTRL + scroll up/down
 					if (ctrl) {
@@ -104,7 +104,7 @@ class MapViewerScript extends Script<Map> {
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
-					if (gameWindow.hovered) {
+					if (gameWindow ? gameWindow.hovered : true) {
 						camera.resetScale()
 					}
 				})
@@ -125,7 +125,7 @@ class MapViewerScript extends Script<Map> {
 			removeEventFunctions << inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
-						if (gameWindow.hovered) {
+						if (gameWindow ? gameWindow.hovered : true) {
 							dragging = true
 						}
 					}
@@ -137,7 +137,7 @@ class MapViewerScript extends Script<Map> {
 
 			// Zoom in/out using the scroll wheel
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
-				if (gameWindow.hovered) {
+				if (gameWindow ? gameWindow.hovered : true) {
 					if (event.yOffset < 0) {
 						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
 					}
@@ -149,7 +149,7 @@ class MapViewerScript extends Script<Map> {
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
-					if (gameWindow.hovered) {
+					if (gameWindow ? gameWindow.hovered : true) {
 						camera.resetScale()
 					}
 				})

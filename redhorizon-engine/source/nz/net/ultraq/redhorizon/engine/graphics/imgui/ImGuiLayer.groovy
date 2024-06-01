@@ -102,7 +102,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		this.config = config
 		debugOverlay = config.debug
 		drawUiElements = config.startWithChrome
-		drawOverlays = config.startWithChrome
+		drawOverlays = config.debug
 		shaderScanlines = config.scanlines
 		shaderSharpUpscaling = true
 

@@ -35,6 +35,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -110,7 +111,7 @@ class Explorer {
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
 				renderResolution: new Dimension(1280, 800),
 				startWithChrome: true
-			), entryList, nodeList)
+			), new LogPanel(true), entryList, nodeList)
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
 			.onApplicationStop(this::applicationStop)

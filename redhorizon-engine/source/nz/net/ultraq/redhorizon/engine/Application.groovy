@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -102,7 +101,6 @@ class Application implements EventTarget {
 		graphicsSystem.on(SystemReadyEvent) { event ->
 			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
 			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
-			graphicsSystem.imGuiLayer.addUiElement(new LogPanel(config.debug))
 			uiElements.each { overlayRenderPass ->
 				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)
 			}
