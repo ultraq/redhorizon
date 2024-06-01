@@ -19,10 +19,12 @@ description = "A playground for any game development I'm trying out"
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
+	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+	implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation 'org.lwjgl:lwjgl-glfw'
 }

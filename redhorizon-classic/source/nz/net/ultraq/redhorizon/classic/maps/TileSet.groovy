@@ -27,6 +27,10 @@ import org.joml.primitives.Rectanglef
 
 import java.nio.ByteBuffer
 
+// TODO: Unused, but allows for any-height sprites in the same sheet.  Might be
+//       good to update the new SpriteSheet class to do this too so this can be
+//       deleted.
+
 /**
  * A texture made to contain all of the textures that make up the current map so
  * that the entire tileset can be bound to a single texture slot.  Individual
@@ -43,7 +47,7 @@ class TileSet implements GraphicsElement {
 	final Palette palette
 
 	private final List<ImagesFile> tileFileList = []
-	private final Map<ImagesFile, Integer> tileFileMap = [:]
+	private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
 	private Texture texture
 
 	/**

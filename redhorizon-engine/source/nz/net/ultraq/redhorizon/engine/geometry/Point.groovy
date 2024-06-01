@@ -33,6 +33,7 @@ record Point(float x, float y) {
 	 * Convert this class into another that can also represent a point.
 	 */
 	Object asType(Class clazz) {
+
 		if (clazz == Vector2f) {
 			return new Vector2f(x, y)
 		}

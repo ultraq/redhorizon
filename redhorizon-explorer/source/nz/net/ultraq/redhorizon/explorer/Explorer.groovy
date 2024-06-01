@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -44,7 +45,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 import nz.net.ultraq.redhorizon.explorer.objects.GridLines
-import nz.net.ultraq.redhorizon.explorer.objects.Map
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript

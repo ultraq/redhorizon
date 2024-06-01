@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
+import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
@@ -30,7 +31,6 @@ import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
-import nz.net.ultraq.redhorizon.explorer.objects.Map
 
 import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.objects
+package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
@@ -23,13 +23,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
-import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
-import nz.net.ultraq.redhorizon.classic.maps.MapRAMapPackTile
-import nz.net.ultraq.redhorizon.classic.maps.MapRAOverlayPackTile
-import nz.net.ultraq.redhorizon.classic.maps.ObjectLine
-import nz.net.ultraq.redhorizon.classic.maps.StructureLine
-import nz.net.ultraq.redhorizon.classic.maps.Theater
-import nz.net.ultraq.redhorizon.classic.maps.UnitLine
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
@@ -63,6 +56,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.json.JsonSlurper
+import groovy.transform.ImmutableOptions
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.FromString
 import java.nio.ByteBuffer
@@ -276,6 +270,10 @@ class Map extends Node<Map> {
 	 * tiles to create a single large mesh for rendering a whole layer in a single
 	 * draw call.
 	 */
+	@ImmutableOptions(
+		// Not really an immutable class, but should be OK since we control its use within this file
+		knownImmutables = ['position']
+	)
 	private static record MapTile(Vector2f position, int frameInTileSet) {}
 
 	/**
