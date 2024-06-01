@@ -65,7 +65,7 @@ class EntryList implements EventTarget, ImGuiElement {
 		focused = ImGui.isWindowFocused(ChildWindows)
 
 		// File list
-		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
+		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | Sortable)) {
 			ImGui.tableSetupScrollFreeze(0, 1)
 			ImGui.tableSetupColumn('Name')
 			ImGui.tableSetupColumn('Type')
@@ -102,9 +102,7 @@ class EntryList implements EventTarget, ImGuiElement {
 				// noinspection ChangeToOperator
 				var isSelected = selectedEntry.equals(entry)
 				if (ImGui.selectable(entry.name, isSelected, SpanAllColumns)) {
-					selectedEntry = entry
-					selectedEntryTriggered = false
-					entryVisibleOnce = false
+					updateSelection(entry)
 				}
 				if (isSelected) {
 					ImGui.setItemDefaultFocus()
@@ -146,9 +144,7 @@ class EntryList implements EventTarget, ImGuiElement {
 		if (focused) {
 			var currentIndex = entries.indexOf(selectedEntry)
 			if (currentIndex < entries.size() - 1) {
-				selectedEntry = entries[currentIndex + 1]
-				selectedEntryTriggered = false
-				entryVisibleOnce = false
+				updateSelection(entries[currentIndex + 1])
 			}
 		}
 	}
@@ -161,10 +157,18 @@ class EntryList implements EventTarget, ImGuiElement {
 		if (focused) {
 			var currentIndex = entries.indexOf(selectedEntry)
 			if (currentIndex > 1) {
-				selectedEntry = entries[currentIndex - 1]
-				selectedEntryTriggered = false
-				entryVisibleOnce = false
+				updateSelection(entries[currentIndex - 1])
 			}
 		}
+	}
+
+	/**
+	 * Update which is the selected entry.
+	 */
+	private void updateSelection(Entry entry) {
+
+		selectedEntry = entry
+		selectedEntryTriggered = false
+		entryVisibleOnce = false
 	}
 }
