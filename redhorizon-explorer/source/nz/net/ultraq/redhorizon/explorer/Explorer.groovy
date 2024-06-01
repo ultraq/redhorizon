@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -30,6 +31,7 @@ import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
@@ -63,6 +65,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.nio.ByteBuffer
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -366,6 +369,8 @@ class Explorer {
 		// Objects
 			case ShpFile ->
 				preview(file, objectId)
+			case TmpFileRA ->
+				preview(file, objectId)
 			case IniFile ->
 				preview(file as MapFile, objectId)
 
@@ -388,6 +393,18 @@ class Explorer {
 
 		if (mediaNode) {
 			scene << mediaNode
+		}
+	}
+
+	/**
+	 * Load up any unspecified multi-image file as a sprite to flip through its
+	 * frames.
+	 */
+	private void preview(ImagesFile imagesFile, String objectId) {
+
+		scene << new PalettedSprite(imagesFile, palette).attachScript(new SpriteShowcaseScript()).tap {
+			bounds.center()
+			name = "PalettedSprite - ${objectId}"
 		}
 	}
 
@@ -425,9 +442,26 @@ class Explorer {
 
 		// No config found, fall back to viewing a SHP file as media
 		else {
-			var sprite = new PalettedSprite(shpFile, palette).attachScript(new SpriteShowcaseScript())
-			sprite.bounds.center()
-			scene << sprite
+			preview(shpFile as ImagesFile, objectId)
+		}
+	}
+
+	/**
+	 * Load up a tile file and arrange it so that it looks complete.
+	 */
+	private void preview(TmpFileRA tileFile, String objectId) {
+
+		var singleImageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
+		var singleImageWidth = tileFile.tilesX * tileFile.width
+		var singleImageHeight = tileFile.tilesY * tileFile.height
+
+		scene << new PalettedSprite(singleImageWidth, singleImageHeight, 1, palette, { scene ->
+			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format,
+				[singleImageData] as ByteBuffer[]))
+		})
+			.attachScript(new SpriteShowcaseScript()).tap {
+			bounds.center()
+			name = "PalettedSprite - ${objectId}"
 		}
 	}
 

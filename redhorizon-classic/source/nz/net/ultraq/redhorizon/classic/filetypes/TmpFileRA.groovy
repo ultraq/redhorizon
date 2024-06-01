@@ -46,8 +46,8 @@ class TmpFileRA implements ImagesFile {
 	final int height    // Stored in file as short
 	final int numImages // Stored in file as short
 	final short zero1
-	final short tileWidth
-	final short tileHeight
+	final short tilesX
+	final short tilesY
 	final int fileSize
 	final int imageOffset
 	final int zero2
@@ -75,20 +75,23 @@ class TmpFileRA implements ImagesFile {
 		height = input.readShort()
 		assert height == 24 : 'Tile height should be 24 pixels'
 
-		// @formatter:off
-		numImages   = input.readShort()
-		zero1       = input.readShort()
-		tileWidth   = input.readShort()
-		tileHeight  = input.readShort()
-		fileSize    = input.readInt()
-		imageOffset = input.readInt()
-		zero2       = input.readInt()
-		unknown3    = input.readInt()
+		numImages = input.readShort()
 
+		zero1 = input.readShort()
+		assert zero1 == 0
+
+		tilesX = input.readShort()
+		tilesY = input.readShort()
+		fileSize = input.readInt()
+		imageOffset = input.readInt()
+
+		zero2 = input.readInt()
+		assert zero2 == 0
+
+		unknown3 = input.readInt()
 		imageIndexOffset = input.readInt()
-		unknown4         = input.readInt()
-		tileIndexOffset  = input.readInt()
-		// @formatter:on
+		unknown4 = input.readInt()
+		tileIndexOffset = input.readInt()
 	}
 
 	@Override
@@ -97,7 +100,7 @@ class TmpFileRA implements ImagesFile {
 		if (!imagesData) {
 			// Image data follows the header and up to the tile index.  Not every tile
 			// has an image (some are empty), so read all the image data for now and
-			// spread them out according to the tile index afterwards.
+			// spread them out according to the tile index that follows.
 			var imageBytes = ByteBuffer.wrapNative(input.readNBytes(tileIndexOffset - imageOffset))
 			imagesData = new ByteBuffer[numImages]
 
