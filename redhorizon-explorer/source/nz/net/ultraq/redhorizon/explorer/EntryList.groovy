@@ -25,6 +25,7 @@ import imgui.ImGui
 import imgui.flag.ImGuiSortDirection
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiCond.FirstUseEver
+import static imgui.flag.ImGuiFocusedFlags.ChildWindows
 import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTableFlags.*
@@ -41,8 +42,11 @@ class EntryList implements EventTarget, ImGuiElement {
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 
 	final List<Entry> entries
+	boolean focused
 
 	private Entry selectedEntry
+	private boolean selectedEntryTriggered
+	private boolean entryVisibleOnce
 
 	EntryList(List<Entry> entries) {
 
@@ -57,6 +61,8 @@ class EntryList implements EventTarget, ImGuiElement {
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.begin('Current directory', new ImBoolean(true))
 		ImGui.popStyleVar()
+
+		focused = ImGui.isWindowFocused(ChildWindows)
 
 		// File list
 		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
@@ -97,10 +103,19 @@ class EntryList implements EventTarget, ImGuiElement {
 				var isSelected = selectedEntry.equals(entry)
 				if (ImGui.selectable(entry.name, isSelected, SpanAllColumns)) {
 					selectedEntry = entry
-					trigger(new EntrySelectedEvent(entry))
+					selectedEntryTriggered = false
+					entryVisibleOnce = false
 				}
 				if (isSelected) {
 					ImGui.setItemDefaultFocus()
+					if (!selectedEntryTriggered) {
+						trigger(new EntrySelectedEvent(entry))
+						selectedEntryTriggered = true
+					}
+					if (!ImGui.isItemVisible() && !entryVisibleOnce) {
+						ImGui.setScrollFromPosY(ImGui.getItemRectMinY())
+						entryVisibleOnce = true
+					}
 				}
 
 				ImGui.tableSetColumnIndex(1)
@@ -121,5 +136,35 @@ class EntryList implements EventTarget, ImGuiElement {
 		}
 
 		ImGui.end()
+	}
+
+	/**
+	 * Select the next entry in the current list.
+	 */
+	void selectNext() {
+
+		if (focused) {
+			var currentIndex = entries.indexOf(selectedEntry)
+			if (currentIndex < entries.size() - 1) {
+				selectedEntry = entries[currentIndex + 1]
+				selectedEntryTriggered = false
+				entryVisibleOnce = false
+			}
+		}
+	}
+
+	/**
+	 * Select the previous entry in the current list.
+	 */
+	void selectPrevious() {
+
+		if (focused) {
+			var currentIndex = entries.indexOf(selectedEntry)
+			if (currentIndex > 1) {
+				selectedEntry = entries[currentIndex - 1]
+				selectedEntryTriggered = false
+				entryVisibleOnce = false
+			}
+		}
 	}
 }
