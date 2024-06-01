@@ -305,8 +305,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 			var framebufferSize = sceneFramebufferResult.texture.size
 			var windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
-			var imageSizeX = windowSize.width
-			var imageSizeY = windowSize.height
+			var imageSizeX = windowSize.width()
+			var imageSizeY = windowSize.height()
 			var uvX = 0f
 			var uvY = 0f
 			var cursorX = 0
@@ -314,15 +314,15 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 			// Window is wider
 			if (windowSize.aspectRatio > framebufferSize.aspectRatio) {
-				uvX = 1 / (framebufferSize.width - (framebufferSize.width - windowSize.width)) as float
+				uvX = 1 / (framebufferSize.width() - (framebufferSize.width() - windowSize.width())) as float
 				imageSizeX = imageSizeY * framebufferSize.aspectRatio as float
-				cursorX = (windowSize.width - imageSizeX) * 0.5f as float
+				cursorX = (windowSize.width() - imageSizeX) * 0.5f as float
 			}
 			// Window is taller
 			else if (windowSize.aspectRatio < framebufferSize.aspectRatio) {
-				uvY = 1 / (framebufferSize.height - (framebufferSize.height - windowSize.height)) as float
+				uvY = 1 / (framebufferSize.height() - (framebufferSize.height() - windowSize.height())) as float
 				imageSizeY = imageSizeX / framebufferSize.aspectRatio as float
-				cursorY = cursorY + (windowSize.height - imageSizeY) * 0.5f as float
+				cursorY = cursorY + (windowSize.height() - imageSizeY) * 0.5f as float
 			}
 
 			ImGui.setCursorPos(cursorX, cursorY)

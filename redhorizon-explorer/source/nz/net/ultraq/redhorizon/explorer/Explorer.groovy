@@ -78,13 +78,13 @@ class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
-	private static final Dimension renderResolution = new Dimension(1280, 800)
 
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
 	private final NodeList nodeList = new NodeList()
-	private final ResourceManager resourceManager = new ResourceManager(new File(System.getProperty('user.dir'), 'mix'),
+	private final ResourceManager resourceManager = new ResourceManager(
+		new File(System.getProperty('user.dir'), 'mix'),
 		'nz.net.ultraq.redhorizon.filetypes',
 		'nz.net.ultraq.redhorizon.classic.filetypes')
 
@@ -109,7 +109,7 @@ class Explorer {
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
 				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
-				renderResolution: renderResolution,
+				renderResolution: new Dimension(1280, 800),
 				startWithChrome: true
 			), entryList, nodeList)
 			.addTimeSystem()

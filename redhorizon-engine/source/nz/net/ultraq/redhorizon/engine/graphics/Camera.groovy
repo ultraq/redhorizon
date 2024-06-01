@@ -44,9 +44,9 @@ abstract class Camera implements AutoCloseable {
 	 */
 	Camera(Dimension renderResolution) {
 
-		size = new Dimension(renderResolution.width, renderResolution.height)
+		size = new Dimension(renderResolution.width(), renderResolution.height())
 		projection = new Matrix4f()
-			.ortho2D(-size.width / 2, size.width / 2, -size.height / 2, size.height / 2)
+			.ortho2D(-size.width() / 2, size.width() / 2, -size.height() / 2, size.height() / 2)
 			.lookAt(
 				new Vector3f(0, 0, 1),
 				new Vector3f(),

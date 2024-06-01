@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,23 +18,17 @@ package nz.net.ultraq.redhorizon.engine.geometry
 
 import org.joml.primitives.Rectanglef
 
-import groovy.transform.Immutable
-
 /**
- * A width/height value.
- * 
+ * An immutable width/height value.
+ *
  * @author Emanuel Rabina
  */
-@Immutable
-class Dimension {
-
-	final int width
-	final int height
+record Dimension(int width, int height) {
 
 	/**
 	 * Convert this object into another that can also represent width/height
 	 * values.
-	 * 
+	 *
 	 * @param clazz
 	 * @return
 	 */
@@ -44,22 +38,22 @@ class Dimension {
 			return new Rectanglef(0, 0, width, height)
 		}
 		else if (clazz == float[]) {
-			return new float[] { width, height }
+			return new float[]{ width, height }
 		}
 		throw new IllegalArgumentException("Cannot convert Dimension to ${clazz}")
 	}
 
 	/**
-	 * Calculate and return a {@code Dimension} which fits into this current
+	 * Calculate and return a new {@code Dimension} which fits into this current
 	 * dimension while respecting the given aspect ratio.
-	 * 
+	 *
 	 * @param fitAspectRatio
 	 * @return
 	 */
 	Dimension calculateFit(float fitAspectRatio) {
 
-		def thisAspectRatio = getAspectRatio()
-		def targetResolution = new Dimension(
+		var thisAspectRatio = getAspectRatio()
+		var targetResolution = new Dimension(
 			thisAspectRatio > fitAspectRatio ?
 				height * fitAspectRatio as int : // This is wider
 				width,
@@ -71,21 +65,8 @@ class Dimension {
 	}
 
 	/**
-	 * Calculate the scale factor for an object of the given width and height to
-	 * fit into this current dimension.
-	 * 
-	 * @param width
-	 * @param height
-	 * @return
-	 */
-	float calculateScaleToFit(int width, int height) {
-
-		return Math.min(this.width / width, this.height / height)
-	}
-
-	/**
 	 * Return the aspect ratio of these dimensions.
-	 * 
+	 *
 	 * @return
 	 */
 	float getAspectRatio() {
@@ -96,7 +77,7 @@ class Dimension {
 	/**
 	 * Return a new {@code Dimension} whose width/height values are multiplied by
 	 * the given value.
-	 * 
+	 *
 	 * @param right
 	 * @return
 	 */
@@ -108,7 +89,7 @@ class Dimension {
 	/**
 	 * Return a new {@code Dimension} whose width/height values are multiplied by
 	 * the first/second values of the given array.
-	 * 
+	 *
 	 * @param right
 	 * @return
 	 */
@@ -119,12 +100,12 @@ class Dimension {
 
 	/**
 	 * Return the width & height dimensions.
-	 * 
-	 * @return "(width)x(height)"
+	 *
+	 * @return "Dimension (width)x(height)"
 	 */
 	@Override
 	String toString() {
 
-		return "${width}x${height}"
+		return "Dimension ${width}x${height}"
 	}
 }

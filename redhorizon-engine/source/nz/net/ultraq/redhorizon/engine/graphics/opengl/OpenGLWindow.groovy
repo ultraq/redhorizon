@@ -81,7 +81,7 @@ class OpenGLWindow extends Window {
 
 		size = fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
-		logger.debug('Using a render resolution of {}x{}', renderResolution.width, renderResolution.height)
+		logger.debug('Using a render resolution of {}x{}', renderResolution.width(), renderResolution.height())
 
 		// Set OpenGL config for the window we want
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
@@ -96,14 +96,14 @@ class OpenGLWindow extends Window {
 
 		// Create a centered or full screen (borderless) window
 		logger.debug('Creating a window of size {}', size)
-		window = glfwCreateWindow(size.width, size.height, title ?: 'Red Horizon', NULL, NULL)
+		window = glfwCreateWindow(size.width(), size.height(), title ?: 'Red Horizon', NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create the GLFW window')
 		}
 
 		glfwSetWindowPos(window,
-			(videoMode.width() / 2) - (size.width / 2) as int,
-			(videoMode.height() / 2) - (size.height / 2) as int)
+			(videoMode.width() / 2) - (size.width() / 2) as int,
+			(videoMode.height() / 2) - (size.height() / 2) as int)
 		if (config.maximized) {
 			glfwMaximizeWindow(window)
 		}
@@ -115,7 +115,7 @@ class OpenGLWindow extends Window {
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
 		framebufferSize = new Dimension(widthPointer[0], heightPointer[0])
 		targetResolution = framebufferSize.calculateFit(config.targetAspectRatio)
-		logger.debug('Using a target resolution of {}x{}', targetResolution.width, targetResolution.height)
+		logger.debug('Using a target resolution of {}x{}', targetResolution.width(), targetResolution.height())
 
 		// Track framebuffer size changes from window size changes
 		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
@@ -229,10 +229,10 @@ class OpenGLWindow extends Window {
 		if (fullScreen) {
 			logger.debug('Switching to windowed mode')
 			glfwSetWindowMonitor(window, NULL,
-				(videoMode.width() / 2) - (windowedSize.width / 2) as int,
-				(videoMode.height() / 2) - (windowedSize.height / 2) as int,
-				windowedSize.width,
-				windowedSize.height,
+				(videoMode.width() / 2) - (windowedSize.width() / 2) as int,
+				(videoMode.height() / 2) - (windowedSize.height() / 2) as int,
+				windowedSize.width(),
+				windowedSize.height(),
 				videoMode.refreshRate())
 		}
 

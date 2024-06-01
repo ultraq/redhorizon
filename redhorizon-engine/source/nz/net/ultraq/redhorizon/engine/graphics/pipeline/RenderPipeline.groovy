@@ -282,10 +282,10 @@ class RenderPipeline implements AutoCloseable {
 			return new Matrix4f()
 				.scale(
 					framebufferSize.aspectRatio > targetResolution.aspectRatio ?
-						1 - ((framebufferSize.width - targetResolution.width) / framebufferSize.width) as float : // Window is wider
+						1 - ((framebufferSize.width() - targetResolution.width()) / framebufferSize.width()) as float : // Window is wider
 						1,
 					framebufferSize.aspectRatio < targetResolution.aspectRatio ?
-						1 - ((framebufferSize.height - targetResolution.height) / framebufferSize.height) as float : // Window is taller
+						1 - ((framebufferSize.height() - targetResolution.height()) / framebufferSize.height()) as float : // Window is taller
 						1,
 					1
 				)

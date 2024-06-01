@@ -44,7 +44,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 */
 	default Framebuffer createFramebuffer(Dimension resolution, boolean filter) {
 
-		return createFramebuffer(resolution.width, resolution.height, filter)
+		return createFramebuffer(resolution.width(), resolution.height(), filter)
 	}
 
 	/**

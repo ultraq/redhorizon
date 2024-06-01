@@ -38,4 +38,15 @@ record Point(float x, float y) {
 		}
 		throw new IllegalArgumentException("Cannot convert Point to type ${clazz}")
 	}
+
+	/**
+	 * Return the point coordinates.
+	 *
+	 * @return "Point (x,y)"
+	 */
+	@Override
+	String toString() {
+
+		return "Point (${x},${y})"
+	}
 }
