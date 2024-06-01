@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.cli.converter
 
-import groovy.transform.TupleConstructor
+import picocli.CommandLine.Command
 
 /**
- * Available palette types.
+ * CLI tool for converting from one file format to another.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum PaletteType {
-
-	RA_SNOW      ('ra-snow.pal'),
-	RA_TEMPERATE ('ra-temperate.pal'),
-	TD_TEMPERATE ('td-temperate.pal')
-
-	final String file
+@Command(
+	name = 'convert',
+	header = [
+		'',
+		'Red Horizon Utilities - File Converter',
+		'======================================',
+		''
+	],
+	mixinStandardHelpOptions = true,
+	subcommands = [
+		Pcx2CpsConverter,
+		Png2ShpConverter,
+		Png2ShpDune2Converter
+	],
+	synopsisSubcommandLabel = 'COMMAND'
+)
+class Converter {
 }

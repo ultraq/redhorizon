@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.cli.converter
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterDune2
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterDune2Options
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterDune2.ShpFileWriterDune2Options
 import nz.net.ultraq.redhorizon.filetypes.PngFile
 
 import org.slf4j.Logger
@@ -37,9 +37,9 @@ import java.util.concurrent.Callable
 	name = 'png2shpd2',
 	description = 'Convert a paletted PNG file to a Dune 2 SHP file'
 )
-class Png2ShpDune2ConverterCli implements Callable<Integer> {
+class Png2ShpDune2Converter implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Png2ShpDune2ConverterCli)
+	private static final Logger logger = LoggerFactory.getLogger(Png2ShpDune2Converter)
 
 	@Parameters(index = '0', description = 'The sounce PNG image.')
 	File sourceFile

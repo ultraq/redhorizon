@@ -44,9 +44,9 @@ import java.util.concurrent.Callable
 	description = 'Extract an entry from a mix file, saving it to disk with the same name.',
 	mixinStandardHelpOptions = true
 )
-class ExtractorCli implements Callable<Integer> {
+class MixExtractor implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExtractorCli)
+	private static final Logger logger = LoggerFactory.getLogger(MixExtractor)
 
 	@Spec
 	CommandSpec commandSpec

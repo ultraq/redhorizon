@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.cli.converter.ConverterCli
-import nz.net.ultraq.redhorizon.cli.mixtools.MixCli
+import nz.net.ultraq.redhorizon.cli.converter.Converter
+import nz.net.ultraq.redhorizon.cli.mixtools.Mix
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -39,13 +39,13 @@ import picocli.CommandLine.IVersionProvider
 	description = 'The Red Horizon command-line interface',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-		ConverterCli,
-		ExplorerCli,
-		MixCli
+		Converter,
+		Explorer,
+		Mix
 	],
 	versionProvider = VersionProvider
 )
-class RedHorizonCli {
+class RedHorizon {
 
 	/**
 	 * Read the version number from the `cli.properties` file.
@@ -70,6 +70,6 @@ class RedHorizonCli {
 	 * @param args
 	 */
 	static void main(String[] args) {
-		System.exit(new CommandLine(new RedHorizonCli()).execute(args))
+		System.exit(new CommandLine(new RedHorizon()).execute(args))
 	}
 }

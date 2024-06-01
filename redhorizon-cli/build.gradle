@@ -65,7 +65,7 @@ if (targetPlatform.startsWith('macos')) {
 }
 
 application {
-	mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizonCli'
+	mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizon'
 	applicationName = 'redhorizon'
 	applicationDefaultJvmArgs = args
 }

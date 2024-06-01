@@ -16,9 +16,8 @@
 
 package nz.net.ultraq.redhorizon.cli.converter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriter
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileWriterOptions
-import nz.net.ultraq.redhorizon.filetypes.PngFile
+import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileWriter
+import nz.net.ultraq.redhorizon.filetypes.PcxFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,32 +28,26 @@ import picocli.CommandLine.Parameters
 import java.util.concurrent.Callable
 
 /**
- * Subcommand for converting PNG files to the C&C SHP format.
+ * Converter subcommand for converting PCX files to C&C CPS files.
  *
  * @author Emanuel Rabina
  */
 @Command(
-	name = 'png2shp',
-	description = 'Convert a paletted PNG file to a Command & Conquer SHP file'
+	name = 'pcx2cps',
+	description = 'Convert a PCX file to a Command & Conquer CPS file'
 )
-class Png2ShpConverterCli implements Callable<Integer> {
+class Pcx2CpsConverter implements Callable<Integer> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Png2ShpConverterCli)
+	private static final Logger logger = LoggerFactory.getLogger(Pcx2CpsConverter)
 
-	@Parameters(index = '0', description = 'The sounce PNG image.')
+	@Parameters(index = '0', description = 'A 320x200 PCX image.  If creating a paletted CPS, then the PCX file must have an internal palette.')
 	File sourceFile
 
-	@Parameters(index = '1', description = 'Path for the SHP file to be written to.')
+	@Parameters(index = '1', description = 'Path for the CPS file to be written to.')
 	File destFile
 
-	@Option(names = ['--width', '-w'], required = true, description = 'Width of each SHP image')
-	int width
-
-	@Option(names = ['--height', '-h'], required = true, description = 'Height of each SHP image')
-	int height
-
-	@Option(names = ['--numImages', '-n'], required = true, description = 'The number of images for the SHP file')
-	int numImages
+	@Option(names = ['-o', '--overwrite'], description = 'Overwrite the destination file if it already exists')
+	boolean overwrite
 
 	/**
 	 * Perform the file conversion.
@@ -64,11 +57,16 @@ class Png2ShpConverterCli implements Callable<Integer> {
 
 		logger.info('Loading {}...', sourceFile)
 		if (sourceFile.exists()) {
+			if (destFile.exists() && overwrite) {
+				destFile.delete()
+			}
 			if (!destFile.exists()) {
+				destFile.createNewFile()
 				sourceFile.withInputStream { inputStream ->
 					destFile.withOutputStream { outputStream ->
-						def pngFile = new PngFile(inputStream)
-						new ShpFileWriter(pngFile).write(outputStream, new ShpFileWriterOptions(width, height, numImages))
+						var pcxFile = new PcxFile(inputStream)
+						new CpsFileWriter(pcxFile).write(outputStream)
+						logger.info('{} written', destFile)
 					}
 				}
 				return 0

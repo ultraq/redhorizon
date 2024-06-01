@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.mixtools
+package nz.net.ultraq.redhorizon.explorer
 
-import picocli.CommandLine.Command
+import groovy.transform.TupleConstructor
 
 /**
- * Parent command to hold all of the mix-related CLI commands.
+ * Available palette types.
  *
  * @author Emanuel Rabina
  */
-@Command(
-	name = 'mix',
-	header = [
-		'',
-		'Red Horizon Mix Tools',
-		'=====================',
-		''
-	],
-	description = 'Tools related to C&C mix files',
-	mixinStandardHelpOptions = true,
-	subcommands = [
-		ExtractorCli,
-		IdCalculatorCli
-	]
-)
-class MixCli {
+@TupleConstructor
+enum PaletteType {
+
+	// @formatter:off
+	RA_TEMPERATE ('ra-temperate.pal'),
+	RA_SNOW      ('ra-snow.pal'),
+	RA_INTERIOR  ('ra-interior.pal'),
+	TD_TEMPERATE ('td-temperate.pal')
+	// @formatter:on
+
+	final String file
 }

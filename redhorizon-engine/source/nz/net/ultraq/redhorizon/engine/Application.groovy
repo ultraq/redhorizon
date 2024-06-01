@@ -64,7 +64,8 @@ class Application implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Application)
 
-	final String windowTitle
+	final String name
+	final String version
 
 	private final Engine engine = new Engine()
 	private final InputEventStream inputEventStream = new InputEventStream()
@@ -94,7 +95,7 @@ class Application implements EventTarget {
 	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
 		ImGuiElement... uiElements) {
 
-		var graphicsSystem = new GraphicsSystem(windowTitle, inputEventStream, config)
+		var graphicsSystem = new GraphicsSystem("${name} - ${version}", inputEventStream, config)
 		graphicsSystem.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(event.window)
 		}

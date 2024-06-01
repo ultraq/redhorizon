@@ -40,11 +40,11 @@ class ShpFileWriter extends FileWriter<ImageFile, ShpFileWriterOptions> {
 		def (width, height, numImages) = options
 
 		// Check options for converting a single image to an SHP file are valid
-		assert width < MAX_WIDTH: "Image width must be less than ${MAX_WIDTH}"
-		assert height < MAX_HEIGHT: "Image height must be less than ${MAX_HEIGHT}"
-		assert source.width % width == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.height % height == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.format == FORMAT_INDEXED: 'Source file must contain paletted image data'
+		assert width < MAX_WIDTH : "Image width must be less than ${MAX_WIDTH}"
+		assert height < MAX_HEIGHT : "Image height must be less than ${MAX_HEIGHT}"
+		assert source.width % width == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.height % height == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.format == FORMAT_INDEXED : 'Source file must contain paletted image data'
 
 		def output = new NativeDataOutputStream(outputStream)
 
@@ -86,11 +86,9 @@ class ShpFileWriter extends FileWriter<ImageFile, ShpFileWriterOptions> {
 			output.write(image.array(), 0, image.limit())
 		}
 	}
-}
 
-/**
- * SHP file writing options.
- *
- * @author Emanuel Rabina
- */
-record ShpFileWriterOptions(int width, int height, int numImages) {}
+	/**
+	 * SHP file writing options.
+	 */
+	static record ShpFileWriterOptions(int width, int height, int numImages) {}
+}

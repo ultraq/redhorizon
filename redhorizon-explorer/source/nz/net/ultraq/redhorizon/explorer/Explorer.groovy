@@ -74,7 +74,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
-	private static final String[] paletteNames = ['ra-temperate', 'ra-snow', 'ra-interior', 'td-temperate']
 	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 
@@ -90,19 +89,19 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private nz.net.ultraq.redhorizon.filetypes.Palette palette
-	private int paletteIndex
+	private PaletteType currentPalette
 	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
 	 */
-	Explorer(String version, nz.net.ultraq.redhorizon.filetypes.Palette palette) {
+	Explorer(String version) {
 
-		this.palette = palette
+		loadPalette()
 		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
 
-		new Application("Explorer - ${version}")
+		new Application('Explorer', version)
 			.addAudioSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
@@ -291,19 +290,24 @@ class Explorer {
 	 */
 	private void cyclePalette() {
 
-		paletteIndex = Math.wrap(paletteIndex + 1, 0, paletteNames.length)
-
-		var paletteName = paletteNames[paletteIndex]
-		logger.info("Using ${paletteName} palette")
-
-		palette = getResourceAsStream("${paletteName}.pal").withBufferedStream { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
-		}
+		loadPalette(PaletteType.values()[Math.wrap(currentPalette.ordinal() + 1, 0, PaletteType.values().length)])
 
 		scene.accept { node ->
 			if (node instanceof PalettedSprite) {
 				node.palette = palette
 			}
+		}
+	}
+
+	/**
+	 * Load the given palette as the global palette for objects.
+	 */
+	private void loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
+
+		logger.info("Using ${paletteType} palette")
+		currentPalette = paletteType
+		palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+			return new PalFile(inputStream).withAlphaMask()
 		}
 	}
 

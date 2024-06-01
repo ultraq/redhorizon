@@ -41,11 +41,11 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile, ShpFileWriterDune2Options
 		def (width, height, numImages, faction) = options
 
 		// Check options for converting a single image to an SHP file are valid
-		assert width < MAX_WIDTH: "Image width must be less than ${MAX_WIDTH}"
-		assert height < MAX_HEIGHT: "Image height must be less than ${MAX_HEIGHT}"
-		assert source.width % width == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.height % height == 0: "Source file doesn't divide cleanly into ${width}x${height} images"
-		assert source.format == FORMAT_INDEXED: 'Source file must contain paletted image data'
+		assert width < MAX_WIDTH : "Image width must be less than ${MAX_WIDTH}"
+		assert height < MAX_HEIGHT : "Image height must be less than ${MAX_HEIGHT}"
+		assert source.width % width == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.height % height == 0 : "Source file doesn't divide cleanly into ${width}x${height} images"
+		assert source.format == FORMAT_INDEXED : 'Source file must contain paletted image data'
 
 		def widths = new int[numImages]
 		Arrays.fill(widths, width)
@@ -140,9 +140,9 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile, ShpFileWriterDune2Options
 			output.write(encodedImage.array())
 		}
 	}
-}
 
-/**
- * Dune 2 SHP file writing options.
- */
-record ShpFileWriterDune2Options(int width, int height, int numImages, boolean faction) {}
+	/**
+	 * Dune 2 SHP file writing options.
+	 */
+	static record ShpFileWriterDune2Options(int width, int height, int numImages, boolean faction) {}
+}

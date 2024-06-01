@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli.converter
+package nz.net.ultraq.redhorizon.cli.mixtools
 
 import picocli.CommandLine.Command
 
 /**
- * CLI tool for converting from one file format to another.
+ * Parent command to hold all of the mix-related CLI commands.
  *
  * @author Emanuel Rabina
  */
 @Command(
-	name = 'convert',
+	name = 'mix',
 	header = [
 		'',
-		'Red Horizon Utilities - File Converter',
-		'======================================',
+		'Red Horizon Mix Tools',
+		'=====================',
 		''
 	],
+	description = 'Tools related to C&C mix files',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-		Pcx2CpsConverterCli,
-		Png2ShpConverterCli,
-		Png2ShpDune2ConverterCli
-	],
-	synopsisSubcommandLabel = 'COMMAND'
+		MixExtractor,
+		MixIdCalculator
+	]
 )
-class ConverterCli {
+class Mix {
 }
