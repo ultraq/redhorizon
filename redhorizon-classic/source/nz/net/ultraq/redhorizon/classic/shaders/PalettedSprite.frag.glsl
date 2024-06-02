@@ -7,12 +7,7 @@ out vec4 fragmentColour;
 
 uniform sampler2D indexTexture;
 uniform sampler2D paletteTexture;
-uniform int[16] factionColours;
-
-// The first and last index of the faction colours in the C&C palette, adjusted
-// for the 0.0f-1.0f range that texture coordinates are in
-float factionLower = 0.3125f;     // 80 / 256
-float factionUpper = 0.37109375f; // 95 / 256
+uniform int[256] factionMap;
 
 /**
  * Fragment shader main function, emits the fragment colour for a paletted
@@ -21,13 +16,10 @@ float factionUpper = 0.37109375f; // 95 / 256
  */
 void main() {
 
+	// Index sampled from the texture, then run through the faction colour
+	// adjustment map, then used to pull a colour from the palette
 	float index = texture(indexTexture, v_textureUVs).x;
-
-	// Faction-adjusted index
-	if (factionLower <= index && index <= factionUpper) {
-		index = float(factionColours[int(index * 256 - 80)]) / 256;
-	}
-
+	index = float(factionMap[int(index * 256)]) / 256;
 	fragmentColour = texture(paletteTexture, vec2(index, 0));
 	fragmentColour *= v_vertexColour;
 }

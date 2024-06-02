@@ -176,7 +176,7 @@ class Map extends Node<Map> {
 
 		return """
 			Red Alert map
-			 - Name: ${mapFile.name}
+			 - Name: ${mapFile.basicSection.name()}
 			 - Theater: ${theater}
 			 - Bounds: x=${boundary.minX},y=${boundary.minY},w=${boundary.lengthX()},h=${boundary.lengthY()}
 		""".stripIndent()
@@ -563,9 +563,13 @@ class Map extends Node<Map> {
 
 				// TODO: Country to faction map
 				faction = switch (objectLine.faction) {
-					case "Greece" -> Faction.BLUE
-					case "USSR" -> Faction.RED
-					default -> Faction.GOLD
+					case 'Greece' -> Faction.BLUE
+					case 'England' -> Faction.GREEN
+					case 'USSR' -> Faction.RED
+					default -> {
+						logger.warn("Unmapped country ${objectLine.faction}")
+						yield Faction.GOLD
+					}
 				}
 				heading = objectLine.heading
 			}

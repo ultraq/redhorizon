@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 
+import groovy.transform.Memoized
+
 /**
  * A 2D sprite shader for palette-based sprites.
  *
@@ -27,8 +29,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class PalettedSpriteShader extends ShaderConfig {
 
-	// TODO: Have this shader take a faction map and alpha mask so we can remove
-	//       the branching statement in the fragment shader
+	private static final int[] IDENTITY_MAP = 0..255
+
 	PalettedSpriteShader() {
 
 		super(
@@ -43,8 +45,22 @@ class PalettedSpriteShader extends ShaderConfig {
 				shader.setUniformTexture('paletteTexture', 1, material.palette)
 			},
 			{ shader, material, window ->
-				shader.setUniform('factionColours', material.faction?.colours ?: Faction.GOLD.colours)
+				shader.setUniform('factionMap', buildAdjustmentMap(material.faction ?: Faction.GOLD))
 			}
 		)
+	}
+
+	/**
+	 * Builds an array that is used as an adjustment map to redirect palette
+	 * lookups to their intended colours.  eg: palette indices 80-95 are used for
+	 * faction colours, so through the fragment shader we want to redirect faction
+	 * colour lookups so they land in a different area of the palette.
+	 */
+	@Memoized
+	private static int[] buildAdjustmentMap(Faction faction) {
+
+		var adjustmentMap = Arrays.copyOf(IDENTITY_MAP, 256)
+		(80..95).eachWithIndex { i, j -> adjustmentMap[i] = faction.colours[j] }
+		return adjustmentMap
 	}
 }
