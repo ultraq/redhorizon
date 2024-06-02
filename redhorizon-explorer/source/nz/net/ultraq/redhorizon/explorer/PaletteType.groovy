@@ -30,7 +30,9 @@ enum PaletteType {
 	RA_TEMPERATE ('ra-temperate.pal'),
 	RA_SNOW      ('ra-snow.pal'),
 	RA_INTERIOR  ('ra-interior.pal'),
-	TD_TEMPERATE ('td-temperate.pal')
+	TD_TEMPERATE ('td-temperate.pal'),
+	TD_WINTER    ('td-winter.pal'),
+	TD_DESERT    ('td-desert.pal')
 	// @formatter:on
 
 	final String file
