@@ -61,7 +61,7 @@ interface GraphicsRequests {
 	static record TextureRequest(int width, int height, ColourFormat format, ByteBuffer data) implements Request<Texture> {
 	}
 
-	static record SpriteSheetRequest(int width, int height, ColourFormat format, ByteBuffer[] data) implements Request<SpriteSheet> {
+	static record SpriteSheetRequest(int width, int height, ColourFormat format, ByteBuffer... data) implements Request<SpriteSheet> {
 	}
 
 	/**

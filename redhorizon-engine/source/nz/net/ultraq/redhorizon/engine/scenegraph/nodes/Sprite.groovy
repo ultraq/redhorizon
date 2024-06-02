@@ -34,7 +34,6 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
-import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -68,7 +67,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 		this(imageFile.width, imageFile.height, 1, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(imageFile.width, imageFile.height, imageFile.format,
-				new ByteBuffer[]{ imageFile.imageData }))
+				imageFile.imageData))
 		})
 	}
 

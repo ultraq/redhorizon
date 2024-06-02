@@ -654,6 +654,29 @@ class Map extends Node<Map> {
 							var combinedData = new JsonSlurper().parseText(combinedJson) as UnitData
 							structure.addBody(combinedImages, palette, combinedData)
 						}
+
+						// Structure bib if applicable
+						var structureConfig = rules.getStructureConfig(structureLine.type)
+						if (structureConfig.bib()) {
+							var structureWidthInCells = Math.ceil(structure.width / TILE_WIDTH) as int
+							var bib = switch (structureWidthInCells) {
+								case 2 -> resourceManager.loadFile("bib3${theater.ext}", ShpFile)
+								case 3 -> resourceManager.loadFile("bib2${theater.ext}", ShpFile)
+								case 4 -> resourceManager.loadFile("bib1${theater.ext}", ShpFile)
+								default -> null
+							}
+							if (bib) {
+								var bibImageData = bib.imagesData.combineImages(bib.width, bib.height, bib.format, structureWidthInCells)
+								var bibWidth = TILE_WIDTH * structureWidthInCells
+								var bibHeight = TILE_HEIGHT * 2
+								var bibSprite = new PalettedSprite(bibWidth, bibHeight, 1, palette, { scene ->
+									return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
+								})
+								bibSprite.name = "Bib"
+								bibSprite.transform.translate(0, -TILE_HEIGHT)
+								structure.addChild(0, bibSprite)
+							}
+						}
 					}
 					addChild(structure)
 				}

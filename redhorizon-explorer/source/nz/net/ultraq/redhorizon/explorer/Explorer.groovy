@@ -65,7 +65,6 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import java.nio.ByteBuffer
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -460,8 +459,7 @@ class Explorer {
 		var singleImageHeight = tileFile.tilesY * tileFile.height
 
 		scene << new PalettedSprite(singleImageWidth, singleImageHeight, 1, palette, { scene ->
-			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format,
-				[singleImageData] as ByteBuffer[]))
+			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
 		})
 			.attachScript(new SpriteShowcaseScript()).tap {
 			bounds.center()

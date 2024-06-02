@@ -52,13 +52,21 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 	/**
 	 * Adds a child node to this node.
-	 *
-	 * @param child
-	 * @return
 	 */
 	T addChild(Node child) {
 
 		children << child
+		child.parent = this
+		return this
+	}
+
+	/**
+	 * Adds a child node to this node, shifting any existing nodes at the given
+	 * position to the right to make room.
+	 */
+	T addChild(int index, Node child) {
+
+		children.add(index, child)
 		child.parent = this
 		return this
 	}
