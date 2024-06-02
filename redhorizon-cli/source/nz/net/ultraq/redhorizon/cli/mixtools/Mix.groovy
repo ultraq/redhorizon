@@ -28,7 +28,6 @@ import picocli.CommandLine.Command
 	header = [
 		'',
 		'Red Horizon Mix Tools',
-		'=====================',
 		''
 	],
 	description = 'Tools related to C&C mix files',

@@ -35,12 +35,6 @@ import java.util.concurrent.Callable
  */
 @Command(
 	name = 'extract',
-	header = [
-		'',
-		'Red Horizon Mix Extractor',
-		'=========================',
-		''
-	],
 	description = 'Extract an entry from a mix file, saving it to disk with the same name.',
 	mixinStandardHelpOptions = true
 )

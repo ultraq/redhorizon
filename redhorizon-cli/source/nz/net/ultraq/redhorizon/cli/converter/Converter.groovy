@@ -27,8 +27,7 @@ import picocli.CommandLine.Command
 	name = 'convert',
 	header = [
 		'',
-		'Red Horizon Utilities - File Converter',
-		'======================================',
+		'Red Horizon File Converter',
 		''
 	],
 	mixinStandardHelpOptions = true,
@@ -36,8 +35,7 @@ import picocli.CommandLine.Command
 		Pcx2CpsConverter,
 		Png2ShpConverter,
 		Png2ShpDune2Converter
-	],
-	synopsisSubcommandLabel = 'COMMAND'
+	]
 )
 class Converter {
 }

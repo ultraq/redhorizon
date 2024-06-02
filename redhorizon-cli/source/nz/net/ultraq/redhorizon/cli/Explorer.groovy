@@ -30,6 +30,10 @@ import java.util.concurrent.Callable
 @Command(name = 'explorer')
 class Explorer implements Callable<Integer> {
 
+	static {
+		System.setProperty('logback.configurationFile', 'logback-explorer.xml')
+	}
+
 	@Spec
 	CommandSpec commandSpec
 

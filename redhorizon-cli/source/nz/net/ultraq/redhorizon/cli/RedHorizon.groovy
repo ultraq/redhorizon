@@ -33,7 +33,6 @@ import picocli.CommandLine.IVersionProvider
 	header = [
 		'',
 		'Red Horizon CLI',
-		'===============',
 		''
 	],
 	description = 'The Red Horizon command-line interface',
@@ -46,6 +45,10 @@ import picocli.CommandLine.IVersionProvider
 	versionProvider = VersionProvider
 )
 class RedHorizon {
+
+	static {
+		System.setProperty('logback.configurationFile', 'logback-cli.xml')
+	}
 
 	/**
 	 * Read the version number from the `cli.properties` file.

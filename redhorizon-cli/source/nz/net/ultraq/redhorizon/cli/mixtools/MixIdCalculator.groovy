@@ -34,12 +34,6 @@ import java.util.concurrent.Callable
  */
 @Command(
 	name = 'id',
-	header = [
-		'',
-		'Red Horizon Mix ID calculator',
-		'=============================',
-		''
-	],
 	description = 'Calculate the mix entry ID of a file name',
 	mixinStandardHelpOptions = true
 )
