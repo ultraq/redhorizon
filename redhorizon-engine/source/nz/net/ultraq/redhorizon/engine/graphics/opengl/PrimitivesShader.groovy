@@ -26,15 +26,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class PrimitivesShader extends ShaderConfig {
 
-	static final String NAME = 'Primitives'
-
-	PrimitivesShader() {
-
-		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl',
-			[Attribute.POSITION, Attribute.COLOUR]
-		)
-	}
+	final String name = 'Primitives'
+	final String vertexShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.vert.glsl')
+	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Primitives.frag.glsl')
+	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR]
 }

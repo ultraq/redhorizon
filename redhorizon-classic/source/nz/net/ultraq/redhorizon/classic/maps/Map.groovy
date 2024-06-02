@@ -570,6 +570,7 @@ class Map extends Node<Map> {
 					case 'Greece' -> Faction.BLUE
 					case 'England' -> Faction.GREEN
 					case 'USSR' -> Faction.RED
+					case 'Neutral' -> Faction.GOLD
 					default -> {
 						logger.warn("Unmapped country ${objectLine.faction}")
 						yield Faction.GOLD

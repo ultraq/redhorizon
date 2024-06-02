@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
  * Configuration for the Sharp Upscaling shader.
@@ -26,24 +27,15 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class SharpUpscalingShader extends ShaderConfig {
 
-	static final String NAME = 'SharpUpscaling'
-	static final String UNIFORM_TEXTURE_SOURCE_SIZE = 'textureSourceSize'
-
-	/**
-	 * Constructor, create the sharp upscaling shader.
-	 */
-	SharpUpscalingShader() {
-
-		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl',
-			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
-			Uniforms.framebufferUniform,
-			{ shader, material, window ->
-				shader.setUniform(UNIFORM_TEXTURE_SOURCE_SIZE, window.renderResolution as float[])
-			},
-			Uniforms.textureTargetSizeUniform
-		)
-	}
+	final String name = 'SharpUpscaling'
+	final String vertexShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.vert.glsl')
+	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/SharpUpscaling.frag.glsl')
+	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
+	final Uniform[] uniforms = [
+		Uniforms.framebufferUniform,
+		{ shader, material, window ->
+			shader.setUniform('textureSourceSize', window.renderResolution as float[])
+		},
+		Uniforms.textureTargetSizeUniform
+	]
 }

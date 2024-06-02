@@ -74,7 +74,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	default Shader createShader(ShaderConfig config) {
 
 		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.attributes,
-			config.uniforms, config.lifecycle)
+			config.uniforms, config instanceof ShaderLifecycle ? config : null)
 	}
 
 	/**

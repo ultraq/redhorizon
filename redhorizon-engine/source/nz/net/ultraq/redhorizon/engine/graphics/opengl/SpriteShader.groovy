@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
  * A simple 2D sprite shader.
@@ -26,19 +27,13 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class SpriteShader extends ShaderConfig {
 
-	static final String NAME = 'Sprite'
-	static final String UNIFORM_MAIN_TEXTURE = 'mainTexture'
-
-	SpriteShader() {
-
-		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl',
-			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
-			{ shader, material, window ->
-				shader.setUniformTexture(UNIFORM_MAIN_TEXTURE, 0, material.texture)
-			}
-		)
-	}
+	final String name = 'Sprite'
+	final String vertexShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.vert.glsl')
+	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl')
+	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
+	final Uniform[] uniforms = [
+		{ shader, material, window ->
+			shader.setUniformTexture('mainTexture', 0, material.texture)
+		}
+	]
 }

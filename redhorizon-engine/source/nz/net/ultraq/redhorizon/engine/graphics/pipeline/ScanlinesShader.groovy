@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
  * Configuration for the Scanlines shader.
@@ -26,24 +27,16 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class ScanlinesShader extends ShaderConfig {
 
-	public static final String NAME = 'Scanlines'
-
-	/**
-	 * Constructor, create the scanline shader.
-	 */
-	ScanlinesShader() {
-
-		super(
-			NAME,
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.frag.glsl',
-			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
-			Uniforms.framebufferUniform,
-			{ shader, material, window ->
-				def scale = window.renderResolution.height / window.targetResolution.height / 2 as float
-				shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
-			},
-			Uniforms.textureTargetSizeUniform
-		)
-	}
+	final String name = 'Scanlines'
+	final String vertexShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.vert.glsl')
+	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/Scanlines.frag.glsl')
+	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
+	final Uniform[] uniforms = [
+		Uniforms.framebufferUniform,
+		{ shader, material, window ->
+			var scale = window.renderResolution.height() / window.targetResolution.height() / 2 as float
+			shader.setUniform('textureSourceSize', window.renderResolution * scale as float[])
+		},
+		Uniforms.textureTargetSizeUniform
+	]
 }

@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
  * Configuration for the Screen shader.
@@ -26,17 +27,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
  */
 class ScreenShader extends ShaderConfig {
 
-	/**
-	 * Constructor, create the screen shader.
-	 */
-	ScreenShader() {
-
-		super(
-			'Screen',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl',
-			'nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl',
-			[Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS],
-			Uniforms.framebufferUniform
-		)
-	}
+	final String name = 'Screen'
+	final String vertexShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.vert.glsl')
+	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/pipeline/Screen.frag.glsl')
+	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
+	final Uniform[] uniforms = [
+		Uniforms.framebufferUniform
+	]
 }
