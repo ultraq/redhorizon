@@ -127,10 +127,14 @@ class Map extends Node<Map> {
 		addChild(new MapBackground())
 		addChild(new MapPack())
 		addChild(new OverlayPack())
+
+		// The following should be rendered in top-left to bottom-right order so
+		// that "lower" objects get drawn over the "higher" ones
 		addChild(new Terrain())
+		addChild(new Structures())
 		addChild(new Units())
 		addChild(new Infantry())
-		addChild(new Structures())
+
 		addChild(new MapLines())
 	}
 

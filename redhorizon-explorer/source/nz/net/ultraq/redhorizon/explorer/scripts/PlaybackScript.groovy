@@ -71,14 +71,14 @@ class PlaybackScript extends Script {
 
 			if (scriptable instanceof Sound) {
 				removeControlFunctions << scene.inputEventStream.addControl(
-					new KeyControl(GLFW_KEY_LEFT, 'Move audio source left', {
+					new KeyControl(GLFW_KEY_A, 'Move audio source left', {
 						->
 						scriptable.transform.translate(-0.25, 0)
 						logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
 					})
 				)
 				removeControlFunctions << scene.inputEventStream.addControl(
-					new KeyControl(GLFW_KEY_RIGHT, 'Move audio source right', { ->
+					new KeyControl(GLFW_KEY_D, 'Move audio source right', { ->
 						scriptable.transform.translate(0.25, 0)
 						logger.debug("Sound at: ${scriptable.transform.getTranslation(new Vector3f()).x()}")
 					})

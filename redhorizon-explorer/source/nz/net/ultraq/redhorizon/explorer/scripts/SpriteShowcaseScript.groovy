@@ -53,11 +53,11 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 		return CompletableFuture.runAsync { ->
 			scene.camera.scale(4.0f)
 
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Previous frame', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
 				Math.wrap(currentFrame--, 0, numImages)
 				region.set(spriteSheet[currentFrame])
 			}))
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Next frame', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
 				Math.wrap(currentFrame++, 0, numImages)
 				region.set(spriteSheet[currentFrame])
 			}))

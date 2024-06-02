@@ -52,22 +52,22 @@ class UnitShowcaseScript extends Script<Unit> {
 			scene.camera.scale(4.0f)
 			logger.info("Showing ${state} state")
 
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_LEFT, 'Rotate left', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
 				rotateLeft()
 			}))
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_RIGHT, 'Rotate right', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
 				rotateRight()
 			}))
 
 			var states = unitData.shpFile.states
 
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_UP, 'Previous animation', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Previous animation', { ->
 				var currentStateIndex = states.findIndexOf { it.name == state }
 				setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
 				logger.info("Showing ${state} state")
 				startAnimation()
 			}))
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_DOWN, 'Next animation', { ->
+			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Next animation', { ->
 				var currentStateIndex = states.findIndexOf { it.name == state }
 				setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
 				logger.info("Showing ${state} state")
