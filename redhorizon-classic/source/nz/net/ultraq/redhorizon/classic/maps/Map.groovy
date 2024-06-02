@@ -103,7 +103,7 @@ class Map extends Node<Map> {
 
 		// TODO: Include more palettes in the project, or load these via the resource manager
 		palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
+			return new PalFile(inputStream)
 		}
 
 		var mapXY = new Vector2f(mapSection.x(), mapSection.y())

@@ -120,10 +120,10 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	}
 
 	/**
-	 * Run through and complete any registered deletions, returning whether or not
-	 * there were items to process.
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
 	 */
-	private boolean processDeletions(GraphicsRenderer renderer) {
+	void processRequests(GraphicsRenderer renderer) {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
@@ -131,18 +131,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				renderer.delete(resource)
 				future.complete(null)
 			}
-			return true
 		}
-		return false
-	}
-
-	/**
-	 * Run through all of the queued requests for the creation and deletion of
-	 * graphics resources.
-	 */
-	void processRequests(GraphicsRenderer renderer) {
-
-		processDeletions(renderer)
 
 		if (creationRequests) {
 			creationRequests.drain().each { creationRequest ->

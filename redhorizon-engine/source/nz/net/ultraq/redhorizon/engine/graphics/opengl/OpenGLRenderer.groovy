@@ -33,6 +33,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.Shader.ShaderLifecycle
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
@@ -51,6 +52,7 @@ import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL20C.GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
 import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
 import static org.lwjgl.opengl.GL30C.glBindFramebuffer
@@ -73,9 +75,9 @@ class OpenGLRenderer implements GraphicsRenderer {
 	protected final OpenGLWindow window
 	protected final GLCapabilities capabilities
 
+	private final int maxTextureSize
 	private Dimension framebufferSize
 	private List<Shader> shaders = []
-	private int maxTextureSize
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -121,6 +123,9 @@ class OpenGLRenderer implements GraphicsRenderer {
 		// Create the default shader programs used by this renderer
 		createShader(new SpriteShader())
 		createShader(new PrimitivesShader())
+
+		// Some graphics hardware info we're interested in
+		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
 	}
 
 	/**
@@ -160,7 +165,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	void close() {
 
-		shaders*.close()
+		shaders.each { shader ->
+			shader.lifecycle?.delete(this)
+			shader.close()
+		}
 	}
 
 	@Override
@@ -186,11 +194,13 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms) {
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes,
+		Uniform[] uniforms, ShaderLifecycle lifecycle) {
 
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
-			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
+			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms, lifecycle)
+			shader.lifecycle?.init(this)
 			shaders << shader
 		}
 		return shader
@@ -212,11 +222,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	SpriteSheet createSpriteSheet(int width, int height, ColourFormat format, ByteBuffer[] data) {
-
-		if (!maxTextureSize) {
-			maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
-			logger.debug('Max supported texture size: {}', maxTextureSize)
-		}
 
 		var framesHorizontal = Math.min(data.length, maxTextureSize / width as int)
 		var framesVertical = Math.ceil(data.length / framesHorizontal) as int
@@ -301,7 +306,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		}
 		else {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0)
-			glViewport(0, 0, framebufferSize.width, framebufferSize.height)
+			glViewport(0, 0, framebufferSize.width(), framebufferSize.height())
 		}
 	}
 
@@ -314,10 +319,9 @@ class OpenGLRenderer implements GraphicsRenderer {
 	String toString() {
 
 		return """
-			OpenGL graphics renderer
-			 - Vendor: ${glGetString(GL_VENDOR)}
-			 - Device name: ${glGetString(GL_RENDERER)}
-			 - OpenGL version: ${glGetString(GL_VERSION)}
-		""".stripIndent()
+			OpenGL device: ${glGetString(GL_VENDOR)}, ${glGetString(GL_RENDERER)}, OpenGL ${glGetString(GL_VERSION)}
+			 - Max texture size: ${maxTextureSize}
+			 - Max fragment uniform components: ${glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)}
+		""".stripIndent().stripTrailing()
 	}
 }

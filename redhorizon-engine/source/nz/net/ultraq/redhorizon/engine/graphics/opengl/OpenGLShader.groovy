@@ -46,9 +46,10 @@ class OpenGLShader extends Shader {
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shaders.
 	 */
-	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform... uniforms) {
+	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes,
+		Uniform[] uniforms, ShaderLifecycle shaderLifecycle) {
 
-		super(name, attributes, uniforms)
+		super(name, attributes, uniforms, shaderLifecycle)
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation
@@ -133,11 +134,8 @@ class OpenGLShader extends Shader {
 
 		stackPush().withCloseable { stack ->
 			switch (data.length) {
-				case 2:
-					glUniform2fv(getUniformLocation(name), stack.floats(data))
-					break
-				default:
-					throw new UnsupportedOperationException("Uniform data of size ${data.length} is not supported")
+				case 2 -> glUniform2fv(getUniformLocation(name), stack.floats(data))
+				default -> glUniform1fv(getUniformLocation(name), stack.floats(data))
 			}
 		}
 	}

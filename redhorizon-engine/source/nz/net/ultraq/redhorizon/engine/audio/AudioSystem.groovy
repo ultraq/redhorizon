@@ -73,10 +73,10 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	}
 
 	/**
-	 * Run through and complete any registered deletions, returning whether or not
-	 * there were items to process.
+	 * Run through all of the queued requests for the creation and deletion of
+	 * graphics resources.
 	 */
-	private boolean processDeletions(AudioRenderer renderer) {
+	private void processRequests(AudioRenderer renderer) {
 
 		if (deletionRequests) {
 			deletionRequests.drain().each { deletionRequest ->
@@ -84,18 +84,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 				renderer.delete(resource)
 				future.complete(null)
 			}
-			return true
 		}
-		return false
-	}
-
-	/**
-	 * Run through all of the queued requests for the creation and deletion of
-	 * graphics resources.
-	 */
-	private void processRequests(AudioRenderer renderer) {
-
-		processDeletions(renderer)
 
 		if (creationRequests) {
 			creationRequests.drain().each { creationRequest ->

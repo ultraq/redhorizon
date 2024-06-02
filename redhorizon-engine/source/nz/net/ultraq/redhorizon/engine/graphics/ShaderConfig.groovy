@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.graphics.Shader.ShaderLifecycle
+
 /**
  * The configuration for a shader program, can be used to build shaders with the
  * renderer.
@@ -29,17 +31,28 @@ class ShaderConfig {
 	final String fragmentShaderSource
 	final Attribute[] attributes
 	final Uniform[] uniforms
+	final ShaderLifecycle lifecycle
 
 	/**
 	 * Constructor, create a shader config for building a shader program later.
 	 */
 	ShaderConfig(String name, String vertexShaderResourcePath, String fragmentShaderResourcePath, List<Attribute> attributes, Uniform... uniforms) {
 
+		this(name, vertexShaderResourcePath, fragmentShaderResourcePath, attributes, uniforms as List<Uniform>, null)
+	}
+
+	/**
+	 * Constructor, create a shader config with an optional initialization
+	 * closure to build any resources the shader needs.
+	 */
+	ShaderConfig(String name, String vertexShaderResourcePath, String fragmentShaderResourcePath, List<Attribute> attributes,
+		List<Uniform> uniforms, ShaderLifecycle lifecycle) {
+
 		this.name = name
-		// TODO: I think these need to use closeable methods as getText() won't be doing that for us right?
-		this.vertexShaderSource = getResourceAsStream(vertexShaderResourcePath).text
-		this.fragmentShaderSource = getResourceAsStream(fragmentShaderResourcePath).text
+		this.vertexShaderSource = getResourceAsStream(vertexShaderResourcePath).withCloseable { it.text }
+		this.fragmentShaderSource = getResourceAsStream(fragmentShaderResourcePath).withCloseable { it.text }
 		this.attributes = attributes
 		this.uniforms = uniforms
+		this.lifecycle = lifecycle
 	}
 }

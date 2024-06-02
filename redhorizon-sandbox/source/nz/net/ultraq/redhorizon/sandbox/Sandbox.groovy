@@ -64,7 +64,7 @@ class Sandbox {
 	Sandbox(boolean touchpadInput) {
 
 		palette = getResourceAsStream(PaletteType.RA_TEMPERATE.file).withBufferedStream { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
+			return new PalFile(inputStream)
 		}
 		this.touchpadInput = touchpadInput
 

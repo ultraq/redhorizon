@@ -105,12 +105,7 @@ class OpenALRenderer implements AudioRenderer {
 	@Override
 	String toString() {
 
-		return """
-			OpenAL audio renderer
-			 - Vendor: ${alGetString(AL_VENDOR)}
-			 - Device name: ${alGetString(AL_RENDERER)}
-			 - OpenAL version: ${alGetString(AL_VERSION)}
-		""".stripIndent()
+		return "OpenAL device: ${alGetString(AL_VENDOR)}, ${alGetString(AL_RENDERER)}, OpenAL ${alGetString(AL_VERSION)}"
 	}
 
 	@Override

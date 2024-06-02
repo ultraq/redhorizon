@@ -313,7 +313,7 @@ class Explorer {
 		logger.info("Using ${paletteType} palette")
 		currentPalette = paletteType
 		palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
-			return new PalFile(inputStream).withAlphaMask()
+			return new PalFile(inputStream)
 		}
 	}
 
