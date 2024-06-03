@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.maps.Map
-import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
@@ -29,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.input.MouseControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 
@@ -48,6 +48,7 @@ class MapViewerScript extends Script<Map> {
 
 	private static final int TICK = 48
 
+	final Camera camera
 	boolean touchpadInput
 
 	private final float initialScale = 1.0f
@@ -57,7 +58,6 @@ class MapViewerScript extends Script<Map> {
 
 	private InputEventStream inputEventStream
 	private Window window
-	private Camera camera
 	private GameWindow gameWindow
 
 	@Delegate
@@ -189,7 +189,6 @@ class MapViewerScript extends Script<Map> {
 		return CompletableFuture.runAsync { ->
 			inputEventStream = scene.inputEventStream
 			window = scene.window
-			camera = scene.camera
 			gameWindow = scene.gameWindow
 			addControls()
 			viewInitialPosition()

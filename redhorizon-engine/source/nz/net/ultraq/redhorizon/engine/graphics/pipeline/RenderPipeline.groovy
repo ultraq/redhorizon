@@ -31,6 +31,7 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
@@ -188,24 +189,25 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			if (scene) {
-				var camera = scene.camera
-				camera.update()
+				Camera camera = scene.findNode { node -> node instanceof Camera }
+				if (camera) {
+					camera.update()
 
-				// Cull the list of renderable items to those just visible in the scene
-				averageNanos('objectCulling', 1f, logger) { ->
-					visibleElements.clear()
-					var frustumIntersection = new FrustumIntersection(camera.projection.mul(camera.view, viewProjection))
-					scene.accept { Node element ->
-						if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
-							element.update()
-							element.script?.update()
-							visibleElements << element
+					// Cull the list of renderable items to those just visible in the scene
+					averageNanos('objectCulling', 1f, logger) { ->
+						visibleElements.clear()
+						var frustumIntersection = new FrustumIntersection(camera.projection.mul(camera.view, viewProjection))
+						scene.accept { Node element ->
+							if (element instanceof GraphicsElement && frustumIntersection.testPlaneXY(element.globalBounds)) {
+								element.update()
+								element.script?.update()
+								visibleElements << element
+							}
 						}
 					}
-				}
-
-				visibleElements.each { element ->
-					element.render(renderer)
+					visibleElements.each { element ->
+						element.render(renderer)
+					}
 				}
 			}
 		}

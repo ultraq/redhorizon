@@ -38,8 +38,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
@@ -78,6 +80,7 @@ class Explorer {
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 
+	private final GraphicsConfiguration graphicsConfig
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
@@ -88,6 +91,8 @@ class Explorer {
 		'nz.net.ultraq.redhorizon.classic.filetypes')
 
 	private Scene scene
+	private Camera camera
+	private Node previewNode
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private nz.net.ultraq.redhorizon.filetypes.Palette palette
@@ -103,14 +108,16 @@ class Explorer {
 		loadPalette()
 		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
 
+		graphicsConfig = new GraphicsConfiguration(
+			clearColour: Colour.GREY,
+			maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
+			renderResolution: new Dimension(1280, 800),
+			startWithChrome: true
+		)
+
 		new Application('Explorer', version)
 			.addAudioSystem()
-			.addGraphicsSystem(new GraphicsConfiguration(
-				clearColour: Colour.GREY,
-				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
-				renderResolution: new Dimension(1280, 800),
-				startWithChrome: true
-			), new LogPanel(true), entryList, nodeList)
+			.addGraphicsSystem(graphicsConfig, new LogPanel(true), entryList, nodeList)
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
 			.onApplicationStop(this::applicationStop)
@@ -188,6 +195,8 @@ class Explorer {
 			}
 		}
 
+		camera = new Camera(graphicsConfig.renderResolution)
+		scene.addNode(camera)
 		scene.addNode(new GridLines())
 	}
 
@@ -286,8 +295,9 @@ class Explorer {
 	private void clearPreview() {
 
 		selectedFileInputStream?.close()
-		scene.removeNode(scene.findNode { node -> node.class != GridLines })
-		scene.camera.center(new Vector3f())
+		scene.removeNode(previewNode)
+		previewNode = null
+		camera.center(new Vector3f())
 	}
 
 	/**
@@ -367,7 +377,7 @@ class Explorer {
 
 		logger.info('File details: {}', file)
 
-		var mediaNode = switch (file) {
+		previewNode = switch (file) {
 
 		// Objects
 			case ShpFile ->
@@ -394,8 +404,8 @@ class Explorer {
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
 
-		if (mediaNode) {
-			scene << mediaNode
+		if (previewNode) {
+			scene << previewNode
 		}
 	}
 
@@ -405,16 +415,17 @@ class Explorer {
 	 */
 	private void preview(ImagesFile imagesFile, String objectId) {
 
-		scene << new PalettedSprite(imagesFile, palette).attachScript(new SpriteShowcaseScript()).tap {
+		previewNode = new PalettedSprite(imagesFile, palette).attachScript(new SpriteShowcaseScript(camera)).tap {
 			bounds.center()
 			name = "PalettedSprite - ${objectId}"
 		}
+		scene << previewNode
 	}
 
 	/**
 	 * Attempt to load up an object from its corresponding SHP file.
 	 */
-	private void preview(ShpFile shpFile, String objectId) {
+	private Node preview(ShpFile shpFile, String objectId) {
 
 		String unitConfig
 		try {
@@ -436,32 +447,30 @@ class Explorer {
 				var unit = targetClass
 					.getDeclaredConstructor(ImagesFile, nz.net.ultraq.redhorizon.filetypes.Palette, UnitData)
 					.newInstance(shpFile, palette, unitData)
-					.attachScript(new UnitShowcaseScript())
+					.attachScript(new UnitShowcaseScript(camera))
 				unit.body.bounds.center()
 				unit.turret?.bounds?.center()
-				scene << unit
+				return unit
 			}
 		}
 
 		// No config found, fall back to viewing a SHP file as media
-		else {
-			preview(shpFile as ImagesFile, objectId)
-		}
+		return preview(shpFile as ImagesFile, objectId)
 	}
 
 	/**
 	 * Load up a tile file and arrange it so that it looks complete.
 	 */
-	private void preview(TmpFileRA tileFile, String objectId) {
+	private Node preview(TmpFileRA tileFile, String objectId) {
 
 		var singleImageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
 		var singleImageWidth = tileFile.tilesX * tileFile.width
 		var singleImageHeight = tileFile.tilesY * tileFile.height
 
-		scene << new PalettedSprite(singleImageWidth, singleImageHeight, 1, palette, { scene ->
+		return new PalettedSprite(singleImageWidth, singleImageHeight, 1, palette, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
 		})
-			.attachScript(new SpriteShowcaseScript()).tap {
+			.attachScript(new SpriteShowcaseScript(camera)).tap {
 			bounds.center()
 			name = "PalettedSprite - ${objectId}"
 		}
@@ -470,11 +479,11 @@ class Explorer {
 	/**
 	 * Attempt to load up a map from its map file.
 	 */
-	private void preview(MapFile mapFile, String objectId) {
+	private Node preview(MapFile mapFile, String objectId) {
 
-		time("Loading map ${objectId}", logger) { ->
-			resourceManager.withDirectory(currentDirectory) { ->
-				scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+		return time("Loading map ${objectId}", logger) { ->
+			return resourceManager.withDirectory(currentDirectory) { ->
+				return new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
 			}
 		}
 	}

@@ -121,10 +121,14 @@ class ResourceManager implements Closeable {
 	 * without having to specify it all the time.  Only lasts for as long as the
 	 * scope of the closure.
 	 */
-	void withDirectory(File directory, Closure closure) {
+	<T> T withDirectory(File directory, Closure<T> closure) {
 
-		customDirectory = directory
-		closure()
-		customDirectory = null
+		try {
+			customDirectory = directory
+			return closure()
+		}
+		finally {
+			customDirectory = null
+		}
 	}
 }

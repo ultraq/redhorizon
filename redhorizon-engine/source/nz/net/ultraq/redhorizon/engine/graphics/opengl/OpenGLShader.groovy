@@ -26,7 +26,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.GL_TRUE
 import static org.lwjgl.opengl.GL20C.*
-import static org.lwjgl.opengl.GL31C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
@@ -102,12 +101,6 @@ class OpenGLShader extends Shader {
 
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
-
-		// Tie the shader's view/projection uniforms to the camera, if applicable
-		var blockIndex = glGetUniformBlockIndex(programId, 'Camera')
-		if (blockIndex != GL_INVALID_INDEX) {
-			glUniformBlockBinding(programId, blockIndex, 0)
-		}
 	}
 
 	@Override

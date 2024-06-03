@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLCamera
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
@@ -56,7 +55,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	private OpenGLWindow window
 	private OpenGLRenderer renderer
-	private OpenGLCamera camera
 	private ImGuiLayer imGuiLayer
 	private RenderPipeline renderPipeline
 
@@ -97,7 +95,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 		scene.graphicsRequestHandler = this
 		scene.window = window
-		scene.camera = camera
 		scene.gameMenu = imGuiLayer.mainMenu
 		scene.gameWindow = imGuiLayer.gameWindow
 		renderPipeline.scene = scene
@@ -150,6 +147,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 					}
 					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
 					case SpriteSheetRequest -> renderer.createSpriteSheet(request.width(), request.height(), request.format(), request.data())
+					case UniformBufferRequest -> renderer.createUniformBuffer(request.name(), request.data())
 					default -> throw new IllegalArgumentException("Cannot create resource from type ${request}")
 				}
 				future.complete(resource)
@@ -214,42 +212,39 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				renderer.withCloseable { renderer ->
 					EngineStats.instance.attachGraphicsRenderer(renderer)
 
-					camera = new OpenGLCamera(window.renderResolution)
-					camera.withCloseable { camera ->
-						imGuiLayer = new ImGuiLayer(config, window)
-						imGuiLayer.withCloseable { imGuiLayer ->
-							logger.debug(renderer.toString())
-							imGuiLayer.relay(FramebufferSizeEvent, this)
+					imGuiLayer = new ImGuiLayer(config, window)
+					imGuiLayer.withCloseable { imGuiLayer ->
+						logger.debug(renderer.toString())
+						imGuiLayer.relay(FramebufferSizeEvent, this)
 
-							renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
-							renderPipeline.withCloseable { pipeline ->
-								trigger(new SystemReadyEvent())
+						renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
+						renderPipeline.withCloseable { pipeline ->
+							trigger(new SystemReadyEvent())
 
-								// Rendering loop
-								logger.debug('Graphics system in render loop...')
-								while (!window.shouldClose() && !Thread.interrupted()) {
-									try {
-										if (shouldToggleFullScreen) {
-											window.toggleFullScreen()
-											shouldToggleFullScreen = false
-										}
-										if (shouldToggleVsync) {
-											window.toggleVsync()
-											shouldToggleVsync = false
-										}
-										processRequests(renderer)
-										pipeline.render()
-										window.swapBuffers()
-										window.pollEvents()
+							// Rendering loop
+							logger.debug('Graphics system in render loop...')
+							while (!window.shouldClose() && !Thread.interrupted()) {
+								try {
+									if (shouldToggleFullScreen) {
+										window.toggleFullScreen()
+										shouldToggleFullScreen = false
 									}
-									catch (InterruptedException ignored) {
-										break
+									if (shouldToggleVsync) {
+										window.toggleVsync()
+										shouldToggleVsync = false
 									}
+									processRequests(renderer)
+									pipeline.render()
+									window.swapBuffers()
+									window.pollEvents()
 								}
-
-								// Shutdown
-								logger.debug('Shutting down graphics system')
+								catch (InterruptedException ignored) {
+									break
+								}
 							}
+
+							// Shutdown
+							logger.debug('Shutting down graphics system')
 						}
 					}
 				}

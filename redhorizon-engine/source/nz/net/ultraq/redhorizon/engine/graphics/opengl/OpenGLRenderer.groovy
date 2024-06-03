@@ -38,6 +38,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
@@ -55,10 +58,12 @@ import static org.lwjgl.opengl.GL20C.GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
 import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
 import static org.lwjgl.opengl.GL30C.glBindFramebuffer
+import static org.lwjgl.opengl.GL31C.*
 import static org.lwjgl.opengl.KHRDebug.*
 
 import groovy.transform.NamedVariant
 import java.lang.reflect.Modifier
+import java.nio.Buffer
 import java.nio.ByteBuffer
 
 /**
@@ -77,6 +82,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	private final int maxTextureSize
 	private Dimension framebufferSize
 	private List<Shader> shaders = []
+	private List<OpenGLUniformBuffer> uniformBuffers = []
 
 	/**
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
@@ -195,6 +201,15 @@ class OpenGLRenderer implements GraphicsRenderer {
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
 			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
+
+			// Link uniform buffers with the shader if present
+			uniformBuffers.each { uniformBuffer ->
+				var blockIndex = glGetUniformBlockIndex(shader.programId, uniformBuffer.name)
+				if (blockIndex != GL_INVALID_INDEX) {
+					glUniformBlockBinding(shader.programId, blockIndex, 0)
+				}
+			}
+
 			shaders << shader
 		}
 		return shader
@@ -245,6 +260,15 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
+	UniformBuffer createUniformBuffer(String name, Buffer data) {
+
+		var uniformBuffer = new OpenGLUniformBuffer(name, data)
+		uniformBuffers << uniformBuffer
+		trigger(new UniformBufferCreatedEvent(uniformBuffer))
+		return uniformBuffer
+	}
+
+	@Override
 	void delete(GraphicsResource resource) {
 
 		if (resource) {
@@ -257,6 +281,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 				case Mesh -> trigger(new MeshDeletedEvent(resource))
 				case Texture -> trigger(new TextureDeletedEvent(resource))
 				case SpriteSheet -> trigger(new TextureDeletedEvent(resource.texture))
+				case UniformBuffer -> trigger(new UniformBufferDeletedEvent(resource))
 				default -> throw new IllegalArgumentException("Cannot delete resource of type ${resource}")
 			}
 		}
@@ -313,7 +338,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	String toString() {
 
 		return """
-			OpenGL device: ${glGetString(GL_VENDOR)}, ${glGetString(GL_RENDERER)}, OpenGL ${glGetString(GL_VERSION)}
+			OpenGL device: ${glGetString(GL_RENDERER)}, OpenGL ${glGetString(GL_VERSION)}
 			 - Max texture size: ${maxTextureSize}
 			 - Max fragment uniform components: ${glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)}
 		""".stripIndent().stripTrailing()

@@ -21,12 +21,14 @@ import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -34,9 +36,12 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class UnitShowcaseScript extends Script<Unit> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitShowcaseScript)
+
+	final Camera camera
 
 	private final List<RemoveControlFunction> removeControlFunctions = []
 
@@ -49,7 +54,7 @@ class UnitShowcaseScript extends Script<Unit> {
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			scene.camera.scale(4.0f)
+			camera.scale(4.0f)
 			logger.info("Showing ${state} state")
 
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
@@ -91,7 +96,7 @@ class UnitShowcaseScript extends Script<Unit> {
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			scene.camera.resetScale()
+			camera.resetScale()
 			removeControlFunctions*.remove()
 		}
 	}

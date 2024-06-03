@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.explorer.objects.GridLines
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
@@ -44,6 +45,7 @@ class Sandbox {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sandbox)
 	private static final String mapFileName = 'scr01ea.ini'
+	private static final Dimension renderResolution = new Dimension(1280, 800)
 
 	final Palette palette
 	final boolean touchpadInput
@@ -72,7 +74,7 @@ class Sandbox {
 			.addAudioSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
-				renderResolution: new Dimension(1280, 800)
+				renderResolution: renderResolution
 			))
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
@@ -86,8 +88,11 @@ class Sandbox {
 
 		logger.info('Loading sandbox map, {}', mapFileName)
 
+		var camera = new Camera(renderResolution)
+		scene << camera
+
 		var mapFile = getResourceAsStream(mapFileName).withBufferedStream { new IniFile(it) as MapFile }
-		scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(touchpadInput))
+		scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
 
 	}
 

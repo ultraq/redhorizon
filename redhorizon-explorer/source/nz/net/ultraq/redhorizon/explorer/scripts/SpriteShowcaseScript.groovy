@@ -22,12 +22,14 @@ import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -35,9 +37,12 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class SpriteShowcaseScript extends Script<PalettedSprite> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SpriteShowcaseScript)
+
+	final Camera camera
 
 	private int currentFrame
 	private final List<RemoveControlFunction> removeControlFunctions = []
@@ -51,7 +56,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			scene.camera.scale(4.0f)
+			camera.scale(4.0f)
 
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
 				Math.wrap(currentFrame--, 0, numImages)
@@ -80,7 +85,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			scene.camera.resetScale()
+			camera.resetScale()
 			removeControlFunctions*.remove()
 		}
 	}

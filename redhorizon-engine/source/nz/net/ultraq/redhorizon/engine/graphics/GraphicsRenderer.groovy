@@ -24,6 +24,7 @@ import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
+import java.nio.Buffer
 import java.nio.ByteBuffer
 
 /**
@@ -106,6 +107,11 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 * Create and fill a texture with the given image data.
 	 */
 	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data)
+
+	/**
+	 * Create a shared uniform buffer filled with the given data.
+	 */
+	UniformBuffer createUniformBuffer(String name, Buffer data)
 
 	/**
 	 * Delete a graphics resource.

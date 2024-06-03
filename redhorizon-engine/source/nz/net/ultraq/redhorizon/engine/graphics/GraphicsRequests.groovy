@@ -22,6 +22,7 @@ import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
 import groovy.transform.ImmutableOptions
+import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
@@ -62,6 +63,10 @@ interface GraphicsRequests {
 	}
 
 	static record SpriteSheetRequest(int width, int height, ColourFormat format, ByteBuffer... data) implements Request<SpriteSheet> {
+	}
+
+	@ImmutableOptions(knownImmutables = ['data'])
+	static record UniformBufferRequest(String name, Buffer data) implements Request<UniformBuffer> {
 	}
 
 	/**

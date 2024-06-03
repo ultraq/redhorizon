@@ -151,11 +151,10 @@ class PalettedSprite extends Sprite implements FactionColours {
 				return alphaMaskData.flip()
 			}
 				.thenComposeAsync { alphaMaskData ->
-					return scene
-						.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
-						.thenAcceptAsync { newTexture ->
-							material.alphaMask = newTexture
-						}
+					return scene.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
+				}
+				.thenAcceptAsync { newTexture ->
+					material.alphaMask = newTexture
 				}
 		)
 	}

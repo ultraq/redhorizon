@@ -173,6 +173,7 @@ class Application implements EventTarget {
 		check(engineStats.activeFramebuffers.get(), 'framebuffers')
 		check(engineStats.activeMeshes.get(), 'meshes')
 		check(engineStats.activeTextures.get(), 'textures')
+		check(engineStats.activeUniformBuffers.get(), 'uniform buffers')
 		check(engineStats.activeSources.get(), 'sources')
 		check(engineStats.activeBuffers.get(), 'buffers')
 	}

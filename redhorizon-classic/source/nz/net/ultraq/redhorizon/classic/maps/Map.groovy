@@ -147,13 +147,13 @@ class Map extends Node<Map> {
 				.flatten() as ByteBuffer[]
 		}
 			.thenComposeAsync { allTileImageData ->
-				return scene
-					.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
-					.thenApplyAsync { newSpriteSheet ->
-						tileSet.spriteSheet = newSpriteSheet
-						return newSpriteSheet
-					}
+				return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
 			}
+			.thenApplyAsync { newSpriteSheet ->
+				tileSet.spriteSheet = newSpriteSheet
+				return newSpriteSheet
+			}
+
 		paletteAsTextureFuture = scene
 			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
 			.thenApplyAsync { newTexture ->
@@ -348,11 +348,10 @@ class Map extends Node<Map> {
 					return alphaMaskData.flip()
 				}
 					.thenComposeAsync { alphaMaskData ->
-						return scene
-							.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
-							.thenAcceptAsync { newTexture ->
-								material.alphaMask = newTexture
-							}
+						return scene.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
+					}
+					.thenAcceptAsync { newTexture ->
+						material.alphaMask = newTexture
 					}
 			)
 		}

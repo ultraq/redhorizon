@@ -31,6 +31,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferCreatedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -46,6 +48,7 @@ class EngineStats {
 	final AtomicInteger activeFramebuffers = new AtomicInteger()
 	final AtomicInteger activeMeshes = new AtomicInteger()
 	final AtomicInteger activeTextures = new AtomicInteger()
+	final AtomicInteger activeUniformBuffers = new AtomicInteger()
 
 	final AtomicInteger activeSources = new AtomicInteger()
 	final AtomicInteger activeBuffers = new AtomicInteger()
@@ -80,6 +83,8 @@ class EngineStats {
 				case MeshDeletedEvent -> activeMeshes.decrementAndGet()
 				case TextureCreatedEvent -> activeTextures.incrementAndGet()
 				case TextureDeletedEvent -> activeTextures.decrementAndGet()
+				case UniformBufferCreatedEvent -> activeUniformBuffers.incrementAndGet()
+				case UniformBufferDeletedEvent -> activeUniformBuffers.decrementAndGet()
 			}
 		}
 		return this

@@ -57,7 +57,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	private int currentFrame = -1
 	private Mesh mesh
 	private Shader shader
-	private Material material
+	private Material material = new Material()
 
 	/**
 	 * Constructor, create an animation using data straight from an animation file.
@@ -99,8 +99,6 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 				}
 		)
 			.thenComposeAsync { _ ->
-				material = new Material()
-
 				return animationSource.onSceneAdded(scene)
 			}
 	}

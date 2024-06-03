@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.audio.Listener
-import nz.net.ultraq.redhorizon.engine.graphics.Camera
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
@@ -58,7 +57,6 @@ class Scene implements EventTarget, Visitable {
 	InputEventStream inputEventStream
 
 	Window window
-	Camera camera
 	Listener listener
 	MainMenu gameMenu
 	GameWindow gameWindow
