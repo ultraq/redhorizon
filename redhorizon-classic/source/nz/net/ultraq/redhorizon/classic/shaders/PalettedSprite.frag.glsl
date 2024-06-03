@@ -6,7 +6,7 @@ in vec2 v_textureUVs;
 out vec4 fragmentColour;
 
 uniform sampler2D indexTexture;
-uniform sampler2D paletteTexture;
+uniform sampler2D palette;
 uniform int[256] adjustmentMap;
 uniform sampler2D alphaMask;
 
@@ -25,7 +25,7 @@ void main() {
 	//  - (and then the usual step of applying the vertex colouring)
 	float index = texture(indexTexture, v_textureUVs).x;
 	index = float(adjustmentMap[int(index * 256)]) / 256;
-	vec4 colour = texture(paletteTexture, vec2(index, 0));
+	vec4 colour = texture(palette, vec2(index, 0));
 	colour *= texture(alphaMask, vec2(index, 0));
 
 	fragmentColour = colour * v_vertexColour;

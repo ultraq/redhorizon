@@ -289,12 +289,10 @@ class Map extends Node<Map> {
 		protected final List<MapTile> mapTiles = []
 		protected Mesh fullMesh
 		protected Shader shader
-		protected Material material
+		protected Material material = new Material()
 
 		@Override
 		CompletableFuture<Void> onSceneAdded(Scene scene) {
-
-			material = new Material()
 
 			return CompletableFuture.allOf(
 				CompletableFuture.supplyAsync { ->
@@ -332,7 +330,30 @@ class Map extends Node<Map> {
 				paletteAsTextureFuture.thenApplyAsync { palette ->
 					material.palette = palette
 					return palette
+				},
+				// TODO: Load the alpha mask once.  I think for these 'once' objects, I
+				//       need a global object and uniform that these shaders use, much
+				//       like the camera
+				CompletableFuture.supplyAsync { ->
+					var alphaMaskData = ByteBuffer.allocateNative(1024)
+					(0..255).each { i ->
+						alphaMaskData.put(
+							switch (i) {
+								case 0 -> new byte[]{ 0, 0, 0, 0 }
+								case 4 -> new byte[]{ 0, 0, 0, 0x7f }
+								default -> new byte[]{ 0xff, 0xff, 0xff, 0xff }
+							}
+						)
+					}
+					return alphaMaskData.flip()
 				}
+					.thenComposeAsync { alphaMaskData ->
+						return scene
+							.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
+							.thenAcceptAsync { newTexture ->
+								material.alphaMask = newTexture
+							}
+					}
 			)
 		}
 
@@ -345,7 +366,7 @@ class Map extends Node<Map> {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			if (fullMesh && shader && material) {
+			if (fullMesh && shader && material.texture && material.palette && material.alphaMask) {
 				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
 		}

@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Shader.ShaderLifecycle
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
@@ -73,8 +72,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 */
 	default Shader createShader(ShaderConfig config) {
 
-		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.attributes,
-			config.uniforms, config instanceof ShaderLifecycle ? config : null)
+		return createShader(config.name, config.vertexShaderSource, config.fragmentShaderSource, config.attributes, config.uniforms)
 	}
 
 	/**
@@ -82,8 +80,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 * scripts, or return the existing shader program if one has already been
 	 * created with the given name.
 	 */
-	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes,
-		Uniform[] uniforms, ShaderLifecycle lifecycle)
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is

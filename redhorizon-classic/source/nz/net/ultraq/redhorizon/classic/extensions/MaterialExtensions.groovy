@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.classic.extensions
 
-import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
@@ -27,22 +26,33 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
  */
 class MaterialExtensions {
 
-	private static final String FACTION_KEY = 'faction'
-	private static final String PALETTE_KEY = 'palette'
+	private static final String KEY_ADJUSTMENTMAP = 'adjustmentMap'
+	private static final String KEY_ALPHAMASK = 'alphaMask'
+	private static final String KEY_PALETTE = 'palette'
 
-	static Faction getFaction(Material self) {
-		return self.attributes[FACTION_KEY] as Faction
+	private static final int[] IDENTITY_MAP = 0..255
+
+	static int[] getAdjustmentMap(Material self) {
+		return self.attributes[KEY_ADJUSTMENTMAP] ?: IDENTITY_MAP
+	}
+
+	static Texture getAlphaMask(Material self) {
+		return self.attributes[KEY_ALPHAMASK]
 	}
 
 	static Texture getPalette(Material self) {
-		return self.attributes[PALETTE_KEY] as Texture
+		return self.attributes[KEY_PALETTE]
 	}
 
-	static void setFaction(Material self, Faction faction) {
-		self.attributes[FACTION_KEY] = faction
+	static void setAdjustmentMap(Material self, int[] adjustmentMap) {
+		self.attributes[KEY_ADJUSTMENTMAP] = adjustmentMap
+	}
+
+	static void setAlphaMask(Material self, Texture alphaMask) {
+		self.attributes[KEY_ALPHAMASK] = alphaMask
 	}
 
 	static void setPalette(Material self, Texture palette) {
-		self.attributes[PALETTE_KEY] = palette
+		self.attributes[KEY_PALETTE] = palette
 	}
 }

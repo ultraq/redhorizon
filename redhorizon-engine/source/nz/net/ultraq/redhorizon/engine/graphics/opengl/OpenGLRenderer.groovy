@@ -33,7 +33,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.Shader.ShaderLifecycle
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
@@ -165,10 +164,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	void close() {
 
-		shaders.each { shader ->
-			shader.lifecycle?.delete(this)
-			shader.close()
-		}
+		shaders*.close()
 	}
 
 	@Override
@@ -194,13 +190,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes,
-		Uniform[] uniforms, ShaderLifecycle lifecycle) {
+	Shader createShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms) {
 
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
-			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms, lifecycle)
-			shader.lifecycle?.init(this)
+			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
 			shaders << shader
 		}
 		return shader

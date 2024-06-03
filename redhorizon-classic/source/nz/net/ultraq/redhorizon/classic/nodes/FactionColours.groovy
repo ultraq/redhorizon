@@ -26,5 +26,13 @@ import nz.net.ultraq.redhorizon.classic.Faction
  */
 trait FactionColours {
 
-	Faction faction = Faction.GOLD
+	private Faction faction = Faction.GOLD
+
+	Faction getFaction() {
+		return faction
+	}
+
+	void setFaction(Faction faction) {
+		this.faction = faction
+	}
 }

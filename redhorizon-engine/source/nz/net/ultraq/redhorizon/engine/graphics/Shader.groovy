@@ -33,7 +33,6 @@ abstract class Shader implements GraphicsResource {
 	final String name
 	final Attribute[] attributes
 	final Uniform[] uniforms
-	final ShaderLifecycle lifecycle
 
 	/**
 	 * Update a shader's uniforms using the given context.
@@ -100,22 +99,4 @@ abstract class Shader implements GraphicsResource {
 	 * Enable the use of this shader for the next rendering commands.
 	 */
 	abstract void use()
-
-	/**
-	 * Additional operations to perform on shader init/delete.
-	 */
-	interface ShaderLifecycle {
-
-		/**
-		 * Called when the shader program is being deleted, use for freeing up any
-		 * shader resources.
-		 */
-		void delete(GraphicsRenderer renderer)
-
-		/**
-		 * Called when the shader program is created, use for creating any
-		 * additional shader resources.
-		 */
-		void init(GraphicsRenderer renderer)
-	}
 }
