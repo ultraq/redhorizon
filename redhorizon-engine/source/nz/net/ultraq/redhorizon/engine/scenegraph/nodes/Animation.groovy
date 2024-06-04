@@ -215,7 +215,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 			streamingDecoder.cancel(true)
-			return scene.requestDelete(*frames)
+			return scene.requestDelete(frames.toArray(new Texture[0]))
 		}
 	}
 }
