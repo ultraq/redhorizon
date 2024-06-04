@@ -523,9 +523,9 @@ class Map extends Node<Map> {
 				Closure configure) {
 
 			var unitConfig = rules.getUnitConfig(objectLine.type)
-			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}.shp", ShpFile)
 			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
+			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}${unitData.spriteSource == 'theater' ? theater.ext : '.shp'}", ShpFile)
 
 			return new Unit(unitImages, unitData).tap {
 				configure(it, unitData)
@@ -535,6 +535,7 @@ class Map extends Node<Map> {
 					case 'Greece', 'Goodguy' -> Faction.BLUE
 					case 'USSR', 'Badguy' -> Faction.RED
 					case 'England' -> Faction.GREEN
+					case 'Ukraine' -> Faction.ORANGE
 					case 'Neutral' -> Faction.GOLD
 					default -> {
 						logger.warn("Unmapped country ${objectLine.faction}")

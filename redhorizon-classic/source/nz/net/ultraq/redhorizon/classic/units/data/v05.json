@@ -1,0 +1,17 @@
+{
+	"type": "structure",
+	"spriteSource": "theater",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			},
+			{
+				"name": "default-damaged"
+			}
+		]
+	}
+}

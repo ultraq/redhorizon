@@ -1,0 +1,19 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			},
+			{
+				"name": "default-damaged"
+			},
+			{
+				"name": "destroyed"
+			}
+		]
+	}
+}

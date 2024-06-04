@@ -1,0 +1,24 @@
+{
+	"type": "vehicle",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 32
+			}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			},
+			{
+				"name": "pickup-left",
+				"frames": 3
+			},
+			{
+				"name": "pickup-right",
+				"frames": 3
+			}
+		]
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			},
+			{
+				"name": "resting",
+				"frames": 2
+			},
+			{
+				"name": "default-damaged",
+				"headings": 32
+			},
+			{
+				"name": "resting-damaged",
+				"frames": 2
+			}
+		]
+	}
+}

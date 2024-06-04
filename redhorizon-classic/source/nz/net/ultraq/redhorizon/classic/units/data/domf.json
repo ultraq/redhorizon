@@ -1,0 +1,13 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			}
+		]
+	}
+}

@@ -24,6 +24,7 @@ package nz.net.ultraq.redhorizon.classic.units
 class UnitData {
 
 	String type
+	String spriteSource = 'shp'
 	// TODO: Maybe don't need this shpFile nested part
 	ShpFile shpFile
 
