@@ -73,7 +73,7 @@ class UnitTests extends Specification {
 				return new JsonSlurper().parseText(reader.text) as UnitData
 			}
 		when:
-			var unit = new Unit(spriteFile, palette, unitData)
+			var unit = new Unit(spriteFile, unitData)
 			scene << unit
 		then:
 			notThrown(Exception)

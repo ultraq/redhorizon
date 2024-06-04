@@ -98,7 +98,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 					shader = requestedShader
 				}
 		)
-			.thenComposeAsync { _ ->
+			.thenRunAsync { ->
 				return animationSource.onSceneAdded(scene)
 			}
 	}

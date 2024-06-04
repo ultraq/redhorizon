@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.maps.Map
+import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -79,8 +80,8 @@ class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
+	private static final Dimension renderResolution = new Dimension(1280, 800)
 
-	private final GraphicsConfiguration graphicsConfig
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
@@ -92,10 +93,10 @@ class Explorer {
 
 	private Scene scene
 	private Camera camera
+	private GlobalPalette globalPalette
 	private Node previewNode
 	private File currentDirectory
 	private InputStream selectedFileInputStream
-	private nz.net.ultraq.redhorizon.filetypes.Palette palette
 	private PaletteType currentPalette
 	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
@@ -105,19 +106,16 @@ class Explorer {
 	 */
 	Explorer(String version) {
 
-		loadPalette()
 		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
-
-		graphicsConfig = new GraphicsConfiguration(
-			clearColour: Colour.GREY,
-			maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
-			renderResolution: new Dimension(1280, 800),
-			startWithChrome: true
-		)
 
 		new Application('Explorer', version)
 			.addAudioSystem()
-			.addGraphicsSystem(graphicsConfig, new LogPanel(true), entryList, nodeList)
+			.addGraphicsSystem(new GraphicsConfiguration(
+				clearColour: Colour.GREY,
+				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
+				renderResolution: renderResolution,
+				startWithChrome: true
+			), new LogPanel(true), entryList, nodeList)
 			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
 			.onApplicationStop(this::applicationStop)
@@ -195,8 +193,13 @@ class Explorer {
 			}
 		}
 
-		camera = new Camera(graphicsConfig.renderResolution)
+		// Start all the global/helper nodes
+		camera = new Camera(renderResolution)
 		scene.addNode(camera)
+
+		globalPalette = new GlobalPalette(loadPalette())
+		scene.addNode(globalPalette)
+
 		scene.addNode(new GridLines())
 	}
 
@@ -306,23 +309,17 @@ class Explorer {
 	 */
 	private void cyclePalette() {
 
-		loadPalette(PaletteType.values()[Math.wrap(currentPalette.ordinal() + 1, 0, PaletteType.values().length)])
-
-		scene.accept { node ->
-			if (node instanceof PalettedSprite) {
-				node.palette = palette
-			}
-		}
+		globalPalette.palette = loadPalette(PaletteType.values()[Math.wrap(currentPalette.ordinal() + 1, 0, PaletteType.values().length)])
 	}
 
 	/**
 	 * Load the given palette as the global palette for objects.
 	 */
-	private void loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
+	private nz.net.ultraq.redhorizon.filetypes.Palette loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
 
 		logger.info("Using ${paletteType} palette")
 		currentPalette = paletteType
-		palette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
 			return new PalFile(inputStream)
 		}
 	}
@@ -377,7 +374,7 @@ class Explorer {
 
 		logger.info('File details: {}', file)
 
-		previewNode = switch (file) {
+		var mediaNode = switch (file) {
 
 		// Objects
 			case ShpFile ->
@@ -404,8 +401,9 @@ class Explorer {
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
 
-		if (previewNode) {
-			scene << previewNode
+		if (mediaNode) {
+			scene << mediaNode
+			previewNode = mediaNode
 		}
 	}
 
@@ -415,17 +413,18 @@ class Explorer {
 	 */
 	private void preview(ImagesFile imagesFile, String objectId) {
 
-		previewNode = new PalettedSprite(imagesFile, palette).attachScript(new SpriteShowcaseScript(camera)).tap {
+		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera)).tap {
 			bounds.center()
 			name = "PalettedSprite - ${objectId}"
 		}
-		scene << previewNode
+		scene << sprite
+		previewNode = sprite
 	}
 
 	/**
 	 * Attempt to load up an object from its corresponding SHP file.
 	 */
-	private Node preview(ShpFile shpFile, String objectId) {
+	private void preview(ShpFile shpFile, String objectId) {
 
 		String unitConfig
 		try {
@@ -445,45 +444,52 @@ class Explorer {
 			}
 			if (targetClass) {
 				var unit = targetClass
-					.getDeclaredConstructor(ImagesFile, nz.net.ultraq.redhorizon.filetypes.Palette, UnitData)
-					.newInstance(shpFile, palette, unitData)
+					.getDeclaredConstructor(ImagesFile, UnitData)
+					.newInstance(shpFile, unitData)
 					.attachScript(new UnitShowcaseScript(camera))
 				unit.body.bounds.center()
 				unit.turret?.bounds?.center()
-				return unit
+				scene << unit
+				previewNode = unit
 			}
 		}
 
 		// No config found, fall back to viewing a SHP file as media
-		return preview(shpFile as ImagesFile, objectId)
+		else {
+			preview(shpFile as ImagesFile, objectId)
+		}
 	}
 
 	/**
 	 * Load up a tile file and arrange it so that it looks complete.
 	 */
-	private Node preview(TmpFileRA tileFile, String objectId) {
+	private void preview(TmpFileRA tileFile, String objectId) {
 
 		var singleImageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
 		var singleImageWidth = tileFile.tilesX * tileFile.width
 		var singleImageHeight = tileFile.tilesY * tileFile.height
 
-		return new PalettedSprite(singleImageWidth, singleImageHeight, 1, palette, { scene ->
+		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
 		})
 			.attachScript(new SpriteShowcaseScript(camera)).tap {
 			bounds.center()
 			name = "PalettedSprite - ${objectId}"
 		}
+		scene << tile
+		previewNode = tile
 	}
 
 	/**
 	 * Attempt to load up a map from its map file.
 	 */
-	private Node preview(MapFile mapFile, String objectId) {
+	private void preview(MapFile mapFile, String objectId) {
 
-		return time("Loading map ${objectId}", logger) { ->
-			return resourceManager.withDirectory(currentDirectory) { ->
-				return new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
+		time("Loading map ${objectId}", logger) { ->
+			resourceManager.withDirectory(currentDirectory) { ->
+				var map = new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
+				scene << map
+				previewNode = map
 			}
 		}
 	}

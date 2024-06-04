@@ -5,10 +5,12 @@ in vec2 v_textureUVs;
 
 out vec4 fragmentColour;
 
+layout (packed) uniform Palette {
+	vec4[256] palette;
+	vec4[256] alphaMask;
+};
 uniform sampler2D indexTexture;
-uniform sampler2D palette;
 uniform int[256] adjustmentMap;
-uniform sampler2D alphaMask;
 
 /**
  * Fragment shader main function, emits the fragment colour for a paletted
@@ -23,10 +25,10 @@ void main() {
 	//  - a colour is then pulled from the palette
 	//  - where an alpha mask is applied
 	//  - (and then the usual step of applying the vertex colouring)
-	float index = texture(indexTexture, v_textureUVs).x;
-	index = float(adjustmentMap[int(index * 256)]) / 256;
-	vec4 colour = texture(palette, vec2(index, 0));
-	colour *= texture(alphaMask, vec2(index, 0));
+	int index = int(texture(indexTexture, v_textureUVs).x * 256);
+	index = adjustmentMap[index];
+	vec4 colour = palette[index];
+	colour *= alphaMask[index];
 
 	fragmentColour = colour * v_vertexColour;
 }

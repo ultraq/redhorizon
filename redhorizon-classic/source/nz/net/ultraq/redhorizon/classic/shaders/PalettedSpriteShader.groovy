@@ -36,13 +36,7 @@ class PalettedSpriteShader extends ShaderConfig {
 			shader.setUniformTexture('indexTexture', 0, material.texture)
 		},
 		{ shader, material, window ->
-			shader.setUniformTexture('palette', 1, material.palette)
-		},
-		{ shader, material, window ->
 			shader.setUniform('adjustmentMap', material.adjustmentMap)
-		},
-		{ shader, material, window ->
-			shader.setUniformTexture('alphaMask', 2, material.alphaMask)
 		}
 	]
 }

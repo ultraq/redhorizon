@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.classic.maps
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
-import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
@@ -33,13 +32,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -48,7 +45,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -81,13 +77,10 @@ class Map extends Node<Map> {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
-	private final Palette palette
 	private final TileSet tileSet
 	private final ResourceManager resourceManager
 	private final RulesFile rules
 
-	private CompletableFuture<Texture> paletteAsTextureFuture
-	private Texture paletteAsTexture
 	private CompletableFuture<SpriteSheet> tileSetSpriteSheetFuture
 
 	/**
@@ -100,11 +93,6 @@ class Map extends Node<Map> {
 
 		var mapSection = mapFile.mapSection
 		theater = Theater.valueOf(mapSection.theater())
-
-		// TODO: Include more palettes in the project, or load these via the resource manager
-		palette = getResourceAsStream("ra-${theater.label.toLowerCase()}.pal").withBufferedStream { inputStream ->
-			return new PalFile(inputStream)
-		}
 
 		var mapXY = new Vector2f(mapSection.x(), mapSection.y())
 		var mapWH = new Vector2f(mapXY).add(mapSection.width(), mapSection.height())
@@ -154,20 +142,13 @@ class Map extends Node<Map> {
 				return newSpriteSheet
 			}
 
-		paletteAsTextureFuture = scene
-			.requestCreateOrGet(new TextureRequest(256, 1, palette.format, palette as ByteBuffer))
-			.thenApplyAsync { newTexture ->
-				paletteAsTexture = newTexture
-				return newTexture
-			}
-
-		return CompletableFuture.allOf(tileSetSpriteSheetFuture, paletteAsTextureFuture)
+		return CompletableFuture.allOf(tileSetSpriteSheetFuture)
 	}
 
 	@Override
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		return scene.requestDelete(tileSet.spriteSheet, paletteAsTexture)
+		return scene.requestDelete(tileSet.spriteSheet)
 	}
 
 	/**
@@ -261,7 +242,7 @@ class Map extends Node<Map> {
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
 
-			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, palette, { scene ->
+			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
 				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
 			})
 			backgroundSprite.transform.translate(boundary.minX, boundary.minY)
@@ -274,10 +255,7 @@ class Map extends Node<Map> {
 	 * tiles to create a single large mesh for rendering a whole layer in a single
 	 * draw call.
 	 */
-	@ImmutableOptions(
-		// Not really an immutable class, but should be OK since we control its use within this file
-		knownImmutables = ['position']
-	)
+	@ImmutableOptions(knownImmutables = ['position'])
 	private static record MapTile(Vector2f position, int frameInTileSet) {}
 
 	/**
@@ -308,7 +286,7 @@ class Map extends Node<Map> {
 					}
 					return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
 				}
-					.thenAcceptAsync { meshData ->
+					.thenComposeAsync { meshData ->
 						def (allVertices, allTextureUVs, allIndices) = meshData
 						return scene
 							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
@@ -326,33 +304,7 @@ class Map extends Node<Map> {
 				tileSetSpriteSheetFuture.thenApplyAsync { spriteSheet ->
 					material.texture = spriteSheet.texture
 					return spriteSheet
-				},
-				paletteAsTextureFuture.thenApplyAsync { palette ->
-					material.palette = palette
-					return palette
-				},
-				// TODO: Load the alpha mask once.  I think for these 'once' objects, I
-				//       need a global object and uniform that these shaders use, much
-				//       like the camera
-				CompletableFuture.supplyAsync { ->
-					var alphaMaskData = ByteBuffer.allocateNative(1024)
-					(0..255).each { i ->
-						alphaMaskData.put(
-							switch (i) {
-								case 0 -> new byte[]{ 0, 0, 0, 0 }
-								case 4 -> new byte[]{ 0, 0, 0, 0x7f }
-								default -> new byte[]{ 0xff, 0xff, 0xff, 0xff }
-							}
-						)
-					}
-					return alphaMaskData.flip()
 				}
-					.thenComposeAsync { alphaMaskData ->
-						return scene.requestCreateOrGet(new TextureRequest(256, 1, ColourFormat.FORMAT_RGBA, alphaMaskData))
-					}
-					.thenAcceptAsync { newTexture ->
-						material.alphaMask = newTexture
-					}
 			)
 		}
 
@@ -365,7 +317,7 @@ class Map extends Node<Map> {
 		@Override
 		void render(GraphicsRenderer renderer) {
 
-			if (fullMesh && shader && material.texture && material.palette && material.alphaMask) {
+			if (fullMesh && shader && material.texture) {
 				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
 		}
@@ -553,18 +505,11 @@ class Map extends Node<Map> {
 //					mapTile.position().y + TILE_HEIGHT as float
 //				)
 
-				addChild(new PalettedSprite(terrainFile, palette).tap {
+				addChild(new PalettedSprite(terrainFile).tap {
 					name = "Terrain ${terrainType}"
 					transform.translate(cellPosXY)
 				})
 			}
-
-			// Sort the terrain elements so that ones lower down the map render "over"
-			// those higher up the map
-//			elements.sort { imageA, imageB ->
-//				return imageB.dimensions.maxX - imageA.dimensions.maxX ?:
-//				       imageB.dimensions.minX - imageA.dimensions.minX
-//			}
 		}
 	}
 
@@ -582,14 +527,14 @@ class Map extends Node<Map> {
 			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
 			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
 
-			return new Unit(unitImages, palette, unitData).tap {
+			return new Unit(unitImages, unitData).tap {
 				configure(it, unitData)
 
 				// TODO: Country to faction map
 				faction = switch (objectLine.faction) {
-					case 'Greece' -> Faction.BLUE
+					case 'Greece', 'Goodguy' -> Faction.BLUE
+					case 'USSR', 'Badguy' -> Faction.RED
 					case 'England' -> Faction.GREEN
-					case 'USSR' -> Faction.RED
 					case 'Neutral' -> Faction.GOLD
 					default -> {
 						logger.warn("Unmapped country ${objectLine.faction}")
@@ -681,7 +626,7 @@ class Map extends Node<Map> {
 							var combinedImages = resourceManager.loadFile("${combineWith}.shp", ShpFile)
 							var combinedJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${combineWith.toLowerCase()}.json")
 							var combinedData = new JsonSlurper().parseText(combinedJson) as UnitData
-							structure.addBody(combinedImages, palette, combinedData)
+							structure.addBody(combinedImages, combinedData)
 						}
 
 						// Structure bib if applicable
@@ -698,7 +643,7 @@ class Map extends Node<Map> {
 								var bibImageData = bib.imagesData.combineImages(bib.width, bib.height, bib.format, structureWidthInCells)
 								var bibWidth = TILE_WIDTH * structureWidthInCells
 								var bibHeight = TILE_HEIGHT * 2
-								var bibSprite = new PalettedSprite(bibWidth, bibHeight, 1, palette, { scene ->
+								var bibSprite = new PalettedSprite(bibWidth, bibHeight, 1, { scene ->
 									return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
 								})
 								bibSprite.name = "Bib"

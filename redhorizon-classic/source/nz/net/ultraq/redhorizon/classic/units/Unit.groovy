@@ -22,12 +22,10 @@ import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import java.util.concurrent.CompletableFuture
 
@@ -49,7 +47,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
 	final ImagesFile imagesFile
-	final Palette palette
 	final UnitData unitData
 	final UnitBody body
 	final UnitTurret turret
@@ -58,23 +55,21 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
-	private Texture paletteAsTexture
 
-	Unit(ImagesFile imagesFile, Palette palette, UnitData unitData) {
+	Unit(ImagesFile imagesFile, UnitData unitData) {
 
 		this.imagesFile = imagesFile
-		this.palette = palette
 		this.unitData = unitData
 
 		bounds.setMax(imagesFile.width, imagesFile.height)
 
-		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, palette, { _ ->
+		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
 			return CompletableFuture.completedFuture(spriteSheet)
 		}, unitData)
 		addChild(body)
 
 		if (unitData.shpFile.parts.turret) {
-			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, palette, { _ ->
+			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
 				return CompletableFuture.completedFuture(spriteSheet)
 			})
 			addChild(turret)
@@ -88,9 +83,9 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 * Adds a second body to this unit.  Used for special cases like the weapons
 	 * factory where the garage door is a separate sprite file.
 	 */
-	void addBody(ImagesFile imagesFile, Palette palette, UnitData unitData) {
+	void addBody(ImagesFile imagesFile, UnitData unitData) {
 
-		body2 = new UnitBody(imagesFile, palette, unitData).tap {
+		body2 = new UnitBody(imagesFile, unitData).tap {
 			name = "UnitBody2"
 		}
 		addChild(body2)
@@ -142,7 +137,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	@Override
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
-		return scene.requestDelete(spriteSheet, paletteAsTexture)
+		return scene.requestDelete(spriteSheet)
 	}
 
 	/**
@@ -201,15 +196,15 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 		private final UnitData unitData
 
-		UnitBody(ImagesFile imagesFile, Palette palette, UnitData unitData) {
+		UnitBody(ImagesFile imagesFile, UnitData unitData) {
 
-			super(imagesFile, palette)
+			super(imagesFile)
 			this.unitData = unitData
 		}
 
-		UnitBody(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
+		UnitBody(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
 
-			super(width, height, numImages, palette, spriteSheetGenerator)
+			super(width, height, numImages, spriteSheetGenerator)
 			this.unitData = unitData
 		}
 
@@ -242,8 +237,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	private class UnitTurret extends PalettedSprite {
 
-		UnitTurret(int width, int height, int numImages, Palette palette, SpriteSheetGenerator spriteSheetGenerator) {
-			super(width, height, numImages, palette, spriteSheetGenerator)
+		UnitTurret(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
+			super(width, height, numImages, spriteSheetGenerator)
 		}
 
 		@Override

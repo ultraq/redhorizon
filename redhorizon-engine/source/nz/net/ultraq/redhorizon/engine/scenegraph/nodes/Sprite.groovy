@@ -58,7 +58,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	protected Material material
+	protected Material material = new Material()
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -110,9 +110,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 			spriteSheetGenerator.generate(scene)
 				.thenAcceptAsync { newSpriteSheet ->
 					spriteSheet = newSpriteSheet
-					material = new Material(
-						texture: spriteSheet.texture
-					)
+					material.texture = spriteSheet.texture
 					region.set(spriteSheet[initialFrame])
 				}
 		)
@@ -127,7 +125,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	void render(GraphicsRenderer renderer) {
 
-		if (mesh && shader && material) {
+		if (mesh && shader && material.texture) {
 			renderer.draw(mesh, globalTransform, shader, material)
 		}
 	}

@@ -202,11 +202,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 		if (!shader) {
 			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
 
-			// Link uniform buffers with the shader if present
+			// Link uniform buffers with the shader if applicable
 			uniformBuffers.each { uniformBuffer ->
 				var blockIndex = glGetUniformBlockIndex(shader.programId, uniformBuffer.name)
 				if (blockIndex != GL_INVALID_INDEX) {
-					glUniformBlockBinding(shader.programId, blockIndex, 0)
+					glUniformBlockBinding(shader.programId, blockIndex, uniformBuffer.blockIndex)
 				}
 			}
 

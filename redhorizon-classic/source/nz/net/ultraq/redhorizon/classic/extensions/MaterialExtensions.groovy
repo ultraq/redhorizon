@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.classic.extensions
 
 import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 
 /**
  * C&C classic extensions to the {@link Material} class.
@@ -27,8 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 class MaterialExtensions {
 
 	private static final String KEY_ADJUSTMENTMAP = 'adjustmentMap'
-	private static final String KEY_ALPHAMASK = 'alphaMask'
-	private static final String KEY_PALETTE = 'palette'
 
 	private static final int[] IDENTITY_MAP = 0..255
 
@@ -36,23 +33,7 @@ class MaterialExtensions {
 		return self.attributes[KEY_ADJUSTMENTMAP] ?: IDENTITY_MAP
 	}
 
-	static Texture getAlphaMask(Material self) {
-		return self.attributes[KEY_ALPHAMASK]
-	}
-
-	static Texture getPalette(Material self) {
-		return self.attributes[KEY_PALETTE]
-	}
-
 	static void setAdjustmentMap(Material self, int[] adjustmentMap) {
 		self.attributes[KEY_ADJUSTMENTMAP] = adjustmentMap
-	}
-
-	static void setAlphaMask(Material self, Texture alphaMask) {
-		self.attributes[KEY_ALPHAMASK] = alphaMask
-	}
-
-	static void setPalette(Material self, Texture palette) {
-		self.attributes[KEY_PALETTE] = palette
 	}
 }

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.maps.Map
+import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
@@ -91,9 +92,10 @@ class Sandbox {
 		var camera = new Camera(renderResolution)
 		scene << camera
 
+		scene << new GlobalPalette(palette)
+
 		var mapFile = getResourceAsStream(mapFileName).withBufferedStream { new IniFile(it) as MapFile }
 		scene << new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
-
 	}
 
 	private void applicationStop(Application application, Scene scene) {
