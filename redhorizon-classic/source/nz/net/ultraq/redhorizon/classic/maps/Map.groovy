@@ -131,7 +131,30 @@ class Map extends Node<Map> {
 
 		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
 			return tileSet.tileFileList
-				.collect { tileFile -> tileFile.imagesData }
+				.collect { tileFile ->
+					if (tileFile.width > TILE_WIDTH || tileFile.height > TILE_HEIGHT) {
+						throw new IllegalArgumentException('Cannot use a tile file whose dimensions exceed 24x24')
+					}
+
+					var imagesData = tileFile.imagesData
+
+					// Place smaller images in the center of a blank tile
+					if (tileFile.width < TILE_WIDTH || tileFile.height < TILE_HEIGHT) {
+						imagesData = imagesData.collect { imageData ->
+							var newTileImageData = ByteBuffer.allocateNative(TILE_WIDTH * TILE_HEIGHT)
+							var xOffset = Math.floor((TILE_WIDTH - tileFile.width) / 2) as int
+							var yOffset = Math.floor((TILE_HEIGHT - tileFile.height) / 2) as int
+							tileFile.height.times { y ->
+								tileFile.width.times { x ->
+									newTileImageData.put(((yOffset + y) * TILE_WIDTH) + (xOffset + x), imageData.get((y * tileFile.width) + x))
+								}
+							}
+							return newTileImageData
+						}
+					}
+
+					return imagesData
+				}
 				.flatten() as ByteBuffer[]
 		}
 			.thenComposeAsync { allTileImageData ->
@@ -399,15 +422,6 @@ class Map extends Node<Map> {
 					if (tileVal != -1) {
 						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
 
-						// TODO: The current spritesheet only works if all images are the
-						//       same dimensions, but the CRATE item is 10x11 instead of
-						//       24x24.  Ignore these for now, but find some way to support
-						//       these odd image sizes
-						if (tile in [MapRAOverlayPackTile.CRATE_WOOD, MapRAOverlayPackTile.CRATE_SILVER, MapRAOverlayPackTile.CRATE_WATER]) {
-							logger.warn('Skipping over CRATE overlay due to differing dimensions')
-							return
-						}
-
 						// Some unknown tile types still coming through?
 						if (!tile) {
 							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
@@ -532,9 +546,13 @@ class Map extends Node<Map> {
 
 				// TODO: Country to faction map
 				faction = switch (objectLine.faction) {
-					case 'Greece', 'Goodguy' -> Faction.BLUE
-					case 'USSR', 'Badguy' -> Faction.RED
+					case 'Greece', 'GoodGuy' -> Faction.BLUE
+					case 'Spain' -> Faction.GOLD
 					case 'England' -> Faction.GREEN
+					case 'Germany' -> Faction.BROWN
+					case 'France' -> Faction.TEAL
+					case 'Turkey' -> Faction.MAROON
+					case 'USSR', 'BadGuy' -> Faction.RED
 					case 'Ukraine' -> Faction.ORANGE
 					case 'Neutral' -> Faction.GOLD
 					default -> {

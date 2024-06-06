@@ -236,12 +236,12 @@ class OpenGLRenderer implements GraphicsRenderer {
 		var framesVertical = Math.ceil(data.length / framesHorizontal) as int
 		var spriteSheetWidth = framesHorizontal * width
 		var spriteSheetHeight = framesVertical * height
-		logger.debug('Sprite sheet - across: {}, down: {}, width: {}, height: {}',
+		logger.trace('Sprite sheet - across: {}, down: {}, width: {}, height: {}',
 			framesHorizontal, framesVertical, spriteSheetWidth, spriteSheetHeight)
 
 		var frameStepX = 1 / framesHorizontal
 		var frameStepY = 1 / framesVertical
-		logger.debug('Texture UV steps for sprite sheet: {}x{}', frameStepX, frameStepY)
+		logger.trace('Texture UV steps for sprite sheet: {}x{}', frameStepX, frameStepY)
 
 		var imagesAsSpriteSheet = data
 			.flipVertical(width, height, format)
