@@ -65,14 +65,6 @@ class Camera extends Node<Camera> {
 	/**
 	 * Move the camera so it centers the given point in the view.
 	 */
-	Camera center(Vector3f point) {
-
-		return center(point.x, point.y, point.z)
-	}
-
-	/**
-	 * Move the camera so it centers the given point in the view.
-	 */
 	Camera center(float x, float y, float z = 0) {
 
 		view.translate(view.origin(new Vector3f()).sub(x, y, z))

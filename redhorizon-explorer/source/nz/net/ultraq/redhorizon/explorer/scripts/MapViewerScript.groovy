@@ -31,12 +31,15 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
+import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
+import nz.net.ultraq.redhorizon.explorer.animation.Transition
 
 import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ForkJoinPool
 
 /**
  * Controls for viewing a map in the explorer.
@@ -191,7 +194,6 @@ class MapViewerScript extends Script<Map> {
 			window = scene.window
 			gameWindow = scene.gameWindow
 			addControls()
-			viewInitialPosition()
 		}
 	}
 
@@ -201,6 +203,7 @@ class MapViewerScript extends Script<Map> {
 		return CompletableFuture.runAsync { ->
 			clearControls()
 			camera.resetScale()
+			camera.center(0, 0, 0)
 		}
 	}
 
@@ -211,8 +214,13 @@ class MapViewerScript extends Script<Map> {
 		addControls()
 	}
 
-	private void viewInitialPosition() {
+	void viewInitialPosition() {
 
-		camera.center(initialPosition.x(), initialPosition.y())
+		ForkJoinPool.commonPool().submit { ->
+			Thread.sleep(100)
+			new Transition(EasingFunctions::easeOutCubic, 1000, { delta ->
+				camera.center(initialPosition.x() * delta as float, initialPosition.y() * delta as float)
+			}).start()
+		}
 	}
 }

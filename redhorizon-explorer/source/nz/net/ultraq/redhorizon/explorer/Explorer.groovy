@@ -61,7 +61,6 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
 import imgui.ImGui
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -300,7 +299,7 @@ class Explorer {
 		selectedFileInputStream?.close()
 		scene.removeNode(previewNode)
 		previewNode = null
-		camera.center(new Vector3f())
+		camera.center(0, 0)
 	}
 
 	/**
@@ -485,12 +484,14 @@ class Explorer {
 	 */
 	private void preview(MapFile mapFile, String objectId) {
 
+		var mapViewerScript = new MapViewerScript(camera, touchpadInput)
 		time("Loading map ${objectId}", logger) { ->
 			resourceManager.withDirectory(currentDirectory) { ->
-				var map = new Map(mapFile, resourceManager).attachScript(new MapViewerScript(camera, touchpadInput))
+				var map = new Map(mapFile, resourceManager).attachScript(mapViewerScript)
 				scene << map
 				previewNode = map
 			}
 		}
+		mapViewerScript.viewInitialPosition()
 	}
 }
