@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
+import org.joml.FrustumIntersection
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
@@ -121,6 +122,15 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	String getName() {
 
 		return name ?: this.class.simpleName
+	}
+
+	/**
+	 * Test this element against a view frustum to check whether it is inside it
+	 * or not.  Used for object culling during the rendering of a scene.
+	 */
+	boolean isVisible(FrustumIntersection frustumIntersection) {
+
+		return frustumIntersection.testPlaneXY(getGlobalBounds())
 	}
 
 	/**
