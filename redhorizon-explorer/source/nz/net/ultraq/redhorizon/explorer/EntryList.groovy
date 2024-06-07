@@ -65,7 +65,7 @@ class EntryList implements EventTarget, ImGuiElement {
 		focused = ImGui.isWindowFocused(ChildWindows)
 
 		// File list
-		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | Sortable)) {
+		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
 			ImGui.tableSetupScrollFreeze(0, 1)
 			ImGui.tableSetupColumn('Name')
 			ImGui.tableSetupColumn('Type')
