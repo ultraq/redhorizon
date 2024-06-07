@@ -1,0 +1,28 @@
+{
+	"type": "vehicle",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 32
+			}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			},
+			{
+				"name": "no-rocket",
+				"headings": 32
+			},
+			{
+				"name": "raised",
+				"headings": 8
+			},
+			{
+				"name": "raised-no-rocket",
+				"headings": 8
+			}
+		]
+	}
+}

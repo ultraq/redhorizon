@@ -1,0 +1,20 @@
+{
+	"type": "structure",
+	"spriteSource": "theater",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			},
+			{
+				"name": "default-enemy-view"
+			},
+			{
+				"name": "default-damaged"
+			}
+		]
+	}
+}

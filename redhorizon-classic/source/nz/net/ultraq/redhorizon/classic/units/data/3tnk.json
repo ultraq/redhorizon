@@ -1,0 +1,19 @@
+{
+	"type": "vehicle",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 32
+			},
+			"turret": {
+				"headings": 32
+			}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			}
+		]
+	}
+}

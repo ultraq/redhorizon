@@ -1,0 +1,15 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"combineWith": "weap2"
+			}
+		},
+		"states": [
+			{
+				"name": "default"
+			}
+		]
+	}
+}

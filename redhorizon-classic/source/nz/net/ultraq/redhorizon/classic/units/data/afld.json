@@ -1,0 +1,24 @@
+{
+	"type": "structure",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default"
+			},
+			{
+				"name": "landing-lights",
+				"frames": 7
+			},
+			{
+				"name": "default-damaged"
+			},
+			{
+				"name": "landing-lights-damaged",
+				"frames": 7
+			}
+		]
+	}
+}
