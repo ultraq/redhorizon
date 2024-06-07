@@ -24,8 +24,9 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
+import org.joml.FrustumIntersection
+
 import groovy.transform.TupleConstructor
-import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.util.concurrent.CompletableFuture
 
@@ -44,16 +45,32 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 	private UniformBuffer paletteAndAlphaMaskBuffer
 	private boolean paletteChanged
 
+	/**
+	 * Create a {@code FloatBuffer} that can be used as data to the palette
+	 * uniform buffer.
+	 */
+	private FloatBuffer buildPaletteBuffer() {
+
+		return (0..255)
+			.inject(FloatBuffer.allocate(4 * 256)) { buffer, i ->
+				var colour = palette[i]
+				return buffer.put(new float[]{ (colour[0] & 0xff) / 256, (colour[1] & 0xff) / 256, (colour[2] & 0xff) / 256, 1 })
+			}
+			.flip()
+	}
+
+	@Override
+	boolean isVisible(FrustumIntersection frustumIntersection) {
+
+		// Always visible so that palette updates can be applied
+		return true
+	}
+
 	@Override
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		return CompletableFuture.supplyAsync { ->
-			var paletteData = (0..255)
-				.inject(FloatBuffer.allocate(4 * 256)) { buffer, i ->
-					var colour = palette[i]
-					return buffer.put(new float[]{ (colour[0] & 0xff) / 256, (colour[1] & 0xff) / 256, (colour[2] & 0xff) / 256, 1 })
-				}
-				.flip()
+			var paletteData = buildPaletteBuffer()
 			var alphaMaskData = (0..255)
 				.inject(FloatBuffer.allocate(4 * 256)) { buffer, i ->
 					return switch (i) {
@@ -93,7 +110,7 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 	void update() {
 
 		if (paletteChanged) {
-			paletteAndAlphaMaskBuffer.updateBufferData(palette as ByteBuffer)
+			paletteAndAlphaMaskBuffer.updateBufferData(buildPaletteBuffer())
 			paletteChanged = false
 		}
 	}

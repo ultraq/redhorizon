@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
 
 /**
  * A 24-bit colour palette for modern colour systems.
- * 
+ *
  * @author Emanuel Rabina
  */
 class Palette {
@@ -39,23 +39,23 @@ class Palette {
 
 	/**
 	 * Constructor, build the palette parts but without any data.
-	 * 
+	 *
 	 * @param size
 	 * @param format
 	 */
 	protected Palette(int size, ColourFormat format) {
 
-		this.size    = size
-		this.format  = format
+		this.size = size
+		this.format = format
 		this.palette = new byte[size][format.value]
 	}
 
 	/**
 	 * Constructor, create a palette using the given data.
-	 * 
-	 * @param size	 Number of colours in the palette.
+	 *
+	 * @param size Number of colours in the palette.
 	 * @param format Colour format of the palette.
-	 * @param bytes	 Palette data.
+	 * @param bytes Palette data.
 	 */
 	Palette(int size, ColourFormat format, ByteBuffer bytes) {
 
@@ -68,8 +68,8 @@ class Palette {
 
 	/**
 	 * Constructor, create a palette from an input stream.
-	 * 
-	 * @param size	 Number of colours in the palette.
+	 *
+	 * @param size Number of colours in the palette.
 	 * @param format Colour format of the palette.
 	 * @param input
 	 */
@@ -83,7 +83,7 @@ class Palette {
 
 	/**
 	 * Constructor, create a new palette with the give colour table.
-	 * 
+	 *
 	 * @param size
 	 * @param format
 	 * @param palette
@@ -96,24 +96,8 @@ class Palette {
 	}
 
 	/**
-	 * Convert this palette to a {@code ByteBuffer} with the {@code as} keyword.
-	 * 
-	 * @param type
-	 * @return
-	 */
-	Object asType(Class type) {
-
-		if (type === ByteBuffer) {
-			var buffer = ByteBuffer.allocateNative(size * format.value)
-			palette.each { colour -> buffer.put(colour) }
-			return buffer.rewind()
-		}
-		throw new IllegalArgumentException("Cannot convert a Palette to type ${type}")
-	}
-
-	/**
 	 * Return the colour data at the specified index.
-	 * 
+	 *
 	 * @param index Position in the palette.
 	 * @return {@code byte} values representing the requested colour.
 	 */
