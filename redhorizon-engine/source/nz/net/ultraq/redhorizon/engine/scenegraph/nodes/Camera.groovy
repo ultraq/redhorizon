@@ -42,7 +42,7 @@ class Camera extends Node<Camera> {
 	private final Matrix4f projection
 	private final Matrix4f view
 	private final Vector3f position = new Vector3f()
-	private final Vector3f scale = new Vector3f()
+	private float scale = 1f
 	private boolean moved = false
 
 	private UniformBuffer viewProjectionBuffer
@@ -70,15 +70,29 @@ class Camera extends Node<Camera> {
 	 */
 	Vector3f getPosition(Vector3f dest) {
 
-		return view.origin(dest)
+		return dest.set(position)
 	}
 
 	/**
-	 * Return the camera's current scale, setting the result in {@code dest}.
+	 * Return the camera's current scaling factor.
 	 */
-	Vector3f getScale(Vector3f dest) {
+	float getScale() {
 
-		return view.getScale(dest)
+		return scale
+	}
+
+	private Matrix4f getView() {
+
+		if (moved) {
+			view
+				.setLookAt(
+					position.x, position.y, 1,
+					position.x, position.y, 0,
+					0, 1, 0
+				)
+				.scaleLocal(scale, scale, 1)
+		}
+		return view
 	}
 
 	/**
@@ -87,7 +101,7 @@ class Camera extends Node<Camera> {
 	 */
 	Matrix4f getViewProjection(Matrix4f dest) {
 
-		return projection.mulOrthoAffine(view, dest)
+		return projection.mulOrthoAffine(getView(), dest)
 	}
 
 	@Override
@@ -95,7 +109,7 @@ class Camera extends Node<Camera> {
 
 		return CompletableFuture.supplyAsync { ->
 			return stackPush().withCloseable { stack ->
-				return view.get(Matrix4f.FLOATS, projection.get(0, stack.mallocFloat(Matrix4f.FLOATS * 2)))
+				return getView().get(Matrix4f.FLOATS, projection.get(0, stack.mallocFloat(Matrix4f.FLOATS * 2)))
 			}
 		}
 			.thenComposeAsync { data ->
@@ -111,7 +125,7 @@ class Camera extends Node<Camera> {
 	 */
 	Camera position(Vector3f point) {
 
-		view.translate(getPosition(this.position).sub(point))
+		position.set(point)
 		moved = true
 		return this
 	}
@@ -121,11 +135,8 @@ class Camera extends Node<Camera> {
 	 */
 	Camera reset() {
 
-		view.setLookAt(
-			0, 0, 1,
-			0, 0, 0,
-			0, 1, 0
-		)
+		position.set(0, 0, 0)
+		scale = 1
 		return this
 	}
 
@@ -138,11 +149,7 @@ class Camera extends Node<Camera> {
 	 */
 	Camera scale(float factor) {
 
-		// Calculate diff between current and target scale to use as the scale factor
-		var scale = getScale(this.scale).x
-		var diff = factor / scale as float
-
-		view.scaleLocal(diff, diff, 1)
+		scale = factor
 		moved = true
 		return this
 	}
@@ -152,26 +159,18 @@ class Camera extends Node<Camera> {
 	 */
 	Camera translate(float x, float y, float z = 0) {
 
-		var scale = view.getScale(scale)
-		view.translate(x / scale.x as float, y / scale.y as float, z)
+		position.sub(x, y, z)
 		moved = true
 		return this
 	}
 
 	/**
 	 * Update the camera's matrices before rendering.
-	 *
-	 * @return
-	 * {@code true} if the camera had to perform operations because it had been
-	 *   moved.
 	 */
 	void update() {
 
-		if (moved) {
-			stackPush().withCloseable { stack ->
-				viewProjectionBuffer.updateBufferData(view.get(stack.mallocFloat(Matrix4f.FLOATS)), Matrix4f.BYTES)
-			}
-			moved = false
+		stackPush().withCloseable { stack ->
+			viewProjectionBuffer.updateBufferData(getView().get(stack.mallocFloat(Matrix4f.FLOATS)), Matrix4f.BYTES)
 		}
 	}
 }

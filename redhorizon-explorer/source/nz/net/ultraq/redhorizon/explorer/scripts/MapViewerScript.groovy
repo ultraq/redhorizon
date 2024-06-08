@@ -225,8 +225,11 @@ class MapViewerScript extends Script<Map> {
 			.thenCompose { _ ->
 				var startPosition = camera.getPosition(new Vector3f())
 				var endPosition = new Vector3f(initialPosition, 0)
+				var newPosition = new Vector3f()
+				var startScale = camera.scale
 				return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
-					camera.position(startPosition.lerp(endPosition, delta))
+					camera.position(startPosition.lerp(endPosition, delta, newPosition))
+					camera.scale((2 - startScale) * delta + startScale as float)
 				}).start()
 			}
 	}
