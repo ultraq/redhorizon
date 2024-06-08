@@ -85,7 +85,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			camera.resetScale()
+			camera.reset()
 			removeControlFunctions*.remove()
 		}
 	}

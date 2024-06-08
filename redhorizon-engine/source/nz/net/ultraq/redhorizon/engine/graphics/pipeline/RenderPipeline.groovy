@@ -58,6 +58,7 @@ class RenderPipeline implements AutoCloseable {
 
 	private final Mesh fullScreenQuad
 	private final List<RenderPass> renderPasses = []
+	private SceneRenderPass sceneRenderPass
 	private ScreenRenderPass screenRenderPass
 
 	/**
@@ -98,7 +99,8 @@ class RenderPipeline implements AutoCloseable {
 	private void configurePipeline(GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
 
 		// Scene render pass
-		renderPasses << new SceneRenderPass(renderer.createFramebuffer(window.renderResolution, true))
+		sceneRenderPass = new SceneRenderPass(renderer.createFramebuffer(window.renderResolution, true))
+		renderPasses << sceneRenderPass
 
 		// Sharp upscaling post-processing pass
 		renderPasses << new PostProcessingRenderPass(
@@ -154,9 +156,11 @@ class RenderPipeline implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Apply a scene to this render pipeline.
+	 */
 	void setScene(Scene scene) {
 
-		var sceneRenderPass = renderPasses.find { it instanceof SceneRenderPass } as SceneRenderPass
 		sceneRenderPass.scene = scene
 	}
 
@@ -166,8 +170,10 @@ class RenderPipeline implements AutoCloseable {
 	 */
 	private class SceneRenderPass implements RenderPass<Void> {
 
-		final Matrix4f viewProjection = new Matrix4f()
 		final Framebuffer framebuffer
+		private final Matrix4f viewProjection = new Matrix4f()
+		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
+
 		Scene scene
 
 		// For object culling
@@ -196,7 +202,7 @@ class RenderPipeline implements AutoCloseable {
 					// Cull the list of renderable items to those just visible in the scene
 					averageNanos('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
-						var frustumIntersection = new FrustumIntersection(camera.projection.mul(camera.view, viewProjection))
+						frustumIntersection.set(camera.getViewProjection(viewProjection))
 						scene.accept { Node element ->
 							if (element instanceof GraphicsElement && element.isVisible(frustumIntersection)) {
 								element.update()

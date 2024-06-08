@@ -96,7 +96,6 @@ class UnitShowcaseScript extends Script<Unit> {
 	CompletableFuture<Void> onSceneRemoved(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			camera.resetScale()
 			removeControlFunctions*.remove()
 		}
 	}

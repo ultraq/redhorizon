@@ -299,7 +299,7 @@ class Explorer {
 		selectedFileInputStream?.close()
 		scene.removeNode(previewNode)
 		previewNode = null
-		camera.center(0, 0)
+		camera.reset()
 	}
 
 	/**

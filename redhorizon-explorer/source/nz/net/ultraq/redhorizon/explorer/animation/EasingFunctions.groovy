@@ -17,9 +17,8 @@
 package nz.net.ultraq.redhorizon.explorer.animation
 
 /**
- * A collection of easing functions, based on those found at
- * <a href="https://easings.net/">https://easings.net/</a>, for use in a
- * {@link Transition}
+ * <a href="https://easings.net/">https://easings.net/</a>  Useful either by
+ * themselves or to control a {@link Transition}
  *
  * @author Emanuel Rabina
  */

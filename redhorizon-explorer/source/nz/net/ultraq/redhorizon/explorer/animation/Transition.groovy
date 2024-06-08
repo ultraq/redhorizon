@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.explorer.animation
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 /**
  * A transition is a combination of an easing function, a duration, and a
@@ -54,14 +54,15 @@ class Transition {
 	 *
 	 * @return A {@code Future} that will be completed when the transition is.
 	 */
-	Future<?> start() {
+	CompletableFuture<Void> start() {
 
 		var startTimeMs = System.currentTimeMillis()
 		var endTimeMs = startTimeMs + durationMs
-		return executorService.submit { ->
-			while (true) {
+		return CompletableFuture.runAsync { ->
+			while (!Thread.interrupted()) {
 				var currentTimeMs = System.currentTimeMillis()
 				if (currentTimeMs > endTimeMs) {
+					callback(easingFunction.transform(1))
 					break
 				}
 				callback(easingFunction.transform((currentTimeMs - startTimeMs) / durationMs))

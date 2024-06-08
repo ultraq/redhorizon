@@ -35,11 +35,11 @@ import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.explorer.animation.Transition
 
 import org.joml.Vector2f
+import org.joml.Vector3f
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ForkJoinPool
 
 /**
  * Controls for viewing a map in the explorer.
@@ -58,7 +58,6 @@ class MapViewerScript extends Script<Map> {
 	private final float[] scaleRange = (1.0..2.0).by(0.1)
 	private final List<RemoveEventFunction> removeEventFunctions = []
 	private final List<RemoveControlFunction> removeControlFunctions = []
-
 	private InputEventStream inputEventStream
 	private Window window
 	private GameWindow gameWindow
@@ -106,9 +105,9 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
-				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
+				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.resetScale()
+						camera.reset()
 					}
 				})
 			)
@@ -151,9 +150,9 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
-				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset scale', { ->
+				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.resetScale()
+						camera.reset()
 					}
 				})
 			)
@@ -202,11 +201,12 @@ class MapViewerScript extends Script<Map> {
 
 		return CompletableFuture.runAsync { ->
 			clearControls()
-			camera.resetScale()
-			camera.center(0, 0, 0)
 		}
 	}
 
+	/**
+	 * Reset controls to optimize touchpad or mouse usage.
+	 */
 	void setTouchpadInput(boolean touchpadInput) {
 
 		this.touchpadInput = touchpadInput
@@ -214,13 +214,20 @@ class MapViewerScript extends Script<Map> {
 		addControls()
 	}
 
-	void viewInitialPosition() {
+	/**
+	 * Recenter the camera on the map initial position.
+	 */
+	CompletableFuture<Void> viewInitialPosition() {
 
-		ForkJoinPool.commonPool().submit { ->
+		return CompletableFuture.runAsync { ->
 			Thread.sleep(100)
-			new Transition(EasingFunctions::easeOutCubic, 1000, { delta ->
-				camera.center(initialPosition.x() * delta as float, initialPosition.y() * delta as float)
-			}).start()
 		}
+			.thenCompose { _ ->
+				var startPosition = camera.getPosition(new Vector3f())
+				var endPosition = new Vector3f(initialPosition, 0)
+				return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
+					camera.position(startPosition.lerp(endPosition, delta))
+				}).start()
+			}
 	}
 }
