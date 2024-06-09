@@ -76,7 +76,7 @@ class Camera extends Node<Camera> {
 	 */
 	Matrix4f getViewProjection(Matrix4f dest) {
 
-		return projection.mulOrthoAffine(transform, dest)
+		return projection.mulOrthoAffine(getView(), dest)
 	}
 
 	@Override

@@ -39,7 +39,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
-	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
 	private final Matrix4f globalTransform = new Matrix4f()
 	private final Vector3f globalPosition = new Vector3f()
@@ -168,12 +167,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	void position(Vector3f newPosition) {
 
-		var currentPosition = getPosition(position)
 		var currentScale = getScale(scale)
-		transform.translate(
-			(currentPosition.x - newPosition.x) * currentScale.x as float,
-			(currentPosition.y - newPosition.y) * currentScale.y as float,
-			(currentPosition.z - newPosition.z) * currentScale.z as float)
+		transform.setTranslation(
+			-newPosition.x * currentScale.x as float,
+			-newPosition.y * currentScale.y as float,
+			-newPosition.z * currentScale.z as float
+		)
 	}
 
 	/**
