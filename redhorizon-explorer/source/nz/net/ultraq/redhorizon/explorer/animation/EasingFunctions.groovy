@@ -25,10 +25,30 @@ package nz.net.ultraq.redhorizon.explorer.animation
 class EasingFunctions {
 
 	/**
+	 * Convenience method for a linear interpolation.
+	 */
+	static float linear(float x) {
+		return x
+	}
+
+	/**
+	 * <a href="https://easings.net/#easeInSine">https://easings.net/#easeInSine</a>
+	 */
+	static float easeInSine(float x) {
+		return 1 - Math.cos((x * Math.PI) / 2)
+	}
+
+	/**
+	 * <a href="https://easings.net/#easeInCubic">https://easings.net/#easeInCubic</a>
+	 */
+	static float easeInCubic(float x) {
+		return x**3
+	}
+
+	/**
 	 * <a href="https://easings.net/#easeOutCubic">https://easings.net/#easeOutCubic</a>
 	 */
-	static float easeOutCubic(float duration) {
-
-		return 1 - (1 - duration)**3
+	static float easeOutCubic(float x) {
+		return 1 - (1 - x)**3
 	}
 }

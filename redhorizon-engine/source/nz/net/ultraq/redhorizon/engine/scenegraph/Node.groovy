@@ -127,11 +127,22 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
-	 * Return the local position of this node.
+	 * Get the local position of this node, storing and returning the result in
+	 * {@code dest}.
 	 */
-	Vector3f getPosition() {
+	Vector3f getPosition(Vector3f dest) {
 
-		return transform.getTranslation(position).negate()
+		var currentScale = getScale(scale)
+		return transform.getTranslation(dest).div(currentScale).negate()
+	}
+
+	/**
+	 * Get the local scale of this node, storing and returning the result in
+	 * {@code dest}.
+	 */
+	Vector3f getScale(Vector3f dest) {
+
+		return transform.getScale(dest)
 	}
 
 	/**
@@ -155,8 +166,25 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	/**
 	 * Set the local position of this node.
 	 */
-	void setPosition(Vector3f newPosition) {
+	void position(Vector3f newPosition) {
 
-		transform.setTranslation(-newPosition.x, -newPosition.y, -newPosition.z)
+		var currentPosition = getPosition(position)
+		var currentScale = getScale(scale)
+		transform.translate(
+			(currentPosition.x - newPosition.x) * currentScale.x as float,
+			(currentPosition.y - newPosition.y) * currentScale.y as float,
+			(currentPosition.z - newPosition.z) * currentScale.z as float)
+	}
+
+	/**
+	 * Set the local scale of this node.
+	 */
+	void scale(Vector3f newScale) {
+
+		var currentScale = getScale(scale)
+		transform.scaleLocal(
+			newScale.x / currentScale.x as float,
+			newScale.y / currentScale.y as float,
+			newScale.z / currentScale.z as float)
 	}
 }

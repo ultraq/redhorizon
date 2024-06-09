@@ -54,8 +54,6 @@ class MapViewerScript extends Script<Map> {
 	final Camera camera
 	boolean touchpadInput
 
-	private final float initialScale = 1.0f
-	private final float[] scaleRange = (1.0..2.0).by(0.1)
 	private final List<RemoveEventFunction> removeEventFunctions = []
 	private final List<RemoveControlFunction> removeControlFunctions = []
 	private InputEventStream inputEventStream
@@ -73,8 +71,6 @@ class MapViewerScript extends Script<Map> {
 	 */
 	private void addControls() {
 
-		var scaleIndex = scaleRange.findIndexOf { it == initialScale }
-
 		// Use touchpad to move around
 		if (touchpadInput) {
 			var ctrl = false
@@ -88,13 +84,15 @@ class MapViewerScript extends Script<Map> {
 
 					// Zoom in/out using CTRL + scroll up/down
 					if (ctrl) {
+						float scaleFactor = camera.getScale(new Vector3f()).x
 						if (event.yOffset < 0) {
-							scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+							scaleFactor -= 0.1
 						}
 						else if (event.yOffset > 0) {
-							scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
+							scaleFactor += 0.1
 						}
-						camera.transform.scaling(scaleRange[scaleIndex])
+						scaleFactor = Math.clamp(scaleFactor, 1f, 2f)
+						camera.scale(new Vector3f(scaleFactor, scaleFactor, 1))
 					}
 					// Use scroll input to move around the map
 					else {
@@ -105,7 +103,7 @@ class MapViewerScript extends Script<Map> {
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.transform.identity()
+						camera.reset()
 					}
 				})
 			)
@@ -138,19 +136,21 @@ class MapViewerScript extends Script<Map> {
 			// Zoom in/out using the scroll wheel
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
+					float scaleFactor = camera.getScale(new Vector3f()).x
 					if (event.yOffset < 0) {
-						scaleIndex = Math.clamp(scaleIndex - 1, 0, scaleRange.length - 1)
+						scaleFactor -= 0.1
 					}
 					else if (event.yOffset > 0) {
-						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
+						scaleFactor += 0.1
 					}
-					camera.transform.scaling(scaleRange[scaleIndex])
+					scaleFactor = Math.clamp(scaleFactor, 1f, 2f)
+					camera.scale(new Vector3f(scaleFactor, scaleFactor, 1))
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.transform.identity()
+						camera.reset()
 					}
 				})
 			)
@@ -217,17 +217,12 @@ class MapViewerScript extends Script<Map> {
 	 */
 	CompletableFuture<Void> viewInitialPosition() {
 
-		return CompletableFuture.runAsync { ->
-			var startPosition = camera.position
-			var endPosition = new Vector3f(initialPosition, 0)
-			var nextPosition = new Vector3f()
-//			var startScale = camera.scale
-//			var endScale = new Vector3f(2, 2, 1)
-//			var nextScale = new Vector3f()
-			return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
-				camera.position = startPosition.lerp(endPosition, delta, nextPosition)
-//				camera.scale.set(startScale.lerp(endScale, delta, nextScale))
-			}).start()
-		}
+		var startPosition = camera.getPosition(new Vector3f())
+		var endPosition = new Vector3f(initialPosition, 0)
+		var nextPosition = new Vector3f()
+
+		return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
+			camera.position(startPosition.lerp(endPosition, delta, nextPosition))
+		}).start()
 	}
 }

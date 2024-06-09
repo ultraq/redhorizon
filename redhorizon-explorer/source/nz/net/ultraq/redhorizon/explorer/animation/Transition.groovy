@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.explorer.animation
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * A transition is a combination of an easing function, a duration, and a
@@ -30,9 +28,6 @@ import java.util.concurrent.Executors
  */
 @TupleConstructor(defaults = false)
 class Transition {
-
-	@Lazy
-	private static final ExecutorService executorService = { Executors.newVirtualThreadPerTaskExecutor() }()
 
 	/**
 	 * An easing function is one that takes a value between 0 and 1 that
