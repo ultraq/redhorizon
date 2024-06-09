@@ -74,8 +74,6 @@ class MapViewerScript extends Script<Map> {
 	private void addControls() {
 
 		var scaleIndex = scaleRange.findIndexOf { it == initialScale }
-		var renderResolution = window.renderResolution
-		var targetResolution = window.targetResolution
 
 		// Use touchpad to move around
 		if (touchpadInput) {
@@ -96,18 +94,18 @@ class MapViewerScript extends Script<Map> {
 						else if (event.yOffset > 0) {
 							scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 						}
-						camera.scale(scaleRange[scaleIndex])
+						camera.transform.scaling(scaleRange[scaleIndex])
 					}
 					// Use scroll input to move around the map
 					else {
-						camera.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
+						camera.transform.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
 					}
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.reset()
+						camera.transform.identity()
 					}
 				})
 			)
@@ -120,7 +118,7 @@ class MapViewerScript extends Script<Map> {
 				if (dragging) {
 					var diffX = (cursorPosition.x - event.xPos) as float
 					var diffY = (cursorPosition.y - event.yPos) as float
-					camera.translate(-diffX, diffY)
+					camera.transform.translate(-diffX, diffY)
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)
 			}
@@ -146,13 +144,13 @@ class MapViewerScript extends Script<Map> {
 					else if (event.yOffset > 0) {
 						scaleIndex = Math.clamp(scaleIndex + 1, 0, scaleRange.length - 1)
 					}
-					camera.scale(scaleRange[scaleIndex])
+					camera.transform.scaling(scaleRange[scaleIndex])
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
 				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
-						camera.reset()
+						camera.transform.identity()
 					}
 				})
 			)
@@ -160,16 +158,16 @@ class MapViewerScript extends Script<Map> {
 
 		// Custom inputs
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
-			camera.translate(0, -TICK)
+			camera.transform.translate(0, -TICK)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Scroll down', { ->
-			camera.translate(0, TICK)
+			camera.transform.translate(0, TICK)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Scroll left', { ->
-			camera.translate(TICK, 0)
+			camera.transform.translate(TICK, 0)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Scroll right', { ->
-			camera.translate(-TICK, 0)
+			camera.transform.translate(-TICK, 0)
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
 			viewInitialPosition()
@@ -220,17 +218,16 @@ class MapViewerScript extends Script<Map> {
 	CompletableFuture<Void> viewInitialPosition() {
 
 		return CompletableFuture.runAsync { ->
-			Thread.sleep(100)
+			var startPosition = camera.position
+			var endPosition = new Vector3f(initialPosition, 0)
+			var nextPosition = new Vector3f()
+//			var startScale = camera.scale
+//			var endScale = new Vector3f(2, 2, 1)
+//			var nextScale = new Vector3f()
+			return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
+				camera.position = startPosition.lerp(endPosition, delta, nextPosition)
+//				camera.scale.set(startScale.lerp(endScale, delta, nextScale))
+			}).start()
 		}
-			.thenCompose { _ ->
-				var startPosition = camera.getPosition(new Vector3f())
-				var endPosition = new Vector3f(initialPosition, 0)
-				var newPosition = new Vector3f()
-				var startScale = camera.scale
-				return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
-					camera.position(startPosition.lerp(endPosition, delta, newPosition))
-					camera.scale((2 - startScale) * delta + startScale as float)
-				}).start()
-			}
 	}
 }

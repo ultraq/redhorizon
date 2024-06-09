@@ -39,10 +39,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
-	private final Rectanglef globalBounds = new Rectanglef()
+	private final Vector3f position = new Vector3f()
+	private final Vector3f scale = new Vector3f(1, 1, 1)
 	private final Matrix4f globalTransform = new Matrix4f()
 	private final Vector3f globalPosition = new Vector3f()
-	private final Vector3f globalScale = new Vector3f()
+	private final Vector3f globalScale = new Vector3f(1, 1, 1)
+	private final Rectanglef globalBounds = new Rectanglef()
 
 	@Override
 	void accept(SceneVisitor visitor) {
@@ -125,6 +127,14 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
+	 * Return the local position of this node.
+	 */
+	Vector3f getPosition() {
+
+		return transform.getTranslation(position).negate()
+	}
+
+	/**
 	 * Test this element against a view frustum to check whether it is inside it
 	 * or not.  Used for object culling during the rendering of a scene.
 	 */
@@ -140,5 +150,13 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	void leftShift(Node child) {
 
 		addChild(child)
+	}
+
+	/**
+	 * Set the local position of this node.
+	 */
+	void setPosition(Vector3f newPosition) {
+
+		transform.setTranslation(-newPosition.x, -newPosition.y, -newPosition.z)
 	}
 }
