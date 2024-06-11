@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
+import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
@@ -39,6 +40,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 
+	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
 	private final Matrix4f globalTransform = new Matrix4f()
 	private final Vector3f globalPosition = new Vector3f()
@@ -126,22 +128,24 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
-	 * Get the local position of this node, storing and returning the result in
-	 * {@code dest}.
+	 * Get the local position of this node.  Note that the returned vector is a
+	 * live value of this node's position, so be sure to wrap in your own object
+	 * if you need a stable value.
 	 */
-	Vector3f getPosition(Vector3f dest) {
+	Vector3f getPosition() {
 
-		var currentScale = getScale(scale)
-		return transform.getTranslation(dest).div(currentScale).negate()
+		var currentScale = getScale()
+		return transform.getTranslation(position).div(currentScale)
 	}
 
 	/**
-	 * Get the local scale of this node, storing and returning the result in
-	 * {@code dest}.
+	 * Get the local scale of this node.  Note that the returnved vector is a live
+	 * value of this node's scale, so be sure to wrap it in your own vector if you
+	 * need a stable value.
 	 */
-	Vector3f getScale(Vector3f dest) {
+	Vector3f getScale() {
 
-		return transform.getScale(dest)
+		return transform.getScale(scale)
 	}
 
 	/**
@@ -165,25 +169,57 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	/**
 	 * Set the local position of this node.
 	 */
-	void position(Vector3f newPosition) {
+	void setPosition(Vector3f newPosition) {
 
-		var currentScale = getScale(scale)
+		setPosition(newPosition.x, newPosition.y, newPosition.z)
+	}
+
+	/**
+	 * Set the local position of this node.
+	 */
+	void setPosition(Vector2f newPosition) {
+
+		setPosition(newPosition.x, newPosition.y)
+	}
+
+	/**
+	 * Set the local position of this node.
+	 */
+	void setPosition(float x, float y, float z = 0) {
+
+		var currentScale = getScale()
 		transform.setTranslation(
-			-newPosition.x * currentScale.x as float,
-			-newPosition.y * currentScale.y as float,
-			-newPosition.z * currentScale.z as float
+			x * currentScale.x as float,
+			y * currentScale.y as float,
+			z * currentScale.z as float
 		)
 	}
 
 	/**
 	 * Set the local scale of this node.
 	 */
-	void scale(Vector3f newScale) {
+	void setScale(Vector3f newScale) {
 
-		var currentScale = getScale(scale)
+		setScale(newScale.x, newScale.y, newScale.z)
+	}
+
+	/**
+	 * Set the local scale of this node.
+	 */
+	void setScale(float x, float y, float z = 1) {
+
+		var currentScale = getScale()
 		transform.scaleLocal(
-			newScale.x / currentScale.x as float,
-			newScale.y / currentScale.y as float,
-			newScale.z / currentScale.z as float)
+			x / currentScale.x as float,
+			y / currentScale.y as float,
+			z / currentScale.z as float)
+	}
+
+	/**
+	 * Set the scale of the X and Y axes to the same value.
+	 */
+	void setScaleXY(float newScale) {
+
+		setScale(newScale, newScale)
 	}
 }

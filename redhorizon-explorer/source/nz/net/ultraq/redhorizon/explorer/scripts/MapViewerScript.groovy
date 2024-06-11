@@ -84,7 +84,7 @@ class MapViewerScript extends Script<Map> {
 
 					// Zoom in/out using CTRL + scroll up/down
 					if (ctrl) {
-						float scaleFactor = camera.getScale(new Vector3f()).x
+						float scaleFactor = camera.scale.x
 						if (event.yOffset < 0) {
 							scaleFactor -= 0.1
 						}
@@ -92,7 +92,7 @@ class MapViewerScript extends Script<Map> {
 							scaleFactor += 0.1
 						}
 						scaleFactor = Math.clamp(scaleFactor, 1f, 2f)
-						camera.scale(new Vector3f(scaleFactor, scaleFactor, 1))
+						camera.setScaleXY(scaleFactor)
 					}
 					// Use scroll input to move around the map
 					else {
@@ -136,7 +136,7 @@ class MapViewerScript extends Script<Map> {
 			// Zoom in/out using the scroll wheel
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
-					float scaleFactor = camera.getScale(new Vector3f()).x
+					float scaleFactor = camera.scale.x
 					if (event.yOffset < 0) {
 						scaleFactor -= 0.1
 					}
@@ -144,7 +144,7 @@ class MapViewerScript extends Script<Map> {
 						scaleFactor += 0.1
 					}
 					scaleFactor = Math.clamp(scaleFactor, 1f, 2f)
-					camera.scale(new Vector3f(scaleFactor, scaleFactor, 1))
+					camera.setScaleXY(scaleFactor)
 				}
 			}
 			removeControlFunctions << inputEventStream.addControl(
@@ -217,12 +217,12 @@ class MapViewerScript extends Script<Map> {
 	 */
 	CompletableFuture<Void> viewInitialPosition() {
 
-		var startPosition = camera.getPosition(new Vector3f())
+		var startPosition = new Vector3f(camera.position)
 		var endPosition = new Vector3f(initialPosition, 0)
 		var nextPosition = new Vector3f()
 
 		return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
-			camera.position(startPosition.lerp(endPosition, delta, nextPosition))
+			camera.position = startPosition.lerp(endPosition, delta, nextPosition)
 		}).start()
 	}
 }

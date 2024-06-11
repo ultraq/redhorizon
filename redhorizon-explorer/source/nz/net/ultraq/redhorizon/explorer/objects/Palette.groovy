@@ -32,8 +32,8 @@ import org.joml.primitives.Rectanglef
  */
 class Palette extends Node<Palette> {
 
-	private static final int SWATCH_WIDTH = 20
-	private static final int SWATCH_HEIGHT = 20
+	private static final int SWATCH_WIDTH = 24
+	private static final int SWATCH_HEIGHT = 24
 
 	Palette(PalFile palFile) {
 
@@ -50,10 +50,10 @@ class Palette extends Node<Palette> {
 			swatch.name = "Colour${i} (${r},${g},${b})"
 			var offsetX = (i % 16) * SWATCH_WIDTH
 			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT
-			swatch.transform.translate(offsetX, offsetY as float)
+			swatch.setPosition(offsetX, offsetY as float)
 			addChild(swatch)
 		}
 
-		transform.translate(8 * -SWATCH_WIDTH, 8 * SWATCH_HEIGHT)
+		setPosition(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT)
 	}
 }

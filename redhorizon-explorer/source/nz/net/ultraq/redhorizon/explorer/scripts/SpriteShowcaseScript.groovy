@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -57,7 +56,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 		return CompletableFuture.runAsync { ->
-			camera.scale(new Vector3f(4, 4, 1))
+			camera.setScaleXY(4)
 
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
 				Math.wrap(currentFrame--, 0, numImages)

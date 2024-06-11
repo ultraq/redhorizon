@@ -268,7 +268,7 @@ class Map extends Node<Map> {
 			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
 				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
 			})
-			backgroundSprite.transform.translate(boundary.minX, boundary.minY)
+			backgroundSprite.setPosition(boundary.minX, boundary.minY)
 			addChild(backgroundSprite)
 		}
 	}
@@ -519,10 +519,10 @@ class Map extends Node<Map> {
 //					mapTile.position().y + TILE_HEIGHT as float
 //				)
 
-				addChild(new PalettedSprite(terrainFile).tap {
-					name = "Terrain ${terrainType}"
-					transform.translate(cellPosXY)
-				})
+				var terrain = new PalettedSprite(terrainFile)
+				terrain.name = "Terrain ${terrainType}"
+				terrain.position = cellPosXY
+				addChild(terrain)
 			}
 		}
 	}
@@ -576,9 +576,9 @@ class Map extends Node<Map> {
 				try {
 					var unit = createObject(unitLine) { unit, unitData ->
 						unit.name = "Vehicle - ${unitLine.faction}, ${unitLine.type}"
-						unit.transform.translate((unitLine.coords as Vector2f)
+						unit.position = (unitLine.coords as Vector2f)
 							.asWorldCoords(1)
-							.centerInCell(unit.width, unit.height))
+							.centerInCell(unit.width, unit.height)
 					}
 					addChild(unit)
 				}
@@ -601,9 +601,9 @@ class Map extends Node<Map> {
 				try {
 					var infantry = createObject(infantryLine) { infantry, infantryData ->
 						infantry.name = "Infantry - ${infantryLine.faction}, ${infantryLine.type}"
-						infantry.transform.translate((infantryLine.coords as Vector2f)
+						infantry.position = (infantryLine.coords as Vector2f)
 							.asWorldCoords(1)
-							.centerInCell(infantry.width, infantry.height))
+							.centerInCell(infantry.width, infantry.height)
 						switch (infantryLine.cellPos) {
 							case 1 -> infantry.transform.translate(-8, 8)
 							case 2 -> infantry.transform.translate(8, 8)
@@ -632,11 +632,11 @@ class Map extends Node<Map> {
 				try {
 					var structure = createObject(structureLine) { structure, structureData ->
 						structure.name = "Structure - ${structureLine.faction}, ${structureLine.type}"
-						var translate = (structureLine.coords as Vector2f).asWorldCoords(Math.ceil(structure.height / TILE_HEIGHT) as int)
+						var position = (structureLine.coords as Vector2f).asWorldCoords(Math.ceil(structure.height / TILE_HEIGHT) as int)
 						if (structure.width < TILE_WIDTH || structure.height < TILE_HEIGHT) {
-							translate.centerInCell(structure.width, structure.height)
+							position.centerInCell(structure.width, structure.height)
 						}
-						structure.transform.translate(translate)
+						structure.position = position
 
 						// A special case for structures with secondary parts, namely the
 						// weapons factory for its garage door
@@ -666,7 +666,7 @@ class Map extends Node<Map> {
 									return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
 								})
 								bibSprite.name = "Bib"
-								bibSprite.transform.translate(0, -TILE_HEIGHT)
+								bibSprite.setPosition(0, -TILE_HEIGHT)
 								structure.addChild(0, bibSprite)
 							}
 						}

@@ -52,10 +52,10 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 				}
 				switch (fillMode) {
 					case FillMode.ASPECT_RATIO -> {
-						child.transform.scaleXY(bounds.calculateScaleToFit(child.bounds))
+						child.setScaleXY(bounds.calculateScaleToFit(child.bounds))
 					}
 					case FillMode.STRETCH -> {
-						child.transform.scaleXY(
+						child.setScale(
 							bounds.lengthX() / child.bounds.lengthX() as float,
 							bounds.lengthY() / child.bounds.lengthY() as float
 						)

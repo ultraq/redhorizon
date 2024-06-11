@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.PlaybackReadyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -71,16 +70,15 @@ class PlaybackScript extends Script {
 
 			if (scriptable instanceof Sound) {
 				removeControlFunctions << scene.inputEventStream.addControl(
-					new KeyControl(GLFW_KEY_A, 'Move audio source left', {
-						->
+					new KeyControl(GLFW_KEY_A, 'Move audio source left', { ->
 						scriptable.transform.translate(-0.25, 0)
-						logger.debug('Sound at: {}', scriptable.getPosition(new Vector3f()).x)
+						logger.debug('Sound at: {}', scriptable.position.x)
 					})
 				)
 				removeControlFunctions << scene.inputEventStream.addControl(
 					new KeyControl(GLFW_KEY_D, 'Move audio source right', { ->
 						scriptable.transform.translate(0.25, 0)
-						logger.debug('Sound at: {}', scriptable.getPosition(new Vector3f()).x)
+						logger.debug('Sound at: {}', scriptable.position.x)
 					})
 				)
 			}
