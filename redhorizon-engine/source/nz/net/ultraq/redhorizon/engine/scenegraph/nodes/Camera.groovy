@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.Matrix4f
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.system.MemoryStack.stackPush
@@ -59,6 +60,14 @@ class Camera extends Node<Camera> {
 			0, 0, 0,
 			0, 1, 0
 		)
+	}
+
+	@Override
+	Vector3f getPosition() {
+
+		// Positioning the camera is the opposite of what we would expect as we are
+		// instead creating a transform matrix that moves the world around it
+		return super.getPosition().negate()
 	}
 
 	/**
@@ -102,6 +111,14 @@ class Camera extends Node<Camera> {
 
 		transform.identity()
 		return this
+	}
+
+	@Override
+	void setPosition(float x, float y, float z = 0) {
+
+		// Positioning the camera is the opposite of what we would expect as we are
+		// instead creating a transform matrix that moves the world around it
+		super.setPosition(-x, -y, -z)
 	}
 
 	/**
