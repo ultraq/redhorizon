@@ -42,6 +42,7 @@ class Camera extends Node<Camera> {
 	private final Matrix4f projection
 	private final Matrix4f view
 	private final Matrix4f viewTransform = new Matrix4f()
+	private final Matrix4f viewProjection = new Matrix4f()
 	private UniformBuffer viewProjectionBuffer
 
 	/**
@@ -71,8 +72,9 @@ class Camera extends Node<Camera> {
 	}
 
 	/**
-	 * Return a matrix that is the view * local transform of this camera, setting
-	 * the result in {@code dest}.
+	 * Return a matrix that is the view * local transform of this camera.  Note
+	 * that the returned matrix is a live value, so be sure to wrap in your own
+	 * object if you need a stable value.
 	 */
 	private Matrix4f getView() {
 
@@ -81,11 +83,12 @@ class Camera extends Node<Camera> {
 
 	/**
 	 * Return a matrix that is the projection * view * local transform of this
-	 * camera, setting the result in {@code dest}.
+	 * camera.  Note that the returned matrix is a live value, so be sure to wrap
+	 * in your own object if you need a stable value.
 	 */
-	Matrix4f getViewProjection(Matrix4f dest) {
+	Matrix4f getViewProjection() {
 
-		return projection.mulOrthoAffine(getView(), dest)
+		return projection.mulOrthoAffine(getView(), viewProjection)
 	}
 
 	@Override

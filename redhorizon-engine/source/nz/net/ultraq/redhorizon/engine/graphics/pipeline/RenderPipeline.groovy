@@ -171,7 +171,6 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Framebuffer framebuffer
-		private final Matrix4f viewProjection = new Matrix4f()
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
 		Scene scene
@@ -202,7 +201,7 @@ class RenderPipeline implements AutoCloseable {
 					// Cull the list of renderable items to those just visible in the scene
 					averageNanos('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
-						frustumIntersection.set(camera.getViewProjection(viewProjection))
+						frustumIntersection.set(camera.viewProjection)
 						scene.accept { Node element ->
 							if (element instanceof GraphicsElement && element.isVisible(frustumIntersection)) {
 								element.update()

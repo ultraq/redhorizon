@@ -139,7 +139,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
-	 * Get the local scale of this node.  Note that the returnved vector is a live
+	 * Get the local scale of this node.  Note that the returned vector is a live
 	 * value of this node's scale, so be sure to wrap it in your own vector if you
 	 * need a stable value.
 	 */
