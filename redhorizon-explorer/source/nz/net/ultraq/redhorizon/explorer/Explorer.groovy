@@ -484,7 +484,7 @@ class Explorer {
 	 */
 	private void preview(MapFile mapFile, String objectId) {
 
-		var mapViewerScript = new MapViewerScript(camera, touchpadInput)
+		var mapViewerScript = new MapViewerScript(camera, nodeList, touchpadInput)
 		time("Loading map ${objectId}", logger) { ->
 			resourceManager.withDirectory(currentDirectory) { ->
 				var map = new Map(mapFile, resourceManager).attachScript(mapViewerScript)

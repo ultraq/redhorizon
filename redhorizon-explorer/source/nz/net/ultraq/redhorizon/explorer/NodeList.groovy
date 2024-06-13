@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -32,9 +33,10 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  *
  * @author Emanuel Rabina
  */
-class NodeList implements ImGuiElement {
+class NodeList implements EventTarget, ImGuiElement {
 
 	Scene scene
+	private Node selectedNode
 
 	NodeList() {
 
@@ -67,11 +69,18 @@ class NodeList implements ImGuiElement {
 	 */
 	private void renderNodeAndChildren(Node node) {
 
-		var flags = DefaultOpen | SpanFullWidth
+		var flags = DefaultOpen | SpanFullWidth | OpenOnArrow
 		if (!node.children) {
 			flags |= Leaf
 		}
+		if (node == selectedNode) {
+			flags |= Selected
+		}
 		if (ImGui.treeNodeEx(node.name ?: '(no name)', flags)) {
+			if (ImGui.isItemClicked() && !ImGui.isItemToggledOpen()) {
+				selectedNode = node
+				trigger(new NodeSelectedEvent(node))
+			}
 			node.children.each { child ->
 				renderNodeAndChildren(child)
 			}

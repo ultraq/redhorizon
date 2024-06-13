@@ -31,6 +31,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
+import nz.net.ultraq.redhorizon.explorer.NodeList
+import nz.net.ultraq.redhorizon.explorer.NodeSelectedEvent
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.explorer.animation.Transition
 
@@ -52,6 +54,7 @@ class MapViewerScript extends Script<Map> {
 	private static final int TICK = 48
 
 	final Camera camera
+	final NodeList nodeList
 	boolean touchpadInput
 
 	private final List<RemoveEventFunction> removeEventFunctions = []
@@ -156,6 +159,15 @@ class MapViewerScript extends Script<Map> {
 			)
 		}
 
+		nodeList.on(NodeSelectedEvent) { event ->
+			var node = event.node
+			var position = new Vector3f(node.globalPosition).add(
+				node.globalBounds.lengthX() / 2 as float,
+				node.globalBounds.lengthY() / 2 as float,
+				0)
+			moveCameraTo(position)
+		}
+
 		// Custom inputs
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
 			camera.transform.translate(0, -TICK)
@@ -181,6 +193,19 @@ class MapViewerScript extends Script<Map> {
 
 		removeEventFunctions*.remove()
 		removeControlFunctions*.remove()
+	}
+
+	/**
+	 * Ease the camera towards the given position.
+	 */
+	private CompletableFuture<Void> moveCameraTo(Vector3f position) {
+
+		var startPosition = new Vector3f(camera.position)
+		var nextPosition = new Vector3f()
+
+		return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
+			camera.position = startPosition.lerp(position, delta, nextPosition)
+		}).start()
 	}
 
 	@Override
@@ -213,12 +238,6 @@ class MapViewerScript extends Script<Map> {
 	 */
 	CompletableFuture<Void> viewInitialPosition() {
 
-		var startPosition = new Vector3f(camera.position)
-		var endPosition = new Vector3f(initialPosition, 0)
-		var nextPosition = new Vector3f()
-
-		return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
-			camera.position = startPosition.lerp(endPosition, delta, nextPosition)
-		}).start()
+		return moveCameraTo(new Vector3f(initialPosition, 0))
 	}
 }

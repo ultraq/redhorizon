@@ -95,7 +95,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 * Get the world-space position of this node.  ie: the local position, then
 	 * modified by all of the ancestor transforms along the path to this node.
 	 */
-	protected Vector3f getGlobalPosition() {
+	Vector3f getGlobalPosition() {
 
 		return getGlobalTransform().getTranslation(globalPosition)
 	}
