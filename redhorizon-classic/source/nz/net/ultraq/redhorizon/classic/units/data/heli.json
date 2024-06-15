@@ -1,0 +1,16 @@
+{
+	"type": "aircraft",
+	"shpFile": {
+		"parts": {
+			"body": {
+				"headings": 32
+			}
+		},
+		"states": [
+			{
+				"name": "default",
+				"headings": 32
+			}
+		]
+	}
+}

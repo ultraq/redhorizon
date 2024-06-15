@@ -219,6 +219,6 @@ class Application implements EventTarget {
 	@FunctionalInterface
 	static interface ApplicationEventHandler {
 
-		void apply(Application application, Scene scene);
+		void apply(Application application, Scene scene)
 	}
 }

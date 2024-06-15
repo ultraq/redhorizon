@@ -59,10 +59,10 @@ class UnitShowcaseScript extends Script<Unit> {
 
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
 				rotateLeft()
-			}))
+			}, true))
 			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
 				rotateRight()
-			}))
+			}, true))
 
 			var states = unitData.shpFile.states
 

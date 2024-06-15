@@ -19,8 +19,10 @@ description = 'A top-down shooter for testing out the game engine'
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
+	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-filetypes')
 
+	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")

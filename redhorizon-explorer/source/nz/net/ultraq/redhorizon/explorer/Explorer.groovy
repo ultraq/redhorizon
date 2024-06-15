@@ -438,7 +438,7 @@ class Explorer {
 		if (unitConfig) {
 			var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
 			var targetClass = switch (unitData.type) {
-				case 'infantry', 'structure', 'vehicle' -> Unit
+				case 'infantry', 'structure', 'vehicle', 'aircraft' -> Unit
 				default -> logger.info('Unit type {} not supported', unitData.type)
 			}
 			if (targetClass) {

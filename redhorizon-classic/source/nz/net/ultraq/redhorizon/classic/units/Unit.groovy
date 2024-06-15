@@ -50,8 +50,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final UnitData unitData
 	final UnitBody body
 	final UnitTurret turret
+	UnitBody body2
 
-	private UnitBody body2
 	private int stateIndex = 0
 	private long animationStartTime
 	private SpriteSheet spriteSheet
@@ -203,6 +203,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				var currentState = unitData.shpFile.states[stateIndex]
 				var headings = currentState.headings
 				var frames = currentState.frames
+				var degreesPerHeading = 360f / headings
 
 				// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
 				//       reverse from how we normally define rotation.

@@ -16,19 +16,24 @@
 
 package nz.net.ultraq.redhorizon.shooter.objects
 
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
+import nz.net.ultraq.redhorizon.classic.units.Unit
+import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.filetypes.PngFile
+import nz.net.ultraq.redhorizon.shooter.Shooter
 
-import org.joml.Vector2f
+import org.joml.Vector3f
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.json.JsonSlurper
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -36,30 +41,46 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements GraphicsElement, Temporal {
+class Player extends Node<Player> implements GraphicsElement, Rotatable, Temporal {
 
-	private static final float SPEED = 100f
+	private static final float FORWARD_SPEED = 100f
+	private static final float ROTATION_SPEED = 120f
+	private static final float STRAFING_SPEED = 25f
 
-	private final Sprite sprite
-	private final Vector2f velocity = new Vector2f()
+	private final Unit unit
 	private final float xPosRange
 	private final float yPosRange
+	private final Vector3f velocity = new Vector3f()
+	private float forward = 0f
+	private float strafing = 0f
+	private float rotation = 0f
 	private long moveUpdateTimeMs
 
 	/**
 	 * Constructor, load the sprite and scripts for the player.
 	 */
-	Player(PngFile spriteFile) {
+	Player(ResourceManager resourceManager) {
 
-		sprite = new Sprite(spriteFile).tap {
-			bounds.center()
+		var spriteFile = resourceManager.loadFile('heli.shp', ShpFile)
+		var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/heli.json")
+		var unitData = new JsonSlurper().parseText(unitJson) as UnitData
+		unit = new Unit(spriteFile, unitData)
+
+		var rotorJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/lrotor.json")
+		var rotorData = new JsonSlurper().parseText(rotorJson) as UnitData
+		unit.addBody(resourceManager.loadFile('lrotor.shp', ShpFile), rotorData)
+		unit.body2.transform.translate(0, 2)
+
+		addChild(unit)
+
+		accept { Node node ->
+			node.bounds.center()
 		}
-		addChild(sprite)
 
 		attachScript(new PlayerScript())
 
-		xPosRange = nz.net.ultraq.redhorizon.shooter.Shooter.RENDER_RESOLUTION.width() / 2 - 12
-		yPosRange = nz.net.ultraq.redhorizon.shooter.Shooter.RENDER_RESOLUTION.height() / 2 - 8
+		xPosRange = Shooter.RENDER_RESOLUTION.width() / 2 - width / 2
+		yPosRange = Shooter.RENDER_RESOLUTION.height() / 2 - height / 2
 	}
 
 	@Override
@@ -71,19 +92,27 @@ class Player extends Node<Player> implements GraphicsElement, Temporal {
 	}
 
 	@Override
-	void update() {
+	void setHeading(float newHeading) {
 
-		var moveCurrentTimeMs = currentTimeMs
-		var frameDelta = (moveCurrentTimeMs - moveUpdateTimeMs) / 1000
+		Rotatable.super.setHeading(newHeading)
+		unit.setHeading(newHeading)
+	}
+
+	@Override
+	void update() {
 
 		// TODO: It'd help if we got a frame delta in here, so update() might need
 		//       to provide that.
-		if (velocity.length()) {
-			var v = new Vector2f(velocity).normalize().mul(SPEED)
+		var moveCurrentTimeMs = currentTimeMs
+		var frameDelta = (moveCurrentTimeMs - moveUpdateTimeMs) / 1000
+
+		if (forward || strafing || rotation) {
+			heading += rotation * frameDelta
+			var v = velocity.set(strafing, forward, 0).mul(frameDelta).rotateZ(Math.toRadians(-heading) as float)
 			var currentPosition = getPosition()
 			setPosition(
-				Math.clamp(currentPosition.x + v.x * frameDelta as float, -xPosRange, xPosRange),
-				Math.clamp(currentPosition.y + v.y * frameDelta as float, -yPosRange, yPosRange)
+				Math.clamp(currentPosition.x + v.x as float, -xPosRange, xPosRange),
+				Math.clamp(currentPosition.y + v.y as float, -yPosRange, yPosRange)
 			)
 		}
 
@@ -107,43 +136,69 @@ class Player extends Node<Player> implements GraphicsElement, Temporal {
 
 				// TODO: Inertia and momentum
 				scene.inputEventStream.addControls(
-					new KeyControl(GLFW_KEY_A, 'Move left',
+					new KeyControl(GLFW_KEY_W, 'Move forward',
 						{ ->
-							velocity.x -= 1
-							moveUpdateTimeMs = currentTimeMs
+							forward += FORWARD_SPEED
+							startMovement()
 						},
 						{ ->
-							velocity.x += 1
+							forward -= FORWARD_SPEED
+						}
+					),
+					new KeyControl(GLFW_KEY_S, 'Move backward',
+						{ ->
+							forward -= FORWARD_SPEED
+							startMovement()
+						},
+						{ ->
+							forward += FORWARD_SPEED
+						}
+					),
+					new KeyControl(GLFW_KEY_A, 'Move left',
+						{ ->
+							strafing -= STRAFING_SPEED
+							startMovement()
+						},
+						{ ->
+							strafing += STRAFING_SPEED
 						}
 					),
 					new KeyControl(GLFW_KEY_D, 'Move right',
 						{ ->
-							velocity.x += 1
-							moveUpdateTimeMs = currentTimeMs
+							strafing += STRAFING_SPEED
+							startMovement()
 						},
 						{ ->
-							velocity.x -= 1
+							strafing -= STRAFING_SPEED
 						}
 					),
-					new KeyControl(GLFW_KEY_W, 'Move up',
+					new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
 						{ ->
-							velocity.y += 1
-							moveUpdateTimeMs = currentTimeMs
+							rotation -= ROTATION_SPEED
+							startMovement()
 						},
 						{ ->
-							velocity.y -= 1
+							rotation += ROTATION_SPEED
 						}
 					),
-					new KeyControl(GLFW_KEY_S, 'Move down',
+					new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
 						{ ->
-							velocity.y += -1
-							moveUpdateTimeMs = currentTimeMs
+							rotation += ROTATION_SPEED
+							startMovement()
 						},
 						{ ->
-							velocity.y -= -1
+							rotation -= ROTATION_SPEED
 						}
 					)
 				)
+			}
+		}
+
+		// TODO: Really needs to be the delta between frame updates
+		private void startMovement() {
+
+			if (!moveUpdateTimeMs) {
+				moveUpdateTimeMs = currentTimeMs
 			}
 		}
 	}

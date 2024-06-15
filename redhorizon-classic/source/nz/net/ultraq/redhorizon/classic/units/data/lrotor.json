@@ -1,0 +1,18 @@
+{
+	"type": "aircraft",
+	"shpFile": {
+		"parts": {
+			"body": {}
+		},
+		"states": [
+			{
+				"name": "default",
+				"frames": 4
+			},
+			{
+				"name": "slow",
+				"frames": 8
+			}
+		]
+	}
+}

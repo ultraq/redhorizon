@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.shooter
 
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
@@ -25,8 +27,12 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
-import nz.net.ultraq.redhorizon.filetypes.PngFile
+import nz.net.ultraq.redhorizon.explorer.PaletteType
+import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.shooter.objects.Player
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Main class for the shooter game ✈️🔫
@@ -36,11 +42,9 @@ import nz.net.ultraq.redhorizon.shooter.objects.Player
 class Shooter {
 
 	static final Dimension RENDER_RESOLUTION = new Dimension(720, 405)
+	private static final Logger logger = LoggerFactory.getLogger(Shooter)
 
-	private final ResourceManager resourceManager = new ResourceManager(
-		new File(System.getProperty('user.dir')),
-		'nz.net.ultraq.redhorizon.filetypes')
-
+	private GlobalPalette globalPalette
 	private Camera camera
 	private Node player
 
@@ -55,25 +59,50 @@ class Shooter {
 				renderResolution: RENDER_RESOLUTION
 			))
 			.addTimeSystem()
-			.onApplicationStart(this::applicationStart)
-			.onApplicationStop(this::applicationStop)
+			.onApplicationStart { application, scene -> start(scene) }
+			.onApplicationStop { application, scene -> stop(scene) }
 			.start()
 	}
 
-	private void applicationStart(Application application, Scene scene) {
+	/**
+	 * Set up and begin the game.
+	 */
+	private void start(Scene scene) {
 
-		camera = new Camera(RENDER_RESOLUTION)
-		scene << camera
+		new ResourceManager(
+			new File(System.getProperty('user.dir'), 'mix'),
+			'nz.net.ultraq.redhorizon.filetypes',
+			'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
 
-		scene << new GridLines(-RENDER_RESOLUTION.width() / 2 as int, RENDER_RESOLUTION.width() / 2 as int, 24)
+			camera = new Camera(RENDER_RESOLUTION)
+			scene << camera
 
-		player = new Player(resourceManager.loadFile('ship_0009.png', PngFile))
-		scene << player
+			scene << new GridLines(-RENDER_RESOLUTION.width() / 2 as int, RENDER_RESOLUTION.width() / 2 as int, 24)
+
+			globalPalette = new GlobalPalette(loadPalette())
+			scene << globalPalette
+
+			player = new Player(resourceManager)
+			scene << player
+		}
 	}
 
-	private void applicationStop(Application application, Scene scene) {
+	/**
+	 * Load the given palette as the global palette for objects.
+	 */
+	private Palette loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
+
+		logger.info("Using ${paletteType} palette")
+		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+			return new PalFile(inputStream)
+		}
+	}
+
+	/**
+	 * Clean up.
+	 */
+	private void stop(Scene scene) {
 
 		scene.clear()
-		resourceManager.close()
 	}
 }
