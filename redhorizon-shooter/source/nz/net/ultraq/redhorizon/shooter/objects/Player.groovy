@@ -35,6 +35,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonSlurper
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 /**
  * The player object in the game.
@@ -45,7 +46,7 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 
 	private static final float FORWARD_SPEED = 100f
 	private static final float ROTATION_SPEED = 120f
-	private static final float STRAFING_SPEED = 25f
+	private static final float STRAFING_SPEED = 50f
 
 	private final Unit unit
 	private final float xPosRange
@@ -124,15 +125,23 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 	 */
 	class PlayerScript extends Script<Player> {
 
-//		@Delegate
-//		private Player applyDelegate() {
-//			return scriptable as Player
-//		}
-//
+		private boolean bobbing
+
 		@Override
 		CompletableFuture<Void> onSceneAdded(Scene scene) {
 
 			return CompletableFuture.runAsync { ->
+				bobbing = true
+
+				// Unit bobbing
+				Executors.newVirtualThreadPerTaskExecutor().execute { ->
+					while (bobbing) {
+						var bob = 0.0625 * Math.sin(currentTimeMs / 750)
+						var unitPosition = unit.position
+						unit.setPosition(unitPosition.x, unitPosition.y + bob as float, unitPosition.z)
+						Thread.sleep(10)
+					}
+				}
 
 				// TODO: Inertia and momentum
 				scene.inputEventStream.addControls(
@@ -191,6 +200,14 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 						}
 					)
 				)
+			}
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+
+			return CompletableFuture.runAsync { ->
+				bobbing = false
 			}
 		}
 
