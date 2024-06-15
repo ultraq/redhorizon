@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007 Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import javax.imageio.ImageIO
 
 /**
  * Wrapper of the Java implementation of Portable Network Graphics (PNG) images.
- * 
+ *
  * @author Emanuel Rabina
  */
 @FileExtensions('png')
@@ -41,33 +41,46 @@ class PngFile implements ImageFile {
 
 	/**
 	 * Constructor, creates a new PNG from the given input stream.
-	 * 
+	 *
 	 * @param inputStream
 	 */
 	PngFile(InputStream inputStream) {
 
-		def image = ImageIO.read(inputStream)
+		var image = ImageIO.read(inputStream)
 
-		width  = image.width
+		width = image.width
 		height = image.height
-		format = image.colorModel.numComponents == 4 ? FORMAT_RGBA : FORMAT_RGB
+		var colorModel = image.colorModel
+		format = colorModel.numComponents == 4 ? FORMAT_RGBA : FORMAT_RGB
 
-		imageData = ByteBuffer.allocateNative(width * height)
-		def rgbArray = image.getRGB(0, 0, width, height, null, 0, width)
-		rgbArray.each { pixel ->
-			imageData.putInt(pixel)
+		imageData = ByteBuffer.allocateNative(width * height * format.value)
+		var pixels = image.getRGB(0, 0, width, height, null, 0, width)
+		pixels.each { pixel ->
+			if (format == FORMAT_RGB) {
+				var red = (byte)(pixel >> 16)
+				var green = (byte)(pixel >> 8)
+				var blue = (byte)(pixel)
+				imageData.put(red).put(green).put(blue)
+			}
+			else {
+				var alpha = (byte)(pixel >> 24)
+				var red = (byte)(pixel >> 16)
+				var green = (byte)(pixel >> 8)
+				var blue = (byte)(pixel)
+				imageData.put(red).put(green).put(blue).put(alpha)
+			}
 		}
 		imageData.rewind()
 	}
 
 	/**
 	 * Constructor, creates a PNG file from an animation.  This just redirects
-	 * to the {@link #PngFile(String, ImagesFile, String...)} constructor since
+	 * to the {@link #PngFile(String, ImagesFile, String ...)} constructor since
 	 * the animation-specific parts don't affect the conversion.
-	 * 
-	 * @param name			The name of this file.
+	 *
+	 * @param name The name of this file.
 	 * @param animationfile File to source data from.
-	 * @param params		Additional parameters: external palette (opt).
+	 * @param params Additional parameters: external palette (opt).
 	 */
 //	PngFile(String name, AnimationFile animationfile, String... params) {
 //
@@ -77,10 +90,10 @@ class PngFile implements ImageFile {
 	/**
 	 * Constructor, allows the construction of a new PNG file from the given
 	 * {@link ImagesFile} implementation, and the accompanying parameters.
-	 * 
-	 * @param name		 The name of this file.
+	 *
+	 * @param name The name of this file.
 	 * @param imagesfile File to source data from.
-	 * @param params	 Additional parameters: external palette (opt).
+	 * @param params Additional parameters: external palette (opt).
 	 */
 //	PngFile(String name, ImagesFile imagesfile, String... params) {
 //
@@ -149,7 +162,7 @@ class PngFile implements ImageFile {
 
 	/**
 	 * Returns some information on this PNG file.
-	 * 
+	 *
 	 * @return PNG file info.
 	 */
 	@Override

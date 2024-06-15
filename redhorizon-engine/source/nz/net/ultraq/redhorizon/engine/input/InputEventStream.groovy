@@ -51,6 +51,19 @@ class InputEventStream implements EventTarget {
 	}
 
 	/**
+	 * Register multiple input bindings at once.
+	 *
+	 * @param controls
+	 * @return
+	 *   A list of functions to remove the input binding, in the same order they
+	 *   were added.
+	 */
+	RemoveControlFunction[] addControls(Control... controls) {
+
+		return controls.collect { control -> addControl(control) }
+	}
+
+	/**
 	 * Add a source for input events that can be listened to using this object.
 	 *
 	 * @param inputSource

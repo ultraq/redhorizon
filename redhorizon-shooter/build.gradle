@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+description = 'A top-down shooter for testing out the game engine'
 
-include(
-	'redhorizon-classic',
-	'redhorizon-cli',
-	'redhorizon-engine',
-	'redhorizon-events',
-	'redhorizon-explorer',
-	'redhorizon-filetypes',
-	'redhorizon-sandbox',
-	'redhorizon-shooter'
-)
+dependencies {
+	implementation project(':redhorizon-classic')
+	implementation project(':redhorizon-engine')
+	implementation project(':redhorizon-filetypes')
+
+	implementation "org.joml:joml:${jomlVersion}"
+	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+	implementation 'org.lwjgl:lwjgl-glfw'
+}

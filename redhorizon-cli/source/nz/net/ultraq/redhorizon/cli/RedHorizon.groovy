@@ -40,7 +40,8 @@ import picocli.CommandLine.IVersionProvider
 	subcommands = [
 		Converter,
 		Explorer,
-		Mix
+		Mix,
+		Shooter
 	],
 	versionProvider = VersionProvider
 )
@@ -51,7 +52,7 @@ class RedHorizon {
 	}
 
 	/**
-	 * Read the version number from the `cli.properties` file.
+	 * Read the version number from the {@code cli.properties} file.
 	 */
 	static class VersionProvider implements IVersionProvider {
 

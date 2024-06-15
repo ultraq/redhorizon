@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE
 
 import java.lang.reflect.Modifier
 
@@ -30,19 +30,21 @@ class KeyControl extends Control<KeyEvent> {
 
 	private final int modifier
 	private final int key
-	private Closure handler
+	private final Closure pressHandler
+	private final Closure releaseHandler
 
-	KeyControl(int key, String name, Closure handler) {
+	KeyControl(int key, String name, Closure pressHandler, Closure releaseHandler = null) {
 
-		this(-1, key, name, handler)
+		this(-1, key, name, pressHandler, releaseHandler)
 	}
 
-	KeyControl(int modifier, int key, String name, Closure handler) {
+	KeyControl(int modifier, int key, String name, Closure pressHandler, Closure releaseHandler = null) {
 
 		super(KeyEvent, name, determineBindingName(modifier, key))
 		this.modifier = modifier
 		this.key = key
-		this.handler = handler
+		this.pressHandler = pressHandler
+		this.releaseHandler = releaseHandler
 	}
 
 	/**
@@ -62,8 +64,13 @@ class KeyControl extends Control<KeyEvent> {
 	@Override
 	void handleEvent(KeyEvent event) {
 
-		if ((event.action == GLFW_PRESS || event.action == GLFW_REPEAT) && event.key == key) {
-			handler()
+		if (event.key == key) {
+			if (event.action == GLFW_PRESS) {
+				pressHandler()
+			}
+			else if (event.action == GLFW_RELEASE) {
+				releaseHandler?.call()
+			}
 		}
 	}
 }

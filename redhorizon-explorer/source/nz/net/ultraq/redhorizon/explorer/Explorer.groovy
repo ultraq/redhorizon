@@ -44,11 +44,11 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
-import nz.net.ultraq.redhorizon.explorer.objects.GridLines
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
@@ -199,7 +199,7 @@ class Explorer {
 		globalPalette = new GlobalPalette(loadPalette())
 		scene.addNode(globalPalette)
 
-		scene.addNode(new GridLines())
+		scene.addNode(new GridLines(-1536, 1536, 24)) // The max area a Red Alert map can be
 	}
 
 	@SuppressWarnings('unused')

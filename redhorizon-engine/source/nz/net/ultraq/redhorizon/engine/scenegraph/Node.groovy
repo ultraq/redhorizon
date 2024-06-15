@@ -61,6 +61,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 		children << child
 		child.parent = this
+
+		bounds.expand(child.bounds)
 		return this
 	}
 
@@ -119,6 +121,15 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
+	 * Return the height of the node.  This is a shortcut for calling
+	 * {@code bounds.lengthY()}.
+	 */
+	float getHeight() {
+
+		return bounds.lengthY()
+	}
+
+	/**
 	 * Returns this node's name.  Used for the scene overview and debugging,
 	 * defaults to the class name of the node.
 	 */
@@ -146,6 +157,15 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	Vector3f getScale() {
 
 		return transform.getScale(scale)
+	}
+
+	/**
+	 * Return the width of the node.  This is a shortcut for calling
+	 * {@code bounds.lengthX()}.
+	 */
+	float getWidth() {
+
+		return bounds.lengthX()
 	}
 
 	/**

@@ -27,6 +27,7 @@ dependencies {
 	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-filetypes')
 	implementation project(':redhorizon-sandbox')
+	implementation project(':redhorizon-shooter')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "info.picocli:picocli:${picocliVersion}"
 	implementation "org.apache.groovy:groovy-json:${groovyVersion}"

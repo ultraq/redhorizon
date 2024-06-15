@@ -28,8 +28,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
 import nz.net.ultraq.redhorizon.explorer.PaletteType
-import nz.net.ultraq.redhorizon.explorer.objects.GridLines
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.filetypes.Palette
 

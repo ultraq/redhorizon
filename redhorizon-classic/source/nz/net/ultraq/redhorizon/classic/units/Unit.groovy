@@ -101,27 +101,11 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	/**
-	 * Return the height of the unit, often determined by the sprite used for it.
-	 */
-	int getHeight() {
-
-		return bounds.lengthY()
-	}
-
-	/**
 	 * Return the name of the current state of the unit.
 	 */
 	String getState() {
 
 		return unitData.shpFile.states[stateIndex].name
-	}
-
-	/**
-	 * Return the width of the unit, often determined by the sprite used for it.
-	 */
-	int getWidth() {
-
-		return bounds.lengthX()
 	}
 
 	@Override

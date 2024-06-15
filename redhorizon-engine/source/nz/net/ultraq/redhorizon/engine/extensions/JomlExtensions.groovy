@@ -66,6 +66,14 @@ class JomlExtensions {
 	}
 
 	/**
+	 * Expand the borders of a rectangle to include another rectangle.
+	 */
+	static Rectanglef expand(Rectanglef self, Rectanglef other) {
+
+		return expand(self, other.minX, other.minY, other.maxX, other.maxY)
+	}
+
+	/**
 	 * Expand the borders of a rectangle to include a given points representing
 	 * another rectangle.
 	 */
@@ -73,14 +81,7 @@ class JomlExtensions {
 
 		self.setMin(Math.min(self.minX, minX), Math.min(self.minY, minY))
 		self.setMax(Math.max(self.maxX, maxX), Math.max(self.maxY, maxY))
-	}
-
-	/**
-	 * Scale just the X and Y components of a matrix by the same value.
-	 */
-	static Matrix4f scaleXY(Matrix4f self, float factor) {
-
-		return self.scaleXY(factor, factor)
+		return self
 	}
 
 	/**
@@ -109,13 +110,5 @@ class JomlExtensions {
 	static Matrix4f translate(Matrix4f self, float x, float y) {
 
 		return self.translate(x, y, 0)
-	}
-
-	/**
-	 * Translate this matrix by just an X and Y component.
-	 */
-	static Matrix4f translate(Matrix4f self, Vector2f vector) {
-
-		return self.translate(vector.x, vector.y, 0)
 	}
 }
