@@ -89,7 +89,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
 			scene

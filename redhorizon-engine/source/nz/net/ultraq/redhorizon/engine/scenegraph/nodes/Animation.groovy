@@ -84,7 +84,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
 			scene
@@ -99,16 +99,16 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 				}
 		)
 			.thenRunAsync { ->
-				return animationSource.onSceneAdded(scene)
+				return animationSource.onSceneAddedAsync(scene)
 			}
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		stop()
 		return CompletableFuture.allOf(
-			animationSource.onSceneRemoved(scene),
+			animationSource.onSceneRemovedAsync(scene),
 			scene.requestDelete(mesh)
 		)
 	}
@@ -187,32 +187,30 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneAdded(Scene scene) {
+		void onSceneAdded(Scene scene) {
 
-			return CompletableFuture.runAsync { ->
-				var buffersAdded = 0
-				streamingDecoder.on(StreamingFrameEvent) { event ->
-					frames << scene
-						.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
-						.get()
-					buffersAdded++
-					if (buffersAdded == 10) {
-						trigger(new PlaybackReadyEvent())
-					}
+			var buffersAdded = 0
+			streamingDecoder.on(StreamingFrameEvent) { event ->
+				frames << scene
+					.requestCreateOrGet(new TextureRequest(event.width, event.height, event.format, event.frameFlippedVertical))
+					.get()
+				buffersAdded++
+				if (buffersAdded == 10) {
+					trigger(new PlaybackReadyEvent())
 				}
+			}
 
-				// Run ourselves, otherwise expect the owner of this source to run this
-				if (autoStream) {
-					Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
-				}
-				else {
-					trigger(new StreamingReadyEvent())
-				}
+			// Run ourselves, otherwise expect the owner of this source to run this
+			if (autoStream) {
+				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+			}
+			else {
+				trigger(new StreamingReadyEvent())
 			}
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 			streamingDecoder.cancel(true)
 			return scene.requestDelete(frames.toArray(new Texture[0]))

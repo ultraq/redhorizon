@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CompletableFuture
 
 /**
  * Script for going forwards/backwards through a sprite files frames.
@@ -53,40 +52,35 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	void onSceneAdded(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			camera.setScaleXY(4)
+		camera.setScaleXY(4)
 
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
-				Math.wrap(currentFrame--, 0, numImages)
-				region.set(spriteSheet[currentFrame])
-			}, true))
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
-				Math.wrap(currentFrame++, 0, numImages)
-				region.set(spriteSheet[currentFrame])
-			}, true))
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
+			Math.wrap(currentFrame--, 0, numImages)
+			region.set(spriteSheet[currentFrame])
+		}, true))
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
+			Math.wrap(currentFrame++, 0, numImages)
+			region.set(spriteSheet[currentFrame])
+		}, true))
 
-			var Faction[] factions = Faction.values()
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
-				->
-				var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
-				logger.info("Viewing with ${selectedFaction.name()} faction colours")
-				accept { node ->
-					if (node instanceof FactionColours) {
-						node.faction = selectedFaction
-					}
+		var Faction[] factions = Faction.values()
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', { ->
+			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
+			logger.info("Viewing with ${selectedFaction.name()} faction colours")
+			accept { node ->
+				if (node instanceof FactionColours) {
+					node.faction = selectedFaction
 				}
-			}))
-		}
+			}
+		}))
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	void onSceneRemoved(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			camera.reset()
-			removeControlFunctions*.remove()
-		}
+		camera.reset()
+		removeControlFunctions*.remove()
 	}
 }

@@ -67,7 +67,7 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.supplyAsync { ->
 			var paletteData = buildPaletteBuffer()

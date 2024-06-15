@@ -28,17 +28,41 @@ interface SceneEvents {
 
 	/**
 	 * Called when this node is added to the scene.
+	 * <p>
+	 * If node setup is relatively simple, override this method insted of
+	 * {@link #onSceneAddedAsync}, which will wrap this one by default.
 	 */
-	default CompletableFuture<Void> onSceneAdded(Scene scene) {
+	default void onSceneAdded(Scene scene) {
+	}
 
-		return CompletableFuture<Void>.completedFuture(null)
+	/**
+	 * Called when this node is added to the scene.
+	 * <p>
+	 * If node setup is more complicated and needs to await calls to the various
+	 * sytems, override this method instead of {@link #onSceneAdded}.
+	 */
+	default CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+
+		return CompletableFuture.runAsync { -> onSceneAdded(scene) }
 	}
 
 	/**
 	 * Called when the node is removed from the scene.
+	 * <p>
+	 * If node cleanup is relatively simple, override this method insted of
+	 * {@link #onSceneRemovedAsync}, which will wrap this one by default.
 	 */
-	default CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	default void onSceneRemoved(Scene scene) {
+	}
 
-		return CompletableFuture<Void>.completedFuture(null)
+	/**
+	 * Called when the node is removed from the scene.
+	 * <p>
+	 * If node cleanup is more complicated and needs to await calls to the various
+	 * sytems, override this method instead of {@link #onSceneRemoved}.
+	 */
+	default CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+		return CompletableFuture.runAsync { -> onSceneRemoved(scene) }
 	}
 }

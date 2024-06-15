@@ -91,8 +91,8 @@ class Scene implements EventTarget, Visitable {
 	private CompletableFuture<Void> addNodeAndChildren(Node node) {
 
 		return CompletableFuture.allOf(
-			node.onSceneAdded(this),
-			node.script?.onSceneAdded(this) ?: CompletableFuture.completedFuture(null)
+			node.onSceneAddedAsync(this),
+			node.script?.onSceneAddedAsync(this) ?: CompletableFuture.completedFuture(null)
 		)
 			.thenRun { ->
 				trigger(new NodeAddedEvent(node))
@@ -196,8 +196,8 @@ class Scene implements EventTarget, Visitable {
 	private CompletableFuture<Void> removeNodeAndChildren(Node node) {
 
 		return CompletableFuture.allOf(
-			node.onSceneRemoved(this),
-			node.script?.onSceneRemoved(this) ?: CompletableFuture.completedFuture(null)
+			node.onSceneRemovedAsync(this),
+			node.script?.onSceneRemovedAsync(this) ?: CompletableFuture.completedFuture(null)
 		)
 			.thenRun { ->
 				trigger(new NodeRemovedEvent(node))

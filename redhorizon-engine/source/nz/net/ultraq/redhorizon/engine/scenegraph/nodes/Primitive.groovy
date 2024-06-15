@@ -74,7 +74,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
 			scene
@@ -94,7 +94,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(mesh)
 	}

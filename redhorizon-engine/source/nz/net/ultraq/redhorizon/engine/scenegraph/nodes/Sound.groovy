@@ -74,7 +74,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
 			scene
@@ -82,16 +82,16 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 				.thenAcceptAsync { newSource ->
 					source = newSource
 				},
-			soundSource.onSceneAdded(scene)
+			soundSource.onSceneAddedAsync(scene)
 		)
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		stop()
 		return CompletableFuture.allOf(
-			soundSource.onSceneRemoved(scene),
+			soundSource.onSceneRemovedAsync(scene),
 			scene.requestDelete(source)
 		)
 	}
@@ -163,7 +163,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		private Buffer staticBuffer
 
 		@Override
-		CompletableFuture<Void> onSceneAdded(Scene scene) {
+		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 			return scene
 				.requestCreateOrGet(new BufferRequest(soundFile.bits, soundFile.channels, soundFile.frequency, soundFile.soundData))
@@ -176,7 +176,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 			return scene.requestDelete(staticBuffer)
 		}
@@ -203,32 +203,30 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 		private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 
 		@Override
-		CompletableFuture<Void> onSceneAdded(Scene scene) {
+		void onSceneAdded(Scene scene) {
 
-			return CompletableFuture.runAsync { ->
-				var buffersAdded = 0
-				streamingDecoder.on(StreamingSampleEvent) { event ->
-					streamingBuffers << scene
-						.requestCreateOrGet(new BufferRequest(event.bits, event.channels, event.frequency, event.sample))
-						.get()
-					buffersAdded++
-					if (buffersAdded == 10) {
-						trigger(new PlaybackReadyEvent())
-					}
+			var buffersAdded = 0
+			streamingDecoder.on(StreamingSampleEvent) { event ->
+				streamingBuffers << scene
+					.requestCreateOrGet(new BufferRequest(event.bits, event.channels, event.frequency, event.sample))
+					.get()
+				buffersAdded++
+				if (buffersAdded == 10) {
+					trigger(new PlaybackReadyEvent())
 				}
+			}
 
-				// Run ourselves, otherwise expect the owner of this source to run this
-				if (autoStream) {
-					Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
-				}
-				else {
-					trigger(new StreamingReadyEvent())
-				}
+			// Run ourselves, otherwise expect the owner of this source to run this
+			if (autoStream) {
+				Executors.newVirtualThreadPerTaskExecutor().execute(streamingDecoder)
+			}
+			else {
+				trigger(new StreamingReadyEvent())
 			}
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 			streamingDecoder.cancel(true)
 			return scene.requestDelete(streamedBuffers.drain().toArray(new Buffer[0]))

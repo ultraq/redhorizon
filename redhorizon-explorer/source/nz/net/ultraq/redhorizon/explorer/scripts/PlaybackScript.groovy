@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
-import java.util.concurrent.CompletableFuture
 
 /**
  * A script to control playback of a playable media node.
@@ -52,62 +51,58 @@ class PlaybackScript extends Script {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	void onSceneAdded(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
-				if (runOnce) {
-					logger.debug('Pausing/Resuming playback')
-					scene.gameClock.togglePause()
+		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+			if (runOnce) {
+				logger.debug('Pausing/Resuming playback')
+				scene.gameClock.togglePause()
+			}
+			else {
+				if (!playing || paused) {
+					logger.debug('Playing')
+					play()
 				}
-				else {
-					if (!playing || paused) {
-						logger.debug('Playing')
-						play()
-					}
-				}
-			}))
-
-			if (scriptable instanceof Sound) {
-				removeControlFunctions << scene.inputEventStream.addControl(
-					new KeyControl(GLFW_KEY_A, 'Move audio source left', { ->
-						scriptable.transform.translate(-0.25, 0)
-						logger.debug('Sound at: {}', scriptable.position.x)
-					})
-				)
-				removeControlFunctions << scene.inputEventStream.addControl(
-					new KeyControl(GLFW_KEY_D, 'Move audio source right', { ->
-						scriptable.transform.translate(0.25, 0)
-						logger.debug('Sound at: {}', scriptable.position.x)
-					})
-				)
 			}
+		}))
 
-			on(PlaybackReadyEvent) { event ->
-				logger.debug('Beginning playback')
-				play()
-			}
+		if (scriptable instanceof Sound) {
+			removeControlFunctions << scene.inputEventStream.addControl(
+				new KeyControl(GLFW_KEY_A, 'Move audio source left', { ->
+					scriptable.transform.translate(-0.25, 0)
+					logger.debug('Sound at: {}', scriptable.position.x)
+				})
+			)
+			removeControlFunctions << scene.inputEventStream.addControl(
+				new KeyControl(GLFW_KEY_D, 'Move audio source right', { ->
+					scriptable.transform.translate(0.25, 0)
+					logger.debug('Sound at: {}', scriptable.position.x)
+				})
+			)
+		}
 
-			// Static sound sources will have fired the above already, so start playback of them here
-			if (!runOnce) {
-				logger.debug('Beginning playback')
-				play()
-			}
+		on(PlaybackReadyEvent) { event ->
+			logger.debug('Beginning playback')
+			play()
+		}
 
-			on(StopEvent) { event ->
-				logger.debug('Playback complete')
-			}
+		// Static sound sources will have fired the above already, so start playback of them here
+		if (!runOnce) {
+			logger.debug('Beginning playback')
+			play()
+		}
+
+		on(StopEvent) { event ->
+			logger.debug('Playback complete')
 		}
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	void onSceneRemoved(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			removeControlFunctions*.remove()
-			if (scene.gameClock.paused) {
-				scene.gameClock.resume()
-			}
+		removeControlFunctions*.remove()
+		if (scene.gameClock.paused) {
+			scene.gameClock.resume()
 		}
 	}
 }

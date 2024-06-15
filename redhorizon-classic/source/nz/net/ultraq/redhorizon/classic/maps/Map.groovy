@@ -127,7 +127,7 @@ class Map extends Node<Map> {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
 			return tileSet.tileFileList
@@ -169,7 +169,7 @@ class Map extends Node<Map> {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(tileSet.spriteSheet)
 	}
@@ -293,7 +293,7 @@ class Map extends Node<Map> {
 		protected Material material = new Material()
 
 		@Override
-		CompletableFuture<Void> onSceneAdded(Scene scene) {
+		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 			return CompletableFuture.allOf(
 				CompletableFuture.supplyAsync { ->
@@ -332,7 +332,7 @@ class Map extends Node<Map> {
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 			return scene.requestDelete(fullMesh)
 		}

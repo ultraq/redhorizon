@@ -184,22 +184,18 @@ class MapViewerScript extends Script<Map> {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	void onSceneAdded(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			inputEventStream = scene.inputEventStream
-			window = scene.window
-			gameWindow = scene.gameWindow
-			addControls()
-		}
+		inputEventStream = scene.inputEventStream
+		window = scene.window
+		gameWindow = scene.gameWindow
+		addControls()
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	void onSceneRemoved(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			clearControls()
-		}
+		clearControls()
 	}
 
 	/**

@@ -34,7 +34,6 @@ import org.joml.Vector3f
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonSlurper
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
 /**
@@ -128,87 +127,83 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		private boolean bobbing
 
 		@Override
-		CompletableFuture<Void> onSceneAdded(Scene scene) {
+		void onSceneAdded(Scene scene) {
 
-			return CompletableFuture.runAsync { ->
-				bobbing = true
+			bobbing = true
 
-				// Unit bobbing
-				Executors.newVirtualThreadPerTaskExecutor().execute { ->
-					while (bobbing) {
-						var bob = 0.0625 * Math.sin(currentTimeMs / 750)
-						var unitPosition = unit.position
-						unit.setPosition(unitPosition.x, unitPosition.y + bob as float, unitPosition.z)
-						Thread.sleep(10)
-					}
+			// Unit bobbing
+			Executors.newVirtualThreadPerTaskExecutor().execute { ->
+				while (bobbing) {
+					var bob = 0.0625 * Math.sin(currentTimeMs / 750)
+					var unitPosition = unit.position
+					unit.setPosition(unitPosition.x, unitPosition.y + bob as float, unitPosition.z)
+					Thread.sleep(10)
 				}
-
-				// TODO: Inertia and momentum
-				scene.inputEventStream.addControls(
-					new KeyControl(GLFW_KEY_W, 'Move forward',
-						{ ->
-							forward += FORWARD_SPEED
-							startMovement()
-						},
-						{ ->
-							forward -= FORWARD_SPEED
-						}
-					),
-					new KeyControl(GLFW_KEY_S, 'Move backward',
-						{ ->
-							forward -= FORWARD_SPEED
-							startMovement()
-						},
-						{ ->
-							forward += FORWARD_SPEED
-						}
-					),
-					new KeyControl(GLFW_KEY_A, 'Move left',
-						{ ->
-							strafing -= STRAFING_SPEED
-							startMovement()
-						},
-						{ ->
-							strafing += STRAFING_SPEED
-						}
-					),
-					new KeyControl(GLFW_KEY_D, 'Move right',
-						{ ->
-							strafing += STRAFING_SPEED
-							startMovement()
-						},
-						{ ->
-							strafing -= STRAFING_SPEED
-						}
-					),
-					new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
-						{ ->
-							rotation -= ROTATION_SPEED
-							startMovement()
-						},
-						{ ->
-							rotation += ROTATION_SPEED
-						}
-					),
-					new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
-						{ ->
-							rotation += ROTATION_SPEED
-							startMovement()
-						},
-						{ ->
-							rotation -= ROTATION_SPEED
-						}
-					)
-				)
 			}
+
+			// TODO: Inertia and momentum
+			scene.inputEventStream.addControls(
+				new KeyControl(GLFW_KEY_W, 'Move forward',
+					{ ->
+						forward += FORWARD_SPEED
+						startMovement()
+					},
+					{ ->
+						forward -= FORWARD_SPEED
+					}
+				),
+				new KeyControl(GLFW_KEY_S, 'Move backward',
+					{ ->
+						forward -= FORWARD_SPEED
+						startMovement()
+					},
+					{ ->
+						forward += FORWARD_SPEED
+					}
+				),
+				new KeyControl(GLFW_KEY_A, 'Move left',
+					{ ->
+						strafing -= STRAFING_SPEED
+						startMovement()
+					},
+					{ ->
+						strafing += STRAFING_SPEED
+					}
+				),
+				new KeyControl(GLFW_KEY_D, 'Move right',
+					{ ->
+						strafing += STRAFING_SPEED
+						startMovement()
+					},
+					{ ->
+						strafing -= STRAFING_SPEED
+					}
+				),
+				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
+					{ ->
+						rotation -= ROTATION_SPEED
+						startMovement()
+					},
+					{ ->
+						rotation += ROTATION_SPEED
+					}
+				),
+				new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
+					{ ->
+						rotation += ROTATION_SPEED
+						startMovement()
+					},
+					{ ->
+						rotation -= ROTATION_SPEED
+					}
+				)
+			)
 		}
 
 		@Override
-		CompletableFuture<Void> onSceneRemoved(Scene scene) {
+		void onSceneRemoved(Scene scene) {
 
-			return CompletableFuture.runAsync { ->
-				bobbing = false
-			}
+			bobbing = false
 		}
 
 		// TODO: Really needs to be the delta between frame updates

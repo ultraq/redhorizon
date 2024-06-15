@@ -92,7 +92,7 @@ class Camera extends Node<Camera> {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.supplyAsync { ->
 			return stackPush().withCloseable { stack ->

@@ -50,7 +50,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	final Rectanglef region = new Rectanglef(0, 0, 1, 1)
 
 	/**
-	 * The frame to load from the sprite sheet in {@link #onSceneAdded}.
+	 * The frame to load from the sprite sheet in {@link #onSceneAddedAsync}.
 	 */
 	int initialFrame = 0
 
@@ -94,7 +94,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
 			scene
@@ -117,7 +117,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(mesh, spriteSheet)
 	}

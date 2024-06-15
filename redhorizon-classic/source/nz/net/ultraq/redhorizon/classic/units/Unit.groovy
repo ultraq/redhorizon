@@ -109,7 +109,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return scene
 			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
@@ -119,7 +119,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneRemoved(Scene scene) {
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(spriteSheet)
 	}

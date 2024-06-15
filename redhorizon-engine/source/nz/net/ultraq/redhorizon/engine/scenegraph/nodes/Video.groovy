@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound.StreamingSoundSour
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
@@ -63,27 +62,25 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 	}
 
 	@Override
-	CompletableFuture<Void> onSceneAdded(Scene scene) {
+	void onSceneAdded(Scene scene) {
 
-		return CompletableFuture.runAsync { ->
-			var executor = Executors.newVirtualThreadPerTaskExecutor()
-			var startExecutorLatch = new CountDownLatch(2)
-			[animation, sound]*.on(StreamingReadyEvent) { event ->
-				startExecutorLatch.countDown()
-			}
-			executor.execute { ->
-				startExecutorLatch.await()
-				executor.execute(streamingDecoder)
-			}
+		var executor = Executors.newVirtualThreadPerTaskExecutor()
+		var startExecutorLatch = new CountDownLatch(2)
+		[animation, sound]*.on(StreamingReadyEvent) { event ->
+			startExecutorLatch.countDown()
+		}
+		executor.execute { ->
+			startExecutorLatch.await()
+			executor.execute(streamingDecoder)
+		}
 
-			var buffersReadyLatch = new CountDownLatch(2)
-			[animation, sound]*.on(PlaybackReadyEvent) { event ->
-				buffersReadyLatch.countDown()
-			}
-			executor.execute { ->
-				buffersReadyLatch.await()
-				trigger(new PlaybackReadyEvent())
-			}
+		var buffersReadyLatch = new CountDownLatch(2)
+		[animation, sound]*.on(PlaybackReadyEvent) { event ->
+			buffersReadyLatch.countDown()
+		}
+		executor.execute { ->
+			buffersReadyLatch.await()
+			trigger(new PlaybackReadyEvent())
 		}
 	}
 
