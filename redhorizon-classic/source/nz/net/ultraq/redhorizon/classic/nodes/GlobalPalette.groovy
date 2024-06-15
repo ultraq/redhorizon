@@ -94,6 +94,12 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 	}
 
 	@Override
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+		return scene.requestDelete(paletteAndAlphaMaskBuffer)
+	}
+
+	@Override
 	void render(GraphicsRenderer renderer) {
 	}
 

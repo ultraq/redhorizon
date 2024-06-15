@@ -70,6 +70,7 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		ImGui.text("Active meshes: ${engineStats.activeMeshes}")
 		ImGui.text("Active textures: ${engineStats.activeTextures}")
 		ImGui.text("Active framebuffers: ${engineStats.activeFramebuffers}")
+		ImGui.text("Active uniform buffers: ${engineStats.activeUniformBuffers}")
 		ImGui.text("Active sources: ${engineStats.activeSources}")
 		ImGui.text("Active buffers: ${engineStats.activeBuffers}")
 		engineStats.drawCalls.set(0)

@@ -107,6 +107,12 @@ class Camera extends Node<Camera> {
 			}
 	}
 
+	@Override
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+		return scene.requestDelete(viewProjectionBuffer)
+	}
+
 	/**
 	 * Reset this camera's properties.
 	 */
