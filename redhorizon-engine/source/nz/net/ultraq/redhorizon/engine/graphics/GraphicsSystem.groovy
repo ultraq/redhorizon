@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
+import nz.net.ultraq.redhorizon.engine.input.GamepadStateProcessor
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
@@ -57,7 +58,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private OpenGLRenderer renderer
 	private ImGuiLayer imGuiLayer
 	private RenderPipeline renderPipeline
-
 	private boolean shouldToggleFullScreen
 	private boolean shouldToggleVsync
 	private long lastClickTime
@@ -184,6 +184,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		Thread.currentThread().name = 'Graphics System'
 		logger.debug('Starting graphics system')
 
+		var gamepadStateProcessor = new GamepadStateProcessor(inputEventStream)
+
 		// Initialization
 		new OpenGLContext(windowTitle, config).withCloseable { context ->
 			window = context.window
@@ -237,6 +239,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 									pipeline.render()
 									window.swapBuffers()
 									window.pollEvents()
+									gamepadStateProcessor.process()
 								}
 								catch (InterruptedException ignored) {
 									break
