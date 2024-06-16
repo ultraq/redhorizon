@@ -64,6 +64,15 @@ class GamepadStateProcessor {
 			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X, 'Gamepad right stick X: {}')
 			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Gamepad right stick Y: {}')
 		}
+
+		// Gamepad mappings not working on macOS, have to use joystick 😢
+		else if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
+			var axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1)
+			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_X, 'Gamepad left stick X: {}')
+			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y, 'Gamepad left stick Y: {}')
+			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X, 'Gamepad right stick X: {}')
+			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Gamepad right stick Y: {}')
+		}
 	}
 
 	/**

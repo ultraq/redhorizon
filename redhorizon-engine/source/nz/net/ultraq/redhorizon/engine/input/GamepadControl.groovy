@@ -16,8 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import static org.lwjgl.glfw.GLFW.GLFW_GAMEPAD_AXIS_LEFT_X
-import static org.lwjgl.glfw.GLFW.GLFW_GAMEPAD_AXIS_LEFT_Y
+import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -51,6 +50,8 @@ class GamepadControl extends Control<GamepadAxisEvent> {
 		return switch (type) {
 			case GLFW_GAMEPAD_AXIS_LEFT_X -> 'Left stick X axis'
 			case GLFW_GAMEPAD_AXIS_LEFT_Y -> 'Left stick Y axis'
+			case GLFW_GAMEPAD_AXIS_RIGHT_X -> 'Right stick X axis'
+			case GLFW_GAMEPAD_AXIS_RIGHT_Y -> 'Right stick Y axis'
 			default -> '(unknown)'
 		}
 	}

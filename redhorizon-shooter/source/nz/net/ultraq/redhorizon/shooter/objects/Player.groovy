@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -43,19 +44,18 @@ import java.util.concurrent.Executors
  */
 class Player extends Node<Player> implements GraphicsElement, Rotatable, Temporal {
 
-	private static final float FORWARD_SPEED = 100f
-	private static final float ROTATION_SPEED = 120f
-	private static final float STRAFING_SPEED = 50f
+	private static final float MOVEMENT_SPEED = 100f
+	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
 	private final Unit unit
 	private final float xPosRange
 	private final float yPosRange
-	private final Vector2f velocity = new Vector2f()
-	private final Vector2f direction = new Vector2f()
-//	private float forward = 0f
-//	private float strafing = 0f
-//	private float rotation = 0f
+
+	private Vector2f velocity = new Vector2f()
+	private Vector2f direction = new Vector2f()
+	private Vector2f movement = new Vector2f()
+	private float rotation = 0f
 	private long moveUpdateTimeMs
 
 	/**
@@ -106,28 +106,23 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		// TODO: It'd help if we got a frame delta in here, so update() might need
 		//       to provide that.
 		var moveCurrentTimeMs = currentTimeMs
-		var frameDelta = (moveCurrentTimeMs - moveUpdateTimeMs) / 1000
+		var frameDelta = (moveCurrentTimeMs - (moveUpdateTimeMs ?: moveCurrentTimeMs)) / 1000
 
-		// Keyboard action
-//		if (forward || strafing || rotation) {
-//			heading += rotation * frameDelta
-//			var v = velocity.set(strafing, forward, 0).mul(frameDelta).rotateZ(Math.toRadians(-heading) as float)
-//			var currentPosition = getPosition()
-//			setPosition(
-//				Math.clamp(currentPosition.x + v.x as float, -xPosRange, xPosRange),
-//				Math.clamp(currentPosition.y + v.y as float, -yPosRange, yPosRange)
-//			)
-//		}
-		// Gamepad action
 		if (velocity.length()) {
 			var currentPosition = getPosition()
-			var v = new Vector2f(velocity).mul(frameDelta)
+			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(frameDelta)
 			setPosition(
-				Math.clamp(currentPosition.x + v.x as float, -xPosRange, xPosRange),
-				Math.clamp(currentPosition.y + v.y as float, -yPosRange, yPosRange)
+				Math.clamp(currentPosition.x + movement.x as float, -xPosRange, xPosRange),
+				Math.clamp(currentPosition.y + movement.y as float, -yPosRange, yPosRange)
 			)
 		}
-		if (direction.length()) {
+
+		// Keyboard rotation
+		if (rotation) {
+			heading = heading + rotation * ROTATION_SPEED * frameDelta as float
+		}
+		// Gamepad rotation
+		else if (direction.length()) {
 			heading = Math.toDegrees(direction.angle(up)) as float
 		}
 
@@ -146,7 +141,7 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 
 			bobbing = true
 
-			// Unit bobbing
+			// Helicopter bobbing
 			Executors.newVirtualThreadPerTaskExecutor().execute { ->
 				while (bobbing) {
 					var bob = 0.0625 * Math.sin(currentTimeMs / 750)
@@ -157,71 +152,42 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 			}
 
 			// TODO: Inertia and momentum
+
 			// Keyboard controls
-//			scene.inputEventStream.addControls(
-//				new KeyControl(GLFW_KEY_W, 'Move forward',
-//					{ ->
-//						forward += FORWARD_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						forward -= FORWARD_SPEED
-//					}
-//				),
-//				new KeyControl(GLFW_KEY_S, 'Move backward',
-//					{ ->
-//						forward -= FORWARD_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						forward += FORWARD_SPEED
-//					}
-//				),
-//				new KeyControl(GLFW_KEY_A, 'Move left',
-//					{ ->
-//						strafing -= STRAFING_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						strafing += STRAFING_SPEED
-//					}
-//				),
-//				new KeyControl(GLFW_KEY_D, 'Move right',
-//					{ ->
-//						strafing += STRAFING_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						strafing -= STRAFING_SPEED
-//					}
-//				),
-//				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
-//					{ ->
-//						rotation -= ROTATION_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						rotation += ROTATION_SPEED
-//					}
-//				),
-//				new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
-//					{ ->
-//						rotation += ROTATION_SPEED
-//						startMovement()
-//					},
-//					{ ->
-//						rotation -= ROTATION_SPEED
-//					}
-//				)
-//			)
+			scene.inputEventStream.addControls(
+				new KeyControl(GLFW_KEY_W, 'Move up',
+					{ -> velocity.y += 1 },
+					{ -> velocity.y -= 1 }
+				),
+				new KeyControl(GLFW_KEY_S, 'Move down',
+					{ -> velocity.y -= 1 },
+					{ -> velocity.y += 1 }
+				),
+				new KeyControl(GLFW_KEY_A, 'Move left',
+					{ -> velocity.x -= 1 },
+					{ -> velocity.x += 1 }
+				),
+				new KeyControl(GLFW_KEY_D, 'Move right',
+					{ -> velocity.x += 1 },
+					{ -> velocity.x -= 1 }
+				),
+				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
+					{ -> rotation -= 1 },
+					{ -> rotation += 1 }
+				),
+				new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
+					{ -> rotation += 1 },
+					{ -> rotation -= 1 }
+				)
+			)
 
 			// Gamepad controls
 			scene.inputEventStream.addControls(
 				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_X, 'Movement along the X axis', { value ->
-					velocity.x = value * FORWARD_SPEED
+					velocity.x = value
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_Y, 'Movement along the Y axis', { value ->
-					velocity.y = -value * FORWARD_SPEED
+					velocity.y = -value
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_X, 'Heading along the X axis', { value ->
 					direction.x = value
@@ -236,14 +202,6 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		void onSceneRemoved(Scene scene) {
 
 			bobbing = false
-		}
-
-		// TODO: Really needs to be the delta between frame updates
-		private void startMovement() {
-
-			if (!moveUpdateTimeMs) {
-				moveUpdateTimeMs = currentTimeMs
-			}
 		}
 	}
 }
