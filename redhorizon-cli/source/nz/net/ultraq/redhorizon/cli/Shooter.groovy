@@ -30,6 +30,10 @@ import java.util.concurrent.Callable
 @Command(name = 'shooter')
 class Shooter implements Callable<Integer> {
 
+	static {
+		System.setProperty('logback.configurationFile', 'logback-application.xml')
+	}
+
 	@Spec
 	CommandSpec commandSpec
 

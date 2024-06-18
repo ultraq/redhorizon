@@ -18,10 +18,13 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.input.GamepadAxisEvent
+import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 
 import imgui.ImGui
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * An overlay rendering pass for displaying debug information about the game.
@@ -36,12 +39,17 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 	private int debugWindowSizeY = 200
 	private final EngineStats engineStats
 
+	private float leftX
+	private float leftY
+	private float rightX
+	private float rightY
+
 	/**
 	 * Constructor, create a new blank overlay.  This is made more useful by
 	 * adding the renderers via the {@code add*} methods to get stats on their
 	 * use.
 	 */
-	DebugOverlay(boolean enabled) {
+	DebugOverlay(InputEventStream inputEventStream, boolean enabled) {
 
 		ImGuiLoggingAppender.instance?.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
@@ -49,6 +57,15 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 			}
 		}
 		engineStats = EngineStats.instance
+
+		inputEventStream.on(GamepadAxisEvent) { event ->
+			switch (event.type) {
+				case GLFW_GAMEPAD_AXIS_LEFT_X -> leftX = event.value
+				case GLFW_GAMEPAD_AXIS_LEFT_Y -> leftY = event.value
+				case GLFW_GAMEPAD_AXIS_RIGHT_X -> rightX = event.value
+				case GLFW_GAMEPAD_AXIS_RIGHT_Y -> rightY = event.value
+			}
+		}
 
 		this.enabled = enabled
 	}
@@ -73,6 +90,9 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		ImGui.text("Active uniform buffers: ${engineStats.activeUniformBuffers}")
 		ImGui.text("Active sources: ${engineStats.activeSources}")
 		ImGui.text("Active buffers: ${engineStats.activeBuffers}")
+		ImGui.text("Gamepad sticks: " +
+			"(${sprintf('%.2f', leftX)}, ${sprintf('%.2f', leftY)}) " +
+			"(${sprintf('%.2f', rightX)}, ${sprintf('%.2f', rightY)})")
 		engineStats.drawCalls.set(0)
 
 		ImGui.separator()

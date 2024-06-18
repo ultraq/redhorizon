@@ -52,12 +52,6 @@ class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements E
 				persistentKey: eventObject.argumentArray[0]
 			))
 		}
-		else if (eventObject.loggerName.contains('GamepadStateProcessor')) {
-			trigger(new ImGuiLogEvent(
-				message: message,
-				persistentKey: eventObject.message
-			))
-		}
 		else {
 			trigger(new ImGuiLogEvent(
 				message: message

@@ -99,7 +99,7 @@ class Application implements EventTarget {
 			inputEventStream.addInputSource(event.window)
 		}
 		graphicsSystem.on(SystemReadyEvent) { event ->
-			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
+			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputEventStream, config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
 			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
 			uiElements.each { overlayRenderPass ->
 				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)

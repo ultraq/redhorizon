@@ -31,7 +31,7 @@ import java.util.concurrent.Callable
 class Explorer implements Callable<Integer> {
 
 	static {
-		System.setProperty('logback.configurationFile', 'logback-explorer.xml')
+		System.setProperty('logback.configurationFile', 'logback-application.xml')
 	}
 
 	@Spec

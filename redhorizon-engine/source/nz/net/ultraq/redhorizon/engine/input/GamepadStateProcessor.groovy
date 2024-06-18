@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.engine.input
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 
 import org.lwjgl.glfw.GLFWGamepadState
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
@@ -42,8 +40,6 @@ import java.nio.FloatBuffer
 @TupleConstructor(defaults = false)
 class GamepadStateProcessor {
 
-	private static final Logger logger = LoggerFactory.getLogger(GamepadStateProcessor)
-
 	final InputEventStream inputEventStream
 
 	@Lazy
@@ -57,31 +53,31 @@ class GamepadStateProcessor {
 
 		if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
 			glfwGetGamepadState(GLFW_JOYSTICK_1, gamepadState)
-
-			var axes = gamepadState.axes()
-			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_X, 'Gamepad left stick X: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y, 'Gamepad left stick Y: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X, 'Gamepad right stick X: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Gamepad right stick Y: {}')
+			processAxes(gamepadState.axes())
 		}
-
 		// Gamepad mappings not working on macOS, have to use joystick 😢
 		else if (glfwJoystickPresent(GLFW_JOYSTICK_1)) {
-			var axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1)
-			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_X, 'Gamepad left stick X: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y, 'Gamepad left stick Y: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X, 'Gamepad right stick X: {}')
-			processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Gamepad right stick Y: {}')
+			processAxes(glfwGetJoystickAxes(GLFW_JOYSTICK_1))
 		}
+	}
+
+	/**
+	 * Process a set of axes.
+	 */
+	private void processAxes(FloatBuffer axes) {
+
+		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_X)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y)
 	}
 
 	/**
 	 * Process a single axis.
 	 */
-	private void processAxis(FloatBuffer axes, int type, String logMessage) {
+	private void processAxis(FloatBuffer axes, int type) {
 
 		var value = axes.get(type)
-		logger.debug(logMessage, sprintf('%.2f', value))
 		inputEventStream.trigger(new GamepadAxisEvent(type, value <= -0.2f || 0.2f <= value ? value : 0f))
 	}
 }
