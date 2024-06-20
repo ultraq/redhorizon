@@ -27,8 +27,10 @@ import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Outline
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.events.RemoveEventFunction
 import nz.net.ultraq.redhorizon.explorer.NodeList
@@ -62,6 +64,7 @@ class MapViewerScript extends Script<Map> {
 	private InputEventStream inputEventStream
 	private Window window
 	private GameWindow gameWindow
+	private Node selectedNode
 
 	@Delegate
 	Map applyDelegate() {
@@ -160,12 +163,18 @@ class MapViewerScript extends Script<Map> {
 		}
 
 		nodeList.on(NodeSelectedEvent) { event ->
-			var node = event.node
-			var position = new Vector3f(node.globalPosition).add(
-				node.globalBounds.lengthX() / 2 as float,
-				node.globalBounds.lengthY() / 2 as float,
-				0)
-			moveCameraTo(position)
+			if (selectedNode) {
+				selectedNode.removeChild { node -> node instanceof Outline }
+			}
+
+			selectedNode = event.node.addChild(new Outline(event.node.bounds))
+			moveCameraTo(
+				new Vector3f(selectedNode.globalPosition).add(
+					selectedNode.globalBounds.lengthX() / 2 as float,
+					selectedNode.globalBounds.lengthY() / 2 as float,
+					0
+				)
+			)
 		}
 
 		// Custom inputs

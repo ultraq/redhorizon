@@ -47,14 +47,14 @@ class GridLines extends Node<GridLines> {
 
 		// TODO: Add support for vertices with different colours
 		var cellLines = new Primitive(MeshType.LINES, new Colour('GridLines-Grey', 0.6, 0.6, 0.6), lines as Vector2f[])
-		cellLines.name = "Step lines"
+		cellLines.name = 'Step lines'
 		addChild(cellLines)
 
 		var originLines = new Primitive(MeshType.LINES, new Colour('GridLines-DarkGrey', 0.2, 0.2, 0.2),
 			new Vector2f(coordMin, 0), new Vector2f(coordMax, 0),
 			new Vector2f(0, coordMin), new Vector2f(0, coordMax)
 		)
-		originLines.name = "Origin lines"
+		originLines.name = 'Origin lines'
 		addChild(originLines)
 	}
 }

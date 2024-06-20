@@ -29,10 +29,9 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
@@ -44,7 +43,7 @@ class Scene implements EventTarget, Visitable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Scene)
 
-	final List<Node> nodes = new CopyOnWriteArrayList<>()
+	final Node root = new RootNode(this)
 
 	// TODO: This stuff is really all 'scene/application context' objects, so
 	//       should be moved to something as such 🤔
@@ -67,67 +66,43 @@ class Scene implements EventTarget, Visitable {
 	@Override
 	void accept(SceneVisitor visitor) {
 
-		nodes.each { node ->
-			node.accept(visitor)
-		}
+		root.accept(visitor)
 	}
 
 	/**
-	 * Add a top-level node to this scene.
+	 * Add a top-level node to this scene.  Shorthand for
+	 * {@code scene.root.addNode(node)}.
 	 */
 	Scene addNode(Node node) {
 
-		return time('Adding node', logger) { ->
-			nodes << node
-			addNodeAndChildren(node).join()
-			return this
+		time('Adding node', logger) { ->
+			root.addChild(node)
 		}
+		return this
 	}
 
 	/**
-	 * Trigger the {@code onSceneAdded} event for this node and all its children.
-	 * Each node triggers a {@link NodeAddedEvent} event.
-	 */
-	private CompletableFuture<Void> addNodeAndChildren(Node node) {
-
-		return CompletableFuture.allOf(
-			node.onSceneAddedAsync(this),
-			node.script?.onSceneAddedAsync(this) ?: CompletableFuture.completedFuture(null)
-		)
-			.thenRun { ->
-				trigger(new NodeAddedEvent(node))
-			}
-			.thenCompose { _ ->
-				var futures = node.children.collect { childNode -> addNodeAndChildren(childNode) }
-
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
-			}
-	}
-
-	/**
-	 * Clear this scene's existing elements.
+	 * Clear this scene's existing elements.  Shorthand for
+	 * {@code scene.root.clear()}.
 	 */
 	void clear() {
 
 		time('Clearing scene', logger) { ->
-			nodes.each { node ->
-				removeNode(node)
-			}
+			root.clear()
 		}
 	}
 
 	/**
 	 * Locate the first node in the scene that satisfies the given predicate.
+	 * Shorthand for {@code scene.root.findChild(predicate)}.
 	 *
 	 * @param predicate
 	 * @return
 	 *   The matching node, or {@code null} if no match is found.
 	 */
-	<T extends Node> T findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
+	Node findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
 
-		return (T)nodes.find(predicate)
+		return root.findNode(predicate)
 	}
 
 	/**
@@ -173,7 +148,8 @@ class Scene implements EventTarget, Visitable {
 //	}
 
 	/**
-	 * Removes a top-level node from the scene.
+	 * Removes a top-level node from the scene.  Shorthand for
+	 * {@code scene.root.removeChild(node)}.
 	 *
 	 * @param node
 	 *   The node to remove.  If {@code null}, then this method does nothing.
@@ -182,32 +158,30 @@ class Scene implements EventTarget, Visitable {
 	 */
 	Scene removeNode(Node node) {
 
-		if (node) {
-			nodes.remove(node)
-			removeNodeAndChildren(node).join()
+		time('Removing node', logger) { ->
+			root.removeChild(node)
 		}
 		return this
 	}
 
 	/**
-	 * Trigger the {@code onSceneRemoved} event for this node and all its
-	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
+	 * A special instance of {@link Node} that is always present in the scene.
 	 */
-	private CompletableFuture<Void> removeNodeAndChildren(Node node) {
+	@TupleConstructor(defaults = false)
+	private static class RootNode extends Node<RootNode> {
 
-		return CompletableFuture.allOf(
-			node.onSceneRemovedAsync(this),
-			node.script?.onSceneRemovedAsync(this) ?: CompletableFuture.completedFuture(null)
-		)
-			.thenRun { ->
-				trigger(new NodeRemovedEvent(node))
-			}
-			.thenCompose { _ ->
-				var futures = node.children.collect { childNode -> removeNodeAndChildren(childNode) }
+		final Scene scene
 
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
-			}
+		@Override
+		String getName() {
+
+			return 'Root node'
+		}
+
+		@Override
+		protected Scene getScene() {
+
+			return scene
+		}
 	}
 }

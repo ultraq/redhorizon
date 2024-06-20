@@ -24,6 +24,9 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -55,26 +58,71 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
-	 * Adds a child node to this node.
+	 * Adds a child node to this node.  If an index is specified, then this will
+	 * shift any existing nodes at the given position to the right to make room.
 	 */
-	T addChild(Node child) {
+	T addChild(Node child, int index = -1) {
 
-		children << child
+		if (index != -1) {
+			children.add(index, child)
+		}
+		else {
+			children.add(child)
+		}
 		child.parent = this
-
+		var scene = getScene()
+		if (scene) {
+			addNodeAndChildren(scene, child).join()
+		}
 		bounds.expand(child.bounds)
 		return this
 	}
 
 	/**
-	 * Adds a child node to this node, shifting any existing nodes at the given
-	 * position to the right to make room.
+	 * Trigger the {@code onSceneAdded} event for this node and all its children.
+	 * Each node triggers a {@link NodeAddedEvent} event.
 	 */
-	T addChild(int index, Node child) {
+	protected CompletableFuture<Void> addNodeAndChildren(Scene scene, Node node) {
 
-		children.add(index, child)
-		child.parent = this
-		return this
+		return CompletableFuture.allOf(
+			node.onSceneAddedAsync(scene),
+			node.script?.onSceneAddedAsync(scene) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRun { ->
+				scene.trigger(new NodeAddedEvent(node))
+			}
+			.thenCompose { _ ->
+				var futures = node.children.collect { childNode -> addNodeAndChildren(scene, childNode) }
+
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
+	}
+
+	/**
+	 * Remove all child nodes from this node.
+	 */
+	void clear() {
+
+		children.each { child ->
+			removeChild(child)
+		}
+	}
+
+	/**
+	 * Locate the first node in the scene that satisfies the given predicate.
+	 * Shorthand for {@code scene.root.findChild(predicate)}.
+	 *
+	 * @param predicate
+	 * @return
+	 *   The matching node, or {@code null} if no match is found.
+	 */
+	Node findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
+
+		return children.find { node ->
+			return predicate(node) ? node : node.findNode(predicate)
+		}
 	}
 
 	/**
@@ -160,6 +208,15 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	}
 
 	/**
+	 * Walk up the scene graph to locate and return the scene to which this node
+	 * belongs.
+	 */
+	protected Scene getScene() {
+
+		return parent?.getScene()
+	}
+
+	/**
 	 * Return the width of the node.  This is a shortcut for calling
 	 * {@code bounds.lengthX()}.
 	 */
@@ -184,6 +241,54 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	void leftShift(Node child) {
 
 		addChild(child)
+	}
+
+	/**
+	 * Remove the child node from this one.
+	 */
+	T removeChild(Node node) {
+
+		if (children.remove(node)) {
+			removeNodeAndChildren(scene, node).join()
+			node.parent = null
+			// TODO: Recalculate bounds
+		}
+		return this
+	}
+
+	/**
+	 * Remove any child node that satisfies the closure condition.
+	 */
+	T removeChild(Closure predicate) {
+
+		children.each { node ->
+			if (predicate(node)) {
+				removeChild(node)
+			}
+		}
+		return this
+	}
+
+	/**
+	 * Trigger the {@code onSceneRemoved} handler for this node and all its
+	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
+	 */
+	protected CompletableFuture<Void> removeNodeAndChildren(Scene scene, Node node) {
+
+		return CompletableFuture.allOf(
+			node.onSceneRemovedAsync(scene),
+			node.script?.onSceneRemovedAsync(scene) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRun { ->
+				scene.trigger(new NodeRemovedEvent(node))
+			}
+			.thenCompose { _ ->
+				var futures = node.children.collect { childNode -> removeNodeAndChildren(scene, childNode) }
+
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
 	}
 
 	/**

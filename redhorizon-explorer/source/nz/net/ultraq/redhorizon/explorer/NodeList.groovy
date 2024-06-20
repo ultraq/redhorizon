@@ -54,9 +54,7 @@ class NodeList implements EventTarget, ImGuiElement {
 		// File list
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
 			if (scene) {
-				scene.nodes.each { node ->
-					renderNodeAndChildren(node)
-				}
+				renderNodeAndChildren(scene.root)
 			}
 			ImGui.endListBox()
 		}

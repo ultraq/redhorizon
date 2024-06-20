@@ -45,8 +45,8 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	final Colour colour
 	final Vector2f[] points
 
-	private Mesh mesh
-	private Shader shader
+	protected Mesh mesh
+	protected Shader shader
 
 	/**
 	 * Constructor, create a set of lines for every 2 vectors passed in to this
