@@ -199,7 +199,7 @@ class RenderPipeline implements AutoCloseable {
 					camera.update()
 
 					// Cull the list of renderable items to those just visible in the scene
-					averageNanos('objectCulling', 1f, logger) { ->
+					average('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
 						frustumIntersection.set(camera.viewProjection)
 						scene.accept { Node element ->
