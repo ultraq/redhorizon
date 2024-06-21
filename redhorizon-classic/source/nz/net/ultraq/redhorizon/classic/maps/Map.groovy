@@ -282,19 +282,69 @@ class Map extends Node<Map> {
 	private static record MapTile(Vector2f position, int frameInTileSet) {}
 
 	/**
-	 * Common class for the *Pack layers of the map, which use 24x24 map tiles and
-	 * can be optimized with a spritesheet.
+	 * The "MapPack" layer of a Red Alert map.
 	 */
-	private abstract class Pack<T extends Pack> extends Node<T> implements GraphicsElement {
+	private class MapPack extends Node<MapPack> implements GraphicsElement {
 
-		protected final List<MapTile> mapTiles = []
-		protected Mesh fullMesh
-		protected Shader shader
-		protected Material material = new Material()
+		private final List<MapTile> mapTiles = []
+		private Mesh fullMesh
+		private Shader shader
+		private Material material = new Material()
+
+		MapPack() {
+
+			var tileData = mapFile.mapPackData
+
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+
+					// Get the byte representing the tile
+					var tileValOffset = y * TILES_Y + x
+					var tileVal = tileData.getShort(tileValOffset * 2)
+					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
+
+					// Retrieve the appropriate tile, skip empty and default tiles
+					if (tileVal != 0xff && tileVal != -1 && tileVal != 0) {
+						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
+
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn('Skipping unknown mappack tile type: {}', tileVal)
+							return
+						}
+						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
+
+						// Skip references to invalid tiles
+						if (tilePic >= tileFile.numImages) {
+							logger.warn('Skipping unknown mappack tile image: {} pic: {}', tileVal, tilePic)
+							return
+						}
+
+						tileSet.addTiles(tileFile)
+						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
+						mapTiles << mapTile
+
+						bounds.expand(
+							mapTile.position().x,
+							mapTile.position().y,
+							mapTile.position().x + TILE_WIDTH as float,
+							mapTile.position().y + TILE_HEIGHT as float
+						)
+					}
+				}
+			}
+		}
+
+		@Override
+		String getName() {
+
+			return "MapPack - ${mapTiles.size()} tiles"
+		}
 
 		@Override
 		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
+			// TODO: Rework and use the TileSet class for this
 			return CompletableFuture.allOf(
 				CompletableFuture.supplyAsync { ->
 					List<Vector2f> allVertices = []
@@ -347,65 +397,11 @@ class Map extends Node<Map> {
 	}
 
 	/**
-	 * The "MapPack" layer of a Red Alert map.
-	 */
-	private class MapPack extends Pack<MapPack> {
-
-		MapPack() {
-
-			var tileData = mapFile.mapPackData
-
-			TILES_X.times { y ->
-				TILES_Y.times { x ->
-
-					// Get the byte representing the tile
-					var tileValOffset = y * TILES_Y + x
-					var tileVal = tileData.getShort(tileValOffset * 2)
-					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
-
-					// Retrieve the appropriate tile, skip empty and default tiles
-					if (tileVal != 0xff && tileVal != -1 && tileVal != 0) {
-						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
-
-						// Some unknown tile types still coming through?
-						if (!tile) {
-							logger.warn('Skipping unknown mappack tile type: {}', tileVal)
-							return
-						}
-						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
-
-						// Skip references to invalid tiles
-						if (tilePic >= tileFile.numImages) {
-							logger.warn('Skipping unknown mappack tile image: {} pic: {}', tileVal, tilePic)
-							return
-						}
-
-						tileSet.addTiles(tileFile)
-						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
-						mapTiles << mapTile
-
-						bounds.expand(
-							mapTile.position().x,
-							mapTile.position().y,
-							mapTile.position().x + TILE_WIDTH as float,
-							mapTile.position().y + TILE_HEIGHT as float
-						)
-					}
-				}
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "MapPack - ${mapTiles.size()} tiles"
-		}
-	}
-
-	/**
 	 * The "OverlayPack" layer of a Red Alert map.
 	 */
-	private class OverlayPack extends Pack<OverlayPack> {
+	private class OverlayPack extends Node<OverlayPack> {
+
+		private int numTiles = 0
 
 		OverlayPack() {
 
@@ -471,23 +467,20 @@ class Map extends Node<Map> {
 						3 + adjacent
 				}
 
-				tileSet.addTiles(tileFile)
-				var mapTile = new MapTile(new Vector2f(tilePos).asWorldCoords(1), tileSet.getFrame(tileFile, imageVariant))
-				mapTiles << mapTile
+				var overlay = new PalettedSprite(tileFile)
+				overlay.name = "${tile.name} - Variant ${imageVariant}"
+				overlay.initialFrame = imageVariant
+				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
+				addChild(overlay)
 
-				bounds.expand(
-					mapTile.position().x,
-					mapTile.position().y,
-					mapTile.position().x + TILE_WIDTH as float,
-					mapTile.position().y + TILE_HEIGHT as float
-				)
+				numTiles++
 			}
 		}
 
 		@Override
 		String getName() {
 
-			return "OverlayPack - ${mapTiles.size()} tiles"
+			return "OverlayPack - ${numTiles} tiles"
 		}
 	}
 
@@ -496,28 +489,12 @@ class Map extends Node<Map> {
 	 */
 	private class Terrain extends Node<Terrain> {
 
-		private final TileSet tileSet = new TileSet()
-		private final List<MapTile> mapTiles = []
-
 		Terrain() {
 
 			var terrainData = mapFile.terrainData
 			terrainData.each { cell, terrainType ->
 				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
 				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT as int)
-				tileSet.addTiles(terrainFile)
-
-				// TODO: Get TileSets to work with any sized sprites, then terrain can
-				//       be included in super map tileset
-//				var mapTile = new MapTile(cellPosXY, tileSet.getFrame(terrainFile, 0))
-//				mapTiles << mapTile
-
-//				bounds.expand(
-//					mapTile.position().x,
-//					mapTile.position().y,
-//					mapTile.position().x + TILE_WIDTH as float,
-//					mapTile.position().y + TILE_HEIGHT as float
-//				)
 
 				var terrain = new PalettedSprite(terrainFile)
 				terrain.name = "Terrain ${terrainType}"
@@ -667,7 +644,7 @@ class Map extends Node<Map> {
 								})
 								bibSprite.name = "Bib"
 								bibSprite.setPosition(0, -TILE_HEIGHT)
-								structure.addChild(0, bibSprite)
+								structure.addChild(bibSprite, 0)
 							}
 						}
 					}
