@@ -63,6 +63,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	T addChild(Node child, int index = -1) {
 
+		// Put child node in place
 		if (index != -1) {
 			children.add(index, child)
 		}
@@ -70,11 +71,22 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 			children.add(child)
 		}
 		child.parent = this
+
+		// Allow it to process
 		var scene = getScene()
 		if (scene) {
 			addNodeAndChildren(scene, child).join()
 		}
-		bounds.expand(child.bounds)
+
+		var childPosition = child.position
+		var childBounds = new Rectanglef(child.bounds).translate(childPosition.x, childPosition.y)
+		if (bounds.lengthX() && bounds.lengthY()) {
+			bounds.expand(childBounds)
+		}
+		else {
+			bounds.set(childBounds)
+		}
+
 		return this
 	}
 
