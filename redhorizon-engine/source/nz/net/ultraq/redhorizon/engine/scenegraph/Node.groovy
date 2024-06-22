@@ -34,7 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
+class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 
 	final Matrix4f transform = new Matrix4f()
 	final Rectanglef bounds = new Rectanglef()
@@ -50,7 +50,13 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	private final Vector3f globalScale = new Vector3f(1, 1, 1)
 	private final Rectanglef globalBounds = new Rectanglef()
 
-	@Override
+	/**
+	 * Accept any scene visitor.
+	 * <p>
+	 * The behaviour of a visitable element is slightly different from standard
+	 * iteration in that the visitor can specify if it wishes to visit each of a
+	 * node's children or not, based on the return value from the visit.
+	 */
 	void accept(SceneVisitor visitor) {
 
 		if (visitor.visit(this)) {
