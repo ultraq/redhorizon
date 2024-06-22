@@ -194,7 +194,7 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			if (scene) {
-				Camera camera = scene.findNode { node -> node instanceof Camera }
+				var camera = (Camera)scene.findNode { node -> node instanceof Camera }
 				if (camera) {
 					camera.update()
 
@@ -203,19 +203,33 @@ class RenderPipeline implements AutoCloseable {
 						visibleElements.clear()
 						frustumIntersection.set(camera.viewProjection)
 						scene.accept { Node element ->
-							if (element instanceof GraphicsElement && element.isVisible(frustumIntersection)) {
-								element.update()
-								element.script?.update()
-								visibleElements << element
+							if (element.isVisible(frustumIntersection)) {
+								if (element instanceof GraphicsElement) {
+									element.update()
+									element.script?.update()
+									visibleElements << element
+								}
+								return true
 							}
+							return false
 						}
 					}
 
-					// TODO: Sort objects from top to bottom to allow lower/newer
-					//       renderables to appear 'over' older/higher ones.
-
-					visibleElements.each { element ->
-						element.render(renderer)
+//					averageNanos('Sorting overhead', 1f, logger) { ->
+//						visibleElements.sort { e1, e2 ->
+//							var b1 = e1.globalBounds
+//							var b2 = e2.globalBounds
+//							var result =
+//								b1.maxY > b2.maxY ? -1 : b1.maxY < b2.maxY ? 1 :
+//									b1.minX < b2.minX ? -1 : b1.minX > b2.minX ? 1 :
+//										0
+//							return result
+//						}
+//					}
+					average('Rendering', 1f, logger) { ->
+						visibleElements.each { element ->
+							element.render(renderer)
+						}
 					}
 				}
 			}

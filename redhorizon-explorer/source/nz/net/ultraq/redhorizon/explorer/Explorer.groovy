@@ -167,7 +167,7 @@ class Explorer {
 				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
 					touchpadInput = !touchpadInput
 					userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
-					Map mapNode = scene.findNode { node -> node instanceof Map }
+					var mapNode = (Map)scene.findNode { node -> node instanceof Map }
 					if (mapNode) {
 						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput
 					}
@@ -194,12 +194,12 @@ class Explorer {
 
 		// Start all the global/helper nodes
 		camera = new Camera(renderResolution)
-		scene.addNode(camera)
+		scene << camera
 
 		globalPalette = new GlobalPalette(loadPalette())
-		scene.addNode(globalPalette)
+		scene << globalPalette
 
-		scene.addNode(new GridLines(-1536, 1536, 24)) // The max area a Red Alert map can be
+		scene << new GridLines(-1536, 1536, 24) // The max area a Red Alert map can be
 	}
 
 	@SuppressWarnings('unused')
@@ -297,7 +297,7 @@ class Explorer {
 	private void clearPreview() {
 
 		selectedFileInputStream?.close()
-		scene.removeNode(previewNode)
+		scene.removeChild(previewNode)
 		previewNode = null
 		camera.reset()
 	}

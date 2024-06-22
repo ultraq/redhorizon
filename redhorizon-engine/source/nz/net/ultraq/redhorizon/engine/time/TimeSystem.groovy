@@ -107,6 +107,7 @@ class TimeSystem extends EngineSystem {
 						if (element instanceof Temporal) {
 							element.tick(currentTimeMillis)
 						}
+						return true
 					}
 
 					lastSystemTimeMillis = currentSystemTimeMillis

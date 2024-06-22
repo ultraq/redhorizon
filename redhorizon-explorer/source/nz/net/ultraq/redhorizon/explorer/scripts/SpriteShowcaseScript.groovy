@@ -73,6 +73,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 				if (node instanceof FactionColours) {
 					node.faction = selectedFaction
 				}
+				return true
 			}
 		}))
 	}

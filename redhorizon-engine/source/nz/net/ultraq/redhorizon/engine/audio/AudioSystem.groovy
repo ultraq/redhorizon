@@ -154,6 +154,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 								if (element instanceof AudioElement) {
 									element.render(renderer)
 								}
+								return true
 							}
 						}
 					}

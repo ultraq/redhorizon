@@ -77,6 +77,7 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 
 		accept { Node node ->
 			node.bounds.center()
+			return true
 		}
 
 		attachScript(new PlayerScript())

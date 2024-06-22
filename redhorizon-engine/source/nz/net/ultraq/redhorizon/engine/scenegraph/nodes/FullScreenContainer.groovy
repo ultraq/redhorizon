@@ -46,6 +46,7 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 		children.each { child ->
 			child.accept { Node node ->
 				node.bounds.center()
+				return true
 			}
 			switch (fillMode) {
 				case FillMode.ASPECT_RATIO -> {

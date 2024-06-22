@@ -28,6 +28,9 @@ interface SceneVisitor {
 	 * Allow visiting any scene element.
 	 *
 	 * @param element
+	 * @return
+	 * {@code true} if the visit can continue to this node's children, {@code
+	 * false} otherwise.
 	 */
-	void visit(Node element)
+	boolean visit(Node element)
 }

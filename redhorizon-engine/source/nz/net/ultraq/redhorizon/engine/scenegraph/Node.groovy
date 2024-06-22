@@ -53,8 +53,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	@Override
 	void accept(SceneVisitor visitor) {
 
-		visitor.visit(this)
-		children*.accept(visitor)
+		if (visitor.visit(this)) {
+			children*.accept(visitor)
+		}
 	}
 
 	/**
@@ -87,7 +88,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 			bounds.set(childBounds)
 		}
 
-		return this
+		return (T)this
 	}
 
 	/**
@@ -124,7 +125,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 
 	/**
 	 * Locate the first node in the scene that satisfies the given predicate.
-	 * Shorthand for {@code scene.root.findChild(predicate)}.
 	 *
 	 * @param predicate
 	 * @return
@@ -243,7 +243,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 	 */
 	boolean isVisible(FrustumIntersection frustumIntersection) {
 
-		return frustumIntersection.testPlaneXY(getGlobalBounds())
+		var plane = getGlobalBounds()
+		return frustumIntersection.testPlaneXY(plane.minX, plane.minY, plane.maxX, plane.maxY)
 	}
 
 	/**
@@ -265,7 +266,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 			node.parent = null
 			// TODO: Recalculate bounds
 		}
-		return this
+		return (T)this
 	}
 
 	/**
@@ -278,7 +279,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T>, Visitable {
 				removeChild(node)
 			}
 		}
-		return this
+		return (T)this
 	}
 
 	/**

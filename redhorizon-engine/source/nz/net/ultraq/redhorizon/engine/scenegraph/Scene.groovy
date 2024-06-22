@@ -30,8 +30,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
@@ -39,10 +37,11 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
-class Scene implements EventTarget, Visitable {
+class Scene implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Scene)
 
+	@Delegate(includes = ['accept', 'addChild', 'clear', 'findNode', 'leftShift', 'removeChild'], interfaces = false)
 	final Node root = new RootNode(this)
 
 	// TODO: This stuff is really all 'scene/application context' objects, so
@@ -61,19 +60,10 @@ class Scene implements EventTarget, Visitable {
 	GameWindow gameWindow
 
 	/**
-	 * Allow visitors into the scene for traversal.
-	 */
-	@Override
-	void accept(SceneVisitor visitor) {
-
-		root.accept(visitor)
-	}
-
-	/**
 	 * Add a top-level node to this scene.  Shorthand for
 	 * {@code scene.root.addNode(node)}.
 	 */
-	Scene addNode(Node node) {
+	Scene addChild(Node node) {
 
 		time('Adding node', logger) { ->
 			root.addChild(node)
@@ -90,27 +80,6 @@ class Scene implements EventTarget, Visitable {
 		time('Clearing scene', logger) { ->
 			root.clear()
 		}
-	}
-
-	/**
-	 * Locate the first node in the scene that satisfies the given predicate.
-	 * Shorthand for {@code scene.root.findChild(predicate)}.
-	 *
-	 * @param predicate
-	 * @return
-	 *   The matching node, or {@code null} if no match is found.
-	 */
-	Node findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
-
-		return root.findNode(predicate)
-	}
-
-	/**
-	 * Overloads the {@code <<} operator to add elements to this scene.
-	 */
-	Scene leftShift(Node element) {
-
-		return addNode(element)
 	}
 
 	/**
@@ -146,23 +115,6 @@ class Scene implements EventTarget, Visitable {
 //			}
 //		}
 //	}
-
-	/**
-	 * Removes a top-level node from the scene.  Shorthand for
-	 * {@code scene.root.removeChild(node)}.
-	 *
-	 * @param node
-	 *   The node to remove.  If {@code null}, then this method does nothing.
-	 * @return
-	 *   This scene so it can be chained.
-	 */
-	Scene removeNode(Node node) {
-
-		time('Removing node', logger) { ->
-			root.removeChild(node)
-		}
-		return this
-	}
 
 	/**
 	 * A special instance of {@link Node} that is always present in the scene.

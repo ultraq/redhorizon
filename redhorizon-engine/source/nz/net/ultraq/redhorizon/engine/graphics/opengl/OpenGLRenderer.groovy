@@ -61,7 +61,6 @@ import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.GL31C.*
 import static org.lwjgl.opengl.KHRDebug.*
 
-import groovy.transform.NamedVariant
 import java.lang.reflect.Modifier
 import java.nio.Buffer
 import java.nio.ByteBuffer
@@ -288,7 +287,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	@NamedVariant
 	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
