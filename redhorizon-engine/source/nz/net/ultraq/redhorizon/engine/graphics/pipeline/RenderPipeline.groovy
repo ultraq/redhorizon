@@ -201,7 +201,7 @@ class RenderPipeline implements AutoCloseable {
 					// Cull the list of renderable items to those just visible in the scene
 					average('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
-						frustumIntersection.set(camera.viewProjection)
+						frustumIntersection.set(camera.viewProjection, false)
 						scene.accept { Node element ->
 							if (element.isVisible(frustumIntersection)) {
 								if (element instanceof GraphicsElement) {
