@@ -78,7 +78,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 	protected final OpenGLWindow window
 	protected final GLCapabilities capabilities
 
+	private final String renderer
+	private final String version
 	private final int maxTextureSize
+	private final int maxUniformComponents
 	private Dimension framebufferSize
 	private List<Shader> shaders = []
 	private List<OpenGLUniformBuffer> uniformBuffers = []
@@ -129,7 +132,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 		createShader(new PrimitivesShader())
 
 		// Some graphics hardware info we're interested in
+		renderer = glGetString(GL_RENDERER)
+		version = glGetString(GL_VERSION)
 		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
+		maxUniformComponents = glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)
 	}
 
 	/**
@@ -336,9 +342,9 @@ class OpenGLRenderer implements GraphicsRenderer {
 	String toString() {
 
 		return """
-			OpenGL device: ${glGetString(GL_RENDERER)}, OpenGL ${glGetString(GL_VERSION)}
+			OpenGL device: ${renderer}, OpenGL ${version}
 			 - Max texture size: ${maxTextureSize}
-			 - Max fragment uniform components: ${glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)}
+			 - Max fragment uniform components: ${maxUniformComponents}
 		""".stripIndent().stripTrailing()
 	}
 }
