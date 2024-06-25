@@ -107,7 +107,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			node.onSceneAddedAsync(scene),
 			node.script?.onSceneAddedAsync(scene) ?: CompletableFuture.completedFuture(null)
 		)
-			.thenRun { ->
+			.thenRunAsync { ->
 				scene.trigger(new NodeAddedEvent(node))
 			}
 			.thenCompose { _ ->
@@ -298,10 +298,10 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			node.onSceneRemovedAsync(scene),
 			node.script?.onSceneRemovedAsync(scene) ?: CompletableFuture.completedFuture(null)
 		)
-			.thenRun { ->
+			.thenRunAsync { ->
 				scene.trigger(new NodeRemovedEvent(node))
 			}
-			.thenCompose { _ ->
+			.thenComposeAsync { _ ->
 				var futures = node.children.collect { childNode -> removeNodeAndChildren(scene, childNode) }
 
 				// Originally used the Groovy spread operator `*` but this would throw
