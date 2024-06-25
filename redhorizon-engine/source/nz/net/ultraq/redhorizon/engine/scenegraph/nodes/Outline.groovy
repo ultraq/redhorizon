@@ -29,9 +29,9 @@ import org.joml.primitives.Rectanglef
  */
 class Outline extends Primitive {
 
-	Outline(Rectanglef bounds) {
+	Outline(Rectanglef bounds, Colour colour) {
 
-		super(MeshType.LINE_LOOP, Colour.RED, bounds as Vector2f[])
+		super(MeshType.LINE_LOOP, colour, bounds as Vector2f[])
 		this.bounds.set(bounds)
 	}
 }

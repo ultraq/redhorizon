@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.maps.Map
+import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
@@ -167,7 +168,7 @@ class MapViewerScript extends Script<Map> {
 				selectedNode.removeChild { node -> node instanceof Outline }
 			}
 
-			selectedNode = event.node.addChild(new Outline(event.node.bounds))
+			selectedNode = event.node.addChild(new Outline(event.node.bounds, Colour.RED))
 			moveCameraTo(
 				new Vector3f(selectedNode.globalPosition).add(
 					selectedNode.globalBounds.lengthX() / 2 as float,
