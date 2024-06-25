@@ -77,7 +77,11 @@ class EntryList implements EventTarget, ImGuiElement {
 			if (tableSortSpecs.specsDirty) {
 
 				// Take the special .. entry out to put back at the top after
-				var specialEntry = entries.remove(entries.findIndexOf { e -> e.name == '/..' || e.name == '..' })
+				var specialEntry = null
+				var specialEntryIndex = entries.findIndexOf { e -> e.name == '/..' || e.name == '..' }
+				if (specialEntryIndex != -1) {
+					specialEntry = entries.remove(specialEntryIndex)
+				}
 
 				var sortingColumn = tableSortSpecs.specs.columnIndex
 				switch (sortingColumn) {
@@ -90,7 +94,9 @@ class EntryList implements EventTarget, ImGuiElement {
 					entries.reverse(true)
 				}
 
-				entries.add(0, specialEntry)
+				if (specialEntry) {
+					entries.add(0, specialEntry)
+				}
 
 				tableSortSpecs.specsDirty = false
 			}
