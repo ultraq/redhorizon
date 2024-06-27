@@ -28,5 +28,5 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class NodeRemovedEvent extends Event {
 
-	final Node element
+	final Node node
 }

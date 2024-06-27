@@ -69,7 +69,7 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', { ->
 			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
 			logger.info("Viewing with ${selectedFaction.name()} faction colours")
-			accept { node ->
+			traverse { node ->
 				if (node instanceof FactionColours) {
 					node.faction = selectedFaction
 				}

@@ -95,10 +95,21 @@ trait EventTarget {
 
 		eventQueue.add(event)
 
+		if (this.class.simpleName == 'Scene') {
+			logger.debug('Queued {}', event.class.simpleName)
+			if (eventQueue.size() > 100) {
+				logger.debug('Crap')
+			}
+		}
+
 		executorService.execute { ->
 			Thread.currentThread().name = "Event handler for ${this.class.simpleName}"
 
 			var nextEvent = eventQueue.remove()
+			if (this.class.simpleName == 'Scene') {
+				logger.debug('Handling {}', event.class.simpleName)
+			}
+
 			eventListeners.each { tuple ->
 				def (eventClass, listener) = tuple
 				if (eventClass.isInstance(nextEvent)) {

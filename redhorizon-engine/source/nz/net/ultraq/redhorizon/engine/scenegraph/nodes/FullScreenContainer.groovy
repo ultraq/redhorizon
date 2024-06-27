@@ -44,7 +44,7 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 
 		// Update children to take up the full screen
 		children.each { child ->
-			child.accept { Node node ->
+			child.traverse { Node node ->
 				node.bounds.center()
 				return true
 			}

@@ -51,20 +51,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	private final Rectanglef globalBounds = new Rectanglef()
 
 	/**
-	 * Accept any scene visitor.
-	 * <p>
-	 * The behaviour of a visitable element is slightly different from standard
-	 * iteration in that the visitor can specify if it wishes to visit each of a
-	 * node's children or not, based on the return value from the visit.
-	 */
-	void accept(SceneVisitor visitor) {
-
-		if (visitor.visit(this)) {
-			children*.accept(visitor)
-		}
-	}
-
-	/**
 	 * Adds a child node to this node.  If an index is specified, then this will
 	 * shift any existing nodes at the given position to the right to make room.
 	 */
@@ -365,5 +351,19 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	void setScaleXY(float newScale) {
 
 		setScale(newScale, newScale)
+	}
+
+	/**
+	 * Traverse a scene and control visits to any children.
+	 * <p>
+	 * The behaviour of a visitable element is slightly different from standard
+	 * iteration in that the visitor can specify if it wishes to visit each of a
+	 * node's children or not, based on the return value from the visit.
+	 */
+	void traverse(SceneVisitor visitor) {
+
+		if (visitor.visit(this)) {
+			children*.traverse(visitor)
+		}
 	}
 }

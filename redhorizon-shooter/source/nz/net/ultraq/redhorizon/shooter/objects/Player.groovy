@@ -75,7 +75,7 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 
 		addChild(unit)
 
-		accept { Node node ->
+		traverse { Node node ->
 			node.bounds.center()
 			return true
 		}

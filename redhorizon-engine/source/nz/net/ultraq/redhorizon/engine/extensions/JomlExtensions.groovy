@@ -66,6 +66,18 @@ class JomlExtensions {
 	}
 
 	/**
+	 * Check if this rectangle contains the given point {@code (x, y)}.  If {@code
+	 * includeBoudary} is set, then we also include whether the point lies on the
+	 * edge of the rectangle and count it as included if so.
+	 */
+	static boolean containsPoint(Rectanglef self, float x, float y, boolean includeBoundary = false) {
+
+		return includeBoundary ?
+			self.minX <= x && self.minY <= y && x <= self.maxX && y <= self.maxY :
+			self.containsPoint(x, y)
+	}
+
+	/**
 	 * Expand the borders of a rectangle to include another rectangle.
 	 */
 	static Rectanglef expand(Rectanglef self, Rectanglef other) {

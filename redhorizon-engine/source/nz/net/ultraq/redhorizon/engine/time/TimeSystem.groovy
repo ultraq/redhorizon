@@ -103,7 +103,7 @@ class TimeSystem extends EngineSystem {
 					}
 
 					// Update time with scene objects
-					scene?.accept { element ->
+					scene?.traverse { element ->
 						if (element instanceof Temporal) {
 							element.tick(currentTimeMillis)
 						}

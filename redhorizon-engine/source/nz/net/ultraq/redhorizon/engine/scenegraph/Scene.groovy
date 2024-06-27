@@ -23,9 +23,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,9 +43,6 @@ class Scene implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Scene)
 
-	@Delegate(includes = ['accept', 'addChild', 'clear', 'findNode', 'leftShift', 'removeChild'], interfaces = false)
-	final Node root = new RootNode(this)
-
 	// TODO: This stuff is really all 'scene/application context' objects, so
 	//       should be moved to something as such 🤔
 	@Delegate
@@ -58,6 +57,24 @@ class Scene implements EventTarget {
 	Listener listener
 	MainMenu gameMenu
 	GameWindow gameWindow
+
+	@Delegate(includes = ['addChild', 'clear', 'findNode', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
+	final Node root = new RootNode(this)
+
+	// Partition static objects in the quadTree to make culling queries faster
+	final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
+
+	Scene() {
+
+		on(NodeAddedEvent) { event ->
+			if (event.node instanceof GraphicsElement) {
+				quadTree.add(event.node)
+			}
+		}
+		on(NodeRemovedEvent) { event ->
+			quadTree.remove(event.node)
+		}
+	}
 
 	/**
 	 * Add a top-level node to this scene.  Shorthand for
@@ -81,6 +98,8 @@ class Scene implements EventTarget {
 			root.clear()
 		}
 	}
+
+//	List<Node> findAll()
 
 	/**
 	 * Select objects whose bounding volumes intersect the given ray.
@@ -134,6 +153,12 @@ class Scene implements EventTarget {
 		protected Scene getScene() {
 
 			return scene
+		}
+
+		@Override
+		void traverse(SceneVisitor visitor) {
+
+			children*.traverse(visitor)
 		}
 	}
 }
