@@ -171,6 +171,7 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Framebuffer framebuffer
+		private final boolean traverseScene = true
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
 		Scene scene
@@ -201,17 +202,29 @@ class RenderPipeline implements AutoCloseable {
 					// Cull the list of renderable items to those just visible in the scene
 					average('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
-						frustumIntersection.set(camera.viewProjection, false)
-						scene.traverse { Node element ->
-							if (element.isVisible(frustumIntersection)) {
+
+						if (traverseScene) {
+							frustumIntersection.set(camera.viewProjection, false)
+							scene.traverse { Node element ->
+								if (element.isVisible(frustumIntersection)) {
+									if (element instanceof GraphicsElement) {
+										element.update()
+										element.script?.update()
+										visibleElements << element
+									}
+									return true
+								}
+								return false
+							}
+						}
+						else {
+							scene.quadTree.query(camera.viewBox).each { Node element ->
 								if (element instanceof GraphicsElement) {
 									element.update()
 									element.script?.update()
 									visibleElements << element
 								}
-								return true
 							}
-							return false
 						}
 					}
 

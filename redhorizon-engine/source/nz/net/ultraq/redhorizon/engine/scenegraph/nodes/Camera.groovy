@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.system.MemoryStack.stackPush
@@ -39,21 +40,21 @@ class Camera extends Node<Camera> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
+	private final Rectanglef box
 	private final Matrix4f projection
 	private final Matrix4f view
 	private final Matrix4f viewTransform = new Matrix4f()
 	private final Matrix4f viewProjection = new Matrix4f()
 	private UniformBuffer viewProjectionBuffer
+	private final Rectanglef boxTransform = new Rectanglef()
 
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
 	 */
 	Camera(Dimension size) {
 
-		projection = new Matrix4f().setOrtho2D(
-			-size.width() / 2, size.width() / 2,
-			-size.height() / 2, size.height() / 2
-		)
+		box = new Rectanglef(-size.width() / 2, -size.height() / 2, size.width() / 2, size.height() / 2)
+		projection = new Matrix4f().setOrtho2D(box.minX, box.maxX, box.minY, box.maxY)
 		logger.debug('Establishing an orthographic projection of {}x{}', size.width(), size.height())
 
 		view = new Matrix4f().setLookAt(
@@ -79,6 +80,16 @@ class Camera extends Node<Camera> {
 	private Matrix4f getView() {
 
 		return view.mulAffine(transform, viewTransform)
+	}
+
+	/**
+	 * Return a rectangle that represents the 2D area being viewed by this
+	 * orthographic projection camera.
+	 */
+	Rectanglef getViewBox() {
+
+		var position = getPosition()
+		return box.translate(position.x, position.y, boxTransform)
 	}
 
 	/**

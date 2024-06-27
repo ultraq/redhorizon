@@ -133,6 +133,22 @@ class QuadTree {
 	}
 
 	/**
+	 * Return all nodes that are within the bounding box of {@code range}.
+	 */
+	List<Node> query(Rectanglef range, List<Node> results = new ArrayList<>()) {
+
+		if (area.intersectsRectangle(range)) {
+			if (children) {
+				results.addAll(children)
+			}
+			else if (quadrants) {
+				quadrants*.query(range, results)
+			}
+		}
+		return results
+	}
+
+	/**
 	 * Removes a node from this quadtree.  Nodes will attempt to rebalance
 	 * themselves if quadrants can also be removed.
 	 */
@@ -148,7 +164,7 @@ class QuadTree {
 				children.remove(node)
 
 				// If all children removed, rebalance the parent node
-				if (!children && !parent.size()) {
+				if (!children && !parent?.size()) {
 					// TODO: There are probably some smarts we can do here, but for now
 					//       the only rebalancing we're doing is to collapse a node with
 					//       4 empty quadrants
