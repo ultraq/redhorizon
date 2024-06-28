@@ -164,7 +164,7 @@ class QuadTree {
 				children.remove(node)
 
 				// If all children removed, rebalance the parent node
-				if (!children && !parent?.size()) {
+				if (!children && parent != null && !parent.size()) {
 					// TODO: There are probably some smarts we can do here, but for now
 					//       the only rebalancing we're doing is to collapse a node with
 					//       4 empty quadrants
