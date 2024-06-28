@@ -40,10 +40,4 @@ abstract class Mesh implements GraphicsResource {
 	 * Use this mesh in upcoming render operations.
 	 */
 	abstract void bind()
-
-	/**
-	 * Update the textureUVs part of the mesh data.  This is only allowed on
-	 * meshes that have been configured to use dynamic buffer data.
-	 */
-	abstract void updateTextureUvs(Vector2f[] textureUVs)
 }

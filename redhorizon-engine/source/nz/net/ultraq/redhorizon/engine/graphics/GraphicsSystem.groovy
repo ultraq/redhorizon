@@ -136,7 +136,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				var resource = switch (request) {
 					case ShaderRequest -> renderer.createShader(request.shaderConfig())
 					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.vertices(), request.colour(),
-						request.textureUVs(), request.indices(), request.dynamic())
+						request.textureUVs(), request.indices())
 					case SpriteMeshRequest -> renderer.createSpriteMesh(request.surface(), request.textureUVs())
 					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
 					case SpriteSheetRequest -> renderer.createSpriteSheet(request.width(), request.height(), request.format(), request.data())

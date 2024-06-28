@@ -34,6 +34,8 @@ abstract class Shader implements GraphicsResource {
 	final Attribute[] attributes
 	final Uniform[] uniforms
 
+	private final Map<String, Object> lastValues = [:]
+
 	/**
 	 * Update a shader's uniforms using the given context.
 	 */
@@ -49,7 +51,26 @@ abstract class Shader implements GraphicsResource {
 	 * Apply a data uniform to the shader.  If {@code data} is an array, it can be
 	 * used to determine the shader type (eg: 2 floats = vec2).
 	 */
-	abstract void setUniformGeneric(String name, Object data)
+	void setUniformGeneric(String name, Object data) {
+
+		if (data == null) {
+			throw new IllegalArgumentException("Data value for key ${name} was null")
+		}
+
+		// Only perform an update if there was a change in the value since last time
+		if (lastValues[name] != data) {
+			lastValues[name] = data
+
+			switch (data) {
+				case Float -> setUniform(name, data)
+				case Float[] -> setUniform(name, (float[])data)
+				case Integer -> setUniform(name, data)
+				case Integer[] -> setUniform(name, (int[])data)
+				case Matrix4f -> setUniform(name, data)
+				default -> throw new UnsupportedOperationException("Data type of ${data.class.simpleName} not supported")
+			}
+		}
+	}
 
 	/**
 	 * Apply a data uniform to the shader.  The type of data is determined by the
