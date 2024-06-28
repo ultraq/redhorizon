@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -54,6 +55,7 @@ class Scene implements EventTarget {
 	InputEventStream inputEventStream
 
 	Window window
+	Camera camera
 	Listener listener
 	MainMenu gameMenu
 	GameWindow gameWindow
@@ -67,7 +69,11 @@ class Scene implements EventTarget {
 	Scene() {
 
 		on(NodeAddedEvent) { event ->
-			if (event.node instanceof GraphicsElement) {
+			var node = event.node
+			if (node instanceof Camera) {
+				camera = node
+			}
+			else if (event.node instanceof GraphicsElement) {
 				quadTree.add(event.node)
 			}
 		}

@@ -31,7 +31,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
@@ -195,7 +194,7 @@ class RenderPipeline implements AutoCloseable {
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			if (scene) {
-				var camera = (Camera)scene.findNode { node -> node instanceof Camera }
+				var camera = scene.camera
 				if (camera) {
 					camera.update()
 
