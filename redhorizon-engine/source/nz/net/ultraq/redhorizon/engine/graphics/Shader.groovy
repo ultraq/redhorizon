@@ -96,7 +96,8 @@ abstract class Shader implements GraphicsResource {
 	}
 
 	/**
-	 * Enable the use of this shader for the next rendering commands.
+	 * Enable the use of this shader for all of the rendering commands within the
+	 * given closure.
 	 */
-	abstract void use()
+	abstract void use(Closure closure)
 }

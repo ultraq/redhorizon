@@ -55,7 +55,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL20C.GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
-import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
 import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.GL31C.*
@@ -292,36 +291,49 @@ class OpenGLRenderer implements GraphicsRenderer {
 		}
 	}
 
+	private static class DrawList {
+		Shader shader
+		final List<Closure> drawCommands = []
+
+		void flush() {
+			shader?.use { ->
+				drawCommands*.call()
+			}
+			shader = null
+			drawCommands.clear()
+		}
+	}
+
+	private final DrawList drawList = new DrawList()
+
 	@Override
 	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material = null) {
 
-		averageNanos('draw', 1f, logger) { ->
-			shader.use()
-			shader.applyUniforms(transform, material, window)
-			mesh.bind()
-			if (mesh.indices) {
-				glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
-			}
-			else {
-				glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
-			}
+		if (shader != drawList.shader) {
+			drawList.flush()
+			drawList.shader = shader
+		}
 
-			trigger(new DrawEvent())
+		drawList.drawCommands << { ->
+			averageNanos('draw', 1f, logger) { ->
+				shader.applyUniforms(transform, material, window)
+				mesh.bind()
+				if (mesh.indices) {
+					glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
+				}
+				else {
+					glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
+				}
 
-			// For an error w/ nVidia on Windows, where the program state seems to
-			// linger when creating a shader with a different layout, eg: we last used
-			// the Sharp Upscaling shader which has all of colour, position, and
-			// texcoord attributes, then try to create the Primitives shader which has
-			// only colour and position.  This then manifests as an error on the next
-			// frame when we call glClear() 🤔
-			// "Program/shader state performance warning: Vertex shader in program X
-			// is being recompiled based on GL state"
-			glUseProgram(0)
+				trigger(new DrawEvent())
+			}
 		}
 	}
 
 	@Override
 	void setRenderTarget(Framebuffer framebuffer) {
+
+		drawList.flush()
 
 		if (framebuffer) {
 			framebuffer.bind()

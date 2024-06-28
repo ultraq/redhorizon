@@ -156,8 +156,10 @@ class OpenGLShader extends Shader {
 	}
 
 	@Override
-	void use() {
+	void use(Closure closure) {
 
 		glUseProgram(programId)
+		closure()
+		glUseProgram(0)
 	}
 }
