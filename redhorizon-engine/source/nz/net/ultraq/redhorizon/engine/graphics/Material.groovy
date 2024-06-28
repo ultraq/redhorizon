@@ -32,12 +32,28 @@ class Material {
 	private static final String KEY_FRAME_STEP_X = 'frameStepX'
 	private static final String KEY_FRAME_STEP_Y = 'frameStepY'
 
-	static final String[] KEYS_SPRITES = [
-		KEY_FRAME, KEY_FRAMES_HORIZONTAL, KEY_FRAMES_VERTICAL, KEY_FRAME_STEP_X, KEY_FRAME_STEP_Y
-	]
-
 	final Map<String, Object> attributes = [:]
 	Texture texture
+
+	int getFrame() {
+		return attributes[KEY_FRAME]
+	}
+
+	float getFrameStepX() {
+		return attributes[KEY_FRAME_STEP_X]
+	}
+
+	float getFrameStepY() {
+		return attributes[KEY_FRAME_STEP_Y]
+	}
+
+	int getFramesHorizontal() {
+		return attributes[KEY_FRAMES_HORIZONTAL]
+	}
+
+	int getFramesVertical() {
+		return attributes[KEY_FRAMES_VERTICAL]
+	}
 
 	void setFrame(int frame) {
 		attributes[KEY_FRAME] = frame

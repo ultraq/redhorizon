@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.classic.shaders
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
-import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
@@ -40,9 +39,11 @@ class PalettedSpriteShader extends ShaderConfig {
 			shader.setUniform('adjustmentMap', material.adjustmentMap)
 		},
 		{ shader, material, window ->
-			Material.KEYS_SPRITES.each { key ->
-				shader.setUniformGeneric(key, material.attributes[key])
-			}
+			shader.setUniform('frame', material.frame)
+			shader.setUniform('framesHorizontal', material.framesHorizontal)
+			shader.setUniform('framesVertical', material.framesVertical)
+			shader.setUniform('frameStepX', material.frameStepX)
+			shader.setUniform('frameStepY', material.frameStepY)
 		}
 	]
 }
