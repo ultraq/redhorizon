@@ -28,6 +28,7 @@ import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
 
 /**
  * An element of a scene, nodes are used to build and organize scene trees.
@@ -68,7 +69,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		// Allow it to process
 		var scene = getScene()
 		if (scene) {
-			addNodeAndChildren(scene, child).join()
+			addNodeAndChildren(scene, child)
+				.orTimeout(5, TimeUnit.SECONDS)
+				.join()
 		}
 
 		var childPosition = child.position
@@ -96,7 +99,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			.thenRunAsync { ->
 				scene.trigger(new NodeAddedEvent(node))
 			}
-			.thenCompose { _ ->
+			.thenComposeAsync { _ ->
 				var futures = node.children.collect { childNode -> addNodeAndChildren(scene, childNode) }
 
 				// Originally used the Groovy spread operator `*` but this would throw
@@ -254,7 +257,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	T removeChild(Node node) {
 
 		if (children.remove(node)) {
-			removeNodeAndChildren(scene, node).join()
+			removeNodeAndChildren(scene, node)
+				.orTimeout(5, TimeUnit.SECONDS)
+				.join()
 			node.parent = null
 			// TODO: Recalculate bounds
 		}

@@ -159,7 +159,13 @@ class Application implements EventTarget {
 		engine.start()
 		engine.systems*.scene = scene
 		scene.inputEventStream = inputEventStream
-		applicationStart?.apply(this, scene)
+
+		try {
+			applicationStart?.apply(this, scene)
+		}
+		catch (Exception ex) {
+			logger.error('An error occurred during application startup', ex)
+		}
 
 		engine.waitUntilStopped()
 
