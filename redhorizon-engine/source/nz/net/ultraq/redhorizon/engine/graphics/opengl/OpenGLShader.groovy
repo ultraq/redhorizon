@@ -111,9 +111,6 @@ class OpenGLShader extends Shader {
 
 	/**
 	 * Cached function for looking up a uniform location in a shader program.
-	 *
-	 * @param name
-	 * @return
 	 */
 	@Memoized
 	private int getUniformLocation(String name) {
@@ -122,29 +119,25 @@ class OpenGLShader extends Shader {
 	}
 
 	@Override
-	void setUniform(String name, float[] data) {
+	void setUniform(String name, Object data) {
+
+		var uniformLocation = getUniformLocation(name)
 
 		stackPush().withCloseable { stack ->
-			switch (data.length) {
-				case 2 -> glUniform2fv(getUniformLocation(name), stack.floats(data))
-				default -> glUniform1fv(getUniformLocation(name), stack.floats(data))
+			switch (data) {
+				case Float -> glUniform1f(uniformLocation, data)
+				case float[] -> {
+					var floatData = (float[])data
+					switch (floatData.length) {
+						case 2 -> glUniform2fv(uniformLocation, stack.floats(floatData))
+						default -> glUniform1fv(uniformLocation, stack.floats(floatData))
+					}
+				}
+				case Integer -> glUniform1i(uniformLocation, data)
+				case int[] -> glUniform1iv(uniformLocation, (int[])data)
+				case Matrix4f -> glUniformMatrix4fv(uniformLocation, false, data.get(stack.mallocFloat(16)))
+				default -> throw new UnsupportedOperationException("Data type of ${data.class.simpleName} not supported")
 			}
-		}
-	}
-
-	@Override
-	void setUniform(String name, int[] data) {
-
-		stackPush().withCloseable { stack ->
-			glUniform1iv(getUniformLocation(name), stack.ints(data))
-		}
-	}
-
-	@Override
-	void setUniform(String name, Matrix4f matrix) {
-
-		stackPush().withCloseable { stack ->
-			glUniformMatrix4fv(getUniformLocation(name), false, matrix.get(stack.mallocFloat(16)))
 		}
 	}
 

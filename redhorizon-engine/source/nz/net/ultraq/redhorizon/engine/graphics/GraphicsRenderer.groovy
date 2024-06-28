@@ -58,14 +58,14 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 */
 	default Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
 
-		return createMesh(type, layout, vertices, colour, null, null, false)
+		return createMesh(type, layout, vertices, colour, null, null)
 	}
 
 	/**
 	 * Create a mesh with all of the mesh parts.
 	 */
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
-		int[] indices, boolean dynamic)
+		int[] indices)
 
 	/**
 	 * Create a new shader program from the given configuration, or return the
@@ -87,10 +87,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
 	 * a convenience method for {@link #createMesh}.
 	 */
-	default Mesh createSpriteMesh(Rectanglef surface) {
-
-		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
-	}
+	Mesh createSpriteMesh(Rectanglef surface)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is

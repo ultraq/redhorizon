@@ -192,10 +192,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
-		int[] indices, boolean dynamic) {
+		int[] indices) {
 
 		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
-			layout, vertices, colour, textureUVs, indices, dynamic)
+			layout, vertices, colour, textureUVs, indices)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
 	}
@@ -221,7 +221,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMesh(
 			MeshType.TRIANGLES,
@@ -229,8 +229,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 			surface as Vector2f[],
 			Colour.WHITE,
 			textureUVs as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[],
-			true
+			0, 1, 3, 1, 2, 3
 		)
 	}
 

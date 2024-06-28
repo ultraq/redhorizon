@@ -46,37 +46,13 @@ abstract class Shader implements GraphicsResource {
 	}
 
 	/**
-	 * Apply a data uniform to the shader.  The type of data is determined by the
-	 * size of the data array.
-	 *
-	 * @param name
-	 * @param data
+	 * Apply a data uniform to the shader.  If {@code data} is an array, it can be
+	 * used to determine the shader type (eg: 2 floats = vec2).
 	 */
-	abstract void setUniform(String name, float[] data)
-
-	/**
-	 * Apply a data uniform to the shader.  The type of data is determined by the
-	 * size of the data array.
-	 *
-	 * @param name
-	 * @param data
-	 */
-	abstract void setUniform(String name, int[] data)
-
-	/**
-	 * Apply a matrix uniform to the shader.
-	 *
-	 * @param name
-	 * @param matrix
-	 */
-	abstract void setUniform(String name, Matrix4f matrix)
+	abstract void setUniform(String name, Object data)
 
 	/**
 	 * Apply a texture uniform using the given texture ID.
-	 *
-	 * @param name
-	 * @param textureUnit
-	 * @param textureId
 	 */
 	abstract void setUniformTexture(String name, int textureUnit, Texture texture)
 

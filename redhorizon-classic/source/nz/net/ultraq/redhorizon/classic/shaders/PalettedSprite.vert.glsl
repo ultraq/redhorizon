@@ -12,6 +12,11 @@ layout (std140) uniform Camera {
 	mat4 view;
 };
 uniform mat4 model;
+uniform int framesHorizontal;
+uniform int framesVertical;
+uniform float frameStepX;
+uniform float frameStepY;
+uniform int frame;
 
 /**
  * Vertex shader main function, mostly passes geometry information along to the
@@ -21,5 +26,9 @@ void main() {
 
 	gl_Position = projection * view * model * position;
 	v_vertexColour = colour;
-	v_textureUVs = textureUVs;
+
+	// Adjust textureUVs to the location of the selected frame in the spritesheet
+	float textureU = (frame % framesHorizontal) * frameStepX;
+	float textureV = floor(frame / framesHorizontal) * frameStepY;
+	v_textureUVs = textureUVs + vec2(textureU, textureV);
 }

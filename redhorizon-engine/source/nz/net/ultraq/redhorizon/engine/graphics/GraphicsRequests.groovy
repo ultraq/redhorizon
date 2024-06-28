@@ -40,21 +40,21 @@ interface GraphicsRequests {
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
 	static record MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour,
-		Vector2f[] textureUVs, int[] indices, boolean dynamic) implements Request<Mesh> {
+		Vector2f[] textureUVs, int[] indices) implements Request<Mesh> {
 
-		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, int[] indices, boolean dynamic) {
-			this(type, layout, vertices, colour, null, indices, dynamic)
+		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, int[] indices) {
+			this(type, layout, vertices, colour, null, indices)
 		}
 
 		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
-			this(type, layout, vertices, colour, null, null, false)
+			this(type, layout, vertices, colour, null, null)
 		}
 	}
 
 	@ImmutableOptions(knownImmutables = ['surface', 'textureUVs'])
 	static record SpriteMeshRequest(Rectanglef surface, Rectanglef textureUVs) implements Request<Mesh> {
 		SpriteMeshRequest(Rectanglef surface) {
-			this(surface, null)
+			this(surface, new Rectanglef(0, 0, 1, 1))
 		}
 	}
 

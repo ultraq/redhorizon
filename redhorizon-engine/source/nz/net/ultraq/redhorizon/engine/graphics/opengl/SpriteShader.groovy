@@ -34,6 +34,13 @@ class SpriteShader extends ShaderConfig {
 	final Uniform[] uniforms = [
 		{ shader, material, window ->
 			shader.setUniformTexture('mainTexture', 0, material.texture)
+		},
+		{ shader, material, window ->
+			shader.setUniform('frame', material.frame)
+			shader.setUniform('framesHorizontal', material.framesHorizontal)
+			shader.setUniform('framesVertical', material.framesVertical)
+			shader.setUniform('frameStepX', material.frameStepX)
+			shader.setUniform('frameStepY', material.frameStepY)
 		}
 	]
 }

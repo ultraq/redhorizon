@@ -210,7 +210,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				var closestHeading = Math.round(heading / degreesPerHeading)
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
 				var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
-				region.set(spriteSheet.getFrame(unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame))
+				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			}
 
 			super.update()
@@ -233,7 +233,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				var turretHeadings = unitData.shpFile.parts.turret.headings
 				var closestTurretHeading = Math.round(heading / degreesPerHeading)
 				var turretRotationFrame = closestTurretHeading ? turretHeadings - closestTurretHeading as int : 0
-				region.set(spriteSheet.getFrame(unitData.shpFile.parts.body.headings + turretRotationFrame))
+				frame = unitData.shpFile.parts.body.headings + turretRotationFrame
 			}
 
 			super.update()

@@ -37,6 +37,13 @@ class PalettedSpriteShader extends ShaderConfig {
 		},
 		{ shader, material, window ->
 			shader.setUniform('adjustmentMap', material.adjustmentMap)
+		},
+		{ shader, material, window ->
+			shader.setUniform('frame', material.frame)
+			shader.setUniform('framesHorizontal', material.framesHorizontal)
+			shader.setUniform('framesVertical', material.framesVertical)
+			shader.setUniform('frameStepX', material.frameStepX)
+			shader.setUniform('frameStepY', material.frameStepY)
 		}
 	]
 }

@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.classic.nodes
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -92,8 +91,19 @@ class PalettedSprite extends Sprite implements FactionColours {
 	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
-			scene
-				.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+			spriteSheetGenerator.generate(scene)
+				.thenComposeAsync { newSpriteSheet ->
+					spriteSheet = newSpriteSheet
+					material.with {
+						texture = spriteSheet.texture
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
+						frameStepX = spriteSheet.frameStepX
+						frameStepY = spriteSheet.frameStepY
+						frame = this.frame
+					}
+					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
+				}
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
 				},
@@ -102,35 +112,10 @@ class PalettedSprite extends Sprite implements FactionColours {
 				.thenAcceptAsync { requestedShader ->
 					shader = requestedShader
 				},
-			spriteSheetGenerator.generate(scene)
-				.thenApplyAsync { newSpriteSheet ->
-					spriteSheet = newSpriteSheet
-					material.texture = spriteSheet.texture
-
-					// TODO: Some uses are a repeating tile, others aren't.  There should be a unified way of doing this 🤔
-					if (repeatX != 1f || repeatY != 1f) {
-						region.setMax(repeatX, repeatY)
-					}
-					else {
-						region.set(spriteSheet[initialFrame])
-					}
-				},
 			CompletableFuture.runAsync { ->
 				material.adjustmentMap = buildAdjustmentMap(faction)
 			}
 		)
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		if (material.adjustmentMap) {
-			if (factionChanged) {
-				material.adjustmentMap = buildAdjustmentMap(faction)
-				factionChanged = false
-			}
-			super.render(renderer)
-		}
 	}
 
 	/**
@@ -141,5 +126,15 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 		FactionColours.super.setFaction(faction)
 		factionChanged = true
+	}
+
+	@Override
+	void update() {
+
+		if (material.adjustmentMap && factionChanged) {
+			material.adjustmentMap = buildAdjustmentMap(faction)
+			factionChanged = false
+		}
+		super.update()
 	}
 }

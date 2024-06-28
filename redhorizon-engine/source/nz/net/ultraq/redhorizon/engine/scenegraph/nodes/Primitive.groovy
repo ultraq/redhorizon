@@ -80,7 +80,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 			scene
 				.requestCreateOrGet(type == MeshType.TRIANGLES ?
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour,
-						[0, 1, 3, 1, 2, 3] as int[], false) :
+						[0, 1, 3, 1, 2, 3] as int[]) :
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour))
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
