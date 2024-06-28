@@ -29,6 +29,7 @@ import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
+import groovy.transform.PackageScope
 
 /**
  * OpenGL-specific shader implementation.
@@ -38,6 +39,7 @@ import groovy.transform.Memoized
 class OpenGLShader extends Shader {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
+	private static int lastProgramId = 0
 
 	final int programId
 
@@ -158,6 +160,21 @@ class OpenGLShader extends Shader {
 	@Override
 	void use() {
 
-		glUseProgram(programId)
+		useProgram(programId)
+	}
+
+	/**
+	 * Set to use the OpenGL shader program with the given ID.
+	 * <p>
+	 * This is only used by the {@link OpenGLRenderer} to reset the program used
+	 * so that program state doesn't bleed into the next one.
+	 */
+	@PackageScope
+	static void useProgram(int programId) {
+
+		if (programId != lastProgramId) {
+			glUseProgram(programId)
+			lastProgramId = programId
+		}
 	}
 }
