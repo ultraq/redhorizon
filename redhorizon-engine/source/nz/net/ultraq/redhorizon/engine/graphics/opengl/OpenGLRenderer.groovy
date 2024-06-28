@@ -55,7 +55,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL20C.GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
-import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER
 import static org.lwjgl.opengl.GL30C.glBindFramebuffer
 import static org.lwjgl.opengl.GL31C.*
@@ -168,6 +167,16 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	void clear() {
+
+		// For an error w/ nVidia on Windows, where the program state seems to
+		// linger when creating a shader with a different layout, eg: we last used
+		// the Sharp Upscaling shader which has all of colour, position, and
+		// texcoord attributes, then try to create the Primitives shader which has
+		// only colour and position.  This then manifests as an error on the next
+		// frame when we call glClear() 🤔
+		// "Program/shader state performance warning: Vertex shader in program X
+		// is being recompiled based on GL state"
+		OpenGLShader.useProgram(0)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	}
@@ -306,16 +315,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 			}
 
 			trigger(new DrawEvent())
-
-			// For an error w/ nVidia on Windows, where the program state seems to
-			// linger when creating a shader with a different layout, eg: we last used
-			// the Sharp Upscaling shader which has all of colour, position, and
-			// texcoord attributes, then try to create the Primitives shader which has
-			// only colour and position.  This then manifests as an error on the next
-			// frame when we call glClear() 🤔
-			// "Program/shader state performance warning: Vertex shader in program X
-			// is being recompiled based on GL state"
-			glUseProgram(0)
 		}
 	}
 
