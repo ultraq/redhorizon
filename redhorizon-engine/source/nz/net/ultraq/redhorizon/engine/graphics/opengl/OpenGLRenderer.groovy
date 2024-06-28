@@ -221,7 +221,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs) {
+	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMesh(
 			MeshType.TRIANGLES,

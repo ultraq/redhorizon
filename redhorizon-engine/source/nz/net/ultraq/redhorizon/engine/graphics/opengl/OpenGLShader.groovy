@@ -111,14 +111,28 @@ class OpenGLShader extends Shader {
 
 	/**
 	 * Cached function for looking up a uniform location in a shader program.
-	 *
-	 * @param name
-	 * @return
 	 */
 	@Memoized
 	private int getUniformLocation(String name) {
 
 		return glGetUniformLocation(programId, name)
+	}
+
+	@Override
+	void setUniformGeneric(String name, Object data) {
+
+		if (data == null) {
+			throw new IllegalArgumentException("Data value for key ${name} was null")
+		}
+
+		switch (data) {
+			case float, Float -> setUniform(name, (float)data)
+			case float[], Float[] -> setUniform(name, (float[])data)
+			case int, Integer -> setUniform(name, (int)data)
+			case int[], Integer[] -> setUniform(name, (int[])data)
+			case Matrix4f -> setUniform(name, data)
+			default -> throw new UnsupportedOperationException("Data type of ${data.class.simpleName} not supported")
+		}
 	}
 
 	@Override

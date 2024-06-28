@@ -53,6 +53,9 @@ class SpriteSheet implements GraphicsResource {
 	/**
 	 * Return coordinates on the sprite sheet that would locate the sprite with
 	 * the corresponding index from the raw data.
+	 * <p>
+	 * Note that with texture adjustments calculated in the shader, there
+	 * shouldn't be a need for this any more.
 	 */
 	Rectanglef getFrame(int index) {
 
@@ -64,5 +67,13 @@ class SpriteSheet implements GraphicsResource {
 			textureU + frameStepX as float,
 			textureV + frameStepY as float
 		)
+	}
+
+	/**
+	 * Return a texture region for use with this spritesheet.
+	 */
+	Rectanglef getTextureRegion() {
+
+		return getFrame(0)
 	}
 }

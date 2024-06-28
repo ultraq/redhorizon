@@ -137,14 +137,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 					case ShaderRequest -> renderer.createShader(request.shaderConfig())
 					case MeshRequest -> renderer.createMesh(request.type(), request.layout(), request.vertices(), request.colour(),
 						request.textureUVs(), request.indices(), request.dynamic())
-					case SpriteMeshRequest -> {
-						if (request.textureUVs() != null) {
-							yield renderer.createSpriteMesh(request.surface(), request.textureUVs())
-						}
-						else {
-							yield renderer.createSpriteMesh(request.surface())
-						}
-					}
+					case SpriteMeshRequest -> renderer.createSpriteMesh(request.surface(), request.textureUVs())
 					case TextureRequest -> renderer.createTexture(request.width(), request.height(), request.format(), request.data())
 					case SpriteSheetRequest -> renderer.createSpriteSheet(request.width(), request.height(), request.format(), request.data())
 					case UniformBufferRequest -> renderer.createUniformBuffer(request.name(), request.data())

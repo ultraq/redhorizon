@@ -31,9 +31,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
-import org.joml.Vector2f
-import org.joml.primitives.Rectanglef
-
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -47,12 +44,11 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	final int numImages
 	final SpriteSheetGenerator spriteSheetGenerator
-	final Rectanglef region = new Rectanglef(0, 0, 1, 1)
 
 	/**
-	 * The frame to load from the sprite sheet in {@link #onSceneAddedAsync}.
+	 * The frame to select from the underlying spritesheet.
 	 */
-	int initialFrame = 0
+	int frame = 0
 
 	SpriteSheet spriteSheet
 
@@ -97,8 +93,19 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
-			scene
-				.requestCreateOrGet(new SpriteMeshRequest(bounds, region))
+			spriteSheetGenerator.generate(scene)
+				.thenComposeAsync { newSpriteSheet ->
+					spriteSheet = newSpriteSheet
+					material.with {
+						texture = spriteSheet.texture
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
+						frameStepX = spriteSheet.frameStepX
+						frameStepY = spriteSheet.frameStepY
+						frame = this.frame
+					}
+					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
+				}
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
 				},
@@ -106,12 +113,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 				.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
 				.thenAcceptAsync { requestedShader ->
 					shader = requestedShader
-				},
-			spriteSheetGenerator.generate(scene)
-				.thenAcceptAsync { newSpriteSheet ->
-					spriteSheet = newSpriteSheet
-					material.texture = spriteSheet.texture
-					region.set(spriteSheet[initialFrame])
 				}
 		)
 	}
@@ -133,9 +134,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	void update() {
 
-		if (mesh) {
-			mesh.updateTextureUvs(region as Vector2f[])
-		}
+		material.frame = frame
 	}
 
 	/**

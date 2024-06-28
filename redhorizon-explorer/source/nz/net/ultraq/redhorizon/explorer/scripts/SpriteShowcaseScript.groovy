@@ -58,11 +58,11 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
 			Math.wrap(currentFrame--, 0, numImages)
-			region.set(spriteSheet[currentFrame])
+			frame = currentFrame
 		}, true))
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
 			Math.wrap(currentFrame++, 0, numImages)
-			region.set(spriteSheet[currentFrame])
+			frame = currentFrame
 		}, true))
 
 		var Faction[] factions = Faction.values()

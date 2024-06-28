@@ -87,10 +87,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 * Create a mesh to represent a surface onto which a texture will go.  This is
 	 * a convenience method for {@link #createMesh}.
 	 */
-	default Mesh createSpriteMesh(Rectanglef surface) {
-
-		return createSpriteMesh(surface, new Rectanglef(0, 0, 1, 1))
-	}
+	Mesh createSpriteMesh(Rectanglef surface)
 
 	/**
 	 * Create a mesh to represent a surface onto which a texture will go.  This is

@@ -54,7 +54,7 @@ interface GraphicsRequests {
 	@ImmutableOptions(knownImmutables = ['surface', 'textureUVs'])
 	static record SpriteMeshRequest(Rectanglef surface, Rectanglef textureUVs) implements Request<Mesh> {
 		SpriteMeshRequest(Rectanglef surface) {
-			this(surface, null)
+			this(surface, new Rectanglef(0, 0, 1, 1))
 		}
 	}
 

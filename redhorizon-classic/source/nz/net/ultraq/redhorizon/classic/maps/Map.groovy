@@ -376,6 +376,14 @@ class Map extends Node<Map> {
 					},
 				tileSetSpriteSheetFuture.thenApplyAsync { spriteSheet ->
 					material.texture = spriteSheet.texture
+					material.with {
+						texture = spriteSheet.texture
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
+						frameStepX = spriteSheet.frameStepX
+						frameStepY = spriteSheet.frameStepY
+						frame = 0
+					}
 					return spriteSheet
 				}
 			)
@@ -469,7 +477,7 @@ class Map extends Node<Map> {
 
 				var overlay = new PalettedSprite(tileFile)
 				overlay.name = "${tile.name} - Variant ${imageVariant}"
-				overlay.initialFrame = imageVariant
+				overlay.frame = imageVariant
 				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
 				addChild(overlay)
 

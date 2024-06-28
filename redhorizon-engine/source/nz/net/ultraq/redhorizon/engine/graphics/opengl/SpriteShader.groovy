@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
+import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
@@ -34,6 +35,11 @@ class SpriteShader extends ShaderConfig {
 	final Uniform[] uniforms = [
 		{ shader, material, window ->
 			shader.setUniformTexture('mainTexture', 0, material.texture)
+		},
+		{ shader, material, window ->
+			Material.KEYS_SPRITES.each { key ->
+				shader.setUniformGeneric(key, material[key])
+			}
 		}
 	]
 }

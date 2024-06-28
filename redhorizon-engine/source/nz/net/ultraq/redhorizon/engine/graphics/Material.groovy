@@ -26,6 +26,36 @@ package nz.net.ultraq.redhorizon.engine.graphics
  */
 class Material {
 
+	private static final String KEY_FRAME = 'frame'
+	private static final String KEY_FRAMES_HORIZONTAL = 'framesHorizontal'
+	private static final String KEY_FRAMES_VERTICAL = 'framesVertical'
+	private static final String KEY_FRAME_STEP_X = 'frameStepX'
+	private static final String KEY_FRAME_STEP_Y = 'frameStepY'
+
+	static final String[] KEYS_SPRITES = [
+		KEY_FRAME, KEY_FRAMES_HORIZONTAL, KEY_FRAMES_VERTICAL, KEY_FRAME_STEP_X, KEY_FRAME_STEP_Y
+	]
+
 	final Map<String, Object> attributes = [:]
 	Texture texture
+
+	void setFrame(int frame) {
+		attributes[KEY_FRAME] = frame
+	}
+
+	void setFrameStepX(float frameStepX) {
+		attributes[KEY_FRAME_STEP_X] = frameStepX
+	}
+
+	void setFrameStepY(float frameStepY) {
+		attributes[KEY_FRAME_STEP_Y] = frameStepY
+	}
+
+	void setFramesHorizontal(int framesHorizontal) {
+		attributes[KEY_FRAMES_HORIZONTAL] = framesHorizontal
+	}
+
+	void setFramesVertical(int framesVertical) {
+		attributes[KEY_FRAMES_VERTICAL] = framesVertical
+	}
 }
