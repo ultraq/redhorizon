@@ -29,10 +29,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
-import org.joml.FrustumIntersection
 import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -170,12 +168,8 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Framebuffer framebuffer
-		private final boolean traverseScene = true
-		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
 		Scene scene
-
-		// For object culling
 		private final List<GraphicsElement> visibleElements = []
 
 		SceneRenderPass(Framebuffer framebuffer) {
@@ -201,28 +195,11 @@ class RenderPipeline implements AutoCloseable {
 					// Cull the list of renderable items to those just visible in the scene
 					average('objectCulling', 1f, logger) { ->
 						visibleElements.clear()
-
-						if (traverseScene) {
-							frustumIntersection.set(camera.viewProjection, false)
-							scene.traverse { Node element ->
-								if (element.isVisible(frustumIntersection)) {
-									if (element instanceof GraphicsElement) {
-										element.update()
-										element.script?.update()
-										visibleElements << element
-									}
-									return true
-								}
-								return false
-							}
-						}
-						else {
-							scene.quadTree.query(camera.viewBox).each { Node element ->
-								if (element instanceof GraphicsElement) {
-									element.update()
-									element.script?.update()
-									visibleElements << element
-								}
+						scene.query(camera.viewBox.scale(1.1f)).each { element ->
+							if (element instanceof GraphicsElement) {
+								element.update()
+								element.script?.update()
+								visibleElements << element
 							}
 						}
 					}

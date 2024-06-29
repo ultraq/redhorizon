@@ -50,20 +50,14 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	private final Vector3f globalPosition = new Vector3f()
 	private final Vector3f globalScale = new Vector3f(1, 1, 1)
 	private final Rectanglef globalBounds = new Rectanglef()
+	private PartitionHint partitionHint = null
 
 	/**
-	 * Adds a child node to this node.  If an index is specified, then this will
-	 * shift any existing nodes at the given position to the right to make room.
+	 * Adds a child node to this node.
 	 */
-	T addChild(Node child, int index = -1) {
+	T addChild(Node child) {
 
-		// Put child node in place
-		if (index != -1) {
-			children.add(index, child)
-		}
-		else {
-			children.add(child)
-		}
+		children.add(child)
 		child.parent = this
 
 		// Allow it to process
@@ -194,6 +188,19 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
+	 * A hint to the scenegraph to add this node to an appropriate data structure
+	 * for performance purposes.
+	 * <p>
+	 * The default behaviour is to inherit the partition hint of its parent,
+	 * defaulting to {@link PartitionHint#None} if there are no hints in the node's ancestor
+	 * tree.
+	 */
+	PartitionHint getPartitionHint() {
+
+		return partitionHint ?: parent?.partitionHint ?: PartitionHint.None
+	}
+
+	/**
 	 * Get the local position of this node.  Note that the returned vector is a
 	 * live value of this node's position, so be sure to wrap in your own object
 	 * if you need a stable value.
@@ -299,6 +306,14 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 				// an exception about "array length is not legal" 🤷
 				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
 			}
+	}
+
+	/**
+	 * Set the partition hint for this node.
+	 */
+	void setPartitionHint(PartitionHint partitionHint) {
+
+		this.partitionHint = partitionHint
 	}
 
 	/**

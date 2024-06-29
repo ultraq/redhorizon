@@ -65,6 +65,14 @@ class OpenGLUniformBuffer extends UniformBuffer {
 		glBindBufferBase(GL_UNIFORM_BUFFER, blockIndex, bufferId)
 	}
 
+	/**
+	 * A buffer is also considered falsey if it has been deleted.
+	 */
+	boolean asBoolean() {
+
+		return glIsBuffer(bufferId)
+	}
+
 	@Override
 	void close() {
 

@@ -33,6 +33,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
@@ -63,22 +64,31 @@ class Scene implements EventTarget {
 	@Delegate(includes = ['addChild', 'clear', 'findNode', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
 	final Node root = new RootNode(this)
 
-	// Partition static objects in the quadTree to make culling queries faster
-	final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
+	// Partition objects in the following data structures to make queries faster
+	private final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
+	private final CopyOnWriteArrayList<Node> nodeList = []
 
 	Scene() {
 
 		on(NodeAddedEvent) { event ->
 			var node = event.node
+
 			if (node instanceof Camera) {
 				camera = node
+				return
 			}
-			else if (event.node instanceof GraphicsElement) {
-				quadTree.add(event.node)
+
+			switch (node.partitionHint) {
+				case PartitionHint.SmallArea -> quadTree.add(node)
+				case PartitionHint.LargeArea, PartitionHint.None -> nodeList.add(node)
 			}
 		}
+
 		on(NodeRemovedEvent) { event ->
-			quadTree.remove(event.node)
+			var node = event.node
+			if (!quadTree.remove(node)) {
+				nodeList.remove(node)
+			}
 		}
 	}
 
@@ -105,7 +115,20 @@ class Scene implements EventTarget {
 		}
 	}
 
-//	List<Node> findAll()
+	/**
+	 * Return all nodes that are within the bounding box of {@code range}.
+	 */
+	List<Node> query(Rectanglef range, List<Node> results = []) {
+
+		nodeList.each { node ->
+			var nodeGlobalBounds = node.globalBounds
+			if (range.containsRectangle(nodeGlobalBounds) || range.intersectsRectangle(nodeGlobalBounds)) {
+				results << node
+			}
+		}
+		quadTree.query(range, results)
+		return results
+	}
 
 	/**
 	 * Select objects whose bounding volumes intersect the given ray.

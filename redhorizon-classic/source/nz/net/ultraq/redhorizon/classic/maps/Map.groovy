@@ -41,6 +41,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
@@ -123,7 +124,9 @@ class Map extends Node<Map> {
 		addChild(new Units())
 		addChild(new Infantry())
 
-		addChild(new MapLines())
+		addChild(new MapLines().tap {
+			transform.translate(0, 0, 0.4)
+		})
 	}
 
 	@Override
@@ -248,6 +251,7 @@ class Map extends Node<Map> {
 	private class MapBackground extends Node<MapBackground> {
 
 		String name = "MapBackground - ${theater.label}"
+		final PartitionHint partitionHint = PartitionHint.LargeArea
 
 		MapBackground() {
 
@@ -285,6 +289,8 @@ class Map extends Node<Map> {
 	 * The "MapPack" layer of a Red Alert map.
 	 */
 	private class MapPack extends Node<MapPack> implements GraphicsElement {
+
+		final PartitionHint partitionHint = PartitionHint.LargeArea
 
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
@@ -409,6 +415,7 @@ class Map extends Node<Map> {
 	 */
 	private class OverlayPack extends Node<OverlayPack> {
 
+		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
 		private int numTiles = 0
 
 		OverlayPack() {
@@ -479,6 +486,8 @@ class Map extends Node<Map> {
 				overlay.name = "${tile.name} - Variant ${imageVariant}"
 				overlay.frame = imageVariant
 				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
+				overlay.partitionHint = PartitionHint.SmallArea
+
 				addChild(overlay)
 
 				numTiles++
@@ -497,6 +506,8 @@ class Map extends Node<Map> {
 	 */
 	private class Terrain extends Node<Terrain> {
 
+		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
+
 		Terrain() {
 
 			var terrainData = mapFile.terrainData
@@ -507,6 +518,7 @@ class Map extends Node<Map> {
 				var terrain = new PalettedSprite(terrainFile)
 				terrain.name = "Terrain ${terrainType}"
 				terrain.position = cellPosXY
+				terrain.partitionHint = PartitionHint.SmallArea
 				addChild(terrain)
 			}
 		}
@@ -516,6 +528,8 @@ class Map extends Node<Map> {
 	 * Common class for the faction units/structures of the map.
 	 */
 	private abstract class FactionObjects<T extends FactionObjects, L extends ObjectLine> extends Node<T> {
+
+		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
 
 		Unit createObject(L objectLine,
 			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
@@ -651,8 +665,9 @@ class Map extends Node<Map> {
 									return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
 								})
 								bibSprite.name = "Bib"
-								bibSprite.setPosition(0, -TILE_HEIGHT)
-								structure.addChild(bibSprite, 0)
+								bibSprite.setPosition(0, -TILE_HEIGHT, -0.1)
+								bibSprite.partitionHint = PartitionHint.SmallArea
+								structure.addChild(bibSprite)
 							}
 						}
 					}

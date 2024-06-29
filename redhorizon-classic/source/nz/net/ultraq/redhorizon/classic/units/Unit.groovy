@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -44,6 +45,8 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 * The state value used for the not-animating / doing nothing state
 	 */
 	static final String DEFAULT_STATE = "default"
+
+	final PartitionHint partitionHint = PartitionHint.SmallArea
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
 	final ImagesFile imagesFile

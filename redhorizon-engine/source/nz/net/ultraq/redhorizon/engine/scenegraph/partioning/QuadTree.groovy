@@ -36,7 +36,8 @@ class QuadTree {
 	private final QuadTree parent
 	private final Rectanglef area
 	private final int capacity
-	private BlockingQueue<Node> children // Needs a different name from the Node property
+	// TODO: Make this quadtree accept any element that can return a Vector2f position
+	private BlockingQueue<Node> children
 	private List<QuadTree> quadrants // Going from NW, NE, SE, SW
 
 	/**
@@ -135,7 +136,7 @@ class QuadTree {
 	/**
 	 * Return all nodes that are within the bounding box of {@code range}.
 	 */
-	List<Node> query(Rectanglef range, List<Node> results = new ArrayList<>()) {
+	List<Node> query(Rectanglef range, List<Node> results = []) {
 
 		if (area.intersectsRectangle(range)) {
 			if (children) {
@@ -151,6 +152,8 @@ class QuadTree {
 	/**
 	 * Removes a node from this quadtree.  Nodes will attempt to rebalance
 	 * themselves if quadrants can also be removed.
+	 *
+	 * @return {@code true} if the node was removed from the quadtree.
 	 */
 	synchronized boolean remove(Node node) {
 
