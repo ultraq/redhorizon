@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import org.joml.FrustumIntersection
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -116,53 +117,18 @@ class Scene implements EventTarget {
 	}
 
 	/**
-	 * Return all nodes that are within the bounding box of {@code range}.
+	 * Return all nodes that are within the given view frustum.
 	 */
-	List<Node> query(Rectanglef range, List<Node> results = []) {
+	List<Node> query(FrustumIntersection frustumIntersection, List<Node> results = []) {
 
 		nodeList.each { node ->
-			var nodeGlobalBounds = node.globalBounds
-			if (range.containsRectangle(nodeGlobalBounds) || range.intersectsRectangle(nodeGlobalBounds)) {
+			if (node.isVisible(frustumIntersection)) {
 				results << node
 			}
 		}
-		quadTree.query(range, results)
+		quadTree.query(frustumIntersection, results)
 		return results
 	}
-
-	/**
-	 * Select objects whose bounding volumes intersect the given ray.
-	 *
-	 * @param ray Ray to test objects against.
-	 * @return List of objects that intersect the ray.
-	 */
-//	public List<Spatial> pickObjects(Ray ray) {
-//
-//		ArrayList<Spatial> results = new ArrayList<>();
-//		pickObjects(ray, rootnode, results);
-//		return results;
-//	}
-
-	/**
-	 * Select objects whose bounding volumes intersect the given ray.
-	 *
-	 * @param ray Ray to test objects against.
-	 * @param node Node being checked for intersecting objects.
-	 * @param results List to add intersecting objects to.
-	 */
-//	private void pickObjects(Ray ray, Node node, List<Spatial> results) {
-//
-//		for (Spatial child: node.getChildren()) {
-//			if (child.intersects(ray)) {
-//				if (child instanceof Node) {
-//					pickObjects(ray, (Node)child, results);
-//				}
-//				else {
-//					results.add(child);
-//				}
-//			}
-//		}
-//	}
 
 	/**
 	 * A special instance of {@link Node} that is always present in the scene.

@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.partioning
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
+import org.joml.FrustumIntersection
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
@@ -134,16 +135,16 @@ class QuadTree {
 	}
 
 	/**
-	 * Return all nodes that are within the bounding box of {@code range}.
+	 * Return all nodes that are within the given view frustum.
 	 */
-	List<Node> query(Rectanglef range, List<Node> results = []) {
+	List<Node> query(FrustumIntersection frustumIntersection, List<Node> results = []) {
 
-		if (area.intersectsRectangle(range)) {
+		if (frustumIntersection.testPlaneXY(area)) {
 			if (children) {
 				results.addAll(children)
 			}
 			else if (quadrants) {
-				quadrants*.query(range, results)
+				quadrants*.query(frustumIntersection, results)
 			}
 		}
 		return results

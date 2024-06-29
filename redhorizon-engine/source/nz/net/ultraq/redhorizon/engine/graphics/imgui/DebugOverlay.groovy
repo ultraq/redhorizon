@@ -83,7 +83,7 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		debugWindowSizeY = ImGui.getWindowSizeY() as int
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
-		ImGui.text("Draw calls: ${engineStats.drawCalls}")
+		ImGui.text("Draw calls: ${engineStats.drawCalls.getAndSet(0)}")
 		ImGui.text("Active meshes: ${engineStats.activeMeshes}")
 		ImGui.text("Active textures: ${engineStats.activeTextures}")
 		ImGui.text("Active framebuffers: ${engineStats.activeFramebuffers}")
@@ -93,7 +93,6 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		ImGui.text("Gamepad sticks: " +
 			"(${sprintf('%.2f', leftX)}, ${sprintf('%.2f', leftY)}) " +
 			"(${sprintf('%.2f', rightX)}, ${sprintf('%.2f', rightY)})")
-		engineStats.drawCalls.set(0)
 
 		ImGui.separator()
 		persistentLines.keySet().sort().each { key ->
