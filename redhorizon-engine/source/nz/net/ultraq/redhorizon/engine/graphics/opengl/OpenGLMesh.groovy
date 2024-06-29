@@ -97,6 +97,14 @@ class OpenGLMesh extends Mesh {
 		lastTextureUVs = textureUVs
 	}
 
+	/**
+	 * A mesh is truthy/ready if its array data is valid.
+	 */
+	boolean asBoolean() {
+
+		return glIsVertexArray(vertexArrayId)
+	}
+
 	@Override
 	void bind() {
 

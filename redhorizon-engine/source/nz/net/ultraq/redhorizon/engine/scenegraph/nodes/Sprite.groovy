@@ -20,9 +20,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -54,7 +54,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	protected Material material = new Material()
+	protected SpriteMaterial material = new SpriteMaterial()
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -98,11 +98,11 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 					spriteSheet = newSpriteSheet
 					material.with {
 						texture = spriteSheet.texture
-						framesHorizontal = spriteSheet.framesHorizontal
-						framesVertical = spriteSheet.framesVertical
+						frame = this.frame
 						frameStepX = spriteSheet.frameStepX
 						frameStepY = spriteSheet.frameStepY
-						frame = this.frame
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
 					}
 					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
 				}

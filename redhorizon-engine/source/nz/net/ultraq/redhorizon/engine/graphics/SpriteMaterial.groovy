@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 /**
- * A material defines special properties to how a shape should be rendered.
- * These are often uniform values that go into configuring a shader, stored as a
- * general-purpose {@code Map}, with extensions used to simplify access to that
- * map.
+ * A material containing attributes for rendering sprites.
  *
  * @author Emanuel Rabina
  */
-class Material {
+class SpriteMaterial extends Material {
 
-	Texture texture
+	int frame
+	float frameStepX
+	float frameStepY
+	int framesHorizontal
+	int framesVertical
 }

@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
+import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -32,7 +33,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
@@ -295,7 +295,7 @@ class Map extends Node<Map> {
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
 		private Shader shader
-		private Material material = new Material()
+		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
 
 		MapPack() {
 
@@ -381,14 +381,13 @@ class Map extends Node<Map> {
 						shader = requestedShader
 					},
 				tileSetSpriteSheetFuture.thenApplyAsync { spriteSheet ->
-					material.texture = spriteSheet.texture
 					material.with {
 						texture = spriteSheet.texture
-						framesHorizontal = spriteSheet.framesHorizontal
-						framesVertical = spriteSheet.framesVertical
+						frame = 0
 						frameStepX = spriteSheet.frameStepX
 						frameStepY = spriteSheet.frameStepY
-						frame = 0
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
 					}
 					return spriteSheet
 				}

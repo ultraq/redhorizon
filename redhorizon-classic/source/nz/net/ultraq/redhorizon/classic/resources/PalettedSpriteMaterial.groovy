@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.extensions
+package nz.net.ultraq.redhorizon.classic.resources
 
-import nz.net.ultraq.redhorizon.engine.graphics.Material
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 
 /**
- * C&C classic extensions to the {@link Material} class.
+ * A material specific to paletted sprites.
  *
  * @author Emanuel Rabina
  */
-class MaterialExtensions {
-
-	private static final String KEY_ADJUSTMENTMAP = 'adjustmentMap'
+class PalettedSpriteMaterial extends SpriteMaterial {
 
 	private static final int[] IDENTITY_MAP = 0..255
 
-	static int[] getAdjustmentMap(Material self) {
-		return self.attributes[KEY_ADJUSTMENTMAP] ?: IDENTITY_MAP
-	}
-
-	static void setAdjustmentMap(Material self, int[] adjustmentMap) {
-		self.attributes[KEY_ADJUSTMENTMAP] = adjustmentMap
-	}
+	int[] adjustmentMap = IDENTITY_MAP
 }

@@ -66,7 +66,7 @@ class OpenGLUniformBuffer extends UniformBuffer {
 	}
 
 	/**
-	 * A buffer is also considered falsey if it has been deleted.
+	 * A buffer is considered truthy/ready if the bufferId is valid.
 	 */
 	boolean asBoolean() {
 

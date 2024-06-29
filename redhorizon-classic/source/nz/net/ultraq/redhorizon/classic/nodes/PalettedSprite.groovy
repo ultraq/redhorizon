@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.nodes
 
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
@@ -48,6 +49,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	PalettedSprite(ImagesFile imagesFile) {
 
 		super(imagesFile)
+		material = new PalettedSpriteMaterial()
 		this.repeatX = 1f
 		this.repeatY = 1f
 	}
@@ -67,7 +69,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 		SpriteSheetGenerator spriteSheetGenerator) {
 
 		super(width, height, numImages, spriteSheetGenerator)
-
+		material = new PalettedSpriteMaterial()
 		// TODO: Should be able to move repeat values to Sprite class
 		this.repeatX = repeatX
 		this.repeatY = repeatY
@@ -96,11 +98,11 @@ class PalettedSprite extends Sprite implements FactionColours {
 					spriteSheet = newSpriteSheet
 					material.with {
 						texture = spriteSheet.texture
-						framesHorizontal = spriteSheet.framesHorizontal
-						framesVertical = spriteSheet.framesVertical
+						frame = this.frame
 						frameStepX = spriteSheet.frameStepX
 						frameStepY = spriteSheet.frameStepY
-						frame = this.frame
+						framesHorizontal = spriteSheet.framesHorizontal
+						framesVertical = spriteSheet.framesVertical
 					}
 					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
 				}
@@ -131,8 +133,8 @@ class PalettedSprite extends Sprite implements FactionColours {
 	@Override
 	void update() {
 
-		if (material.adjustmentMap && factionChanged) {
-			material.adjustmentMap = buildAdjustmentMap(faction)
+		if (factionChanged) {
+			((PalettedSpriteMaterial)material).adjustmentMap = buildAdjustmentMap(faction)
 			factionChanged = false
 		}
 		super.update()
