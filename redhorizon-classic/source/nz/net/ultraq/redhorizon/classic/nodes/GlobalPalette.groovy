@@ -101,6 +101,11 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 
 	@Override
 	void render(GraphicsRenderer renderer) {
+
+		if (paletteChanged) {
+			paletteAndAlphaMaskBuffer.updateBufferData(buildPaletteBuffer())
+			paletteChanged = false
+		}
 	}
 
 	/**
@@ -110,14 +115,5 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 
 		this.palette = palette
 		paletteChanged = true
-	}
-
-	@Override
-	void update() {
-
-		if (paletteChanged) {
-			paletteAndAlphaMaskBuffer.updateBufferData(buildPaletteBuffer())
-			paletteChanged = false
-		}
 	}
 }

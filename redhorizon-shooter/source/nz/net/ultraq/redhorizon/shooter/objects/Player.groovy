@@ -20,11 +20,9 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
@@ -42,7 +40,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements GraphicsElement, Rotatable, Temporal {
+class Player extends Node<Player> implements Rotatable, Temporal {
 
 	private static final float MOVEMENT_SPEED = 100f
 	private static final float ROTATION_SPEED = 180f
@@ -84,14 +82,6 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 
 		xPosRange = Shooter.RENDER_RESOLUTION.width() / 2 - width / 2
 		yPosRange = Shooter.RENDER_RESOLUTION.height() / 2 - height / 2
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		// Does nothing
-		// TODO: All we want GraphicsElement for is the update() method.  Maybe that
-		//       needs to be moved out to the Node class 🤔
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.FrustumIntersection
@@ -169,7 +170,7 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Framebuffer framebuffer
-		private final List<GraphicsElement> visibleElements = []
+		private final List<Node> visibleElements = []
 		private final Matrix4f enlargedViewProjection = new Matrix4f()
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
@@ -193,10 +194,10 @@ class RenderPipeline implements AutoCloseable {
 			if (scene) {
 				var camera = scene.camera
 				if (camera) {
-					camera.update()
+					camera.render(renderer)
 
 					// Cull the list of renderable items to those just visible in the scene
-					average('objectCulling', 1f, logger) { ->
+					average('Culling', 1f, logger) { ->
 						visibleElements.clear()
 						frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(camera.viewProjection), false)
 						scene.query(frustumIntersection).each { element ->
@@ -208,20 +209,9 @@ class RenderPipeline implements AutoCloseable {
 						}
 					}
 
-//					averageNanos('Sorting overhead', 1f, logger) { ->
-//						visibleElements.sort { e1, e2 ->
-//							var b1 = e1.globalBounds
-//							var b2 = e2.globalBounds
-//							var result =
-//								b1.maxY > b2.maxY ? -1 : b1.maxY < b2.maxY ? 1 :
-//									b1.minX < b2.minX ? -1 : b1.minX > b2.minX ? 1 :
-//										0
-//							return result
-//						}
-//					}
 					average('Rendering', 1f, logger) { ->
 						visibleElements.each { element ->
-							element.render(renderer)
+							((GraphicsElement)element).render(renderer)
 						}
 					}
 				}

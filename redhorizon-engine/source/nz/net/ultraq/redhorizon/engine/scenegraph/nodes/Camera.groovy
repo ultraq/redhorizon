@@ -17,8 +17,10 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
@@ -35,7 +37,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Camera extends Node<Camera> {
+class Camera extends Node<Camera> implements GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
@@ -113,6 +115,16 @@ class Camera extends Node<Camera> {
 		return scene.requestDelete(viewProjectionBuffer)
 	}
 
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+		if (viewProjectionBuffer) {
+			stackPush().withCloseable { stack ->
+				viewProjectionBuffer.updateBufferData(getView().get(stack.mallocFloat(Matrix4f.FLOATS)), Matrix4f.BYTES)
+			}
+		}
+	}
+
 	/**
 	 * Reset this camera's properties.
 	 */
@@ -128,17 +140,5 @@ class Camera extends Node<Camera> {
 		// Positioning the camera is the opposite of what we would expect as we are
 		// instead creating a transform matrix that moves the world around it
 		super.setPosition(-x, -y, -z)
-	}
-
-	/**
-	 * Update the camera's matrices before rendering.
-	 */
-	void update() {
-
-		if (viewProjectionBuffer) {
-			stackPush().withCloseable { stack ->
-				viewProjectionBuffer.updateBufferData(getView().get(stack.mallocFloat(Matrix4f.FLOATS)), Matrix4f.BYTES)
-			}
-		}
 	}
 }

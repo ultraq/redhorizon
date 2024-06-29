@@ -386,4 +386,11 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			children*.traverse(visitor)
 		}
 	}
+
+	/**
+	 * Called on every frame before the node is rendered, allowing it to perform
+	 * any processing as a response to changes in the scene.
+	 */
+	void update() {
+	}
 }
