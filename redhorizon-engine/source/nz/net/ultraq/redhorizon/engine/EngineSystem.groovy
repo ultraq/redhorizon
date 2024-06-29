@@ -19,21 +19,35 @@ package nz.net.ultraq.redhorizon.engine
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import groovy.transform.PackageScope
+
 /**
  * A system provides behaviour for a component or set of components.  Systems
  * traverse a {@link Scene}, looking for the components they work with, and then
  * doing something with the data in those components.
+ * <p>
+ * Systems operate on their own thread, and should be careful not to step on
+ * data that could be used by other systems/threads.
  *
  * @author Emanuel Rabina
  */
 abstract class EngineSystem implements Runnable, EventTarget {
 
-	Scene scene
+	private Engine engine
+	protected Scene scene
 
 	/**
 	 * Configure the current scene with this system.
 	 */
 	abstract void configureScene()
+
+	/**
+	 * Return the engine that this system is a part of.
+	 */
+	protected Engine getEngine() {
+
+		return engine
+	}
 
 	/**
 	 * Execute an action and optionally wait such that, if repeated, it would run
@@ -55,8 +69,18 @@ abstract class EngineSystem implements Runnable, EventTarget {
 	}
 
 	/**
+	 * Set the engine this system is a part of.
+	 */
+	@PackageScope
+	void setEngine(Engine engine) {
+
+		this.engine = engine
+	}
+
+	/**
 	 * Set and configure the scene with this system
 	 */
+	@PackageScope
 	void setScene(Scene scene) {
 
 		this.scene = scene

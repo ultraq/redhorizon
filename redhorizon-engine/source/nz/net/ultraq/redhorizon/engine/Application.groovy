@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
+import nz.net.ultraq.redhorizon.engine.game.GameLogicSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
@@ -67,6 +68,7 @@ class Application implements EventTarget {
 	final String version
 
 	private final Engine engine = new Engine()
+	private final GameLogicSystem gameLogicSystem = new GameLogicSystem()
 	private final InputEventStream inputEventStream = new InputEventStream()
 
 	private Scene scene
@@ -137,6 +139,7 @@ class Application implements EventTarget {
 	final void start() {
 
 		logger.debug('Initializing application...')
+		engine << gameLogicSystem
 
 		if (!scene) {
 			scene = new Scene()

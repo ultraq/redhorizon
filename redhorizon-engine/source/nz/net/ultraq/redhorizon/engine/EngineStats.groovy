@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.BufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
+import nz.net.ultraq.redhorizon.engine.game.GameLogicSystem
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
@@ -33,6 +34,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeAddedEvent
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeRemovedEvent
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -43,6 +46,8 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 @Singleton
 class EngineStats {
+
+	final AtomicInteger sceneObjects = new AtomicInteger()
 
 	final AtomicInteger drawCalls = new AtomicInteger()
 	final AtomicInteger activeFramebuffers = new AtomicInteger()
@@ -65,6 +70,20 @@ class EngineStats {
 				case SourceCreatedEvent -> activeSources.incrementAndGet()
 				case SourceDeletedEvent -> activeSources.decrementAndGet()
 			}
+		}
+		return this
+	}
+
+	/**
+	 * Add the game logic system to get stats on the game world.
+	 */
+	EngineStats attachGameLogicSystem(GameLogicSystem gameLogicSystem) {
+
+		gameLogicSystem.scene.on(NodeAddedEvent) { event ->
+			sceneObjects.incrementAndGet()
+		}
+		gameLogicSystem.scene.on(NodeRemovedEvent) { event ->
+			sceneObjects.decrementAndGet()
 		}
 		return this
 	}

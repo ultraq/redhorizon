@@ -28,9 +28,9 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 /**
- * The engine is responsible for running the systems that operate on a scene.
- * Each system can be given it's own thread to take advantage of multi-processor
- * CPUs.
+ * A coordinator object responsible for starting/stopping the engine systems
+ * that operate on a scene.  Each system can be given it's own thread to take
+ * advantage of multi-processor CPUs.
  *
  * @author Emanuel Rabina
  */
@@ -49,18 +49,15 @@ class Engine {
 
 	/**
 	 * Add a system to the engine.
-	 *
-	 * @param system
 	 */
 	void addSystem(EngineSystem system) {
 
 		systems << system
+		system.engine = this
 	}
 
 	/**
 	 * Groovy overload of {@code <<} to call {@link #addSystem}.
-	 *
-	 * @param system
 	 */
 	void leftShift(EngineSystem system) {
 

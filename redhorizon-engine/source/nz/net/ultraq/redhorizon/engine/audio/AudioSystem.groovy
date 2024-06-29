@@ -150,6 +150,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 							listener.render(renderer)
 
 							// Run the audio elements
+							// TODO: Split this out like the graphics system where we wait to
+							//       be told to process audio objects instead of looping
+							//       through the scene ourselves
 							scene?.traverse { element ->
 								if (element instanceof AudioElement) {
 									element.render(renderer)

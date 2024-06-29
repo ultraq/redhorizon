@@ -130,6 +130,14 @@ class RenderPipeline implements AutoCloseable {
 	}
 
 	/**
+	 * Collect the objects to draw with the next call to {@link #render}.
+	 */
+	void gather() {
+
+		sceneRenderPass.gather()
+	}
+
+	/**
 	 * Run through each of the rendering passes configured in the pipeline.
 	 */
 	void render() {
@@ -175,7 +183,6 @@ class RenderPipeline implements AutoCloseable {
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
 		Scene scene
-		private long lastUpdateTimeMs
 
 		SceneRenderPass(Framebuffer framebuffer) {
 
@@ -189,30 +196,15 @@ class RenderPipeline implements AutoCloseable {
 			renderer.delete(framebuffer)
 		}
 
-		@Override
-		void render(GraphicsRenderer renderer, Void unused) {
-
-			var currentTimeMs = System.currentTimeMillis()
-			var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
+		/**
+		 * Gather a list of renderables to be drawn to the screen with the next call
+		 * to {@link #render}.
+		 */
+		void gather() {
 
 			if (scene) {
 				var camera = scene.camera
 				if (camera) {
-					camera.render(renderer)
-
-					// TODO: Multi-thread and optimize this since it'll run against every
-					//       node in a scene.  Alternatively, make updates part of the
-					//       main game loop to then throw all renderables to the graphics
-					//       thread.
-					average('Updating', 1f, logger) { ->
-						scene.traverse { Node element ->
-							element.update(delta)
-							element.script?.update(delta)
-							return true
-						}
-					}
-
-					// Cull the list of renderable items to those just visible in the scene
 					average('Culling', 1f, logger) { ->
 						visibleElements.clear()
 						frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(camera.viewProjection), false)
@@ -222,6 +214,17 @@ class RenderPipeline implements AutoCloseable {
 							}
 						}
 					}
+				}
+			}
+		}
+
+		@Override
+		void render(GraphicsRenderer renderer, Void unused) {
+
+			if (scene) {
+				var camera = scene.camera
+				if (camera) {
+					camera.render(renderer)
 
 					average('Rendering', 1f, logger) { ->
 						visibleElements.each { element ->
@@ -230,8 +233,6 @@ class RenderPipeline implements AutoCloseable {
 					}
 				}
 			}
-
-			lastUpdateTimeMs = currentTimeMs
 		}
 	}
 

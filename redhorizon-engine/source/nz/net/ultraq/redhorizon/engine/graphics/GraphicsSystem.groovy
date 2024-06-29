@@ -35,7 +35,9 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.BrokenBarrierException
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -53,6 +55,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<GraphicsResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
+	private final CyclicBarrier renderBarrier = new CyclicBarrier(2)
+	private final CyclicBarrier continueBarrier = new CyclicBarrier(2)
 
 	private OpenGLWindow window
 	private OpenGLRenderer renderer
@@ -229,12 +233,23 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 										shouldToggleVsync = false
 									}
 									processRequests(renderer)
+
+									// Synchronization point where we wait for the game logic
+									// system to signal that it's OK to gather renderables from
+									// the scene.  Once we have those renderables, we can let the
+									// game logic system continue while we draw those out.
+									renderBarrier.await()
+									renderBarrier.reset()
+									pipeline.gather()
+									continueBarrier.await()
+									continueBarrier.reset()
+
 									pipeline.render()
 									window.swapBuffers()
 									window.pollEvents()
 									gamepadStateProcessor.process()
 								}
-								catch (InterruptedException ignored) {
+								catch (BrokenBarrierException | InterruptedException ignored) {
 									break
 								}
 							}
@@ -248,5 +263,18 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		}
 		trigger(new SystemStoppedEvent())
 		logger.debug('Graphics system stopped')
+	}
+
+	/**
+	 * Called by the game logic system to signal to the graphics system that it
+	 * should start gathering objects from the scene to render.  This method will
+	 * block until that gathering process is complete so that it's safe for the
+	 * game logic system to continue with its work and there is no longer
+	 * competition for data.
+	 */
+	void waitForContinue() {
+
+		renderBarrier.await()
+		continueBarrier.await()
 	}
 }

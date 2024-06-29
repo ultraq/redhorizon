@@ -83,6 +83,7 @@ class DebugOverlay implements ImGuiElement<DebugOverlay> {
 		debugWindowSizeY = ImGui.getWindowSizeY() as int
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
+		ImGui.text("Scene objects: ${engineStats.sceneObjects.get()}")
 		ImGui.text("Draw calls: ${engineStats.drawCalls.getAndSet(0)}")
 		ImGui.text("Active meshes: ${engineStats.activeMeshes}")
 		ImGui.text("Active textures: ${engineStats.activeTextures}")
