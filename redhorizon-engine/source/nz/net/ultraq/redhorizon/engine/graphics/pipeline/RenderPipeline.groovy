@@ -175,6 +175,7 @@ class RenderPipeline implements AutoCloseable {
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 
 		Scene scene
+		private long lastUpdateTimeMs
 
 		SceneRenderPass(Framebuffer framebuffer) {
 
@@ -191,10 +192,25 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
+			var currentTimeMs = System.currentTimeMillis()
+			var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
+
 			if (scene) {
 				var camera = scene.camera
 				if (camera) {
 					camera.render(renderer)
+
+					// TODO: Multi-thread and optimize this since it'll run against every
+					//       node in a scene.  Alternatively, make updates part of the
+					//       main game loop to then throw all renderables to the graphics
+					//       thread.
+					average('Updating', 1f, logger) { ->
+						scene.traverse { Node element ->
+							element.update(delta)
+							element.script?.update(delta)
+							return true
+						}
+					}
 
 					// Cull the list of renderable items to those just visible in the scene
 					average('Culling', 1f, logger) { ->
@@ -202,8 +218,6 @@ class RenderPipeline implements AutoCloseable {
 						frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(camera.viewProjection), false)
 						scene.query(frustumIntersection).each { element ->
 							if (element instanceof GraphicsElement) {
-								element.update()
-								element.script?.update()
 								visibleElements << element
 							}
 						}
@@ -216,6 +230,8 @@ class RenderPipeline implements AutoCloseable {
 					}
 				}
 			}
+
+			lastUpdateTimeMs = currentTimeMs
 		}
 	}
 

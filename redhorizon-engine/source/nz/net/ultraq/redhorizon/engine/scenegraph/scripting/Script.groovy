@@ -43,7 +43,10 @@ abstract class Script<T extends Scriptable> implements SceneEvents {
 	/**
 	 * Called on every frame before the node is rendered, allowing it to perform
 	 * any processing as a response to changes in the scene.
+	 *
+	 * @param delta
+	 *   Time, in seconds, since the last time this method was called.
 	 */
-	void update() {
+	void update(float delta) {
 	}
 }

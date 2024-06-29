@@ -132,7 +132,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	}
 
 	@Override
-	void update() {
+	void update(float delta) {
 
 		material.frame = frame
 	}

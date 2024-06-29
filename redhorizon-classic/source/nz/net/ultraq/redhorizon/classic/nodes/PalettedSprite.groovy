@@ -131,12 +131,12 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	void update() {
+	void update(float delta) {
 
 		if (factionChanged) {
 			((PalettedSpriteMaterial)material).adjustmentMap = buildAdjustmentMap(faction)
 			factionChanged = false
 		}
-		super.update()
+		super.update(delta)
 	}
 }

@@ -54,7 +54,6 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
 	private float rotation = 0f
-	private long moveUpdateTimeMs
 
 	/**
 	 * Constructor, load the sprite and scripts for the player.
@@ -92,16 +91,11 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	}
 
 	@Override
-	void update() {
-
-		// TODO: It'd help if we got a frame delta in here, so update() might need
-		//       to provide that.
-		var moveCurrentTimeMs = currentTimeMs
-		var frameDelta = (moveCurrentTimeMs - (moveUpdateTimeMs ?: moveCurrentTimeMs)) / 1000
+	void update(float delta) {
 
 		if (velocity.length()) {
 			var currentPosition = getPosition()
-			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(frameDelta)
+			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
 			setPosition(
 				Math.clamp(currentPosition.x + movement.x as float, -xPosRange, xPosRange),
 				Math.clamp(currentPosition.y + movement.y as float, -yPosRange, yPosRange)
@@ -110,14 +104,12 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 		// Keyboard rotation
 		if (rotation) {
-			heading = heading + rotation * ROTATION_SPEED * frameDelta as float
+			heading = heading + rotation * ROTATION_SPEED * delta as float
 		}
 		// Gamepad rotation
 		else if (direction.length()) {
 			heading = Math.toDegrees(direction.angle(up)) as float
 		}
-
-		moveUpdateTimeMs = moveCurrentTimeMs
 	}
 
 	/**

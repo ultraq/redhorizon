@@ -196,7 +196,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		}
 
 		@Override
-		void update() {
+		void update(float delta) {
 
 			// TODO: If this animation region picking gets more complicated, it might
 			//       be worth making an 'animation library' for units
@@ -216,7 +216,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			}
 
-			super.update()
+			super.update(delta)
 		}
 	}
 
@@ -230,7 +230,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		}
 
 		@Override
-		void update() {
+		void update(float delta) {
 
 			if (spriteSheet) {
 				var turretHeadings = unitData.shpFile.parts.turret.headings
@@ -239,7 +239,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				frame = unitData.shpFile.parts.body.headings + turretRotationFrame
 			}
 
-			super.update()
+			super.update(delta)
 		}
 	}
 }
