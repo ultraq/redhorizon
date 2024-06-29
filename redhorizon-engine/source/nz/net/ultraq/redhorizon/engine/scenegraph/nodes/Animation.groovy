@@ -20,9 +20,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -57,7 +57,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	private int currentFrame = -1
 	private Mesh mesh
 	private Shader shader
-	private Material material = new Material()
+	private SpriteMaterial material = new SpriteMaterial()
 
 	/**
 	 * Constructor, create an animation using data straight from an animation file.
