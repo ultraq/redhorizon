@@ -183,16 +183,17 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		var sceneResult = closure()
 
 		// Draw ImGui objects
-		if (drawUiElements && sceneResult) {
-			var dockspaceId = setUpDockspace()
-			uiElements*.render(dockspaceId, sceneResult)
+		average('Rendering', 1f, logger) { ->
+			if (drawUiElements && sceneResult) {
+				var dockspaceId = setUpDockspace()
+				uiElements*.render(dockspaceId, sceneResult)
+			}
+			if (drawOverlays) {
+				overlays*.render(-1, null)
+			}
+			ImGui.render()
+			imGuiGl3.renderDrawData(ImGui.getDrawData())
 		}
-		if (drawOverlays) {
-			overlays*.render(-1, null)
-		}
-
-		ImGui.render()
-		imGuiGl3.renderDrawData(ImGui.getDrawData())
 	}
 
 	/**

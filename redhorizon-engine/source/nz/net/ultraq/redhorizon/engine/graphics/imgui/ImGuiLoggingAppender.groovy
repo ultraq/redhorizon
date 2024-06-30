@@ -49,7 +49,7 @@ class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements E
 		if (eventObject.message.contains('average time')) {
 			trigger(new ImGuiLogEvent(
 				message: message,
-				persistentKey: eventObject.argumentArray[0]
+				persistentKey: eventObject.loggerName + eventObject.argumentArray[0]
 			))
 		}
 		else {
