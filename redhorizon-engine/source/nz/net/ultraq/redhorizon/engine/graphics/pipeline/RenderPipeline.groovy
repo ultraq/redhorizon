@@ -29,7 +29,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement.RenderCommand
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.FrustumIntersection
@@ -178,9 +178,9 @@ class RenderPipeline implements AutoCloseable {
 	private class SceneRenderPass implements RenderPass<Void> {
 
 		final Framebuffer framebuffer
-		private final List<Node> visibleElements = []
 		private final Matrix4f enlargedViewProjection = new Matrix4f()
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
+		private final List<RenderCommand> drawCommands = []
 
 		Scene scene
 
@@ -205,12 +205,12 @@ class RenderPipeline implements AutoCloseable {
 			if (scene) {
 				var camera = scene.camera
 				if (camera) {
-					average('Culling', 1f, logger) { ->
-						visibleElements.clear()
+					average('Gathering', 1f, logger) { ->
+						drawCommands.clear()
 						frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(camera.viewProjection), false)
 						scene.query(frustumIntersection).each { element ->
 							if (element instanceof GraphicsElement) {
-								visibleElements << element
+								drawCommands << element.renderLater()
 							}
 						}
 					}
@@ -227,9 +227,7 @@ class RenderPipeline implements AutoCloseable {
 					camera.render(renderer)
 
 					average('Rendering', 1f, logger) { ->
-						visibleElements.each { element ->
-							((GraphicsElement)element).render(renderer)
-						}
+						drawCommands*.render(renderer)
 					}
 				}
 			}

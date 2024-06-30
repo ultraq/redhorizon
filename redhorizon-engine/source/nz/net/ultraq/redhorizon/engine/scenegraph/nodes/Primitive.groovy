@@ -30,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
+import org.joml.Matrix4f
 import org.joml.Vector2f
 
 import java.util.concurrent.CompletableFuture
@@ -104,6 +105,18 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 		if (mesh && shader) {
 			renderer.draw(mesh, globalTransform, shader)
+		}
+	}
+
+	@Override
+	RenderCommand renderLater() {
+
+		var transformCopy = new Matrix4f(globalTransform)
+
+		return { renderer ->
+			if (mesh && shader) {
+				renderer.draw(mesh, transformCopy, shader)
+			}
 		}
 	}
 }

@@ -28,4 +28,20 @@ class SpriteMaterial extends Material {
 	float frameStepY
 	int framesHorizontal
 	int framesVertical
+
+	SpriteMaterial() {
+	}
+
+	/**
+	 * Create a new material that is a shallow copy of {@code other}.
+	 */
+	SpriteMaterial(SpriteMaterial other) {
+
+		super(other)
+		frame = other.frame
+		frameStepX = other.frameStepX
+		frameStepY = other.frameStepY
+		framesHorizontal = other.framesHorizontal
+		framesVertical = other.framesVertical
+	}
 }

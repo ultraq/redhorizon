@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -49,7 +50,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 	PalettedSprite(ImagesFile imagesFile) {
 
 		super(imagesFile)
-		material = new PalettedSpriteMaterial()
 		this.repeatX = 1f
 		this.repeatY = 1f
 	}
@@ -69,7 +69,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 		SpriteSheetGenerator spriteSheetGenerator) {
 
 		super(width, height, numImages, spriteSheetGenerator)
-		material = new PalettedSpriteMaterial()
 		// TODO: Should be able to move repeat values to Sprite class
 		this.repeatX = repeatX
 		this.repeatY = repeatY
@@ -87,6 +86,12 @@ class PalettedSprite extends Sprite implements FactionColours {
 		var adjustmentMap = Arrays.copyOf(IDENTITY_MAP, 256)
 		(80..95).eachWithIndex { i, j -> adjustmentMap[i] = faction.colours[j] }
 		return adjustmentMap
+	}
+
+	@Override
+	protected PalettedSpriteMaterial buildMaterial(SpriteMaterial material = null) {
+
+		return material ? new PalettedSpriteMaterial((PalettedSpriteMaterial)material) : new PalettedSpriteMaterial()
 	}
 
 	@Override

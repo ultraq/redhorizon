@@ -27,4 +27,15 @@ package nz.net.ultraq.redhorizon.engine.graphics
 class Material {
 
 	Texture texture
+
+	Material() {
+	}
+
+	/**
+	 * Create a new material that is a shallow copy of {@code other}.
+	 */
+	Material(Material other) {
+
+		texture = other.texture
+	}
 }

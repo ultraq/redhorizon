@@ -47,6 +47,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
+import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -405,6 +406,19 @@ class Map extends Node<Map> {
 
 			if (fullMesh && shader && material.texture) {
 				renderer.draw(fullMesh, globalTransform, shader, material)
+			}
+		}
+
+		@Override
+		RenderCommand renderLater() {
+
+			var transformCopy = new Matrix4f(globalTransform)
+			var materialCopy = new PalettedSpriteMaterial(material)
+
+			return { renderer ->
+				if (fullMesh && shader && material.texture) {
+					renderer.draw(fullMesh, transformCopy, shader, materialCopy)
+				}
 			}
 		}
 	}

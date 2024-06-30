@@ -16,10 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -38,7 +34,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Video extends Node<Video> implements AudioElement, GraphicsElement, Playable {
+class Video extends Node<Video> implements Playable {
 
 	final VideoFile videoFile
 
@@ -96,14 +92,6 @@ class Video extends Node<Video> implements AudioElement, GraphicsElement, Playab
 
 		[animation, sound]*.play()
 		Playable.super.play()
-	}
-
-	@Override
-	void render(AudioRenderer renderer) {
-	}
-
-	@Override
-	void render(GraphicsRenderer renderer) {
 	}
 
 	@Override

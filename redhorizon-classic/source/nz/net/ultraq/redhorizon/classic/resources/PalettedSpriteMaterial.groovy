@@ -28,4 +28,16 @@ class PalettedSpriteMaterial extends SpriteMaterial {
 	private static final int[] IDENTITY_MAP = 0..255
 
 	int[] adjustmentMap = IDENTITY_MAP
+
+	PalettedSpriteMaterial() {
+	}
+
+	/**
+	 * Create a new material that is a shallow copy of {@code other}.
+	 */
+	PalettedSpriteMaterial(PalettedSpriteMaterial other) {
+
+		super(other)
+		adjustmentMap = other.adjustmentMap
+	}
 }

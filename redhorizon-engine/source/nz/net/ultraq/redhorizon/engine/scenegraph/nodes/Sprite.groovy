@@ -31,6 +31,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
+import org.joml.Matrix4f
+
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -54,7 +56,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	protected SpriteMaterial material = new SpriteMaterial()
+	protected SpriteMaterial material
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -87,6 +89,15 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 		bounds.set(0, 0, width, height)
 		this.numImages = numImages
 		this.spriteSheetGenerator = spriteSheetGenerator
+		material = buildMaterial()
+	}
+
+	/**
+	 * Create the appropriate material for this sprite.
+	 */
+	protected SpriteMaterial buildMaterial(SpriteMaterial material = null) {
+
+		return material ? new SpriteMaterial(material) : new SpriteMaterial()
 	}
 
 	@Override
@@ -128,6 +139,19 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 		if (mesh && shader && material.texture) {
 			renderer.draw(mesh, globalTransform, shader, material)
+		}
+	}
+
+	@Override
+	RenderCommand renderLater() {
+
+		var transformCopy = new Matrix4f(globalTransform)
+		var materialCopy = buildMaterial(material)
+
+		return { renderer ->
+			if (mesh && shader && material.texture) {
+				renderer.draw(mesh, transformCopy, shader, materialCopy)
+			}
 		}
 	}
 
