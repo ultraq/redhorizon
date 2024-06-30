@@ -30,6 +30,7 @@ import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTableFlags.*
 
+import groovy.transform.TupleConstructor
 import java.text.DecimalFormat
 
 /**
@@ -37,6 +38,7 @@ import java.text.DecimalFormat
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false, includes = 'entries')
 class EntryList implements EventTarget, ImGuiElement {
 
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
@@ -47,12 +49,6 @@ class EntryList implements EventTarget, ImGuiElement {
 	private Entry selectedEntry
 	private boolean selectedEntryTriggered
 	private boolean entryVisibleOnce
-
-	EntryList(List<Entry> entries) {
-
-		this.entries = entries
-		this.enabled = true
-	}
 
 	@Override
 	void render(int dockspaceId, Framebuffer sceneResult) {

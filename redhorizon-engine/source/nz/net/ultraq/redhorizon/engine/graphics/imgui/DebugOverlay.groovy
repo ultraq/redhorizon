@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.Switch
 import nz.net.ultraq.redhorizon.engine.input.GamepadAxisEvent
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 
@@ -31,7 +32,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay implements ImGuiElement<DebugOverlay> {
+class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 
 	// Debug information
 	private final Map<String, String> persistentLines = [:]

@@ -39,11 +39,6 @@ class NodeList implements EventTarget, ImGuiElement {
 	Scene scene
 	private Node selectedNode
 
-	NodeList() {
-
-		this.enabled = true
-	}
-
 	@Override
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
 

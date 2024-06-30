@@ -30,7 +30,7 @@ import java.util.concurrent.BlockingQueue
  *
  * @author Emanuel Rabina
  */
-class LogPanel implements ImGuiElement<LogPanel> {
+class LogPanel implements ImGuiElement {
 
 	private static final int MAX_DEBUG_LINES = 400
 
@@ -51,8 +51,6 @@ class LogPanel implements ImGuiElement<LogPanel> {
 				scrollToBottom = true
 			}
 		}
-
-		this.enabled = enabled
 	}
 
 	@Override

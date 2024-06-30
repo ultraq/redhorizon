@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.Switch
 
 /**
  * A object that contains ImGui content to render.
  *
  * @author Emanuel Rabina
  */
-interface ImGuiElement<T extends Switch> extends Switch<T> {
+interface ImGuiElement {
 
 	/**
 	 * Draw the ImGui content.
