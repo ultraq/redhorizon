@@ -44,6 +44,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_EXPANDED
+	boolean canUpdate = true
 
 	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)

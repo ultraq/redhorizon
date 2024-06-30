@@ -236,6 +236,8 @@ class Map extends Node<Map> {
 		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3072)
 		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3072)
 
+		final boolean canUpdate = false
+
 		MapLines() {
 
 			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
@@ -254,6 +256,7 @@ class Map extends Node<Map> {
 
 		String name = "MapBackground - ${theater.label}"
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
+		final boolean canUpdate = false
 
 		MapBackground() {
 
@@ -293,6 +296,7 @@ class Map extends Node<Map> {
 	private class MapPack extends Node<MapPack> implements GraphicsElement {
 
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
+		final boolean canUpdate = false
 
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
@@ -431,6 +435,8 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+		final boolean canUpdate = false
+
 		private int numTiles = 0
 
 		OverlayPack() {
@@ -523,6 +529,7 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+		final boolean canUpdate = false
 
 		Terrain() {
 

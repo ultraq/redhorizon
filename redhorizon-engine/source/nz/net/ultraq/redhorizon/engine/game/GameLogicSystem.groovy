@@ -64,9 +64,12 @@ class GameLogicSystem extends EngineSystem {
 
 				average('Updating', 1f, logger) { ->
 					scene?.traverseAsync { Node node ->
-						node.update(delta)
-						node.script?.update(delta)
-						return true
+						if (node.canUpdate) {
+							node.update(delta)
+							node.script?.update(delta)
+							return true
+						}
+						return false
 					}
 						?.join()
 				}

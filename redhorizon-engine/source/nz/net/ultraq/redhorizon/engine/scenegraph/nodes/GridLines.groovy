@@ -29,6 +29,8 @@ import org.joml.Vector2f
  */
 class GridLines extends Node<GridLines> {
 
+	final boolean canUpdate = false
+
 	/**
 	 * Constructor, build a set of grid lines for the X and Y planes between the
 	 * min/max values for every {@code step} rendered pixels.
