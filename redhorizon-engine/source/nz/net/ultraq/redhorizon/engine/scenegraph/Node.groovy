@@ -388,6 +388,23 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
+	 * Similar to {@link #traverse}, but run in parallel.
+	 */
+	CompletableFuture<Void> traverseAsync(SceneVisitor visitor) {
+
+		return CompletableFuture.supplyAsync { ->
+			return visitor.visit(this)
+		}
+			.thenComposeAsync { visitChildren ->
+				var futures = []
+				if (visitChildren) {
+					futures = children.collect { child -> child.traverseAsync(visitor) }
+				}
+				return CompletableFuture.allOf(*futures)
+			}
+	}
+
+	/**
 	 * Called on every frame before the node is rendered, allowing it to perform
 	 * any processing as a response to changes in the scene.
 	 *

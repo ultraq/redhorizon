@@ -63,11 +63,12 @@ class GameLogicSystem extends EngineSystem {
 				var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
 
 				average('Updating', 1f, logger) { ->
-					scene?.traverse { Node node ->
+					scene?.traverseAsync { Node node ->
 						node.update(delta)
 						node.script?.update(delta)
 						return true
 					}
+						?.join()
 				}
 				graphicsSystem.waitForContinue()
 

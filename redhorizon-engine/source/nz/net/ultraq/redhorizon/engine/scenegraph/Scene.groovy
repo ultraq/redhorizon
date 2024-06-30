@@ -62,7 +62,7 @@ class Scene implements EventTarget {
 	MainMenu gameMenu
 	GameWindow gameWindow
 
-	@Delegate(includes = ['addChild', 'clear', 'findNode', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
+	@Delegate(includes = ['addChild', 'clear', 'findNode', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)
 	final Node root = new RootNode(this)
 
 	// Partition objects in the following data structures to make queries faster
@@ -148,12 +148,6 @@ class Scene implements EventTarget {
 		protected Scene getScene() {
 
 			return scene
-		}
-
-		@Override
-		void traverse(SceneVisitor visitor) {
-
-			children*.traverse(visitor)
 		}
 	}
 }
