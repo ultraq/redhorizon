@@ -28,22 +28,22 @@ enum PartitionHint {
 	/**
 	 * Apply no special treatment to partitioning this object.
 	 */
-	None,
+	NONE,
 
 	/**
 	 * Dot not include this object in any partitioning algorithms.
 	 */
-	DoNotParticipate,
+	DO_NOT_PARTICIPATE,
 
 	/**
 	 * An object which takes up a significant amount of 2D space.
 	 */
-	LargeArea,
+	LARGE_AREA,
 
 	/**
 	 * An object which takes up a relatively small amount of 2D space.  Nodes with
 	 * this partition hint can end up in a quadtree data structure which is good
 	 * for object culling.
 	 */
-	SmallArea
+	SMALL_AREA
 }

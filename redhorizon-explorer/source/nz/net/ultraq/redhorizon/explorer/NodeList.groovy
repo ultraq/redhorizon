@@ -64,7 +64,7 @@ class NodeList implements EventTarget, ImGuiElement {
 	private void renderNodeAndChildren(Node node) {
 
 		var flags = SpanFullWidth | OpenOnArrow
-		if (node.nodeListDisplayHint == NodeListDisplayHint.StartExpanded) {
+		if (node.nodeListDisplayHint == NodeListDisplayHint.START_EXPANDED) {
 			flags |= DefaultOpen
 		}
 		if (!node.children) {

@@ -46,7 +46,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	static final String DEFAULT_STATE = "default"
 
-	final PartitionHint partitionHint = PartitionHint.SmallArea
+	final PartitionHint partitionHint = PartitionHint.SMALL_AREA
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
 	final ImagesFile imagesFile

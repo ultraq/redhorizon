@@ -253,7 +253,7 @@ class Map extends Node<Map> {
 	private class MapBackground extends Node<MapBackground> {
 
 		String name = "MapBackground - ${theater.label}"
-		final PartitionHint partitionHint = PartitionHint.LargeArea
+		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 
 		MapBackground() {
 
@@ -292,7 +292,7 @@ class Map extends Node<Map> {
 	 */
 	private class MapPack extends Node<MapPack> implements GraphicsElement {
 
-		final PartitionHint partitionHint = PartitionHint.LargeArea
+		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
@@ -429,8 +429,8 @@ class Map extends Node<Map> {
 	 */
 	private class OverlayPack extends Node<OverlayPack> {
 
-		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 		private int numTiles = 0
 
 		OverlayPack() {
@@ -501,7 +501,7 @@ class Map extends Node<Map> {
 				overlay.name = "${tile.name} - Variant ${imageVariant}"
 				overlay.frame = imageVariant
 				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
-				overlay.partitionHint = PartitionHint.SmallArea
+				overlay.partitionHint = PartitionHint.SMALL_AREA
 
 				addChild(overlay)
 
@@ -521,8 +521,8 @@ class Map extends Node<Map> {
 	 */
 	private class Terrain extends Node<Terrain> {
 
-		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Terrain() {
 
@@ -534,7 +534,7 @@ class Map extends Node<Map> {
 				var terrain = new PalettedSprite(terrainFile)
 				terrain.name = "Terrain ${terrainType}"
 				terrain.position = cellPosXY
-				terrain.partitionHint = PartitionHint.SmallArea
+				terrain.partitionHint = PartitionHint.SMALL_AREA
 				addChild(terrain)
 			}
 		}
@@ -545,7 +545,7 @@ class Map extends Node<Map> {
 	 */
 	private abstract class FactionObjects<T extends FactionObjects, L extends ObjectLine> extends Node<T> {
 
-		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
+		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 
 		Unit createObject(L objectLine,
 			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
@@ -585,7 +585,7 @@ class Map extends Node<Map> {
 	 */
 	private class Units extends FactionObjects<Units, UnitLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Units() {
 
@@ -612,7 +612,7 @@ class Map extends Node<Map> {
 	 */
 	private class Infantry extends FactionObjects<Infantry, InfantryLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Infantry() {
 
@@ -645,7 +645,7 @@ class Map extends Node<Map> {
 	 */
 	private class Structures extends FactionObjects<Structures, StructureLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Structures() {
 
@@ -688,7 +688,7 @@ class Map extends Node<Map> {
 								})
 								bibSprite.name = "Bib"
 								bibSprite.setPosition(0, -TILE_HEIGHT, -0.1)
-								bibSprite.partitionHint = PartitionHint.SmallArea
+								bibSprite.partitionHint = PartitionHint.SMALL_AREA
 								structure.addChild(bibSprite)
 							}
 						}

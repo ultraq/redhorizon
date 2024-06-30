@@ -43,7 +43,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	String name
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
-	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartExpanded
+	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_EXPANDED
 
 	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
@@ -193,12 +193,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 * for performance purposes.
 	 * <p>
 	 * The default behaviour is to inherit the partition hint of its parent,
-	 * defaulting to {@link PartitionHint#None} if there are no hints in the node's ancestor
+	 * defaulting to {@link PartitionHint#NONE} if there are no hints in the node's ancestor
 	 * tree.
 	 */
 	PartitionHint getPartitionHint() {
 
-		return partitionHint ?: parent?.partitionHint ?: PartitionHint.None
+		return partitionHint ?: parent?.partitionHint ?: PartitionHint.NONE
 	}
 
 	/**

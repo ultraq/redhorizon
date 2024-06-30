@@ -24,6 +24,6 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
  */
 enum NodeListDisplayHint {
 
-	StartExpanded,
-	StartCollapsed
+	START_EXPANDED,
+	START_COLLAPSED
 }

@@ -80,8 +80,8 @@ class Scene implements EventTarget {
 			}
 
 			switch (node.partitionHint) {
-				case PartitionHint.SmallArea -> quadTree.add(node)
-				case PartitionHint.LargeArea, PartitionHint.None -> nodeList.add(node)
+				case PartitionHint.SMALL_AREA -> quadTree.add(node)
+				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
 			}
 		}
 
