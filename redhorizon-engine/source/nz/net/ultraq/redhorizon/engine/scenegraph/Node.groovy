@@ -43,6 +43,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	String name
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
+	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartExpanded
 
 	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
@@ -400,7 +401,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 				if (visitChildren) {
 					futures = children.collect { child -> child.traverseAsync(visitor) }
 				}
-				return CompletableFuture.allOf(*futures)
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
 			}
 	}
 

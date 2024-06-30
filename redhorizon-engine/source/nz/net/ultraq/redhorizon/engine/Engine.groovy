@@ -131,7 +131,7 @@ class Engine {
 			var failedTasks = systemTasks.findAll { task -> task.state() == State.FAILED }
 			if (failedTasks) {
 				failedTasks.each { failedTask ->
-					logger.error('An error occurred during engine shutdown', failedTask)
+					logger.error('An error occurred during engine shutdown', failedTask.exceptionNow())
 				}
 				break
 			}

@@ -41,6 +41,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
@@ -429,6 +430,7 @@ class Map extends Node<Map> {
 	private class OverlayPack extends Node<OverlayPack> {
 
 		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
 		private int numTiles = 0
 
 		OverlayPack() {
@@ -520,6 +522,7 @@ class Map extends Node<Map> {
 	private class Terrain extends Node<Terrain> {
 
 		final PartitionHint partitionHint = PartitionHint.DoNotParticipate
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
 
 		Terrain() {
 
@@ -582,6 +585,8 @@ class Map extends Node<Map> {
 	 */
 	private class Units extends FactionObjects<Units, UnitLine> {
 
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
+
 		Units() {
 
 			mapFile.unitsData.eachWithIndex { unitLine, index ->
@@ -606,6 +611,8 @@ class Map extends Node<Map> {
 	 * The "Infantry" section of a Red Alert map.
 	 */
 	private class Infantry extends FactionObjects<Infantry, InfantryLine> {
+
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
 
 		Infantry() {
 
@@ -637,6 +644,8 @@ class Map extends Node<Map> {
 	 * The "Structures" section of a Red Alert map.
 	 */
 	private class Structures extends FactionObjects<Structures, StructureLine> {
+
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.StartCollapsed
 
 		Structures() {
 

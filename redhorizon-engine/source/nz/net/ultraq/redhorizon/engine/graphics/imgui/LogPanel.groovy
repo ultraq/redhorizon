@@ -32,7 +32,7 @@ import java.util.concurrent.BlockingQueue
  */
 class LogPanel implements ImGuiElement<LogPanel> {
 
-	private static final int MAX_DEBUG_LINES = 500
+	private static final int MAX_DEBUG_LINES = 400
 
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 
@@ -71,8 +71,8 @@ class LogPanel implements ImGuiElement<LogPanel> {
 
 			if (scrollToBottom) {
 				ImGui.setScrollHereY(1f)
+				scrollToBottom = false
 			}
-			scrollToBottom = false
 		}
 
 		ImGui.end()
