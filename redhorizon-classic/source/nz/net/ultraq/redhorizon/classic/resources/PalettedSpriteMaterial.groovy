@@ -29,15 +29,13 @@ class PalettedSpriteMaterial extends SpriteMaterial {
 
 	int[] adjustmentMap = IDENTITY_MAP
 
-	PalettedSpriteMaterial() {
-	}
-
 	/**
-	 * Create a new material that is a shallow copy of {@code other}.
+	 * Copy the values of an existing material into this one.
 	 */
-	PalettedSpriteMaterial(PalettedSpriteMaterial other) {
+	PalettedSpriteMaterial copy(PalettedSpriteMaterial other) {
 
-		super(other)
+		super.copy(other)
 		adjustmentMap = other.adjustmentMap
+		return this
 	}
 }

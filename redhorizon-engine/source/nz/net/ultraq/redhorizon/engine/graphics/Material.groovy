@@ -28,14 +28,12 @@ class Material {
 
 	Texture texture
 
-	Material() {
-	}
-
 	/**
-	 * Create a new material that is a shallow copy of {@code other}.
+	 * Copy the values of an existing material into this one.
 	 */
-	Material(Material other) {
+	Material copy(Material other) {
 
 		texture = other.texture
+		return this
 	}
 }

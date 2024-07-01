@@ -47,6 +47,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	final int numImages
 	final SpriteSheetGenerator spriteSheetGenerator
 
+	protected final Matrix4f transformCopy = new Matrix4f()
+	protected final SpriteMaterial materialCopy = buildMaterial()
+
 	/**
 	 * The frame to select from the underlying spritesheet.
 	 */
@@ -95,9 +98,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	/**
 	 * Create the appropriate material for this sprite.
 	 */
-	protected SpriteMaterial buildMaterial(SpriteMaterial material = null) {
+	protected SpriteMaterial buildMaterial() {
 
-		return material ? new SpriteMaterial(material) : new SpriteMaterial()
+		return new SpriteMaterial()
 	}
 
 	@Override
@@ -145,11 +148,11 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	RenderCommand renderLater() {
 
-		var transformCopy = new Matrix4f(globalTransform)
-		var materialCopy = buildMaterial(material)
+		transformCopy.set(globalTransform)
+		materialCopy.copy(material)
 
 		return { renderer ->
-			if (mesh && shader && material.texture) {
+			if (mesh && shader && materialCopy.texture) {
 				renderer.draw(mesh, transformCopy, shader, materialCopy)
 			}
 		}

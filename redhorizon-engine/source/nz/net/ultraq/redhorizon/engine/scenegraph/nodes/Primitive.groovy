@@ -48,6 +48,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
+	private final Matrix4f transformCopy = new Matrix4f()
 
 	/**
 	 * Constructor, create a set of lines for every 2 vectors passed in to this
@@ -111,7 +112,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	@Override
 	RenderCommand renderLater() {
 
-		var transformCopy = new Matrix4f(globalTransform)
+		transformCopy.set(globalTransform)
 
 		return { renderer ->
 			if (mesh && shader) {

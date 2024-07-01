@@ -29,19 +29,17 @@ class SpriteMaterial extends Material {
 	int framesHorizontal
 	int framesVertical
 
-	SpriteMaterial() {
-	}
-
 	/**
-	 * Create a new material that is a shallow copy of {@code other}.
+	 * Copy the values of an existing material into this one.
 	 */
-	SpriteMaterial(SpriteMaterial other) {
+	SpriteMaterial copy(SpriteMaterial other) {
 
-		super(other)
+		super.copy(other)
 		frame = other.frame
 		frameStepX = other.frameStepX
 		frameStepY = other.frameStepY
 		framesHorizontal = other.framesHorizontal
 		framesVertical = other.framesVertical
+		return this
 	}
 }

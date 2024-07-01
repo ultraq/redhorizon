@@ -51,13 +51,15 @@ import java.util.concurrent.Executors
  */
 class Animation extends Node<Animation> implements GraphicsElement, Playable, Temporal {
 
+	protected final Matrix4f transformCopy = new Matrix4f()
+	protected final SpriteMaterial materialCopy = new SpriteMaterial()
+
 	private final AnimationSource animationSource
 
 	private final int numFrames
 	private final float frameRate
 	private long startTimeMs
 	private int currentFrame = -1
-	private int lastFrame = 0
 	private Mesh mesh
 	private Shader shader
 	private SpriteMaterial material = new SpriteMaterial()
@@ -131,8 +133,8 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	RenderCommand renderLater() {
 
-		var transformCopy = new Matrix4f(globalTransform)
-		var materialCopy = new SpriteMaterial(material)
+		transformCopy.set(globalTransform)
+		materialCopy.copy(material)
 
 		return { renderer ->
 			if (mesh && shader && currentFrame != -1) {

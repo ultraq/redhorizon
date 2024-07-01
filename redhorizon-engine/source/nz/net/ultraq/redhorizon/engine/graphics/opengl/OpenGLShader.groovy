@@ -30,6 +30,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
 import groovy.transform.PackageScope
+import java.nio.Buffer
 
 /**
  * OpenGL-specific shader implementation.
@@ -42,6 +43,7 @@ class OpenGLShader extends Shader {
 	private static int lastProgramId = 0
 
 	final int programId
+	private final Map<String, Buffer> uniformBuffers = [:]
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
@@ -130,14 +132,20 @@ class OpenGLShader extends Shader {
 				case Float -> glUniform1f(uniformLocation, data)
 				case float[] -> {
 					var floatData = (float[])data
+					var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(floatData.length) }
+					buffer.put(0, floatData)
 					switch (floatData.length) {
-						case 2 -> glUniform2fv(uniformLocation, stack.floats(floatData))
-						default -> glUniform1fv(uniformLocation, stack.floats(floatData))
+						case 2 -> glUniform2fv(uniformLocation, buffer)
+						default -> glUniform1fv(uniformLocation, buffer)
 					}
 				}
 				case Integer -> glUniform1i(uniformLocation, data)
 				case int[] -> glUniform1iv(uniformLocation, (int[])data)
-				case Matrix4f -> glUniformMatrix4fv(uniformLocation, false, data.get(stack.mallocFloat(16)))
+				case Matrix4f -> {
+					var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(Matrix4f.FLOATS) }
+					data.get(buffer)
+					glUniformMatrix4fv(uniformLocation, false, buffer)
+				}
 				default -> throw new UnsupportedOperationException("Data type of ${data.class.simpleName} not supported")
 			}
 		}

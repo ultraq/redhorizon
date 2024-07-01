@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -89,9 +88,9 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	protected PalettedSpriteMaterial buildMaterial(SpriteMaterial material = null) {
+	protected PalettedSpriteMaterial buildMaterial() {
 
-		return material ? new PalettedSpriteMaterial((PalettedSpriteMaterial)material) : new PalettedSpriteMaterial()
+		return new PalettedSpriteMaterial()
 	}
 
 	@Override

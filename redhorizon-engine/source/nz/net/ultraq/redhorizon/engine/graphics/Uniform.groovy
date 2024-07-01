@@ -22,11 +22,11 @@ package nz.net.ultraq.redhorizon.engine.graphics
  *
  * @author Emanuel Rabina
  */
-interface Uniform {
+interface Uniform<M extends Material> {
 
 	/**
 	 * Apply the uniform value to the shader using the given material and window
 	 * context.
 	 */
-	void apply(Shader shader, Material material, Window window)
+	void apply(Shader shader, M material, Window window)
 }

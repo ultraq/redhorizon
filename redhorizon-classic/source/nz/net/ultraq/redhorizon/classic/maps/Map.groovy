@@ -80,6 +80,9 @@ class Map extends Node<Map> {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
+	protected final Matrix4f transformCopy = new Matrix4f()
+	protected final PalettedSpriteMaterial materialCopy = new PalettedSpriteMaterial()
+
 	private final TileSet tileSet
 	private final ResourceManager resourceManager
 	private final RulesFile rules
@@ -417,11 +420,11 @@ class Map extends Node<Map> {
 		@Override
 		RenderCommand renderLater() {
 
-			var transformCopy = new Matrix4f(globalTransform)
-			var materialCopy = new PalettedSpriteMaterial(material)
+			transformCopy.set(globalTransform)
+			materialCopy.copy(material)
 
 			return { renderer ->
-				if (fullMesh && shader && material.texture) {
+				if (fullMesh && shader && materialCopy.texture) {
 					renderer.draw(fullMesh, transformCopy, shader, materialCopy)
 				}
 			}
