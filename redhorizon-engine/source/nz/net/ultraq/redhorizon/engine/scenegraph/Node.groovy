@@ -44,7 +44,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_EXPANDED
-	boolean canUpdate = true
 
 	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
@@ -53,6 +52,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	private final Vector3f globalScale = new Vector3f(1, 1, 1)
 	private final Rectanglef globalBounds = new Rectanglef()
 	private PartitionHint partitionHint = null
+	private UpdateHint updateHint = null
 
 	/**
 	 * Adds a child node to this node.
@@ -65,7 +65,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		// Allow it to process
 		var scene = getScene()
 		if (scene) {
-			addNodeAndChildren(scene, child)
+			scene.addNodeAndChildren(child)
 				.orTimeout(5, TimeUnit.SECONDS)
 				.join()
 		}
@@ -80,28 +80,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		}
 
 		return (T)this
-	}
-
-	/**
-	 * Trigger the {@code onSceneAdded} event for this node and all its children.
-	 * Each node triggers a {@link NodeAddedEvent} event.
-	 */
-	protected CompletableFuture<Void> addNodeAndChildren(Scene scene, Node node) {
-
-		return CompletableFuture.allOf(
-			node.onSceneAddedAsync(scene),
-			node.script?.onSceneAddedAsync(scene) ?: CompletableFuture.completedFuture(null)
-		)
-			.thenRunAsync { ->
-				scene.trigger(new NodeAddedEvent(node))
-			}
-			.thenComposeAsync { _ ->
-				var futures = node.children.collect { childNode -> addNodeAndChildren(scene, childNode) }
-
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
-			}
 	}
 
 	/**
@@ -233,6 +211,19 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
+	 * A hint to the scenegraph to add this node to an appropriate data structure
+	 * for performance purposes.
+	 * <p>
+	 * The default behaviour is to inherit the update hint of its parent,
+	 * defaulting to {@link UpdateHint#ALWAYS} if there are no hints in the node's
+	 * ancestor tree.
+	 */
+	UpdateHint getUpdateHint() {
+
+		return updateHint ?: parent?.updateHint ?: UpdateHint.ALWAYS
+	}
+
+	/**
 	 * Return the width of the node.  This is a shortcut for calling
 	 * {@code bounds.lengthX()}.
 	 */
@@ -266,9 +257,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	T removeChild(Node node) {
 
 		if (children.remove(node)) {
-			removeNodeAndChildren(scene, node)
-				.orTimeout(5, TimeUnit.SECONDS)
-				.join()
+			var scene = getScene()
+			if (scene) {
+				scene.removeNodeAndChildren(node)
+					.orTimeout(5, TimeUnit.SECONDS)
+					.join()
+			}
 			node.parent = null
 			// TODO: Recalculate bounds
 		}
@@ -286,28 +280,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			}
 		}
 		return (T)this
-	}
-
-	/**
-	 * Trigger the {@code onSceneRemoved} handler for this node and all its
-	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
-	 */
-	protected CompletableFuture<Void> removeNodeAndChildren(Scene scene, Node node) {
-
-		return CompletableFuture.allOf(
-			node.onSceneRemovedAsync(scene),
-			node.script?.onSceneRemovedAsync(scene) ?: CompletableFuture.completedFuture(null)
-		)
-			.thenRunAsync { ->
-				scene.trigger(new NodeRemovedEvent(node))
-			}
-			.thenComposeAsync { _ ->
-				var futures = node.children.collect { childNode -> removeNodeAndChildren(scene, childNode) }
-
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
-			}
 	}
 
 	/**

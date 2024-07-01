@@ -33,7 +33,9 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -69,19 +71,25 @@ class Scene implements EventTarget {
 	private final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
 	private final CopyOnWriteArrayList<Node> nodeList = []
 
+	private final List<Node> updateableNodes = new CopyOnWriteArrayList<>()
+
+	/**
+	 * Constructor, sets up scene internals.
+	 */
 	Scene() {
 
 		on(NodeAddedEvent) { event ->
 			var node = event.node
-
 			if (node instanceof Camera) {
 				camera = node
 				return
 			}
-
 			switch (node.partitionHint) {
 				case PartitionHint.SMALL_AREA -> quadTree.add(node)
 				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
+			}
+			switch (node.updateHint) {
+				case UpdateHint.ALWAYS -> updateableNodes << node
 			}
 		}
 
@@ -103,6 +111,29 @@ class Scene implements EventTarget {
 			root.addChild(node)
 		}
 		return this
+	}
+
+	/**
+	 * Trigger the {@code onSceneAdded} event for this node and all its children.
+	 * Each node triggers a {@link NodeAddedEvent} event.
+	 */
+	@PackageScope
+	CompletableFuture<Void> addNodeAndChildren(Node node) {
+
+		return CompletableFuture.allOf(
+			node.onSceneAddedAsync(this),
+			node.script?.onSceneAddedAsync(this) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRunAsync { ->
+				trigger(new NodeAddedEvent(node))
+			}
+			.thenComposeAsync { _ ->
+				var futures = node.children.collect { childNode -> addNodeAndChildren(childNode) }
+
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
 	}
 
 	/**
@@ -128,6 +159,43 @@ class Scene implements EventTarget {
 		}
 		quadTree.query(frustumIntersection, results)
 		return results
+	}
+
+	/**
+	 * Trigger the {@code onSceneRemoved} handler for this node and all its
+	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
+	 */
+	@PackageScope
+	CompletableFuture<Void> removeNodeAndChildren(Node node) {
+
+		return CompletableFuture.allOf(
+			node.onSceneRemovedAsync(this),
+			node.script?.onSceneRemovedAsync(this) ?: CompletableFuture.completedFuture(null)
+		)
+			.thenRunAsync { ->
+				trigger(new NodeRemovedEvent(node))
+			}
+			.thenComposeAsync { _ ->
+				var futures = node.children.collect { childNode -> removeNodeAndChildren(childNode) }
+
+				// Originally used the Groovy spread operator `*` but this would throw
+				// an exception about "array length is not legal" 🤷
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+			}
+	}
+
+	/**
+	 * Run through the scene, calling {@link Node#update} as appropriate for the
+	 * node configuration.
+	 */
+	void update(float delta) {
+
+		var futures = updateableNodes.collect { node ->
+			return CompletableFuture.runAsync { ->
+				node.update(delta)
+			}
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0])).join()
 	}
 
 	/**

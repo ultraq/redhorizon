@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.MeshType
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 
 import org.joml.Vector2f
 
@@ -29,7 +30,7 @@ import org.joml.Vector2f
  */
 class GridLines extends Node<GridLines> {
 
-	final boolean canUpdate = false
+	final UpdateHint updateHint = UpdateHint.NEVER
 
 	/**
 	 * Constructor, build a set of grid lines for the X and Y planes between the

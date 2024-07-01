@@ -44,6 +44,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -239,7 +240,7 @@ class Map extends Node<Map> {
 		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3072)
 		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3072)
 
-		final boolean canUpdate = false
+		final UpdateHint updateHint = UpdateHint.NEVER
 
 		MapLines() {
 
@@ -259,7 +260,7 @@ class Map extends Node<Map> {
 
 		String name = "MapBackground - ${theater.label}"
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
-		final boolean canUpdate = false
+		final UpdateHint updateHint = UpdateHint.NEVER
 
 		MapBackground() {
 
@@ -299,7 +300,7 @@ class Map extends Node<Map> {
 	private class MapPack extends Node<MapPack> implements GraphicsElement {
 
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
-		final boolean canUpdate = false
+		final UpdateHint updateHint = UpdateHint.NEVER
 
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
@@ -438,7 +439,7 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-		final boolean canUpdate = false
+		final UpdateHint updateHint = UpdateHint.NEVER
 
 		private int numTiles = 0
 
@@ -532,7 +533,7 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-		final boolean canUpdate = false
+		final UpdateHint updateHint = UpdateHint.NEVER
 
 		Terrain() {
 

@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -63,15 +62,7 @@ class GameLogicSystem extends EngineSystem {
 				var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
 
 				average('Updating', 1f, logger) { ->
-					scene?.traverseAsync { Node node ->
-						if (node.canUpdate) {
-							node.update(delta)
-							node.script?.update(delta)
-							return true
-						}
-						return false
-					}
-						?.join()
+					scene?.update(delta)
 				}
 				graphicsSystem.waitForContinue()
 
