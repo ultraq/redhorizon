@@ -102,7 +102,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 			}
 		}
 			.thenComposeAsync { data ->
-				return scene.requestCreateOrGet(new UniformBufferRequest('Camera', data))
+				return scene.requestCreateOrGet(new UniformBufferRequest('Camera', data, true))
 			}
 			.thenAcceptAsync { newUniformBuffer ->
 				viewProjectionBuffer = newUniformBuffer

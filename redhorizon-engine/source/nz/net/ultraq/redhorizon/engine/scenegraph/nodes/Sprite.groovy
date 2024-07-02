@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
@@ -33,6 +34,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import org.joml.Matrix4f
 
+import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -118,6 +120,16 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 						framesHorizontal = spriteSheet.framesHorizontal
 						framesVertical = spriteSheet.framesVertical
 					}
+					var spriteSheetUniformBuffer = ByteBuffer.allocateNative((Float.BYTES * 2) + (Integer.BYTES * 2))
+						.putFloat(material.frameStepX)
+						.putFloat(material.frameStepY)
+						.putInt(material.framesHorizontal)
+						.putInt(material.framesVertical)
+						.flip()
+					return scene.requestCreateOrGet(new UniformBufferRequest('SpriteMetadata', spriteSheetUniformBuffer))
+				}
+				.thenComposeAsync { newUniformBuffer ->
+					material.spriteMetadataBuffer = newUniformBuffer
 					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
 				}
 				.thenAcceptAsync { newMesh ->

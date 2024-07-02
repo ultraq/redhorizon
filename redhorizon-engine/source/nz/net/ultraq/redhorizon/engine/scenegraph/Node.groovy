@@ -28,7 +28,6 @@ import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
 
 /**
  * An element of a scene, nodes are used to build and organize scene trees.
@@ -66,7 +65,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		var scene = getScene()
 		if (scene) {
 			scene.addNodeAndChildren(child)
-				.orTimeout(5, TimeUnit.SECONDS)
+//				.orTimeout(5, TimeUnit.SECONDS)
 				.join()
 		}
 
@@ -276,7 +275,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			var scene = getScene()
 			if (scene) {
 				scene.removeNodeAndChildren(node)
-					.orTimeout(5, TimeUnit.SECONDS)
+//					.orTimeout(5, TimeUnit.SECONDS)
 					.join()
 			}
 			node.parent = null

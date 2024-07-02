@@ -7,10 +7,6 @@ in vec2 textureUVs;
 out vec4 v_vertexColour;
 out vec2 v_textureUVs;
 
-layout (std140) uniform Camera {
-	mat4 projection;
-	mat4 view;
-};
 uniform mat4 model;
 
 /**

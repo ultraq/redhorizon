@@ -86,7 +86,7 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 				.flip()
 		}
 			.thenComposeAsync { paletteAndAlphaMaskData ->
-				return scene.requestCreateOrGet(new UniformBufferRequest('Palette', paletteAndAlphaMaskData))
+				return scene.requestCreateOrGet(new UniformBufferRequest('Palette', paletteAndAlphaMaskData, true))
 			}
 			.thenAcceptAsync { newUniformBuffer ->
 				paletteAndAlphaMaskBuffer = newUniformBuffer

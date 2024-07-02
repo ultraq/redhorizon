@@ -16,7 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
+import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
@@ -32,18 +34,23 @@ class PalettedSpriteShader extends ShaderConfig {
 	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/classic/shaders/PalettedSprite.frag.glsl')
 	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
 	final Uniform[] uniforms = [
-		{ shader, material, window ->
+		{ Shader shader, PalettedSpriteMaterial material, window ->
 			shader.setUniformTexture('indexTexture', 0, material.texture)
 		},
-		{ shader, material, window ->
+		{ Shader shader, PalettedSpriteMaterial material, window ->
 			shader.setUniform('adjustmentMap', material.adjustmentMap)
 		},
-		{ shader, material, window ->
+		{ Shader shader, PalettedSpriteMaterial material, window ->
+			if (material.spriteMetadataBuffer) {
+				material.spriteMetadataBuffer.bind()
+			}
+			else {
+				shader.setUniform('framesHorizontal', material.framesHorizontal)
+				shader.setUniform('framesVertical', material.framesVertical)
+				shader.setUniform('frameStepX', material.frameStepX)
+				shader.setUniform('frameStepY', material.frameStepY)
+			}
 			shader.setUniform('frame', material.frame)
-			shader.setUniform('framesHorizontal', material.framesHorizontal)
-			shader.setUniform('framesVertical', material.framesVertical)
-			shader.setUniform('frameStepX', material.frameStepX)
-			shader.setUniform('frameStepY', material.frameStepY)
 		}
 	]
 }

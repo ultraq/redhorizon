@@ -108,7 +108,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	/**
 	 * Create a shared uniform buffer filled with the given data.
 	 */
-	UniformBuffer createUniformBuffer(String name, Buffer data)
+	UniformBuffer createUniformBuffer(String name, Buffer data, boolean global)
 
 	/**
 	 * Delete a graphics resource.

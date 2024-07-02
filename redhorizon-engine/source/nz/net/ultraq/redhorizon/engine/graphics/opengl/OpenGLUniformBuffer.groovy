@@ -26,7 +26,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
 import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.Semaphore
 
 /**
  * An OpenGL implementation of the shared uniform object.
@@ -35,7 +35,9 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class OpenGLUniformBuffer extends UniformBuffer {
 
-	private static final AtomicInteger UNIFORM_BLOCKS = new AtomicInteger()
+	private static final Semaphore uniformBlockIndexSemaphore = new Semaphore(1, true)
+	private static final Map<String, Integer> uniformBlockIndices = [:]
+	private static int uniformBlockCounter = 0
 
 	final int blockIndex
 	private final int bufferId
@@ -43,7 +45,7 @@ class OpenGLUniformBuffer extends UniformBuffer {
 	/**
 	 * Constructor, create a new uniform buffer object to hold this initial data.
 	 */
-	OpenGLUniformBuffer(String name, Buffer initialData) {
+	OpenGLUniformBuffer(String name, Buffer initialData, boolean global) {
 
 		super(name)
 
@@ -61,8 +63,15 @@ class OpenGLUniformBuffer extends UniformBuffer {
 			}
 		}
 		initialData.rewind()
-		blockIndex = UNIFORM_BLOCKS.getAndIncrement()
-		glBindBufferBase(GL_UNIFORM_BUFFER, blockIndex, bufferId)
+		blockIndex = uniformBlockIndexSemaphore.acquireAndRelease { ->
+			return uniformBlockIndices.getOrCreate(name) { ->
+				return uniformBlockCounter++
+			}
+		}
+
+		if (global) {
+			bind()
+		}
 	}
 
 	/**
@@ -71,6 +80,12 @@ class OpenGLUniformBuffer extends UniformBuffer {
 	boolean asBoolean() {
 
 		return glIsBuffer(bufferId)
+	}
+
+	@Override
+	void bind() {
+
+		glBindBufferBase(GL_UNIFORM_BUFFER, blockIndex, bufferId)
 	}
 
 	@Override

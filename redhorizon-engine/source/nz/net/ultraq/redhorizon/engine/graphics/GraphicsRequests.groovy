@@ -66,7 +66,10 @@ interface GraphicsRequests {
 	}
 
 	@ImmutableOptions(knownImmutables = ['data'])
-	static record UniformBufferRequest(String name, Buffer data) implements Request<UniformBuffer> {
+	static record UniformBufferRequest(String name, Buffer data, boolean global) implements Request<UniformBuffer> {
+		UniformBufferRequest(String name, Buffer data) {
+			this(name, data, false)
+		}
 	}
 
 	/**

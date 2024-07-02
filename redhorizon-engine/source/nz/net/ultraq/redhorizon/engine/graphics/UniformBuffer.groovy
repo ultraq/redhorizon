@@ -30,6 +30,11 @@ abstract class UniformBuffer implements GraphicsResource {
 	final String name
 
 	/**
+	 * Use this uniform buffer in upcoming render operations
+	 */
+	abstract void bind()
+
+	/**
 	 * Update a partial set of the buffer contents with the given data.
 	 *
 	 * @param data

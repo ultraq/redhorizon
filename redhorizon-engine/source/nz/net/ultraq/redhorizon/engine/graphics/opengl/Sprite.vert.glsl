@@ -12,10 +12,12 @@ layout (std140) uniform Camera {
 	mat4 view;
 };
 uniform mat4 model;
-uniform int framesHorizontal;
-uniform int framesVertical;
-uniform float frameStepX;
-uniform float frameStepY;
+layout (std140) uniform SpriteMetadata {
+	float frameStepX;
+	float frameStepY;
+	int framesHorizontal;
+	int framesVertical;
+};
 uniform int frame;
 
 /**

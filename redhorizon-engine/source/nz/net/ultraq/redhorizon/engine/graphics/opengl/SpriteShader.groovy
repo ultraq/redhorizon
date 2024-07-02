@@ -17,7 +17,9 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
@@ -32,15 +34,20 @@ class SpriteShader extends ShaderConfig {
 	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/engine/graphics/opengl/Sprite.frag.glsl')
 	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
 	final Uniform[] uniforms = [
-		{ shader, material, window ->
+		{ Shader shader, SpriteMaterial material, window ->
 			shader.setUniformTexture('mainTexture', 0, material.texture)
 		},
-		{ shader, material, window ->
+		{ Shader shader, SpriteMaterial material, window ->
+			if (material.spriteMetadataBuffer) {
+				material.spriteMetadataBuffer.bind()
+			}
+			else {
+				shader.setUniform('framesHorizontal', material.framesHorizontal)
+				shader.setUniform('framesVertical', material.framesVertical)
+				shader.setUniform('frameStepX', material.frameStepX)
+				shader.setUniform('frameStepY', material.frameStepY)
+			}
 			shader.setUniform('frame', material.frame)
-			shader.setUniform('framesHorizontal', material.framesHorizontal)
-			shader.setUniform('framesVertical', material.framesVertical)
-			shader.setUniform('frameStepX', material.frameStepX)
-			shader.setUniform('frameStepY', material.frameStepY)
 		}
 	]
 }

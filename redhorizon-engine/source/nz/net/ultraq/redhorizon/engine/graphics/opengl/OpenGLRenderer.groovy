@@ -80,9 +80,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 	private final String renderer
 	private final String version
 	private final int maxTextureSize
-	private final int maxUniformComponents
+	private final int maxFragmentUniformComponents
+	private final int maxUniformBufferBindings
 	private Dimension framebufferSize
-	private List<Shader> shaders = []
+	private List<OpenGLShader> shaders = []
 	private List<OpenGLUniformBuffer> uniformBuffers = []
 
 	/**
@@ -134,7 +135,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		renderer = glGetString(GL_RENDERER)
 		version = glGetString(GL_VERSION)
 		maxTextureSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
-		maxUniformComponents = glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)
+		maxFragmentUniformComponents = glGetInteger(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS)
+		maxUniformBufferBindings = glGetInteger(GL_MAX_UNIFORM_BUFFER_BINDINGS)
 	}
 
 	/**
@@ -215,6 +217,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
 			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
+			shaders << shader
 
 			// Link uniform buffers with the shader if applicable
 			uniformBuffers.each { uniformBuffer ->
@@ -223,8 +226,6 @@ class OpenGLRenderer implements GraphicsRenderer {
 					glUniformBlockBinding(shader.programId, blockIndex, uniformBuffer.blockIndex)
 				}
 			}
-
-			shaders << shader
 		}
 		return shader
 	}
@@ -273,10 +274,19 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	UniformBuffer createUniformBuffer(String name, Buffer data) {
+	UniformBuffer createUniformBuffer(String name, Buffer data, boolean global) {
 
-		var uniformBuffer = new OpenGLUniformBuffer(name, data)
+		var uniformBuffer = new OpenGLUniformBuffer(name, data, global)
 		uniformBuffers << uniformBuffer
+
+		// Link this uniform buffer with all shaders made thus far
+		shaders.each { shader ->
+			var blockIndex = glGetUniformBlockIndex(shader.programId, uniformBuffer.name)
+			if (blockIndex != GL_INVALID_INDEX) {
+				glUniformBlockBinding(shader.programId, blockIndex, uniformBuffer.blockIndex)
+			}
+		}
+
 		trigger(new UniformBufferCreatedEvent(uniformBuffer))
 		return uniformBuffer
 	}
@@ -342,7 +352,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		return """
 			OpenGL device: ${renderer}, OpenGL ${version}
 			 - Max texture size: ${maxTextureSize}
-			 - Max fragment uniform components: ${maxUniformComponents}
+			 - Max fragment uniform components: ${maxFragmentUniformComponents}
+			 - Max uniform buffer bindings: ${maxUniformBufferBindings}
 		""".stripIndent().stripTrailing()
 	}
 }

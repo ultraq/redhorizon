@@ -21,11 +21,13 @@ import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import groovy.transform.Memoized
+import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -102,12 +104,23 @@ class PalettedSprite extends Sprite implements FactionColours {
 					spriteSheet = newSpriteSheet
 					material.with {
 						texture = spriteSheet.texture
+						adjustmentMap = buildAdjustmentMap(faction)
 						frame = this.frame
 						frameStepX = spriteSheet.frameStepX
 						frameStepY = spriteSheet.frameStepY
 						framesHorizontal = spriteSheet.framesHorizontal
 						framesVertical = spriteSheet.framesVertical
 					}
+					var spriteSheetUniformBuffer = ByteBuffer.allocateNative((Float.BYTES * 2) + (Integer.BYTES * 2))
+						.putFloat(material.frameStepX)
+						.putFloat(material.frameStepY)
+						.putInt(material.framesHorizontal)
+						.putInt(material.framesVertical)
+						.flip()
+					return scene.requestCreateOrGet(new UniformBufferRequest('SpriteMetadata', spriteSheetUniformBuffer))
+				}
+				.thenComposeAsync { newUniformBuffer ->
+					material.spriteMetadataBuffer = newUniformBuffer
 					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
 				}
 				.thenAcceptAsync { newMesh ->
@@ -117,10 +130,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 				.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
 				.thenAcceptAsync { requestedShader ->
 					shader = requestedShader
-				},
-			CompletableFuture.runAsync { ->
-				material.adjustmentMap = buildAdjustmentMap(faction)
-			}
+				}
 		)
 	}
 
