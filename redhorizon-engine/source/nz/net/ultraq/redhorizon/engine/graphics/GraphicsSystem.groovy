@@ -178,7 +178,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Graphics System'
+		Thread.currentThread().name = 'Graphics system'
 		logger.debug('Starting graphics system')
 
 		var gamepadStateProcessor = new GamepadStateProcessor(inputEventStream)

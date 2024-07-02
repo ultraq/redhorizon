@@ -96,7 +96,7 @@ trait EventTarget {
 		eventQueue.add(event)
 
 		executorService.execute { ->
-			Thread.currentThread().name = "Event handler for ${this.class.simpleName}"
+			Thread.currentThread().name = "${this.class.simpleName} event handler"
 
 			var nextEvent = eventQueue.remove()
 			eventListeners.each { tuple ->

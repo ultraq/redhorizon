@@ -46,7 +46,7 @@ class GameLogicSystem extends EngineSystem {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Game Logic System'
+		Thread.currentThread().name = 'Game logic system'
 		logger.debug('Starting game logic system')
 
 		// Initialization

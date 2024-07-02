@@ -126,7 +126,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Audio System'
+		Thread.currentThread().name = 'Audio system'
 		logger.debug('Starting audio system')
 
 		// Initialization
