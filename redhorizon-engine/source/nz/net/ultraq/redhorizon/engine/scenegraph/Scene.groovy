@@ -64,7 +64,7 @@ class Scene implements EventTarget {
 	MainMenu gameMenu
 	GameWindow gameWindow
 
-	@Delegate(includes = ['addChild', 'clear', 'findNode', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)
+	@Delegate(includes = ['addChild', 'clear', 'findAncestor', 'findDescendent', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)
 	final Node root = new RootNode(this)
 
 	// Partition objects in the following data structures to make queries faster
@@ -84,10 +84,17 @@ class Scene implements EventTarget {
 				camera = node
 				return
 			}
-			switch (node.partitionHint) {
-				case PartitionHint.SMALL_AREA -> quadTree.add(node)
-				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
+
+			// Add this node to a partition if it doesn't have a renderable ancestor.
+			// That ancestor will be the one to add to the partition and can take care
+			// of things like the render order of descendents
+			if (!node.findAncestor { parent -> parent instanceof GraphicsElement }) {
+				switch (node.partitionHint) {
+					case PartitionHint.SMALL_AREA -> quadTree.add(node)
+					case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
+				}
 			}
+
 			switch (node.updateHint) {
 				case UpdateHint.ALWAYS -> updateableNodes << node
 			}

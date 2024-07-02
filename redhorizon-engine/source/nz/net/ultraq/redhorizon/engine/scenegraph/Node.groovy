@@ -93,16 +93,32 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
-	 * Locate the first node in the scene that satisfies the given predicate.
+	 * Locate the first ancestor node that satisfies the given predicate.
 	 *
 	 * @param predicate
 	 * @return
 	 *   The matching node, or {@code null} if no match is found.
 	 */
-	Node findNode(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
+	Node findAncestor(@ClosureParams(value = SimpleType, options = 'Node') Closure<Boolean> predicate) {
+
+		if (parent) {
+			return predicate(parent) ? parent : parent.findAncestor(predicate)
+		}
+		return null
+	}
+
+	/**
+	 * Locate the first descendent from this node that satisfies the given
+	 * predicate.
+	 *
+	 * @param predicate
+	 * @return
+	 *   The matching node, or {@code null} if no match is found.
+	 */
+	Node findDescendent(@ClosureParams(value = SimpleType, options = "Node") Closure<Boolean> predicate) {
 
 		return children.find { node ->
-			return predicate(node) ? node : node.findNode(predicate)
+			return predicate(node) ? node : node.findDescendent(predicate)
 		}
 	}
 

@@ -69,11 +69,12 @@ import java.util.concurrent.CompletableFuture
  */
 class Map extends Node<Map> {
 
+	static final int TILE_WIDTH = 24
+	static final int TILE_HEIGHT = 24
+
 	private static final Logger logger = LoggerFactory.getLogger(Map)
 	private static final int TILES_X = 128
 	private static final int TILES_Y = 128
-	private static final int TILE_WIDTH = 24
-	private static final int TILE_HEIGHT = 24
 
 	final MapFile mapFile
 	final String name = "Map - ${mapFile.basicSection.name()}"
@@ -690,18 +691,7 @@ class Map extends Node<Map> {
 								case 4 -> resourceManager.loadFile("bib1${theater.ext}", ShpFile)
 								default -> null
 							}
-							if (bib) {
-								var bibImageData = bib.imagesData.combineImages(bib.width, bib.height, bib.format, structureWidthInCells)
-								var bibWidth = TILE_WIDTH * structureWidthInCells
-								var bibHeight = TILE_HEIGHT * 2
-								var bibSprite = new PalettedSprite(bibWidth, bibHeight, 1, { scene ->
-									return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
-								})
-								bibSprite.name = "Bib"
-								bibSprite.setPosition(0, -TILE_HEIGHT, -0.1)
-								bibSprite.partitionHint = PartitionHint.SMALL_AREA
-								structure.addChild(bibSprite)
-							}
+							structure.addBib(bib)
 						}
 					}
 					addChild(structure)

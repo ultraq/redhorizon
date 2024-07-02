@@ -44,6 +44,9 @@ interface GraphicsElement {
 		}
 	}
 
+	/**
+	 * A render instruction that can be executed later.
+	 */
 	@FunctionalInterface
 	static interface RenderCommand {
 

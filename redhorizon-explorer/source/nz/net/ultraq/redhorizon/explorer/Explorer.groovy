@@ -167,7 +167,7 @@ class Explorer {
 				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
 					touchpadInput = !touchpadInput
 					userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
-					var mapNode = (Map)scene.findNode { node -> node instanceof Map }
+					var mapNode = (Map)scene.findDescendent { node -> node instanceof Map }
 					if (mapNode) {
 						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput
 					}

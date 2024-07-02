@@ -20,13 +20,18 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
+import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
+import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_WIDTH
 
 import java.util.concurrent.CompletableFuture
 
@@ -37,7 +42,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
+class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotatable, Temporal {
 
 	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
@@ -54,6 +59,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	final UnitBody body
 	final UnitTurret turret
 	UnitBody body2
+	PalettedSprite bib
 
 	private int stateIndex = 0
 	private long animationStartTime
@@ -80,6 +86,27 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		else {
 			turret = null
 		}
+	}
+
+	/**
+	 * TODO: This method signature sucks 😅  Need a better way to add components
+	 *       like this to a unit.  Time to revisit ECS stuffs...
+	 */
+	void addBib(ImagesFile bibFile) {
+
+		var structureWidthInCells = Math.ceil(width / TILE_WIDTH) as int
+
+		var bibImageData = bibFile.imagesData.combineImages(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
+		var bibWidth = TILE_WIDTH * structureWidthInCells
+		var bibHeight = TILE_HEIGHT * 2
+		bib = new PalettedSprite(bibWidth, bibHeight, 1, { scene ->
+			return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
+		})
+		bib.name = "Bib"
+		bib.setPosition(0, -TILE_HEIGHT)
+		bib.partitionHint = PartitionHint.SMALL_AREA
+
+		addChild(bib)
 	}
 
 	/**
@@ -125,6 +152,33 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(spriteSheet)
+	}
+
+	@Override
+	void render(GraphicsRenderer renderer) {
+
+		bib?.render(renderer)
+		body.render(renderer)
+		body2?.render(renderer)
+		turret?.render(renderer)
+	}
+
+	// TODO: The returned render command probably counts as an allocation 🤔  I
+	//       should probably cut those out too
+	@Override
+	RenderCommand renderLater() {
+
+		var bibRenderCommand = bib?.renderLater()
+		var bodyRenderCommand = body.renderLater()
+		var body2RenderCommand = body2?.renderLater()
+		var turretRenderCommand = turret?.renderLater()
+
+		return { renderer ->
+			bibRenderCommand?.render(renderer)
+			bodyRenderCommand.render(renderer)
+			body2RenderCommand?.render(renderer)
+			turretRenderCommand?.render(renderer)
+		}
 	}
 
 	/**
