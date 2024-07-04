@@ -102,8 +102,12 @@ class Explorer {
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
+	 *
+	 * @param version
+	 * @param openOnLaunch
+	 *   Optional, a file to open on launch of the explorer.
 	 */
-	Explorer(String version) {
+	Explorer(String version, File openOnLaunch) {
 
 		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
 
@@ -116,12 +120,16 @@ class Explorer {
 				startWithChrome: true
 			), new LogPanel(true), entryList, nodeList)
 			.addTimeSystem()
-			.onApplicationStart(this::applicationStart)
-			.onApplicationStop(this::applicationStop)
+			.onApplicationStart { application, scene ->
+				applicationStart(application, scene, openOnLaunch)
+			}
+			.onApplicationStop { application, scene ->
+				applicationStop(scene)
+			}
 			.start()
 	}
 
-	private void applicationStart(Application application, Scene scene) {
+	private void applicationStart(Application application, Scene scene, File openOnLaunch) {
 
 		this.scene = scene
 
@@ -200,10 +208,13 @@ class Explorer {
 		scene << globalPalette
 
 		scene << new GridLines(-1536, 1536, 24) // The max area a Red Alert map can be
+
+		if (openOnLaunch) {
+			preview(openOnLaunch)
+		}
 	}
 
-	@SuppressWarnings('unused')
-	private void applicationStop(Application application, Scene scene) {
+	private void applicationStop(Scene scene) {
 
 		removeEventFunctions*.remove()
 		clearPreview()

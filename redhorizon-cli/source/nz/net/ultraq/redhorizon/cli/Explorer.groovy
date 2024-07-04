@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.cli
 
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
+import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
 
 import java.util.concurrent.Callable
@@ -37,10 +38,13 @@ class Explorer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
+	@Parameters(index = '0', description = 'Path to a file to open on launch')
+	File file
+
 	@Override
 	Integer call() {
 
-		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.parent().version()[0])
+		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.parent().version()[0], file)
 		return 0
 	}
 }
