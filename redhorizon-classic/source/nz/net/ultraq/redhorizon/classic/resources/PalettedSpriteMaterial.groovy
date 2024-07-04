@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.resources
 
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
+import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 
 /**
  * A material specific to paletted sprites.
@@ -29,6 +30,8 @@ class PalettedSpriteMaterial extends SpriteMaterial {
 
 	int[] adjustmentMap = IDENTITY_MAP
 
+	UniformBuffer paletteMetadataBuffer
+
 	/**
 	 * Copy the values of an existing material into this one.
 	 */
@@ -36,6 +39,7 @@ class PalettedSpriteMaterial extends SpriteMaterial {
 
 		super.copy(other)
 		adjustmentMap = other.adjustmentMap
+		paletteMetadataBuffer = other.paletteMetadataBuffer
 		return this
 	}
 }

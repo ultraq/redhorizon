@@ -20,14 +20,12 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import groovy.transform.Memoized
-import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -40,10 +38,9 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 	private static final int[] IDENTITY_MAP = 0..255
 
-	final float repeatX
-	final float repeatY
-
 	private boolean factionChanged
+	private final PalettedSpriteMaterial palettedSpriteMaterial = new PalettedSpriteMaterial()
+	private final PalettedSpriteMaterial palettedSpriteMaterialCopy = new PalettedSpriteMaterial()
 
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.
@@ -51,16 +48,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 	PalettedSprite(ImagesFile imagesFile) {
 
 		super(imagesFile)
-		this.repeatX = 1f
-		this.repeatY = 1f
-	}
-
-	/**
-	 * Constructor, build this sprite from an existing sprite sheet.
-	 */
-	PalettedSprite(float width, float height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
-
-		this(width, height, numImages, 1f, 1f, spriteSheetGenerator)
 	}
 
 	/**
@@ -69,10 +56,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 	PalettedSprite(float width, float height, int numImages, float repeatX, float repeatY,
 		SpriteSheetGenerator spriteSheetGenerator) {
 
-		super(width, height, numImages, spriteSheetGenerator)
-		// TODO: Should be able to move repeat values to Sprite class
-		this.repeatX = repeatX
-		this.repeatY = repeatY
+		super(width, height, numImages, repeatX, repeatY, spriteSheetGenerator)
 	}
 
 	/**
@@ -90,47 +74,31 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	protected PalettedSpriteMaterial buildMaterial() {
+	protected PalettedSpriteMaterial getMaterial() {
 
-		return new PalettedSpriteMaterial()
+		return palettedSpriteMaterial
+	}
+
+	@Override
+	protected PalettedSpriteMaterial getMaterialCopy() {
+
+		return palettedSpriteMaterialCopy
+	}
+
+	@Override
+	protected CompletableFuture<Shader> generateShader(Scene scene) {
+
+		return scene.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
 	}
 
 	@Override
 	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
 		return CompletableFuture.allOf(
-			spriteSheetGenerator.generate(scene)
-				.thenComposeAsync { newSpriteSheet ->
-					spriteSheet = newSpriteSheet
-					material.with {
-						texture = spriteSheet.texture
-						adjustmentMap = buildAdjustmentMap(faction)
-						frame = this.frame
-						frameStepX = spriteSheet.frameStepX
-						frameStepY = spriteSheet.frameStepY
-						framesHorizontal = spriteSheet.framesHorizontal
-						framesVertical = spriteSheet.framesVertical
-					}
-					var spriteSheetUniformBuffer = ByteBuffer.allocateNative((Float.BYTES * 2) + (Integer.BYTES * 2))
-						.putFloat(material.frameStepX)
-						.putFloat(material.frameStepY)
-						.putInt(material.framesHorizontal)
-						.putInt(material.framesVertical)
-						.flip()
-					return scene.requestCreateOrGet(new UniformBufferRequest('SpriteMetadata', spriteSheetUniformBuffer))
-				}
-				.thenComposeAsync { newUniformBuffer ->
-					material.spriteMetadataBuffer = newUniformBuffer
-					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
-				}
-				.thenAcceptAsync { newMesh ->
-					mesh = newMesh
-				},
-			scene
-				.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
-				.thenAcceptAsync { requestedShader ->
-					shader = requestedShader
-				}
+			super.onSceneAddedAsync(scene),
+			CompletableFuture.runAsync { ->
+				material.adjustmentMap = buildAdjustmentMap(faction)
+			}
 		)
 	}
 
@@ -147,8 +115,9 @@ class PalettedSprite extends Sprite implements FactionColours {
 	@Override
 	void update(float delta) {
 
+		// TODO: Make this a UBO
 		if (factionChanged) {
-			((PalettedSpriteMaterial)material).adjustmentMap = buildAdjustmentMap(faction)
+			material.adjustmentMap = buildAdjustmentMap(faction)
 			factionChanged = false
 		}
 		super.update(delta)

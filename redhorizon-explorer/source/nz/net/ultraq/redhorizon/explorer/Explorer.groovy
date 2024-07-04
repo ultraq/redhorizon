@@ -468,7 +468,7 @@ class Explorer {
 		var singleImageWidth = tileFile.tilesX * tileFile.width
 		var singleImageHeight = tileFile.tilesY * tileFile.height
 
-		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, { scene ->
+		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
 		})
 			.attachScript(new SpriteShowcaseScript(camera)).tap {

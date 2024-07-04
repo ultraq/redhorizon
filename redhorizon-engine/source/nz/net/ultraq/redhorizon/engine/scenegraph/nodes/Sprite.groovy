@@ -47,10 +47,13 @@ import java.util.concurrent.CompletableFuture
 class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	final int numImages
+	final float repeatX
+	final float repeatY
 	final SpriteSheetGenerator spriteSheetGenerator
 
 	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final SpriteMaterial materialCopy = buildMaterial()
+	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
+	private final SpriteMaterial spriteMaterialCopy = new SpriteMaterial()
 
 	/**
 	 * The frame to select from the underlying spritesheet.
@@ -61,14 +64,13 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	protected SpriteMaterial material
 
 	/**
 	 * Constructor, build a sprite from an image file.
 	 */
 	Sprite(ImageFile imageFile) {
 
-		this(imageFile.width, imageFile.height, 1, { scene ->
+		this(imageFile.width, imageFile.height, 1, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(imageFile.width, imageFile.height, imageFile.format,
 				imageFile.imageData))
 		})
@@ -79,7 +81,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(ImagesFile imagesFile) {
 
-		this(imagesFile.width, imagesFile.height, imagesFile.numImages, { scene ->
+		this(imagesFile.width, imagesFile.height, imagesFile.numImages, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format,
 				imagesFile.imagesData))
 		})
@@ -89,20 +91,37 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 * Constructor, create a sprite using any implementation of the
 	 * {@link SpriteSheetGenerator} interface.
 	 */
-	protected Sprite(float width, float height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
+	Sprite(float width, float height, int numImages, float repeatX, float repeatY, SpriteSheetGenerator spriteSheetGenerator) {
 
 		bounds.set(0, 0, width, height)
 		this.numImages = numImages
+		this.repeatX = repeatX
+		this.repeatY = repeatY
 		this.spriteSheetGenerator = spriteSheetGenerator
-		material = buildMaterial()
 	}
 
 	/**
-	 * Create the appropriate material for this sprite.
+	 * Return the request for a shader for this sprite.
 	 */
-	protected SpriteMaterial buildMaterial() {
+	protected CompletableFuture<Shader> generateShader(Scene scene) {
 
-		return new SpriteMaterial()
+		return scene.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
+	}
+
+	/**
+	 * Get the appropriate material for this sprite.
+	 */
+	protected SpriteMaterial getMaterial() {
+
+		return spriteMaterial
+	}
+
+	/**
+	 * Get a material that can be used as a copy for queued rendering.
+	 */
+	protected SpriteMaterial getMaterialCopy() {
+
+		return spriteMaterialCopy
 	}
 
 	@Override
@@ -120,23 +139,22 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 						framesHorizontal = spriteSheet.framesHorizontal
 						framesVertical = spriteSheet.framesVertical
 					}
-					var spriteSheetUniformBuffer = ByteBuffer.allocateNative((Float.BYTES * 2) + (Integer.BYTES * 2))
-						.putFloat(material.frameStepX)
-						.putFloat(material.frameStepY)
-						.putInt(material.framesHorizontal)
-						.putInt(material.framesVertical)
-						.flip()
-					return scene.requestCreateOrGet(new UniformBufferRequest('SpriteMetadata', spriteSheetUniformBuffer))
+					return scene.requestCreateOrGet(new UniformBufferRequest('SpriteMetadata',
+						ByteBuffer.allocateNative((Float.BYTES * 2) + (Integer.BYTES * 2))
+							.putFloat(material.frameStepX)
+							.putFloat(material.frameStepY)
+							.putInt(material.framesHorizontal)
+							.putInt(material.framesVertical)
+							.flip()))
 				}
 				.thenComposeAsync { newUniformBuffer ->
 					material.spriteMetadataBuffer = newUniformBuffer
-					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
+					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
 				}
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
 				},
-			scene
-				.requestCreateOrGet(new ShaderRequest(Shaders.spriteShader))
+			generateShader(scene)
 				.thenAcceptAsync { requestedShader ->
 					shader = requestedShader
 				}

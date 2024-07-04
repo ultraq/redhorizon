@@ -99,7 +99,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		var bibImageData = bibFile.imagesData.combineImages(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
 		var bibWidth = TILE_WIDTH * structureWidthInCells
 		var bibHeight = TILE_HEIGHT * 2
-		bib = new PalettedSprite(bibWidth, bibHeight, 1, { scene ->
+		bib = new PalettedSprite(bibWidth, bibHeight, 1, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
 		})
 		bib.name = "Bib"
@@ -245,7 +245,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 
 		UnitBody(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
 
-			super(width, height, numImages, spriteSheetGenerator)
+			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
 			this.unitData = unitData
 		}
 
@@ -280,7 +280,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 	private class UnitTurret extends PalettedSprite {
 
 		UnitTurret(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
-			super(width, height, numImages, spriteSheetGenerator)
+			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
 		}
 
 		@Override
