@@ -51,19 +51,28 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	final float repeatY
 	final SpriteSheetGenerator spriteSheetGenerator
 
-	protected final Matrix4f transformCopy = new Matrix4f()
-	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
-	private final SpriteMaterial spriteMaterialCopy = new SpriteMaterial()
-
 	/**
 	 * The frame to select from the underlying spritesheet.
 	 */
 	int frame = 0
 
-	SpriteSheet spriteSheet
-
 	protected Mesh mesh
 	protected Shader shader
+	protected SpriteSheet spriteSheet
+
+	protected RenderCommand renderCommand = new RenderCommand() {
+		Matrix4f transformCopy = new Matrix4f()
+		SpriteMaterial materialCopy = getMaterial()
+
+		@Override
+		void render(GraphicsRenderer renderer) {
+			if (mesh && shader && materialCopy.texture) {
+				renderer.draw(mesh, transformCopy, shader, materialCopy)
+			}
+		}
+	}
+
+	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -114,14 +123,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	protected SpriteMaterial getMaterial() {
 
 		return spriteMaterial
-	}
-
-	/**
-	 * Get a material that can be used as a copy for queued rendering.
-	 */
-	protected SpriteMaterial getMaterialCopy() {
-
-		return spriteMaterialCopy
 	}
 
 	@Override
@@ -178,14 +179,10 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	RenderCommand renderLater() {
 
-		transformCopy.set(globalTransform)
-		materialCopy.copy(material)
+		renderCommand.transformCopy.set(globalTransform)
+		renderCommand.materialCopy.copy(material)
 
-		return { renderer ->
-			if (mesh && shader && materialCopy.texture) {
-				renderer.draw(mesh, transformCopy, shader, materialCopy)
-			}
-		}
+		return renderCommand
 	}
 
 	@Override

@@ -40,7 +40,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 	private boolean factionChanged
 	private final PalettedSpriteMaterial palettedSpriteMaterial = new PalettedSpriteMaterial()
-	private final PalettedSpriteMaterial palettedSpriteMaterialCopy = new PalettedSpriteMaterial()
 
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.
@@ -77,12 +76,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 	protected PalettedSpriteMaterial getMaterial() {
 
 		return palettedSpriteMaterial
-	}
-
-	@Override
-	protected PalettedSpriteMaterial getMaterialCopy() {
-
-		return palettedSpriteMaterialCopy
 	}
 
 	@Override
