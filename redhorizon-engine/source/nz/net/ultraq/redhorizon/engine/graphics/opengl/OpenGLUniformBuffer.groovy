@@ -26,6 +26,7 @@ import static org.lwjgl.system.MemoryStack.stackPush
 import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
+import java.nio.IntBuffer
 import java.util.concurrent.Semaphore
 
 /**
@@ -54,10 +55,14 @@ class OpenGLUniformBuffer extends UniformBuffer {
 		stackPush().withCloseable { stack ->
 			switch (initialData) {
 				case ByteBuffer -> {
+					// TODO: Param so we can specify GL_STATIC_DRAW
 					glBufferData(GL_UNIFORM_BUFFER, stack.malloc(initialData.capacity()).put(initialData).flip(), GL_DYNAMIC_DRAW)
 				}
 				case FloatBuffer -> {
 					glBufferData(GL_UNIFORM_BUFFER, stack.mallocFloat(initialData.capacity()).put(initialData).flip(), GL_DYNAMIC_DRAW)
+				}
+				case IntBuffer -> {
+					glBufferData(GL_UNIFORM_BUFFER, stack.mallocInt(initialData.capacity()).put(initialData).flip(), GL_DYNAMIC_DRAW)
 				}
 				default -> throw new UnsupportedOperationException("Buffer of type ${initialData.class} not supported as input to a uniform buffer object")
 			}

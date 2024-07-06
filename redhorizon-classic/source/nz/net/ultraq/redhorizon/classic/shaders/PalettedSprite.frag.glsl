@@ -10,7 +10,9 @@ layout (packed) uniform Palette {
 	vec4[256] alphaMask;
 };
 uniform sampler2D indexTexture;
-uniform int[256] adjustmentMap;
+layout (packed) uniform PaletteMetadata {
+	int[256] adjustmentMap;
+};
 
 /**
  * Fragment shader main function, emits the fragment colour for a paletted

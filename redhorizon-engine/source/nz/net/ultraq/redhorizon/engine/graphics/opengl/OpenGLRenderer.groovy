@@ -223,6 +223,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 			uniformBuffers.each { uniformBuffer ->
 				var blockIndex = glGetUniformBlockIndex(shader.programId, uniformBuffer.name)
 				if (blockIndex != GL_INVALID_INDEX) {
+					logger.trace('Binding uniform buffer {} in shader {} at block index {}', uniformBuffer.name, name, blockIndex)
 					glUniformBlockBinding(shader.programId, blockIndex, uniformBuffer.blockIndex)
 				}
 			}
@@ -283,6 +284,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		shaders.each { shader ->
 			var blockIndex = glGetUniformBlockIndex(shader.programId, uniformBuffer.name)
 			if (blockIndex != GL_INVALID_INDEX) {
+				logger.trace('Binding uniform buffer {} in shader {} at block index {}', name, shader.name, blockIndex)
 				glUniformBlockBinding(shader.programId, blockIndex, uniformBuffer.blockIndex)
 			}
 		}

@@ -20,12 +20,14 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import groovy.transform.Memoized
+import java.nio.IntBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -96,9 +98,15 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 		return CompletableFuture.allOf(
 			super.onSceneAddedAsync(scene),
-			CompletableFuture.runAsync { ->
-				material.adjustmentMap = buildAdjustmentMap(faction)
-			}
+			CompletableFuture.completedFuture(buildAdjustmentMap(faction))
+				.thenComposeAsync { adjustmentMap ->
+					material.adjustmentMap = adjustmentMap
+					return scene.requestCreateOrGet(new UniformBufferRequest('PaletteMetadata',
+						IntBuffer.allocate(256).put(adjustmentMap).flip()))
+				}
+				.thenAcceptAsync { newUniformBuffer ->
+					material.paletteMetadataBuffer = newUniformBuffer
+				}
 		)
 	}
 

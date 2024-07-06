@@ -38,7 +38,7 @@ class Explorer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', description = 'Path to a file to open on launch')
+	@Parameters(index = '0', defaultValue = '', description = 'Path to a file to open on launch')
 	File file
 
 	@Override

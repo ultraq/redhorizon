@@ -38,7 +38,12 @@ class PalettedSpriteShader extends ShaderConfig {
 			shader.setUniformTexture('indexTexture', 0, material.texture)
 		},
 		{ Shader shader, PalettedSpriteMaterial material, window ->
-			shader.setUniform('adjustmentMap', material.adjustmentMap)
+			if (material.paletteMetadataBuffer) {
+				material.paletteMetadataBuffer.bind()
+			}
+			else {
+				shader.setUniform('adjustmentMap', material.adjustmentMap)
+			}
 		},
 		{ Shader shader, PalettedSpriteMaterial material, window ->
 			if (material.spriteMetadataBuffer) {
