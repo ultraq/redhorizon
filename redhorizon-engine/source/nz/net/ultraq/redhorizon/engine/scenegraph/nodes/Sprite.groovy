@@ -59,20 +59,22 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	protected Mesh mesh
 	protected Shader shader
 	protected SpriteSheet spriteSheet
+	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
 
-	protected RenderCommand renderCommand = new RenderCommand() {
-		Matrix4f transformCopy = new Matrix4f()
-		SpriteMaterial materialCopy = getMaterial()
+	@Lazy
+	protected RenderCommand renderCommand = { ->
+		new RenderCommand() {
+			Matrix4f transformCopy = new Matrix4f()
+			SpriteMaterial materialCopy = getMaterial()
 
-		@Override
-		void render(GraphicsRenderer renderer) {
-			if (mesh && shader && materialCopy.texture) {
-				renderer.draw(mesh, transformCopy, shader, materialCopy)
+			@Override
+			void render(GraphicsRenderer renderer) {
+				if (mesh && shader && materialCopy.texture) {
+					renderer.draw(mesh, transformCopy, shader, materialCopy)
+				}
 			}
 		}
-	}
-
-	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
+	}()
 
 	/**
 	 * Constructor, build a sprite from an image file.
