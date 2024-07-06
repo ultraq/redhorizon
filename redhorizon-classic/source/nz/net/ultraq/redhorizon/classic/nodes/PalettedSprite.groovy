@@ -101,8 +101,18 @@ class PalettedSprite extends Sprite implements FactionColours {
 			CompletableFuture.completedFuture(buildAdjustmentMap(faction))
 				.thenComposeAsync { adjustmentMap ->
 					material.adjustmentMap = adjustmentMap
-					return scene.requestCreateOrGet(new UniformBufferRequest('PaletteMetadata',
-						IntBuffer.allocate(256).put(adjustmentMap).flip()))
+
+					// This is an int[] in the shader, which on macOS will use a layout
+					// like that of std140 with a tonne of padding 😭  As such, we need to
+					// include the padding here.  See rule 4 of the standard layout in
+					// http://www.opengl.org/registry/doc/glspec45.core.pdf#page=159
+					var paletteMetadataBuffer = IntBuffer.allocate(256 * 4) // Each array item will take up 16 bytes, 4x the size of an int
+					adjustmentMap.each { adjustment ->
+						paletteMetadataBuffer.put(adjustment).advance(3)
+					}
+					paletteMetadataBuffer.flip()
+
+					return scene.requestCreateOrGet(new UniformBufferRequest('PaletteMetadata', paletteMetadataBuffer))
 				}
 				.thenAcceptAsync { newUniformBuffer ->
 					material.paletteMetadataBuffer = newUniformBuffer

@@ -5,12 +5,12 @@ in vec2 v_textureUVs;
 
 out vec4 fragmentColour;
 
-layout (packed) uniform Palette {
+layout (std140) uniform Palette {
 	vec4[256] palette;
 	vec4[256] alphaMask;
 };
 uniform sampler2D indexTexture;
-layout (packed) uniform PaletteMetadata {
+layout (std140) uniform PaletteMetadata {
 	int[256] adjustmentMap;
 };
 
