@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALListener
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
+import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,6 +46,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
+	private final List<Node> queryResults = []
 
 	private OpenALRenderer renderer
 	private OpenALListener listener
@@ -153,11 +155,13 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 							// TODO: Split this out like the graphics system where we wait to
 							//       be told to process audio objects instead of looping
 							//       through the scene ourselves
-							scene?.traverse { element ->
-								if (element instanceof AudioElement) {
-									element.render(renderer)
+							if (scene) {
+								queryResults.clear()
+								scene.query(listener.range, queryResults).each { node ->
+									if (node instanceof AudioElement) {
+										node.render(renderer)
+									}
 								}
-								return true
 							}
 						}
 					}

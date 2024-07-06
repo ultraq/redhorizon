@@ -29,6 +29,8 @@ import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.FrustumIntersection
+import org.joml.Intersectionf
+import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -70,43 +72,8 @@ class Scene implements EventTarget {
 	// Partition objects in the following data structures to make queries faster
 	private final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
 	private final CopyOnWriteArrayList<Node> nodeList = []
-
+	private final List<Temporal> temporalNodes = new CopyOnWriteArrayList<>()
 	private final List<Node> updateableNodes = new CopyOnWriteArrayList<>()
-
-	/**
-	 * Constructor, sets up scene internals.
-	 */
-	Scene() {
-
-		on(NodeAddedEvent) { event ->
-			var node = event.node
-			if (node instanceof Camera) {
-				camera = node
-				return
-			}
-
-			// Add this node to a partition if it doesn't have a renderable ancestor.
-			// That ancestor will be the one to add to the partition and can take care
-			// of things like the render order of descendents
-			if (!node.findAncestor { parent -> parent instanceof GraphicsElement }) {
-				switch (node.partitionHint) {
-					case PartitionHint.SMALL_AREA -> quadTree.add(node)
-					case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
-				}
-			}
-
-			switch (node.updateHint) {
-				case UpdateHint.ALWAYS -> updateableNodes << node
-			}
-		}
-
-		on(NodeRemovedEvent) { event ->
-			var node = event.node
-			if (!quadTree.remove(node)) {
-				nodeList.remove(node)
-			}
-		}
-	}
 
 	/**
 	 * Add a top-level node to this scene.  Shorthand for
@@ -132,6 +99,7 @@ class Scene implements EventTarget {
 			node.script?.onSceneAddedAsync(this) ?: CompletableFuture.completedFuture(null)
 		)
 			.thenRunAsync { ->
+				partition(node)
 				trigger(new NodeAddedEvent(node))
 			}
 			.thenComposeAsync { _ ->
@@ -155,6 +123,36 @@ class Scene implements EventTarget {
 	}
 
 	/**
+	 * Sort the node into one of many partitioning data structures to make future
+	 * operations more efficient.
+	 */
+	private void partition(Node node) {
+
+		if (node instanceof Camera) {
+			camera = node
+			return
+		}
+
+		// Add this node to a partition if it doesn't have a renderable ancestor.
+		// That ancestor will be the one to add to the partition and can take care
+		// of things like the render order of descendents
+		if (!node.findAncestor { parent -> parent instanceof GraphicsElement }) {
+			switch (node.partitionHint) {
+				case PartitionHint.SMALL_AREA -> quadTree.add(node)
+				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
+			}
+		}
+
+		switch (node.updateHint) {
+			case UpdateHint.ALWAYS -> updateableNodes << node
+		}
+
+		if (node instanceof Temporal) {
+			temporalNodes << node
+		}
+	}
+
+	/**
 	 * Return all nodes that are within the given view frustum.
 	 */
 	List<Node> query(FrustumIntersection frustumIntersection, List<Node> results = []) {
@@ -165,6 +163,21 @@ class Scene implements EventTarget {
 			}
 		}
 		quadTree.query(frustumIntersection, results)
+		return results
+	}
+
+	/**
+	 * Return all nodes that are within the given range.
+	 */
+	List<Node> query(Circlef range, List<Node> results = []) {
+
+		nodeList.each { node ->
+			var position = node.position
+			if (Intersectionf.testPointCircle(position.x, position.y, range.x, range.y, range.r)) {
+				results << node
+			}
+		}
+		quadTree.query(range, results)
 		return results
 	}
 
@@ -180,6 +193,7 @@ class Scene implements EventTarget {
 			node.script?.onSceneRemovedAsync(this) ?: CompletableFuture.completedFuture(null)
 		)
 			.thenRunAsync { ->
+				unpartition(node)
 				trigger(new NodeRemovedEvent(node))
 			}
 			.thenComposeAsync { _ ->
@@ -189,6 +203,34 @@ class Scene implements EventTarget {
 				// an exception about "array length is not legal" 🤷
 				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
 			}
+	}
+
+	/**
+	 * Update the scene's temporal nodes with the given time value.
+	 */
+	void tick(long currentTimeMillis) {
+
+		temporalNodes.each { element ->
+			element.tick(currentTimeMillis)
+		}
+	}
+
+	/**
+	 * Remove a node from the partitioning data structures.
+	 */
+	private void unpartition(Node node) {
+
+		if (!quadTree.remove(node)) {
+			nodeList.remove(node)
+		}
+
+		switch (node.updateHint) {
+			case UpdateHint.ALWAYS -> updateableNodes.remove(node)
+		}
+
+		if (node instanceof Temporal) {
+			temporalNodes.remove(node)
+		}
 	}
 
 	/**

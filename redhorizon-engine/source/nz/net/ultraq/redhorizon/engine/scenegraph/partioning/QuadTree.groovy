@@ -19,7 +19,9 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.partioning
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.joml.FrustumIntersection
+import org.joml.Intersectionf
 import org.joml.Vector3f
+import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 
 import java.util.concurrent.ArrayBlockingQueue
@@ -145,6 +147,22 @@ class QuadTree {
 			}
 			else if (quadrants) {
 				quadrants*.query(frustumIntersection, results)
+			}
+		}
+		return results
+	}
+
+	/**
+	 * Return all nodes that are within the given range.
+	 */
+	List<Node> query(Circlef range, List<Node> results = []) {
+
+		if (Intersectionf.testAarCircle(area.minX, area.minY, area.maxX, area.maxY, range.x, range.y, range.r)) {
+			if (children) {
+				results.addAll(children)
+			}
+			if (quadrants) {
+				quadrants*.query(range, results)
 			}
 		}
 		return results

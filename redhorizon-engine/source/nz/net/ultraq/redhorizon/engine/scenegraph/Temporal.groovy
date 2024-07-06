@@ -27,8 +27,6 @@ trait Temporal {
 
 	/**
 	 * Update this object's current time with a new value from the game clock.
-	 *
-	 * @param updatedTimeMs
 	 */
 	void tick(long updatedTimeMs) {
 

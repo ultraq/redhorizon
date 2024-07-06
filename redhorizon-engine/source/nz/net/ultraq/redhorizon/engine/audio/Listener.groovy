@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.joml.Vector3f
+import org.joml.primitives.Circlef
 
 /**
  * The player's ears into the game world.
@@ -31,4 +32,5 @@ abstract class Listener extends Node<Listener> implements AudioElement {
 
 	final Vector3f velocity = new Vector3f(0, 0, 0)
 	final Orientation orientation = new Orientation()
+	final Circlef range = new Circlef(0f, 0f, 100f) // TODO: Set this from the game
 }
