@@ -266,7 +266,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 				//       reverse from how we normally define rotation.
 				var closestHeading = Math.round(heading / degreesPerHeading)
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
-				var animationFrame = frames ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+				var animationFrame = frames > 1 ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
 				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			}
 
