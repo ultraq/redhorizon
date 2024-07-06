@@ -110,6 +110,15 @@ class PalettedSprite extends Sprite implements FactionColours {
 		)
 	}
 
+	@Override
+	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+		return CompletableFuture.allOf(
+			super.onSceneRemovedAsync(scene),
+			scene.requestDelete(material.paletteMetadataBuffer)
+		)
+	}
+
 	/**
 	 * Update the faction being applied to this sprite.
 	 */

@@ -51,19 +51,18 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	final float repeatY
 	final SpriteSheetGenerator spriteSheetGenerator
 
-	protected final Matrix4f transformCopy = new Matrix4f()
-	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
-	private final SpriteMaterial spriteMaterialCopy = new SpriteMaterial()
-
 	/**
 	 * The frame to select from the underlying spritesheet.
 	 */
 	int frame = 0
 
-	SpriteSheet spriteSheet
-
 	protected Mesh mesh
 	protected Shader shader
+	protected SpriteSheet spriteSheet
+
+	protected final Matrix4f transformCopy = new Matrix4f()
+	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
+	private final SpriteMaterial spriteMaterialCopy = new SpriteMaterial()
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -164,7 +163,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	@Override
 	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
-		return scene.requestDelete(mesh, spriteSheet)
+		return scene.requestDelete(mesh, spriteSheet, material.spriteMetadataBuffer)
 	}
 
 	@Override
