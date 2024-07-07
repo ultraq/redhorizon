@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3f
+import org.joml.Vector3fc
 
 import java.nio.ByteBuffer
 
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface AudioRenderer extends EventTarget {
+interface AudioRenderer extends AutoCloseable, EventTarget {
 
 	/**
 	 * Creates and fills a sound buffer with the given data.
@@ -48,7 +49,12 @@ interface AudioRenderer extends EventTarget {
 	void delete(AudioResource resource)
 
 	/**
-	 * Set updated autio properties of a source.
+	 * Set updated audio properties of a listener.
+	 */
+	void updateListener(float gain, Vector3fc position)
+
+	/**
+	 * Set updated audio properties of a source.
 	 */
 	void updateSource(Source source, Vector3f position)
 }

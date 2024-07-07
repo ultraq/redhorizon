@@ -17,13 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
-import nz.net.ultraq.redhorizon.engine.audio.Listener
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -130,6 +130,11 @@ class Scene implements EventTarget {
 
 		if (node instanceof Camera) {
 			camera = node
+			return
+		}
+
+		if (node instanceof Listener) {
+			listener = node
 			return
 		}
 

@@ -59,7 +59,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final CyclicBarrier continueBarrier = new CyclicBarrier(2)
 
 	private OpenGLWindow window
-	private OpenGLRenderer renderer
 	private ImGuiLayer imGuiLayer
 	private RenderPipeline renderPipeline
 	private boolean shouldToggleFullScreen
@@ -110,14 +109,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	ImGuiLayer getImGuiLayer() {
 
 		return imGuiLayer
-	}
-
-	/**
-	 * Return the renderer.
-	 */
-	GraphicsRenderer getRenderer() {
-
-		return renderer
 	}
 
 	/**
@@ -207,8 +198,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			context.withCurrent { ->
 				trigger(new WindowCreatedEvent(window))
 
-				renderer = new OpenGLRenderer(config, window)
-				renderer.withCloseable { renderer ->
+				new OpenGLRenderer(config, window).withCloseable { renderer ->
 					EngineStats.instance.attachGraphicsRenderer(renderer)
 
 					imGuiLayer = new ImGuiLayer(config, window)

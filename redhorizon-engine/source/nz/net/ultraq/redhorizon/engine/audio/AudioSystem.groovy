@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
-import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALListener
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -48,9 +47,6 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 	private final List<Node> queryResults = []
 
-	private OpenALRenderer renderer
-	private OpenALListener listener
-
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 */
@@ -63,15 +59,6 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	void configureScene() {
 
 		scene.audioRequestsHandler = this
-		scene.listener = listener
-	}
-
-	/**
-	 * Return the audio renderer.
-	 */
-	AudioRenderer getRenderer() {
-
-		return renderer
 	}
 
 	/**
@@ -134,39 +121,38 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 		// Initialization
 		new OpenALContext().withCloseable { context ->
 			context.withCurrent { ->
-				renderer = new OpenALRenderer(config)
-				logger.debug(renderer.toString())
-				EngineStats.instance.attachAudioRenderer(renderer)
+				new OpenALRenderer(config).withCloseable { renderer ->
+					logger.debug(renderer.toString())
+					EngineStats.instance.attachAudioRenderer(renderer)
 
-				listener = new OpenALListener(config.volume)
+					trigger(new SystemReadyEvent())
 
-				trigger(new SystemReadyEvent())
+					// Rendering loop
+					logger.debug('Audio system in render loop...')
+					while (!Thread.interrupted()) {
+						try {
+							rateLimit(100) { ->
 
-				// Rendering loop
-				logger.debug('Audio system in render loop...')
-				while (!Thread.interrupted()) {
-					try {
-						rateLimit(100) { ->
+								processRequests(renderer)
 
-							processRequests(renderer)
-							listener.render(renderer)
-
-							// Run the audio elements
-							// TODO: Split this out like the graphics system where we wait to
-							//       be told to process audio objects instead of looping
-							//       through the scene ourselves
-							if (scene) {
-								queryResults.clear()
-								scene.query(listener.range, queryResults).each { node ->
-									if (node instanceof AudioElement) {
-										node.render(renderer)
+								// Run the audio elements
+								// TODO: Split this out like the graphics system where we wait to
+								//       be told to process audio objects instead of looping
+								//       through the scene ourselves
+								if (scene?.listener) {
+									scene.listener.render(renderer)
+									queryResults.clear()
+									scene.query(scene.listener.range, queryResults).each { node ->
+										if (node instanceof AudioElement) {
+											node.render(renderer)
+										}
 									}
 								}
 							}
 						}
-					}
-					catch (InterruptedException ignored) {
-						break
+						catch (InterruptedException ignored) {
+							break
+						}
 					}
 				}
 

@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 
 import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.lwjgl.openal.AL
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -73,6 +74,10 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
+	void close() {
+	}
+
+	@Override
 	Buffer createBuffer(int bits, int channels, int frequency, ByteBuffer data) {
 
 		var buffer = new OpenALBuffer(bits, channels, frequency, data)
@@ -109,12 +114,21 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
+	void updateListener(float gain, Vector3fc position) {
+
+		stackPush().withCloseable { stack ->
+			alListenerf(AL_GAIN, gain)
+			alListenerfv(AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS)))
+//			alListenerfv(AL_VELOCITY, velocity as float[])
+//			alListenerfv(AL_ORIENTATION, orientation as float[])
+		}
+	}
+
+	@Override
 	void updateSource(Source source, Vector3f position) {
 
 		stackPush().withCloseable { stack ->
-			checkForError { ->
-				alSourcefv(((OpenALSource)source).sourceId, AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS)))
-			}
+			alSourcefv(((OpenALSource)source).sourceId, AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS)))
 //		checkForError { -> alSourcefv(sourceId, AL_DIRECTION, direction as float[]) }
 //		checkForError { -> alSourcefv(sourceId, AL_VELOCITY, velocity as float[]) }
 		}

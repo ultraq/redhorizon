@@ -45,6 +45,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
+import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
@@ -80,6 +81,7 @@ class Explorer {
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
+	private static final float volume = 0.5f
 
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
@@ -92,6 +94,7 @@ class Explorer {
 
 	private Scene scene
 	private Camera camera
+	private Listener listener
 	private GlobalPalette globalPalette
 	private Node previewNode
 	private File currentDirectory
@@ -203,6 +206,9 @@ class Explorer {
 		// Start all the global/helper nodes
 		camera = new Camera(renderResolution)
 		scene << camera
+
+		listener = new Listener(volume)
+		scene << listener
 
 		globalPalette = new GlobalPalette(loadPalette())
 		scene << globalPalette

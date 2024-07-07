@@ -204,17 +204,14 @@ class RenderPipeline implements AutoCloseable {
 		 */
 		void gather() {
 
-			if (scene) {
-				var camera = scene.camera
-				if (camera) {
-					average('Gathering', 1f, logger) { ->
-						queryResults.clear()
-						drawCommands.clear()
-						frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(camera.viewProjection), false)
-						scene.query(frustumIntersection, queryResults).each { element ->
-							if (element instanceof GraphicsElement) {
-								drawCommands << element.renderLater()
-							}
+			if (scene?.camera) {
+				average('Gathering', 1f, logger) { ->
+					queryResults.clear()
+					drawCommands.clear()
+					frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(scene.camera.viewProjection), false)
+					scene.query(frustumIntersection, queryResults).each { element ->
+						if (element instanceof GraphicsElement) {
+							drawCommands << element.renderLater()
 						}
 					}
 				}
@@ -224,14 +221,10 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
-			if (scene) {
-				var camera = scene.camera
-				if (camera) {
-					camera.render(renderer)
-
-					average('Rendering', 1f, logger) { ->
-						drawCommands*.render(renderer)
-					}
+			if (scene?.camera) {
+				scene.camera.render(renderer)
+				average('Rendering', 1f, logger) { ->
+					drawCommands*.render(renderer)
 				}
 			}
 		}
