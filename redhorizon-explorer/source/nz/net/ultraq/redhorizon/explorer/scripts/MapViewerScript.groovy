@@ -91,7 +91,7 @@ class MapViewerScript extends Script<Map> {
 
 					// Zoom in/out using CTRL + scroll up/down
 					if (ctrl) {
-						float scaleFactor = camera.scale.x
+						float scaleFactor = camera.scale.x()
 						if (event.yOffset < 0) {
 							scaleFactor -= 0.1
 						}
@@ -103,7 +103,9 @@ class MapViewerScript extends Script<Map> {
 					}
 					// Use scroll input to move around the map
 					else {
-						camera.transform.translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
+						camera.transform { ->
+							translate(Math.round(3 * event.xOffset) as float, Math.round(3 * -event.yOffset) as float)
+						}
 					}
 				}
 			}
@@ -121,9 +123,11 @@ class MapViewerScript extends Script<Map> {
 			var dragging = false
 			removeEventFunctions << inputEventStream.on(CursorPositionEvent) { event ->
 				if (dragging) {
-					var diffX = (cursorPosition.x - event.xPos) as float
-					var diffY = (cursorPosition.y - event.yPos) as float
-					camera.transform.translate(-diffX, diffY)
+					var diffX = (cursorPosition.x - event.xPos) / 3 as float
+					var diffY = (cursorPosition.y - event.yPos) / 3 as float
+					camera.transform { ->
+						translate(-diffX, diffY)
+					}
 				}
 				cursorPosition.set(event.xPos as float, event.yPos as float)
 			}
@@ -180,16 +184,24 @@ class MapViewerScript extends Script<Map> {
 
 		// Custom inputs
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
-			camera.transform.translate(0, -TICK)
+			camera.transform { ->
+				translate(0, -TICK)
+			}
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Scroll down', { ->
-			camera.transform.translate(0, TICK)
+			camera.transform { ->
+				translate(0, TICK)
+			}
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Scroll left', { ->
-			camera.transform.translate(TICK, 0)
+			camera.transform { ->
+				translate(TICK, 0)
+			}
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Scroll right', { ->
-			camera.transform.translate(-TICK, 0)
+			camera.transform { ->
+				translate(-TICK, 0)
+			}
 		}))
 		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
 			viewInitialPosition()

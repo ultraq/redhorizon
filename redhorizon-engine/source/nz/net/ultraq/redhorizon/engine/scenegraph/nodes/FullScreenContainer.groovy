@@ -38,14 +38,16 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		bounds
-			.set(scene.window.renderResolution as Rectanglef)
-			.center()
+		bounds { ->
+			set(scene.window.renderResolution as Rectanglef).center()
+		}
 
 		// Update children to take up the full screen
 		children.each { child ->
 			child.traverse { Node node ->
-				node.bounds.center()
+				node.bounds { ->
+					center()
+				}
 				return true
 			}
 			switch (fillMode) {

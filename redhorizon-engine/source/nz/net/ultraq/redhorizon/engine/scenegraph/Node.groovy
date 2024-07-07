@@ -20,8 +20,10 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.joml.primitives.Rectanglef
 
 import groovy.transform.stc.ClosureParams
@@ -36,14 +38,13 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 
-	final Matrix4f transform = new Matrix4f()
-	final Rectanglef bounds = new Rectanglef()
-
 	String name
 	Node parent
 	CopyOnWriteArrayList<Node> children = new CopyOnWriteArrayList<>()
 	NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_EXPANDED
 
+	private final Rectanglef bounds = new Rectanglef()
+	private final Matrix4f transform = new Matrix4f()
 	private final Vector3f position = new Vector3f()
 	private final Vector3f scale = new Vector3f(1, 1, 1)
 	private final Matrix4f globalTransform = new Matrix4f()
@@ -64,21 +65,37 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		// Allow it to process
 		var scene = getScene()
 		if (scene) {
-			scene.addNodeAndChildren(child)
-//				.orTimeout(5, TimeUnit.SECONDS)
-				.join()
+			scene.addNodeAndChildren(child).join()
 		}
 
-		var childPosition = child.position
-		var childBounds = new Rectanglef(child.bounds).translate(childPosition.x, childPosition.y)
+		var childBounds = new Rectanglef(child.bounds).translate(child.position.x(), child.position.y())
 		if (bounds.lengthX() && bounds.lengthY()) {
-			bounds.expand(childBounds)
+			bounds { ->
+				expand(childBounds)
+			}
 		}
 		else {
-			bounds.set(childBounds)
+			bounds { ->
+				set(childBounds)
+			}
 		}
 
 		return (T)this
+	}
+
+	/**
+	 * Modify the bounds of this node using the given closure.  The delegate of
+	 * the closure will be the bounds themselves.
+	 * <p>
+	 * This only exists because JOML currently doesn't have a read-only view for
+	 * {@code Rectanglef}, though hopefully that won't be the case if this PR gets
+	 * merged: https://github.com/JOML-CI/joml-primitives/pull/3
+	 */
+	void bounds(@DelegatesTo(Rectanglef) Closure closure) {
+
+		closure.delegate = bounds
+		closure()
+		recalculateProperties()
 	}
 
 	/**
@@ -122,46 +139,53 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
+	 * Returns this node's bounds.  Don't modify this object directly, instead
+	 * use {@link #bounds(Closure)} and the closure to make changes.
+	 * <p>
+	 * This only exists because JOML currently doesn't have a read-only view for
+	 * {@code Rectanglef}, though hopefully that won't be the case if this PR gets
+	 * merged: https://github.com/JOML-CI/joml-primitives/pull/3
+	 */
+	Rectanglef getBounds() {
+
+		return bounds
+	}
+
+	/**
 	 * Return the world-space bounds of this node.  ie: the local bounds, then
 	 * taking into account local and all parent/ancestor transforms along the path
 	 * to this node.
 	 */
 	Rectanglef getGlobalBounds() {
 
-		var scale = getGlobalScale()
-		var translate = getGlobalPosition()
-		return globalBounds.set(bounds)
-			.scale(scale.x, scale.y)
-			.translate(translate.x, translate.y)
+		return globalBounds
 	}
 
 	/**
 	 * Get the world-space position of this node.  ie: the local position, then
 	 * modified by all of the ancestor transforms along the path to this node.
 	 */
-	Vector3f getGlobalPosition() {
+	Vector3fc getGlobalPosition() {
 
-		return getGlobalTransform().getTranslation(globalPosition)
+		return globalPosition
 	}
 
 	/**
 	 * Get the world-space scale of this node.  ie: the local scale, then modified
 	 * by all of the ancestor transforms along the path to this node.
 	 */
-	protected Vector3f getGlobalScale() {
+	Vector3fc getGlobalScale() {
 
-		return globalTransform.getScale(globalScale)
+		return globalScale
 	}
 
 	/**
 	 * Get the world-space transform of this node.  ie: the local transform, then
 	 * modified by all of the ancestor transforms along the path to this node.
 	 */
-	protected Matrix4f getGlobalTransform() {
+	Matrix4fc getGlobalTransform() {
 
-		return parent != null ?
-			transform.mul(parent.globalTransform, globalTransform) :
-			transform.get(globalTransform)
+		return globalTransform
 	}
 
 	/**
@@ -196,24 +220,25 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
-	 * Get the local position of this node.  Note that the returned vector is a
-	 * live value of this node's position, so be sure to wrap in your own object
-	 * if you need a stable value.
+	 * Get the local position of this node.
+	 * <p>
+	 * Note that the returned vector is a live value of this node's scale, so be
+	 * sure to wrap it in your own vector if you need a stable value.
 	 */
-	Vector3f getPosition() {
+	Vector3fc getPosition() {
 
-		var currentScale = getScale()
-		return transform.getTranslation(position).div(currentScale)
+		return position
 	}
 
 	/**
-	 * Get the local scale of this node.  Note that the returned vector is a live
-	 * value of this node's scale, so be sure to wrap it in your own vector if you
-	 * need a stable value.
+	 * Get the local scale of this node.
+	 * <p>
+	 * Note that the returned vector is a live value of this node's scale, so be
+	 * sure to wrap it in your own vector if you need a stable value.
 	 */
-	Vector3f getScale() {
+	Vector3fc getScale() {
 
-		return transform.getScale(scale)
+		return scale
 	}
 
 	/**
@@ -223,6 +248,17 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	protected Scene getScene() {
 
 		return parent?.getScene()
+	}
+
+	/**
+	 * Get the local transform of this node.
+	 * <p>
+	 * Note that the returned matrix is a live value of this node's transform, so
+	 * be sure to wrap it in your own matrix if you need a stable value.
+	 */
+	Matrix4fc getTransform() {
+
+		return transform
 	}
 
 	/**
@@ -253,8 +289,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	boolean isVisible(FrustumIntersection frustumIntersection) {
 
-		var plane = getGlobalBounds()
-		return frustumIntersection.testPlaneXY(plane.minX, plane.minY, plane.maxX, plane.maxY)
+		return frustumIntersection.testPlaneXY(globalBounds.minX, globalBounds.minY, globalBounds.maxX, globalBounds.maxY)
 	}
 
 	/**
@@ -267,6 +302,36 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
+	 * Recalculate all of the node properties that hang off a transform change.
+	 */
+	protected void recalculateProperties() {
+
+		// Update local properties
+		transform.getScale(scale)
+		transform.getTranslation(position).div(scale)
+
+		// Update global properties
+		if (parent) {
+			transform.mul(parent.globalTransform, globalTransform)
+		}
+		else {
+			transform.get(globalTransform)
+		}
+
+		globalTransform.getScale(globalScale)
+		globalTransform.getTranslation(globalPosition)
+		globalBounds.set(bounds)
+			.scale(globalScale.x, globalScale.y)
+			.translate(globalPosition.x, globalPosition.y)
+
+		// Children need to be updated too
+		children*.traverse { Node node ->
+			node.recalculateProperties()
+			return true
+		}
+	}
+
+	/**
 	 * Remove the child node from this one.
 	 */
 	T removeChild(Node node) {
@@ -274,9 +339,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		if (children.remove(node)) {
 			var scene = getScene()
 			if (scene) {
-				scene.removeNodeAndChildren(node)
-//					.orTimeout(5, TimeUnit.SECONDS)
-					.join()
+				scene.removeNodeAndChildren(node).join()
 			}
 			node.parent = null
 			// TODO: Recalculate bounds
@@ -326,12 +389,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	void setPosition(float x, float y, float z = 0) {
 
-		var currentScale = getScale()
 		transform.setTranslation(
-			x * currentScale.x as float,
-			y * currentScale.y as float,
-			z * currentScale.z as float
+			x * scale.x as float,
+			y * scale.y as float,
+			z * scale.z as float
 		)
+		recalculateProperties()
 	}
 
 	/**
@@ -347,11 +410,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	void setScale(float x, float y, float z = 1) {
 
-		var currentScale = getScale()
 		transform.scaleLocal(
-			x / currentScale.x as float,
-			y / currentScale.y as float,
-			z / currentScale.z as float)
+			x / scale.x() as float,
+			y / scale.y() as float,
+			z / scale.z() as float
+		)
+		recalculateProperties()
 	}
 
 	/**
@@ -360,6 +424,17 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	void setScaleXY(float newScale) {
 
 		setScale(newScale, newScale)
+	}
+
+	/**
+	 * Modify the transform of this node using the given closure.  The delegate of
+	 * the closure will be the transform itself.
+	 */
+	void transform(@DelegatesTo(Matrix4f) Closure closure) {
+
+		closure.delegate = transform
+		closure()
+		recalculateProperties()
 	}
 
 	/**

@@ -62,7 +62,7 @@ class JomlExtensions {
 
 		var halfLengthX = self.lengthX() / 2 as float
 		var halfLengthY = self.lengthY() / 2 as float
-		return self.set(-halfLengthX, -halfLengthY, halfLengthX, halfLengthY)
+		return set(self, -halfLengthX, -halfLengthY, halfLengthX, halfLengthY)
 	}
 
 	/**

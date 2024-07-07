@@ -44,7 +44,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
-import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.lwjgl.opengl.GL
@@ -313,7 +313,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material = null) {
+	void draw(Mesh mesh, Matrix4fc transform, Shader shader, Material material = null) {
 
 		averageNanos('draw', 1f, logger) { ->
 			shader.use()

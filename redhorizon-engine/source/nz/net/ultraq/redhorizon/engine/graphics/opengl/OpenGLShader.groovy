@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.GL_TRUE
@@ -141,7 +142,7 @@ class OpenGLShader extends Shader {
 				}
 				case Integer -> glUniform1i(uniformLocation, data)
 				case int[] -> glUniform1iv(uniformLocation, (int[])data)
-				case Matrix4f -> {
+				case Matrix4fc -> {
 					var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(Matrix4f.FLOATS) }
 					data.get(buffer)
 					glUniformMatrix4fv(uniformLocation, false, buffer)

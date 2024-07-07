@@ -92,7 +92,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(float width, float height, int numImages, float repeatX, float repeatY, SpriteSheetGenerator spriteSheetGenerator) {
 
-		bounds.set(0, 0, width, height)
+		bounds { ->
+			set(0, 0, width, height)
+		}
 		this.numImages = numImages
 		this.repeatX = repeatX
 		this.repeatY = repeatY

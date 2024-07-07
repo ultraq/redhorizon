@@ -72,7 +72,9 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 			maxX = Math.max(maxX, point.x())
 			maxY = Math.max(maxY, point.y())
 		}
-		bounds.set(minX, minY, maxX, maxY)
+		bounds { ->
+			set(minX, minY, maxX, maxY)
+		}
 	}
 
 	@Override

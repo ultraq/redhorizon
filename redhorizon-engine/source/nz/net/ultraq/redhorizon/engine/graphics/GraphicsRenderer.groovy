@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
-import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
@@ -118,12 +118,12 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	/**
 	 * Draw a mesh using the given shader.
 	 */
-	void draw(Mesh mesh, Matrix4f transform, Shader shader)
+	void draw(Mesh mesh, Matrix4fc transform, Shader shader)
 
 	/**
 	 * Draw a mesh using a shader and material to configure the shader.
 	 */
-	void draw(Mesh mesh, Matrix4f transform, Shader shader, Material material)
+	void draw(Mesh mesh, Matrix4fc transform, Shader shader, Material material)
 
 	/**
 	 * Set a framebuffer to be used as the target for subsequent draw calls.  Use

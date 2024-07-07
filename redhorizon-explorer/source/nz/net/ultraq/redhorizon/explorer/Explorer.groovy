@@ -424,7 +424,9 @@ class Explorer {
 	private void preview(ImagesFile imagesFile, String objectId) {
 
 		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera)).tap {
-			bounds.center()
+			bounds { ->
+				center()
+			}
 			name = "PalettedSprite - ${objectId}"
 		}
 		scene << sprite
@@ -457,8 +459,14 @@ class Explorer {
 					.getDeclaredConstructor(ImagesFile, UnitData)
 					.newInstance(shpFile, unitData)
 					.attachScript(new UnitShowcaseScript(camera))
-				unit.body.bounds.center()
-				unit.turret?.bounds?.center()
+				unit.body.bounds { ->
+					center()
+				}
+				if (unit.turret) {
+					unit.turret.bounds { ->
+						center()
+					}
+				}
 				scene << unit
 				previewNode = unit
 			}

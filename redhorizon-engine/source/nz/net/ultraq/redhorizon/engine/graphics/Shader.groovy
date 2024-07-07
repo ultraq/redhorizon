@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import org.joml.Matrix4f
+import org.joml.Matrix4fc
 
 import groovy.transform.TupleConstructor
 
@@ -37,7 +37,7 @@ abstract class Shader implements GraphicsResource {
 	/**
 	 * Update a shader's uniforms using the given context.
 	 */
-	void applyUniforms(Matrix4f transform, Material material, Window window) {
+	void applyUniforms(Matrix4fc transform, Material material, Window window) {
 
 		// Model uniform is universal, so bake this here
 		setUniform(UNIFORM_MODEL, transform)

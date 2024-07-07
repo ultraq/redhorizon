@@ -112,7 +112,9 @@ class Map extends Node<Map> {
 
 		var halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		var halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
-		bounds.set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+		bounds { ->
+			set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+		}
 
 		tileSet = new TileSet()
 
@@ -132,7 +134,9 @@ class Map extends Node<Map> {
 		addChild(new Infantry())
 
 		addChild(new MapLines().tap {
-			transform.translate(0, 0, 0.4)
+			transform { ->
+				translate(0, 0, 0.4)
+			}
 		})
 	}
 
@@ -341,12 +345,14 @@ class Map extends Node<Map> {
 						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
 						mapTiles << mapTile
 
-						bounds.expand(
-							mapTile.position().x,
-							mapTile.position().y,
-							mapTile.position().x + TILE_WIDTH as float,
-							mapTile.position().y + TILE_HEIGHT as float
-						)
+						bounds { ->
+							expand(
+								mapTile.position().x,
+								mapTile.position().y,
+								mapTile.position().x + TILE_WIDTH as float,
+								mapTile.position().y + TILE_HEIGHT as float
+							)
+						}
 					}
 				}
 			}
@@ -636,10 +642,10 @@ class Map extends Node<Map> {
 							.asWorldCoords(1)
 							.centerInCell(infantry.width, infantry.height)
 						switch (infantryLine.cellPos) {
-							case 1 -> infantry.transform.translate(-8, 8)
-							case 2 -> infantry.transform.translate(8, 8)
-							case 3 -> infantry.transform.translate(-8, -8)
-							case 4 -> infantry.transform.translate(8, -8)
+							case 1 -> infantry.transform { -> translate(-8, 8) }
+							case 2 -> infantry.transform { -> translate(8, 8) }
+							case 3 -> infantry.transform { -> translate(-8, -8) }
+							case 4 -> infantry.transform { -> translate(8, -8) }
 						}
 					}
 					addChild(infantry)

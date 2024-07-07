@@ -48,7 +48,9 @@ class Video extends Node<Video> implements Playable {
 
 		animation = new Animation(videoFile.width, videoFile.height, videoFile.numFrames, videoFile.frameRate,
 			videoFile.forVgaMonitors, new StreamingAnimationSource(streamingDecoder, false))
-		bounds.set(animation.bounds)
+		bounds { ->
+			set(animation.bounds)
+		}
 		addChild(animation)
 
 		sound = new Sound(new StreamingSoundSource(streamingDecoder, false))

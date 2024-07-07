@@ -68,12 +68,16 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		var rotorJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/lrotor.json")
 		var rotorData = new JsonSlurper().parseText(rotorJson) as UnitData
 		unit.addBody(resourceManager.loadFile('lrotor.shp', ShpFile), rotorData)
-		unit.body2.transform.translate(0, 2)
+		unit.body2.transform { ->
+			translate(0, 2)
+		}
 
 		addChild(unit)
 
 		traverse { Node node ->
-			node.bounds.center()
+			node.bounds { ->
+				center()
+			}
 			return true
 		}
 
@@ -94,11 +98,10 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	void update(float delta) {
 
 		if (velocity.length()) {
-			var currentPosition = getPosition()
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
 			setPosition(
-				Math.clamp(currentPosition.x + movement.x as float, -xPosRange, xPosRange),
-				Math.clamp(currentPosition.y + movement.y as float, -yPosRange, yPosRange)
+				Math.clamp(position.x() + movement.x as float, -xPosRange, xPosRange),
+				Math.clamp(position.y() + movement.y as float, -yPosRange, yPosRange)
 			)
 		}
 
@@ -128,8 +131,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			Executors.newVirtualThreadPerTaskExecutor().execute { ->
 				while (bobbing) {
 					var bob = 0.0625 * Math.sin(currentTimeMs / 750)
-					var unitPosition = unit.position
-					unit.setPosition(unitPosition.x, unitPosition.y + bob as float, unitPosition.z)
+					unit.setPosition(unit.position.x(), unit.position.y() + bob as float, unit.position.z())
 					Thread.sleep(10)
 				}
 			}

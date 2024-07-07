@@ -32,6 +32,8 @@ class Outline extends Primitive {
 	Outline(Rectanglef bounds, Colour colour) {
 
 		super(MeshType.LINE_LOOP, colour, bounds as Vector2f[])
-		this.bounds.set(bounds)
+		this.bounds { ->
+			set(bounds)
+		}
 	}
 }

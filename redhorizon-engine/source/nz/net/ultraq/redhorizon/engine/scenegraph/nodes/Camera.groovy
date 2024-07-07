@@ -46,6 +46,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	private final Matrix4f viewTransform = new Matrix4f()
 	private final Matrix4f viewProjection = new Matrix4f()
 	private UniformBuffer viewProjectionBuffer
+	private final Vector3f inverse = new Vector3f()
 
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
@@ -70,7 +71,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 
 		// Positioning the camera is the opposite of what we would expect as we are
 		// instead creating a transform matrix that moves the world around it
-		return super.getPosition().negate()
+		return super.getPosition().negate(inverse)
 	}
 
 	/**
