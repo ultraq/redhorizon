@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
+package nz.net.ultraq.redhorizon.engine.geometry
 
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.MeshType
-
-import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 
+import groovy.transform.InheritConstructors
+
 /**
- * Draws a line at the bounds of its parent node.  Mainly used for debugging.
+ * A {@code Rectanglef} calculated value.
  *
  * @author Emanuel Rabina
  */
-class Outline extends Primitive {
+@InheritConstructors
+class CalculatedRectanglef extends CalculatedValue<Rectanglef> {
 
-	Outline(Rectanglef bounds, Colour colour) {
+	private final Rectanglef value = new Rectanglef()
 
-		super(MeshType.LINE_LOOP, colour, bounds as Vector2f[])
-		this.bounds.modify { ->
-			set(bounds)
-		}
+	void modify(@DelegatesTo(Rectanglef) Closure closure) {
+
+		closure.delegate = value
+		closure()
+		changed = true
 	}
 }

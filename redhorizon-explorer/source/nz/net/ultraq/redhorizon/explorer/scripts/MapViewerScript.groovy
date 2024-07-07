@@ -168,7 +168,7 @@ class MapViewerScript extends Script<Map> {
 				selectedNode.removeChild { node -> node instanceof Outline }
 			}
 
-			selectedNode = event.node.addChild(new Outline(event.node.bounds, Colour.RED))
+			selectedNode = event.node.addChild(new Outline(event.node.bounds.get(), Colour.RED))
 			moveCameraTo(
 				new Vector3f(selectedNode.globalPosition).add(
 					selectedNode.globalBounds.lengthX() / 2 as float,

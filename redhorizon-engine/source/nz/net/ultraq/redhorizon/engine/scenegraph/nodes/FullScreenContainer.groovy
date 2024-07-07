@@ -38,24 +38,28 @@ class FullScreenContainer extends Node<FullScreenContainer> {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		bounds
-			.set(scene.window.renderResolution as Rectanglef)
-			.center()
+		bounds.modify { ->
+			set(scene.window.renderResolution as Rectanglef).center()
+		}
 
 		// Update children to take up the full screen
 		children.each { child ->
 			child.traverse { Node node ->
-				node.bounds.center()
+				node.bounds.modify { ->
+					center()
+				}
 				return true
 			}
+			var boundsValue = bounds.get()
+			var childBoundsValue = child.bounds.get()
 			switch (fillMode) {
 				case FillMode.ASPECT_RATIO -> {
-					child.setScaleXY(bounds.calculateScaleToFit(child.bounds))
+					child.setScaleXY(boundsValue.calculateScaleToFit(child.bounds.get()))
 				}
 				case FillMode.STRETCH -> {
 					child.setScale(
-						bounds.lengthX() / child.bounds.lengthX() as float,
-						bounds.lengthY() / child.bounds.lengthY() as float
+						boundsValue.lengthX() / childBoundsValue.lengthX() as float,
+						boundsValue / childBoundsValue.lengthY() as float
 					)
 				}
 			}

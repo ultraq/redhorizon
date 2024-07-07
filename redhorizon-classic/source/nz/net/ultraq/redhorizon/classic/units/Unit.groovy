@@ -70,7 +70,9 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		this.imagesFile = imagesFile
 		this.unitData = unitData
 
-		bounds.setMax(imagesFile.width, imagesFile.height)
+		bounds.modify { ->
+			setMax(imagesFile.width, imagesFile.height)
+		}
 
 		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
 			return CompletableFuture.completedFuture(spriteSheet)

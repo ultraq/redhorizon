@@ -92,7 +92,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 	 */
 	Sprite(float width, float height, int numImages, float repeatX, float repeatY, SpriteSheetGenerator spriteSheetGenerator) {
 
-		bounds.set(0, 0, width, height)
+		bounds.modify { ->
+			set(0, 0, width, height)
+		}
 		this.numImages = numImages
 		this.repeatX = repeatX
 		this.repeatY = repeatY
@@ -148,7 +150,7 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 				}
 				.thenComposeAsync { newUniformBuffer ->
 					material.spriteMetadataBuffer = newUniformBuffer
-					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion.scale(repeatX, repeatY)))
+					return scene.requestCreateOrGet(new SpriteMeshRequest(bounds.get(), spriteSheet.textureRegion.scale(repeatX, repeatY)))
 				}
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import nz.net.ultraq.redhorizon.engine.geometry.TrackedObject
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
 
 import org.joml.FrustumIntersection
@@ -37,7 +38,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 
 	final Matrix4f transform = new Matrix4f()
-	final Rectanglef bounds = new Rectanglef()
+	final TrackedObject<Rectanglef> bounds = new TrackedObject<>(new Rectanglef())
 
 	String name
 	Node parent
@@ -64,18 +65,21 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		// Allow it to process
 		var scene = getScene()
 		if (scene) {
-			scene.addNodeAndChildren(child)
-//				.orTimeout(5, TimeUnit.SECONDS)
-				.join()
+			scene.addNodeAndChildren(child).join()
 		}
 
+		var boundsValue = bounds.get()
 		var childPosition = child.position
-		var childBounds = new Rectanglef(child.bounds).translate(childPosition.x, childPosition.y)
-		if (bounds.lengthX() && bounds.lengthY()) {
-			bounds.expand(childBounds)
+		var childBounds = new Rectanglef(child.bounds.get()).translate(childPosition.x, childPosition.y)
+		if (boundsValue.lengthX() && boundsValue.lengthY()) {
+			bounds.modify { ->
+				expand(childBounds)
+			}
 		}
 		else {
-			bounds.set(childBounds)
+			bounds.modify { ->
+				set(childBounds)
+			}
 		}
 
 		return (T)this
@@ -128,11 +132,15 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	Rectanglef getGlobalBounds() {
 
-		var scale = getGlobalScale()
-		var translate = getGlobalPosition()
-		return globalBounds.set(bounds)
-			.scale(scale.x, scale.y)
-			.translate(translate.x, translate.y)
+		if (bounds.changed) {
+			var scale = getGlobalScale()
+			var translate = getGlobalPosition()
+			globalBounds.set(bounds.get())
+				.scale(scale.x, scale.y)
+				.translate(translate.x, translate.y)
+			bounds.reset()
+		}
+		return globalBounds
 	}
 
 	/**
@@ -170,7 +178,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	float getHeight() {
 
-		return bounds.lengthY()
+		return bounds.get().lengthY()
 	}
 
 	/**
@@ -244,7 +252,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 */
 	float getWidth() {
 
-		return bounds.lengthX()
+		return bounds.get().lengthX()
 	}
 
 	/**

@@ -73,7 +73,9 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		addChild(unit)
 
 		traverse { Node node ->
-			node.bounds.center()
+			node.bounds.modify { ->
+				center()
+			}
 			return true
 		}
 

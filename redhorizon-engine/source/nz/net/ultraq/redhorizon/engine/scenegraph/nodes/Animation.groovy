@@ -80,7 +80,9 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	Animation(int width, int height, int numFrames, float frameRate, boolean forVgaMonitors = false,
 		AnimationSource animationSource) {
 
-		bounds.set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
+		bounds.modify { ->
+			set(0, 0, width, forVgaMonitors ? height * 1.2f as float : height)
+		}
 		this.numFrames = numFrames
 		this.frameRate = frameRate
 
@@ -93,7 +95,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 		return CompletableFuture.allOf(
 			scene
-				.requestCreateOrGet(new SpriteMeshRequest(bounds))
+				.requestCreateOrGet(new SpriteMeshRequest(bounds.get()))
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
 				},

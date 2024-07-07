@@ -112,7 +112,9 @@ class Map extends Node<Map> {
 
 		var halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
 		var halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
-		bounds.set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+		bounds.modify { ->
+			set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+		}
 
 		tileSet = new TileSet()
 
@@ -341,12 +343,14 @@ class Map extends Node<Map> {
 						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
 						mapTiles << mapTile
 
-						bounds.expand(
-							mapTile.position().x,
-							mapTile.position().y,
-							mapTile.position().x + TILE_WIDTH as float,
-							mapTile.position().y + TILE_HEIGHT as float
-						)
+						bounds.modify { ->
+							expand(
+								mapTile.position().x,
+								mapTile.position().y,
+								mapTile.position().x + TILE_WIDTH as float,
+								mapTile.position().y + TILE_HEIGHT as float
+							)
+						}
 					}
 				}
 			}
