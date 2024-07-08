@@ -41,6 +41,18 @@ class QuadTreeTests extends Specification {
 	def "Subdivides when breaching capacity"() {
 		expect:
 			var quadTree = new QuadTree(area, 1)
+			quadTree.add(new Node().tap {
+				setPosition(3, 2)
+			})
+			quadTree.add(new Node().tap {
+				setPosition(-5, 1)
+			})
+			quadTree.size() == 2
+	}
+
+	def "Can subdivide at the intersection of quadrants"() {
+		expect:
+			var quadTree = new QuadTree(area, 1)
 			quadTree.add(new Node())
 			quadTree.add(new Node())
 			quadTree.size() == 2

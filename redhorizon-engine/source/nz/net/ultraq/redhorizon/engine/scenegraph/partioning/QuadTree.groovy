@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 
 import org.joml.FrustumIntersection
 import org.joml.Intersectionf
-import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 
@@ -74,7 +74,7 @@ class QuadTree {
 		var nodePosition = node.globalPosition
 
 		// Node can live within this quadtree
-		if (area.containsPoint(nodePosition.x, nodePosition.y, true)) {
+		if (area.containsPoint(nodePosition.x(), nodePosition.y(), true)) {
 
 			// Try to add the node as an immediate child
 			if (!children?.offer(node)) {
@@ -111,11 +111,11 @@ class QuadTree {
 	/**
 	 * Add a child to one of the existing quadrants.
 	 */
-	private boolean addToQuadrant(Vector3f position, Node node) {
+	private boolean addToQuadrant(Vector3fc position, Node node) {
 
 		// For the literal edge case where the node lives right at the center of all
 		// of the quadrants, pick a random unfilled quadrant to place it into
-		if (position.x == area.minX + area.lengthX() / 2 && position.y == area.minY + area.lengthY() / 2) {
+		if (position.x() == area.minX + area.lengthX() / 2 && position.y() == area.minY + area.lengthY() / 2) {
 			var randomQuadrantIndex = (int)Math.floor(Math.random() * 4)
 			var attempts = 0
 			while (true) {
@@ -179,7 +179,7 @@ class QuadTree {
 		var nodePosition = node.globalPosition
 
 		// Node potentially lives within this quadtree
-		if (area.containsPoint(nodePosition.x, nodePosition.y, true)) {
+		if (area.containsPoint(nodePosition.x(), nodePosition.y(), true)) {
 
 			// Check children for node first
 			if (children?.contains(node)) {
