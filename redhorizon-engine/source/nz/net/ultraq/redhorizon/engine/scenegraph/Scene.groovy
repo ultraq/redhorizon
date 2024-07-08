@@ -177,8 +177,7 @@ class Scene implements EventTarget {
 	List<Node> query(Circlef range, List<Node> results = []) {
 
 		nodeList.each { node ->
-			var position = node.position
-			if (Intersectionf.testPointCircle(position.x, position.y, range.x, range.y, range.r)) {
+			if (Intersectionf.testPointCircle(node.position.x(), node.position.y(), range.x, range.y, range.r)) {
 				results << node
 			}
 		}
