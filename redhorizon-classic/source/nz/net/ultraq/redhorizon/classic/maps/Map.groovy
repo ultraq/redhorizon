@@ -260,11 +260,13 @@ class Map extends Node<Map> {
 	/**
 	 * Special layer for the background image.
 	 */
-	private class MapBackground extends Node<MapBackground> {
+	private class MapBackground extends Node<MapBackground> implements GraphicsElement {
 
 		String name = "MapBackground - ${theater.label}"
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 		final UpdateHint updateHint = UpdateHint.NEVER
+
+		private final PalettedSprite backgroundSprite
 
 		MapBackground() {
 
@@ -282,11 +284,17 @@ class Map extends Node<Map> {
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
 
-			var backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
+			backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
 				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
 			})
 			backgroundSprite.setPosition(boundary.minX, boundary.minY)
 			addChild(backgroundSprite)
+		}
+
+		@Override
+		RenderCommand renderCommand() {
+
+			return backgroundSprite.renderCommand()
 		}
 	}
 

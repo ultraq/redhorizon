@@ -19,6 +19,7 @@ description = 'A top-down shooter for testing out the game engine'
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-engine')
+	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-filetypes')
 
