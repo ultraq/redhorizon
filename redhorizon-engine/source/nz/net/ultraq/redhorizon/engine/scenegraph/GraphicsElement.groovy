@@ -26,23 +26,13 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 interface GraphicsElement {
 
 	/**
-	 * Render the element for display.
-	 */
-	void render(GraphicsRenderer renderer)
-
-	/**
 	 * Build a render command that can be used for later.
 	 * <p>
 	 * Implementations should ensure all mutable data is copied for use in the
 	 * command as a defensive measure against changes by other threads in the
 	 * space between now and running the command.
 	 */
-	default RenderCommand renderLater() {
-
-		return { renderer ->
-			render(renderer)
-		}
-	}
+	RenderCommand renderCommand()
 
 	/**
 	 * A render instruction that can be executed later.

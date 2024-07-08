@@ -208,10 +208,11 @@ class RenderPipeline implements AutoCloseable {
 				average('Gathering', 1f, logger) { ->
 					queryResults.clear()
 					drawCommands.clear()
+					drawCommands << scene.camera.renderCommand()
 					frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(scene.camera.viewProjection), false)
 					scene.query(frustumIntersection, queryResults).each { element ->
 						if (element instanceof GraphicsElement) {
-							drawCommands << element.renderLater()
+							drawCommands << element.renderCommand()
 						}
 					}
 				}
@@ -221,11 +222,8 @@ class RenderPipeline implements AutoCloseable {
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
-			if (scene?.camera) {
-				scene.camera.render(renderer)
-				average('Rendering', 1f, logger) { ->
-					drawCommands*.render(renderer)
-				}
+			average('Rendering', 1f, logger) { ->
+				drawCommands*.render(renderer)
 			}
 		}
 	}

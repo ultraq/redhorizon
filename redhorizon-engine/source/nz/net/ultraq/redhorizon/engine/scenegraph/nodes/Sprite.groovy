@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -168,16 +167,9 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 		return scene.requestDelete(mesh, spriteSheet, material.spriteMetadataBuffer)
 	}
 
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		if (mesh && shader && material.texture) {
-			renderer.draw(mesh, globalTransform, shader, material)
-		}
-	}
 
 	@Override
-	RenderCommand renderLater() {
+	RenderCommand renderCommand() {
 
 		transformCopy.set(globalTransform)
 		materialCopy.copy(material)

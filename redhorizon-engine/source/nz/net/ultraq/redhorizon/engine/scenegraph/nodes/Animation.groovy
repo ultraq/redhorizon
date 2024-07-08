@@ -120,20 +120,9 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 		)
 	}
 
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		if (mesh && shader && material && currentFrame != -1) {
-			var frame = animationSource.prepareFrame(renderer, currentFrame)
-			if (frame) {
-				material.texture = frame
-				renderer.draw(mesh, globalTransform, shader, material)
-			}
-		}
-	}
 
 	@Override
-	RenderCommand renderLater() {
+	RenderCommand renderCommand() {
 
 		transformCopy.set(globalTransform)
 		materialCopy.copy(material)

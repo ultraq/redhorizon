@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -417,16 +416,9 @@ class Map extends Node<Map> {
 			return scene.requestDelete(fullMesh)
 		}
 
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			if (fullMesh && shader && material.texture) {
-				renderer.draw(fullMesh, globalTransform, shader, material)
-			}
-		}
 
 		@Override
-		RenderCommand renderLater() {
+		RenderCommand renderCommand() {
 
 			transformCopy.set(globalTransform)
 			materialCopy.copy(material)

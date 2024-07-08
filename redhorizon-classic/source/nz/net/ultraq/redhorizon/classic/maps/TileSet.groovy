@@ -141,6 +141,10 @@ class TileSet implements GraphicsElement {
 	}
 
 	@Override
-	void render(GraphicsRenderer renderer) {
+	RenderCommand renderCommand() {
+
+		return { renderer ->
+			// Does nothing
+		}
 	}
 }

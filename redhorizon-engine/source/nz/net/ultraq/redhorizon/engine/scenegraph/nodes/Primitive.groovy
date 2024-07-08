@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -48,7 +47,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	private final Matrix4f transformCopy = new Matrix4f()
+	protected final Matrix4f transformCopy = new Matrix4f()
 
 	/**
 	 * Constructor, create a set of lines for every 2 vectors passed in to this
@@ -103,16 +102,9 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 		return scene.requestDelete(mesh)
 	}
 
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		if (mesh && shader) {
-			renderer.draw(mesh, globalTransform, shader)
-		}
-	}
 
 	@Override
-	RenderCommand renderLater() {
+	RenderCommand renderCommand() {
 
 		transformCopy.set(globalTransform)
 

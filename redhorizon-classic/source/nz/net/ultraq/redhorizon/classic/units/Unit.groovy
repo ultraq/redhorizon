@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -156,24 +155,16 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		return scene.requestDelete(spriteSheet)
 	}
 
-	@Override
-	void render(GraphicsRenderer renderer) {
-
-		bib?.render(renderer)
-		body.render(renderer)
-		body2?.render(renderer)
-		turret?.render(renderer)
-	}
 
 	// TODO: The returned render command probably counts as an allocation 🤔  I
 	//       should probably cut those out too
 	@Override
-	RenderCommand renderLater() {
+	RenderCommand renderCommand() {
 
-		var bibRenderCommand = bib?.renderLater()
-		var bodyRenderCommand = body.renderLater()
-		var body2RenderCommand = body2?.renderLater()
-		var turretRenderCommand = turret?.renderLater()
+		var bibRenderCommand = bib?.renderCommand()
+		var bodyRenderCommand = body.renderCommand()
+		var body2RenderCommand = body2?.renderCommand()
+		var turretRenderCommand = turret?.renderCommand()
 
 		return { renderer ->
 			bibRenderCommand?.render(renderer)
