@@ -58,14 +58,14 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget {
 	 */
 	default Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
 
-		return createMesh(type, layout, vertices, colour, null, null)
+		return createMesh(type, layout, vertices, colour, null, null, false)
 	}
 
 	/**
 	 * Create a mesh with all of the mesh parts.
 	 */
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
-		int[] indices)
+		int[] indices, boolean dynamic)
 
 	/**
 	 * Create a new shader program from the given configuration, or return the

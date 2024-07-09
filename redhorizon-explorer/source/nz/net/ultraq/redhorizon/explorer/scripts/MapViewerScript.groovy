@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Outline
@@ -41,6 +40,7 @@ import nz.net.ultraq.redhorizon.explorer.animation.Transition
 
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
@@ -65,7 +65,7 @@ class MapViewerScript extends Script<Map> {
 	private InputEventStream inputEventStream
 	private Window window
 	private GameWindow gameWindow
-	private Node selectedNode
+	private Outline outline
 
 	@Delegate
 	Map applyDelegate() {
@@ -168,15 +168,12 @@ class MapViewerScript extends Script<Map> {
 		}
 
 		nodeList.on(NodeSelectedEvent) { event ->
-			if (selectedNode) {
-				selectedNode.removeChild { node -> node instanceof Outline }
-			}
-
-			selectedNode = event.node.addChild(new Outline(event.node.bounds, Colour.RED))
+			var node = event.node
+			outline.updatePoints(node.globalBounds as Vector2f[])
 			moveCameraTo(
-				new Vector3f(selectedNode.globalPosition).add(
-					selectedNode.globalBounds.lengthX() / 2 as float,
-					selectedNode.globalBounds.lengthY() / 2 as float,
+				new Vector3f(node.globalPosition).add(
+					node.globalBounds.lengthX() / 2 as float,
+					node.globalBounds.lengthY() / 2 as float,
 					0
 				)
 			)
@@ -236,6 +233,12 @@ class MapViewerScript extends Script<Map> {
 		inputEventStream = scene.inputEventStream
 		window = scene.window
 		gameWindow = scene.gameWindow
+		outline = new Outline(new Rectanglef(), Colour.RED, true).tap {
+			transform { ->
+				translate(0, 0, 0.5)
+			}
+		}
+		scene << outline
 		addControls()
 	}
 

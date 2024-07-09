@@ -92,12 +92,9 @@ class Engine {
 			if (engineReadyLatch.count == 0) {
 				break
 			}
-			var failedTasks = systemTasks.findAll { task -> task.state() == State.FAILED }
+			var failedTasks = systemTasks.findAll { task -> task.done || task.cancelled }
 			if (failedTasks) {
-				failedTasks.each { failedTask ->
-					logger.error('An error occurred during engine startup', failedTask)
-				}
-				throw failedTasks.first().exceptionNow()
+				throw new Exception('An error occurred during engine startup')
 			}
 		}
 

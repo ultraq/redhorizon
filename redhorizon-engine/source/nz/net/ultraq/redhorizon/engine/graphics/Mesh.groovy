@@ -35,9 +35,18 @@ abstract class Mesh implements GraphicsResource {
 	final Colour colour
 	final Vector2f[] textureUVs
 	final int[] indices
+	final boolean dynamic
 
 	/**
 	 * Use this mesh in upcoming render operations.
 	 */
 	abstract void bind()
+
+	/**
+	 * Update the vertices part of the mesh data.
+	 *
+	 * This is only allowed on meshes that have been configured to be
+	 * {@link #dynamic}.
+	 */
+	abstract void updateVertices(Vector2f[] vertices)
 }

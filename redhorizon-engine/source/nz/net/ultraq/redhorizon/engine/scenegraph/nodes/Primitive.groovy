@@ -43,37 +43,27 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 	final MeshType type
 	final Colour colour
-	final Vector2f[] points
+	Vector2f[] points
+	final boolean dynamic
 
 	protected Mesh mesh
 	protected Shader shader
 	protected final Matrix4f transformCopy = new Matrix4f()
+	protected boolean pointsChanged
 
 	/**
 	 * Constructor, create a set of lines for every 2 vectors passed in to this
 	 * method.  The first describes the line start, the second describes the line
 	 * end.
 	 */
-	Primitive(MeshType type, Colour colour, Vector2f... points) {
+	Primitive(MeshType type, Colour colour, Vector2f[] points, boolean dynamic = false) {
 
 		this.type = type
 		this.colour = colour
 		this.points = points
+		this.dynamic = dynamic
 
-		// Set bounds to the min/max X/Y points
-		var minX = Float.MAX_VALUE
-		var minY = Float.MAX_VALUE
-		var maxX = Float.MIN_VALUE
-		var maxY = Float.MIN_VALUE
-		points.each { point ->
-			minX = Math.min(minX, point.x())
-			minY = Math.min(minY, point.y())
-			maxX = Math.max(maxX, point.x())
-			maxY = Math.max(maxY, point.y())
-		}
-		bounds { ->
-			set(minX, minY, maxX, maxY)
-		}
+		recalculateBounds()
 	}
 
 	@Override
@@ -83,8 +73,8 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 			scene
 				.requestCreateOrGet(type == MeshType.TRIANGLES ?
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour,
-						[0, 1, 3, 1, 2, 3] as int[]) :
-					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour))
+						[0, 1, 3, 1, 2, 3] as int[], dynamic) :
+					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour, dynamic))
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh
 				},
@@ -102,6 +92,26 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 		return scene.requestDelete(mesh)
 	}
 
+	/**
+	 * Update the bounds of this object against the points used to build it.
+	 */
+	private void recalculateBounds() {
+
+		var minX = Float.MAX_VALUE
+		var minY = Float.MAX_VALUE
+		var maxX = Float.MIN_VALUE
+		var maxY = Float.MIN_VALUE
+		points.each { point ->
+			minX = Math.min(minX, point.x())
+			minY = Math.min(minY, point.y())
+			maxX = Math.max(maxX, point.x())
+			maxY = Math.max(maxY, point.y())
+		}
+		bounds { ->
+			set(minX, minY, maxX, maxY)
+		}
+	}
+
 
 	@Override
 	RenderCommand renderCommand() {
@@ -109,9 +119,28 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 		transformCopy.set(globalTransform)
 
 		return { renderer ->
+			if (mesh && pointsChanged) {
+				mesh.updateVertices(points)
+				pointsChanged = false
+			}
+
 			if (mesh && shader) {
 				renderer.draw(mesh, transformCopy, shader)
 			}
 		}
+	}
+
+	/**
+	 * Update the points of this primitive object.
+	 */
+	void updatePoints(Vector2f[] newPoints) {
+
+		if (!dynamic) {
+			throw new IllegalStateException('Cannot update points of a static mesh')
+		}
+
+		points = newPoints
+		recalculateBounds()
+		pointsChanged = true
 	}
 }

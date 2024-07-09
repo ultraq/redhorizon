@@ -40,14 +40,14 @@ interface GraphicsRequests {
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
 	static record MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour,
-		Vector2f[] textureUVs, int[] indices) implements Request<Mesh> {
+		Vector2f[] textureUVs, int[] indices, boolean dynamic = false) implements Request<Mesh> {
 
-		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, int[] indices) {
-			this(type, layout, vertices, colour, null, indices)
+		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, int[] indices, boolean dynamic = false) {
+			this(type, layout, vertices, colour, null, indices, dynamic)
 		}
 
-		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
-			this(type, layout, vertices, colour, null, null)
+		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, boolean dynamic = false) {
+			this(type, layout, vertices, colour, null, null, dynamic)
 		}
 	}
 

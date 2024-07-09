@@ -30,6 +30,7 @@ import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
 
 /**
  * An element of a scene, nodes are used to build and organize scene trees.
@@ -65,7 +66,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		// Allow it to process
 		var scene = getScene()
 		if (scene) {
-			scene.addNodeAndChildren(child).join()
+			scene.addNodeAndChildren(child)
+				.orTimeout(5, TimeUnit.SECONDS)
+				.join()
 		}
 
 		var childBounds = new Rectanglef(child.bounds).translate(child.position.x(), child.position.y())
@@ -339,7 +342,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 		if (children.remove(node)) {
 			var scene = getScene()
 			if (scene) {
-				scene.removeNodeAndChildren(node).join()
+				scene.removeNodeAndChildren(node)
+					.orTimeout(5, TimeUnit.SECONDS)
+					.join()
 			}
 			node.parent = null
 			// TODO: Recalculate bounds
