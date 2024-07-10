@@ -171,9 +171,9 @@ class MapViewerScript extends Script<Map> {
 			var node = event.node
 			outline.updatePoints(node.globalBounds as Vector2f[])
 			moveCameraTo(
-				new Vector3f(node.globalPosition).add(
-					node.globalBounds.lengthX() / 2 as float,
-					node.globalBounds.lengthY() / 2 as float,
+				new Vector3f(
+					(node.globalBounds.minX + node.globalBounds.maxX) / 2 as float,
+					(node.globalBounds.minY + node.globalBounds.maxY) / 2 as float,
 					0
 				)
 			)
