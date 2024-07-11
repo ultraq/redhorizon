@@ -120,7 +120,7 @@ class QuadTree {
 			var attempts = 0
 			while (true) {
 				var randomQuadrant = quadrants[randomQuadrantIndex]
-				if (randomQuadrant.add(node)) {
+				if (randomQuadrant.children?.offer(node)) {
 					return true
 				}
 				else {
