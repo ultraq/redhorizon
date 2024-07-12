@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
+import nz.net.ultraq.redhorizon.engine.game.Command
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
@@ -29,10 +30,12 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.shooter.Shooter
 
+import org.joml.Math
 import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonSlurper
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 /**
@@ -54,6 +57,29 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
 	private float rotation = 0f
+	private List<Command> movementCommands = new CopyOnWriteArrayList<>()
+
+	private final Command moveForward = { ->
+		var headingInRadians = Math.toRadians(heading)
+		velocity.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).normalize()
+	}
+	private final Command moveBackwards = { ->
+		var headingInRadians = Math.toRadians(heading)
+		velocity.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).negate().normalize()
+	}
+	private final Command moveLeft = { ->
+		var leftAngle = java.lang.Math.wrap((float)(heading - 90f), 0f, 360f)
+		var leftAngleInRadians = Math.toRadians(leftAngle)
+		velocity.set(Math.sin(leftAngleInRadians), Math.cos(leftAngleInRadians)).normalize()
+	}
+	private final Command moveRight = { ->
+		var rightAngle = java.lang.Math.wrap((float)(heading + 90f), 0f, 360f)
+		var rightAngleInRadians = Math.toRadians(rightAngle)
+		velocity.set(Math.sin(rightAngleInRadians), Math.cos(rightAngleInRadians)).normalize()
+	}
+	private final Command stop = { ->
+		velocity.set(0, 0)
+	}
 
 	/**
 	 * Constructor, load the sprite and scripts for the player.
@@ -96,6 +122,13 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 	@Override
 	void update(float delta) {
+
+		if (movementCommands) {
+			movementCommands*.execute()
+		}
+		else {
+			stop.execute()
+		}
 
 		if (velocity.length()) {
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
@@ -140,21 +173,21 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 			// Keyboard controls
 			scene.inputEventStream.addControls(
-				new KeyControl(GLFW_KEY_W, 'Move up',
-					{ -> velocity.y += 1 },
-					{ -> velocity.y -= 1 }
+				new KeyControl(GLFW_KEY_W, 'Move forwards',
+					{ -> movementCommands.add(moveForward) },
+					{ -> movementCommands.remove(moveForward) }
 				),
-				new KeyControl(GLFW_KEY_S, 'Move down',
-					{ -> velocity.y -= 1 },
-					{ -> velocity.y += 1 }
+				new KeyControl(GLFW_KEY_S, 'Move backwards',
+					{ -> movementCommands.add(moveBackwards) },
+					{ -> movementCommands.remove(moveBackwards) }
 				),
-				new KeyControl(GLFW_KEY_A, 'Move left',
-					{ -> velocity.x -= 1 },
-					{ -> velocity.x += 1 }
+				new KeyControl(GLFW_KEY_A, 'Strafe left',
+					{ -> movementCommands.add(moveLeft) },
+					{ -> movementCommands.remove(moveLeft) }
 				),
-				new KeyControl(GLFW_KEY_D, 'Move right',
-					{ -> velocity.x += 1 },
-					{ -> velocity.x -= 1 }
+				new KeyControl(GLFW_KEY_D, 'Strafe right',
+					{ -> movementCommands.add(moveRight) },
+					{ -> movementCommands.remove(moveRight) }
 				),
 				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
 					{ -> rotation -= 1 },
