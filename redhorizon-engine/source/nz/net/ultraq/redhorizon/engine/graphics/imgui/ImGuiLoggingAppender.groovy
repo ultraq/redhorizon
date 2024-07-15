@@ -27,6 +27,8 @@ import ch.qos.logback.core.encoder.Encoder
  *
  * @author Emanuel Rabina
  */
+// Using E and not ILoggingEvent here otherwise it'll bring in logback-classic
+// and that'll conflict with our tests that use their own SLF4J provider.
 class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements EventTarget {
 
 	static ImGuiLoggingAppender instance

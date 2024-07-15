@@ -19,6 +19,7 @@
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="nz.net.ultraq.redhorizon.cli.ExcludePerformanceStatsFilter"/>
 		<encoder>
 			<pattern>[%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>

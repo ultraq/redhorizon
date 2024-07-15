@@ -94,7 +94,8 @@ class Engine {
 			}
 			var failedTasks = systemTasks.findAll { task -> task.done || task.cancelled }
 			if (failedTasks) {
-				throw new Exception('An error occurred during engine startup')
+				var exception = failedTasks.find { task -> task.state() == State.FAILED }?.exceptionNow()
+				throw new Exception('An error occurred during engine startup', exception)
 			}
 		}
 

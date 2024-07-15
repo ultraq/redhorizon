@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.cli.converter
 
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
 
+import com.github.valfirst.slf4jtest.TestLogger
 import com.github.valfirst.slf4jtest.TestLoggerFactory
 import spock.lang.Specification
 import static com.github.valfirst.slf4jtest.Assertions.assertThat
@@ -29,7 +30,7 @@ import static com.github.valfirst.slf4jtest.Assertions.assertThat
  */
 class Pcx2CpsConverterTests extends Specification {
 
-	private final logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverter)
+	private final TestLogger logger = TestLoggerFactory.getTestLogger(Pcx2CpsConverter)
 
 	def "Converts a PCX file to a CPS file"() {
 		given:
