@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.game.Command
+import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
@@ -56,6 +57,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
+	private Vector2f lookAt = new Vector2f()
+	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
 	private List<Command> movementCommands = new CopyOnWriteArrayList<>()
 
@@ -138,8 +141,12 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			)
 		}
 
+		// Mouse rotation
+		if (lookAt.length()) {
+			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(position.x(), position.y()).angle(up))
+		}
 		// Keyboard rotation
-		if (rotation) {
+		else if (rotation) {
 			heading = heading + rotation * ROTATION_SPEED * delta as float
 		}
 		// Gamepad rotation
@@ -198,6 +205,16 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 					{ -> rotation -= 1 }
 				)
 			)
+
+			// Mouse input
+			scene.inputEventStream.on(CursorPositionEvent) { event ->
+				lookAt
+					.set(
+						(float)(event.xPos - scene.window.size.width() / 2),
+						(float)((scene.window.size.height() - event.yPos) - scene.window.size.height() / 2)
+					)
+					.div(scene.window.renderToWindowScale)
+			}
 
 			// Gamepad controls
 			scene.inputEventStream.addControls(

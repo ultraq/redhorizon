@@ -28,43 +28,37 @@ abstract class Window implements AutoCloseable, InputSource {
 
 	/**
 	 * Return the current window handle.
-	 *
-	 * @return
 	 */
 	abstract long getHandle()
 
 	/**
 	 * Return the current framebuffer dimensions.
-	 *
-	 * @return
 	 */
 	abstract Dimension getFramebufferSize()
 
 	/**
 	 * Returns the DPI scaling value of the current monitor.
-	 *
-	 * @return
 	 */
 	abstract float getMonitorScale()
 
 	/**
 	 * Returns the current internal rendering resolution.
-	 *
-	 * @return
 	 */
 	abstract Dimension getRenderResolution()
 
 	/**
+	 * Returns the scaling factor between the render resolution and the window
+	 * size.
+	 */
+	abstract float getRenderToWindowScale()
+
+	/**
 	 * Return the current window dimensions.
-	 *
-	 * @return
 	 */
 	abstract Dimension getSize()
 
 	/**
 	 * Returns the current output rendering resolution.
-	 *
-	 * @return
 	 */
 	abstract Dimension getTargetResolution()
 
@@ -75,15 +69,11 @@ abstract class Window implements AutoCloseable, InputSource {
 
 	/**
 	 * Return whether or not the underlying window has signalled to be closed.
-	 *
-	 * @return
 	 */
 	abstract boolean shouldClose()
 
 	/**
 	 * Manually set whether or not the underlying window should close.
-	 *
-	 * @param close
 	 */
 	abstract void shouldClose(boolean close)
 

@@ -48,6 +48,7 @@ class OpenGLWindow extends Window {
 	Dimension size
 	Dimension framebufferSize
 	Dimension targetResolution
+	final float renderToWindowScale
 
 	private final long window
 	private final Dimension windowedSize
@@ -81,6 +82,7 @@ class OpenGLWindow extends Window {
 
 		size = fullScreen ? new Dimension(videoMode.width(), videoMode.height()) : windowedSize
 		renderResolution = config.renderResolution
+		renderToWindowScale = size.width() / renderResolution.width()
 		logger.debug('Using a render resolution of {}x{}', renderResolution.width(), renderResolution.height())
 
 		// Set OpenGL config for the window we want
