@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.shooter.objects
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
+import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -29,10 +30,10 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.shooter.Shooter
 
 import org.joml.Math
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonSlurper
@@ -46,13 +47,12 @@ import java.util.concurrent.Executors
  */
 class Player extends Node<Player> implements Rotatable, Temporal {
 
+	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
 	private static final float MOVEMENT_SPEED = 100f
 	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
 	private final Unit unit
-	private final float xPosRange
-	private final float yPosRange
 
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
@@ -111,9 +111,6 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		}
 
 		attachScript(new PlayerScript())
-
-		xPosRange = Shooter.RENDER_RESOLUTION.width() / 2 - width / 2
-		yPosRange = Shooter.RENDER_RESOLUTION.height() / 2 - height / 2
 	}
 
 	@Override
@@ -136,8 +133,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		if (velocity.length()) {
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
 			setPosition(
-				Math.clamp(position.x() + movement.x as float, -xPosRange, xPosRange),
-				Math.clamp(position.y() + movement.y as float, -yPosRange, yPosRange)
+				Math.clamp(position.x() + movement.x as float, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
+				Math.clamp(position.y() + movement.y as float, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
 		}
 
@@ -214,6 +211,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 						(float)((scene.window.size.height() - event.yPos) - scene.window.size.height() / 2)
 					)
 					.div(scene.window.renderToWindowScale)
+					.add(globalPosition.x(), globalPosition.y())
 			}
 
 			// Gamepad controls

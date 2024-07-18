@@ -376,9 +376,9 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	/**
 	 * Set the local position of this node.
 	 */
-	void setPosition(Vector3f newPosition) {
+	void setPosition(Vector3fc newPosition) {
 
-		setPosition(newPosition.x, newPosition.y, newPosition.z)
+		setPosition(newPosition.x(), newPosition.y(), newPosition.z())
 	}
 
 	/**

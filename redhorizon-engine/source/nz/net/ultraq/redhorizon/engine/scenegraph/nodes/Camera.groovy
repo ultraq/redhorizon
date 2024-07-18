@@ -48,6 +48,8 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	private UniformBuffer viewProjectionBuffer
 	private final Vector3f inverse = new Vector3f()
 
+	private Node tracking
+
 	/**
 	 * Constructor, build a camera to work with the given dimensions.
 	 */
@@ -64,6 +66,14 @@ class Camera extends Node<Camera> implements GraphicsElement {
 			0, 0, 0,
 			0, 1, 0
 		)
+	}
+
+	/**
+	 * Make the camera follow another object around the scene.
+	 */
+	void follow(Node node) {
+
+		tracking = node
 	}
 
 	@Override
@@ -134,12 +144,12 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	}
 
 	/**
-	 * Reset this camera's properties.
+	 * Reset this camera's position.
 	 */
-	Camera reset() {
+	void reset() {
 
 		transform.identity()
-		return this
+		recalculateProperties()
 	}
 
 	@Override
@@ -148,5 +158,13 @@ class Camera extends Node<Camera> implements GraphicsElement {
 		// Positioning the camera is the opposite of what we would expect as we are
 		// instead creating a transform matrix that moves the world around it
 		super.setPosition(-x, -y, -z)
+	}
+
+	@Override
+	void update(float delta) {
+
+		if (tracking) {
+			setPosition(tracking.globalPosition)
+		}
 	}
 }

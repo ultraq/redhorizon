@@ -70,10 +70,16 @@ class Map extends Node<Map> {
 
 	static final int TILE_WIDTH = 24
 	static final int TILE_HEIGHT = 24
+	static final int TILES_X = 128
+	static final int TILES_Y = 128
+	static final Rectanglef MAX_BOUNDS = new Rectanglef(
+		-TILES_X * TILE_WIDTH / 2 as float,
+		-TILES_Y * TILE_HEIGHT / 2 as float,
+		TILES_X * TILE_WIDTH / 2 as float,
+		TILES_Y * TILE_HEIGHT / 2 as float
+	)
 
 	private static final Logger logger = LoggerFactory.getLogger(Map)
-	private static final int TILES_X = 128
-	private static final int TILES_Y = 128
 
 	final MapFile mapFile
 	final String name = "Map - ${mapFile.basicSection.name()}"
@@ -109,10 +115,8 @@ class Map extends Node<Map> {
 		var waypoint98 = waypoints[98]
 		initialPosition = waypoint98.asCellCoords().asWorldCoords(1)
 
-		var halfMapWidth = (TILES_X * TILE_WIDTH) / 2 as float
-		var halfMapHeight = (TILES_Y * TILE_HEIGHT) / 2 as float
 		bounds { ->
-			set(-halfMapWidth, -halfMapHeight, halfMapWidth, halfMapHeight)
+			set(MAX_BOUNDS)
 		}
 
 		tileSet = new TileSet()

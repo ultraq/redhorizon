@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory
  */
 class Shooter {
 
-	static final Dimension RENDER_RESOLUTION = new Dimension(720, 405)
+	private static final Dimension RENDER_RESOLUTION = new Dimension(720, 405)
 	private static final Logger logger = LoggerFactory.getLogger(Shooter)
 
 	private GlobalPalette globalPalette
@@ -84,6 +84,8 @@ class Shooter {
 
 			player = new Player(resourceManager)
 			scene << player
+
+			camera.follow(player)
 		}
 	}
 

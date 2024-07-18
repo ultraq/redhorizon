@@ -130,6 +130,7 @@ class Scene implements EventTarget {
 
 		if (node instanceof Camera) {
 			camera = node
+			updateableNodes << node
 			return
 		}
 
