@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.shooter
 
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
+import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
@@ -77,7 +78,7 @@ class Shooter {
 			camera = new Camera(RENDER_RESOLUTION)
 			scene << camera
 
-			scene << new GridLines(-RENDER_RESOLUTION.width() / 2 as int, RENDER_RESOLUTION.width() / 2 as int, 24)
+			scene << new GridLines(Map.MAX_BOUNDS, 24)
 
 			globalPalette = new GlobalPalette(loadPalette())
 			scene << globalPalette

@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 
 import org.joml.Vector2f
+import org.joml.primitives.Rectanglef
 
 /**
  * A set of grid lines to help with positioning of elements.
@@ -33,14 +34,14 @@ class GridLines extends Node<GridLines> {
 	final UpdateHint updateHint = UpdateHint.NEVER
 
 	/**
-	 * Constructor, build a set of grid lines for the X and Y planes between the
-	 * min/max values for every {@code step} rendered pixels.
+	 * Constructor, build a set of grid lines for the X and Y axes within the
+	 * bounds specified by {@range}, for every {@code step} rendered pixels.
 	 */
-	GridLines(int coordMin, int coordMax, int step) {
+	GridLines(Rectanglef range, float step) {
 
 		var lines = new ArrayList<Vector2f>()
-		for (var y = coordMin; y <= coordMax; y += step) {
-			for (var x = coordMin; x <= coordMax; x += step) {
+		for (float y = range.minY; y <= range.maxY; y += step) {
+			for (float x = range.minX; x <= range.maxX; x += step) {
 				if (!x && !y) {
 					continue
 				}
@@ -54,8 +55,8 @@ class GridLines extends Node<GridLines> {
 		addChild(cellLines)
 
 		var originLines = new Primitive(MeshType.LINES, new Colour('GridLines-DarkGrey', 0.2, 0.2, 0.2),
-			new Vector2f(coordMin, 0), new Vector2f(coordMax, 0),
-			new Vector2f(0, coordMin), new Vector2f(0, coordMax)
+			new Vector2f(range.minX, 0), new Vector2f(range.maxX, 0),
+			new Vector2f(0, range.minX), new Vector2f(0, range.maxX)
 		)
 		originLines.name = 'Origin lines'
 		addChild(originLines)

@@ -213,7 +213,7 @@ class Explorer {
 		globalPalette = new GlobalPalette(loadPalette())
 		scene << globalPalette
 
-		scene << new GridLines(-1536, 1536, 24) // The max area a Red Alert map can be
+		scene << new GridLines(Map.MAX_BOUNDS, 24)
 
 		if (openOnLaunch) {
 			preview(openOnLaunch)
