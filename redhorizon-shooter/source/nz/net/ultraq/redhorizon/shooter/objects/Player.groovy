@@ -57,6 +57,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
+	private Vector2f movementDiff = new Vector2f()
 	private Vector2f lookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
@@ -132,15 +133,21 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 		if (velocity.length()) {
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
+			movementDiff.set(position.x() + movement.x as float, position.y() + movement.y as float)
 			setPosition(
-				Math.clamp(position.x() + movement.x as float, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
-				Math.clamp(position.y() + movement.y as float, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
+				Math.clamp(movementDiff.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
+				Math.clamp(movementDiff.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
 		}
 
 		// Mouse rotation
 		if (lookAt.length()) {
 			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(position.x(), position.y()).angle(up))
+
+			// Update lookAt only if moving towards the mouse cursor so as not to 'crash' into it
+			if (movementCommands.size() == 1 && movementCommands.first() == moveForward) {
+				lookAt.add(movementDiff)
+			}
 		}
 		// Keyboard rotation
 		else if (rotation) {

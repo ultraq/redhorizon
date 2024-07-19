@@ -48,7 +48,7 @@ class OpenGLWindow extends Window {
 	Dimension size
 	Dimension framebufferSize
 	Dimension targetResolution
-	final float renderToWindowScale
+	float renderToWindowScale
 
 	private final long window
 	private final Dimension windowedSize
@@ -129,6 +129,7 @@ class OpenGLWindow extends Window {
 			glfwGetWindowSize(window, windowWidthPointer, windowHeightPointer)
 			size = new Dimension(windowWidthPointer[0], windowHeightPointer[0])
 			targetResolution = framebufferSize.calculateFit(config.targetAspectRatio)
+			renderToWindowScale = size.width() / renderResolution.width()
 			logger.debug('Target resolution changed to {}', targetResolution)
 
 			trigger(new FramebufferSizeEvent(framebufferSize, size, targetResolution))
