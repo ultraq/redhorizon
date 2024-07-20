@@ -24,7 +24,9 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
 import org.joml.Matrix4f
+import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.system.MemoryStack.stackPush
@@ -41,12 +43,14 @@ class Camera extends Node<Camera> implements GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
+	private final int[] viewportDef
 	private final Matrix4f projection
 	private final Matrix4f view
 	private final Matrix4f viewTransform = new Matrix4f()
 	private final Matrix4f viewProjection = new Matrix4f()
 	private UniformBuffer viewProjectionBuffer
 	private final Vector3f inverse = new Vector3f()
+	private final Vector3f projectionCalc = new Vector3f()
 
 	private Node tracking
 
@@ -55,6 +59,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	 */
 	Camera(Dimension size) {
 
+		viewportDef = [0, 0, size.width(), size.height()]
 		projection = new Matrix4f().setOrtho2D(
 			-size.width() / 2, size.width() / 2,
 			-size.height() / 2, size.height() / 2
@@ -66,6 +71,16 @@ class Camera extends Node<Camera> implements GraphicsElement {
 			0, 0, 0,
 			0, 1, 0
 		)
+	}
+
+	/**
+	 * Convert an object's 3D position in the scene to a 2D position on the
+	 * screen.
+	 */
+	Vector2f calculateSceneToScreenSpace(Vector3fc position, Vector2f dest) {
+
+		getViewProjection().project(position, viewportDef, projectionCalc)
+		return dest.set(projectionCalc.x(), projectionCalc.y())
 	}
 
 	/**

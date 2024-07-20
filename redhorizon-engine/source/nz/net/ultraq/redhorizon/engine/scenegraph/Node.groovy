@@ -225,7 +225,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	/**
 	 * Get the local position of this node.
 	 * <p>
-	 * Note that the returned vector is a live value of this node's scale, so be
+	 * Note that the returned vector is a live value of this node's position, so be
 	 * sure to wrap it in your own vector if you need a stable value.
 	 */
 	Vector3fc getPosition() {

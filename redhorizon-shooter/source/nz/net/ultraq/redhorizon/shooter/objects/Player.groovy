@@ -47,6 +47,7 @@ import java.util.concurrent.Executors
  */
 class Player extends Node<Player> implements Rotatable, Temporal {
 
+//	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
 	private static final float MOVEMENT_SPEED = 100f
 	private static final float ROTATION_SPEED = 180f
@@ -54,11 +55,13 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 	private final Unit unit
 
+	private final Vector2f screenPosition = new Vector2f()
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
 	private Vector2f movementDiff = new Vector2f()
 	private Vector2f lookAt = new Vector2f()
+	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
 	private List<Command> movementCommands = new CopyOnWriteArrayList<>()
@@ -141,13 +144,13 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		}
 
 		// Mouse rotation
-		if (lookAt.length()) {
-			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(position.x(), position.y()).angle(up))
+		if (lookAt.length() && lookAt != lastLookAt) {
+			scene.camera.calculateSceneToScreenSpace(position, screenPosition)
+			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(screenPosition.x(), screenPosition.y()).angle(up))
 
-			// Update lookAt only if moving towards the mouse cursor so as not to 'crash' into it
-			if (movementCommands.size() == 1 && movementCommands.first() == moveForward) {
-				lookAt.add(movementDiff)
-			}
+			// Adjust lookAt position with movement
+			lookAt.add(movementDiff)
+			lastLookAt.set(lookAt)
 		}
 		// Keyboard rotation
 		else if (rotation) {
@@ -213,12 +216,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			// Mouse input
 			scene.inputEventStream.on(CursorPositionEvent) { event ->
 				lookAt
-					.set(
-						(float)(event.xPos - scene.window.size.width() / 2),
-						(float)((scene.window.size.height() - event.yPos) - scene.window.size.height() / 2)
-					)
+					.set(event.xPos, scene.window.size.height() - event.yPos)
 					.div(scene.window.renderToWindowScale)
-					.add(globalPosition.x(), globalPosition.y())
 			}
 
 			// Gamepad controls
