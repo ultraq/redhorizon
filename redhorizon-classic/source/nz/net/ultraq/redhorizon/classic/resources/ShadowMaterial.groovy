@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.shaders
+package nz.net.ultraq.redhorizon.classic.resources
+
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 
 /**
- * A collection of shaders used by this module.
+ * A material for drawing a sprite silhouette.
  *
  * @author Emanuel Rabina
  */
-class Shaders {
-
-	static final PalettedSpriteShader palettedSpriteShader = new PalettedSpriteShader()
-	static final ShadowShader shadowShader = new ShadowShader()
+class ShadowMaterial extends SpriteMaterial {
 }

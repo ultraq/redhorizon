@@ -20,7 +20,14 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
+import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
+import nz.net.ultraq.redhorizon.classic.resources.ShadowMaterial
+import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh
+import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -31,6 +38,9 @@ import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_WIDTH
+
+import org.joml.Matrix4f
+import org.joml.Vector3f
 
 import java.util.concurrent.CompletableFuture
 
@@ -59,6 +69,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 	final UnitTurret turret
 	UnitBody body2
 	PalettedSprite bib
+	UnitShadow shadow
 
 	private int stateIndex = 0
 	private long animationStartTime
@@ -123,6 +134,17 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 	}
 
 	/**
+	 * Add a generated shadow to this unit.
+	 *
+	 * TODO: This is a good candidate for a component in an ECS.
+	 */
+	void addShadow() {
+
+		shadow = new UnitShadow()
+		addChild(shadow)
+	}
+
+	/**
 	 * Return the number of degrees it takes to rotate the unit left/right in
 	 * either direction for the current state of the unit.
 	 */
@@ -165,8 +187,10 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		var bodyRenderCommand = body.renderCommand()
 		var body2RenderCommand = body2?.renderCommand()
 		var turretRenderCommand = turret?.renderCommand()
+		var shadowRenderCommand = shadow?.renderCommand()
 
 		return { renderer ->
+			shadowRenderCommand?.render(renderer)
 			bibRenderCommand?.render(renderer)
 			bodyRenderCommand.render(renderer)
 			body2RenderCommand?.render(renderer)
@@ -243,6 +267,12 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		}
 
 		@Override
+		PalettedSpriteMaterial getMaterial() {
+
+			return super.getMaterial()
+		}
+
+		@Override
 		void update(float delta) {
 
 			// TODO: If this animation region picking gets more complicated, it might
@@ -287,6 +317,67 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 			}
 
 			super.update(delta)
+		}
+	}
+
+	/**
+	 * A generated unit shadow.  Used mainly for aircraft which draw a silhouette
+	 * of the unit on the ground beneath them.
+	 */
+	private class UnitShadow extends Node<UnitShadow> implements GraphicsElement {
+
+		private static final Vector3f offset = new Vector3f(0f, -20f, 0f)
+
+		final String name = 'Shadow'
+
+		private Mesh mesh
+		private Shader shader
+
+		private final Matrix4f transformCopy = new Matrix4f()
+		private final materialCopy = new ShadowMaterial()
+
+		UnitShadow() {
+
+			bounds { ->
+				set(body.bounds)
+			}
+			transform { ->
+				translate(offset)
+			}
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+
+			return CompletableFuture.allOf(
+				scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
+					.thenAcceptAsync { newMesh ->
+						mesh = newMesh
+					},
+				scene.requestCreateOrGet(new ShaderRequest(Shaders.shadowShader))
+					.thenAcceptAsync { shadowShader ->
+						shader = shadowShader
+					}
+			)
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+			return scene.requestDelete(mesh)
+		}
+
+		@Override
+		RenderCommand renderCommand() {
+
+			transformCopy.set(globalTransform)
+			materialCopy.copy(body.material)
+
+			return { renderer ->
+				if (mesh && shader) {
+					renderer.draw(mesh, transformCopy, shader, materialCopy)
+				}
+			}
 		}
 	}
 }

@@ -105,6 +105,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			translate(0, 2)
 		}
 
+		unit.addShadow()
 		addChild(unit)
 
 		traverse { Node node ->
@@ -177,8 +178,13 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			// Helicopter bobbing
 			Executors.newVirtualThreadPerTaskExecutor().execute { ->
 				while (bobbing) {
-					var bob = 0.0625 * Math.sin(currentTimeMs / 750)
-					unit.setPosition(unit.position.x(), unit.position.y() + bob as float, unit.position.z())
+					var bob = 0.0625 * Math.sin(currentTimeMs / 750) as float
+					unit.body.transform { ->
+						translate(0f, bob, 0f)
+					}
+					unit.body2.transform { ->
+						translate(0f, bob, 0f)
+					}
 					Thread.sleep(10)
 				}
 			}
