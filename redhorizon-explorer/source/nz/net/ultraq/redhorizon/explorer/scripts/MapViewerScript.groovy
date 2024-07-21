@@ -122,14 +122,17 @@ class MapViewerScript extends Script<Map> {
 			var cursorPosition = new Vector2f()
 			var dragging = false
 			removeEventFunctions << inputEventStream.on(CursorPositionEvent) { event ->
+				var adjustedPosX = event.xPos / window.renderToWindowScale as float
+				var adjustedPosY = event.yPos / window.renderToWindowScale as float
 				if (dragging) {
-					var diffX = (cursorPosition.x - event.xPos) / 3 as float
-					var diffY = (cursorPosition.y - event.yPos) / 3 as float
+					var scale = camera.scale
+					var diffX = (cursorPosition.x - adjustedPosX) / scale.x() as float
+					var diffY = (cursorPosition.y - adjustedPosY) / scale.y() as float
 					camera.transform { ->
 						translate(-diffX, diffY)
 					}
 				}
-				cursorPosition.set(event.xPos as float, event.yPos as float)
+				cursorPosition.set(adjustedPosX, adjustedPosY)
 			}
 			removeEventFunctions << inputEventStream.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -147,7 +150,7 @@ class MapViewerScript extends Script<Map> {
 			// Zoom in/out using the scroll wheel
 			removeEventFunctions << inputEventStream.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
-					float scaleFactor = camera.scale.x
+					float scaleFactor = camera.scale.x()
 					if (event.yOffset < 0) {
 						scaleFactor -= 0.1
 					}
