@@ -240,7 +240,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 			surface as Vector2f[],
 			Colour.WHITE,
 			textureUVs as Vector2f[],
-			[0, 1, 3, 1, 2, 3] as int[],
+			[0, 1, 2, 0, 2, 3] as int[],
 			false
 		)
 	}

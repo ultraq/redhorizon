@@ -388,7 +388,7 @@ class Map extends Node<Map> {
 					mapTiles.each { mapTile ->
 						allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
 						allTextureUVs.addAll(tileSet.spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
-						allIndices.addAll([0, 1, 3, 1, 2, 3].collect { index -> index + indexOffset })
+						allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
 						indexOffset += 4
 					}
 					return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])

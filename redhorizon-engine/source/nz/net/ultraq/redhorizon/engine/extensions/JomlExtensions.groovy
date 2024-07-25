@@ -37,9 +37,9 @@ class JomlExtensions {
 		if (clazz == Vector2f[]) {
 			return new Vector2f[]{
 				new Vector2f(self.minX, self.minY),
-				new Vector2f(self.minX, self.maxY),
+				new Vector2f(self.maxX, self.minY),
 				new Vector2f(self.maxX, self.maxY),
-				new Vector2f(self.maxX, self.minY)
+				new Vector2f(self.minX, self.maxY)
 			}
 		}
 		throw new IllegalArgumentException("Cannot convert Rectanglef to type ${clazz}")
