@@ -121,16 +121,27 @@ class Map extends Node<Map> {
 		rules = rulesIni as RulesFile
 
 		addChild(new MapBackground())
-		addChild(new MapPack())
-		addChild(new OverlayPack())
-		addChild(new Terrain())
-		addChild(new Structures())
-		addChild(new Units())
-		addChild(new Infantry())
+		addChild(new MapPack().tap {
+			setPosition(0, 0, 0.1f)
+		})
+		addChild(new OverlayPack().tap {
+			setPosition(0, 0, 0.2f)
+		})
+		addChild(new Terrain().tap {
+			setPosition(0, 0, 0.2f)
+		})
+		addChild(new Structures().tap {
+			setPosition(0, 0, 0.2f)
+		})
+		addChild(new Units().tap {
+			setPosition(0, 0, 0.2f)
+		})
+		addChild(new Infantry().tap {
+			setPosition(0, 0, 0.2f)
+		})
+
 		addChild(new MapLines().tap {
-			transform { ->
-				translate(0f, 0f, 0.1f)
-			}
+			setPosition(0, 0, 0.4f)
 		})
 	}
 
