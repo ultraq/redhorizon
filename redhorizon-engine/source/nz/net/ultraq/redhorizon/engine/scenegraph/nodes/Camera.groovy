@@ -60,14 +60,11 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	Camera(Dimension size) {
 
 		viewportDef = [0, 0, size.width(), size.height()]
-		projection = new Matrix4f().setOrtho2D(
-			-size.width() / 2, size.width() / 2,
-			-size.height() / 2, size.height() / 2
-		)
+		projection = new Matrix4f().setOrthoSymmetric(size.width(), size.height(), 0f, 10f)
 		logger.debug('Establishing an orthographic projection of {}x{}', size.width(), size.height())
 
 		view = new Matrix4f().setLookAt(
-			0, 0, 1,
+			0, 0, 10,
 			0, 0, 0,
 			0, 1, 0
 		)
@@ -168,7 +165,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	}
 
 	@Override
-	void setPosition(float x, float y, float z = 0) {
+	void setPosition(float x, float y, float z = position.z()) {
 
 		// Positioning the camera is the opposite of what we would expect as we are
 		// instead creating a transform matrix that moves the world around it
@@ -179,7 +176,7 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	void update(float delta) {
 
 		if (tracking) {
-			setPosition(tracking.globalPosition)
+			setPosition(tracking.globalPosition.x(), tracking.globalPosition.y())
 		}
 	}
 }

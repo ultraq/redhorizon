@@ -66,7 +66,8 @@ class CoordinateExtensions {
 	 *
 	 * @param self
 	 * @param objectHeightInCells
-	 *   Vertical space occupied by the objheheight of the object whose coordinates are being translated.
+	 *   Vertical space occupied by the objheheight of the object whose
+	 *   coordinates are being translated.
 	 * @return
 	 */
 	static Vector2f asWorldCoords(Vector2f self, int objectHeightInCells = 0) {

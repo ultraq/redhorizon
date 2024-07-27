@@ -183,6 +183,12 @@ class RenderPipeline implements AutoCloseable {
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private final List<Node> queryResults = []
 		private final List<RenderCommand> drawCommands = []
+		private final Comparator<Node> renderOrderComparator = new Comparator<Node>() {
+			@Override
+			int compare(Node node1, Node node2) {
+				return node1.globalPosition.z() <=> node2.globalPosition.z()
+			}
+		}
 
 		Scene scene
 
@@ -208,13 +214,16 @@ class RenderPipeline implements AutoCloseable {
 				average('Gathering', 1f, logger) { ->
 					queryResults.clear()
 					drawCommands.clear()
+
 					drawCommands << scene.camera.renderCommand()
 					frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(scene.camera.viewProjection), false)
-					scene.query(frustumIntersection, queryResults).each { element ->
-						if (element instanceof GraphicsElement) {
-							drawCommands << element.renderCommand()
+					scene.query(frustumIntersection, queryResults)
+						.sort(true, renderOrderComparator) // Furthest-away objects first
+						.each { node ->
+							if (node instanceof GraphicsElement) {
+								drawCommands << node.renderCommand()
+							}
 						}
-					}
 				}
 			}
 		}

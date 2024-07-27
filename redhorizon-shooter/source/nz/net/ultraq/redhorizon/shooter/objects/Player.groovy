@@ -26,9 +26,12 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
+import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
+import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.joml.Math
@@ -45,21 +48,22 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements Rotatable, Temporal {
+class Player extends Node<Player> implements GraphicsElement, Rotatable, Temporal {
 
 //	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
-	private static final float MOVEMENT_SPEED = 100f
+	private static final float MOVEMENT_SPEED = 200f
 	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
+	final PartitionHint partitionHint = PartitionHint.NONE
+	final UpdateHint updateHint = UpdateHint.ALWAYS
 	private final Unit unit
 
 	private final Vector2f screenPosition = new Vector2f()
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
-	private Vector2f movementDiff = new Vector2f()
 	private Vector2f lookAt = new Vector2f()
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
@@ -118,6 +122,15 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		attachScript(new PlayerScript())
 	}
 
+	// TODO: Shouldn't need to implement this, but a Unit type is in the quadtree
+	//       whereas Player is not.  What should happen is that we update the unit
+	//       position in the QuadTree.
+	@Override
+	RenderCommand renderCommand() {
+
+		return unit.renderCommand()
+	}
+
 	@Override
 	void setHeading(float newHeading) {
 
@@ -136,11 +149,10 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		}
 
 		if (velocity.length()) {
-			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta)
-			movementDiff.set(position.x() + movement.x as float, position.y() + movement.y as float)
+			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta).add(position.x(), position.y())
 			setPosition(
-				Math.clamp(movementDiff.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
-				Math.clamp(movementDiff.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
+				java.lang.Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
+				java.lang.Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
 		}
 
@@ -150,7 +162,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(screenPosition.x(), screenPosition.y()).angle(up))
 
 			// Adjust lookAt position with movement
-			lookAt.add(movementDiff)
+			lookAt.add(movement)
 			lastLookAt.set(lookAt)
 		}
 		// Keyboard rotation

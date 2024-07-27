@@ -214,8 +214,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	 * for performance purposes.
 	 * <p>
 	 * The default behaviour is to inherit the partition hint of its parent,
-	 * defaulting to {@link PartitionHint#NONE} if there are no hints in the node's ancestor
-	 * tree.
+	 * defaulting to {@link PartitionHint#NONE} if there are no hints in the
+	 * node's ancestor tree.
 	 */
 	PartitionHint getPartitionHint() {
 
@@ -392,7 +392,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	/**
 	 * Set the local position of this node.
 	 */
-	void setPosition(float x, float y, float z = 0) {
+	void setPosition(float x, float y, float z = position.z()) {
 
 		transform.setTranslation(
 			x * scale.x as float,

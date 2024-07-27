@@ -72,12 +72,7 @@ class Map extends Node<Map> {
 	static final int TILE_HEIGHT = 24
 	static final int TILES_X = 128
 	static final int TILES_Y = 128
-	static final Rectanglef MAX_BOUNDS = new Rectanglef(
-		-TILES_X * TILE_WIDTH / 2 as float,
-		-TILES_Y * TILE_HEIGHT / 2 as float,
-		TILES_X * TILE_WIDTH / 2 as float,
-		TILES_Y * TILE_HEIGHT / 2 as float
-	)
+	static final Rectanglef MAX_BOUNDS = new Rectanglef(0, 0, TILES_X * TILE_WIDTH, TILES_Y * TILE_HEIGHT).center()
 
 	private static final Logger logger = LoggerFactory.getLogger(Map)
 
@@ -128,17 +123,13 @@ class Map extends Node<Map> {
 		addChild(new MapBackground())
 		addChild(new MapPack())
 		addChild(new OverlayPack())
-
-		// The following should be rendered in top-left to bottom-right order so
-		// that "lower" objects get drawn over the "higher" ones
 		addChild(new Terrain())
 		addChild(new Structures())
 		addChild(new Units())
 		addChild(new Infantry())
-
 		addChild(new MapLines().tap {
 			transform { ->
-				translate(0, 0, 0.4)
+				translate(0f, 0f, 0.1f)
 			}
 		})
 	}
@@ -146,6 +137,7 @@ class Map extends Node<Map> {
 	@Override
 	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
+		// TODO: Need to handle if there are no tiles, ie: an empty map
 		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
 			return tileSet.tileFileList
 				.collect { tileFile ->
@@ -188,7 +180,10 @@ class Map extends Node<Map> {
 	@Override
 	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
-		return scene.requestDelete(tileSet.spriteSheet)
+		if (tileSet.numTiles) {
+			return scene.requestDelete(tileSet.spriteSheet)
+		}
+		return CompletableFuture.completedFuture()
 	}
 
 	/**

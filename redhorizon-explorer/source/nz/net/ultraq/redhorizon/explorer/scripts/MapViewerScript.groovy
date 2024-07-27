@@ -223,7 +223,7 @@ class MapViewerScript extends Script<Map> {
 	private CompletableFuture<Void> moveCameraTo(Vector3f position) {
 
 		var startPosition = new Vector3f(camera.position)
-		var nextPosition = new Vector3f()
+		var nextPosition = new Vector3f(0, 0, camera.position.z())
 
 		return new Transition(EasingFunctions::easeOutCubic, 800, { float delta ->
 			camera.position = startPosition.lerp(position, delta, nextPosition)
@@ -249,6 +249,7 @@ class MapViewerScript extends Script<Map> {
 	void onSceneRemoved(Scene scene) {
 
 		clearControls()
+		scene.removeChild(outline)
 	}
 
 	/**

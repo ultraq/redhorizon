@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.shooter
 
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
+import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
@@ -83,10 +85,18 @@ class Shooter {
 			globalPalette = new GlobalPalette(loadPalette())
 			scene << globalPalette
 
-			player = new Player(resourceManager)
+			player = new Player(resourceManager).tap {
+				transform { ->
+					translate(0f, 0f, 0.5f)
+				}
+			}
 			scene << player
 
 			camera.follow(player)
+
+			var mapFile = resourceManager.loadFile('scg01ea.ini', IniFile)
+			var map = new Map(mapFile as MapFile, resourceManager)
+			scene << map
 		}
 	}
 
