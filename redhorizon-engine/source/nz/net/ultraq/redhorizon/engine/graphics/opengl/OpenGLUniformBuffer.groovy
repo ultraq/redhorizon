@@ -108,6 +108,9 @@ class OpenGLUniformBuffer extends UniformBuffer {
 				case ByteBuffer -> {
 					glBufferSubData(GL_UNIFORM_BUFFER, offset, stack.malloc(data.capacity()).put(data).flip())
 				}
+				case IntBuffer -> {
+					glBufferSubData(GL_UNIFORM_BUFFER, offset, stack.mallocInt(data.capacity()).put(data).flip())
+				}
 				case FloatBuffer -> {
 					glBufferSubData(GL_UNIFORM_BUFFER, offset, stack.mallocFloat(data.capacity()).put(data).flip())
 				}

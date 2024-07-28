@@ -167,7 +167,6 @@ class Sprite extends Node<Sprite> implements GraphicsElement {
 		return scene.requestDelete(mesh, spriteSheet, material.spriteMetadataBuffer)
 	}
 
-
 	@Override
 	RenderCommand renderCommand() {
 

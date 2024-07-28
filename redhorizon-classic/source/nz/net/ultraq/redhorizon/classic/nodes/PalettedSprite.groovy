@@ -129,6 +129,29 @@ class PalettedSprite extends Sprite implements FactionColours {
 		)
 	}
 
+	@Override
+	RenderCommand renderCommand() {
+
+		transformCopy.set(globalTransform)
+
+		var updateAdjustmentMap = materialCopy.adjustmentMap != material.adjustmentMap
+		materialCopy.copy(material)
+
+		return { renderer ->
+			if (mesh && shader && materialCopy.texture) {
+				if (updateAdjustmentMap) {
+					var paletteMetadataBuffer = IntBuffer.allocate(256 * 4)
+					materialCopy.adjustmentMap.each { adjustment ->
+						paletteMetadataBuffer.put(adjustment).advance(3)
+					}
+					paletteMetadataBuffer.flip()
+					materialCopy.paletteMetadataBuffer.updateBufferData(paletteMetadataBuffer, 0)
+				}
+				renderer.draw(mesh, transformCopy, shader, materialCopy)
+			}
+		}
+	}
+
 	/**
 	 * Update the faction being applied to this sprite.
 	 */
@@ -142,7 +165,6 @@ class PalettedSprite extends Sprite implements FactionColours {
 	@Override
 	void update(float delta) {
 
-		// TODO: Make this a UBO
 		if (factionChanged) {
 			material.adjustmentMap = buildAdjustmentMap(faction)
 			factionChanged = false
