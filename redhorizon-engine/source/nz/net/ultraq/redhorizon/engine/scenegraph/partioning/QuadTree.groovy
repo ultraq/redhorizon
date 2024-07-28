@@ -24,8 +24,7 @@ import org.joml.Vector3fc
 import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
+import java.util.concurrent.ConcurrentSkipListSet
 
 /**
  * A class for partitioning the scene of 2D game objects so that spatial queries
@@ -40,8 +39,8 @@ class QuadTree {
 	private final Rectanglef area
 	private final int capacity
 	// TODO: Make this quadtree accept any element that can return a Vector2f position
-	private BlockingQueue<Node> children
-	private List<QuadTree> quadrants // Going from NW, NE, SE, SW
+	private ConcurrentSkipListSet<Node> children
+	private List<QuadTree> quadrants // Going from NW, NE, SW, SE, to somewhat match the order of rendering objects
 
 	/**
 	 * Constructor, create a quadtree with the given area over which it resides
@@ -60,7 +59,11 @@ class QuadTree {
 		this.parent = parent
 		this.area = area
 		this.capacity = capacity
-		children = new ArrayBlockingQueue<>(capacity, true)
+
+		// Children ordered in rendering order so we can save having to sort later
+		children = new ConcurrentSkipListSet<>({ Node node1, Node node2 ->
+			return node2.globalPosition.y() <=> node1.globalPosition.y() ?: node2.globalPosition.x() <=> node1.globalPosition.x()
+		})
 	}
 
 	/**
@@ -77,7 +80,7 @@ class QuadTree {
 		if (area.containsPoint(nodePosition.x(), nodePosition.y(), true)) {
 
 			// Try to add the node as an immediate child
-			if (!children?.offer(node)) {
+			if (!addChild(node)) {
 
 				// Otherwise, subdivide into quadrants, move all children to quadrants
 				if (!quadrants) {
@@ -86,8 +89,8 @@ class QuadTree {
 					quadrants = [
 						new QuadTree(this, new Rectanglef(area.minX, halfY, halfX, area.maxY), capacity),
 						new QuadTree(this, new Rectanglef(halfX, halfY, area.maxX, area.maxY), capacity),
-						new QuadTree(this, new Rectanglef(halfX, area.minY, area.maxX, halfY), capacity),
-						new QuadTree(this, new Rectanglef(area.minX, area.minY, halfX, halfY), capacity)
+						new QuadTree(this, new Rectanglef(area.minX, area.minY, halfX, halfY), capacity),
+						new QuadTree(this, new Rectanglef(halfX, area.minY, area.maxX, halfY), capacity)
 					]
 					var moveResult = children.every() { existingChild ->
 						return addToQuadrant(existingChild.globalPosition, existingChild)
@@ -109,6 +112,18 @@ class QuadTree {
 	}
 
 	/**
+	 * Attempt to add a child object, returning {@code true} if the operation
+	 * succeeded.
+	 */
+	private synchronized boolean addChild(Node node) {
+
+		if (children != null && children.size() < capacity) {
+			return children.add(node)
+		}
+		return false
+	}
+
+	/**
 	 * Add a child to one of the existing quadrants.
 	 */
 	private boolean addToQuadrant(Vector3fc position, Node node) {
@@ -120,7 +135,7 @@ class QuadTree {
 			var attempts = 0
 			while (true) {
 				var randomQuadrant = quadrants[randomQuadrantIndex]
-				if (randomQuadrant.children?.offer(node)) {
+				if (randomQuadrant.addChild(node)) {
 					return true
 				}
 				else {
@@ -190,7 +205,7 @@ class QuadTree {
 					// TODO: There are probably some smarts we can do here, but for now
 					//       the only rebalancing we're doing is to collapse a node with
 					//       4 empty quadrants
-					parent.children = new ArrayBlockingQueue<>(capacity, true)
+					parent.children = new ConcurrentSkipListSet<>()
 					parent.quadrants = null
 				}
 

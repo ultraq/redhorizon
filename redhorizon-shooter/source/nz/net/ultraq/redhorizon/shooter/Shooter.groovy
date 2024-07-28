@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
+import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
@@ -86,9 +87,7 @@ class Shooter {
 			scene << globalPalette
 
 			player = new Player(resourceManager).tap {
-				transform { ->
-					translate(0f, 0f, 0.5f)
-				}
+				layer = Layer.SPRITES2
 			}
 			scene << player
 

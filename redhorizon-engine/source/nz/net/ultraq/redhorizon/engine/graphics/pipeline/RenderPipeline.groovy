@@ -184,10 +184,6 @@ class RenderPipeline implements AutoCloseable {
 		private final List<Node> queryResults = []
 		private final List<RenderCommand> drawCommands = []
 
-		// Sorting seems to be more performant with separate sort functions
-		private final Comparator<Node> orderByDistance = Comparator.comparing { Node node -> node.globalPosition.z() }
-		private final Comparator<Node> orderByHighest = Comparator.comparing { Node node -> -node.globalPosition.y() }
-
 		Scene scene
 
 		SceneRenderPass(Framebuffer framebuffer) {
@@ -213,15 +209,12 @@ class RenderPipeline implements AutoCloseable {
 					queryResults.clear()
 					drawCommands.clear()
 					drawCommands << scene.camera.renderCommand()
-					frustumIntersection.set(enlargedViewProjection.scaling(0.9f, 0.9f, 1f).mul(scene.camera.viewProjection), false)
-					scene.query(frustumIntersection, queryResults)
-						.sort(true, orderByHighest)
-						.sort(true, orderByDistance)
-						.each { node ->
-							if (node instanceof GraphicsElement) {
-								drawCommands << node.renderCommand()
-							}
+					frustumIntersection.set(enlargedViewProjection.scaling(0.8f, 0.8f, 1f).mul(scene.camera.viewProjection), false)
+					scene.query(frustumIntersection, queryResults).each { node ->
+						if (node instanceof GraphicsElement) {
+							drawCommands << node.renderCommand()
 						}
+					}
 				}
 			}
 		}

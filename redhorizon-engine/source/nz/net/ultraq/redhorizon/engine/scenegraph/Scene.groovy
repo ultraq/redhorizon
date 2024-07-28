@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory
 import groovy.transform.PackageScope
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.Semaphore
 
 /**
  * Entry point for the Red Horizon scene graph, holds all of the objects that
@@ -66,14 +68,17 @@ class Scene implements EventTarget {
 	MainMenu gameMenu
 	GameWindow gameWindow
 
-	@Delegate(includes = ['addChild', 'clear', 'findAncestor', 'findDescendent', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)
+	@Delegate(includes = ['clear', 'findAncestor', 'findDescendent', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)
 	final Node root = new RootNode(this)
 
 	// Partition objects in the following data structures to make queries faster
-	private final QuadTree quadTree = new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
-	private final CopyOnWriteArrayList<Node> nodeList = []
+	private final ConcurrentSkipListSet<Float> zValues = new ConcurrentSkipListSet<>()
+	private final TreeMap<Float, QuadTree> quadTrees = new TreeMap<>()
+	private final TreeMap<Float, CopyOnWriteArrayList<Node>> nodeLists = new TreeMap<>()
 	private final List<Temporal> temporalNodes = new CopyOnWriteArrayList<>()
 	private final List<Node> updateableNodes = new CopyOnWriteArrayList<>()
+	private final Semaphore createQuadTreeSemaphore = new Semaphore(1)
+	private final Semaphore createNodeListSemaphore = new Semaphore(1)
 
 	/**
 	 * Add a top-level node to this scene.  Shorthand for
@@ -143,10 +148,33 @@ class Scene implements EventTarget {
 		// That ancestor will be the one to add to the partition and can take care
 		// of things like the render order of descendents
 		if (!node.findAncestor { parent -> parent instanceof GraphicsElement }) {
+			var zValue = node.globalPosition.z()
 			switch (node.partitionHint) {
-				case PartitionHint.SMALL_AREA -> quadTree.add(node)
-				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> nodeList.add(node)
+				case PartitionHint.SMALL_AREA -> {
+					var quadTree = quadTrees[zValue]
+					if (!quadTree) {
+						quadTree = createQuadTreeSemaphore.acquireAndRelease { ->
+							return quadTrees.getOrCreate(zValue) { ->
+								// TODO: Quadtree of map size, somehow find a way to pass this value in
+								return new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
+							}
+						}
+					}
+					quadTree.add(node)
+				}
+				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> {
+					var nodeList = nodeLists[zValue]
+					if (!nodeList) {
+						nodeList = createNodeListSemaphore.acquireAndRelease { ->
+							return nodeLists.getOrCreate(zValue) { ->
+								return new CopyOnWriteArrayList<Node>()
+							}
+						}
+					}
+					nodeList.add(node)
+				}
 			}
+			zValues << zValue
 		}
 
 		switch (node.updateHint) {
@@ -163,12 +191,14 @@ class Scene implements EventTarget {
 	 */
 	List<Node> query(FrustumIntersection frustumIntersection, List<Node> results = []) {
 
-		nodeList.each { node ->
-			if (node.isVisible(frustumIntersection)) {
-				results << node
+		zValues.each { zValue ->
+			nodeLists[zValue]?.each { node ->
+				if (node.isVisible(frustumIntersection)) {
+					results << node
+				}
 			}
+			quadTrees[zValue]?.query(frustumIntersection, results)
 		}
-		quadTree.query(frustumIntersection, results)
 		return results
 	}
 
@@ -177,12 +207,14 @@ class Scene implements EventTarget {
 	 */
 	List<Node> query(Circlef range, List<Node> results = []) {
 
-		nodeList.each { node ->
-			if (Intersectionf.testPointCircle(node.position.x(), node.position.y(), range.x, range.y, range.r)) {
-				results << node
+		zValues.each { zValue ->
+			nodeLists[zValue]?.each { node ->
+				if (Intersectionf.testPointCircle(node.position.x(), node.position.y(), range.x, range.y, range.r)) {
+					results << node
+				}
 			}
+			quadTrees[zValue]?.query(range, results)
 		}
-		quadTree.query(range, results)
 		return results
 	}
 
@@ -225,8 +257,8 @@ class Scene implements EventTarget {
 	 */
 	private void unpartition(Node node) {
 
-		if (!quadTree.remove(node)) {
-			nodeList.remove(node)
+		if (!quadTrees.any { zValue, quadTree -> quadTree.remove(node) }) {
+			nodeLists.any { zValue, nodeList -> nodeList.remove(node) }
 		}
 
 		switch (node.updateHint) {

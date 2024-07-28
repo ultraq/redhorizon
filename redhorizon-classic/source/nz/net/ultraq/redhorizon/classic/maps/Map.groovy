@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
@@ -120,28 +121,30 @@ class Map extends Node<Map> {
 		var rulesIni = resourceManager.loadFile('rules.ini', IniFile)
 		rules = rulesIni as RulesFile
 
-		addChild(new MapBackground())
+		addChild(new MapBackground().tap {
+			layer = Layer.BACKGROUND1
+		})
 		addChild(new MapPack().tap {
-			setPosition(0, 0, 0.1f)
+			layer = Layer.BACKGROUND1
 		})
 		addChild(new OverlayPack().tap {
-			setPosition(0, 0, 0.2f)
+			layer = Layer.SPRITES1
 		})
 		addChild(new Terrain().tap {
-			setPosition(0, 0, 0.2f)
+			layer = Layer.SPRITES1
 		})
 		addChild(new Structures().tap {
-			setPosition(0, 0, 0.2f)
+			layer = Layer.SPRITES1
 		})
 		addChild(new Units().tap {
-			setPosition(0, 0, 0.2f)
+			layer = Layer.SPRITES1
 		})
 		addChild(new Infantry().tap {
-			setPosition(0, 0, 0.2f)
+			layer = Layer.SPRITES1
 		})
 
 		addChild(new MapLines().tap {
-			setPosition(0, 0, 0.4f)
+			layer = Layer.OVERLAY1
 		})
 	}
 
