@@ -248,6 +248,11 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	SpriteSheet createSpriteSheet(int width, int height, ColourFormat format, ByteBuffer[] data) {
 
+		// Empty spritesheet
+		if (!data) {
+			return new SpriteSheet(null, 0, 0, 0, 0)
+		}
+
 		var framesHorizontal = Math.min(data.length, maxTextureSize / width as int)
 		var framesVertical = Math.ceil(data.length / framesHorizontal) as int
 		var spriteSheetWidth = framesHorizontal * width

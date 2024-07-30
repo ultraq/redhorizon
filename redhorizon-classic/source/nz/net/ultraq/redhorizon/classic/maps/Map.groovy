@@ -151,7 +151,6 @@ class Map extends Node<Map> {
 	@Override
 	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
-		// TODO: Need to handle if there are no tiles, ie: an empty map
 		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
 			return tileSet.tileFileList
 				.collect { tileFile ->
