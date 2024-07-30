@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
+import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
@@ -51,7 +52,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotatable, Temporal {
+class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
@@ -92,7 +93,9 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		if (unitData.shpFile.parts.turret) {
 			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
 				return CompletableFuture.completedFuture(spriteSheet)
-			})
+			}).tap {
+				layer = Layer.UP_ONE
+			}
 			addChild(turret)
 		}
 		else {
@@ -111,11 +114,13 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 		var bibImageData = bibFile.imagesData.combineImages(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
 		var bibWidth = TILE_WIDTH * structureWidthInCells
 		var bibHeight = TILE_HEIGHT * 2
+
 		bib = new PalettedSprite(bibWidth, bibHeight, 1, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
 		})
 		bib.name = "Bib"
 		bib.setPosition(0, -TILE_HEIGHT)
+		bib.layer = Layer.DOWN_THREE
 		bib.partitionHint = PartitionHint.SMALL_AREA
 
 		addChild(bib)
@@ -129,6 +134,7 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 
 		body2 = new UnitBody(imagesFile, unitData).tap {
 			name = "UnitBody2"
+			layer = Layer.UP_ONE
 		}
 		addChild(body2)
 	}
@@ -140,7 +146,9 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 	 */
 	void addShadow() {
 
-		shadow = new UnitShadow()
+		shadow = new UnitShadow().tap {
+			layer = Layer.DOWN_ONE
+		}
 		addChild(shadow)
 	}
 
@@ -175,27 +183,6 @@ class Unit extends Node<Unit> implements FactionColours, GraphicsElement, Rotata
 	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
 		return scene.requestDelete(spriteSheet)
-	}
-
-
-	// TODO: The returned render command probably counts as an allocation 🤔  I
-	//       should probably cut those out too
-	@Override
-	RenderCommand renderCommand() {
-
-		var bibRenderCommand = bib?.renderCommand()
-		var bodyRenderCommand = body.renderCommand()
-		var body2RenderCommand = body2?.renderCommand()
-		var turretRenderCommand = turret?.renderCommand()
-		var shadowRenderCommand = shadow?.renderCommand()
-
-		return { renderer ->
-			shadowRenderCommand?.render(renderer)
-			bibRenderCommand?.render(renderer)
-			bodyRenderCommand.render(renderer)
-			body2RenderCommand?.render(renderer)
-			turretRenderCommand?.render(renderer)
-		}
 	}
 
 	/**

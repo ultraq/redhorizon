@@ -144,38 +144,33 @@ class Scene implements EventTarget {
 			return
 		}
 
-		// Add this node to a partition if it doesn't have a renderable ancestor.
-		// That ancestor will be the one to add to the partition and can take care
-		// of things like the render order of descendents
-		if (!node.findAncestor { parent -> parent instanceof GraphicsElement }) {
-			var zValue = node.globalPosition.z()
-			switch (node.partitionHint) {
-				case PartitionHint.SMALL_AREA -> {
-					var quadTree = quadTrees[zValue]
-					if (!quadTree) {
-						quadTree = createQuadTreeSemaphore.acquireAndRelease { ->
-							return quadTrees.getOrCreate(zValue) { ->
-								// TODO: Quadtree of map size, somehow find a way to pass this value in
-								return new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
-							}
+		var zValue = node.globalPosition.z()
+		switch (node.partitionHint) {
+			case PartitionHint.SMALL_AREA -> {
+				var quadTree = quadTrees[zValue]
+				if (!quadTree) {
+					quadTree = createQuadTreeSemaphore.acquireAndRelease { ->
+						return quadTrees.getOrCreate(zValue) { ->
+							// TODO: Quadtree of map size, somehow find a way to pass this value in
+							return new QuadTree(new Rectanglef(-1536, -1536, 1536, 1536))
 						}
 					}
-					quadTree.add(node)
 				}
-				case PartitionHint.LARGE_AREA, PartitionHint.NONE -> {
-					var nodeList = nodeLists[zValue]
-					if (!nodeList) {
-						nodeList = createNodeListSemaphore.acquireAndRelease { ->
-							return nodeLists.getOrCreate(zValue) { ->
-								return new CopyOnWriteArrayList<Node>()
-							}
-						}
-					}
-					nodeList.add(node)
-				}
+				quadTree.add(node)
 			}
-			zValues << zValue
+			case PartitionHint.LARGE_AREA, PartitionHint.NONE -> {
+				var nodeList = nodeLists[zValue]
+				if (!nodeList) {
+					nodeList = createNodeListSemaphore.acquireAndRelease { ->
+						return nodeLists.getOrCreate(zValue) { ->
+							return new CopyOnWriteArrayList<Node>()
+						}
+					}
+				}
+				nodeList.add(node)
+			}
 		}
+		zValues << zValue
 
 		switch (node.updateHint) {
 			case UpdateHint.ALWAYS -> updateableNodes << node

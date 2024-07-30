@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.maps.Map
+import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
@@ -41,6 +42,8 @@ import nz.net.ultraq.redhorizon.explorer.animation.Transition
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
@@ -54,6 +57,7 @@ import java.util.concurrent.CompletableFuture
 @TupleConstructor(defaults = false)
 class MapViewerScript extends Script<Map> {
 
+	private static final Logger logger = LoggerFactory.getLogger(MapViewerScript)
 	private static final int TICK = 48
 
 	final Camera camera
@@ -180,6 +184,8 @@ class MapViewerScript extends Script<Map> {
 					0
 				)
 			)
+			logger.debug('{} selected, lives at ({}, {}, {})', node.name,
+				node.globalPosition.x(), node.globalPosition.y(), node.globalPosition.z())
 		}
 
 		// Custom inputs
@@ -237,9 +243,7 @@ class MapViewerScript extends Script<Map> {
 		window = scene.window
 		gameWindow = scene.gameWindow
 		outline = new Outline(new Rectanglef(), Colour.RED, true).tap {
-			transform { ->
-				translate(0, 0, 0.5)
-			}
+			layer = Layer.OVERLAY
 		}
 		scene << outline
 		addControls()

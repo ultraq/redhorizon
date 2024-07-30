@@ -27,11 +27,24 @@ import groovy.transform.TupleConstructor
 enum Layer {
 
 	// @formatter:off
-	BACKGROUND1 (0),
-	BACKGROUND2 (0.1),
-	SPRITES1    (0.2),
-	SPRITES2    (0.3),
-	OVERLAY1    (0.4)
+
+	// Absolute
+	MAP_BACKGROUND (0.0),
+	MAP_PACK       (0.1),
+	STRUCTURE_BIBS (0.2),
+	OVERLAY_PACK   (0.3),
+	SPRITES_LOWER  (0.4),
+	SPRITES        (0.5),
+	SPRITES_UPPER  (0.6),
+	OVERLAY        (1.0),
+
+	// Relative
+	UP_ONE      (0.1),
+	CURRENT     (0.0),
+	DOWN_ONE   (-0.1),
+	DOWN_TWO   (-0.2),
+	DOWN_THREE (-0.3)
+
 	// @formatter:on
 
 	final float value

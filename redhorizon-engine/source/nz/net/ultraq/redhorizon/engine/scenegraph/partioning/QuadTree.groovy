@@ -24,8 +24,6 @@ import org.joml.Vector3fc
 import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 
-import java.util.concurrent.ConcurrentSkipListSet
-
 /**
  * A class for partitioning the scene of 2D game objects so that spatial queries
  * (eg: frustrum culling) can be performant.
@@ -35,11 +33,18 @@ import java.util.concurrent.ConcurrentSkipListSet
  */
 class QuadTree {
 
+	private static final Comparator<Node> nodeComparator = new Comparator<Node>() {
+		@Override
+		int compare(Node node1, Node node2) {
+			return node2.globalPosition.y() <=> node1.globalPosition.y() ?: node2.globalPosition.x() <=> node1.globalPosition.x()
+		}
+	}
+
 	private final QuadTree parent
 	private final Rectanglef area
 	private final int capacity
 	// TODO: Make this quadtree accept any element that can return a Vector2f position
-	private ConcurrentSkipListSet<Node> children
+	private List<Node> children = []
 	private List<QuadTree> quadrants // Going from NW, NE, SW, SE, to somewhat match the order of rendering objects
 
 	/**
@@ -59,11 +64,6 @@ class QuadTree {
 		this.parent = parent
 		this.area = area
 		this.capacity = capacity
-
-		// Children ordered in rendering order so we can save having to sort later
-		children = new ConcurrentSkipListSet<>({ Node node1, Node node2 ->
-			return node2.globalPosition.y() <=> node1.globalPosition.y() ?: node2.globalPosition.x() <=> node1.globalPosition.x()
-		})
 	}
 
 	/**
@@ -118,7 +118,11 @@ class QuadTree {
 	private synchronized boolean addChild(Node node) {
 
 		if (children != null && children.size() < capacity) {
-			return children.add(node)
+			children.add(node)
+			if (children.size() > 1) {
+				children.sort(nodeComparator)
+			}
+			return true
 		}
 		return false
 	}
@@ -197,15 +201,14 @@ class QuadTree {
 		if (area.containsPoint(nodePosition.x(), nodePosition.y(), true)) {
 
 			// Check children for node first
-			if (children?.contains(node)) {
-				children.remove(node)
+			if (removeChild(node)) {
 
 				// If all children removed, rebalance the parent node
 				if (!children && parent != null && !parent.size()) {
 					// TODO: There are probably some smarts we can do here, but for now
 					//       the only rebalancing we're doing is to collapse a node with
 					//       4 empty quadrants
-					parent.children = new ConcurrentSkipListSet<>()
+					parent.children = []
 					parent.quadrants = null
 				}
 
@@ -216,6 +219,21 @@ class QuadTree {
 			return removeFromQuadrant(node)
 		}
 
+		return false
+	}
+
+	/**
+	 * Attempt to remove a child object, returning {@code true} if the operation
+	 * succeeded.
+	 */
+	private synchronized boolean removeChild(Node node) {
+
+		if (children?.remove(node)) {
+			if (children.size() > 1) {
+				children.sort(nodeComparator)
+			}
+			return true
+		}
 		return false
 	}
 

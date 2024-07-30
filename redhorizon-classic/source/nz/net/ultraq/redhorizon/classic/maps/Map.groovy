@@ -122,29 +122,29 @@ class Map extends Node<Map> {
 		rules = rulesIni as RulesFile
 
 		addChild(new MapBackground().tap {
-			layer = Layer.BACKGROUND1
+			layer = Layer.MAP_BACKGROUND
 		})
 		addChild(new MapPack().tap {
-			layer = Layer.BACKGROUND1
+			layer = Layer.MAP_PACK
 		})
 		addChild(new OverlayPack().tap {
-			layer = Layer.SPRITES1
+			layer = Layer.OVERLAY_PACK
 		})
 		addChild(new Terrain().tap {
-			layer = Layer.SPRITES1
+			layer = Layer.SPRITES
 		})
 		addChild(new Structures().tap {
-			layer = Layer.SPRITES1
+			layer = Layer.SPRITES
 		})
 		addChild(new Units().tap {
-			layer = Layer.SPRITES1
+			layer = Layer.SPRITES
 		})
 		addChild(new Infantry().tap {
-			layer = Layer.SPRITES1
+			layer = Layer.SPRITES
 		})
 
 		addChild(new MapLines().tap {
-			layer = Layer.OVERLAY1
+			layer = Layer.OVERLAY
 		})
 	}
 
@@ -272,7 +272,7 @@ class Map extends Node<Map> {
 	/**
 	 * Special layer for the background image.
 	 */
-	private class MapBackground extends Node<MapBackground> implements GraphicsElement {
+	private class MapBackground extends Node<MapBackground> {
 
 		String name = "MapBackground - ${theater.label}"
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
@@ -301,12 +301,6 @@ class Map extends Node<Map> {
 			})
 			backgroundSprite.setPosition(boundary.minX, boundary.minY)
 			addChild(backgroundSprite)
-		}
-
-		@Override
-		RenderCommand renderCommand() {
-
-			return backgroundSprite.renderCommand()
 		}
 	}
 
@@ -386,7 +380,6 @@ class Map extends Node<Map> {
 		@Override
 		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
 
-			// TODO: Rework and use the TileSet class for this
 			return CompletableFuture.allOf(
 				CompletableFuture.supplyAsync { ->
 					List<Vector2f> allVertices = []
