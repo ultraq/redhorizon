@@ -49,7 +49,7 @@ class StructureLine implements ObjectLine {
 		return new StructureLine(
 			lineParts[0],
 			lineParts[1],
-			100 / 256 * Integer.parseInt(lineParts[2]) as float,
+			100 / 256 * Integer.parseInt(lineParts[2]),
 			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
 			360 / 256 * Float.parseFloat(lineParts[4]) as float,
 			triggerName != "None" ? triggerName : null,

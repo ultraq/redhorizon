@@ -87,7 +87,7 @@ class Shooter {
 			scene << globalPalette
 
 			player = new Player(resourceManager).tap {
-				layer = Layer.SPRITES
+				layer = Layer.SPRITES_UPPER
 			}
 			scene << player
 

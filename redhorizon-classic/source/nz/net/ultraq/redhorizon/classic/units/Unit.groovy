@@ -262,18 +262,16 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		@Override
 		void update(float delta) {
 
-			// TODO: If this animation region picking gets more complicated, it might
-			//       be worth making an 'animation library' for units
-
+			// Update region in spritesheet to match heading and currently-playing animation
 			if (spriteSheet) {
-				// Update region in spritesheet to match heading and currently-playing animation
 				var currentState = unitData.shpFile.states[stateIndex]
 				var headings = currentState.headings
 				var frames = currentState.frames
 				var degreesPerHeading = 360f / headings
 
-				// NOTE: C&C unit headings were ordered in a counter-clockwise order, the
-				//       reverse from how we normally define rotation.
+				// NOTE: C&C unit headings were ordered in a counter-clockwise order
+				//       (maybe to match how radians work?), the reverse from how
+				//       degrees-based headings are done.
 				var closestHeading = Math.round(heading / degreesPerHeading)
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
 				var animationFrame = frames > 1 ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0

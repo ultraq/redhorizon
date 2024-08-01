@@ -48,7 +48,7 @@ class InfantryLine implements ObjectLine {
 		return new InfantryLine(
 			lineParts[0],
 			lineParts[1],
-			100 / 256 * Integer.parseInt(lineParts[2]) as float,
+			100 / 256 * Integer.parseInt(lineParts[2]),
 			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
 			Integer.parseInt(lineParts[4]),
 			lineParts[5],

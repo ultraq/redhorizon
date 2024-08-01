@@ -327,8 +327,8 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			.translate(globalPosition.x, globalPosition.y)
 
 		// Children need to be updated too
-		children*.traverse { Node node ->
-			node.recalculateProperties()
+		children*.traverse { Node child ->
+			child.recalculateProperties()
 			return true
 		}
 	}
@@ -428,6 +428,12 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	void setScaleXY(float newScale) {
 
 		setScale(newScale, newScale)
+	}
+
+	@Override
+	String toString() {
+
+		return "${this.class.simpleName} @ (${globalPosition.x()}, ${globalPosition.y()}, ${globalPosition.z()})"
 	}
 
 	/**

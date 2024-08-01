@@ -47,7 +47,7 @@ class UnitLine implements ObjectLine {
 		return new UnitLine(
 			lineParts[0],
 			lineParts[1],
-			100 / 256 * Integer.parseInt(lineParts[2]) as float,
+			100 / 256 * Integer.parseInt(lineParts[2]),
 			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
 			360 / 256 * Float.parseFloat(lineParts[4]) as float,
 			lineParts[5],

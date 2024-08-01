@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -34,7 +33,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
-import org.joml.Math
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.*
@@ -48,7 +46,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements GraphicsElement, Rotatable, Temporal {
+class Player extends Node<Player> implements Rotatable, Temporal {
 
 //	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
@@ -79,12 +77,12 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		velocity.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).negate().normalize()
 	}
 	private final Command moveLeft = { ->
-		var leftAngle = java.lang.Math.wrap((float)(heading - 90f), 0f, 360f)
+		var leftAngle = Math.wrap((float)(heading - 90f), 0f, 360f)
 		var leftAngleInRadians = Math.toRadians(leftAngle)
 		velocity.set(Math.sin(leftAngleInRadians), Math.cos(leftAngleInRadians)).normalize()
 	}
 	private final Command moveRight = { ->
-		var rightAngle = java.lang.Math.wrap((float)(heading + 90f), 0f, 360f)
+		var rightAngle = Math.wrap((float)(heading + 90f), 0f, 360f)
 		var rightAngleInRadians = Math.toRadians(rightAngle)
 		velocity.set(Math.sin(rightAngleInRadians), Math.cos(rightAngleInRadians)).normalize()
 	}
@@ -122,15 +120,6 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		attachScript(new PlayerScript())
 	}
 
-	// TODO: Shouldn't need to implement this, but a Unit type is in the quadtree
-	//       whereas Player is not.  What should happen is that we update the unit
-	//       position in the QuadTree.
-	@Override
-	RenderCommand renderCommand() {
-
-		return unit.renderCommand()
-	}
-
 	@Override
 	void setHeading(float newHeading) {
 
@@ -151,15 +140,15 @@ class Player extends Node<Player> implements GraphicsElement, Rotatable, Tempora
 		if (velocity.length()) {
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta).add(position.x(), position.y())
 			setPosition(
-				java.lang.Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
-				java.lang.Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
+				Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
+				Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
 		}
 
 		// Mouse rotation
 		if (lookAt.length() && lookAt != lastLookAt) {
 			scene.camera.calculateSceneToScreenSpace(position, screenPosition)
-			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(screenPosition.x(), screenPosition.y()).angle(up))
+			heading = Math.toDegrees(relativeLookAt.set(lookAt).sub(screenPosition.x(), screenPosition.y()).angle(up)) as float
 
 			// Adjust lookAt position with movement
 			lookAt.add(movement)

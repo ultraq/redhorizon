@@ -17,8 +17,9 @@
 package nz.net.ultraq.redhorizon.classic.nodes
 
 /**
- * Trait for an independent rotation property indicating heading.  Note that
- * this is different from the {@code transform} rotation, and instead used to
+ * Trait for an independent rotation property indicating heading.
+ * <p>
+ * Note that this is separate from the {@code transform} rotation, and used to
  * control which sprite animation to display.
  *
  * @author Emanuel Rabina
