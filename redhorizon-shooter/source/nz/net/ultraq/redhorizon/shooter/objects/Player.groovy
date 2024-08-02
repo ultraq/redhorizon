@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.shooter.objects
 
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.maps.Map
+import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -98,7 +99,9 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		var spriteFile = resourceManager.loadFile('heli.shp', ShpFile)
 		var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/heli.json")
 		var unitData = new JsonSlurper().parseText(unitJson) as UnitData
-		unit = new Unit(spriteFile, unitData)
+		unit = new Unit(spriteFile, unitData).tap {
+			layer = Layer.UP_ONE
+		}
 
 		var rotorJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/lrotor.json")
 		var rotorData = new JsonSlurper().parseText(rotorJson) as UnitData
