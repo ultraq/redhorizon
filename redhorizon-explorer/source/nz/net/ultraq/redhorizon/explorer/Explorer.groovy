@@ -489,7 +489,7 @@ class Explorer {
 	 */
 	private void preview(TmpFileRA tileFile, String objectId) {
 
-		var singleImageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
+		var singleImageData = tileFile.imagesData.combine(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
 		var singleImageWidth = tileFile.tilesX * tileFile.width
 		var singleImageHeight = tileFile.tilesY * tileFile.height
 

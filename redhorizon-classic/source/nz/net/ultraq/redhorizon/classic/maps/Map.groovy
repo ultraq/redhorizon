@@ -86,11 +86,8 @@ class Map extends Node<Map> {
 	protected final Matrix4f transformCopy = new Matrix4f()
 	protected final PalettedSpriteMaterial materialCopy = new PalettedSpriteMaterial()
 
-	private final TileSet tileSet
 	private final ResourceManager resourceManager
 	private final RulesFile rules
-
-	private CompletableFuture<SpriteSheet> tileSetSpriteSheetFuture
 
 	/**
 	 * Constructor, create a new map from a map file.
@@ -114,8 +111,6 @@ class Map extends Node<Map> {
 		bounds { ->
 			set(MAX_BOUNDS)
 		}
-
-		tileSet = new TileSet()
 
 		// Rules file needed for some object configuration
 		var rulesIni = resourceManager.loadFile('rules.ini', IniFile)
@@ -148,57 +143,6 @@ class Map extends Node<Map> {
 		})
 	}
 
-	@Override
-	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
-
-		tileSetSpriteSheetFuture = CompletableFuture.supplyAsync { ->
-			return tileSet.tileFileList
-				.collect { tileFile ->
-					if (tileFile.width > TILE_WIDTH || tileFile.height > TILE_HEIGHT) {
-						throw new IllegalArgumentException('Cannot use a tile file whose dimensions exceed 24x24')
-					}
-
-					var imagesData = tileFile.imagesData
-
-					// Place smaller images in the center of a blank tile
-					if (tileFile.width < TILE_WIDTH || tileFile.height < TILE_HEIGHT) {
-						imagesData = imagesData.collect { imageData ->
-							var newTileImageData = ByteBuffer.allocateNative(TILE_WIDTH * TILE_HEIGHT)
-							var xOffset = Math.floor((TILE_WIDTH - tileFile.width) / 2) as int
-							var yOffset = Math.floor((TILE_HEIGHT - tileFile.height) / 2) as int
-							tileFile.height.times { y ->
-								tileFile.width.times { x ->
-									newTileImageData.put(((yOffset + y) * TILE_WIDTH) + (xOffset + x), imageData.get((y * tileFile.width) + x))
-								}
-							}
-							return newTileImageData
-						}
-					}
-
-					return imagesData
-				}
-				.flatten() as ByteBuffer[]
-		}
-			.thenComposeAsync { allTileImageData ->
-				return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
-			}
-			.thenApplyAsync { newSpriteSheet ->
-				tileSet.spriteSheet = newSpriteSheet
-				return newSpriteSheet
-			}
-
-		return CompletableFuture.allOf(tileSetSpriteSheetFuture)
-	}
-
-	@Override
-	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
-
-		if (tileSet.numTiles) {
-			return scene.requestDelete(tileSet.spriteSheet)
-		}
-		return CompletableFuture.completedFuture()
-	}
-
 	/**
 	 * Return some information about this map.
 	 *
@@ -229,6 +173,10 @@ class Map extends Node<Map> {
 		 * Add more tiles to the tileset.
 		 */
 		void addTiles(ImagesFile tilesFile) {
+
+			if (tilesFile.width > TILE_WIDTH || tilesFile.height > TILE_HEIGHT) {
+				throw new IllegalArgumentException('Cannot use a tile file whose dimensions exceed 24x24')
+			}
 
 			if (!tileFileList.contains(tilesFile)) {
 				tileFileList << tilesFile
@@ -286,7 +234,7 @@ class Map extends Node<Map> {
 			var tileFile = resourceManager.loadFile(clearTileName, TmpFileRA)
 
 			// Create a sprite sheet for the 5x4 background tile
-			var imageData = tileFile.imagesData.combineImages(tileFile.width, tileFile.height, tileFile.format, theater.clearX)
+			var imageData = tileFile.imagesData.combine(tileFile.width, tileFile.height, tileFile.format, theater.clearX)
 			var spriteWidth = tileFile.width * theater.clearX
 			var spriteHeight = tileFile.height * theater.clearY
 
@@ -320,6 +268,7 @@ class Map extends Node<Map> {
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 		final UpdateHint updateHint = UpdateHint.NEVER
 
+		private final TileSet tileSet = new TileSet()
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
 		private Shader shader
@@ -382,18 +331,43 @@ class Map extends Node<Map> {
 
 			return CompletableFuture.allOf(
 				CompletableFuture.supplyAsync { ->
-					List<Vector2f> allVertices = []
-					List<Vector2f> allTextureUVs = []
-					List<Integer> allIndices = []
-					var indexOffset = 0
-					mapTiles.each { mapTile ->
-						allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
-						allTextureUVs.addAll(tileSet.spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
-						allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
-						indexOffset += 4
-					}
-					return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+					return tileSet.tileFileList
+						.collect { tileFile ->
+							return tileFile.imagesData.collect { imageData ->
+								return imageData.center(tileFile.width, tileFile.height, TILE_WIDTH, TILE_HEIGHT)
+							}
+						}
+						.flatten() as ByteBuffer[]
 				}
+					.thenComposeAsync { allTileImageData ->
+						return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
+					}
+					.thenApplyAsync { newSpriteSheet ->
+						tileSet.spriteSheet = newSpriteSheet
+						material.with {
+							texture = newSpriteSheet.texture
+							frame = 0
+							frameStepX = newSpriteSheet.frameStepX
+							frameStepY = newSpriteSheet.frameStepY
+							framesHorizontal = newSpriteSheet.framesHorizontal
+							framesVertical = newSpriteSheet.framesVertical
+						}
+						return newSpriteSheet
+					}
+				// TODO: This can be some batching request method
+					.thenApplyAsync { spriteSheet ->
+						List<Vector2f> allVertices = []
+						List<Vector2f> allTextureUVs = []
+						List<Integer> allIndices = []
+						var indexOffset = 0
+						mapTiles.each { mapTile ->
+							allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
+							allTextureUVs.addAll(spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
+							allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
+							indexOffset += 4
+						}
+						return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+					}
 					.thenComposeAsync { meshData ->
 						def (allVertices, allTextureUVs, allIndices) = meshData
 						return scene
@@ -408,27 +382,15 @@ class Map extends Node<Map> {
 					.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
 					.thenAcceptAsync { requestedShader ->
 						shader = requestedShader
-					},
-				tileSetSpriteSheetFuture.thenApplyAsync { spriteSheet ->
-					material.with {
-						texture = spriteSheet.texture
-						frame = 0
-						frameStepX = spriteSheet.frameStepX
-						frameStepY = spriteSheet.frameStepY
-						framesHorizontal = spriteSheet.framesHorizontal
-						framesVertical = spriteSheet.framesVertical
 					}
-					return spriteSheet
-				}
 			)
 		}
 
 		@Override
 		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
 
-			return scene.requestDelete(fullMesh)
+			return scene.requestDelete(fullMesh, tileSet.spriteSheet)
 		}
-
 
 		@Override
 		RenderCommand renderCommand() {

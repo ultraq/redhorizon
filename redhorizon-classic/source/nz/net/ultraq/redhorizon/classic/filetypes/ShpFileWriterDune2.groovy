@@ -53,7 +53,7 @@ class ShpFileWriterDune2 extends FileWriter<ImageFile, ShpFileWriterDune2Options
 		Arrays.fill(heights, height)
 
 		// Split the image file data into multiple smaller images
-		def imagesData = source.imageData.splitImage(source.width, source.height, width, height)
+		def imagesData = source.imageData.split(source.width, source.height, width, height)
 
 		def rleZero = new RLEZero()
 //		def lcw = new LCW()

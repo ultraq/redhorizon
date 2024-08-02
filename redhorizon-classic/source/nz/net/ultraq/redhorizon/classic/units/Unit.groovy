@@ -111,7 +111,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 
 		var structureWidthInCells = Math.ceil(width / TILE_WIDTH) as int
 
-		var bibImageData = bibFile.imagesData.combineImages(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
+		var bibImageData = bibFile.imagesData.combine(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
 		var bibWidth = TILE_WIDTH * structureWidthInCells
 		var bibHeight = TILE_HEIGHT * 2
 

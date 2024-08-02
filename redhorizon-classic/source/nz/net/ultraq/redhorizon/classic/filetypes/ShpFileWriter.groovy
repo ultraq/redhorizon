@@ -58,7 +58,7 @@ class ShpFileWriter extends FileWriter<ImageFile, ShpFileWriterOptions> {
 		output.writeShort(0) // flags
 
 		// Split the image file data into multiple smaller images
-		def imagesData = source.imageData.splitImage(source.width, source.height, width, height)
+		def imagesData = source.imageData.split(source.width, source.height, width, height)
 
 		def lcw = new LCW()
 

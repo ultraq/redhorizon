@@ -49,17 +49,38 @@ class ByteBufferImageExtensions {
 	}
 
 	/**
+	 * If an image buffer contains an image less than the specified dimensions,
+	 * return an image buffer padded with 0s such that it will appear in the
+	 * center.
+	 */
+	static ByteBuffer center(ByteBuffer self, int imageWidth, int imageHeight, int targetWidth, int targetHeight) {
+
+		if (imageWidth < targetWidth || imageHeight < targetHeight) {
+			var newTileImageData = ByteBuffer.allocateNative(targetWidth * targetHeight)
+			var xOffset = Math.floor((targetWidth - imageWidth) / 2 as int) as int
+			var yOffset = Math.floor((targetHeight - imageHeight) / 2 as int) as int
+			imageHeight.times { y ->
+				imageWidth.times { x ->
+					newTileImageData.put(((yOffset + y) * targetWidth) + (xOffset + x), self.get((y * imageWidth) + x))
+				}
+			}
+			return newTileImageData
+		}
+		return self
+	}
+
+	/**
 	 * Creates a single overall image buffer from a series of smaller image
 	 * buffers.
 	 *
 	 * @param self
-	 * @param width   Width of each image.
-	 * @param height  Height of each image
+	 * @param width Width of each image.
+	 * @param height Height of each image
 	 * @param format
 	 * @param imagesX Number of images to fit on the X axis.
 	 * @return Single combined image buffer.
 	 */
-	static ByteBuffer combineImages(ByteBuffer[] self, int width, int height, ColourFormat format, int imagesX) {
+	static ByteBuffer combine(ByteBuffer[] self, int width, int height, ColourFormat format, int imagesX) {
 
 		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
 		var compileWidth = width * format.value * imagesX as int
@@ -89,7 +110,7 @@ class ByteBufferImageExtensions {
 	 * means the bottom row of pixels.
 	 *
 	 * @param self
-	 * @param width  Width of the image.
+	 * @param width Width of the image.
 	 * @param height Height of the image.
 	 * @param format The number of colour channels in each pixel.
 	 * @return A new buffer with the horizontal pixel data flipped.
@@ -109,7 +130,7 @@ class ByteBufferImageExtensions {
 	 * buffer in the array.
 	 *
 	 * @param self
-	 * @param width  Width of each image.
+	 * @param width Width of each image.
 	 * @param height Height of each image.
 	 * @param format The number of colour channels in each pixel.
 	 * @return A new array of buffers whose pixel data has been flipped.
@@ -122,15 +143,8 @@ class ByteBufferImageExtensions {
 	/**
 	 * Take the image data for a single image and split it into several smaller
 	 * images of the given dimensions.
-	 *
-	 * @param self
-	 * @param sourceWidth
-	 * @param sourceHeight
-	 * @param targetWidth
-	 * @param targetHeight
-	 * @return
 	 */
-	static ByteBuffer[] splitImage(ByteBuffer self, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
+	static ByteBuffer[] split(ByteBuffer self, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
 
 		def imagesAcross = sourceWidth / targetWidth as int
 		def numImages = imagesAcross * (sourceHeight / targetHeight) as int
