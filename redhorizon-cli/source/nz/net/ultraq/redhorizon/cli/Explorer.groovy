@@ -16,8 +16,15 @@
 
 package nz.net.ultraq.redhorizon.cli
 
+import nz.net.ultraq.preferences.Preferences
+import nz.net.ultraq.redhorizon.explorer.ExplorerOptions
+
 import picocli.CommandLine.Command
+import picocli.CommandLine.IDefaultValueProvider
+import picocli.CommandLine.Model.ArgSpec
 import picocli.CommandLine.Model.CommandSpec
+import picocli.CommandLine.Model.OptionSpec
+import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import picocli.CommandLine.Spec
 
@@ -28,12 +35,14 @@ import java.util.concurrent.Callable
  *
  * @author Emanuel Rabina
  */
-@Command(name = 'explorer')
+@Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
 class Explorer implements Callable<Integer> {
 
 	static {
 		System.setProperty('logback.configurationFile', 'logback-application.xml')
 	}
+
+	private static final Preferences userPreferences = new Preferences()
 
 	@Spec
 	CommandSpec commandSpec
@@ -41,10 +50,48 @@ class Explorer implements Callable<Integer> {
 	@Parameters(index = '0', defaultValue = '', description = 'Path to a file to open on launch')
 	File file
 
+	@Option(names = '--maximized', description = 'Start the application maximized. Remembers your last usage.')
+	boolean maximized
+
+	@Option(names = '--touchpad-input', description = 'Start the application using touchpad controls.  Remembers your last usage.')
+	boolean touchpadInput
+
 	@Override
 	Integer call() {
 
-		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.parent().version()[0], file)
+		// Load options from command line or preferences
+		var explorerOptions = new ExplorerOptions(
+			maximized: maximized,
+			touchpadInput: touchpadInput
+		)
+
+		new nz.net.ultraq.redhorizon.explorer.Explorer(commandSpec.parent().version()[0], explorerOptions, file)
+
+		// Save preferences for next time
+		userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, explorerOptions.maximized)
+		userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, explorerOptions.touchpadInput)
+
 		return 0
+	}
+
+	/**
+	 * Provide default options for the user-remembered options.
+	 */
+	static class DefaultOptionsProvider implements IDefaultValueProvider {
+
+		@Override
+		String defaultValue(ArgSpec argSpec) {
+
+			if (argSpec.option) {
+				var option = (OptionSpec)argSpec
+				if (option.longestName() == '--maximized') {
+					return userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED)
+				}
+				if (option.longestName() == '--touchpad-input') {
+					return userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT).toString()
+				}
+			}
+			return null
+		}
 	}
 }
