@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
@@ -79,10 +78,10 @@ import java.util.concurrent.CopyOnWriteArrayList
 class Explorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
-	private static final Preferences userPreferences = new Preferences()
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 	private static final float volume = 0.5f
 
+	private final ExplorerOptions options
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final MixDatabase mixDatabase = new MixDatabase()
@@ -100,7 +99,6 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private PaletteType currentPalette
-	private boolean touchpadInput
 	private List<RemoveEventFunction> removeEventFunctions = []
 
 	/**
@@ -110,15 +108,15 @@ class Explorer {
 	 * @param openOnLaunch
 	 *   Optional, a file to open on launch of the explorer.
 	 */
-	Explorer(String version, File openOnLaunch) {
+	Explorer(String version, ExplorerOptions options, File openOnLaunch) {
 
-		touchpadInput = userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT)
+		this.options = options
 
 		new Application('Explorer', version)
 			.addAudioSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
-				maximized: userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED),
+				maximized: options.maximized,
 				renderResolution: renderResolution,
 				startWithChrome: true
 			), new LogPanel(true), entryList, nodeList)
@@ -137,7 +135,7 @@ class Explorer {
 		this.scene = scene
 
 		application.on(WindowMaximizedEvent) { event ->
-			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, event.maximized)
+			options.maximized = event.maximized
 		}
 
 		buildList(new File(System.getProperty("user.dir")))
@@ -175,12 +173,11 @@ class Explorer {
 		scene.gameMenu.optionsMenu << new MenuItem() {
 			@Override
 			void render() {
-				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
-					touchpadInput = !touchpadInput
-					userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
+				if (ImGui.menuItem('Touchpad input', null, options.touchpadInput)) {
+					options.touchpadInput = !options.touchpadInput
 					var mapNode = (Map)scene.findDescendent { node -> node instanceof Map }
 					if (mapNode) {
-						((MapViewerScript)mapNode.script).touchpadInput = touchpadInput
+						((MapViewerScript)mapNode.script).touchpadInput = options.touchpadInput
 					}
 				}
 			}
@@ -509,7 +506,7 @@ class Explorer {
 	 */
 	private void preview(MapFile mapFile, String objectId) {
 
-		var mapViewerScript = new MapViewerScript(camera, nodeList, touchpadInput)
+		var mapViewerScript = new MapViewerScript(camera, nodeList, options.touchpadInput)
 		time("Loading map ${objectId}", logger) { ->
 			resourceManager.withDirectory(currentDirectory) { ->
 				var map = new Map(mapFile, resourceManager).attachScript(mapViewerScript)

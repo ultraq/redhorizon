@@ -352,7 +352,6 @@ class Map extends Node<Map> {
 						}
 						return newSpriteSheet
 					}
-				// TODO: This can be some batching request method
 					.thenApplyAsync { spriteSheet ->
 						List<Vector2f> allVertices = []
 						List<Vector2f> allTextureUVs = []
