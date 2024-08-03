@@ -49,7 +49,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
-import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -82,9 +81,6 @@ class Map extends Node<Map> {
 	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
-
-	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final PalettedSpriteMaterial materialCopy = new PalettedSpriteMaterial()
 
 	private final ResourceManager resourceManager
 	private final RulesFile rules
@@ -268,8 +264,8 @@ class Map extends Node<Map> {
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 		final UpdateHint updateHint = UpdateHint.NEVER
 
-		private final TileSet tileSet = new TileSet()
 		private final List<MapTile> mapTiles = []
+		private final TileSet tileSet = new TileSet()
 		private Mesh fullMesh
 		private Shader shader
 		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
@@ -324,6 +320,186 @@ class Map extends Node<Map> {
 		String getName() {
 
 			return "MapPack - ${mapTiles.size()} tiles"
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+
+			return CompletableFuture.allOf(
+				CompletableFuture.supplyAsync { ->
+					return tileSet.tileFileList
+						.collect { tileFile -> tileFile.imagesData }
+						.flatten() as ByteBuffer[]
+				}
+					.thenComposeAsync { allTileImageData ->
+						return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
+					}
+					.thenApplyAsync { newSpriteSheet ->
+						tileSet.spriteSheet = newSpriteSheet
+						material.with {
+							texture = newSpriteSheet.texture
+							frame = 0
+							frameStepX = newSpriteSheet.frameStepX
+							frameStepY = newSpriteSheet.frameStepY
+							framesHorizontal = newSpriteSheet.framesHorizontal
+							framesVertical = newSpriteSheet.framesVertical
+						}
+						return newSpriteSheet
+					}
+				// TODO: This can be some batching request method
+					.thenApplyAsync { spriteSheet ->
+						List<Vector2f> allVertices = []
+						List<Vector2f> allTextureUVs = []
+						List<Integer> allIndices = []
+						var indexOffset = 0
+						mapTiles.each { mapTile ->
+							allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
+							allTextureUVs.addAll(spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
+							allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
+							indexOffset += 4
+						}
+						return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+					}
+					.thenComposeAsync { meshData ->
+						def (allVertices, allTextureUVs, allIndices) = meshData
+						return scene
+							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
+								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
+								allVertices, Colour.WHITE, allTextureUVs, allIndices))
+							.thenAcceptAsync { newMesh ->
+								fullMesh = newMesh
+							}
+					},
+				scene
+					.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
+					.thenAcceptAsync { requestedShader ->
+						shader = requestedShader
+					}
+			)
+		}
+
+		@Override
+		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+
+			return scene.requestDelete(fullMesh, tileSet.spriteSheet)
+		}
+
+		@Override
+		RenderCommand renderCommand() {
+
+			return { renderer ->
+				if (fullMesh && shader && material.texture) {
+					renderer.draw(fullMesh, transform, shader, material)
+				}
+			}
+		}
+	}
+
+	/**
+	 * The "OverlayPack" layer of a Red Alert map.
+	 */
+	private class OverlayPack extends Node<OverlayPack> implements GraphicsElement {
+
+		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
+		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+		final UpdateHint updateHint = UpdateHint.NEVER
+
+		private final List<MapTile> mapTiles = []
+		private final TileSet tileSet = new TileSet()
+		private Mesh fullMesh
+		private Shader shader
+		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
+
+		OverlayPack() {
+
+			var tileData = mapFile.overlayPackData
+			java.util.Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
+
+			TILES_X.times { y ->
+				TILES_Y.times { x ->
+
+					// Get the byte representing the tile
+					var tileVal = tileData.get()
+
+					// Retrieve the appropriate tile, skip empty tiles
+					if (tileVal != -1) {
+						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
+
+						// Some unknown tile types still coming through?
+						if (!tile) {
+							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
+							return
+						}
+
+						tileTypes << [(new Vector2f(x, y)): tile]
+					}
+				}
+			}
+
+			// Now that the tiles are all assembled, build the appropriate image
+			// representation for them
+			tileTypes.each { tilePos, tile ->
+				var tileFile = tile.isWall || tile.useShp ?
+					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
+					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
+				var imageVariant = 0
+
+				// Select the proper orientation for wall tiles
+				if (tile.isWall) {
+					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
+						imageVariant |= 0x01
+					}
+					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
+						imageVariant |= 0x02
+					}
+					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
+						imageVariant |= 0x04
+					}
+					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
+						imageVariant |= 0x08
+					}
+				}
+				// Select the proper density for resources
+				else if (tile.isResource) {
+					var adjacent = (-1..1).inject(0) { accY, y ->
+						return accY + (-1..1).inject(0) { accX, x ->
+							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
+								return accX + 1
+							}
+							return accX
+						}
+					}
+					imageVariant = tile.name().startsWith('GEM') ?
+						adjacent / 3 as int :
+						3 + adjacent
+				}
+
+				tileSet.addTiles(tileFile)
+//				var overlay = new PalettedSprite(tileFile)
+//				overlay.name = "${tile.name} - Variant ${imageVariant}"
+//				overlay.frame = imageVariant
+//				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
+//				overlay.partitionHint = PartitionHint.SMALL_AREA
+//
+//				addChild(overlay)
+				var mapTile = new MapTile(new Vector2f(tilePos).asWorldCoords(1), tileSet.getFrame(tileFile, imageVariant))
+				mapTiles << mapTile
+
+				bounds { ->
+					expand(
+						mapTile.position().x,
+						mapTile.position().y,
+						mapTile.position().x + TILE_WIDTH as float,
+						mapTile.position().y + TILE_HEIGHT as float
+					)
+				}
+			}
+		}
+
+		@Override
+		String getName() {
+
+			return "OverlayPack - ${mapTiles.size()} tiles"
 		}
 
 		@Override
@@ -395,108 +571,11 @@ class Map extends Node<Map> {
 		@Override
 		RenderCommand renderCommand() {
 
-			transformCopy.set(globalTransform)
-			materialCopy.copy(material)
-
 			return { renderer ->
-				if (fullMesh && shader && materialCopy.texture) {
-					renderer.draw(fullMesh, transformCopy, shader, materialCopy)
+				if (fullMesh && shader && material.texture) {
+					renderer.draw(fullMesh, transform, shader, material)
 				}
 			}
-		}
-	}
-
-	/**
-	 * The "OverlayPack" layer of a Red Alert map.
-	 */
-	private class OverlayPack extends Node<OverlayPack> {
-
-		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-		final UpdateHint updateHint = UpdateHint.NEVER
-
-		private int numTiles = 0
-
-		OverlayPack() {
-
-			var tileData = mapFile.overlayPackData
-			java.util.Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
-
-			TILES_X.times { y ->
-				TILES_Y.times { x ->
-
-					// Get the byte representing the tile
-					var tileVal = tileData.get()
-
-					// Retrieve the appropriate tile, skip empty tiles
-					if (tileVal != -1) {
-						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
-
-						// Some unknown tile types still coming through?
-						if (!tile) {
-							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
-							return
-						}
-
-						tileTypes << [(new Vector2f(x, y)): tile]
-					}
-				}
-			}
-
-			// Now that the tiles are all assembled, build the appropriate image
-			// representation for them
-			tileTypes.each { tilePos, tile ->
-				var tileFile = tile.isWall || tile.useShp ?
-					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
-					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
-				var imageVariant = 0
-
-				// Select the proper orientation for wall tiles
-				if (tile.isWall) {
-					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
-						imageVariant |= 0x01
-					}
-					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
-						imageVariant |= 0x02
-					}
-					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
-						imageVariant |= 0x04
-					}
-					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
-						imageVariant |= 0x08
-					}
-				}
-				// Select the proper density for resources
-				else if (tile.isResource) {
-					var adjacent = (-1..1).inject(0) { accY, y ->
-						return accY + (-1..1).inject(0) { accX, x ->
-							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
-								return accX + 1
-							}
-							return accX
-						}
-					}
-					imageVariant = tile.name().startsWith('GEM') ?
-						adjacent / 3 as int :
-						3 + adjacent
-				}
-
-				var overlay = new PalettedSprite(tileFile)
-				overlay.name = "${tile.name} - Variant ${imageVariant}"
-				overlay.frame = imageVariant
-				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
-				overlay.partitionHint = PartitionHint.SMALL_AREA
-
-				addChild(overlay)
-
-				numTiles++
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "OverlayPack - ${numTiles} tiles"
 		}
 	}
 
