@@ -49,4 +49,14 @@ abstract class Mesh implements GraphicsResource {
 	 * {@link #dynamic}.
 	 */
 	abstract void updateVertices(Vector2f[] vertices)
+
+	/**
+	 * The types of mesh that can be created.
+	 */
+	static enum MeshType {
+
+		LINE_LOOP,
+		LINES,
+		TRIANGLES
+	}
 }

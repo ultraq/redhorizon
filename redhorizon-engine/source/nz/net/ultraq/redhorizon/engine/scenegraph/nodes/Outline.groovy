@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
-import nz.net.ultraq.redhorizon.engine.graphics.MeshType
+import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
