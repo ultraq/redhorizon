@@ -34,8 +34,8 @@ abstract class Mesh implements GraphicsResource {
 	final Vector2f[] vertices
 	final Colour colour
 	final Vector2f[] textureUVs
-	final int[] indices
 	final boolean dynamic
+	final int[] index
 
 	/**
 	 * Use this mesh in upcoming render operations.
