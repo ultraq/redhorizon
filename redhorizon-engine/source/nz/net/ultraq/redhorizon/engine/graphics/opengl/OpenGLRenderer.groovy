@@ -203,10 +203,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 	@Override
 	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
-		int[] indices, boolean dynamic) {
+		boolean dynamic, int[] index) {
 
 		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
-			layout, vertices, colour, textureUVs, indices, dynamic)
+			layout, vertices, colour, textureUVs, dynamic, index)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
 	}
@@ -240,8 +240,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 			surface as Vector2f[],
 			Colour.WHITE,
 			textureUVs as Vector2f[],
-			[0, 1, 2, 0, 2, 3] as int[],
-			false
+			false,
+			[0, 1, 2, 0, 2, 3] as int[]
 		)
 	}
 
@@ -325,8 +325,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 			shader.use()
 			shader.applyUniforms(transform, material, window)
 			mesh.bind()
-			if (mesh.indices) {
-				glDrawElements(mesh.vertexType, mesh.indices.size(), GL_UNSIGNED_INT, 0)
+			if (mesh.index) {
+				glDrawElements(mesh.vertexType, mesh.index.size(), GL_UNSIGNED_INT, 0)
 			}
 			else {
 				glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())

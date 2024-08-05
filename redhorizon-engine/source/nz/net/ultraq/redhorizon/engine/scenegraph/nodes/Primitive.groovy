@@ -72,8 +72,8 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 		return CompletableFuture.allOf(
 			scene
 				.requestCreateOrGet(type == MeshType.TRIANGLES ?
-					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour,
-						[0, 1, 3, 1, 2, 3] as int[], dynamic) :
+					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour, dynamic,
+						[0, 1, 3, 1, 2, 3] as int[]) :
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour, dynamic))
 				.thenAcceptAsync { newMesh ->
 					mesh = newMesh

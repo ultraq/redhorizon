@@ -45,10 +45,10 @@ class OpenGLMesh extends Mesh {
 	/**
 	 * Constructor, creates a new OpenGL mesh.
 	 */
-	OpenGLMesh(int type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs, int[] indices,
-		boolean dynamic) {
+	OpenGLMesh(int type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
+		boolean dynamic, int[] index) {
 
-		super(type, layout, vertices, colour, textureUVs, indices, dynamic)
+		super(type, layout, vertices, colour, textureUVs, dynamic, index)
 
 		vertexArrayId = glGenVertexArrays()
 		glBindVertexArray(vertexArrayId)
@@ -58,15 +58,12 @@ class OpenGLMesh extends Mesh {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 		stackPush().withCloseable { stack ->
 			var vertexBuffer = stack.mallocFloat(layout.size() * vertices.size())
-			vertices.eachWithIndex { vertex, index ->
+			vertices.eachWithIndex { vertex, i ->
 				layout.attributes.each { attribute ->
 					switch (attribute) {
 						case Attribute.POSITION -> vertexBuffer.put(vertex.x, vertex.y)
 						case Attribute.COLOUR -> vertexBuffer.put(colour.r, colour.g, colour.b, colour.a)
-						case Attribute.TEXTURE_UVS -> {
-							var textureUV = textureUVs[index]
-							vertexBuffer.put(textureUV.x, textureUV.y)
-						}
+						case Attribute.TEXTURE_UVS -> vertexBuffer.put(textureUVs[i].x, textureUVs[i].y)
 						default -> throw new UnsupportedOperationException("Unhandled vertex layout part ${attribute.name()}")
 					}
 				}
@@ -80,15 +77,11 @@ class OpenGLMesh extends Mesh {
 			}
 		}
 
-		// Buffer for all the index data, if applicable
-		if (indices) {
+		if (index) {
 			elementBufferId = glGenBuffers()
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
 			stackPush().withCloseable { stack ->
-				var indexBuffer = stack.mallocInt(indices.size())
-					.put(indices)
-					.flip()
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW)
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, stack.mallocInt(index.size()).put(index).flip(), GL_STATIC_DRAW)
 			}
 		}
 		else {

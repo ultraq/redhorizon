@@ -370,7 +370,7 @@ class Map extends Node<Map> {
 						return scene
 							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
 								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
-								allVertices, Colour.WHITE, allTextureUVs, allIndices))
+								allVertices, Colour.WHITE, allTextureUVs, false, allIndices))
 							.thenAcceptAsync { newMesh ->
 								fullMesh = newMesh
 							}
