@@ -21,10 +21,8 @@ dependencies {
 	implementation project(':redhorizon-filetypes')
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
-	implementation("io.github.spair:imgui-java-lwjgl3:${imguiVersion}") {
-		exclude group: 'io.github.spair', module: 'imgui-java-binding'
-	}
-	implementation files("../libraries/imgui-java-binding-with-tablesortspecs-${imguiVersion}.jar")
+	implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
+	implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation 'org.lwjgl:lwjgl'
@@ -32,8 +30,8 @@ dependencies {
 	implementation 'org.lwjgl:lwjgl-openal'
 	implementation 'org.lwjgl:lwjgl-opengl'
 
-	runtimeOnly files("../libraries/imgui-java-natives-with-tablesortspecs-macos-arm64-${imguiVersion}.jar")
-	runtimeOnly files("../libraries/imgui-java-natives-with-tablesortspecs-windows-${imguiVersion}.jar")
+	runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
+	runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
 	['natives-macos-arm64', 'natives-windows'].each { natives ->
 		runtimeOnly "org.lwjgl:lwjgl::${natives}"
 		runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"

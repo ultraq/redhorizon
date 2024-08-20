@@ -44,8 +44,6 @@ import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 /**
  * Wrapper around all of the `imgui-java` binding classes, hiding all of the
@@ -63,20 +61,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	static ImFont robotoFont
 	static ImFont robotoMonoFont
-
-	static {
-
-		// Extract and use the locally built natives for macOS running M processors
-		if (System.isMacOs() && System.isArm64()) {
-			ImGuiLayer.classLoader.getResourceAsStream('io/imgui/java/native-bin/libimgui-javaarm64.dylib').withStream { inputStream ->
-				var tmpDir = File.createTempDir('imgui-java-natives-macos-arm64')
-				tmpDir.deleteOnExit()
-				var libFile = new File(tmpDir, 'libimgui-javaarm64.dylib')
-				Files.copy(inputStream, libFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-				System.load(libFile.absolutePath)
-			}
-		}
-	}
 
 	final MainMenu mainMenu
 	final GameWindow gameWindow
@@ -165,8 +149,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	@Override
 	void close() {
 
-		imGuiGl3.dispose()
-		imGuiGlfw.dispose()
+		imGuiGl3.shutdown()
+		imGuiGlfw.shutdown()
 		ImGui.destroyContext()
 	}
 
@@ -176,6 +160,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	void frame(Closure<Framebuffer> closure) {
 
+		imGuiGl3.newFrame()
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
 

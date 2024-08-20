@@ -79,14 +79,14 @@ class EntryList implements EventTarget, ImGuiElement {
 					specialEntry = entries.remove(specialEntryIndex)
 				}
 
-				var sortingColumn = tableSortSpecs.specs.columnIndex
-				switch (sortingColumn) {
+				var sortingColumnSpecs = tableSortSpecs.specs[0]
+				switch (sortingColumnSpecs.columnIndex) {
 					case 1 -> entries.sort { it.type }
 					case 2 -> entries.sort { it.size }
 					case 3 && entries[0] instanceof MixEntry -> entries.sort { it.description }
 					default -> entries.sort { it.name }
 				}
-				if (tableSortSpecs.specs.sortDirection == ImGuiSortDirection.Descending) {
+				if (sortingColumnSpecs.sortDirection == ImGuiSortDirection.Descending) {
 					entries.reverse(true)
 				}
 
