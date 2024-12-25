@@ -18,4 +18,5 @@ moduleName = redhorizon-classic
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.classic.extensions.BigIntegerExtensions,\
                    nz.net.ultraq.redhorizon.classic.extensions.CoordinateExtensions,\
-                   nz.net.ultraq.redhorizon.classic.extensions.NodeExtensions
+                   nz.net.ultraq.redhorizon.classic.extensions.NodeExtensions,\
+                   nz.net.ultraq.redhorizon.classic.extensions.UnitDataExtensions

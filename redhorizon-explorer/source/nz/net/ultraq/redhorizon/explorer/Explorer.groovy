@@ -446,7 +446,7 @@ class Explorer {
 
 		String unitConfig
 		try {
-			unitConfig = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectId.toLowerCase()}.json")
+			unitConfig = getUnitDataJson(objectId)
 			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
 		}
 		catch (IllegalArgumentException ignored) {

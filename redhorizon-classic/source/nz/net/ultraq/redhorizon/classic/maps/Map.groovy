@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
-import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
@@ -55,7 +54,6 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.json.JsonSlurper
 import groovy.transform.ImmutableOptions
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.FromString
@@ -537,8 +535,7 @@ class Map extends Node<Map> {
 				Closure configure) {
 
 			var unitConfig = rules.getUnitConfig(objectLine.type)
-			var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${objectLine.type.toLowerCase()}.json")
-			var unitData = new JsonSlurper().parseText(unitJson) as UnitData
+			var unitData = getUnitData(objectLine.type)
 			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}${unitData.spriteSource == 'theater' ? theater.ext : '.shp'}", ShpFile)
 
 			return new Unit(unitImages, unitData).tap {
@@ -648,10 +645,7 @@ class Map extends Node<Map> {
 						// weapons factory for its garage door
 						var combineWith = structureData.shpFile.parts.body.combineWith
 						if (combineWith) {
-							var combinedImages = resourceManager.loadFile("${combineWith}.shp", ShpFile)
-							var combinedJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/${combineWith.toLowerCase()}.json")
-							var combinedData = new JsonSlurper().parseText(combinedJson) as UnitData
-							structure.addBody(combinedImages, combinedData)
+							structure.addBody(resourceManager.loadFile("${combineWith}.shp", ShpFile), getUnitData(combineWith))
 						}
 
 						// Structure bib if applicable

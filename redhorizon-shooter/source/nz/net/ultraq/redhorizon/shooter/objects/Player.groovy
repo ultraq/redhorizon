@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
-import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.game.Command
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
@@ -38,7 +37,6 @@ import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.json.JsonSlurper
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
@@ -96,16 +94,11 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	 */
 	Player(ResourceManager resourceManager) {
 
-		var spriteFile = resourceManager.loadFile('heli.shp', ShpFile)
-		var unitJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/heli.json")
-		var unitData = new JsonSlurper().parseText(unitJson) as UnitData
-		unit = new Unit(spriteFile, unitData).tap {
+		unit = new Unit(resourceManager.loadFile('heli.shp', ShpFile), getUnitData('heli')).tap {
 			layer = Layer.UP_ONE
 		}
 
-		var rotorJson = getResourceAsText("nz/net/ultraq/redhorizon/classic/units/data/lrotor.json")
-		var rotorData = new JsonSlurper().parseText(rotorJson) as UnitData
-		unit.addBody(resourceManager.loadFile('lrotor.shp', ShpFile), rotorData)
+		unit.addBody(resourceManager.loadFile('lrotor.shp', ShpFile), getUnitData('lrotor'))
 		unit.body2.transform { ->
 			translate(0, 2)
 		}
