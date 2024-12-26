@@ -46,8 +46,8 @@ subprojects {
 		imguiVersion = '1.87.7'
 		jomlVersion = '1.10.8'
 		jomlPrimitivesVersion = '1.10.0'
-		logbackVersion = '1.5.7'
-		lwjglVersion = '3.3.4'
+		logbackVersion = '1.5.15'
+		lwjglVersion = '3.3.5'
 		slf4jVersion = '2.0.16'
 	}
 	ext.targetPlatform = targetPlatform
