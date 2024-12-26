@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 
-import org.joml.Vector3f
 import org.joml.Vector3fc
 
 import java.nio.ByteBuffer
@@ -56,5 +55,5 @@ interface AudioRenderer extends AutoCloseable, EventTarget {
 	/**
 	 * Set updated audio properties of a source.
 	 */
-	void updateSource(Source source, Vector3f position)
+	void updateSource(Source source, Vector3fc position)
 }

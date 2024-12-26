@@ -153,12 +153,14 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	@Override
 	void update(float delta) {
 
-		var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
-		if (nextFrame < numFrames) {
-			currentFrame = nextFrame
-		}
-		else {
-			stop()
+		if (playing) {
+			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
+			if (nextFrame < numFrames) {
+				currentFrame = nextFrame
+			}
+			else {
+				stop()
+			}
 		}
 	}
 

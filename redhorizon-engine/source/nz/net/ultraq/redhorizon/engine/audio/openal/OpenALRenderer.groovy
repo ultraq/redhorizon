@@ -125,7 +125,7 @@ class OpenALRenderer implements AudioRenderer {
 	}
 
 	@Override
-	void updateSource(Source source, Vector3f position) {
+	void updateSource(Source source, Vector3fc position) {
 
 		stackPush().withCloseable { stack ->
 			alSourcefv(((OpenALSource)source).sourceId, AL_POSITION, position.get(stack.mallocFloat(Vector3f.FLOATS)))
