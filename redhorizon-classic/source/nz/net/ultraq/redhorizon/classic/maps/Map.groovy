@@ -520,6 +520,12 @@ class Map extends Node<Map> {
 				addChild(terrain)
 			}
 		}
+
+		@Override
+		String getName() {
+
+			return "Terrain - ${children.size()} objects"
+		}
 	}
 
 	/**
@@ -558,6 +564,12 @@ class Map extends Node<Map> {
 				}
 				heading = objectLine.heading
 			}
+		}
+
+		@Override
+		String getName() {
+
+			return "${this.class.simpleName} - ${children.size()} units"
 		}
 	}
 

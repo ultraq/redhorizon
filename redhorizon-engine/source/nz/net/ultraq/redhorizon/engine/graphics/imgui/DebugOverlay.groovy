@@ -27,6 +27,10 @@ import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*
 
+import java.lang.management.ManagementFactory
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 /**
  * An overlay rendering pass for displaying debug information about the game.
  *
@@ -39,11 +43,14 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 	private int debugWindowSizeX = 350
 	private int debugWindowSizeY = 200
 	private final EngineStats engineStats
+	private final Runtime runtime
 
 	private float leftX
 	private float leftY
 	private float rightX
 	private float rightY
+	private float memoryUsage
+	private long garbageCollections
 
 	/**
 	 * Constructor, create a new blank overlay.  This is made more useful by
@@ -58,6 +65,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 			}
 		}
 		engineStats = EngineStats.instance
+		runtime = Runtime.runtime
 
 		inputEventStream.on(GamepadAxisEvent) { event ->
 			switch (event.type) {
@@ -69,6 +77,11 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 		}
 
 		this.enabled = enabled
+
+		Executors.newScheduledThreadPool(1).scheduleAtFixedRate({ ->
+			memoryUsage = ((runtime.totalMemory() - runtime.freeMemory()) / 1024) / 1024
+			garbageCollections = ManagementFactory.garbageCollectorMXBeans.inject(0L) { acc, bean -> acc + bean.collectionCount }
+		}, 1, 1, TimeUnit.SECONDS)
 	}
 
 	@Override
@@ -84,14 +97,12 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 		debugWindowSizeY = ImGui.getWindowSizeY() as int
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
+		ImGui.text("Memory used: ${String.format('%.2f', memoryUsage)}MB, GCs: ${garbageCollections}")
 		ImGui.text("Scene objects: ${engineStats.sceneObjects.get()}")
 		ImGui.text("Draw calls: ${engineStats.drawCalls.getAndSet(0)}")
-		ImGui.text("Active meshes: ${engineStats.activeMeshes}")
-		ImGui.text("Active textures: ${engineStats.activeTextures}")
-		ImGui.text("Active framebuffers: ${engineStats.activeFramebuffers}")
-		ImGui.text("Active uniform buffers: ${engineStats.activeUniformBuffers}")
-		ImGui.text("Active sources: ${engineStats.activeSources}")
-		ImGui.text("Active buffers: ${engineStats.activeBuffers}")
+		ImGui.text("Graphics meshes: ${engineStats.activeMeshes}, textures: ${engineStats.activeTextures}")
+		ImGui.text("Graphics framebuffers: ${engineStats.activeFramebuffers}, uniform buffers: ${engineStats.activeUniformBuffers}")
+		ImGui.text("Sound sources: ${engineStats.activeSources}, buffers: ${engineStats.activeBuffers}")
 		ImGui.text("Gamepad sticks: " +
 			"(${sprintf('%.2f', leftX)}, ${sprintf('%.2f', leftY)}) " +
 			"(${sprintf('%.2f', rightX)}, ${sprintf('%.2f', rightY)})")
