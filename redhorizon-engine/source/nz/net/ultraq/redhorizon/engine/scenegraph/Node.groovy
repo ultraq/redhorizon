@@ -470,11 +470,7 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			return visitor.visit(this)
 		}
 			.thenComposeAsync { visitChildren ->
-				var futures = []
-				if (visitChildren) {
-					futures = children.collect { child -> child.traverseAsync(visitor) }
-				}
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+				return CompletableFuture.allOf(visitChildren ? children.collect { child -> child.traverseAsync(visitor) } : [])
 			}
 	}
 

@@ -154,12 +154,11 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	CompletableFuture<Void> requestDelete(GraphicsResource... resources) {
 
-		var futures = resources.collect { resource ->
+		return CompletableFuture.allOf(resources.collect { resource ->
 			var future = new CompletableFuture<Void>()
 			deletionRequests << new Tuple2(resource, future)
 			return future
-		}
-		return CompletableFuture.allOf(*futures)
+		})
 	}
 
 	/**

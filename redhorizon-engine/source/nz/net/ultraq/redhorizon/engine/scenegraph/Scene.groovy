@@ -108,11 +108,7 @@ class Scene implements EventTarget {
 				trigger(new NodeAddedEvent(node))
 			}
 			.thenComposeAsync { _ ->
-				var futures = node.children.collect { childNode -> addNodeAndChildren(childNode) }
-
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+				return CompletableFuture.allOf(node.children.collect { childNode -> addNodeAndChildren(childNode) })
 			}
 	}
 
@@ -229,11 +225,7 @@ class Scene implements EventTarget {
 				trigger(new NodeRemovedEvent(node))
 			}
 			.thenComposeAsync { _ ->
-				var futures = node.children.collect { childNode -> removeNodeAndChildren(childNode) }
-
-				// Originally used the Groovy spread operator `*` but this would throw
-				// an exception about "array length is not legal" 🤷
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0]))
+				return CompletableFuture.allOf(node.children.collect { childNode -> removeNodeAndChildren(childNode) })
 			}
 	}
 
@@ -271,12 +263,11 @@ class Scene implements EventTarget {
 	 */
 	void update(float delta) {
 
-		var futures = updateableNodes.collect { node ->
+		CompletableFuture.allOf(updateableNodes.collect { node ->
 			return CompletableFuture.runAsync { ->
 				node.update(delta)
 			}
-		}
-		CompletableFuture.allOf(futures.toArray(new CompletableFuture<Void>[0])).join()
+		}).join()
 	}
 
 	/**
