@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
@@ -114,7 +114,6 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Audio system'
 		logger.debug('Starting audio system')
 
 		// Initialization
@@ -124,7 +123,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 					logger.debug(renderer.toString())
 					EngineStats.instance.attachAudioRenderer(renderer)
 
-					trigger(new SystemReadyEvent())
+					trigger(new EngineSystemReadyEvent())
 
 					// Rendering loop
 					logger.debug('Audio system in render loop...')
@@ -159,7 +158,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 				logger.debug('Shutting down audio system')
 			}
 		}
-		trigger(new SystemStoppedEvent())
+		trigger(new EngineSystemStoppedEvent())
 		logger.debug('Audio system stopped')
 	}
 }

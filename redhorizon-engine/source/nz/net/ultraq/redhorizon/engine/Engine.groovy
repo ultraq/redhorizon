@@ -16,14 +16,12 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.events.EventTarget
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.Future.State
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -34,17 +32,15 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Engine {
+class Engine implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
 	final List<EngineSystem> systems = []
 
-	private final ExecutorService executorService = Executors.newCachedThreadPool()
 	private final Semaphore enginesStoppingSemaphore = new Semaphore(1)
-	private CountDownLatch engineStoppedLatch
 
-	private List<Future<?>> systemTasks
+	private List<Thread> systemThreads
 	private boolean engineStopping
 
 	/**
@@ -66,25 +62,33 @@ class Engine {
 
 	/**
 	 * Start the game engine.  This will assign all systems their own thread to
-	 * run.  This method will block until all systems have signalled their ready
-	 * status.
+	 * run.  This method will block until all systems have completed execution.
+	 *
+	 * @throws Throwable
+	 *   Any exception that may have occurred during the running of the engine.
 	 */
 	void start() {
 
 		logger.debug('Starting engine...')
 
-		engineStoppedLatch = new CountDownLatch(systems.size())
+		Throwable uncaughtException
+		var threadBuilder = Thread.ofPlatform()
+			.uncaughtExceptionHandler { Thread t, Throwable e ->
+				logger.error('An error occurred in thread {}', t.name)
+				uncaughtException = e
+			}
 
 		var engineReadyLatch = new CountDownLatch(systems.size())
-		systemTasks = systems.collect() { system ->
-			system.on(SystemReadyEvent) { event ->
+		systemThreads = systems.collect() { system ->
+			system.on(EngineSystemReadyEvent) { event ->
 				engineReadyLatch.countDown()
 			}
-			system.on(SystemStoppedEvent) { event ->
-				engineStoppedLatch.countDown()
+			system.on(EngineSystemStoppedEvent) { event ->
 				stop()
 			}
-			return executorService.submit(system)
+			return threadBuilder
+				.name(system.class.simpleName)
+				.start(system)
 		}
 
 		while (true) {
@@ -92,14 +96,20 @@ class Engine {
 			if (engineReadyLatch.count == 0) {
 				break
 			}
-			var failedTasks = systemTasks.findAll { task -> task.done || task.cancelled }
-			if (failedTasks) {
-				var exception = failedTasks.find { task -> task.state() == State.FAILED }?.exceptionNow()
-				throw new Exception('An error occurred during engine startup', exception)
+			if (uncaughtException) {
+				throw uncaughtException
 			}
 		}
 
 		logger.debug('Engine started')
+		trigger(new EngineReadyEvent())
+
+		logger.debug('Waiting for each system to signal completion')
+		systemThreads*.join()
+		if (uncaughtException) {
+			throw uncaughtException
+		}
+		logger.debug('Engine stopped')
 	}
 
 	/**
@@ -109,31 +119,9 @@ class Engine {
 
 		enginesStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!engineStopping) {
-				systemTasks*.cancel(true)
+				systemThreads*.interrupt()
 				engineStopping = true
 			}
 		}
-	}
-
-	/**
-	 * Wait here until the engine has stopped/completed.
-	 */
-	void waitUntilStopped() {
-
-		logger.debug('Waiting for each system to signal completion')
-		while (true) {
-			engineStoppedLatch.await(1, TimeUnit.SECONDS)
-			if (engineStoppedLatch.count == 0) {
-				break
-			}
-			var failedTasks = systemTasks.findAll { task -> task.state() == State.FAILED }
-			if (failedTasks) {
-				failedTasks.each { failedTask ->
-					logger.error('An error occurred during engine shutdown', failedTask.exceptionNow())
-				}
-				break
-			}
-		}
-		logger.debug('Engine stopped')
 	}
 }

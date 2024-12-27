@@ -100,7 +100,7 @@ class Application implements EventTarget {
 		graphicsSystem.on(WindowCreatedEvent) { event ->
 			inputEventStream.addInputSource(event.window)
 		}
-		graphicsSystem.on(SystemReadyEvent) { event ->
+		graphicsSystem.on(EngineSystemReadyEvent) { event ->
 			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputEventStream, config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
 			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
 			uiElements.each { overlayRenderPass ->
@@ -133,8 +133,7 @@ class Application implements EventTarget {
 	}
 
 	/**
-	 * Begin the application and wait until completion.  An exit code is returned
-	 * once the application has finished.
+	 * Begin the application and wait until completion.
 	 */
 	final void start() {
 
@@ -144,6 +143,7 @@ class Application implements EventTarget {
 		if (!scene) {
 			scene = new Scene()
 		}
+		scene.inputEventStream = inputEventStream
 
 		// Universal quit on exit
 		inputEventStream.on(KeyEvent) { event ->
@@ -157,34 +157,30 @@ class Application implements EventTarget {
 			}
 		}
 
-		// Start the application
-		logger.debug('Starting application...')
-		engine.start()
-		engine.systems*.scene = scene
-		scene.inputEventStream = inputEventStream
-
 		try {
-			applicationStart?.apply(this, scene)
-		}
-		catch (Exception ex) {
-			logger.error('An error occurred during application startup', ex)
-		}
-
-		engine.waitUntilStopped()
-
-		// Check we closed everything
-		var check = { int resourceCount, String resourceName ->
-			if (resourceCount > 0) {
-				logger.warn("Not all ${resourceName} closed, {} remaining", resourceCount)
+			// Start the application
+			logger.debug('Starting application...')
+			engine.on(EngineReadyEvent) { event ->
+				engine.systems*.scene = scene
+				applicationStart?.apply(this, scene)
 			}
+			engine.start()
 		}
-		var engineStats = EngineStats.instance
-		check(engineStats.activeFramebuffers.get(), 'framebuffers')
-		check(engineStats.activeMeshes.get(), 'meshes')
-		check(engineStats.activeTextures.get(), 'textures')
-		check(engineStats.activeUniformBuffers.get(), 'uniform buffers')
-		check(engineStats.activeSources.get(), 'sources')
-		check(engineStats.activeBuffers.get(), 'buffers')
+		finally {
+			// Check we closed everything
+			var check = { int resourceCount, String resourceName ->
+				if (resourceCount > 0) {
+					logger.warn("Not all {} closed, {} remaining", resourceName, resourceCount)
+				}
+			}
+			var engineStats = EngineStats.instance
+			check(engineStats.activeFramebuffers.get(), 'framebuffers')
+			check(engineStats.activeMeshes.get(), 'meshes')
+			check(engineStats.activeTextures.get(), 'textures')
+			check(engineStats.activeUniformBuffers.get(), 'uniform buffers')
+			check(engineStats.activeSources.get(), 'sources')
+			check(engineStats.activeBuffers.get(), 'buffers')
+		}
 	}
 
 	/**

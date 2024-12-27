@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
@@ -168,7 +168,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Graphics system'
 		logger.debug('Starting graphics system')
 
 		var gamepadStateProcessor = new GamepadStateProcessor(inputEventStream)
@@ -207,7 +206,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 						renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
 						renderPipeline.withCloseable { pipeline ->
-							trigger(new SystemReadyEvent())
+							trigger(new EngineSystemReadyEvent())
 
 							// Rendering loop
 							logger.debug('Graphics system in render loop...')
@@ -250,7 +249,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 				}
 			}
 		}
-		trigger(new SystemStoppedEvent())
+		trigger(new EngineSystemStoppedEvent())
 		logger.debug('Graphics system stopped')
 	}
 

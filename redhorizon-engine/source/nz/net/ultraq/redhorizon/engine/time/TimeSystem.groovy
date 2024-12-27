@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.time
 
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.SystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.SystemStoppedEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
+import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -77,10 +77,9 @@ class TimeSystem extends EngineSystem {
 	@Override
 	void run() {
 
-		Thread.currentThread().name = 'Time system'
 		logger.debug('Starting time system')
 
-		trigger(new SystemReadyEvent())
+		trigger(new EngineSystemReadyEvent())
 
 		var lastSystemTimeMillis = System.currentTimeMillis()
 		long currentTimeMillis = lastSystemTimeMillis
@@ -112,7 +111,7 @@ class TimeSystem extends EngineSystem {
 			}
 		}
 
-		trigger(new SystemStoppedEvent())
+		trigger(new EngineSystemStoppedEvent())
 		logger.debug('Time system stopped')
 	}
 
