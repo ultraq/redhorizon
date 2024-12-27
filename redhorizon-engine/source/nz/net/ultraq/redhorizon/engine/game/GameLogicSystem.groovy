@@ -46,9 +46,8 @@ class GameLogicSystem extends EngineSystem {
 	@Override
 	void run() {
 
-		logger.debug('Starting game logic system')
-
 		// Initialization
+		logger.debug('Starting game logic system')
 		// TODO: These phases could probably live in the parent EngineSystem class
 		var graphicsSystem = (GraphicsSystem)engine.systems.find { system -> system instanceof GraphicsSystem }
 		trigger(new EngineSystemReadyEvent())
@@ -74,7 +73,6 @@ class GameLogicSystem extends EngineSystem {
 
 		// Shutdown
 		logger.debug('Shutting down game logic system')
-
 		trigger(new EngineSystemStoppedEvent())
 		logger.debug('Game logic system stopped')
 	}
