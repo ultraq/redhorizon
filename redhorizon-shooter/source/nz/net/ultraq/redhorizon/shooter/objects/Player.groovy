@@ -39,6 +39,8 @@ import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * The player object in the game.
@@ -165,26 +167,21 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	 */
 	class PlayerScript extends Script<Player> {
 
-		private boolean bobbing
+		private ScheduledFuture<?> bobbingTask
 
 		@Override
 		void onSceneAdded(Scene scene) {
 
-			bobbing = true
-
 			// Helicopter bobbing
-			Executors.newVirtualThreadPerTaskExecutor().execute { ->
-				while (bobbing) {
-					var bob = 0.0625 * Math.sin(currentTimeMs / 750) as float
-					unit.body.transform { ->
-						translate(0f, bob, 0f)
-					}
-					unit.body2.transform { ->
-						translate(0f, bob, 0f)
-					}
-					Thread.sleep(10)
+			bobbingTask = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({ ->
+				var bob = 0.0625 * Math.sin(currentTimeMs / 750) as float
+				unit.body.transform { ->
+					translate(0f, bob, 0f)
 				}
-			}
+				unit.body2.transform { ->
+					translate(0f, bob, 0f)
+				}
+			}, 0, 10, TimeUnit.MILLISECONDS)
 
 			// TODO: Inertia and momentum
 
@@ -243,7 +240,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		@Override
 		void onSceneRemoved(Scene scene) {
 
-			bobbing = false
+			bobbingTask.cancel()
 		}
 	}
 }
