@@ -98,8 +98,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
 		ImGui.text("Memory used: ${String.format('%.2f', memoryUsage)}MB, GCs: ${garbageCollections}")
-		ImGui.text("Scene objects: ${engineStats.sceneObjects.get()}")
-		ImGui.text("Draw calls: ${engineStats.drawCalls.getAndSet(0)}")
+		ImGui.text("Scene objects: ${engineStats.sceneObjects.get()}, draw calls: ${engineStats.drawCalls.getAndSet(0)}")
 		ImGui.text("Graphics meshes: ${engineStats.activeMeshes}, textures: ${engineStats.activeTextures}")
 		ImGui.text("Graphics framebuffers: ${engineStats.activeFramebuffers}, uniform buffers: ${engineStats.activeUniformBuffers}")
 		ImGui.text("Sound sources: ${engineStats.activeSources}, buffers: ${engineStats.activeBuffers}")
