@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.engine.game
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 
 import org.slf4j.Logger
@@ -44,17 +42,10 @@ class GameLogicSystem extends EngineSystem {
 	}
 
 	@Override
-	void run() {
+	void runLoop() {
 
-		logger.debug('Starting game logic system')
-
-		// Initialization
-		// TODO: These phases could probably live in the parent EngineSystem class
 		var graphicsSystem = (GraphicsSystem)engine.systems.find { system -> system instanceof GraphicsSystem }
-		trigger(new EngineSystemReadyEvent())
 
-		// Game loop
-		logger.debug('Game logic system in loop...')
 		while (!Thread.interrupted()) {
 			try {
 				var currentTimeMs = System.currentTimeMillis()
@@ -71,11 +62,5 @@ class GameLogicSystem extends EngineSystem {
 				break
 			}
 		}
-
-		// Shutdown
-		logger.debug('Shutting down game logic system')
-
-		trigger(new EngineSystemStoppedEvent())
-		logger.debug('Game logic system stopped')
 	}
 }

@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
@@ -34,7 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * Audio system, manages the connection to the audio hardware and playback of
- * audio objects.
+ * audio objects in the scene.
  *
  * @author Emanuel Rabina
  */
@@ -46,6 +44,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 	private final List<Node> queryResults = []
+
+	private OpenALContext context
+	private OpenALRenderer renderer
 
 	/**
 	 * Constructor, build a new engine for rendering audio.
@@ -106,59 +107,54 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 		})
 	}
 
-	/**
-	 * Starts the audio engine loop: builds a connection to the OpenAL device,
-	 * renders audio items found within the current scene, cleaning it all up when
-	 * made to shut down.
-	 */
 	@Override
-	void run() {
+	protected void runInit() {
 
-		logger.debug('Starting audio system')
+		context = new OpenALContext()
+		context.withCurrent { ->
+			renderer = new OpenALRenderer(config)
+			logger.debug(renderer.toString())
+			EngineStats.instance.attachAudioRenderer(renderer)
+		}
+	}
 
-		// Initialization
-		new OpenALContext().withCloseable { context ->
-			context.withCurrent { ->
-				new OpenALRenderer(config).withCloseable { renderer ->
-					logger.debug(renderer.toString())
-					EngineStats.instance.attachAudioRenderer(renderer)
+	@Override
+	protected void runLoop() {
 
-					trigger(new EngineSystemReadyEvent())
+		context.withCurrent { ->
+			while (!Thread.interrupted()) {
+				try {
+					rateLimit(100) { ->
+						processRequests(renderer)
 
-					// Rendering loop
-					logger.debug('Audio system in render loop...')
-					while (!Thread.interrupted()) {
-						try {
-							rateLimit(100) { ->
-
-								processRequests(renderer)
-
-								// Run the audio elements
-								// TODO: Split this out like the graphics system where we wait to
-								//       be told to process audio objects instead of looping
-								//       through the scene ourselves
-								if (scene?.listener) {
-									scene.listener.render(renderer)
-									queryResults.clear()
-									scene.query(scene.listener.range, queryResults).each { node ->
-										if (node instanceof AudioElement) {
-											node.render(renderer)
-										}
-									}
+						// Run the audio elements
+						// TODO: Split this out like the graphics system where we wait to
+						//       be told to process audio objects instead of looping
+						//       through the scene ourselves
+						if (scene?.listener) {
+							scene.listener.render(renderer)
+							queryResults.clear()
+							scene.query(scene.listener.range, queryResults).each { node ->
+								if (node instanceof AudioElement) {
+									node.render(renderer)
 								}
 							}
 						}
-						catch (InterruptedException ignored) {
-							break
-						}
 					}
 				}
-
-				// Shutdown
-				logger.debug('Shutting down audio system')
+				catch (InterruptedException ignored) {
+					break
+				}
 			}
 		}
-		trigger(new EngineSystemStoppedEvent())
-		logger.debug('Audio system stopped')
+	}
+
+	@Override
+	protected void runShutdown() {
+
+		context.withCurrent { ->
+			renderer.close()
+		}
+		context.close()
 	}
 }

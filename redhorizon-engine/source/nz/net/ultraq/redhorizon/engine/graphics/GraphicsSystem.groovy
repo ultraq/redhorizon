@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.BrokenBarrierException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.LinkedBlockingQueue
@@ -58,7 +55,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	private final CyclicBarrier renderBarrier = new CyclicBarrier(2)
 	private final CyclicBarrier continueBarrier = new CyclicBarrier(2)
 
+	private OpenGLContext context
 	private OpenGLWindow window
+	private OpenGLRenderer renderer
 	private ImGuiLayer imGuiLayer
 	private RenderPipeline renderPipeline
 	private boolean shouldToggleFullScreen
@@ -161,96 +160,93 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		})
 	}
 
-	/**
-	 * Start the graphics system loop: creates a new window in which to render the
-	 * elements in the current scene, cleaning it all up when made to shut down.
-	 */
 	@Override
-	void run() {
+	protected void runInit() {
 
-		logger.debug('Starting graphics system')
+		context = new OpenGLContext(windowTitle, config)
+
+		window = context.window
+		window.relay(FramebufferSizeEvent, this)
+		window.relay(WindowMaximizedEvent, this)
+
+		// Only do quick window mode switching on Windows - the macOS experience
+		// is quite different from using the fullscreen button which assigns the
+		// app its own space.
+		if (System.isWindows()) {
+			window.on(MouseButtonEvent) { event ->
+				checkScreenMode(event)
+			}
+		}
+
+		window.on(KeyEvent) { event ->
+			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_V) {
+				shouldToggleVsync = true
+			}
+		}
+
+		context.withCurrent { ->
+			trigger(new WindowCreatedEvent(window))
+
+			renderer = new OpenGLRenderer(config, window)
+			logger.debug(renderer.toString())
+			EngineStats.instance.attachGraphicsRenderer(renderer)
+
+			imGuiLayer = new ImGuiLayer(config, window)
+			imGuiLayer.relay(FramebufferSizeEvent, this)
+
+			renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
+		}
+	}
+
+	@Override
+	protected void runLoop() {
 
 		var gamepadStateProcessor = new GamepadStateProcessor(inputEventStream)
 
-		// Initialization
-		new OpenGLContext(windowTitle, config).withCloseable { context ->
-			window = context.window
-			window.relay(FramebufferSizeEvent, this)
-			window.relay(WindowMaximizedEvent, this)
-
-			// Only do quick window mode switching on Windows - the macOS experience
-			// is quite different from using the fullscreen button which assigns the
-			// app its own space.
-			if (System.isWindows()) {
-				window.on(MouseButtonEvent) { event ->
-					checkScreenMode(event)
-				}
-			}
-
-			window.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_V) {
-					shouldToggleVsync = true
-				}
-			}
-
-			context.withCurrent { ->
-				trigger(new WindowCreatedEvent(window))
-
-				new OpenGLRenderer(config, window).withCloseable { renderer ->
-					EngineStats.instance.attachGraphicsRenderer(renderer)
-
-					imGuiLayer = new ImGuiLayer(config, window)
-					imGuiLayer.withCloseable { imGuiLayer ->
-						logger.debug(renderer.toString())
-						imGuiLayer.relay(FramebufferSizeEvent, this)
-
-						renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
-						renderPipeline.withCloseable { pipeline ->
-							trigger(new EngineSystemReadyEvent())
-
-							// Rendering loop
-							logger.debug('Graphics system in render loop...')
-							while (!window.shouldClose() && !Thread.interrupted()) {
-								try {
-									if (shouldToggleFullScreen) {
-										window.toggleFullScreen()
-										shouldToggleFullScreen = false
-									}
-									if (shouldToggleVsync) {
-										window.toggleVsync()
-										shouldToggleVsync = false
-									}
-									processRequests(renderer)
-
-									// Synchronization point where we wait for the game logic
-									// system to signal that it's OK to gather renderables from
-									// the scene.  Once we have those renderables, we can let the
-									// game logic system continue while we draw those out.
-									renderBarrier.await()
-									renderBarrier.reset()
-									pipeline.gather()
-									continueBarrier.await()
-									continueBarrier.reset()
-
-									pipeline.render()
-									window.swapBuffers()
-									window.pollEvents()
-									gamepadStateProcessor.process()
-								}
-								catch (BrokenBarrierException | InterruptedException ignored) {
-									break
-								}
-							}
-
-							// Shutdown
-							logger.debug('Shutting down graphics system')
-						}
+		context.withCurrent { ->
+			while (!window.shouldClose() && !Thread.interrupted()) {
+				try {
+					if (shouldToggleFullScreen) {
+						window.toggleFullScreen()
+						shouldToggleFullScreen = false
 					}
+					if (shouldToggleVsync) {
+						window.toggleVsync()
+						shouldToggleVsync = false
+					}
+					processRequests(renderer)
+
+					// Synchronization point where we wait for the game logic
+					// system to signal that it's OK to gather renderables from
+					// the scene.  Once we have those renderables, we can let the
+					// game logic system continue while we draw those out.
+					renderBarrier.await()
+					renderBarrier.reset()
+					renderPipeline.gather()
+					continueBarrier.await()
+					continueBarrier.reset()
+
+					renderPipeline.render()
+					window.swapBuffers()
+					window.pollEvents()
+					gamepadStateProcessor.process()
+				}
+				catch (InterruptedException ignored) {
+					break
 				}
 			}
 		}
-		trigger(new EngineSystemStoppedEvent())
-		logger.debug('Graphics system stopped')
+	}
+
+	@Override
+	protected void runShutdown() {
+
+		context.withCurrent { ->
+			renderPipeline.close()
+			imGuiLayer.close()
+			renderer.close()
+		}
+		context.close()
 	}
 
 	/**

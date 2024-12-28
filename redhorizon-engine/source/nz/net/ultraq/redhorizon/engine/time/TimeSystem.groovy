@@ -17,15 +17,14 @@
 package nz.net.ultraq.redhorizon.engine.time
 
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
-import nz.net.ultraq.redhorizon.engine.EngineSystemStoppedEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
  * A separate time source from the usual system time, allowing game time to flow
- * at different speeds.
+ * at different speeds.  This system is used to update any temporal components
+ * in the scene.
  *
  * @author Emanuel Rabina
  */
@@ -33,6 +32,8 @@ class TimeSystem extends EngineSystem {
 
 	private static Logger logger = LoggerFactory.getLogger(TimeSystem)
 
+	private long lastSystemTimeMillis
+	private long currentTimeMillis
 	private float speed = 1.0f
 	private float lastSpeed
 
@@ -40,6 +41,13 @@ class TimeSystem extends EngineSystem {
 	void configureScene() {
 
 		scene.gameClock = this
+	}
+
+	@Override
+	protected void runInit() {
+
+		lastSystemTimeMillis = System.currentTimeMillis()
+		currentTimeMillis = lastSystemTimeMillis
 	}
 
 	/**
@@ -71,20 +79,9 @@ class TimeSystem extends EngineSystem {
 		speed = lastSpeed
 	}
 
-	/**
-	 * Starts the game clock and uses it to update temporal objects in the scene.
-	 */
 	@Override
-	void run() {
+	protected void runLoop() {
 
-		logger.debug('Starting time system')
-
-		trigger(new EngineSystemReadyEvent())
-
-		var lastSystemTimeMillis = System.currentTimeMillis()
-		long currentTimeMillis = lastSystemTimeMillis
-
-		logger.debug('Time system in update loop')
 		while (!Thread.interrupted()) {
 			try {
 				rateLimit(100) { ->
@@ -110,9 +107,6 @@ class TimeSystem extends EngineSystem {
 				break
 			}
 		}
-
-		trigger(new EngineSystemStoppedEvent())
-		logger.debug('Time system stopped')
 	}
 
 	/**

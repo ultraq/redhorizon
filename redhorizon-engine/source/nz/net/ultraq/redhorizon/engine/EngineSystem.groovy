@@ -19,6 +19,9 @@ package nz.net.ultraq.redhorizon.engine
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.PackageScope
 
 /**
@@ -32,6 +35,8 @@ import groovy.transform.PackageScope
  * @author Emanuel Rabina
  */
 abstract class EngineSystem implements Runnable, EventTarget {
+
+	private static final Logger logger = LoggerFactory.getLogger(EngineSystem)
 
 	private Engine engine
 	protected Scene scene
@@ -47,6 +52,14 @@ abstract class EngineSystem implements Runnable, EventTarget {
 	protected Engine getEngine() {
 
 		return engine
+	}
+
+	/**
+	 * Return the name of the system, for logging purposes.
+	 */
+	protected String getSystemName() {
+
+		return this.class.simpleName
 	}
 
 	/**
@@ -66,6 +79,43 @@ abstract class EngineSystem implements Runnable, EventTarget {
 		if (waitTime > 0) {
 			Thread.sleep((long)waitTime)
 		}
+	}
+
+	/**
+	 * Controlled initialization, execution loop, and shutdown or an engine
+	 * system.
+	 */
+	@Override
+	final void run() {
+
+		logger.debug('{}: starting', systemName)
+		runInit()
+		trigger(new EngineSystemReadyEvent())
+
+		logger.debug('{}: in loop', systemName)
+		runLoop()
+
+		logger.debug('{}: shutting down', systemName)
+		trigger(new EngineSystemStoppedEvent())
+		runShutdown()
+		logger.debug('{}: stopped', systemName)
+	}
+
+	/**
+	 * Initialize any resources for the running of the system here.
+	 */
+	protected void runInit() {
+	}
+
+	/**
+	 * Enter the loop for the system to continually work on the scene.
+	 */
+	protected abstract void runLoop()
+
+	/**
+	 * Cleanup/free any resources created by the system here.
+	 */
+	protected void runShutdown() {
 	}
 
 	/**
