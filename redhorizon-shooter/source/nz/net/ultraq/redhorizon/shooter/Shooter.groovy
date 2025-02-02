@@ -93,7 +93,7 @@ class Shooter {
 
 			camera.follow(player)
 
-			var mapFile = resourceManager.loadFile('scg01ea.ini', IniFile)
+			var mapFile = resourceManager.loadFile('scm01ea.ini', IniFile)
 			var map = new Map(mapFile as MapFile, resourceManager)
 			scene << map
 		}

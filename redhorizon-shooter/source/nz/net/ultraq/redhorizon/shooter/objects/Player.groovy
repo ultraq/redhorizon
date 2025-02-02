@@ -66,6 +66,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f velocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
+	private float movementHeading
 	private Vector2f lookAt = new Vector2f()
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
@@ -158,6 +159,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 				Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
 				Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
+			movementHeading = Math.toDegrees(velocity.angle(up)) as float
 		}
 		else {
 			stop.execute()
@@ -179,6 +181,9 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		// Gamepad rotation
 		else if (direction.length()) {
 			heading = Math.toDegrees(direction.angle(up)) as float
+		}
+		else {
+			heading = movementHeading
 		}
 
 		// Gamepad firing
@@ -267,10 +272,16 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
 						direction.x = value
 					}
+					else {
+						direction.x = 0
+					}
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Heading along the Y axis', { value ->
 					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
 						direction.y = -value
+					}
+					else {
+						direction.y = 0
 					}
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER, 'Fire', { value ->
