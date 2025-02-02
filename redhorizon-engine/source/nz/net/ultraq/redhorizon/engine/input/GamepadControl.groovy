@@ -52,6 +52,7 @@ class GamepadControl extends Control<GamepadAxisEvent> {
 			case GLFW_GAMEPAD_AXIS_LEFT_Y -> 'Left stick Y axis'
 			case GLFW_GAMEPAD_AXIS_RIGHT_X -> 'Right stick X axis'
 			case GLFW_GAMEPAD_AXIS_RIGHT_Y -> 'Right stick Y axis'
+			case GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER -> 'Right trigger'
 			default -> '(unknown)'
 		}
 	}

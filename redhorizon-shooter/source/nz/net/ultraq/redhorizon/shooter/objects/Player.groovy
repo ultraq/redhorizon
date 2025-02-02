@@ -35,6 +35,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.CopyOnWriteArrayList
@@ -49,9 +51,10 @@ import java.util.concurrent.TimeUnit
  */
 class Player extends Node<Player> implements Rotatable, Temporal {
 
-//	private static final Logger logger = LoggerFactory.getLogger(Player)
+	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
 	private static final float MOVEMENT_SPEED = 200f
+	private static final float MOVEMENT_THRESHOLD = 0.2f
 	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
@@ -67,7 +70,11 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
+	private boolean usingKeyboard
 	private List<Command> movementCommands = new CopyOnWriteArrayList<>()
+
+	private boolean firing
+	private List<Command> firingCommands = new CopyOnWriteArrayList<>()
 
 	private final Command moveForward = { ->
 		var headingInRadians = Math.toRadians(heading)
@@ -128,19 +135,32 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	@Override
 	void update(float delta) {
 
+		// TODO: The separate input handling should probably be split up so it's not all jumbled together
+
+		// Keyboad movement
 		if (movementCommands) {
 			movementCommands*.execute()
+			usingKeyboard = true
 		}
-		else {
+		else if (usingKeyboard) {
 			stop.execute()
+			usingKeyboard = false
 		}
 
+		if (firingCommands) {
+			firingCommands*.execute()
+		}
+
+		// Gamepad movement
 		if (velocity.length()) {
 			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta).add(position.x(), position.y())
 			setPosition(
 				Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
 				Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
+		}
+		else {
+			stop.execute()
 		}
 
 		// Mouse rotation
@@ -159,6 +179,11 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		// Gamepad rotation
 		else if (direction.length()) {
 			heading = Math.toDegrees(direction.angle(up)) as float
+		}
+
+		// Gamepad firing
+		if (firing) {
+			logger.debug('Firing')
 		}
 	}
 
@@ -223,16 +248,33 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			// Gamepad controls
 			scene.inputEventStream.addControls(
 				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_X, 'Movement along the X axis', { value ->
-					velocity.x = value
+					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
+						velocity.x = value
+					}
+					else {
+						velocity.x = 0
+					}
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_Y, 'Movement along the Y axis', { value ->
-					velocity.y = -value
+					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
+						velocity.y = -value
+					}
+					else {
+						velocity.y = 0
+					}
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_X, 'Heading along the X axis', { value ->
-					direction.x = value
+					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
+						direction.x = value
+					}
 				}),
 				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Heading along the Y axis', { value ->
-					direction.y = -value
+					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
+						direction.y = -value
+					}
+				}),
+				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER, 'Fire', { value ->
+					firing = value > -1f
 				})
 			)
 		}

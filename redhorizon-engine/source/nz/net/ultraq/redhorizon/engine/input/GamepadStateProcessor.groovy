@@ -70,6 +70,7 @@ class GamepadStateProcessor {
 		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER)
 	}
 
 	/**
@@ -78,6 +79,6 @@ class GamepadStateProcessor {
 	private void processAxis(FloatBuffer axes, int type) {
 
 		var value = axes.get(type)
-		inputEventStream.trigger(new GamepadAxisEvent(type, value <= -0.2f || 0.2f <= value ? value : 0f))
+		inputEventStream.trigger(new GamepadAxisEvent(type, value))
 	}
 }
