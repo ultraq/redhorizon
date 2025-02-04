@@ -32,6 +32,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
+import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
+import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -41,6 +43,7 @@ import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
@@ -53,8 +56,9 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
-	private static final float MOVEMENT_SPEED = 200f
-	private static final float MOVEMENT_THRESHOLD = 0.2f
+	private static final float MAX_SPEED = 200f
+	private static final float TIME_TO_MAX_SPEED_MS = 1000 // ms
+	private static final float TIME_TO_STOP_MS = 2000
 	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
@@ -62,42 +66,30 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	final UpdateHint updateHint = UpdateHint.ALWAYS
 	private final Unit unit
 
+	private boolean keyboardForwards
+	private boolean keyboardBackwards
+	private boolean keyboardStrafeLeft
+	private boolean keyboardStrafeRight
 	private final Vector2f screenPosition = new Vector2f()
+	private Vector2f impulse = new Vector2f()
+	private long startAccelerationTimeMs
+	private long stopAccelerationTimeMs
 	private Vector2f velocity = new Vector2f()
+	private Vector2f initialStoppingVelocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
 	private Vector2f movement = new Vector2f()
-	private float movementHeading
 	private Vector2f lookAt = new Vector2f()
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
-	private boolean usingKeyboard
-	private List<Command> movementCommands = new CopyOnWriteArrayList<>()
 
 	private boolean firing
 	private List<Command> firingCommands = new CopyOnWriteArrayList<>()
 
-	private final Command moveForward = { ->
-		var headingInRadians = Math.toRadians(heading)
-		velocity.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).normalize()
-	}
-	private final Command moveBackwards = { ->
-		var headingInRadians = Math.toRadians(heading)
-		velocity.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).negate().normalize()
-	}
-	private final Command moveLeft = { ->
-		var leftAngle = Math.wrap((float)(heading - 90f), 0f, 360f)
-		var leftAngleInRadians = Math.toRadians(leftAngle)
-		velocity.set(Math.sin(leftAngleInRadians), Math.cos(leftAngleInRadians)).normalize()
-	}
-	private final Command moveRight = { ->
-		var rightAngle = Math.wrap((float)(heading + 90f), 0f, 360f)
-		var rightAngleInRadians = Math.toRadians(rightAngle)
-		velocity.set(Math.sin(rightAngleInRadians), Math.cos(rightAngleInRadians)).normalize()
-	}
-	private final Command stop = { ->
-		velocity.set(0, 0)
-	}
+	private final long rateOfFireMs = 1000
+	private ScheduledFuture<?> firingTask
+	private final ImagesFile bulletImagesFile
+	private ScheduledExecutorService firingService = Executors.newScheduledThreadPool(4)
 
 	/**
 	 * Constructor, load the sprite and scripts for the player.
@@ -123,6 +115,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			return true
 		}
 
+//		bulletImagesFile = resourceManager.loadFile('dragon.shp', ShpFile)
+
 		attachScript(new PlayerScript())
 	}
 
@@ -138,31 +132,60 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 		// TODO: The separate input handling should probably be split up so it's not all jumbled together
 
-		// Keyboad movement
-		if (movementCommands) {
-			movementCommands*.execute()
-			usingKeyboard = true
+		// Apply keyboard movement
+		if (keyboardForwards) {
+			var headingInRadians = Math.toRadians(heading)
+			impulse.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).normalize()
 		}
-		else if (usingKeyboard) {
-			stop.execute()
-			usingKeyboard = false
+		if (keyboardBackwards) {
+			var headingInRadians = Math.toRadians(heading)
+			impulse.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).negate().normalize()
+		}
+		if (keyboardStrafeLeft) {
+			var leftAngle = Math.wrap((float)(heading - 90f), 0f, 360f)
+			var leftAngleInRadians = Math.toRadians(leftAngle)
+			impulse.set(Math.sin(leftAngleInRadians), Math.cos(leftAngleInRadians)).normalize()
+		}
+		if (keyboardStrafeRight) {
+			var rightAngle = Math.wrap((float)(heading + 90f), 0f, 360f)
+			var rightAngleInRadians = Math.toRadians(rightAngle)
+			impulse.set(Math.sin(rightAngleInRadians), Math.cos(rightAngleInRadians)).normalize()
+		}
+		if (!keyboardForwards && !keyboardBackwards && !keyboardStrafeLeft && !keyboardStrafeRight) {
+			impulse.zero()
 		}
 
-		if (firingCommands) {
-			firingCommands*.execute()
+		// Movement
+		if (impulse) {
+			startAccelerationTimeMs ?= currentTimeMs
+			if (stopAccelerationTimeMs) {
+				stopAccelerationTimeMs = 0
+			}
+			if (initialStoppingVelocity) {
+				initialStoppingVelocity.zero()
+			}
+			var timeElapsedMs = Math.min(currentTimeMs - startAccelerationTimeMs, TIME_TO_MAX_SPEED_MS)
+			var accelerationCurve = EasingFunctions.linear((float)(timeElapsedMs / TIME_TO_MAX_SPEED_MS))
+			var maxAcceleration = new Vector2f(impulse).mul(MAX_SPEED).mul(accelerationCurve).mul(delta)
+			velocity.set(maxAcceleration)
 		}
-
-		// Gamepad movement
-		if (velocity.length()) {
-			movement.set(velocity).normalize().mul(MOVEMENT_SPEED).mul(delta).add(position.x(), position.y())
+		else if (velocity) {
+			stopAccelerationTimeMs ?= currentTimeMs
+			startAccelerationTimeMs = 0
+			if (!initialStoppingVelocity) {
+				initialStoppingVelocity.set(velocity)
+			}
+			var timeElapsedMs = Math.min(currentTimeMs - stopAccelerationTimeMs, TIME_TO_STOP_MS)
+			var deccelerationCurve = EasingFunctions.linear((float)(1 - timeElapsedMs / TIME_TO_STOP_MS))
+			var maxDecceleration = new Vector2f(initialStoppingVelocity).mul(deccelerationCurve)
+			velocity.set(maxDecceleration)
+		}
+		if (velocity) {
+			movement.set(position).add(velocity)
 			setPosition(
 				Math.clamp(movement.x, MOVEMENT_RANGE.minX, MOVEMENT_RANGE.maxX),
 				Math.clamp(movement.y, MOVEMENT_RANGE.minY, MOVEMENT_RANGE.maxY)
 			)
-			movementHeading = Math.toDegrees(velocity.angle(up)) as float
-		}
-		else {
-			stop.execute()
 		}
 
 		// Mouse rotation
@@ -182,13 +205,22 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		else if (direction.length()) {
 			heading = Math.toDegrees(direction.angle(up)) as float
 		}
-		else {
-			heading = movementHeading
-		}
+		// Let the current movement direction inform the heading
+//		else if (velocity.length()) {
+//			heading = Math.toDegrees(velocity.angle(up)) as float
+//		}
 
 		// Gamepad firing
 		if (firing) {
 			logger.debug('Firing')
+			firingTask = firingService.scheduleAtFixedRate({ ->
+				var bullet = new Bullet(bulletImagesFile, heading)
+				bullet.position = globalPosition
+				addChild(bullet)
+			}, 0, rateOfFireMs, TimeUnit.MILLISECONDS)
+		}
+		else {
+			firingTask?.cancel()
 		}
 	}
 
@@ -197,13 +229,14 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	 */
 	class PlayerScript extends Script<Player> {
 
+		private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2)
 		private ScheduledFuture<?> bobbingTask
 
 		@Override
 		void onSceneAdded(Scene scene) {
 
 			// Helicopter bobbing
-			bobbingTask = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({ ->
+			bobbingTask = scheduledExecutor.scheduleAtFixedRate({ ->
 				var bob = 0.0625 * Math.sin(currentTimeMs / 750) as float
 				unit.body.transform { ->
 					translate(0f, bob, 0f)
@@ -213,25 +246,23 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 				}
 			}, 0, 10, TimeUnit.MILLISECONDS)
 
-			// TODO: Inertia and momentum
-
 			// Keyboard controls
 			scene.inputEventStream.addControls(
 				new KeyControl(GLFW_KEY_W, 'Move forwards',
-					{ -> movementCommands.add(moveForward) },
-					{ -> movementCommands.remove(moveForward) }
+					{ -> keyboardForwards = true },
+					{ -> keyboardForwards = false }
 				),
 				new KeyControl(GLFW_KEY_S, 'Move backwards',
-					{ -> movementCommands.add(moveBackwards) },
-					{ -> movementCommands.remove(moveBackwards) }
+					{ -> keyboardBackwards = true },
+					{ -> keyboardBackwards = false }
 				),
 				new KeyControl(GLFW_KEY_A, 'Strafe left',
-					{ -> movementCommands.add(moveLeft) },
-					{ -> movementCommands.remove(moveLeft) }
+					{ -> keyboardStrafeLeft = true },
+					{ -> keyboardStrafeLeft = false }
 				),
 				new KeyControl(GLFW_KEY_D, 'Strafe right',
-					{ -> movementCommands.add(moveRight) },
-					{ -> movementCommands.remove(moveRight) }
+					{ -> keyboardStrafeRight = true },
+					{ -> keyboardStrafeRight = false }
 				),
 				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
 					{ -> rotation -= 1 },
@@ -252,41 +283,21 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 			// Gamepad controls
 			scene.inputEventStream.addControls(
-				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_X, 'Movement along the X axis', { value ->
-					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
-						velocity.x = value
-					}
-					else {
-						velocity.x = 0
-					}
-				}),
-				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_Y, 'Movement along the Y axis', { value ->
-					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
-						velocity.y = -value
-					}
-					else {
-						velocity.y = 0
-					}
-				}),
-				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_X, 'Heading along the X axis', { value ->
-					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
-						direction.x = value
-					}
-					else {
-						direction.x = 0
-					}
-				}),
-				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Heading along the Y axis', { value ->
-					if (value < -MOVEMENT_THRESHOLD || value > MOVEMENT_THRESHOLD) {
-						direction.y = -value
-					}
-					else {
-						direction.y = 0
-					}
-				}),
-				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER, 'Fire', { value ->
-					firing = value > -1f
-				})
+				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_X, 'Movement along the X axis',
+					{ value -> velocity.x = value }
+				),
+				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_Y, 'Movement along the Y axis',
+					{ value -> velocity.y = -value }
+				),
+				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_X, 'Heading along the X axis',
+					{ value -> direction.x = value }
+				),
+				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_Y, 'Heading along the Y axis',
+					{ value -> direction.y = -value }
+				),
+				new GamepadControl(GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER, 'Fire',
+					{ value -> firing = value > -1f }
+				)
 			)
 		}
 
