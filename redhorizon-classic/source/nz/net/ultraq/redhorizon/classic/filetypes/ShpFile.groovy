@@ -65,7 +65,8 @@ class ShpFile implements ImagesFile {
 	final ColourFormat format = FORMAT_INDEXED
 
 	private final NativeDataInputStream input
-	private ByteBuffer[] imagesData
+	@Lazy
+	volatile ByteBuffer[] imagesData = { decodeImagesData() }()
 
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
@@ -101,37 +102,37 @@ class ShpFile implements ImagesFile {
 		}
 	}
 
-	@Override
-	ByteBuffer[] getImagesData() {
+	/**
+	 * Decompress the SHP file data into the indexed image frames.
+	 */
+	private ByteBuffer[] decodeImagesData() {
 
-		// Decompresses the raw SHP data into palette-index data
-		if (!imagesData) {
-			var lcw = new LCW()
-			var xorDelta = new XORDelta(delta)
+		var lcw = new LCW()
+		var xorDelta = new XORDelta(delta)
 
-			imagesData = new ByteBuffer[numImages]
-			imagesData.length.times { i ->
-				var imageOffset = imageOffsets[i]
+		var imagesData = new ByteBuffer[numImages]
+		imagesData.length.times { i ->
+			var imageOffset = imageOffsets[i]
 
-				// Format conversion buffers
-				var compressedImageSize = imageOffsets[i + 1].offset - imageOffset.offset
-				var compressedImage = ByteBuffer.wrapNative(input.readNBytes(compressedImageSize))
-				var uncompressedImage = ByteBuffer.allocateNative(width * height)
+			// Format conversion buffers
+			var compressedImageSize = imageOffsets[i + 1].offset - imageOffset.offset
+			var compressedImage = ByteBuffer.wrapNative(input.readNBytes(compressedImageSize))
+			var uncompressedImage = ByteBuffer.allocateNative(width * height)
 
-				imagesData[i] = switch (imageOffset.offsetFormat) {
-					case FORMAT_LCW ->
-						lcw.decode(compressedImage, uncompressedImage)
-					case FORMAT_XOR_BASE ->
-						xorDelta
-							.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
-							.decode(compressedImage, uncompressedImage)
-					case FORMAT_XOR_CHAIN ->
-						xorDelta
+			imagesData[i] = switch (imageOffset.offsetFormat) {
+				case FORMAT_LCW ->
+					lcw.decode(compressedImage, uncompressedImage)
+				case FORMAT_XOR_BASE ->
+					xorDelta
+						.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
+						.decode(compressedImage, uncompressedImage)
+				case FORMAT_XOR_CHAIN ->
+					xorDelta
 //						.deltaSource(imagesData[i - 1])
-							.decode(compressedImage, uncompressedImage)
-				}
+						.decode(compressedImage, uncompressedImage)
 			}
 		}
+
 		return imagesData
 	}
 
