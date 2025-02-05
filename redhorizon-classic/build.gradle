@@ -18,7 +18,7 @@ plugins {
 	id 'maven-publish'
 	id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
-apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/maven-publish-support.gradle'
+apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.2/maven-publish-support.gradle'
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
 year = '2007'
