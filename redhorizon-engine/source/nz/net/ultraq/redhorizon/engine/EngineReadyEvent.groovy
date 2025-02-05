@@ -23,5 +23,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-class EngineReadyEvent extends Event {
+class EngineReadyEvent implements Event {
 }

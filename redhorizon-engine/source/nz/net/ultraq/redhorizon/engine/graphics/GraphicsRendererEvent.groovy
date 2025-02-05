@@ -23,5 +23,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-abstract class GraphicsRendererEvent extends Event {
+abstract class GraphicsRendererEvent implements Event {
 }

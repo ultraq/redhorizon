@@ -27,7 +27,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class StreamingSampleEvent extends Event {
+class StreamingSampleEvent implements Event {
 
 	final int bits
 	final int channels

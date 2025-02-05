@@ -27,7 +27,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class WindowCreatedEvent extends Event {
+class WindowCreatedEvent implements Event {
 
 	final Window window
 }

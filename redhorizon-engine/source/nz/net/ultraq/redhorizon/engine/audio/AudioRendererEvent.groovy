@@ -23,5 +23,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-abstract class AudioRendererEvent extends Event {
+abstract class AudioRendererEvent implements Event {
 }

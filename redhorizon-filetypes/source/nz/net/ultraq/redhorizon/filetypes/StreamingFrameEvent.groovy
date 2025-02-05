@@ -27,7 +27,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class StreamingFrameEvent extends Event {
+class StreamingFrameEvent implements Event {
 
 	final int width
 	final int height

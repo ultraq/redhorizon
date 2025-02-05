@@ -27,7 +27,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class NodeSelectedEvent extends Event {
+class NodeSelectedEvent implements Event {
 
 	final Node node
 }

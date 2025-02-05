@@ -48,7 +48,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
-import nz.net.ultraq.redhorizon.events.RemoveEventFunction
+import nz.net.ultraq.redhorizon.events.RemoveEventListenerFunction
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
@@ -99,7 +99,7 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private PaletteType currentPalette
-	private List<RemoveEventFunction> removeEventFunctions = []
+	private List<RemoveEventListenerFunction> removeEventListenerFunctions = []
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
@@ -190,7 +190,7 @@ class Explorer {
 				}
 			}
 		}
-		removeEventFunctions << scene.inputEventStream.on(KeyEvent) { event ->
+		removeEventListenerFunctions << scene.inputEventStream.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
 					case GLFW_KEY_P -> cyclePalette()
@@ -219,7 +219,7 @@ class Explorer {
 
 	private void applicationStop(Scene scene) {
 
-		removeEventFunctions*.remove()
+		removeEventListenerFunctions*.remove()
 		clearPreview()
 		scene.clear()
 		resourceManager.close()
