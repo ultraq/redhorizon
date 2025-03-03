@@ -57,8 +57,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
 	private static final float MAX_SPEED = 200f
-	private static final float TIME_TO_MAX_SPEED_MS = 1000 // ms
-	private static final float TIME_TO_STOP_MS = 2000
+	private static final float TIME_TO_MAX_SPEED_S = 1
 	private static final float ROTATION_SPEED = 180f
 	private static final Vector2f up = new Vector2f(0, 1)
 
@@ -72,8 +71,6 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private boolean keyboardStrafeRight
 	private final Vector2f screenPosition = new Vector2f()
 	private Vector2f impulse = new Vector2f()
-	private long startAccelerationTimeMs
-	private long stopAccelerationTimeMs
 	private Vector2f velocity = new Vector2f()
 	private Vector2f initialStoppingVelocity = new Vector2f()
 	private Vector2f direction = new Vector2f()
@@ -82,6 +79,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
+	private float accDelta = 0f
 
 	private boolean firing
 	private List<Command> firingCommands = new CopyOnWriteArrayList<>()
@@ -133,50 +131,55 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		// TODO: The separate input handling should probably be split up so it's not all jumbled together
 
 		// Apply keyboard movement
+		float impulseDirection = 0f
+		var accelerating = false
 		if (keyboardForwards) {
-			var headingInRadians = Math.toRadians(heading)
+			impulseDirection =
+				keyboardStrafeLeft ? Math.wrapToCircle((float)(heading - 45f)) :
+					keyboardStrafeRight ? Math.wrapToCircle((float)(heading + 45f)) :
+						heading
+			accelerating = true
+		}
+		else if (keyboardBackwards) {
+			impulseDirection =
+				keyboardStrafeLeft ? Math.wrapToCircle((float)(heading + 180f + 45f)) :
+					keyboardStrafeRight ? Math.wrapToCircle((float)(heading + 180f - 45f)) :
+						Math.wrapToCircle((float)(heading - 180f))
+			accelerating = true
+		}
+		else if (keyboardStrafeLeft) {
+			impulseDirection = Math.wrapToCircle((float)(heading - 90f))
+			accelerating = true
+		}
+		else if (keyboardStrafeRight) {
+			impulseDirection = Math.wrapToCircle((float)(heading + 90f))
+			accelerating = true
+		}
+
+		if (accelerating) {
+			var headingInRadians = Math.toRadians(impulseDirection)
 			impulse.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).normalize()
+			accDelta = Math.min((float)(accDelta + delta), TIME_TO_MAX_SPEED_S)
 		}
-		if (keyboardBackwards) {
-			var headingInRadians = Math.toRadians(heading)
-			impulse.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).negate().normalize()
-		}
-		if (keyboardStrafeLeft) {
-			var leftAngle = Math.wrap((float)(heading - 90f), 0f, 360f)
-			var leftAngleInRadians = Math.toRadians(leftAngle)
-			impulse.set(Math.sin(leftAngleInRadians), Math.cos(leftAngleInRadians)).normalize()
-		}
-		if (keyboardStrafeRight) {
-			var rightAngle = Math.wrap((float)(heading + 90f), 0f, 360f)
-			var rightAngleInRadians = Math.toRadians(rightAngle)
-			impulse.set(Math.sin(rightAngleInRadians), Math.cos(rightAngleInRadians)).normalize()
-		}
-		if (!keyboardForwards && !keyboardBackwards && !keyboardStrafeLeft && !keyboardStrafeRight) {
+		else {
 			impulse.zero()
+			accDelta = Math.max((float)(accDelta - delta), 0f)
 		}
 
 		// Movement
 		if (impulse) {
-			startAccelerationTimeMs ?= currentTimeMs
-			if (stopAccelerationTimeMs) {
-				stopAccelerationTimeMs = 0
-			}
 			if (initialStoppingVelocity) {
 				initialStoppingVelocity.zero()
 			}
-			var timeElapsedMs = Math.min(currentTimeMs - startAccelerationTimeMs, TIME_TO_MAX_SPEED_MS)
-			var accelerationCurve = EasingFunctions.linear((float)(timeElapsedMs / TIME_TO_MAX_SPEED_MS))
+			var accelerationCurve = EasingFunctions.linear(accDelta)
 			var maxAcceleration = new Vector2f(impulse).mul(MAX_SPEED).mul(accelerationCurve).mul(delta)
 			velocity.set(maxAcceleration)
 		}
 		else if (velocity) {
-			stopAccelerationTimeMs ?= currentTimeMs
-			startAccelerationTimeMs = 0
 			if (!initialStoppingVelocity) {
 				initialStoppingVelocity.set(velocity)
 			}
-			var timeElapsedMs = Math.min(currentTimeMs - stopAccelerationTimeMs, TIME_TO_STOP_MS)
-			var deccelerationCurve = EasingFunctions.linear((float)(1 - timeElapsedMs / TIME_TO_STOP_MS))
+			var deccelerationCurve = EasingFunctions.linear(accDelta)
 			var maxDecceleration = new Vector2f(initialStoppingVelocity).mul(deccelerationCurve)
 			velocity.set(maxDecceleration)
 		}
