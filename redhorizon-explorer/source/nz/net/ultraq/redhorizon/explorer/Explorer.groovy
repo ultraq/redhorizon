@@ -120,7 +120,6 @@ class Explorer {
 				renderResolution: renderResolution,
 				startWithChrome: true
 			), new LogPanel(true), entryList, nodeList)
-			.addTimeSystem()
 			.onApplicationStart { application, scene ->
 				applicationStart(application, scene, openOnLaunch)
 			}

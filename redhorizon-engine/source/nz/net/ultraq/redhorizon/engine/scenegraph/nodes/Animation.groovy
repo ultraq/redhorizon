@@ -30,7 +30,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
@@ -49,7 +48,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Animation extends Node<Animation> implements GraphicsElement, Playable, Temporal {
+class Animation extends Node<Animation> implements GraphicsElement, Playable {
 
 	protected final Matrix4f transformCopy = new Matrix4f()
 	protected final SpriteMaterial materialCopy = new SpriteMaterial()
@@ -58,7 +57,7 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 	private final int numFrames
 	private final float frameRate
-	private long startTimeMs
+	private float accAnimationTime
 	private int currentFrame = -1
 	private Mesh mesh
 	private Shader shader
@@ -139,28 +138,17 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	}
 
 	@Override
-	void tick(long updatedTimeMs) {
-
-		if (playing) {
-			Temporal.super.tick(updatedTimeMs)
-
-			if (!startTimeMs) {
-				startTimeMs = currentTimeMs
-			}
-		}
-	}
-
-	@Override
 	void update(float delta) {
 
 		if (playing) {
-			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
+			var nextFrame = Math.floor(accAnimationTime * frameRate) as int
 			if (nextFrame < numFrames) {
 				currentFrame = nextFrame
 			}
 			else {
 				stop()
 			}
+			accAnimationTime += delta
 		}
 	}
 

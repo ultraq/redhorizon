@@ -77,7 +77,7 @@ class UnitShowcaseScript extends Script<Unit> {
 			startAnimation()
 		}))
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
-			scene.gameClock.togglePause()
+//			scene.gameClock.togglePause()
 		}))
 
 		var Faction[] factions = Faction.values()

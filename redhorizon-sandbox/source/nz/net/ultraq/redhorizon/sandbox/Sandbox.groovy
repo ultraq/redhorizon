@@ -77,7 +77,6 @@ class Sandbox {
 				clearColour: Colour.GREY,
 				renderResolution: renderResolution
 			))
-			.addTimeSystem()
 			.onApplicationStart(this::applicationStart)
 			.onApplicationStop(this::applicationStop)
 			.start()

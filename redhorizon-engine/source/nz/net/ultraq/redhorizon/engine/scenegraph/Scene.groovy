@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
-import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.FrustumIntersection
@@ -58,7 +57,6 @@ class Scene implements EventTarget {
 	AudioRequests audioRequestsHandler
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
-	TimeSystem gameClock
 	// TODO: A better name for this or way for nodes to have access to inputs?
 	InputEventStream inputEventStream
 
@@ -75,7 +73,6 @@ class Scene implements EventTarget {
 	private final ConcurrentSkipListSet<Float> zValues = new ConcurrentSkipListSet<>()
 	private final TreeMap<Float, QuadTree> quadTrees = new TreeMap<>()
 	private final TreeMap<Float, CopyOnWriteArrayList<Node>> nodeLists = new TreeMap<>()
-	private final List<Temporal> temporalNodes = new CopyOnWriteArrayList<>()
 	private final List<Node> updateableNodes = new CopyOnWriteArrayList<>()
 	private final Semaphore createQuadTreeSemaphore = new Semaphore(1)
 	private final Semaphore createNodeListSemaphore = new Semaphore(1)
@@ -171,10 +168,6 @@ class Scene implements EventTarget {
 		switch (node.updateHint) {
 			case UpdateHint.ALWAYS -> updateableNodes << node
 		}
-
-		if (node instanceof Temporal) {
-			temporalNodes << node
-		}
 	}
 
 	/**
@@ -230,16 +223,6 @@ class Scene implements EventTarget {
 	}
 
 	/**
-	 * Update the scene's temporal nodes with the given time value.
-	 */
-	void tick(long currentTimeMillis) {
-
-		temporalNodes.each { element ->
-			element.tick(currentTimeMillis)
-		}
-	}
-
-	/**
 	 * Remove a node from the partitioning data structures.
 	 */
 	private void unpartition(Node node) {
@@ -250,10 +233,6 @@ class Scene implements EventTarget {
 
 		switch (node.updateHint) {
 			case UpdateHint.ALWAYS -> updateableNodes.remove(node)
-		}
-
-		if (node instanceof Temporal) {
-			temporalNodes.remove(node)
 		}
 	}
 

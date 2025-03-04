@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
@@ -52,7 +51,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements Rotatable, Temporal {
+class Player extends Node<Player> implements Rotatable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
@@ -79,7 +78,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	private Vector2f lastLookAt = new Vector2f()
 	private Vector2f relativeLookAt = new Vector2f()
 	private float rotation = 0f
-	private float accDelta = 0f
+	private float accAccelerationTime = 0f
+	private float accTime
 
 	private boolean firing
 	private List<Command> firingCommands = new CopyOnWriteArrayList<>()
@@ -128,6 +128,8 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 	@Override
 	void update(float delta) {
 
+		accTime += delta
+
 		// TODO: The separate input handling should probably be split up so it's not all jumbled together
 
 		// Apply keyboard movement
@@ -159,11 +161,11 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 		if (accelerating) {
 			var headingInRadians = Math.toRadians(impulseDirection)
 			impulse.set(Math.sin(headingInRadians), Math.cos(headingInRadians)).normalize()
-			accDelta = Math.min((float)(accDelta + delta), TIME_TO_MAX_SPEED_S)
+			accAccelerationTime = Math.min((float)(accAccelerationTime + delta), TIME_TO_MAX_SPEED_S)
 		}
 		else {
 			impulse.zero()
-			accDelta = Math.max((float)(accDelta - delta), 0f)
+			accAccelerationTime = Math.max((float)(accAccelerationTime - delta), 0f)
 		}
 
 		// Movement
@@ -171,7 +173,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			if (initialStoppingVelocity) {
 				initialStoppingVelocity.zero()
 			}
-			var accelerationCurve = EasingFunctions.linear(accDelta)
+			var accelerationCurve = EasingFunctions.linear(accAccelerationTime)
 			var maxAcceleration = new Vector2f(impulse).mul(MAX_SPEED).mul(accelerationCurve).mul(delta)
 			velocity.set(maxAcceleration)
 		}
@@ -179,7 +181,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 			if (!initialStoppingVelocity) {
 				initialStoppingVelocity.set(velocity)
 			}
-			var deccelerationCurve = EasingFunctions.linear(accDelta)
+			var deccelerationCurve = EasingFunctions.linear(accAccelerationTime)
 			var maxDecceleration = new Vector2f(initialStoppingVelocity).mul(deccelerationCurve)
 			velocity.set(maxDecceleration)
 		}
@@ -240,7 +242,7 @@ class Player extends Node<Player> implements Rotatable, Temporal {
 
 			// Helicopter bobbing
 			bobbingTask = scheduledExecutor.scheduleAtFixedRate({ ->
-				var bob = 0.0625 * Math.sin(currentTimeMs / 750) as float
+				var bob = 0.0625 * Math.sin(accTime) as float
 				unit.body.transform { ->
 					translate(0f, bob, 0f)
 				}

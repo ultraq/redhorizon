@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.shooter.objects
 
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
 import org.joml.Vector2f
@@ -28,7 +27,7 @@ import org.joml.Vector2f
  *
  * @author Emanuel Rabina
  */
-class Bullet extends PalettedSprite implements Rotatable, Temporal {
+class Bullet extends PalettedSprite implements Rotatable {
 
 	private static final float MOVEMENT_SPEED = 100
 

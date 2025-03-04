@@ -82,4 +82,17 @@ trait Playable extends EventTarget {
 			trigger(new StopEvent())
 		}
 	}
+
+	/**
+	 * Toggle between playing and paused states.
+	 */
+	void togglePause() {
+
+		if (playing) {
+			pause()
+		}
+		else {
+			play()
+		}
+	}
 }

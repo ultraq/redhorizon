@@ -34,7 +34,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
@@ -52,7 +51,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
+class Unit extends Node<Unit> implements FactionColours, Rotatable {
 
 	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
@@ -73,7 +72,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	UnitShadow shadow
 
 	private int stateIndex = 0
-	private long animationStartTime
+	private float accAnimationTime
 	private SpriteSheet spriteSheet
 
 	Unit(ImagesFile imagesFile, UnitData unitData) {
@@ -231,7 +230,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	void startAnimation() {
 
-		animationStartTime = currentTimeMs
+		accAnimationTime = 0
 	}
 
 	/**
@@ -274,10 +273,11 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				//       degrees-based headings are done.
 				var closestHeading = Math.round(heading / degreesPerHeading)
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
-				var animationFrame = frames > 1 ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+				var animationFrame = frames > 1 ? Math.floor((float)(accAnimationTime * FRAMERATE)) % frames as int : 0
 				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			}
 
+			accAnimationTime += delta
 			super.update(delta)
 		}
 	}

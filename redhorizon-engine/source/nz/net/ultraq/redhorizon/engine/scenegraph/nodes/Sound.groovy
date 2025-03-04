@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
@@ -46,7 +45,7 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
+class Sound extends Node<Sound> implements AudioElement, Playable {
 
 	private final SoundSource soundSource
 
@@ -125,18 +124,6 @@ class Sound extends Node<Sound> implements AudioElement, Playable, Temporal {
 				}
 			}
 		}
-	}
-
-	@Override
-	void tick(long updatedTimeMs) {
-
-		if (playing && currentTimeMs == updatedTimeMs) {
-			pause()
-		}
-		else if (paused && currentTimeMs != updatedTimeMs) {
-			play()
-		}
-		currentTimeMs = updatedTimeMs
 	}
 
 	/**

@@ -60,7 +60,6 @@ class Shooter {
 				clearColour: Colour.GREY,
 				renderResolution: RENDER_RESOLUTION
 			))
-			.addTimeSystem()
 			.onApplicationStart { application, scene -> start(scene) }
 			.onApplicationStop { application, scene -> stop(scene) }
 			.start()

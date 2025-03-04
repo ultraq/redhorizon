@@ -56,7 +56,7 @@ class PlaybackScript extends Script {
 		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
 			if (runOnce) {
 				logger.debug('Pausing/Resuming playback')
-				scene.gameClock.togglePause()
+				togglePause()
 			}
 			else {
 				if (!playing || paused) {
@@ -105,8 +105,5 @@ class PlaybackScript extends Script {
 	void onSceneRemoved(Scene scene) {
 
 		removeControlFunctions*.remove()
-		if (scene.gameClock.paused) {
-			scene.gameClock.resume()
-		}
 	}
 }

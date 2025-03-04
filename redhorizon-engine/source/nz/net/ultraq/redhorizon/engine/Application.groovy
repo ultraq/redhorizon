@@ -30,7 +30,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
@@ -109,16 +108,6 @@ class Application implements EventTarget {
 		}
 		graphicsSystem.relay(WindowMaximizedEvent, this)
 		engine << graphicsSystem
-		return this
-	}
-
-	/**
-	 * Add a managed time system to this application.  The time system will update
-	 * objects in the scene on its own thread.
-	 */
-	Application addTimeSystem() {
-
-		engine << new TimeSystem()
 		return this
 	}
 
