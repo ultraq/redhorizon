@@ -52,7 +52,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	private final Vector3f globalScale = new Vector3f(1, 1, 1)
 	private final Rectanglef globalBounds = new Rectanglef()
 	private PartitionHint partitionHint = null
-	private UpdateHint updateHint = null
 
 	/**
 	 * Adds a child node to this node.
@@ -264,19 +263,6 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 	}
 
 	/**
-	 * A hint to the scenegraph to add this node to an appropriate data structure
-	 * for performance purposes.
-	 * <p>
-	 * The default behaviour is to inherit the update hint of its parent,
-	 * defaulting to {@link UpdateHint#ALWAYS} if there are no hints in the node's
-	 * ancestor tree.
-	 */
-	UpdateHint getUpdateHint() {
-
-		return updateHint ?: parent?.updateHint ?: UpdateHint.ALWAYS
-	}
-
-	/**
 	 * Return the width of the node.  This is a shortcut for calling
 	 * {@code bounds.lengthX()}.
 	 */
@@ -472,15 +458,5 @@ class Node<T extends Node> implements SceneEvents, Scriptable<T> {
 			.thenComposeAsync { visitChildren ->
 				return CompletableFuture.allOf(visitChildren ? children.collect { child -> child.traverseAsync(visitor) } : [])
 			}
-	}
-
-	/**
-	 * Called on every frame before the node is rendered, allowing it to perform
-	 * any processing as a response to changes in the scene.
-	 *
-	 * @param delta
-	 *   Time, in seconds, since the last time this method was called.
-	 */
-	void update(float delta) {
 	}
 }

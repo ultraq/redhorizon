@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
@@ -39,7 +40,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Camera extends Node<Camera> implements GraphicsElement {
+class Camera extends Node<Camera> implements GameObject, GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 

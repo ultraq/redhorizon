@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph
+package nz.net.ultraq.redhorizon.engine.game
 
 /**
- * Hint to the scene for how a node can handle updates.  This allows the scene
- * to move the node to make calls to {@code update} more performant.
+ * Any object in the scene that should be updated by the {@link GameLogicSystem}.
  *
  * @author Emanuel Rabina
  */
-enum UpdateHint {
+trait GameObject {
 
-	ALWAYS,
-	NEVER
+	/**
+	 * Called regularly by the game logic system, allowing it to perform any
+	 * processing as a response to changes in the scene.
+	 *
+	 * @param delta
+	 *   Time, in seconds, since the last time this method was called.
+	 */
+	abstract void update(float delta)
 }

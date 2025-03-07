@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
@@ -48,7 +49,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Animation extends Node<Animation> implements GraphicsElement, Playable {
+class Animation extends Node<Animation> implements GameObject, GraphicsElement, Playable {
 
 	protected final Matrix4f transformCopy = new Matrix4f()
 	protected final SpriteMaterial materialCopy = new SpriteMaterial()

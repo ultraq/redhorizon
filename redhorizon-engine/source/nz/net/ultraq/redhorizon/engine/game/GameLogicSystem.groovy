@@ -45,6 +45,7 @@ class GameLogicSystem extends EngineSystem {
 	void runLoop() {
 
 		var graphicsSystem = (GraphicsSystem)engine.systems.find { system -> system instanceof GraphicsSystem }
+		var gameObjects = []
 
 		while (!Thread.interrupted()) {
 			try {
@@ -52,7 +53,8 @@ class GameLogicSystem extends EngineSystem {
 				var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
 
 				average('Updating', 1f, logger) { ->
-					scene?.update(delta)
+					scene?.query(GameObject, gameObjects)*.update(delta)
+					gameObjects.clear()
 				}
 				graphicsSystem.waitForContinue()
 

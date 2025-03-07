@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.game.Command
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
@@ -29,7 +30,6 @@ import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements Rotatable {
+class Player extends Node<Player> implements GameObject, Rotatable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
@@ -61,7 +61,6 @@ class Player extends Node<Player> implements Rotatable {
 	private static final Vector2f up = new Vector2f(0, 1)
 
 	final PartitionHint partitionHint = PartitionHint.NONE
-	final UpdateHint updateHint = UpdateHint.ALWAYS
 	private final Unit unit
 
 	private boolean keyboardForwards
