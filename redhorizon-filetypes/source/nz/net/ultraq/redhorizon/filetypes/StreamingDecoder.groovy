@@ -16,28 +16,30 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
+import java.util.concurrent.RunnableFuture
 
 /**
- * A special kind of {@code RunnableFuture} for decoding file data and emitting
- * the results as events.  Workers can be stopped using the standard
- * {@code Future.cancel} method, and worker implementations must respect these
- * controls.
+ * A special kind of {@link RunnableFuture} for decoding file data and emitting
+ * the results as {@link StreamingEvent}s.  Decoders can be stopped using the
+ * standard {@link Future#cancel} method, and the underlying {@code Runnable}
+ * implementation must respect these controls.
  *
  * @author Emanuel Rabina
  */
 class StreamingDecoder extends FutureTask<Void> implements EventTarget {
 
 	/**
-	 * Constructor, set the work loop.
+	 * Constructor, create a decoder with the underlying {@code Runnable},
+	 * relaying events to this decoder.
 	 */
 	StreamingDecoder(Runnable runnable) {
 
 		super(runnable, null)
 		assert runnable instanceof EventTarget
-		runnable.relay(Event, this)
+		runnable.relay(StreamingEvent, this)
 	}
 }
