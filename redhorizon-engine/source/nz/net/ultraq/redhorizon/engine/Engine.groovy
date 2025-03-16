@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
@@ -26,9 +27,9 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 /**
- * A coordinator object responsible for starting/stopping the engine systems
- * that operate on a scene.  Each system can be given it's own thread to take
- * advantage of multi-processor CPUs.
+ * A coordinator object responsible for starting/stopping any registered
+ * {@link EngineSystem}s that operate on a {@link Scene}.  Each system is given
+ * it's own thread to take advantage of multi-processor CPUs.
  *
  * @author Emanuel Rabina
  */
@@ -36,20 +37,37 @@ class Engine implements EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
-	final List<EngineSystem> systems = []
-
+	private final List<EngineSystem> allSystems = []
+	private final List<EngineSystem> inputSystems = []
+	private final List<EngineSystem> updateSystems = []
+	private final List<EngineSystem> renderSystems = []
 	private final Semaphore enginesStoppingSemaphore = new Semaphore(1)
 
+	private Thread engineThread
 	private List<Thread> systemThreads
 	private boolean engineStopping
+	private Scene scene
 
 	/**
 	 * Add a system to the engine.
 	 */
 	void addSystem(EngineSystem system) {
 
-		systems << system
+		switch (system.type) {
+			case EngineSystemType.INPUT -> inputSystems << system
+			case EngineSystemType.UPDATE -> updateSystems << system
+			case EngineSystemType.RENDER -> renderSystems << system
+		}
+		allSystems << system
 		system.engine = this
+	}
+
+	/**
+	 * Find and return the given system, if present.
+	 */
+	<T extends EngineSystem> T findSystem(Class<T> clazz) {
+
+		return (T)allSystems.find { system -> system.class == clazz }
 	}
 
 	/**
@@ -61,13 +79,33 @@ class Engine implements EventTarget {
 	}
 
 	/**
-	 * Start the game engine.  This will assign all systems their own thread to
-	 * run.  This method will block until all systems have completed execution.
+	 * Notify all systems in the given list that they may begin a new processing
+	 * iteration, then wait for them to signal completion before returning.
+	 */
+	private void notifySystemsAndWaitForCompletion(List<EngineSystem> systems) {
+
+		systems.each { system ->
+			system.notifyForProcessStart()
+		}
+		systems.each { system ->
+			system.waitForProcessComplete()
+		}
+	}
+
+	/**
+	 * Start the game engine and the main game loop.  This will assign all systems
+	 * their own thread on which to start and run.  This method will block until
+	 * all systems have completed execution.
 	 *
 	 * @throws Throwable
 	 *   Any exception that may have occurred during the running of the engine.
 	 */
 	void start() {
+
+		engineThread = Thread.currentThread()
+
+		// Engine setup
+		// -------------------------------------------------------------------------
 
 		logger.debug('Starting engine...')
 
@@ -78,8 +116,8 @@ class Engine implements EventTarget {
 				uncaughtException = e
 			}
 
-		var engineReadyLatch = new CountDownLatch(systems.size())
-		systemThreads = systems.collect() { system ->
+		var engineReadyLatch = new CountDownLatch(allSystems.size())
+		systemThreads = allSystems.collect() { system ->
 			system.on(EngineSystemReadyEvent) { event ->
 				engineReadyLatch.countDown()
 			}
@@ -100,16 +138,44 @@ class Engine implements EventTarget {
 				throw uncaughtException
 			}
 		}
-
 		logger.debug('Engine started')
 		trigger(new EngineReadyEvent())
 
+		// Game loop
+		// -------------------------------------------------------------------------
+
+		logger.debug('Beginning game loop')
+		while (!Thread.interrupted() && !engineStopping) {
+			try {
+				notifySystemsAndWaitForCompletion(inputSystems)
+				notifySystemsAndWaitForCompletion(updateSystems)
+				notifySystemsAndWaitForCompletion(renderSystems)
+			}
+			catch (InterruptedException ignored) {
+				break
+			}
+		}
+
 		logger.debug('Waiting for each system to signal completion')
 		systemThreads*.join()
+
+		// Engine shutdown
+		// -------------------------------------------------------------------------
+
 		if (uncaughtException) {
 			throw uncaughtException
 		}
 		logger.debug('Engine stopped')
+	}
+
+	/**
+	 * Set the scene the engine is running the game loop over.
+	 */
+	void setScene(Scene scene) {
+
+		this.scene = scene
+		allSystems*.scene = scene
+		allSystems*.configureScene()
 	}
 
 	/**
@@ -119,6 +185,7 @@ class Engine implements EventTarget {
 
 		enginesStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!engineStopping) {
+				engineThread.interrupt()
 				systemThreads*.interrupt()
 				engineStopping = true
 			}

@@ -16,6 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
+import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.EngineSystemType
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
+import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
@@ -27,18 +31,13 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS
  *
  * @author Emanuel Rabina
  */
-class InputEventStream implements EventTarget {
+class InputEventStream extends EngineSystem implements InputRequests, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(InputEventStream)
 
-	/**
-	 * Register an input binding with the application.
-	 *
-	 * @param control
-	 * @return
-	 *   A function that can be executed to remove the input binding that was just
-	 *   added.
-	 */
+	final EngineSystemType type = EngineSystemType.INPUT
+
+	@Override
 	RemoveControlFunction addControl(Control control) {
 
 		var removeEventFunction = on(control.event, control)
@@ -51,22 +50,7 @@ class InputEventStream implements EventTarget {
 	}
 
 	/**
-	 * Register multiple input bindings at once.
-	 *
-	 * @param controls
-	 * @return
-	 *   A list of functions to remove the input binding, in the same order they
-	 *   were added.
-	 */
-	RemoveControlFunction[] addControls(Control... controls) {
-
-		return controls.collect { control -> addControl(control) }
-	}
-
-	/**
 	 * Add a source for input events that can be listened to using this object.
-	 *
-	 * @param inputSource
 	 */
 	void addInputSource(InputSource inputSource) {
 
@@ -75,6 +59,36 @@ class InputEventStream implements EventTarget {
 				logger.trace("Key: {}, mods: {}", event.key, event.mods)
 			}
 			trigger(event)
+		}
+	}
+
+	@Override
+	void configureScene() {
+
+		scene.inputEventStream = this
+	}
+
+	@Override
+	protected void runInit() {
+
+		var graphicsSystem = engine.findSystem(GraphicsSystem)
+		graphicsSystem.on(WindowCreatedEvent) { event ->
+			addInputSource(event.window)
+		}
+	}
+
+	@Override
+	protected void runLoop() {
+
+		while (!Thread.interrupted()) {
+			try {
+				process { ->
+					// TODO: Process input at this step of the game loop
+				}
+			}
+			catch (InterruptedException ignored) {
+				break
+			}
 		}
 	}
 }

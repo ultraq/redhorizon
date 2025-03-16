@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLContext
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
@@ -34,7 +35,6 @@ import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -47,13 +47,12 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 
 	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
 
+	final EngineSystemType type = EngineSystemType.RENDER
+
 	private final String windowTitle
-	private final InputEventStream inputEventStream
 	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<GraphicsResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
-	private final CyclicBarrier renderBarrier = new CyclicBarrier(2)
-	private final CyclicBarrier continueBarrier = new CyclicBarrier(2)
 
 	private OpenGLContext context
 	private OpenGLWindow window
@@ -67,10 +66,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	/**
 	 * Constructor, build a new system for rendering graphics.
 	 */
-	GraphicsSystem(String windowTitle, InputEventStream inputEventStream, GraphicsConfiguration config) {
+	GraphicsSystem(String windowTitle, GraphicsConfiguration config) {
 
 		this.windowTitle = windowTitle
-		this.inputEventStream = inputEventStream
 		this.config = config
 	}
 
@@ -194,42 +192,38 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			imGuiLayer = new ImGuiLayer(config, window)
 			imGuiLayer.relay(FramebufferSizeEvent, this)
 
-			renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer, inputEventStream)
+			renderPipeline = new RenderPipeline(config, window, renderer, imGuiLayer)
 		}
 	}
 
 	@Override
 	protected void runLoop() {
 
-		var gamepadStateProcessor = new GamepadStateProcessor(inputEventStream)
+		var inputSystem = engine.findSystem(InputEventStream)
+		var gamepadStateProcessor = new GamepadStateProcessor(inputSystem)
 
 		context.withCurrent { ->
 			while (!window.shouldClose() && !Thread.interrupted()) {
 				try {
-					if (shouldToggleFullScreen) {
-						window.toggleFullScreen()
-						shouldToggleFullScreen = false
-					}
-					if (shouldToggleVsync) {
-						window.toggleVsync()
-						shouldToggleVsync = false
-					}
-					processRequests(renderer)
+					process { ->
+						if (shouldToggleFullScreen) {
+							window.toggleFullScreen()
+							shouldToggleFullScreen = false
+						}
+						if (shouldToggleVsync) {
+							window.toggleVsync()
+							shouldToggleVsync = false
+						}
+						processRequests(renderer)
 
-					// Synchronization point where we wait for the game logic
-					// system to signal that it's OK to gather renderables from
-					// the scene.  Once we have those renderables, we can let the
-					// game logic system continue while we draw those out.
-					renderBarrier.await()
-					renderBarrier.reset()
-					renderPipeline.gather()
-					continueBarrier.await()
-					continueBarrier.reset()
+						// TODO: Combine gather/render into 1 again
+						renderPipeline.gather()
+						renderPipeline.render()
+						window.swapBuffers()
+						window.pollEvents()
 
-					renderPipeline.render()
-					window.swapBuffers()
-					window.pollEvents()
-					gamepadStateProcessor.process()
+						gamepadStateProcessor.process()
+					}
 				}
 				catch (InterruptedException ignored) {
 					break
@@ -247,18 +241,5 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			renderer.close()
 		}
 		context.close()
-	}
-
-	/**
-	 * Called by the game logic system to signal to the graphics system that it
-	 * should start gathering objects from the scene to render.  This method will
-	 * block until that gathering process is complete so that it's safe for the
-	 * game logic system to continue with its work and there is no longer
-	 * competition for data.
-	 */
-	void waitForContinue() {
-
-		renderBarrier.await()
-		continueBarrier.await()
 	}
 }

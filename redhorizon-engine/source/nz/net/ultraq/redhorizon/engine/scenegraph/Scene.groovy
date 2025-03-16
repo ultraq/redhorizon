@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputRequests
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
@@ -58,8 +58,8 @@ class Scene implements EventTarget {
 	AudioRequests audioRequestsHandler
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
-	// TODO: A better name for this or way for nodes to have access to inputs?
-	InputEventStream inputEventStream
+	@Delegate
+	InputRequests inputEventStream
 
 	Window window
 	Camera camera

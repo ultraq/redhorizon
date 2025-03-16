@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.game.GameLogicSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
@@ -43,8 +42,8 @@ import java.util.concurrent.Semaphore
 /**
  * A base for developing an application that uses the Red Horizon engine and
  * various systems.  This class uses a builder-like API to let you pick what
- * goes into the application, as well as customize it at certain event
- * lifecycles, eg:
+ * goes into the application, as well as customize it at certain stages of the
+ * application lifecycle, eg:
  * <p>
  * <pre>{@code
  * new Application("Window title")
@@ -67,8 +66,6 @@ class Application implements EventTarget {
 	final String version
 
 	private final Engine engine = new Engine()
-	private final GameLogicSystem gameLogicSystem = new GameLogicSystem()
-	private final InputEventStream inputEventStream = new InputEventStream()
 
 	private Scene scene
 	private ApplicationEventHandler applicationStart
@@ -82,8 +79,16 @@ class Application implements EventTarget {
 	 */
 	Application addAudioSystem(AudioConfiguration config = new AudioConfiguration()) {
 
-		var audioSystem = new AudioSystem(config)
-		engine << audioSystem
+		engine << new AudioSystem(config)
+		return this
+	}
+
+	/**
+	 * Add a game object updater to this application.
+	 */
+	Application addGameLogicSystem() {
+
+		engine << new GameLogicSystem()
 		return this
 	}
 
@@ -95,19 +100,28 @@ class Application implements EventTarget {
 	Application addGraphicsSystem(GraphicsConfiguration config = new GraphicsConfiguration(),
 		ImGuiElement... uiElements) {
 
-		var graphicsSystem = new GraphicsSystem("${name} - ${version}", inputEventStream, config)
-		graphicsSystem.on(WindowCreatedEvent) { event ->
-			inputEventStream.addInputSource(event.window)
-		}
+		var graphicsSystem = new GraphicsSystem("${name} - ${version}", config)
 		graphicsSystem.on(EngineSystemReadyEvent) { event ->
-			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputEventStream, config.debug).toggleWith(inputEventStream, GLFW_KEY_D))
-			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputEventStream).toggleWith(inputEventStream, GLFW_KEY_C))
+			var inputSystem = engine.findSystem(InputEventStream)
+			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, config.debug).toggleWith(inputSystem, GLFW_KEY_D))
+			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem).toggleWith(inputSystem, GLFW_KEY_C))
 			uiElements.each { overlayRenderPass ->
 				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)
 			}
 		}
 		graphicsSystem.relay(WindowMaximizedEvent, this)
 		engine << graphicsSystem
+		return this
+	}
+
+	/**
+	 * Add an input-processing system to this application.  This will need an
+	 * input source of some kind to work, of which the {@code GraphicsSystem} is
+	 * one.
+	 */
+	Application addInputSystem() {
+
+		engine << new InputEventStream()
 		return this
 	}
 
@@ -127,30 +141,32 @@ class Application implements EventTarget {
 	final void start() {
 
 		logger.debug('Initializing application...')
-		engine << gameLogicSystem
 
 		if (!scene) {
 			scene = new Scene()
 		}
-		scene.inputEventStream = inputEventStream
 
 		// Universal quit on exit
-		inputEventStream.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
-				stop()
+		var inputSystem = engine.findSystem(InputEventStream)
+		if (inputSystem) {
+			inputSystem.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+					stop()
+				}
 			}
-		}
-		inputEventStream.on(GuiEvent) { event ->
-			if (event.type == EVENT_TYPE_STOP) {
-				stop()
+			inputSystem.on(GuiEvent) { event ->
+				if (event.type == EVENT_TYPE_STOP) {
+					stop()
+				}
 			}
 		}
 
 		try {
 			// Start the application
 			logger.debug('Starting application...')
+			// TODO: Scene setup shouldn't be part of an event 🤔
 			engine.on(EngineReadyEvent) { event ->
-				engine.systems*.scene = scene
+				engine.scene = scene
 				applicationStart?.apply(this, scene)
 			}
 			engine.start()

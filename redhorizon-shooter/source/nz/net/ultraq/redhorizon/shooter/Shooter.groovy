@@ -56,10 +56,12 @@ class Shooter {
 	Shooter(String version) {
 
 		new Application('Shooter', version)
+			.addGameLogicSystem()
 			.addGraphicsSystem(new GraphicsConfiguration(
 				clearColour: Colour.GREY,
 				renderResolution: RENDER_RESOLUTION
 			))
+			.addInputSystem()
 			.onApplicationStart { application, scene -> start(scene) }
 			.onApplicationStop { application, scene -> stop(scene) }
 			.start()

@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
@@ -39,6 +40,8 @@ import java.util.concurrent.LinkedBlockingQueue
 class AudioSystem extends EngineSystem implements AudioRequests {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
+
+	final EngineSystemType type = EngineSystemType.RENDER
 
 	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
@@ -124,7 +127,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 		context.withCurrent { ->
 			while (!Thread.interrupted()) {
 				try {
-					rateLimit(100) { ->
+					process { ->
 						processRequests(renderer)
 
 						// Run the audio elements
