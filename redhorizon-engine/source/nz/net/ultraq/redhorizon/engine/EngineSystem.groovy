@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.PackageScope
 import java.util.concurrent.CyclicBarrier
 
 /**
@@ -41,22 +40,14 @@ abstract class EngineSystem implements Runnable, EventTarget {
 
 	private final CyclicBarrier processStartBarrier = new CyclicBarrier(2)
 	private final CyclicBarrier processCompleteBarrier = new CyclicBarrier(2)
-	private Engine engine
 
+	protected Engine engine
 	protected Scene scene
 
 	/**
 	 * Configure the current scene with this system.
 	 */
 	abstract void configureScene()
-
-	/**
-	 * Return the engine that this system is a part of.
-	 */
-	protected Engine getEngine() {
-
-		return engine
-	}
 
 	/**
 	 * Return the name of the system, for logging purposes.
@@ -139,15 +130,6 @@ abstract class EngineSystem implements Runnable, EventTarget {
 	 * Cleanup/free any resources created by the system here.
 	 */
 	protected void runShutdown() {
-	}
-
-	/**
-	 * Set the engine this system is a part of.
-	 */
-	@PackageScope
-	void setEngine(Engine engine) {
-
-		this.engine = engine
 	}
 
 	/**

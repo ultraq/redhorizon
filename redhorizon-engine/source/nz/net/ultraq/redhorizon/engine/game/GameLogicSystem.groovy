@@ -23,6 +23,8 @@ import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.BrokenBarrierException
+
 /**
  * Engine subsystem for running game logic and updating objects in response to
  * inputs and other factors.
@@ -48,8 +50,8 @@ class GameLogicSystem extends EngineSystem {
 
 		List<GameObject> gameObjects = []
 
-		while (!Thread.interrupted()) {
-			try {
+		try {
+			while (!Thread.interrupted()) {
 				process { ->
 					var currentTimeMs = System.currentTimeMillis()
 					var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
@@ -62,9 +64,9 @@ class GameLogicSystem extends EngineSystem {
 					lastUpdateTimeMs = currentTimeMs
 				}
 			}
-			catch (InterruptedException ignored) {
-				break
-			}
+		}
+		catch (InterruptedException | BrokenBarrierException ignored) {
+			// Do nothing
 		}
 	}
 }

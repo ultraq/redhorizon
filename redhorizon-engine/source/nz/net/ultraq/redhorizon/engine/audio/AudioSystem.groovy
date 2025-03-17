@@ -28,6 +28,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.BrokenBarrierException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -125,8 +126,8 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	protected void runLoop() {
 
 		context.withCurrent { ->
-			while (!Thread.interrupted()) {
-				try {
+			try {
+				while (!Thread.interrupted()) {
 					process { ->
 						processRequests(renderer)
 
@@ -145,9 +146,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 						}
 					}
 				}
-				catch (InterruptedException ignored) {
-					break
-				}
+			}
+			catch (InterruptedException | BrokenBarrierException ignored) {
+				// Do nothing
 			}
 		}
 	}

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.BrokenBarrierException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -203,8 +204,8 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		var gamepadStateProcessor = new GamepadStateProcessor(inputSystem)
 
 		context.withCurrent { ->
-			while (!window.shouldClose() && !Thread.interrupted()) {
-				try {
+			try {
+				while (!window.shouldClose() && !Thread.interrupted()) {
 					process { ->
 						if (shouldToggleFullScreen) {
 							window.toggleFullScreen()
@@ -225,9 +226,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 						gamepadStateProcessor.process()
 					}
 				}
-				catch (InterruptedException ignored) {
-					break
-				}
+			}
+			catch (InterruptedException | BrokenBarrierException ignored) {
+				// Do nothing
 			}
 		}
 	}

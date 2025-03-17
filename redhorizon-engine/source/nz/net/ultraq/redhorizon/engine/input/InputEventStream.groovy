@@ -26,8 +26,11 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
+import java.util.concurrent.BrokenBarrierException
+
 /**
- * The input event stream for relaying input events from other input sources.
+ * The input system for accepting input from one or more sources and processing
+ * them during the input stage of the game loop.
  *
  * @author Emanuel Rabina
  */
@@ -80,15 +83,15 @@ class InputEventStream extends EngineSystem implements InputRequests, EventTarge
 	@Override
 	protected void runLoop() {
 
-		while (!Thread.interrupted()) {
-			try {
+		try {
+			while (!Thread.interrupted()) {
 				process { ->
 					// TODO: Process input at this step of the game loop
 				}
 			}
-			catch (InterruptedException ignored) {
-				break
-			}
+		}
+		catch (InterruptedException | BrokenBarrierException ignored) {
+			// Do nothing
 		}
 	}
 }
