@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
+import nz.net.ultraq.redhorizon.engine.input.InputHandler
 import nz.net.ultraq.redhorizon.engine.input.InputRequests
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
@@ -59,7 +60,7 @@ class Scene implements EventTarget {
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
 	@Delegate
-	InputRequests inputEventStream
+	InputRequests inputRequestHandler
 
 	Window window
 	Camera camera
@@ -75,6 +76,7 @@ class Scene implements EventTarget {
 	private final TreeMap<Float, QuadTree> quadTrees = new TreeMap<>()
 	private final TreeMap<Float, CopyOnWriteArrayList<Node>> nodeLists = new TreeMap<>()
 	private final List<GameObject> updateableNodes = new CopyOnWriteArrayList<>()
+	private final List<InputHandler> inputNodes = new CopyOnWriteArrayList<>()
 	private final Semaphore createQuadTreeSemaphore = new Semaphore(1)
 	private final Semaphore createNodeListSemaphore = new Semaphore(1)
 
@@ -169,6 +171,9 @@ class Scene implements EventTarget {
 		if (node instanceof GameObject) {
 			updateableNodes << node
 		}
+		if (node instanceof InputHandler) {
+			inputNodes << node
+		}
 	}
 
 	/**
@@ -208,9 +213,11 @@ class Scene implements EventTarget {
 	 */
 	<T> List<T> query(Class<T> clazz, List<T> results = []) {
 
-		// Currently only optimized for GameObjects
 		if (clazz === GameObject) {
 			results.addAll(updateableNodes)
+		}
+		else if (clazz === InputHandler) {
+			results.addAll(inputNodes)
 		}
 		else {
 			traverseAsync { node ->
@@ -254,6 +261,9 @@ class Scene implements EventTarget {
 
 		if (node instanceof GameObject) {
 			updateableNodes.remove(node)
+		}
+		if (node instanceof InputHandler) {
+			inputNodes.remove(node)
 		}
 	}
 

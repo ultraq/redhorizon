@@ -55,33 +55,33 @@ class UnitShowcaseScript extends Script<Unit> {
 		camera.setScaleXY(4)
 		logger.info("Showing ${state} state")
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
 			rotateLeft()
 		}, true))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
 			rotateRight()
 		}, true))
 
 		var states = unitData.shpFile.states
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Previous animation', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_W, 'Previous animation', { ->
 			var currentStateIndex = states.findIndexOf { it.name == state }
 			setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
 			logger.info("Showing ${state} state")
 			startAnimation()
 		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Next animation', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_S, 'Next animation', { ->
 			var currentStateIndex = states.findIndexOf { it.name == state }
 			setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
 			logger.info("Showing ${state} state")
 			startAnimation()
 		}))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
 //			scene.gameClock.togglePause()
 		}))
 
 		var Faction[] factions = Faction.values()
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
 			->
 			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
 			logger.info('Viewing with {} faction colours', selectedFaction.name())

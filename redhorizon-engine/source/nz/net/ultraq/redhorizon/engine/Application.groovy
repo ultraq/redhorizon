@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
@@ -34,7 +34,8 @@ import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
@@ -102,9 +103,9 @@ class Application implements EventTarget {
 
 		var graphicsSystem = new GraphicsSystem("${name} - ${version}", config)
 		graphicsSystem.on(EngineSystemReadyEvent) { event ->
-			var inputSystem = engine.findSystem(InputEventStream)
-			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, config.debug).toggleWith(inputSystem, GLFW_KEY_D))
-			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem).toggleWith(inputSystem, GLFW_KEY_C))
+			var inputSystem = engine.findSystem(InputSystem)
+			graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, config.debug))
+			graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem))
 			uiElements.each { overlayRenderPass ->
 				graphicsSystem.imGuiLayer.addUiElement(overlayRenderPass)
 			}
@@ -121,7 +122,7 @@ class Application implements EventTarget {
 	 */
 	Application addInputSystem() {
 
-		engine << new InputEventStream()
+		engine << new InputSystem()
 		return this
 	}
 
@@ -147,7 +148,7 @@ class Application implements EventTarget {
 		}
 
 		// Universal quit on exit
-		var inputSystem = engine.findSystem(InputEventStream)
+		var inputSystem = engine.findSystem(InputSystem)
 		if (inputSystem) {
 			inputSystem.on(KeyEvent) { event ->
 				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
@@ -164,7 +165,6 @@ class Application implements EventTarget {
 		try {
 			// Start the application
 			logger.debug('Starting application...')
-			// TODO: Scene setup shouldn't be part of an event 🤔
 			engine.on(EngineReadyEvent) { event ->
 				engine.scene = scene
 				applicationStart?.apply(this, scene)

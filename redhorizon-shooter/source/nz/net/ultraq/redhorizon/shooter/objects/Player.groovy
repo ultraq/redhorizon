@@ -25,7 +25,10 @@ import nz.net.ultraq.redhorizon.engine.game.Command
 import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
+import nz.net.ultraq.redhorizon.engine.input.InputEvent
+import nz.net.ultraq.redhorizon.engine.input.InputHandler
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
@@ -51,7 +54,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Player extends Node<Player> implements GameObject, Rotatable {
+class Player extends Node<Player> implements GameObject, InputHandler, Rotatable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Player)
 	private static final Rectanglef MOVEMENT_RANGE = Map.MAX_BOUNDS
@@ -115,6 +118,38 @@ class Player extends Node<Player> implements GameObject, Rotatable {
 //		bulletImagesFile = resourceManager.loadFile('dragon.shp', ShpFile)
 
 		attachScript(new PlayerScript())
+	}
+
+	@Override
+	boolean input(InputEvent inputEvent) {
+
+		if (inputEvent instanceof KeyEvent) {
+			return switch (inputEvent.action) {
+				case GLFW_PRESS -> {
+					yield switch (inputEvent.key) {
+						case GLFW_KEY_W -> inputHandled { -> keyboardForwards = true }
+						case GLFW_KEY_S -> inputHandled { -> keyboardBackwards = true }
+						case GLFW_KEY_A -> inputHandled { -> keyboardStrafeLeft = true }
+						case GLFW_KEY_D -> inputHandled { -> keyboardStrafeRight = true }
+						case GLFW_KEY_LEFT -> inputHandled { -> rotation -= 1 }
+						case GLFW_KEY_RIGHT -> inputHandled { -> rotation += 1 }
+						default -> false
+					}
+				}
+				case GLFW_RELEASE -> {
+					yield switch (inputEvent.key) {
+						case GLFW_KEY_W -> inputHandled { -> keyboardForwards = false }
+						case GLFW_KEY_S -> inputHandled { -> keyboardBackwards = false }
+						case GLFW_KEY_A -> inputHandled { -> keyboardStrafeLeft = false }
+						case GLFW_KEY_D -> inputHandled { -> keyboardStrafeRight = false }
+						case GLFW_KEY_LEFT -> inputHandled { -> rotation += 1 }
+						case GLFW_KEY_RIGHT -> inputHandled { -> rotation -= 1 }
+						default -> false
+					}
+				}
+			}
+		}
+		return false
 	}
 
 	@Override
@@ -251,7 +286,7 @@ class Player extends Node<Player> implements GameObject, Rotatable {
 			}, 0, 10, TimeUnit.MILLISECONDS)
 
 			// Keyboard controls
-			scene.inputEventStream.addControls(
+			scene.addControls(
 				new KeyControl(GLFW_KEY_W, 'Move forwards',
 					{ -> keyboardForwards = true },
 					{ -> keyboardForwards = false }
@@ -279,14 +314,14 @@ class Player extends Node<Player> implements GameObject, Rotatable {
 			)
 
 			// Mouse input
-			scene.inputEventStream.on(CursorPositionEvent) { event ->
+			scene.inputRequestHandler.on(CursorPositionEvent) { event ->
 				lookAt
 					.set(event.xPos, scene.window.size.height() - event.yPos)
 					.div(scene.window.renderToWindowScale)
 			}
 
 			// Gamepad controls
-			scene.inputEventStream.addControls(
+			scene.inputRequestHandler.addControls(
 				new GamepadControl(GLFW_GAMEPAD_AXIS_LEFT_X, 'Movement along the X axis',
 					{ value -> velocity.x = value }
 				),

@@ -21,7 +21,7 @@ package nz.net.ultraq.redhorizon.engine.game
  *
  * @author Emanuel Rabina
  */
-trait GameObject {
+interface GameObject {
 
 	/**
 	 * Called regularly by the game logic system, allowing it to perform any
@@ -30,5 +30,5 @@ trait GameObject {
 	 * @param delta
 	 *   Time, in seconds, since the last time this method was called.
 	 */
-	abstract void update(float delta)
+	void update(float delta)
 }

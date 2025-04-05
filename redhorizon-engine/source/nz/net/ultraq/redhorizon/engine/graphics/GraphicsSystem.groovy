@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.GamepadStateProcessor
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 
@@ -200,8 +200,9 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	@Override
 	protected void runLoop() {
 
-		var inputSystem = engine.findSystem(InputEventStream)
-		var gamepadStateProcessor = new GamepadStateProcessor(inputSystem)
+		var gamepadStateProcessor = new GamepadStateProcessor()
+		var inputSystem = engine.findSystem(InputSystem)
+		inputSystem.addInputSource(gamepadStateProcessor)
 
 		context.withCurrent { ->
 			try {

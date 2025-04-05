@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
 import nz.net.ultraq.redhorizon.engine.input.GamepadAxisEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -57,7 +57,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 	 * adding the renderers via the {@code add*} methods to get stats on their
 	 * use.
 	 */
-	DebugOverlay(InputEventStream inputEventStream, boolean enabled) {
+	DebugOverlay(InputSystem inputSystem, boolean enabled) {
 
 		ImGuiLoggingAppender.instance?.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
@@ -67,7 +67,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 		engineStats = EngineStats.instance
 		runtime = Runtime.runtime
 
-		inputEventStream.on(GamepadAxisEvent) { event ->
+		inputSystem.on(GamepadAxisEvent) { event ->
 			switch (event.type) {
 				case GLFW_GAMEPAD_AXIS_LEFT_X -> leftX = event.value
 				case GLFW_GAMEPAD_AXIS_LEFT_Y -> leftY = event.value

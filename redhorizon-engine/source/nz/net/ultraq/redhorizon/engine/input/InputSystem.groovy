@@ -26,7 +26,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
+import java.util.concurrent.BlockingQueue
 import java.util.concurrent.BrokenBarrierException
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * The input system for accepting input from one or more sources and processing
@@ -34,11 +36,13 @@ import java.util.concurrent.BrokenBarrierException
  *
  * @author Emanuel Rabina
  */
-class InputEventStream extends EngineSystem implements InputRequests, EventTarget {
+class InputSystem extends EngineSystem implements InputRequests, EventTarget {
 
-	private static final Logger logger = LoggerFactory.getLogger(InputEventStream)
+	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
 
 	final EngineSystemType type = EngineSystemType.INPUT
+
+	private final BlockingQueue<InputEvent> inputEvents = new LinkedBlockingQueue<>()
 
 	@Override
 	RemoveControlFunction addControl(Control control) {
@@ -61,14 +65,14 @@ class InputEventStream extends EngineSystem implements InputRequests, EventTarge
 			if (event instanceof KeyEvent && event.action == GLFW_PRESS) {
 				logger.trace("Key: {}, mods: {}", event.key, event.mods)
 			}
-			trigger(event)
+			inputEvents << event
 		}
 	}
 
 	@Override
 	void configureScene() {
 
-		scene.inputEventStream = this
+		scene.inputRequestHandler = this
 	}
 
 	@Override
@@ -83,10 +87,34 @@ class InputEventStream extends EngineSystem implements InputRequests, EventTarge
 	@Override
 	protected void runLoop() {
 
+		List<InputHandler> inputHandlers = []
+		List<InputEvent> unhandledInputs = []
+
 		try {
 			while (!Thread.interrupted()) {
 				process { ->
-					// TODO: Process input at this step of the game loop
+					if (inputEvents) {
+						scene?.query(InputHandler, inputHandlers)
+						if (inputHandlers) {
+							inputEvents.drain().each { inputEvent ->
+								var inputHandled = inputHandlers.any { inputHandler ->
+									return inputHandler.input(inputEvent)
+								}
+								if (!inputHandled) {
+									unhandledInputs << inputEvent
+								}
+							}
+							// Refire any unhandled inputs as events.  This should be replaced
+							// with something else like the above, but for a way for non-scene
+							// objects to participate 🤔
+							unhandledInputs.each { inputEvent ->
+								trigger(inputEvent)
+							}
+
+							unhandledInputs.clear()
+							inputHandlers.clear()
+						}
+					}
 				}
 			}
 		}

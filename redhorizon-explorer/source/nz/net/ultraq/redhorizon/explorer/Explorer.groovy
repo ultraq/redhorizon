@@ -189,7 +189,7 @@ class Explorer {
 				}
 			}
 		}
-		removeEventFunctions << scene.inputEventStream.on(KeyEvent) { event ->
+		removeEventFunctions << scene.inputRequestHandler.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
 				switch (event.key) {
 					case GLFW_KEY_P -> cyclePalette()

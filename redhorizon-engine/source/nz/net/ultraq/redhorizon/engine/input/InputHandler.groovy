@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,30 @@
  */
 
 package nz.net.ultraq.redhorizon.engine.input
+
 /**
- * A function that can be used to remove a control binding that was added via
- * {@link InputSystem#addControl}.
+ * Any object in a scene that can accept player input.
  *
  * @author Emanuel Rabina
  */
-@FunctionalInterface
-interface RemoveControlFunction {
+interface InputHandler {
 
-	void remove()
+	/**
+	 * Called during the input stage of the game loop to allow this object to
+	 * respond to player input.
+	 *
+	 * @return Whether or not the input was handled in this object.
+	 */
+	boolean input(InputEvent inputEvent)
+
+	/**
+	 * Convenience method for performing some action in {@code closure} and
+	 * returning {@code true}, as a way to signal in {@link #input} that an input
+	 * event was handled.
+	 */
+	default boolean inputHandled(Closure closure) {
+
+		closure()
+		return true
+	}
 }

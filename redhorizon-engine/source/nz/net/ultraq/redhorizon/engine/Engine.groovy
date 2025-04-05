@@ -114,6 +114,7 @@ class Engine implements EventTarget {
 			.uncaughtExceptionHandler { Thread t, Throwable e ->
 				logger.error('An error occurred in thread {}', t.name)
 				uncaughtException = e
+				stop()
 			}
 
 		var engineReadyLatch = new CountDownLatch(allSystems.size())
