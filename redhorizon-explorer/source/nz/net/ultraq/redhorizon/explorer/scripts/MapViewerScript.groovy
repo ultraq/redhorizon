@@ -25,8 +25,8 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonControl
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.input.MouseControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -114,7 +114,7 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeControlFunctions << inputSystem.addControl(
-				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
+				new MouseButtonControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
 						camera.reset()
 					}
@@ -166,7 +166,7 @@ class MapViewerScript extends Script<Map> {
 				}
 			}
 			removeControlFunctions << inputSystem.addControl(
-				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
+				new MouseButtonControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
 						camera.reset()
 					}

@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
 import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputHandler
-import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -149,6 +148,15 @@ class Player extends Node<Player> implements GameObject, InputHandler, Rotatable
 				}
 			}
 		}
+
+		if (inputEvent instanceof CursorPositionEvent) {
+			inputHandled { ->
+				lookAt
+					.set(inputEvent.xPos, scene.window.size.height() - inputEvent.yPos)
+					.div(scene.window.renderToWindowScale)
+			}
+		}
+
 		return false
 	}
 
@@ -284,41 +292,6 @@ class Player extends Node<Player> implements GameObject, InputHandler, Rotatable
 					translate(0f, bob, 0f)
 				}
 			}, 0, 10, TimeUnit.MILLISECONDS)
-
-			// Keyboard controls
-			scene.addControls(
-				new KeyControl(GLFW_KEY_W, 'Move forwards',
-					{ -> keyboardForwards = true },
-					{ -> keyboardForwards = false }
-				),
-				new KeyControl(GLFW_KEY_S, 'Move backwards',
-					{ -> keyboardBackwards = true },
-					{ -> keyboardBackwards = false }
-				),
-				new KeyControl(GLFW_KEY_A, 'Strafe left',
-					{ -> keyboardStrafeLeft = true },
-					{ -> keyboardStrafeLeft = false }
-				),
-				new KeyControl(GLFW_KEY_D, 'Strafe right',
-					{ -> keyboardStrafeRight = true },
-					{ -> keyboardStrafeRight = false }
-				),
-				new KeyControl(GLFW_KEY_LEFT, 'Rotate left',
-					{ -> rotation -= 1 },
-					{ -> rotation += 1 }
-				),
-				new KeyControl(GLFW_KEY_RIGHT, 'Rotate right',
-					{ -> rotation += 1 },
-					{ -> rotation -= 1 }
-				)
-			)
-
-			// Mouse input
-			scene.inputRequestHandler.on(CursorPositionEvent) { event ->
-				lookAt
-					.set(event.xPos, scene.window.size.height() - event.yPos)
-					.div(scene.window.renderToWindowScale)
-			}
 
 			// Gamepad controls
 			scene.inputRequestHandler.addControls(
