@@ -79,20 +79,6 @@ class Engine implements EventTarget {
 	}
 
 	/**
-	 * Notify all systems in the given list that they may begin a new processing
-	 * iteration, then wait for them to signal completion before returning.
-	 */
-	private void notifySystemsAndWaitForCompletion(List<EngineSystem> systems) {
-
-		systems.each { system ->
-			system.notifyForProcessStart()
-		}
-		systems.each { system ->
-			system.waitForProcessComplete()
-		}
-	}
-
-	/**
 	 * Start the game engine and the main game loop.  This will assign all systems
 	 * their own thread on which to start and run.  This method will block until
 	 * all systems have completed execution.
@@ -148,9 +134,14 @@ class Engine implements EventTarget {
 		logger.debug('Beginning game loop')
 		while (!Thread.interrupted() && !engineStopping) {
 			try {
-				notifySystemsAndWaitForCompletion(inputSystems)
-				notifySystemsAndWaitForCompletion(updateSystems)
-				notifySystemsAndWaitForCompletion(renderSystems)
+				inputSystems*.notifyForProcessStart()
+				inputSystems*.waitForProcessComplete()
+
+				updateSystems*.notifyForProcessStart()
+				updateSystems*.waitForProcessComplete()
+
+				renderSystems*.notifyForProcessStart()
+				renderSystems*.waitForProcessComplete()
 			}
 			catch (InterruptedException ignored) {
 				break
