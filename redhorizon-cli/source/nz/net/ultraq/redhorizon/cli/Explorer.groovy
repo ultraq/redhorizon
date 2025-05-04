@@ -47,7 +47,7 @@ class Explorer implements Callable<Integer> {
 	@Spec
 	CommandSpec commandSpec
 
-	@Parameters(index = '0', defaultValue = '', description = 'Path to a file to open on launch')
+	@Parameters(index = '0', defaultValue = Option.NULL_VALUE, description = 'Path to a file to open on launch')
 	File file
 
 	@Option(names = '--maximized', description = 'Start the application maximized. Remembers your last usage.')

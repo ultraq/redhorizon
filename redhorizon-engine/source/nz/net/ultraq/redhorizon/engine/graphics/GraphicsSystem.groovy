@@ -218,8 +218,6 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 						}
 						processRequests(renderer)
 
-						// TODO: Combine gather/render into 1 again
-						renderPipeline.gather()
 						renderPipeline.render()
 						window.swapBuffers()
 						window.pollEvents()

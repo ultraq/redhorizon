@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement.RenderCommand
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
@@ -128,14 +127,6 @@ class RenderPipeline implements AutoCloseable {
 	}
 
 	/**
-	 * Collect the objects to draw with the next call to {@link #render}.
-	 */
-	void gather() {
-
-		sceneRenderPass.gather()
-	}
-
-	/**
 	 * Run through each of the rendering passes configured in the pipeline.
 	 */
 	void render() {
@@ -179,7 +170,6 @@ class RenderPipeline implements AutoCloseable {
 		private final Matrix4f enlargedViewProjection = new Matrix4f()
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private final List<Node> queryResults = []
-		private final List<RenderCommand> drawCommands = []
 
 		Scene scene
 
@@ -195,32 +185,20 @@ class RenderPipeline implements AutoCloseable {
 			renderer.delete(framebuffer)
 		}
 
-		/**
-		 * Gather a list of renderables to be drawn to the screen with the next call
-		 * to {@link #render}.
-		 */
-		void gather() {
-
-			if (scene?.camera) {
-				average('Gathering', 1f, logger) { ->
-					queryResults.clear()
-					drawCommands.clear()
-					drawCommands << scene.camera.renderCommand()
-					frustumIntersection.set(enlargedViewProjection.scaling(0.8f, 0.8f, 1f).mul(scene.camera.viewProjection), false)
-					scene.query(frustumIntersection, queryResults).each { node ->
-						if (node instanceof GraphicsElement) {
-							drawCommands << node.renderCommand()
-						}
-					}
-				}
-			}
-		}
-
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			average('Rendering', 1f, logger) { ->
-				drawCommands*.render(renderer)
+				if (scene?.camera) {
+					queryResults.clear()
+					scene.camera.render(renderer)
+					frustumIntersection.set(enlargedViewProjection.scaling(0.8f, 0.8f, 1f).mul(scene.camera.viewProjection), false)
+					scene.query(frustumIntersection, queryResults).each { node ->
+						if (node instanceof GraphicsElement) {
+							node.render(renderer)
+						}
+					}
+				}
 			}
 		}
 	}

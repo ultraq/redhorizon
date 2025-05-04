@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
-import nz.net.ultraq.redhorizon.classic.resources.ShadowMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 
 /**
@@ -34,10 +34,10 @@ class ShadowShader extends ShaderConfig {
 	final String fragmentShaderSource = getResourceAsText('nz/net/ultraq/redhorizon/classic/shaders/Shadow.frag.glsl')
 	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
 	final Uniform[] uniforms = [
-		{ Shader shader, ShadowMaterial material, window ->
+		{ Shader shader, SpriteMaterial material, window ->
 			shader.setUniformTexture('indexTexture', 0, material.texture)
 		},
-		{ Shader shader, ShadowMaterial material, window ->
+		{ Shader shader, SpriteMaterial material, window ->
 			if (material.spriteMetadataBuffer) {
 				material.spriteMetadataBuffer.bind()
 			}

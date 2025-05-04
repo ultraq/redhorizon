@@ -30,19 +30,4 @@ class SpriteMaterial extends Material {
 	int framesVertical
 
 	UniformBuffer spriteMetadataBuffer
-
-	/**
-	 * Copy the values of an existing material into this one.
-	 */
-	SpriteMaterial copy(SpriteMaterial other) {
-
-		super.copy(other)
-		frame = other.frame
-		frameStepX = other.frameStepX
-		frameStepY = other.frameStepY
-		framesHorizontal = other.framesHorizontal
-		framesVertical = other.framesVertical
-		spriteMetadataBuffer = other.spriteMetadataBuffer
-		return this
-	}
 }

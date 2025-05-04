@@ -31,15 +31,4 @@ class PalettedSpriteMaterial extends SpriteMaterial {
 	int[] adjustmentMap = IDENTITY_MAP
 
 	UniformBuffer paletteMetadataBuffer
-
-	/**
-	 * Copy the values of an existing material into this one.
-	 */
-	PalettedSpriteMaterial copy(PalettedSpriteMaterial other) {
-
-		super.copy(other)
-		adjustmentMap = other.adjustmentMap
-		paletteMetadataBuffer = other.paletteMetadataBuffer
-		return this
-	}
 }

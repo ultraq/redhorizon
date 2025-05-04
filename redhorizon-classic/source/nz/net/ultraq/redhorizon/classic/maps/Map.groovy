@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -47,7 +48,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
-import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -79,9 +79,6 @@ class Map extends Node<Map> {
 	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
-
-	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final PalettedSpriteMaterial materialCopy = new PalettedSpriteMaterial()
 
 	private final ResourceManager resourceManager
 	private final RulesFile rules
@@ -385,15 +382,10 @@ class Map extends Node<Map> {
 		}
 
 		@Override
-		RenderCommand renderCommand() {
+		void render(GraphicsRenderer renderer) {
 
-			transformCopy.set(globalTransform)
-			materialCopy.copy(material)
-
-			return { renderer ->
-				if (fullMesh && shader && materialCopy.texture) {
-					renderer.draw(fullMesh, transformCopy, shader, materialCopy)
-				}
+			if (fullMesh && shader && material.texture) {
+				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
 		}
 	}

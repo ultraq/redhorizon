@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.engine.game.GameObject
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -31,8 +32,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-
-import org.joml.Matrix4f
 
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture
@@ -60,9 +59,7 @@ class Sprite extends Node<Sprite> implements GameObject, GraphicsElement {
 	protected Shader shader
 	protected SpriteSheet spriteSheet
 
-	protected final Matrix4f transformCopy = new Matrix4f()
 	private final SpriteMaterial spriteMaterial = new SpriteMaterial()
-	private final SpriteMaterial spriteMaterialCopy = new SpriteMaterial()
 
 	/**
 	 * Constructor, build a sprite from an image file.
@@ -112,17 +109,9 @@ class Sprite extends Node<Sprite> implements GameObject, GraphicsElement {
 	/**
 	 * Get the appropriate material for this sprite.
 	 */
-	protected SpriteMaterial getMaterial() {
+	SpriteMaterial getMaterial() {
 
 		return spriteMaterial
-	}
-
-	/**
-	 * Get a material that can be used as a copy for queued rendering.
-	 */
-	protected SpriteMaterial getMaterialCopy() {
-
-		return spriteMaterialCopy
 	}
 
 	@Override
@@ -169,15 +158,10 @@ class Sprite extends Node<Sprite> implements GameObject, GraphicsElement {
 	}
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		transformCopy.set(globalTransform)
-		materialCopy.copy(material)
-
-		return { renderer ->
-			if (mesh && shader && materialCopy.texture) {
-				renderer.draw(mesh, transformCopy, shader, materialCopy)
-			}
+		if (mesh && shader && material.texture) {
+			renderer.draw(mesh, globalTransform, shader, material)
 		}
 	}
 

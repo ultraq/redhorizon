@@ -38,8 +38,6 @@ import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
 
-import org.joml.Matrix4f
-
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -50,9 +48,6 @@ import java.util.concurrent.Executors
  * @author Emanuel Rabina
  */
 class Animation extends Node<Animation> implements GameObject, GraphicsElement, Playable {
-
-	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final SpriteMaterial materialCopy = new SpriteMaterial()
 
 	private final AnimationSource animationSource
 
@@ -122,18 +117,13 @@ class Animation extends Node<Animation> implements GameObject, GraphicsElement, 
 
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		transformCopy.set(globalTransform)
-		materialCopy.copy(material)
-
-		return { renderer ->
-			if (mesh && shader && currentFrame != -1) {
-				var frame = animationSource.prepareFrame(renderer, currentFrame)
-				if (frame) {
-					materialCopy.texture = frame
-					renderer.draw(mesh, transformCopy, shader, materialCopy)
-				}
+		if (mesh && shader && currentFrame != -1) {
+			var frame = animationSource.prepareFrame(renderer, currentFrame)
+			if (frame) {
+				material.texture = frame
+				renderer.draw(mesh, globalTransform, shader, material)
 			}
 		}
 	}

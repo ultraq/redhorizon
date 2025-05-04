@@ -21,9 +21,8 @@ import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
-import nz.net.ultraq.redhorizon.classic.resources.ShadowMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -39,7 +38,6 @@ import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_WIDTH
 
-import org.joml.Matrix4f
 import org.joml.Vector3f
 
 import java.util.concurrent.CompletableFuture
@@ -253,12 +251,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		}
 
 		@Override
-		PalettedSpriteMaterial getMaterial() {
-
-			return super.getMaterial()
-		}
-
-		@Override
 		void update(float delta) {
 
 			// Update region in spritesheet to match heading and currently-playing animation
@@ -318,9 +310,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		private Mesh mesh
 		private Shader shader
 
-		private final Matrix4f transformCopy = new Matrix4f()
-		private final materialCopy = new ShadowMaterial()
-
 		UnitShadow() {
 
 			bounds { ->
@@ -353,15 +342,10 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		}
 
 		@Override
-		RenderCommand renderCommand() {
+		void render(GraphicsRenderer renderer) {
 
-			transformCopy.set(globalTransform)
-			materialCopy.copy(body.material)
-
-			return { renderer ->
-				if (mesh && shader) {
-					renderer.draw(mesh, transformCopy, shader, materialCopy)
-				}
+			if (mesh && shader && body.material) {
+				renderer.draw(mesh, globalTransform, shader, body.material)
 			}
 		}
 	}
