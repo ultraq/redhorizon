@@ -89,9 +89,9 @@ trait EventTarget {
 	}
 
 	/**
-	 * A {@link #trigger )} implementation with a supplied {@code ExecutorService}.
+	 * A {@link #trigger} implementation with a supplied {@code ExecutorService}.
 	 */
-	<E extends Event> void trigger(E event, ExecutorService executorService) {
+	public <E extends Event> void trigger(E event, ExecutorService executorService) {
 
 		eventQueue.add(event)
 
