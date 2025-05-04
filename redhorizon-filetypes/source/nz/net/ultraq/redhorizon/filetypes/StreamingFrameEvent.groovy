@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import nz.net.ultraq.redhorizon.events.Event
-
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 
@@ -27,7 +25,7 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class StreamingFrameEvent extends Event {
+class StreamingFrameEvent implements StreamingEvent {
 
 	final int width
 	final int height

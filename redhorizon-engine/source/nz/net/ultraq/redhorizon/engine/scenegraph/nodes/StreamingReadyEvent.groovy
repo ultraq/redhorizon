@@ -24,5 +24,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-class StreamingReadyEvent extends Event {
+class StreamingReadyEvent implements Event {
 }

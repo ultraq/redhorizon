@@ -34,7 +34,7 @@ subprojects {
 	apply plugin: 'java-library'
 	apply plugin: 'groovy'
 	apply plugin: 'idea'
-	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.1/gradle-support.gradle'
+	apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.2/gradle-support.gradle'
 
 //	configurations.all {
 //		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'

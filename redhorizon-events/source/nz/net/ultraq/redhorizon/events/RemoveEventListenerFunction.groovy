@@ -23,7 +23,7 @@ package nz.net.ultraq.redhorizon.events
  * @author Emanuel Rabina
  */
 @FunctionalInterface
-interface RemoveEventFunction {
+interface RemoveEventListenerFunction {
 
 	void remove()
 }

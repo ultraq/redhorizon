@@ -31,7 +31,7 @@ class EventTargetTests extends Specification {
 
 	private class TestEventTarget implements EventTarget {}
 
-	private class TestEvent extends Event {}
+	private class TestEvent implements Event {}
 
 	private class TestSubclassEvent extends TestEvent {}
 

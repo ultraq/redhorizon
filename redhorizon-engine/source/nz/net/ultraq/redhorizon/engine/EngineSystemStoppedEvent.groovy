@@ -23,5 +23,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-class EngineSystemStoppedEvent extends Event {
+class EngineSystemStoppedEvent implements Event {
 }

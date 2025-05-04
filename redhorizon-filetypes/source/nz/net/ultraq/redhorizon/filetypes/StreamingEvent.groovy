@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.filetypes
 
 import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * Common type for all graphics rendering events.
+ * Base class for events emitted by {@link StreamingDecoder}s.
  *
  * @author Emanuel Rabina
  */
-abstract class GraphicsRendererEvent implements Event {
+interface StreamingEvent extends Event {
 }

@@ -24,11 +24,11 @@ import groovy.transform.TupleConstructor
 /**
  * Fired when the framebuffer size changes, like when moving the window between
  * monitors with different DPIs.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class FramebufferSizeEvent extends Event {
+class FramebufferSizeEvent implements Event {
 
 	final Dimension framebufferSize
 	final Dimension windowSize

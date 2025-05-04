@@ -33,7 +33,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Outline
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.events.RemoveEventFunction
+import nz.net.ultraq.redhorizon.events.RemoveEventListenerFunction
 import nz.net.ultraq.redhorizon.explorer.NodeList
 import nz.net.ultraq.redhorizon.explorer.NodeSelectedEvent
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
@@ -64,7 +64,7 @@ class MapViewerScript extends Script<Map> {
 	final NodeList nodeList
 	boolean touchpadInput
 
-	private final List<RemoveEventFunction> removeEventFunctions = []
+	private final List<RemoveEventListenerFunction> removeEventListenerFunctions = []
 	private final List<RemoveControlFunction> removeControlFunctions = []
 	private InputSystem inputSystem
 	private Window window
@@ -85,12 +85,12 @@ class MapViewerScript extends Script<Map> {
 		// Use touchpad to move around
 		if (touchpadInput) {
 			var ctrl = false
-			removeEventFunctions << inputSystem.on(KeyEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(KeyEvent) { event ->
 				if (event.key == GLFW_KEY_LEFT_CONTROL) {
 					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
 				}
 			}
-			removeEventFunctions << inputSystem.on(ScrollEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
 
 					// Zoom in/out using CTRL + scroll up/down
@@ -125,7 +125,7 @@ class MapViewerScript extends Script<Map> {
 		else {
 			var cursorPosition = new Vector2f()
 			var dragging = false
-			removeEventFunctions << inputSystem.on(CursorPositionEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(CursorPositionEvent) { event ->
 				var adjustedPosX = event.xPos / window.renderToWindowScale as float
 				var adjustedPosY = event.yPos / window.renderToWindowScale as float
 				if (dragging) {
@@ -138,7 +138,7 @@ class MapViewerScript extends Script<Map> {
 				}
 				cursorPosition.set(adjustedPosX, adjustedPosY)
 			}
-			removeEventFunctions << inputSystem.on(MouseButtonEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
 						if (gameWindow ? gameWindow.hovered : true) {
@@ -152,7 +152,7 @@ class MapViewerScript extends Script<Map> {
 			}
 
 			// Zoom in/out using the scroll wheel
-			removeEventFunctions << inputSystem.on(ScrollEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
 					float scaleFactor = camera.scale.x()
 					if (event.yOffset < 0) {
@@ -219,7 +219,7 @@ class MapViewerScript extends Script<Map> {
 	 */
 	private void clearControls() {
 
-		removeEventFunctions*.remove()
+		removeEventListenerFunctions*.remove()
 		removeControlFunctions*.remove()
 	}
 
