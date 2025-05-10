@@ -18,12 +18,9 @@ description = 'A top-down shooter for testing out the game engine'
 
 dependencies {
 	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-engine')
-	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-explorer')
-	implementation project(':redhorizon-filetypes')
+	implementation project(':redhorizon-runtime')
 
-	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation 'org.lwjgl:lwjgl-glfw'
