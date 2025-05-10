@@ -44,13 +44,21 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	final EngineSystemType type = EngineSystemType.RENDER
 
+	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 	private final List<Node> queryResults = []
 
-	private AudioConfiguration config = new AudioConfiguration()
 	private OpenALContext context
 	private OpenALRenderer renderer
+
+	/**
+	 * Constructor, build a new engine for rendering audio.
+	 */
+	AudioSystem(AudioConfiguration config = new AudioConfiguration()) {
+
+		this.config = config
+	}
 
 	@Override
 	void configureScene() {
@@ -152,13 +160,5 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 			renderer.close()
 		}
 		context.close()
-	}
-
-	/**
-	 * Set the configuration for objects created by this system.
-	 */
-	void setAudioConfiguration(AudioConfiguration config) {
-
-		this.config = config
 	}
 }

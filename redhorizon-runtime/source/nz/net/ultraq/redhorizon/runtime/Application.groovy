@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
-import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
@@ -29,22 +27,6 @@ import nz.net.ultraq.redhorizon.events.EventTarget
  * @author Emanuel Rabina
  */
 interface Application extends EventTarget {
-
-	/**
-	 * Configure and return the audio system.
-	 */
-	default AudioSystem configureAudioSystem(AudioSystem audioSystem) {
-
-		return audioSystem
-	}
-
-	/**
-	 * Configure and return the graphics system.
-	 */
-	default GraphicsSystem configureGraphicsSystem(GraphicsSystem graphicsSystem) {
-
-		return graphicsSystem
-	}
 
 	/**
 	 * Return the name of the application.  This is displayed in the window title,

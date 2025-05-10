@@ -51,10 +51,10 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	final EngineSystemType type = EngineSystemType.RENDER
 
 	private final String windowTitle
+	private final GraphicsConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<GraphicsResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<GraphicsResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 
-	private GraphicsConfiguration config = new GraphicsConfiguration()
 	private OpenGLContext context
 	private OpenGLWindow window
 	private OpenGLRenderer renderer
@@ -67,9 +67,10 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	/**
 	 * Constructor, build a new system for rendering graphics.
 	 */
-	GraphicsSystem(String windowTitle) {
+	GraphicsSystem(String windowTitle, GraphicsConfiguration config) {
 
 		this.windowTitle = windowTitle
+		this.config = config
 	}
 
 	/**
@@ -240,13 +241,5 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 			renderer.close()
 		}
 		context.close()
-	}
-
-	/**
-	 * Set the configuration for objects created by this system.
-	 */
-	void setGraphicsConfiguration(GraphicsConfiguration config) {
-
-		this.config = config
 	}
 }

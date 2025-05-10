@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystemReadyEvent
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.game.GameLogicSystem
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
@@ -38,7 +39,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import java.util.concurrent.Semaphore
-import java.util.function.Function
 
 /**
  * Main class for starting a Red Horizon engine, configuring and running it for
@@ -46,7 +46,7 @@ import java.util.function.Function
  * so:
  * <pre><code>
  * static void main(String[] args) {
- *   System.exit(new Runtime(args).execute(options -> new MyApplication()))
+ *   System.exit(new Runtime(new MyApplication()).execute(args))
  * }
  * </code></pre>
  *
@@ -56,49 +56,46 @@ final class Runtime {
 
 	private static final Logger logger = LoggerFactory.getLogger(Runtime)
 
-	private ApplicationOptions options
+	private final String version
+	private final Application application
+
+	private GraphicsConfiguration graphicsConfiguration
 	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
-
-	private Application application
 	private Engine engine
 	private Scene scene
 
 	/**
-	 * Constructor, sets up a new engine to be configured and run with the given
-	 * command-line arguments.
-	 *
-	 * @param args
-	 *   Command line arguments.  Currently unused.  Should in future be parsed
-	 *   and merged into the options object used in the {@link #execute} method.
+	 * Constructor, creates a new runtime to launch the given application.
 	 */
-	Runtime(String[] args) {
+	Runtime(Application application) {
 
-		logger.debug('Creating a new runtime w/ args {}', args)
-
-		var version = getResourceAsStream('runtime.properties').withBufferedReader { reader ->
+		version = getResourceAsStream('runtime.properties').withBufferedReader { reader ->
 			var cliProperties = new Properties()
 			cliProperties.load(reader)
 			var version = cliProperties.getProperty('version')
 			return version == '${version}' ? '(development)' : version
 		}
+		this.application = application
 
-		options = new ApplicationOptions(version)
+		logger.debug('Red Horizon runtime version {} for application', version, application.class.simpleName)
 	}
 
 	/**
 	 * Start the Red Horizon runtime with the given command-line parameters
 	 * straight from a standard Java {@code main} method.
 	 *
+	 * @param args
+	 *   Command line arguments.  Currently unused.  Should in future be parsed
+	 *   and merged into the options object used in the {@link #execute} method.
 	 * @return
 	 *   A value that can be passed to `System.exit` to indicate whether the
 	 *   runtime and application completed successfully, or with an error.
 	 */
-	int execute(Function<ApplicationOptions, Application> applicationBuilder) {
+	int execute(String[] args) {
 
 		try {
-			logger.debug('Initializing application...')
-			application = applicationBuilder(options)
+			logger.debug('Initializing application w/ args {}', args)
 
 			engine = new Engine()
 			scene = new Scene()
@@ -121,15 +118,15 @@ final class Runtime {
 			engine << inputSystem
 
 			var audioSystem = new AudioSystem()
-			engine << application.configureAudioSystem(audioSystem)
+			engine << audioSystem
 
-			var graphicsSystem = new GraphicsSystem("${application.name} - ${application.version}")
+			var graphicsSystem = new GraphicsSystem("${application.name} - ${application.version}", graphicsConfiguration)
 			graphicsSystem.on(EngineSystemReadyEvent) { event ->
 				graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, true))
 				graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem))
 			}
 			graphicsSystem.relay(WindowMaximizedEvent, application)
-			engine << application.configureGraphicsSystem(graphicsSystem)
+			engine << graphicsSystem
 
 			// Start the application
 			logger.debug('Starting application...')
@@ -184,8 +181,11 @@ final class Runtime {
 	}
 
 	/**
-	 * Options passed from the runtime to an application that it can use if it
-	 * wishes.
+	 * Configure the graphics options for this runtime.
 	 */
-	private static record ApplicationOptions(String version) {}
+	Runtime withGraphicsConfiguration(GraphicsConfiguration graphicsConfiguration) {
+
+		this.graphicsConfiguration = graphicsConfiguration
+		return this
+	}
 }

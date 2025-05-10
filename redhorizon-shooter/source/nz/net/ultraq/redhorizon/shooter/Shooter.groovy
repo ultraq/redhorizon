@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
@@ -51,30 +50,16 @@ class Shooter implements Application {
 	 */
 	static void main(String[] args) {
 
-		System.exit(new Runtime(args).execute(options -> new Shooter(options.version())))
+		System.exit(new Runtime(new Shooter())
+			.withGraphicsConfiguration(new GraphicsConfiguration(
+				clearColour: Colour.GREY,
+				renderResolution: RENDER_RESOLUTION
+			))
+			.execute(args))
 	}
 
 	final String name = 'Shooter'
-	final String version
-
-	/**
-	 * Constructor, create a new Shooter game.
-	 */
-	Shooter(String version) {
-
-		this.version = version
-	}
-
-	@Override
-	GraphicsSystem configureGraphicsSystem(GraphicsSystem graphicsSystem) {
-
-		return graphicsSystem.tap {
-			graphicsConfiguration = new GraphicsConfiguration(
-				clearColour: Colour.GREY,
-				renderResolution: RENDER_RESOLUTION
-			)
-		}
-	}
+	final String version = '0.1.0'
 
 	@Override
 	void start(Scene scene) {
