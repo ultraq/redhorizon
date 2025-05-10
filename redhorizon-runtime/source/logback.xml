@@ -26,7 +26,7 @@
 	</appender>
 
 	<appender name="file" class="ch.qos.logback.core.FileAppender">
-		<file>${java.io.tmpdir}/redhorizon/logs/redhorizon-explorer-${timestamp}.log</file>
+		<file>${java.io.tmpdir}/redhorizon/logs/redhorizon-runtime-${timestamp}.log</file>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>

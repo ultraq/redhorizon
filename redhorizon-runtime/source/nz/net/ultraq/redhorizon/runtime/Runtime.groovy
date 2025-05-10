@@ -46,7 +46,7 @@ import java.util.function.Function
  * so:
  * <pre><code>
  * static void main(String[] args) {
- *   System.exit(new Runtime(new MyApplication()).execute(args))
+ *   System.exit(new Runtime(args).execute(options -> new MyApplication()))
  * }
  * </code></pre>
  *
@@ -79,7 +79,8 @@ final class Runtime {
 		var version = getResourceAsStream('runtime.properties').withBufferedReader { reader ->
 			var cliProperties = new Properties()
 			cliProperties.load(reader)
-			return cliProperties.getProperty('version')
+			var version = cliProperties.getProperty('version')
+			return version == '${version}' ? '(development)' : version
 		}
 
 		options = new ApplicationOptions(version)
