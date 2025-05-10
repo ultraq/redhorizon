@@ -15,3 +15,9 @@ jobs:
           distribution: 'temurin'
           java-version: 21
       - run: ./gradlew build
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: build-reports
+          path: redhorizon-engine/build/reports/
+          retention-days: 30
