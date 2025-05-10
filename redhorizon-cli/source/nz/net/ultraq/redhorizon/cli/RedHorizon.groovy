@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.cli.converter.Converter
 import nz.net.ultraq.redhorizon.cli.mixtools.Mix
+import nz.net.ultraq.redhorizon.shooter.Shooter
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -41,7 +42,7 @@ import picocli.CommandLine.IVersionProvider
 		Converter,
 		Explorer,
 		Mix,
-		Shooter
+		Shooter.CliWrapper
 	],
 	versionProvider = VersionProvider
 )

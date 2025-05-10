@@ -34,6 +34,10 @@ import nz.net.ultraq.redhorizon.shooter.objects.Player
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import picocli.CommandLine
+import picocli.CommandLine.Command
+
+import java.util.concurrent.Callable
 
 /**
  * A twin-stick shooter game to exercise the Red Horizon engine ✈️🔫
@@ -50,12 +54,25 @@ class Shooter implements Application {
 	 */
 	static void main(String[] args) {
 
-		System.exit(new Runtime(new Shooter())
-			.withGraphicsConfiguration(new GraphicsConfiguration(
-				clearColour: Colour.GREY,
-				renderResolution: RENDER_RESOLUTION
-			))
-			.execute(args))
+		System.exit(new CommandLine(new CliWrapper()).execute(args))
+	}
+
+	/**
+	 * Tiny CLI wrapper around the Shooter game so it's launchable w/ Picocli.
+	 */
+	@Command(name = 'shooter')
+	static class CliWrapper implements Callable<Integer> {
+
+		@Override
+		Integer call() {
+
+			return new Runtime(new Shooter())
+				.withGraphicsConfiguration(new GraphicsConfiguration(
+					clearColour: Colour.GREY,
+					renderResolution: RENDER_RESOLUTION
+				))
+				.execute()
+		}
 	}
 
 	final String name = 'Shooter'

@@ -48,6 +48,7 @@ subprojects {
 		jomlPrimitivesVersion = '1.10.0'
 		logbackVersion = '1.5.15'
 		lwjglVersion = '3.3.5'
+		picocliVersion = '4.7.5'
 		slf4jVersion = '2.0.16'
 	}
 	ext.targetPlatform = targetPlatform
