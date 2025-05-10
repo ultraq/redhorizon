@@ -23,6 +23,7 @@ include(
 	'redhorizon-events',
 	'redhorizon-explorer',
 	'redhorizon-filetypes',
+	'redhorizon-runtime',
 	'redhorizon-sandbox',
 	'redhorizon-shooter'
 )
