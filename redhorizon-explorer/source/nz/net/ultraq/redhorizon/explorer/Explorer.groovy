@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -36,7 +35,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequ
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.KeyControl
+import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -48,7 +48,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
-import nz.net.ultraq.redhorizon.events.RemoveEventListenerFunction
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
@@ -59,6 +58,8 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
+import nz.net.ultraq.redhorizon.runtime.Application
+import nz.net.ultraq.redhorizon.runtime.Runtime
 
 import imgui.ImGui
 import org.slf4j.Logger
@@ -75,21 +76,49 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Explorer {
+class Explorer implements Application {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Dimension renderResolution = new Dimension(1280, 800)
 	private static final float volume = 0.5f
 
+	/**
+	 * Entry point to the Explorer application.
+	 */
+	static void main(String[] args) {
+
+		var entries = new CopyOnWriteArrayList<Entry>()
+		var entryList = new EntryList(entries)
+		var nodeList = new NodeList()
+		var explorerOptions = new ExplorerOptions(
+			maximized: args.contains('--maximized'),
+			touchpadInput: args.contains('--touchpad-input')
+		)
+
+		System.exit(new Runtime(new Explorer(entries, entryList, nodeList, explorerOptions, null))
+			.withGraphicsConfiguration(new GraphicsConfiguration(
+				clearColour: Colour.GREY,
+				maximized: explorerOptions.maximized,
+				renderResolution: renderResolution,
+				startWithChrome: true
+			))
+			.withImGuiElements(new LogPanel(true), entryList, nodeList)
+			.execute(args))
+	}
+
+	final String name = 'Explorer'
+	final String version = Runtime.version
+
 	private final ExplorerOptions options
-	private final List<Entry> entries = new CopyOnWriteArrayList<>()
-	private final EntryList entryList = new EntryList(entries)
-	private final MixDatabase mixDatabase = new MixDatabase()
-	private final NodeList nodeList = new NodeList()
+	private final List<Entry> entries
+	private final EntryList entryList
+	private final NodeList nodeList
+	private final File openOnLaunch
 	private final ResourceManager resourceManager = new ResourceManager(
 		new File(System.getProperty('user.dir'), 'mix'),
 		'nz.net.ultraq.redhorizon.filetypes',
 		'nz.net.ultraq.redhorizon.classic.filetypes')
+	private final MixDatabase mixDatabase = new MixDatabase()
 
 	private Scene scene
 	private Camera camera
@@ -99,129 +128,21 @@ class Explorer {
 	private File currentDirectory
 	private InputStream selectedFileInputStream
 	private PaletteType currentPalette
-	private List<RemoveEventListenerFunction> removeEventListenerFunctions = []
+	private List<RemoveControlFunction> removeControlFunctions = []
 
 	/**
 	 * Constructor, sets up an application with the default configurations.
 	 *
-	 * @param version
 	 * @param openOnLaunch
 	 *   Optional, a file to open on launch of the explorer.
 	 */
-	Explorer(String version, ExplorerOptions options, File openOnLaunch) {
+	Explorer(List<Entry> entries, EntryList entryList, NodeList nodeList, ExplorerOptions options, File openOnLaunch) {
 
+		this.entries = entries
+		this.entryList = entryList
+		this.nodeList = nodeList
 		this.options = options
-
-		new Application('Explorer', version)
-			.addAudioSystem()
-			.addGraphicsSystem(new GraphicsConfiguration(
-				clearColour: Colour.GREY,
-				maximized: options.maximized,
-				renderResolution: renderResolution,
-				startWithChrome: true
-			), new LogPanel(true), entryList, nodeList)
-			.onApplicationStart { application, scene ->
-				applicationStart(application, scene, openOnLaunch)
-			}
-			.onApplicationStop { application, scene ->
-				applicationStop(scene)
-			}
-			.start()
-	}
-
-	private void applicationStart(Application application, Scene scene, File openOnLaunch) {
-
-		this.scene = scene
-
-		application.on(WindowMaximizedEvent) { event ->
-			options.maximized = event.maximized
-		}
-
-		buildList(new File(System.getProperty("user.dir")))
-
-		// Handle events from the explorer GUI
-		entryList.on(EntrySelectedEvent) { event ->
-			var entry = event.entry
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
-				}
-				else {
-					clearPreview()
-					preview(entry)
-				}
-			}
-			else if (entry instanceof FileEntry) {
-				var file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				else {
-					clearPreview()
-					preview(file)
-				}
-			}
-		}
-
-		nodeList.scene = scene
-
-		// Add a menu item for touchpad input
-		scene.gameMenu.optionsMenu << new MenuItem() {
-			@Override
-			void render() {
-				if (ImGui.menuItem('Touchpad input', null, options.touchpadInput)) {
-					options.touchpadInput = !options.touchpadInput
-					var mapNode = (Map)scene.findDescendent { node -> node instanceof Map }
-					if (mapNode) {
-						((MapViewerScript)mapNode.script).touchpadInput = options.touchpadInput
-					}
-				}
-			}
-		}
-		scene.gameMenu.optionsMenu << new MenuItem() {
-			@Override
-			void render() {
-				if (ImGui.menuItem('Cycle palette', 'P')) {
-					cyclePalette()
-				}
-			}
-		}
-		removeEventListenerFunctions << scene.inputRequestHandler.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS || event.action == GLFW_REPEAT) {
-				switch (event.key) {
-					case GLFW_KEY_P -> cyclePalette()
-					case GLFW_KEY_UP -> entryList.selectPrevious()
-					case GLFW_KEY_DOWN -> entryList.selectNext()
-				}
-			}
-		}
-
-		// Start all the global/helper nodes
-		camera = new Camera(renderResolution)
-		scene << camera
-
-		listener = new Listener(volume)
-		scene << listener
-
-		globalPalette = new GlobalPalette(loadPalette())
-		scene << globalPalette
-
-		scene << new GridLines(Map.MAX_BOUNDS, 24)
-
-		if (openOnLaunch) {
-			preview(openOnLaunch)
-		}
-	}
-
-	private void applicationStop(Scene scene) {
-
-		removeEventListenerFunctions*.remove()
-		clearPreview()
-		scene.clear()
-		resourceManager.close()
+		this.openOnLaunch = openOnLaunch
 	}
 
 	/**
@@ -425,12 +346,11 @@ class Explorer {
 	 */
 	private void preview(ImagesFile imagesFile, String objectId) {
 
-		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera)).tap {
-			bounds { ->
-				center()
-			}
-			name = "PalettedSprite - ${objectId}"
+		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera))
+		sprite.bounds { ->
+			center()
 		}
+		sprite.name = "PalettedSprite - ${objectId}"
 		scene << sprite
 		previewNode = sprite
 	}
@@ -492,10 +412,9 @@ class Explorer {
 		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, 1f, 1f, { scene ->
 			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
 		})
-			.attachScript(new SpriteShowcaseScript(camera)).tap {
-			bounds.center()
-			name = "PalettedSprite - ${objectId}"
-		}
+			.attachScript(new SpriteShowcaseScript(camera))
+		tile.bounds.center()
+		tile.name = "PalettedSprite - ${objectId}"
 		scene << tile
 		previewNode = tile
 	}
@@ -514,5 +433,98 @@ class Explorer {
 			}
 		}
 		mapViewerScript.viewInitialPosition()
+	}
+
+	@Override
+	void start(Scene scene) {
+
+		this.scene = scene
+
+		on(WindowMaximizedEvent) { event ->
+			options.maximized = event.maximized
+		}
+
+		buildList(new File(System.getProperty("user.dir")))
+
+		// Handle events from the explorer GUI
+		entryList.on(EntrySelectedEvent) { event ->
+			var entry = event.entry
+			if (entry instanceof MixEntry) {
+				if (entry.name == '..') {
+					buildList(currentDirectory)
+				}
+				else {
+					clearPreview()
+					preview(entry)
+				}
+			}
+			else if (entry instanceof FileEntry) {
+				var file = entry.file
+				if (file.directory) {
+					buildList(file)
+				}
+				else if (file.name.endsWith('.mix')) {
+					buildList(new MixFile(file))
+				}
+				else {
+					clearPreview()
+					preview(file)
+				}
+			}
+		}
+
+		nodeList.scene = scene
+
+		// Add a menu item for touchpad input
+		scene.gameMenu.optionsMenu << new MenuItem() {
+			@Override
+			void render() {
+				if (ImGui.menuItem('Touchpad input', null, options.touchpadInput)) {
+					options.touchpadInput = !options.touchpadInput
+					var mapNode = (Map)scene.findDescendent { node -> node instanceof Map }
+					if (mapNode) {
+						((MapViewerScript)mapNode.script).touchpadInput = options.touchpadInput
+					}
+				}
+			}
+		}
+		scene.gameMenu.optionsMenu << new MenuItem() {
+			@Override
+			void render() {
+				if (ImGui.menuItem('Cycle palette', 'P')) {
+					cyclePalette()
+				}
+			}
+		}
+		removeControlFunctions.addAll(scene.inputRequestHandler.addControls(
+			new KeyControl(GLFW_KEY_P, 'Cycle palette', { -> cyclePalette() }),
+			new KeyControl(GLFW_KEY_UP, 'Select previous', { -> entryList.selectPrevious() }),
+			new KeyControl(GLFW_KEY_DOWN, 'Select next', { -> entryList.selectNext() }))
+		)
+
+		// Start all the global/helper nodes
+		camera = new Camera(renderResolution)
+		scene << camera
+
+		listener = new Listener(volume)
+		scene << listener
+
+		globalPalette = new GlobalPalette(loadPalette())
+		scene << globalPalette
+
+		scene << new GridLines(Map.MAX_BOUNDS, 24)
+
+		if (openOnLaunch) {
+			preview(openOnLaunch)
+		}
+	}
+
+	@Override
+	void stop(Scene scene) {
+
+		removeControlFunctions*.remove()
+		clearPreview()
+		scene.clear()
+		resourceManager.close()
 	}
 }

@@ -76,7 +76,7 @@ class Shooter implements Application {
 	}
 
 	final String name = 'Shooter'
-	final String version = '0.1.0'
+	final String version = Runtime.version
 
 	@Override
 	void start(Scene scene) {

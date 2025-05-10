@@ -104,16 +104,16 @@ class InputSystem extends EngineSystem implements InputRequests, EventTarget {
 									unhandledInputs << inputEvent
 								}
 							}
-							// Refire any unhandled inputs as events.  This should be replaced
-							// with something else like the above, but for a way for non-scene
-							// objects to participate 🤔
-							unhandledInputs.each { inputEvent ->
-								trigger(inputEvent)
-							}
-
-							unhandledInputs.clear()
 							inputHandlers.clear()
 						}
+
+						// Refire any unhandled inputs as events.  This should be replaced
+						// with something else like the above, but for a way for non-scene
+						// objects to participate 🤔
+						unhandledInputs.each { inputEvent ->
+							trigger(inputEvent)
+						}
+						unhandledInputs.clear()
 					}
 				}
 			}

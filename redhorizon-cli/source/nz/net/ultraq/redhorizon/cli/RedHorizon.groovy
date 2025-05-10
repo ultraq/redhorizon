@@ -61,9 +61,9 @@ class RedHorizon {
 		String[] getVersion() {
 
 			return getResourceAsStream('cli.properties').withBufferedReader { reader ->
-				def cliProperties = new Properties()
+				var cliProperties = new Properties()
 				cliProperties.load(reader)
-				def version = cliProperties.getProperty('version')
+				var version = cliProperties.getProperty('version')
 				return new String[]{ version == '${version}' ? '(development)' : version }
 			}
 		}
