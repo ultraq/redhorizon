@@ -103,16 +103,14 @@ final class Runtime {
 			engine << new GameLogicSystem()
 
 			var inputSystem = new InputSystem()
-			if (inputSystem) {
-				inputSystem.on(KeyEvent) { event ->
-					if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
-						stop()
-					}
+			inputSystem.on(KeyEvent) { event ->
+				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+					stop()
 				}
-				inputSystem.on(GuiEvent) { event ->
-					if (event.type == EVENT_TYPE_STOP) {
-						stop()
-					}
+			}
+			inputSystem.on(GuiEvent) { event ->
+				if (event.type == EVENT_TYPE_STOP) {
+					stop()
 				}
 			}
 			engine << inputSystem

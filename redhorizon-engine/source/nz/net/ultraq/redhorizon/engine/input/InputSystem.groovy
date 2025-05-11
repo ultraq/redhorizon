@@ -87,32 +87,37 @@ class InputSystem extends EngineSystem implements InputRequests, EventTarget {
 	@Override
 	protected void runLoop() {
 
+		List<InputEvent> localInputsEvents = []
 		List<InputHandler> inputHandlers = []
-		List<InputEvent> unhandledInputs = []
 
 		try {
 			while (!Thread.interrupted()) {
 				process { ->
+					localInputsEvents.clear()
+					inputHandlers.clear()
+
 					if (inputEvents) {
-						scene?.query(InputHandler, inputHandlers)
-						if (inputHandlers) {
-							inputEvents.drain().each { inputEvent ->
+						inputEvents.drainTo(localInputsEvents)
+
+						// Process inputs through handlers in the scene
+						if (scene?.query(InputHandler, inputHandlers)) {
+							var inputEventsIterator = localInputsEvents.listIterator()
+							while (inputEventsIterator.hasNext()) {
+								var inputEvent = inputEventsIterator.next()
 								var inputHandled = inputHandlers.any { inputHandler ->
 									return inputHandler.input(inputEvent)
 								}
-								if (!inputHandled) {
-									unhandledInputs << inputEvent
+								if (inputHandled) {
+									inputEventsIterator.remove()
 								}
 							}
-							// Refire any unhandled inputs as events.  This should be replaced
-							// with something else like the above, but for a way for non-scene
-							// objects to participate 🤔
-							unhandledInputs.each { inputEvent ->
-								trigger(inputEvent)
-							}
+						}
 
-							unhandledInputs.clear()
-							inputHandlers.clear()
+						// Refire any unhandled inputs as events.  This should be replaced
+						// with something else like the above, but for a way for non-scene
+						// objects to participate 🤔
+						localInputsEvents.each { inputEvent ->
+							trigger(inputEvent)
 						}
 					}
 				}
