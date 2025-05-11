@@ -149,12 +149,12 @@ final class Runtime {
 			}
 			var engineStats = EngineStats.instance
 			var resourcesClosed = true
-			resourcesClosed |= check(engineStats.activeFramebuffers.get(), 'framebuffers')
-			resourcesClosed |= check(engineStats.activeMeshes.get(), 'meshes')
-			resourcesClosed |= check(engineStats.activeTextures.get(), 'textures')
-			resourcesClosed |= check(engineStats.activeUniformBuffers.get(), 'uniform buffers')
-			resourcesClosed |= check(engineStats.activeSources.get(), 'sources')
-			resourcesClosed |= check(engineStats.activeBuffers.get(), 'buffers')
+			resourcesClosed &= check(engineStats.activeFramebuffers.get(), 'framebuffers')
+			resourcesClosed &= check(engineStats.activeMeshes.get(), 'meshes')
+			resourcesClosed &= check(engineStats.activeTextures.get(), 'textures')
+			resourcesClosed &= check(engineStats.activeUniformBuffers.get(), 'uniform buffers')
+			resourcesClosed &= check(engineStats.activeSources.get(), 'sources')
+			resourcesClosed &= check(engineStats.activeBuffers.get(), 'buffers')
 			if (!resourcesClosed) {
 				return 2
 			}
