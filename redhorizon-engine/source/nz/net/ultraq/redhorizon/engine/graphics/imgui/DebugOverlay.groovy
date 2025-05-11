@@ -59,7 +59,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 	 */
 	DebugOverlay(InputSystem inputSystem, boolean enabled) {
 
-		ImGuiLoggingAppender.instance?.on(ImGuiLogEvent) { event ->
+		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey) {
 				persistentLines[event.persistentKey] = event.message
 			}

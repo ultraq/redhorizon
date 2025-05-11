@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.UserPreference
 

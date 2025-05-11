@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -56,10 +57,21 @@ final class Runtime {
 
 	private static final Logger logger = LoggerFactory.getLogger(Runtime)
 
-	private final String version
+	static final String version
+
+	static {
+		version = Runtime.class.classLoader.getResourceAsStream('runtime.properties').withBufferedReader { reader ->
+			var cliProperties = new Properties()
+			cliProperties.load(reader)
+			var version = cliProperties.getProperty('version')
+			return version == '${version}' ? '(development)' : version
+		}
+	}
+
 	private final Application application
 
 	private GraphicsConfiguration graphicsConfiguration
+	private ImGuiElement[] imGuiElements
 	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
 	private Engine engine
@@ -70,15 +82,9 @@ final class Runtime {
 	 */
 	Runtime(Application application) {
 
-		version = getResourceAsStream('runtime.properties').withBufferedReader { reader ->
-			var cliProperties = new Properties()
-			cliProperties.load(reader)
-			var version = cliProperties.getProperty('version')
-			return version == '${version}' ? '(development)' : version
-		}
-		this.application = application
-
 		logger.debug('Red Horizon runtime version {} for application', version, application.class.simpleName)
+
+		this.application = application
 	}
 
 	/**
@@ -87,7 +93,7 @@ final class Runtime {
 	 *
 	 * @param args
 	 *   Command line arguments.  Currently unused.  Should in future be parsed
-	 *   and merged into the options object used in the {@link #execute} method.
+	 *   and used to configure the runtime.
 	 * @return
 	 *   A value that can be passed to `System.exit` to indicate whether the
 	 *   runtime and application completed successfully, or with an error.
@@ -122,6 +128,9 @@ final class Runtime {
 			graphicsSystem.on(EngineSystemReadyEvent) { event ->
 				graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, true))
 				graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem))
+				imGuiElements?.each { imGuiElement ->
+					graphicsSystem.imGuiLayer.addUiElement(imGuiElement)
+				}
 			}
 			graphicsSystem.relay(WindowMaximizedEvent, application)
 			engine << graphicsSystem
@@ -166,7 +175,7 @@ final class Runtime {
 	/**
 	 * Stop the application.
 	 */
-	final void stop() {
+	void stop() {
 
 		applicationStoppingSemaphore.tryAcquireAndRelease { ->
 			if (!applicationStopping) {
@@ -184,6 +193,15 @@ final class Runtime {
 	Runtime withGraphicsConfiguration(GraphicsConfiguration graphicsConfiguration) {
 
 		this.graphicsConfiguration = graphicsConfiguration
+		return this
+	}
+
+	/**
+	 * Configure additional ImGui elements for the window.
+	 */
+	Runtime withImGuiElements(ImGuiElement... imGuiElements) {
+
+		this.imGuiElements = imGuiElements
 		return this
 	}
 }
