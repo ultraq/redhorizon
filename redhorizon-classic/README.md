@@ -12,8 +12,7 @@ here, and serve as working examples for other programmers.
 Installation
 ------------
 
-Requires Java 17 on macOS 10.15 Catalina and newer, or Windows 10 64-bit and
-newer.
+Requires Java 21 on macOS 12 Monterey and newer, or Windows 10 64-bit and newer.
 
 ### For Maven and Maven-compatible dependency managers
 
