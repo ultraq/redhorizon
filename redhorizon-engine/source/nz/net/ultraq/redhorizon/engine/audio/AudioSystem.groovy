@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
+import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
@@ -27,6 +28,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.BrokenBarrierException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -40,6 +42,8 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
+	final EngineSystemType type = EngineSystemType.RENDER
+
 	private final AudioConfiguration config
 	private final BlockingQueue<Tuple2<Request, CompletableFuture<AudioResource>>> creationRequests = new LinkedBlockingQueue<>()
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
@@ -51,7 +55,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	/**
 	 * Constructor, build a new engine for rendering audio.
 	 */
-	AudioSystem(AudioConfiguration config) {
+	AudioSystem(AudioConfiguration config = new AudioConfiguration()) {
 
 		this.config = config
 	}
@@ -122,9 +126,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	protected void runLoop() {
 
 		context.withCurrent { ->
-			while (!Thread.interrupted()) {
-				try {
-					rateLimit(100) { ->
+			try {
+				while (!Thread.interrupted()) {
+					process { ->
 						processRequests(renderer)
 
 						// Run the audio elements
@@ -142,9 +146,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 						}
 					}
 				}
-				catch (InterruptedException ignored) {
-					break
-				}
+			}
+			catch (InterruptedException | BrokenBarrierException ignored) {
+				// Do nothing
 			}
 		}
 	}

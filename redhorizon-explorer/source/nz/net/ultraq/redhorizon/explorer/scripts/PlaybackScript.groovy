@@ -53,10 +53,10 @@ class PlaybackScript extends Script {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_SPACE, 'Play/Pause', { ->
 			if (runOnce) {
 				logger.debug('Pausing/Resuming playback')
-				scene.gameClock.togglePause()
+				togglePause()
 			}
 			else {
 				if (!playing || paused) {
@@ -67,7 +67,7 @@ class PlaybackScript extends Script {
 		}))
 
 		if (scriptable instanceof Sound) {
-			removeControlFunctions << scene.inputEventStream.addControl(
+			removeControlFunctions << scene.addControl(
 				new KeyControl(GLFW_KEY_A, 'Move audio source left', { ->
 					scriptable.transform { ->
 						translate(-0.25, 0)
@@ -75,7 +75,7 @@ class PlaybackScript extends Script {
 					logger.debug('Sound at: {}', scriptable.position.x())
 				})
 			)
-			removeControlFunctions << scene.inputEventStream.addControl(
+			removeControlFunctions << scene.addControl(
 				new KeyControl(GLFW_KEY_D, 'Move audio source right', { ->
 					scriptable.transform { ->
 						translate(0.25, 0)
@@ -105,8 +105,5 @@ class PlaybackScript extends Script {
 	void onSceneRemoved(Scene scene) {
 
 		removeControlFunctions*.remove()
-		if (scene.gameClock.paused) {
-			scene.gameClock.resume()
-		}
 	}
 }

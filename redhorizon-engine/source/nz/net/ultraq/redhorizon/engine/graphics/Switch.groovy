@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS
@@ -45,10 +45,10 @@ trait Switch<T extends Switch> {
 	/**
 	 * Toggle the state of this render pass with the given key.
 	 */
-	T toggleWith(InputEventStream inputEventStream, int key,
+	T toggleWith(InputSystem inputSystem, int key,
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPass') Closure closure = null) {
 
-		inputEventStream.on(KeyEvent) { event ->
+		inputSystem.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS && event.key == key) {
 				toggle()
 				if (closure) {

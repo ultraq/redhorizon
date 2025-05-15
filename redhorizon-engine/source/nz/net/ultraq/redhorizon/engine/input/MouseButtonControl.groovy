@@ -19,22 +19,22 @@ package nz.net.ultraq.redhorizon.engine.input
 import java.lang.reflect.Modifier
 
 /**
- * Mouse-specific control class.
+ * Mouse button control class.
  *
  * @author Emanuel Rabina
  */
-class MouseControl extends Control<MouseButtonEvent> {
+class MouseButtonControl extends Control<MouseButtonEvent> {
 
 	private final int modifier
 	private final int button
 	private Closure handler
 
-	MouseControl(int button, String name, Closure handler) {
+	MouseButtonControl(int button, String name, Closure handler) {
 
 		this(0, button, name, handler)
 	}
 
-	MouseControl(int modifier, int button, String name, Closure handler) {
+	MouseButtonControl(int modifier, int button, String name, Closure handler) {
 
 		super(MouseButtonEvent, name, determineBindingName(modifier, button))
 		this.modifier = modifier

@@ -16,7 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -31,7 +33,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.system.MemoryStack.stackPush
 
-import java.nio.FloatBuffer
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -39,7 +40,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Camera extends Node<Camera> implements GraphicsElement {
+class Camera extends Node<Camera> implements GameObject, GraphicsElement {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
@@ -139,18 +140,11 @@ class Camera extends Node<Camera> implements GraphicsElement {
 	}
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		FloatBuffer updateViewBuffer
 		if (viewProjectionBuffer) {
 			stackPush().withCloseable { stack ->
-				updateViewBuffer = getView().get(stack.mallocFloat(Matrix4f.FLOATS))
-			}
-		}
-
-		return { renderer ->
-			if (updateViewBuffer) {
-				viewProjectionBuffer.updateBufferData(updateViewBuffer, Matrix4f.BYTES)
+				viewProjectionBuffer.updateBufferData(getView().get(stack.mallocFloat(Matrix4f.FLOATS)), Matrix4f.BYTES)
 			}
 		}
 	}

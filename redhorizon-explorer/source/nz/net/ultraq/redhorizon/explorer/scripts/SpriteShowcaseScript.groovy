@@ -56,17 +56,18 @@ class SpriteShowcaseScript extends Script<PalettedSprite> {
 
 		camera.setScaleXY(4)
 
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_A, 'Previous frame', { ->
 			Math.wrap(currentFrame--, 0, numImages)
 			frame = currentFrame
 		}, true))
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_D, 'Next frame', { ->
 			Math.wrap(currentFrame++, 0, numImages)
 			frame = currentFrame
 		}, true))
 
 		var Faction[] factions = Faction.values()
-		removeControlFunctions << scene.inputEventStream.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', { ->
+		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
+			->
 			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
 			logger.info("Viewing with ${selectedFaction.name()} faction colours")
 			traverse { node ->

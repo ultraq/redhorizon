@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.input
 /**
  * A function that can be used to remove a control binding that was added via
- * {@link InputEventStream#addControl}.
+ * {@link InputSystem#addControl}.
  *
  * @author Emanuel Rabina
  */

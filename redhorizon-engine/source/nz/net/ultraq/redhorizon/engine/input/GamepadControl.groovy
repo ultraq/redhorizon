@@ -28,14 +28,21 @@ import groovy.transform.stc.SimpleType
  */
 class GamepadControl extends Control<GamepadAxisEvent> {
 
+	private static final int[] AXIS_TYPES = [
+		GLFW_GAMEPAD_AXIS_LEFT_X,
+		GLFW_GAMEPAD_AXIS_LEFT_Y,
+		GLFW_GAMEPAD_AXIS_RIGHT_X,
+		GLFW_GAMEPAD_AXIS_RIGHT_Y
+	]
+	private static final float AXIS_THRESHOLD = 0.2f // TODO: Configurable deadzone
+
 	private final int type
 	private final Closure handler
 
 	/**
 	 * Create a new gamepad control to act on the given gamepad axis events.
 	 */
-	GamepadControl(int type, String name,
-		@ClosureParams(value = SimpleType, options = 'float') Closure handler) {
+	GamepadControl(int type, String name, @ClosureParams(value = SimpleType, options = 'float') Closure handler) {
 
 		super(GamepadAxisEvent, name, determineBindingName(type))
 		this.type = type
@@ -52,6 +59,7 @@ class GamepadControl extends Control<GamepadAxisEvent> {
 			case GLFW_GAMEPAD_AXIS_LEFT_Y -> 'Left stick Y axis'
 			case GLFW_GAMEPAD_AXIS_RIGHT_X -> 'Right stick X axis'
 			case GLFW_GAMEPAD_AXIS_RIGHT_Y -> 'Right stick Y axis'
+			case GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER -> 'Right trigger'
 			default -> '(unknown)'
 		}
 	}
@@ -60,7 +68,18 @@ class GamepadControl extends Control<GamepadAxisEvent> {
 	void handleEvent(GamepadAxisEvent event) {
 
 		if (event.type == type) {
-			handler(event.value)
+			if (type in AXIS_TYPES) {
+				var value = event.value
+				if (Math.abs(value) > AXIS_THRESHOLD) {
+					handler(event.value)
+				}
+				else {
+					handler(0)
+				}
+			}
+			else {
+				handler(event.value)
+			}
 		}
 	}
 }

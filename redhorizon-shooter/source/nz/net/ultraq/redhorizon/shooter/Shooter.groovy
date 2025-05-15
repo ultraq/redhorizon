@@ -16,104 +16,104 @@
 
 package nz.net.ultraq.redhorizon.shooter
 
-import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
-import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
-import nz.net.ultraq.redhorizon.engine.Application
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
 import nz.net.ultraq.redhorizon.explorer.PaletteType
-import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.runtime.Application
+import nz.net.ultraq.redhorizon.runtime.Runtime
+import nz.net.ultraq.redhorizon.runtime.VersionReader
 import nz.net.ultraq.redhorizon.shooter.objects.Player
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import picocli.CommandLine
+import picocli.CommandLine.Command
+
+import java.util.concurrent.Callable
 
 /**
- * Main class for the shooter game ✈️🔫
+ * A twin-stick shooter game to exercise the Red Horizon engine ✈️🔫
  *
  * @author Emanuel Rabina
  */
-class Shooter {
+class Shooter implements Application {
 
 	private static final Dimension RENDER_RESOLUTION = new Dimension(720, 405)
 	private static final Logger logger = LoggerFactory.getLogger(Shooter)
 
-	private GlobalPalette globalPalette
-	private Camera camera
-	private Node player
-
 	/**
-	 * Constructor, launch the shooter game.
+	 * Entry point to the Shooter game.
 	 */
-	Shooter(String version) {
+	static void main(String[] args) {
 
-		new Application('Shooter', version)
-			.addGraphicsSystem(new GraphicsConfiguration(
-				clearColour: Colour.GREY,
-				renderResolution: RENDER_RESOLUTION
-			))
-			.addTimeSystem()
-			.onApplicationStart { application, scene -> start(scene) }
-			.onApplicationStop { application, scene -> stop(scene) }
-			.start()
+		System.exit(new CommandLine(new CliWrapper()).execute(args))
 	}
 
 	/**
-	 * Set up and begin the game.
+	 * Tiny CLI wrapper around the Shooter game so it's launchable w/ Picocli.
 	 */
-	private void start(Scene scene) {
+	@Command(name = 'shooter')
+	static class CliWrapper implements Callable<Integer> {
+
+		@Override
+		Integer call() {
+
+			return new Runtime(new Shooter())
+				.withGraphicsConfiguration(new GraphicsConfiguration(
+					clearColour: Colour.GREY,
+					renderResolution: RENDER_RESOLUTION
+				))
+				.execute()
+		}
+	}
+
+	final String name = 'Shooter'
+	final String version = new VersionReader('shooter.properties').read()
+
+	@Override
+	void start(Scene scene) {
 
 		new ResourceManager(
 			new File(System.getProperty('user.dir'), 'mix'),
 			'nz.net.ultraq.redhorizon.filetypes',
 			'nz.net.ultraq.redhorizon.classic.filetypes').withCloseable { resourceManager ->
 
-			camera = new Camera(RENDER_RESOLUTION)
+			var camera = new Camera(RENDER_RESOLUTION)
 			scene << camera
 
 			scene << new GridLines(Map.MAX_BOUNDS, 24)
 
-			globalPalette = new GlobalPalette(loadPalette())
+			var paletteType = PaletteType.RA_TEMPERATE
+			logger.info('Using {} palette', paletteType)
+			var globalPalette = getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
+				return new GlobalPalette(new PalFile(inputStream))
+			}
 			scene << globalPalette
 
-			player = new Player(resourceManager).tap {
+			var player = new Player(resourceManager).tap {
 				layer = Layer.SPRITES_UPPER
 			}
 			scene << player
 
 			camera.follow(player)
 
-			var mapFile = resourceManager.loadFile('scg01ea.ini', IniFile)
-			var map = new Map(mapFile as MapFile, resourceManager)
-			scene << map
+//			var mapFile = resourceManager.loadFile('scm01ea.ini', IniFile)
+//			var map = new Map(mapFile as MapFile, resourceManager)
+//			scene << map
 		}
 	}
 
-	/**
-	 * Load the given palette as the global palette for objects.
-	 */
-	private Palette loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
-
-		logger.info("Using ${paletteType} palette")
-		return getResourceAsStream(paletteType.file).withBufferedStream { inputStream ->
-			return new PalFile(inputStream)
-		}
-	}
-
-	/**
-	 * Clean up.
-	 */
-	private void stop(Scene scene) {
+	@Override
+	void stop(Scene scene) {
 
 		scene.clear()
 	}

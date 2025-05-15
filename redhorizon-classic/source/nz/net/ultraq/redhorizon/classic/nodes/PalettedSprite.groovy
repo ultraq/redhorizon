@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.classic.nodes
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
@@ -41,8 +42,8 @@ class PalettedSprite extends Sprite implements FactionColours {
 	private static final int[] IDENTITY_MAP = 0..255
 
 	private boolean factionChanged
+	private boolean adjustmentMapChanged
 	private final PalettedSpriteMaterial palettedSpriteMaterial = new PalettedSpriteMaterial()
-	private final PalettedSpriteMaterial palettedSpriteMaterialCopy = new PalettedSpriteMaterial()
 
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.
@@ -76,15 +77,9 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	protected PalettedSpriteMaterial getMaterial() {
+	PalettedSpriteMaterial getMaterial() {
 
 		return palettedSpriteMaterial
-	}
-
-	@Override
-	protected PalettedSpriteMaterial getMaterialCopy() {
-
-		return palettedSpriteMaterialCopy
 	}
 
 	@Override
@@ -130,25 +125,19 @@ class PalettedSprite extends Sprite implements FactionColours {
 	}
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		transformCopy.set(globalTransform)
-
-		var updateAdjustmentMap = materialCopy.adjustmentMap != material.adjustmentMap
-		materialCopy.copy(material)
-
-		return { renderer ->
-			if (mesh && shader && materialCopy.texture) {
-				if (updateAdjustmentMap) {
-					var paletteMetadataBuffer = IntBuffer.allocate(256 * 4)
-					materialCopy.adjustmentMap.each { adjustment ->
-						paletteMetadataBuffer.put(adjustment).advance(3)
-					}
-					paletteMetadataBuffer.flip()
-					materialCopy.paletteMetadataBuffer.updateBufferData(paletteMetadataBuffer, 0)
+		if (mesh && shader && material.texture) {
+			if (adjustmentMapChanged) {
+				var paletteMetadataBuffer = IntBuffer.allocate(256 * 4)
+				material.adjustmentMap.each { adjustment ->
+					paletteMetadataBuffer.put(adjustment).advance(3)
 				}
-				renderer.draw(mesh, transformCopy, shader, materialCopy)
+				paletteMetadataBuffer.flip()
+				material.paletteMetadataBuffer.updateBufferData(paletteMetadataBuffer, 0)
+				adjustmentMapChanged = false
 			}
+			renderer.draw(mesh, globalTransform, shader, material)
 		}
 	}
 
@@ -167,6 +156,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 		if (factionChanged) {
 			material.adjustmentMap = buildAdjustmentMap(faction)
+			adjustmentMapChanged = true
 			factionChanged = false
 		}
 		super.update(delta)

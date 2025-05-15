@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -43,12 +44,10 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.UpdateHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 
-import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
@@ -80,9 +79,6 @@ class Map extends Node<Map> {
 	final Theater theater
 	final Rectanglef boundary
 	final Vector2f initialPosition
-
-	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final PalettedSpriteMaterial materialCopy = new PalettedSpriteMaterial()
 
 	private final ResourceManager resourceManager
 	private final RulesFile rules
@@ -202,8 +198,6 @@ class Map extends Node<Map> {
 		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3072)
 		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3072)
 
-		final UpdateHint updateHint = UpdateHint.NEVER
-
 		MapLines() {
 
 			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
@@ -222,7 +216,6 @@ class Map extends Node<Map> {
 
 		String name = "MapBackground - ${theater.label}"
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
-		final UpdateHint updateHint = UpdateHint.NEVER
 
 		private final PalettedSprite backgroundSprite
 
@@ -264,7 +257,6 @@ class Map extends Node<Map> {
 	private class MapPack extends Node<MapPack> implements GraphicsElement {
 
 		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
-		final UpdateHint updateHint = UpdateHint.NEVER
 
 		private final TileSet tileSet = new TileSet()
 		private final List<MapTile> mapTiles = []
@@ -390,15 +382,10 @@ class Map extends Node<Map> {
 		}
 
 		@Override
-		RenderCommand renderCommand() {
+		void render(GraphicsRenderer renderer) {
 
-			transformCopy.set(globalTransform)
-			materialCopy.copy(material)
-
-			return { renderer ->
-				if (fullMesh && shader && materialCopy.texture) {
-					renderer.draw(fullMesh, transformCopy, shader, materialCopy)
-				}
+			if (fullMesh && shader && material.texture) {
+				renderer.draw(fullMesh, globalTransform, shader, material)
 			}
 		}
 	}
@@ -410,7 +397,6 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-		final UpdateHint updateHint = UpdateHint.NEVER
 
 		private int numTiles = 0
 
@@ -504,7 +490,6 @@ class Map extends Node<Map> {
 
 		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-		final UpdateHint updateHint = UpdateHint.NEVER
 
 		Terrain() {
 

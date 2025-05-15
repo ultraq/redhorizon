@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.cli
 
 import nz.net.ultraq.redhorizon.cli.converter.Converter
 import nz.net.ultraq.redhorizon.cli.mixtools.Mix
+import nz.net.ultraq.redhorizon.explorer.Explorer
+import nz.net.ultraq.redhorizon.shooter.Shooter
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -39,16 +41,20 @@ import picocli.CommandLine.IVersionProvider
 	mixinStandardHelpOptions = true,
 	subcommands = [
 		Converter,
-		Explorer,
+		Explorer.CliWrapper,
 		Mix,
-		Shooter
+		Shooter.CliWrapper
 	],
 	versionProvider = VersionProvider
 )
 class RedHorizon {
 
-	static {
-		System.setProperty('logback.configurationFile', 'logback-cli.xml')
+	/**
+	 * Bootstrap the application using Picocli.
+	 */
+	static void main(String[] args) {
+
+		System.exit(new CommandLine(new RedHorizon()).execute(args))
 	}
 
 	/**
@@ -60,20 +66,11 @@ class RedHorizon {
 		String[] getVersion() {
 
 			return getResourceAsStream('cli.properties').withBufferedReader { reader ->
-				def cliProperties = new Properties()
+				var cliProperties = new Properties()
 				cliProperties.load(reader)
-				def version = cliProperties.getProperty('version')
+				var version = cliProperties.getProperty('version')
 				return new String[]{ version == '${version}' ? '(development)' : version }
 			}
 		}
-	}
-
-	/**
-	 * Bootstrap the application using Picocli.
-	 *
-	 * @param args
-	 */
-	static void main(String[] args) {
-		System.exit(new CommandLine(new RedHorizon()).execute(args))
 	}
 }

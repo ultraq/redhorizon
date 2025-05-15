@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-description = "A playground for any game development I'm trying out"
+description = 'Runtime package for building applications with the Red Horizon engine'
 
 dependencies {
-	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-engine')
-	implementation project(':redhorizon-explorer')
-	implementation project(':redhorizon-events')
-	implementation project(':redhorizon-filetypes')
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+	api project(':redhorizon-engine')
+	api project(':redhorizon-events')
+	api project(':redhorizon-filetypes')
+	implementation "ch.qos.logback:logback-core:${logbackVersion}"
+	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation 'org.lwjgl:lwjgl-glfw'
+}
+
+processResources {
+	filesMatching('**/runtime.properties') {
+		expand version: version
+	}
 }

@@ -21,12 +21,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import org.lwjgl.glfw.GLFWGamepadState
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.TupleConstructor
 import java.nio.FloatBuffer
 
 /**
  * A class for managing gamepad inputs and emitting them as events so that it
- * all acts the same for those on the other end of the {@link InputEventStream}.
+ * all acts the same for those on the other end of the {@link InputSystem}.
  * <p>
  * GLFW currently doesn't have a callback system in place for joysticks, and so
  * you have to do DIY polling and handling.  See https://github.com/glfw/glfw/issues/601,
@@ -37,10 +36,7 @@ import java.nio.FloatBuffer
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class GamepadStateProcessor {
-
-	final InputEventStream inputEventStream
+class GamepadStateProcessor implements InputSource {
 
 	@Lazy
 	private GLFWGamepadState gamepadState = { GLFWGamepadState.create() }()
@@ -70,6 +66,7 @@ class GamepadStateProcessor {
 		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER)
 	}
 
 	/**
@@ -78,6 +75,6 @@ class GamepadStateProcessor {
 	private void processAxis(FloatBuffer axes, int type) {
 
 		var value = axes.get(type)
-		inputEventStream.trigger(new GamepadAxisEvent(type, value <= -0.2f || 0.2f <= value ? value : 0f))
+		trigger(new GamepadAxisEvent(type, value))
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph
+package nz.net.ultraq.redhorizon.explorer
+
+import nz.net.ultraq.preferences.UserPreference
+
+import groovy.transform.TupleConstructor
 
 /**
- * A temporal component is one that can receive updates about the game time.
+ * Preferences for the explorer.
  *
  * @author Emanuel Rabina
  */
-trait Temporal {
+@TupleConstructor
+enum ExplorerPreferences implements UserPreference {
 
-	long currentTimeMs
+	WINDOW_MAXIMIZED(false),
+	TOUCHPAD_INPUT(false)
 
-	/**
-	 * Update this object's current time with a new value from the game clock.
-	 */
-	void tick(long updatedTimeMs) {
-
-		currentTimeMs = updatedTimeMs
-	}
+	final Object defaultValue
 }

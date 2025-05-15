@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
-
-import nz.net.ultraq.preferences.UserPreference
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.engine.game
 
 /**
- * Preferences for the explorer.
+ * Any object in the scene that should be updated by the {@link GameLogicSystem}.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum ExplorerPreferences implements UserPreference {
+interface GameObject {
 
-	WINDOW_MAXIMIZED(false),
-	TOUCHPAD_INPUT(false)
-
-	final Object defaultValue
+	/**
+	 * Called regularly by the game logic system, allowing it to perform any
+	 * processing as a response to changes in the scene.
+	 *
+	 * @param delta
+	 *   Time, in seconds, since the last time this method was called.
+	 */
+	void update(float delta)
 }

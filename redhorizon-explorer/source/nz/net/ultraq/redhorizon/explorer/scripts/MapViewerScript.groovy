@@ -22,11 +22,11 @@ import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
+import nz.net.ultraq.redhorizon.engine.input.MouseButtonControl
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
-import nz.net.ultraq.redhorizon.engine.input.MouseControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -66,7 +66,7 @@ class MapViewerScript extends Script<Map> {
 
 	private final List<RemoveEventListenerFunction> removeEventListenerFunctions = []
 	private final List<RemoveControlFunction> removeControlFunctions = []
-	private InputEventStream inputEventStream
+	private InputSystem inputSystem
 	private Window window
 	private GameWindow gameWindow
 	private Outline outline
@@ -85,12 +85,12 @@ class MapViewerScript extends Script<Map> {
 		// Use touchpad to move around
 		if (touchpadInput) {
 			var ctrl = false
-			removeEventListenerFunctions << inputEventStream.on(KeyEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(KeyEvent) { event ->
 				if (event.key == GLFW_KEY_LEFT_CONTROL) {
 					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
 				}
 			}
-			removeEventListenerFunctions << inputEventStream.on(ScrollEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
 
 					// Zoom in/out using CTRL + scroll up/down
@@ -113,8 +113,8 @@ class MapViewerScript extends Script<Map> {
 					}
 				}
 			}
-			removeControlFunctions << inputEventStream.addControl(
-				new MouseControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
+			removeControlFunctions << inputSystem.addControl(
+				new MouseButtonControl(GLFW_MOD_CONTROL, GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
 						camera.reset()
 					}
@@ -125,7 +125,7 @@ class MapViewerScript extends Script<Map> {
 		else {
 			var cursorPosition = new Vector2f()
 			var dragging = false
-			removeEventListenerFunctions << inputEventStream.on(CursorPositionEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(CursorPositionEvent) { event ->
 				var adjustedPosX = event.xPos / window.renderToWindowScale as float
 				var adjustedPosY = event.yPos / window.renderToWindowScale as float
 				if (dragging) {
@@ -138,7 +138,7 @@ class MapViewerScript extends Script<Map> {
 				}
 				cursorPosition.set(adjustedPosX, adjustedPosY)
 			}
-			removeEventListenerFunctions << inputEventStream.on(MouseButtonEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(MouseButtonEvent) { event ->
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					if (event.action == GLFW_PRESS) {
 						if (gameWindow ? gameWindow.hovered : true) {
@@ -152,7 +152,7 @@ class MapViewerScript extends Script<Map> {
 			}
 
 			// Zoom in/out using the scroll wheel
-			removeEventListenerFunctions << inputEventStream.on(ScrollEvent) { event ->
+			removeEventListenerFunctions << inputSystem.on(ScrollEvent) { event ->
 				if (gameWindow ? gameWindow.hovered : true) {
 					float scaleFactor = camera.scale.x()
 					if (event.yOffset < 0) {
@@ -165,8 +165,8 @@ class MapViewerScript extends Script<Map> {
 					camera.setScaleXY(scaleFactor)
 				}
 			}
-			removeControlFunctions << inputEventStream.addControl(
-				new MouseControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
+			removeControlFunctions << inputSystem.addControl(
+				new MouseButtonControl(GLFW_MOUSE_BUTTON_RIGHT, 'Reset camera', { ->
 					if (gameWindow ? gameWindow.hovered : true) {
 						camera.reset()
 					}
@@ -189,27 +189,27 @@ class MapViewerScript extends Script<Map> {
 		}
 
 		// Custom inputs
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
+		removeControlFunctions << inputSystem.addControl(new KeyControl(GLFW_KEY_W, 'Scroll up', { ->
 			camera.transform { ->
 				translate(0, -TICK)
 			}
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_S, 'Scroll down', { ->
+		removeControlFunctions << inputSystem.addControl(new KeyControl(GLFW_KEY_S, 'Scroll down', { ->
 			camera.transform { ->
 				translate(0, TICK)
 			}
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_A, 'Scroll left', { ->
+		removeControlFunctions << inputSystem.addControl(new KeyControl(GLFW_KEY_A, 'Scroll left', { ->
 			camera.transform { ->
 				translate(TICK, 0)
 			}
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_D, 'Scroll right', { ->
+		removeControlFunctions << inputSystem.addControl(new KeyControl(GLFW_KEY_D, 'Scroll right', { ->
 			camera.transform { ->
 				translate(-TICK, 0)
 			}
 		}))
-		removeControlFunctions << inputEventStream.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
+		removeControlFunctions << inputSystem.addControl(new KeyControl(GLFW_KEY_SPACE, 'Reset camera position', { ->
 			viewInitialPosition()
 		}))
 	}
@@ -239,7 +239,7 @@ class MapViewerScript extends Script<Map> {
 	@Override
 	void onSceneAdded(Scene scene) {
 
-		inputEventStream = scene.inputEventStream
+		inputSystem = scene.inputRequestHandler
 		window = scene.window
 		gameWindow = scene.gameWindow
 		outline = new Outline(new Rectanglef(), Colour.RED, true).tap {

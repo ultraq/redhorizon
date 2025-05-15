@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
@@ -30,15 +31,12 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Playable
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.SceneEvents
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.events.Event
 import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
-
-import org.joml.Matrix4f
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture
@@ -49,16 +47,13 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Animation extends Node<Animation> implements GraphicsElement, Playable, Temporal {
-
-	protected final Matrix4f transformCopy = new Matrix4f()
-	protected final SpriteMaterial materialCopy = new SpriteMaterial()
+class Animation extends Node<Animation> implements GameObject, GraphicsElement, Playable {
 
 	private final AnimationSource animationSource
 
 	private final int numFrames
 	private final float frameRate
-	private long startTimeMs
+	private float accAnimationTime
 	private int currentFrame = -1
 	private Mesh mesh
 	private Shader shader
@@ -122,30 +117,13 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		transformCopy.set(globalTransform)
-		materialCopy.copy(material)
-
-		return { renderer ->
-			if (mesh && shader && currentFrame != -1) {
-				var frame = animationSource.prepareFrame(renderer, currentFrame)
-				if (frame) {
-					materialCopy.texture = frame
-					renderer.draw(mesh, transformCopy, shader, materialCopy)
-				}
-			}
-		}
-	}
-
-	@Override
-	void tick(long updatedTimeMs) {
-
-		if (playing) {
-			Temporal.super.tick(updatedTimeMs)
-
-			if (!startTimeMs) {
-				startTimeMs = currentTimeMs
+		if (mesh && shader && currentFrame != -1) {
+			var frame = animationSource.prepareFrame(renderer, currentFrame)
+			if (frame) {
+				material.texture = frame
+				renderer.draw(mesh, globalTransform, shader, material)
 			}
 		}
 	}
@@ -154,13 +132,14 @@ class Animation extends Node<Animation> implements GraphicsElement, Playable, Te
 	void update(float delta) {
 
 		if (playing) {
-			var nextFrame = Math.floor((currentTimeMs - startTimeMs) / 1000 * frameRate) as int
+			var nextFrame = Math.floor(accAnimationTime * frameRate) as int
 			if (nextFrame < numFrames) {
 				currentFrame = nextFrame
 			}
 			else {
 				stop()
 			}
+			accAnimationTime += delta
 		}
 	}
 

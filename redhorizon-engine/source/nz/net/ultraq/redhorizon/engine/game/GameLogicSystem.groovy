@@ -18,10 +18,12 @@ package nz.net.ultraq.redhorizon.engine.game
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
+import nz.net.ultraq.redhorizon.engine.EngineSystemType
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.util.concurrent.BrokenBarrierException
 
 /**
  * Engine subsystem for running game logic and updating objects in response to
@@ -32,6 +34,8 @@ import org.slf4j.LoggerFactory
 class GameLogicSystem extends EngineSystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(GameLogicSystem)
+
+	final EngineSystemType type = EngineSystemType.UPDATE
 
 	private long lastUpdateTimeMs
 
@@ -44,23 +48,25 @@ class GameLogicSystem extends EngineSystem {
 	@Override
 	void runLoop() {
 
-		var graphicsSystem = (GraphicsSystem)engine.systems.find { system -> system instanceof GraphicsSystem }
+		List<GameObject> gameObjects = []
 
-		while (!Thread.interrupted()) {
-			try {
-				var currentTimeMs = System.currentTimeMillis()
-				var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
+		try {
+			while (!Thread.interrupted()) {
+				process { ->
+					var currentTimeMs = System.currentTimeMillis()
+					var delta = (currentTimeMs - (lastUpdateTimeMs ?: currentTimeMs)) / 1000
 
-				average('Updating', 1f, logger) { ->
-					scene?.update(delta)
+					average('Updating', 1f, logger) { ->
+						scene?.query(GameObject, gameObjects)*.update(delta)
+						gameObjects.clear()
+					}
+
+					lastUpdateTimeMs = currentTimeMs
 				}
-				graphicsSystem.waitForContinue()
-
-				lastUpdateTimeMs = currentTimeMs
 			}
-			catch (InterruptedException ignored) {
-				break
-			}
+		}
+		catch (InterruptedException | BrokenBarrierException ignored) {
+			// Do nothing
 		}
 	}
 }

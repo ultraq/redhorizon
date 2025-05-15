@@ -27,13 +27,4 @@ package nz.net.ultraq.redhorizon.engine.graphics
 class Material {
 
 	Texture texture
-
-	/**
-	 * Copy the values of an existing material into this one.
-	 */
-	Material copy(Material other) {
-
-		texture = other.texture
-		return this
-	}
 }

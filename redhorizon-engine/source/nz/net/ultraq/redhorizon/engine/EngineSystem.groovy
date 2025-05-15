@@ -22,12 +22,12 @@ import nz.net.ultraq.redhorizon.events.EventTarget
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.PackageScope
+import java.util.concurrent.CyclicBarrier
 
 /**
  * A system provides behaviour for a component or set of components.  Systems
  * traverse a {@link Scene}, looking for the components they work with, and then
- * doing something with the data in those components.
+ * do something with the data in those components.
  * <p>
  * Systems operate on their own thread, and should be careful not to step on
  * data that could be used by other systems/threads.
@@ -38,21 +38,16 @@ abstract class EngineSystem implements Runnable, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(EngineSystem)
 
-	private Engine engine
+	private final CyclicBarrier processStartBarrier = new CyclicBarrier(2)
+	private final CyclicBarrier processCompleteBarrier = new CyclicBarrier(2)
+
+	protected Engine engine
 	protected Scene scene
 
 	/**
 	 * Configure the current scene with this system.
 	 */
 	abstract void configureScene()
-
-	/**
-	 * Return the engine that this system is a part of.
-	 */
-	protected Engine getEngine() {
-
-		return engine
-	}
 
 	/**
 	 * Return the name of the system, for logging purposes.
@@ -63,22 +58,41 @@ abstract class EngineSystem implements Runnable, EventTarget {
 	}
 
 	/**
-	 * Execute an action and optionally wait such that, if repeated, it would run
-	 * no faster than the given frequency.
-	 *
-	 * @param frequency
-	 *   The number of times per second the action could be repeated.
-	 * @param action
-	 * @return
+	 * Return what part of the game loop this system will be used for.
 	 */
-	protected static void rateLimit(float frequency, Closure action) {
+	protected abstract EngineSystemType getType()
 
-		var maxExecTime = 1000f / frequency
-		var execTime = time(action)
-		var waitTime = maxExecTime - execTime
-		if (waitTime > 0) {
-			Thread.sleep((long)waitTime)
-		}
+	/**
+	 * Called by the system at the end of a processing iteration to let the engine
+	 * know it has finished.
+	 *
+	 * @see {@link #process}
+	 */
+	protected void notifyForProcessComplete() {
+
+		processCompleteBarrier.await()
+		processCompleteBarrier.reset()
+	}
+
+	/**
+	 * Called by the engine to release the system waiting on {@link #waitForProcessStart}
+	 * so that it can begin a processing iteration.
+	 */
+	protected void notifyForProcessStart() {
+
+		processStartBarrier.await()
+		processStartBarrier.reset()
+	}
+
+	/**
+	 * A convenience method to execute the given closure between a {@link #waitForProcessStart}
+	 * call and a {@link #notifyForProcessComplete} call.
+	 */
+	protected void process(Closure closure) {
+
+		waitForProcessStart()
+		closure()
+		notifyForProcessComplete()
 	}
 
 	/**
@@ -119,21 +133,22 @@ abstract class EngineSystem implements Runnable, EventTarget {
 	}
 
 	/**
-	 * Set the engine this system is a part of.
+	 * Called by the engine to wait for the signal by the system that processing
+	 * has completed.
 	 */
-	@PackageScope
-	void setEngine(Engine engine) {
+	protected void waitForProcessComplete() {
 
-		this.engine = engine
+		processCompleteBarrier.await()
 	}
 
 	/**
-	 * Set and configure the scene with this system
+	 * Called by the system to wait for the signal from the engine that processing
+	 * may continue.  A system should call this at the start of a processing loop.
+	 *
+	 * @see {@link #process}
 	 */
-	@PackageScope
-	void setScene(Scene scene) {
+	protected void waitForProcessStart() {
 
-		this.scene = scene
-		configureScene()
+		processStartBarrier.await()
 	}
 }

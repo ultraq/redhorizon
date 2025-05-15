@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.nodes
 
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -99,18 +100,11 @@ class GlobalPalette extends Node<GlobalPalette> implements GraphicsElement {
 	}
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		FloatBuffer updatePaletteBuffer
 		if (paletteChanged) {
-			updatePaletteBuffer = buildPaletteBuffer()
+			paletteAndAlphaMaskBuffer.updateBufferData(buildPaletteBuffer())
 			paletteChanged = false
-		}
-
-		return { renderer ->
-			if (updatePaletteBuffer) {
-				paletteAndAlphaMaskBuffer.updateBufferData(updatePaletteBuffer)
-			}
 		}
 	}
 

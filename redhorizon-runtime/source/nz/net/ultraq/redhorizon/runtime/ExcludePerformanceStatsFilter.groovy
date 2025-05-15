@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.cli
+package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
 

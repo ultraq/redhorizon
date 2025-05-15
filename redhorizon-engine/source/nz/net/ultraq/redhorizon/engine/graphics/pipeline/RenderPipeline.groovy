@@ -27,9 +27,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement.RenderCommand
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
@@ -38,7 +36,6 @@ import org.joml.Matrix4f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_U
 
 /**
  * A render pipeline contains all of the configured rendering passes and
@@ -64,8 +61,7 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * Constructor, configure the rendering pipeline.
 	 */
-	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer, ImGuiLayer imGuiLayer,
-		InputEventStream inputEventStream) {
+	RenderPipeline(GraphicsConfiguration config, Window window, GraphicsRenderer renderer, ImGuiLayer imGuiLayer) {
 
 		this.renderer = renderer
 		this.imGuiLayer = imGuiLayer
@@ -83,7 +79,7 @@ class RenderPipeline implements AutoCloseable {
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in
 		// development
-		configurePipeline(config, window, inputEventStream)
+		configurePipeline(config, window)
 	}
 
 	@Override
@@ -96,7 +92,7 @@ class RenderPipeline implements AutoCloseable {
 	/**
 	 * Build out the rendering pipeline.
 	 */
-	private void configurePipeline(GraphicsConfiguration config, Window window, InputEventStream inputEventStream) {
+	private void configurePipeline(GraphicsConfiguration config, Window window) {
 
 		// Scene render pass
 		sceneRenderPass = new SceneRenderPass(renderer.createFramebuffer(window.renderResolution, true))
@@ -108,9 +104,9 @@ class RenderPipeline implements AutoCloseable {
 			renderer.createShader(new SharpUpscalingShader()),
 			true
 		)
-			.toggleWith(inputEventStream, GLFW_KEY_U) { renderPass ->
-				logger.debug("Sharp upscaling ${renderPass.enabled ? 'enabled' : 'disabled'}")
-			}
+//			.toggleWith(inputEventStream, GLFW_KEY_U) { renderPass ->
+//				logger.debug("Sharp upscaling ${renderPass.enabled ? 'enabled' : 'disabled'}")
+//			}
 
 		// Scanline post-processing pass
 //		renderPasses << new PostProcessingRenderPass(
@@ -128,14 +124,6 @@ class RenderPipeline implements AutoCloseable {
 			window
 		)
 		renderPasses << screenRenderPass
-	}
-
-	/**
-	 * Collect the objects to draw with the next call to {@link #render}.
-	 */
-	void gather() {
-
-		sceneRenderPass.gather()
 	}
 
 	/**
@@ -182,7 +170,6 @@ class RenderPipeline implements AutoCloseable {
 		private final Matrix4f enlargedViewProjection = new Matrix4f()
 		private final FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private final List<Node> queryResults = []
-		private final List<RenderCommand> drawCommands = []
 
 		Scene scene
 
@@ -198,32 +185,20 @@ class RenderPipeline implements AutoCloseable {
 			renderer.delete(framebuffer)
 		}
 
-		/**
-		 * Gather a list of renderables to be drawn to the screen with the next call
-		 * to {@link #render}.
-		 */
-		void gather() {
-
-			if (scene?.camera) {
-				average('Gathering', 1f, logger) { ->
-					queryResults.clear()
-					drawCommands.clear()
-					drawCommands << scene.camera.renderCommand()
-					frustumIntersection.set(enlargedViewProjection.scaling(0.8f, 0.8f, 1f).mul(scene.camera.viewProjection), false)
-					scene.query(frustumIntersection, queryResults).each { node ->
-						if (node instanceof GraphicsElement) {
-							drawCommands << node.renderCommand()
-						}
-					}
-				}
-			}
-		}
-
 		@Override
 		void render(GraphicsRenderer renderer, Void unused) {
 
 			average('Rendering', 1f, logger) { ->
-				drawCommands*.render(renderer)
+				if (scene?.camera) {
+					queryResults.clear()
+					scene.camera.render(renderer)
+					frustumIntersection.set(enlargedViewProjection.scaling(0.8f, 0.8f, 1f).mul(scene.camera.viewProjection), false)
+					scene.query(frustumIntersection, queryResults).each { node ->
+						if (node instanceof GraphicsElement) {
+							node.render(renderer)
+						}
+					}
+				}
 			}
 		}
 	}

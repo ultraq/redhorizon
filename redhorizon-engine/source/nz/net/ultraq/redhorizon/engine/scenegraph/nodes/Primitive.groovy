@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
@@ -29,7 +30,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 
-import org.joml.Matrix4f
 import org.joml.Vector2f
 
 import java.util.concurrent.CompletableFuture
@@ -48,7 +48,6 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 	protected Mesh mesh
 	protected Shader shader
-	protected final Matrix4f transformCopy = new Matrix4f()
 	protected boolean pointsChanged
 
 	/**
@@ -114,19 +113,15 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 
 	@Override
-	RenderCommand renderCommand() {
+	void render(GraphicsRenderer renderer) {
 
-		transformCopy.set(globalTransform)
+		if (mesh && pointsChanged) {
+			mesh.updateVertices(points)
+			pointsChanged = false
+		}
 
-		return { renderer ->
-			if (mesh && pointsChanged) {
-				mesh.updateVertices(points)
-				pointsChanged = false
-			}
-
-			if (mesh && shader) {
-				renderer.draw(mesh, transformCopy, shader)
-			}
+		if (mesh && shader) {
+			renderer.draw(mesh, globalTransform, shader)
 		}
 	}
 

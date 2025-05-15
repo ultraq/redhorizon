@@ -17,15 +17,16 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
+import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
 import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputHandler
+import nz.net.ultraq.redhorizon.engine.input.InputRequests
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
-import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.FrustumIntersection
@@ -58,9 +59,8 @@ class Scene implements EventTarget {
 	AudioRequests audioRequestsHandler
 	@Delegate
 	GraphicsRequests graphicsRequestHandler
-	TimeSystem gameClock
-	// TODO: A better name for this or way for nodes to have access to inputs?
-	InputEventStream inputEventStream
+	@Delegate
+	InputRequests inputRequestHandler
 
 	Window window
 	Camera camera
@@ -75,8 +75,8 @@ class Scene implements EventTarget {
 	private final ConcurrentSkipListSet<Float> zValues = new ConcurrentSkipListSet<>()
 	private final TreeMap<Float, QuadTree> quadTrees = new TreeMap<>()
 	private final TreeMap<Float, CopyOnWriteArrayList<Node>> nodeLists = new TreeMap<>()
-	private final List<Temporal> temporalNodes = new CopyOnWriteArrayList<>()
-	private final List<Node> updateableNodes = new CopyOnWriteArrayList<>()
+	private final List<GameObject> updateableNodes = new CopyOnWriteArrayList<>()
+	private final List<InputHandler> inputNodes = new CopyOnWriteArrayList<>()
 	private final Semaphore createQuadTreeSemaphore = new Semaphore(1)
 	private final Semaphore createNodeListSemaphore = new Semaphore(1)
 
@@ -168,12 +168,11 @@ class Scene implements EventTarget {
 		}
 		zValues << zValue
 
-		switch (node.updateHint) {
-			case UpdateHint.ALWAYS -> updateableNodes << node
+		if (node instanceof GameObject) {
+			updateableNodes << node
 		}
-
-		if (node instanceof Temporal) {
-			temporalNodes << node
+		if (node instanceof InputHandler) {
+			inputNodes << node
 		}
 	}
 
@@ -210,6 +209,28 @@ class Scene implements EventTarget {
 	}
 
 	/**
+	 * Return all nodes of the given class.
+	 */
+	<T> List<T> query(Class<T> clazz, List<T> results = []) {
+
+		if (clazz === GameObject) {
+			results.addAll(updateableNodes)
+		}
+		else if (clazz === InputHandler) {
+			results.addAll(inputNodes)
+		}
+		else {
+			traverseAsync { node ->
+				if (node.class === clazz) {
+					results.add(node)
+				}
+				return true
+			}
+		}
+		return results
+	}
+
+	/**
 	 * Trigger the {@code onSceneRemoved} handler for this node and all its
 	 * children.  Each node triggers a {@link NodeRemovedEvent} event.
 	 */
@@ -230,16 +251,6 @@ class Scene implements EventTarget {
 	}
 
 	/**
-	 * Update the scene's temporal nodes with the given time value.
-	 */
-	void tick(long currentTimeMillis) {
-
-		temporalNodes.each { element ->
-			element.tick(currentTimeMillis)
-		}
-	}
-
-	/**
 	 * Remove a node from the partitioning data structures.
 	 */
 	private void unpartition(Node node) {
@@ -248,26 +259,12 @@ class Scene implements EventTarget {
 			nodeLists.any { zValue, nodeList -> nodeList.remove(node) }
 		}
 
-		switch (node.updateHint) {
-			case UpdateHint.ALWAYS -> updateableNodes.remove(node)
+		if (node instanceof GameObject) {
+			updateableNodes.remove(node)
 		}
-
-		if (node instanceof Temporal) {
-			temporalNodes.remove(node)
+		if (node instanceof InputHandler) {
+			inputNodes.remove(node)
 		}
-	}
-
-	/**
-	 * Run through the scene, calling {@link Node#update} as appropriate for the
-	 * node configuration.
-	 */
-	void update(float delta) {
-
-		CompletableFuture.allOf(updateableNodes.collect { node ->
-			return CompletableFuture.runAsync { ->
-				node.update(delta)
-			}
-		}).join()
 	}
 
 	/**

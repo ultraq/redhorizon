@@ -18,23 +18,16 @@ plugins {
 	id 'application'
 }
 
-def picocliVersion = '4.7.5'
-
 dependencies {
 	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-engine')
-	implementation project(':redhorizon-events')
 	implementation project(':redhorizon-explorer')
-	implementation project(':redhorizon-filetypes')
-	implementation project(':redhorizon-sandbox')
 	implementation project(':redhorizon-shooter')
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "info.picocli:picocli:${picocliVersion}"
-	implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
 	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 	implementation "org.joml:joml:${jomlVersion}"
 	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 	implementation 'org.lwjgl:lwjgl-glfw'
 	runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 
@@ -45,12 +38,6 @@ dependencies {
 configurations {
 	testRuntimeOnly {
 		exclude group: 'ch.qos.logback'
-	}
-}
-
-processResources {
-	filesMatching('**/cli.properties') {
-		expand version: version
 	}
 }
 

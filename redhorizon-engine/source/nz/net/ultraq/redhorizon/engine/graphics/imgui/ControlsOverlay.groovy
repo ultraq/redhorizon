@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
 import nz.net.ultraq.redhorizon.engine.input.ControlAddedEvent
 import nz.net.ultraq.redhorizon.engine.input.ControlRemovedEvent
-import nz.net.ultraq.redhorizon.engine.input.InputEventStream
+import nz.net.ultraq.redhorizon.engine.input.InputSystem
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -39,14 +39,14 @@ class ControlsOverlay implements ImGuiElement, Switch<ControlsOverlay> {
 	private int controlsWindowSizeX = 350
 	private int controlsWindowSizeY = 200
 
-	ControlsOverlay(InputEventStream inputEventStream) {
+	ControlsOverlay(InputSystem inputSystem) {
 
 		enabled = true
 
-		inputEventStream.on(ControlAddedEvent) { event ->
+		inputSystem.on(ControlAddedEvent) { event ->
 			controls << event.control.toString()
 		}
-		inputEventStream.on(ControlRemovedEvent) { event ->
+		inputSystem.on(ControlRemovedEvent) { event ->
 			controls.remove(event.control.toString())
 		}
 	}

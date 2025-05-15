@@ -21,9 +21,8 @@ import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
-import nz.net.ultraq.redhorizon.classic.resources.ShadowMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
@@ -34,13 +33,11 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.Temporal
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
 import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_WIDTH
 
-import org.joml.Matrix4f
 import org.joml.Vector3f
 
 import java.util.concurrent.CompletableFuture
@@ -52,7 +49,7 @@ import java.util.concurrent.CompletableFuture
  *
  * @author Emanuel Rabina
  */
-class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
+class Unit extends Node<Unit> implements FactionColours, Rotatable {
 
 	private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 
@@ -73,7 +70,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	UnitShadow shadow
 
 	private int stateIndex = 0
-	private long animationStartTime
+	private float accAnimationTime
 	private SpriteSheet spriteSheet
 
 	Unit(ImagesFile imagesFile, UnitData unitData) {
@@ -231,7 +228,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 	 */
 	void startAnimation() {
 
-		animationStartTime = currentTimeMs
+		accAnimationTime = 0
 	}
 
 	/**
@@ -254,12 +251,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		}
 
 		@Override
-		PalettedSpriteMaterial getMaterial() {
-
-			return super.getMaterial()
-		}
-
-		@Override
 		void update(float delta) {
 
 			// Update region in spritesheet to match heading and currently-playing animation
@@ -274,10 +265,11 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 				//       degrees-based headings are done.
 				var closestHeading = Math.round(heading / degreesPerHeading)
 				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
-				var animationFrame = frames > 1 ? Math.floor((currentTimeMs - animationStartTime) / 1000 * FRAMERATE) % frames as int : 0
+				var animationFrame = frames > 1 ? Math.floor((float)(accAnimationTime * FRAMERATE)) % frames as int : 0
 				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			}
 
+			accAnimationTime += delta
 			super.update(delta)
 		}
 	}
@@ -318,9 +310,6 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		private Mesh mesh
 		private Shader shader
 
-		private final Matrix4f transformCopy = new Matrix4f()
-		private final materialCopy = new ShadowMaterial()
-
 		UnitShadow() {
 
 			bounds { ->
@@ -353,15 +342,10 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable, Temporal {
 		}
 
 		@Override
-		RenderCommand renderCommand() {
+		void render(GraphicsRenderer renderer) {
 
-			transformCopy.set(globalTransform)
-			materialCopy.copy(body.material)
-
-			return { renderer ->
-				if (mesh && shader) {
-					renderer.draw(mesh, transformCopy, shader, materialCopy)
-				}
+			if (mesh && shader && body.material) {
+				renderer.draw(mesh, globalTransform, shader, body.material)
 			}
 		}
 	}
