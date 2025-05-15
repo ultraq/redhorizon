@@ -101,8 +101,8 @@ class Explorer implements Application {
 	}
 
 	/**
-	 * Tiny CLI wrapper around the Explorer application so it's launchable w/
-	 * Picocli.
+	 * Not-so-tiny CLI wrapper around the Explorer application so it's launchable
+	 * w/ Picocli.
 	 */
 	@Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
 	static class CliWrapper implements Callable<Integer> {
