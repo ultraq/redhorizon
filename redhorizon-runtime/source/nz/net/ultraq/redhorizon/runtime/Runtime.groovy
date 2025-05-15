@@ -57,17 +57,7 @@ final class Runtime {
 
 	private static final Logger logger = LoggerFactory.getLogger(Runtime)
 
-	static final String version
-
-	static {
-		version = Runtime.class.classLoader.getResourceAsStream('runtime.properties').withBufferedReader { reader ->
-			var cliProperties = new Properties()
-			cliProperties.load(reader)
-			var version = cliProperties.getProperty('version')
-			return version == '${version}' ? '(development)' : version
-		}
-	}
-
+	final String version
 	private final Application application
 
 	private GraphicsConfiguration graphicsConfiguration
@@ -82,6 +72,7 @@ final class Runtime {
 	 */
 	Runtime(Application application) {
 
+		version = new VersionReader('runtime.properties').read()
 		logger.debug('Red Horizon runtime version {} for application', version, application.class.simpleName)
 
 		this.application = application

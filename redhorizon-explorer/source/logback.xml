@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+  ~ Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 	</appender>
 
 	<appender name="file" class="ch.qos.logback.core.FileAppender">
-		<file>${java.io.tmpdir}/redhorizon/logs/redhorizon-runtime-${timestamp}.log</file>
+		<file>${java.io.tmpdir}/redhorizon/logs/redhorizon-explorer-${timestamp}.log</file>
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>

@@ -41,12 +41,6 @@ configurations {
 	}
 }
 
-processResources {
-	filesMatching('**/cli.properties') {
-		expand version: version
-	}
-}
-
 compileJava {
 	options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }

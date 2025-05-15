@@ -61,6 +61,7 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
+import nz.net.ultraq.redhorizon.runtime.VersionReader
 
 import imgui.ImGui
 import org.slf4j.Logger
@@ -167,7 +168,7 @@ class Explorer implements Application {
 	}
 
 	final String name = 'Explorer'
-	final String version = Runtime.version
+	final String version = new VersionReader('runtime.properties').read()
 
 	private final ExplorerOptions options
 	private final List<Entry> entries

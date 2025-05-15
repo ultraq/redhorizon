@@ -30,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
+import nz.net.ultraq.redhorizon.runtime.VersionReader
 import nz.net.ultraq.redhorizon.shooter.objects.Player
 
 import org.slf4j.Logger
@@ -76,7 +77,7 @@ class Shooter implements Application {
 	}
 
 	final String name = 'Shooter'
-	final String version = Runtime.version
+	final String version = new VersionReader('shooter.properties').read()
 
 	@Override
 	void start(Scene scene) {
