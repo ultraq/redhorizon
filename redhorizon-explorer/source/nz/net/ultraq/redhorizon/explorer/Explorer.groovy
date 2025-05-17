@@ -135,7 +135,7 @@ class Explorer implements Application {
 					renderResolution: renderResolution,
 					startWithChrome: true
 				))
-				.withImGuiElements(new LogPanel(true), entryList, nodeList)
+				.withImGuiElements(new LogPanel(), entryList, nodeList)
 				.execute()
 
 			// Save preferences for next time

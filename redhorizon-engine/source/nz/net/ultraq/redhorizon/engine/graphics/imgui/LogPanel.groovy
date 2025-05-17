@@ -41,7 +41,7 @@ class LogPanel implements ImGuiElement {
 	/**
 	 * Constructor, create a new ImGui window for capturing and showing the logs.
 	 */
-	LogPanel(boolean enabled) {
+	LogPanel() {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (!event.persistentKey) {
