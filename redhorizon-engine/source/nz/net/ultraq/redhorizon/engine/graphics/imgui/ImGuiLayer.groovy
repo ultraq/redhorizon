@@ -65,11 +65,10 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	final MainMenu mainMenu
 	final GameWindow gameWindow
 
-	private final GraphicsConfiguration config
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
-	private final List<ImGuiElement> uiElements = []
-	private final List<ImGuiElement> overlays = []
+	private final List<ImGuiChrome> chrome = []
+	private final List<ImGuiOverlay> overlays = []
 
 	private boolean drawUiElements
 	private boolean drawOverlays
@@ -83,7 +82,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	ImGuiLayer(GraphicsConfiguration config, Window window) {
 
-		this.config = config
 		debugOverlay = config.debug
 		drawUiElements = config.startWithChrome
 		drawOverlays = config.debug
@@ -114,10 +112,10 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGl3.init('#version 410 core')
 
 		mainMenu = new MainMenu()
-		addUiElement(mainMenu)
+		addChrome(mainMenu)
 
 		gameWindow = new GameWindow(config.targetAspectRatio)
-		addUiElement(gameWindow)
+		addChrome(gameWindow)
 
 		window.on(KeyEvent) { event ->
 			if (event.action == GLFW_PRESS) {
@@ -130,20 +128,19 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
-	 * Register an ImGui overlay to be drawn.
+	 * Register any ImGui chrome to be drawn.
 	 */
-	void addOverlay(ImGuiElement overlay) {
+	void addChrome(ImGuiChrome uiChrome) {
 
-		overlays << overlay
+		chrome << uiChrome
 	}
 
 	/**
-	 * Register an ImGui element (that is not an overlay, use {@link #addOverlay}
-	 * for that instead) to be drawn.
+	 * Register any ImGui overlay to be drawn.
 	 */
-	void addUiElement(ImGuiElement uiElement) {
+	void addOverlay(ImGuiOverlay overlay) {
 
-		uiElements << uiElement
+		overlays << overlay
 	}
 
 	@Override
@@ -171,10 +168,10 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		average('ImGui Rendering', 1f, logger) { ->
 			if (drawUiElements && sceneResult) {
 				var dockspaceId = setUpDockspace()
-				uiElements*.render(dockspaceId, sceneResult)
+				chrome*.render(dockspaceId, sceneResult)
 			}
 			if (drawOverlays) {
-				overlays*.render(-1, null)
+				overlays*.render()
 			}
 			ImGui.render()
 			imGuiGl3.renderDrawData(ImGui.getDrawData())
@@ -187,6 +184,14 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	boolean isEnabled() {
 
 		return drawUiElements
+	}
+
+	/**
+	 * Alias for {@link #addOverlay}.
+	 */
+	void leftShift(ImGuiOverlay overlay) {
+
+		addOverlay(overlay)
 	}
 
 	/**
@@ -218,7 +223,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 *
 	 * @author Emanuel Rabina
 	 */
-	private class MainMenu implements nz.net.ultraq.redhorizon.engine.graphics.MainMenu, ImGuiElement, EventTarget {
+	private class MainMenu implements nz.net.ultraq.redhorizon.engine.graphics.MainMenu, ImGuiChrome, EventTarget {
 
 		@Override
 		void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
@@ -266,7 +271,7 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 * @author Emanuel Rabina
 	 */
 	@TupleConstructor
-	class GameWindow implements ImGuiElement, EventTarget {
+	class GameWindow implements ImGuiChrome, EventTarget {
 
 		final float targetAspectRatio
 

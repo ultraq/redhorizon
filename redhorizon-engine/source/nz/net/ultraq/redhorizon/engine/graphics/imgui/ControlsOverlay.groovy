@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
 import nz.net.ultraq.redhorizon.engine.input.ControlAddedEvent
 import nz.net.ultraq.redhorizon.engine.input.ControlRemovedEvent
@@ -33,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class ControlsOverlay implements ImGuiElement, Switch<ControlsOverlay> {
+class ControlsOverlay implements ImGuiOverlay, Switch<ControlsOverlay> {
 
 	private List<String> controls = new CopyOnWriteArrayList<>()
 	private int controlsWindowSizeX = 350
@@ -52,7 +51,7 @@ class ControlsOverlay implements ImGuiElement, Switch<ControlsOverlay> {
 	}
 
 	@Override
-	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
+	void render() {
 
 		if (!controls) {
 			return

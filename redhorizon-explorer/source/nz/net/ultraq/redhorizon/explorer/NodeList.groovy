@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -34,7 +34,7 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  *
  * @author Emanuel Rabina
  */
-class NodeList implements EventTarget, ImGuiElement {
+class NodeList implements EventTarget, ImGuiChrome {
 
 	Scene scene
 	private Node selectedNode

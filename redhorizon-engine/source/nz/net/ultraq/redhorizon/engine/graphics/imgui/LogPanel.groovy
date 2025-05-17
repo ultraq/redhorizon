@@ -30,7 +30,7 @@ import java.util.concurrent.BlockingQueue
  *
  * @author Emanuel Rabina
  */
-class LogPanel implements ImGuiElement {
+class LogPanel implements ImGuiChrome {
 
 	private static final int MAX_DEBUG_LINES = 400
 

@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.events.EventTarget
 
@@ -39,7 +39,7 @@ import java.text.DecimalFormat
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = 'entries')
-class EntryList implements EventTarget, ImGuiElement {
+class EntryList implements EventTarget, ImGuiChrome {
 
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 

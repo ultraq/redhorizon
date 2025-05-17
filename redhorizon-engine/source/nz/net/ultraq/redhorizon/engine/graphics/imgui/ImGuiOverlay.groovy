@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-
 /**
- * A object that contains ImGui content to render.
+ * An object that contains ImGui content to render and doesn't take up window
+ * space.
  *
  * @author Emanuel Rabina
  */
-interface ImGuiElement {
+interface ImGuiOverlay {
 
 	/**
-	 * Draw the ImGui content.
+	 * Draw the overlay.
 	 */
-	void render(int dockspaceId, Framebuffer sceneFramebufferResult)
+	void render()
 }

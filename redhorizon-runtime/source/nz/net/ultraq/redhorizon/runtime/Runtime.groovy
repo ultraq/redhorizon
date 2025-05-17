@@ -28,7 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -61,7 +61,7 @@ final class Runtime {
 	private final Application application
 
 	private GraphicsConfiguration graphicsConfiguration
-	private ImGuiElement[] imGuiElements
+	private ImGuiChrome[] imGuiElements
 	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
 	private Engine engine
@@ -120,7 +120,7 @@ final class Runtime {
 				graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, true))
 				graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem))
 				imGuiElements?.each { imGuiElement ->
-					graphicsSystem.imGuiLayer.addUiElement(imGuiElement)
+					graphicsSystem.imGuiLayer.addChrome(imGuiElement)
 				}
 			}
 			graphicsSystem.relay(WindowMaximizedEvent, application)
@@ -190,7 +190,7 @@ final class Runtime {
 	/**
 	 * Configure additional ImGui elements for the window.
 	 */
-	Runtime withImGuiElements(ImGuiElement... imGuiElements) {
+	Runtime withImGuiElements(ImGuiChrome... imGuiElements) {
 
 		this.imGuiElements = imGuiElements
 		return this

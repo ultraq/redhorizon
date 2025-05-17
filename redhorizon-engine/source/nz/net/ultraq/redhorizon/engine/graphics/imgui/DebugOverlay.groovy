@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
 import nz.net.ultraq.redhorizon.engine.input.GamepadAxisEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
@@ -36,7 +35,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
+class DebugOverlay implements ImGuiOverlay, Switch<DebugOverlay> {
 
 	// Debug information
 	private final Map<String, String> persistentLines = [:]
@@ -85,7 +84,7 @@ class DebugOverlay implements ImGuiElement, Switch<DebugOverlay> {
 	}
 
 	@Override
-	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
+	void render() {
 
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
