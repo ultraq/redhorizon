@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
@@ -35,6 +36,9 @@ import java.util.concurrent.CompletableFuture
 interface GraphicsRequests {
 
 	static interface Request<T extends GraphicsResource> {}
+
+	@ImmutableOptions(knownImmutables = ['dimension'])
+	static record FramebufferRequest(Dimension dimension, boolean filter) implements Request<Framebuffer> {}
 
 	@ImmutableOptions(knownImmutables = ['shaderConfig'])
 	static record ShaderRequest(ShaderConfig shaderConfig) implements Request<Shader> {}
