@@ -20,6 +20,7 @@ plugins {
 
 dependencies {
 	implementation project(':redhorizon-classic')
+	implementation project(':redhorizon-filetypes')
 	implementation project(':redhorizon-explorer')
 	implementation project(':redhorizon-shooter')
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
