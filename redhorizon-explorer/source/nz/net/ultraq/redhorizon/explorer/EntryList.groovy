@@ -44,11 +44,24 @@ class EntryList implements EventTarget, ImGuiChrome {
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 
 	final List<Entry> entries
-	boolean focused
 
+	private boolean focused
+	private boolean hovered
 	private Entry selectedEntry
 	private boolean selectedEntryTriggered
 	private boolean entryVisibleOnce
+
+	@Override
+	boolean isFocused() {
+
+		return focused
+	}
+
+	@Override
+	boolean isHovered() {
+
+		return hovered
+	}
 
 	@Override
 	void render(int dockspaceId, Framebuffer sceneResult) {
@@ -59,6 +72,7 @@ class EntryList implements EventTarget, ImGuiChrome {
 		ImGui.popStyleVar()
 
 		focused = ImGui.isWindowFocused(ChildWindows)
+		hovered = ImGui.isWindowHovered()
 
 		// File list
 		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {

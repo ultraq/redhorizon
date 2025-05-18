@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Window
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
@@ -241,7 +241,7 @@ class MapViewerScript extends Script<Map> {
 
 		inputSystem = scene.inputRequestHandler
 		window = scene.window
-		gameWindow = scene.gameWindow
+		gameWindow = scene.imGuiLayer.findChrome(GameWindow)
 		outline = new Outline(new Rectanglef(), Colour.RED, true).tap {
 			layer = Layer.OVERLAY
 		}

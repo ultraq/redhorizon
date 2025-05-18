@@ -95,20 +95,25 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	void configureScene() {
 
 		scene.graphicsRequestHandler = this
-		scene.window = window
-		scene.gameWindow = imGuiLayer.gameWindow
 		renderPipeline.scene = scene
 	}
 
-	/**
-	 * Return the ImGui layer.
-	 */
+	@Override
 	ImGuiLayer getImGuiLayer() {
 
 		if (!imGuiLayer) {
 			throw new IllegalStateException('Cannot request ImGuiLayer - graphics system not yet initialized')
 		}
 		return imGuiLayer
+	}
+
+	@Override
+	OpenGLWindow getWindow() {
+
+		if (!window) {
+			throw new IllegalStateException('Cannot request window - graphics system not yet initialized')
+		}
+		return window
 	}
 
 	/**

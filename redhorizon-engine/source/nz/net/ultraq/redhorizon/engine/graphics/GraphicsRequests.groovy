@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Vector2f
@@ -76,6 +77,16 @@ interface GraphicsRequests {
 			this(name, data, false)
 		}
 	}
+
+	/**
+	 * Return the ImGui layer.
+	 */
+	ImGuiLayer getImGuiLayer()
+
+	/**
+	 * Return the window into which everything is being rendered.
+	 */
+	Window getWindow()
 
 	/**
 	 * Request the creation or retrieval of the given resource type from the

@@ -41,6 +41,8 @@ class LogPanel implements ImGuiChrome {
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 
 	private boolean scrollToBottom = true
+	private boolean focused
+	private boolean hovered
 
 	/**
 	 * Constructor, create a new ImGui window for capturing and showing the logs.
@@ -58,10 +60,25 @@ class LogPanel implements ImGuiChrome {
 	}
 
 	@Override
+	boolean isFocused() {
+
+		return focused
+	}
+
+	@Override
+	boolean isHovered() {
+
+		return hovered
+	}
+
+	@Override
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
 
 		ImGui.setNextWindowSize(800, 300, FirstUseEver)
 		ImGui.begin('Logs', new ImBoolean(true))
+
+		focused = ImGui.isWindowFocused()
+		hovered = ImGui.isWindowHovered()
 
 		if (logLines.size()) {
 			ImGui.separator()

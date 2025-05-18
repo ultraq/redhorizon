@@ -60,10 +60,10 @@ import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
-import nz.net.ultraq.redhorizon.runtime.VersionReader
 import nz.net.ultraq.redhorizon.runtime.imgui.LogPanel
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
+import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 
 import imgui.ImGui
 import org.slf4j.Logger

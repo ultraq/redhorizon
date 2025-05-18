@@ -26,6 +26,16 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 interface ImGuiChrome {
 
 	/**
+	 * Is the current item in focus?
+	 */
+	boolean isFocused()
+
+	/**
+	 * Is the current item being hovered over?  (Mouse inputs only)
+	 */
+	boolean isHovered()
+
+	/**
 	 * Draw the ImGui content.
 	 */
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult)

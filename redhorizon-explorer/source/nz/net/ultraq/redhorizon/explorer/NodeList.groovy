@@ -37,7 +37,21 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
 class NodeList implements EventTarget, ImGuiChrome {
 
 	Scene scene
+	private boolean focused
+	private boolean hovered
 	private Node selectedNode
+
+	@Override
+	boolean isFocused() {
+
+		return focused
+	}
+
+	@Override
+	boolean isHovered() {
+
+		return hovered
+	}
 
 	@Override
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
@@ -46,6 +60,9 @@ class NodeList implements EventTarget, ImGuiChrome {
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.begin('Scene', new ImBoolean(true))
 		ImGui.popStyleVar()
+
+		focused = ImGui.isWindowFocused()
+		hovered = ImGui.isWindowHovered()
 
 		// File list
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {

@@ -33,6 +33,7 @@ import nz.net.ultraq.redhorizon.runtime.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.runtime.imgui.ExitEvent
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
+import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 
 import imgui.ImGui
 import org.slf4j.Logger
@@ -91,13 +92,11 @@ final class Runtime {
 	 */
 	int execute(String[] args) {
 
-		try {
-			logger.debug('Initializing application w/ args {}', args)
+		logger.debug('Initializing application w/ args {}', args)
 
+		try {
 			engine = new Engine()
 			scene = new Scene()
-
-			engine << new GameLogicSystem()
 
 			// Have the Esc key close the application
 			var inputSystem = new InputSystem()
@@ -108,17 +107,23 @@ final class Runtime {
 			}
 			engine << inputSystem
 
-			var audioSystem = new AudioSystem()
-			engine << audioSystem
+			engine << new GameLogicSystem()
+			engine << new AudioSystem()
 
 			var graphicsSystem = new GraphicsSystem("${application.name} - ${application.version}", graphicsConfiguration)
 			graphicsSystem.on(EngineSystemReadyEvent) { systemReadyEvent ->
 				var imGuiLayer = graphicsSystem.imGuiLayer
+
+				// Close the application when Exit in the main menu is selected
 				var mainMenuBar = new MainMenuBar()
+				mainMenuBar.on(ExitEvent) { exitEvent ->
+					stop()
+				}
+				imGuiLayer << mainMenuBar
 
 				// Add debug overlay, toggle with D key
 				var debugOverlay = new DebugOverlay(inputSystem, true)
-				imGuiLayer.addOverlay(debugOverlay)
+				imGuiLayer << debugOverlay
 				mainMenuBar.addOptionsMenuItem(new MenuItem() {
 					@Override
 					void render() {
@@ -130,7 +135,7 @@ final class Runtime {
 
 				// Add controls overlay, toggle with C key
 				var controlsOverlay = new ControlsOverlay(inputSystem)
-				imGuiLayer.addOverlay(controlsOverlay)
+				imGuiLayer << controlsOverlay
 				mainMenuBar.addOptionsMenuItem(new MenuItem() {
 					@Override
 					void render() {
@@ -139,13 +144,6 @@ final class Runtime {
 						}
 					}
 				})
-
-				// Close the application when Exit in the main menu is selected
-				mainMenuBar.on(ExitEvent) { exitEvent ->
-					stop()
-				}
-
-				imGuiLayer << mainMenuBar
 			}
 			graphicsSystem.relay(WindowMaximizedEvent, application)
 			engine << graphicsSystem

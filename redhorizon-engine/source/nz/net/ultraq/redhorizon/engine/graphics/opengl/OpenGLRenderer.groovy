@@ -42,6 +42,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 
 import org.joml.Matrix4fc
@@ -74,7 +75,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderer)
 
 	protected final GraphicsConfiguration config
-	protected final OpenGLWindow window
+	protected final Window window
 	protected final GLCapabilities capabilities
 
 	private final String renderer
@@ -90,7 +91,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	 * Constructor, create a modern OpenGL renderer with a set of defaults for Red
 	 * Horizon's 2D game engine.
 	 */
-	OpenGLRenderer(GraphicsConfiguration config, OpenGLWindow window) {
+	OpenGLRenderer(GraphicsConfiguration config, Window window) {
 
 		this.config = config
 		this.window = window

@@ -40,6 +40,18 @@ class MainMenuBar implements ImGuiChrome, EventTarget {
 	}
 
 	@Override
+	boolean isFocused() {
+
+		return false
+	}
+
+	@Override
+	boolean isHovered() {
+
+		return false
+	}
+
+	@Override
 	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
 
 		if (ImGui.beginMainMenuBar()) {
