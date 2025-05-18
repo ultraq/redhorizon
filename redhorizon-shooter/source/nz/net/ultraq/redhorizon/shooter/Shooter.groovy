@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
@@ -80,7 +81,7 @@ class Shooter implements Application {
 	final String version = new VersionReader('shooter.properties').read()
 
 	@Override
-	void start(Scene scene) {
+	void start(Scene scene, ImGuiLayer imGuiLayer) {
 
 		new ResourceManager(
 			new File(System.getProperty('user.dir'), 'mix'),

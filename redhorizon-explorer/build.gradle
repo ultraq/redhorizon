@@ -19,7 +19,6 @@ description = 'A file and media explorer application for viewing classic Command
 dependencies {
 	implementation project(':redhorizon-classic')
 	implementation project(':redhorizon-runtime')
-	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "info.picocli:picocli:${picocliVersion}"
 	implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 	implementation 'nz.net.ultraq.preferences:preferences:3.1.0'

@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Material
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.Window
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ChangeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -69,12 +68,13 @@ class RenderPipeline implements AutoCloseable {
 		fullScreenQuad = renderer.createSpriteMesh(new Rectanglef(-1, -1, 1, 1))
 
 		// Allow for changes to the pipeline from the GUI
-		imGuiLayer.on(ChangeEvent) { event ->
-			var postProcessingRenderPass = renderPasses.find { renderPass ->
-				return renderPass instanceof PostProcessingRenderPass && renderPass.shader.name == event.name
-			}
-			postProcessingRenderPass.enabled = event.value
-		}
+		// TODO: These should be moved to the runtime as it should configure the GUI and pipeline
+//		imGuiLayer.on(ChangeEvent) { event ->
+//			var postProcessingRenderPass = renderPasses.find { renderPass ->
+//				return renderPass instanceof PostProcessingRenderPass && renderPass.shader.name == event.name
+//			}
+//			postProcessingRenderPass.enabled = event.value
+//		}
 
 		// Build the standard rendering pipeline, including the debug and control
 		// overlays as they'll be standard for as long as this thing is in

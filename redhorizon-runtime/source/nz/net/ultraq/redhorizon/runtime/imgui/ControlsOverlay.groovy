@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.runtime.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiOverlay
 import nz.net.ultraq.redhorizon.engine.input.ControlAddedEvent
 import nz.net.ultraq.redhorizon.engine.input.ControlRemovedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem

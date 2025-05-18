@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.runtime.imgui
 
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiOverlay
 import nz.net.ultraq.redhorizon.engine.input.GamepadAxisEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
+import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLogEvent
+import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLoggingAppender
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -59,8 +62,8 @@ class DebugOverlay implements ImGuiOverlay, Switch<DebugOverlay> {
 	DebugOverlay(InputSystem inputSystem, boolean enabled) {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
-			if (event.persistentKey) {
-				persistentLines[event.persistentKey] = event.message
+			if (event.persistentKey()) {
+				persistentLines[event.persistentKey()] = event.message()
 			}
 		}
 		engineStats = EngineStats.instance

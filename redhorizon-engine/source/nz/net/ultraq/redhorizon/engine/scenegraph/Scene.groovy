@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
-import nz.net.ultraq.redhorizon.engine.graphics.MainMenu
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.InputHandler
@@ -65,7 +64,6 @@ class Scene implements EventTarget {
 	Window window
 	Camera camera
 	Listener listener
-	MainMenu gameMenu
 	GameWindow gameWindow
 
 	@Delegate(includes = ['clear', 'findAncestor', 'findDescendent', 'leftShift', 'removeChild', 'traverse', 'traverseAsync'], interfaces = false)

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.events.EventTarget
 
@@ -44,7 +45,7 @@ interface Application extends EventTarget {
 	 * Called by the runtime when the engine and an empty scene are set up, and
 	 * passed the scene for the application to use.
 	 */
-	void start(Scene scene)
+	void start(Scene scene, ImGuiLayer imGuiLayer)
 
 	/**
 	 * Called by the runtime before the engine is shut down.

@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.engine.input.InputSource
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
-import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
 
 import imgui.ImFont
 import imgui.ImFontConfig
@@ -55,14 +54,9 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
 
-	static final String OPTIONS_DEBUG_OVERLAY = 'options/debug-overlay'
-	static final String OPTIONS_SHADER_SCANLINES = 'options/scanlines-shader'
-	static final String OPTIONS_SHADER_SHARP_UPSCALING = 'options/sharp-upscaling-shader'
-
 	static ImFont robotoFont
 	static ImFont robotoMonoFont
 
-	final MainMenu mainMenu
 	final GameWindow gameWindow
 
 	private final ImGuiImplGl3 imGuiGl3
@@ -72,7 +66,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 	private boolean drawUiElements
 	private boolean drawOverlays
-	private boolean debugOverlay
 	private boolean shaderScanlines
 	private boolean shaderSharpUpscaling
 
@@ -82,7 +75,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	 */
 	ImGuiLayer(GraphicsConfiguration config, Window window) {
 
-		debugOverlay = config.debug
 		drawUiElements = config.startWithChrome
 		drawOverlays = config.debug
 		shaderScanlines = config.scanlines
@@ -110,9 +102,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 
 		imGuiGlfw.init(window.handle, true)
 		imGuiGl3.init('#version 410 core')
-
-		mainMenu = new MainMenu()
-		addChrome(mainMenu)
 
 		gameWindow = new GameWindow(config.targetAspectRatio)
 		addChrome(gameWindow)
@@ -149,6 +138,22 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		imGuiGl3.shutdown()
 		imGuiGlfw.shutdown()
 		ImGui.destroyContext()
+	}
+
+	/**
+	 * Find the ImGui chrome item by class.
+	 */
+	<T extends ImGuiChrome> T findChrome(Class<T> clazz) {
+
+		return (T)chrome.find { c -> c.class == clazz }
+	}
+
+	/**
+	 * Find the ImGui overlay item by class.
+	 */
+	<T extends ImGuiOverlay> T findOverlay(Class<T> clazz) {
+
+		return (T)overlays.find { overlay -> overlay.class == clazz }
 	}
 
 	/**
@@ -195,6 +200,14 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 	}
 
 	/**
+	 * Alias for {@link #addChrome}.
+	 */
+	void leftShift(ImGuiChrome chrome) {
+
+		addChrome(chrome)
+	}
+
+	/**
 	 * Build the docking window into which the app will be rendered.
 	 */
 	private static int setUpDockspace() {
@@ -216,52 +229,6 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		ImGui.end()
 
 		return dockspaceId
-	}
-
-	/**
-	 * An ImGUI implementation of the main menu bar.
-	 *
-	 * @author Emanuel Rabina
-	 */
-	private class MainMenu implements nz.net.ultraq.redhorizon.engine.graphics.MainMenu, ImGuiChrome, EventTarget {
-
-		@Override
-		void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
-
-			if (ImGui.beginMainMenuBar()) {
-
-				if (ImGui.beginMenu('File')) {
-					if (ImGui.menuItem('Exit', 'Esc')) {
-						trigger(new GuiEvent(EVENT_TYPE_STOP))
-					}
-					ImGui.endMenu()
-				}
-
-				if (ImGui.beginMenu('Options')) {
-					if (ImGui.menuItem('Debug overlay', 'D', debugOverlay)) {
-						debugOverlay = !debugOverlay
-						trigger(new ChangeEvent(OPTIONS_DEBUG_OVERLAY, null))
-					}
-					if (ImGui.menuItem('Scanlines', 'S', shaderScanlines)) {
-						shaderScanlines = !shaderScanlines
-						trigger(new ChangeEvent(OPTIONS_SHADER_SCANLINES, shaderScanlines))
-					}
-					if (ImGui.menuItem('Sharp upscaling', 'U', shaderSharpUpscaling)) {
-						shaderSharpUpscaling = !shaderSharpUpscaling
-						trigger(new ChangeEvent(OPTIONS_SHADER_SHARP_UPSCALING, shaderSharpUpscaling))
-					}
-
-					if (optionsMenu) {
-						ImGui.separator()
-						optionsMenu*.render()
-					}
-
-					ImGui.endMenu()
-				}
-
-				ImGui.endMainMenuBar()
-			}
-		}
 	}
 
 	/**

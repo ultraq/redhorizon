@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.runtime.logback
 
 import nz.net.ultraq.redhorizon.events.Event
 
-import groovy.transform.TupleConstructor
-
 /**
- * Event fired when a control in the ImGui overlay has been changed.
+ * Event for log lines that should be captured in the debug overlay.
  *
  * @author Emanuel Rabina
+ * @param persistentKey
+ *   If present, then {@link #message} will be shown with the other persistent
+ *   debug lines in the overlay.
  */
-@TupleConstructor(defaults = false)
-class ChangeEvent implements Event {
+record ImGuiLogEvent(String message, String persistentKey) implements Event {
 
-	final String name
-	final Object value
+	ImGuiLogEvent(String message) {
+		this(message, null)
+	}
 }

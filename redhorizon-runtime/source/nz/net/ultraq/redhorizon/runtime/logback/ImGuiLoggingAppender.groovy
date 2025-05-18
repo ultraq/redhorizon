@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.runtime.logback
 
 import nz.net.ultraq.redhorizon.events.EventTarget
 
+import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase
 import ch.qos.logback.core.encoder.Encoder
 
@@ -27,13 +28,11 @@ import ch.qos.logback.core.encoder.Encoder
  *
  * @author Emanuel Rabina
  */
-// Using E and not ILoggingEvent here otherwise it'll bring in logback-classic
-// and that'll conflict with our tests that use their own SLF4J provider.
-class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements EventTarget {
+class ImGuiLoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements EventTarget {
 
 	static ImGuiLoggingAppender instance
 
-	Encoder<E> encoder
+	Encoder<ImGuiLogEvent> encoder
 
 	/**
 	 * Constructor, saves this instance to the singleton value so it can be
@@ -45,19 +44,14 @@ class ImGuiLoggingAppender<E> extends UnsynchronizedAppenderBase<E> implements E
 	}
 
 	@Override
-	protected void append(E eventObject) {
+	protected void append(ILoggingEvent eventObject) {
 
 		var message = new String(encoder.encode(eventObject))
 		if (eventObject.message.contains('average time')) {
-			trigger(new ImGuiLogEvent(
-				message: message,
-				persistentKey: eventObject.loggerName + eventObject.argumentArray[0]
-			))
+			trigger(new ImGuiLogEvent(message, eventObject.loggerName + eventObject.argumentArray[0]))
 		}
 		else {
-			trigger(new ImGuiLogEvent(
-				message: message
-			))
+			trigger(new ImGuiLogEvent(message))
 		}
 	}
 }

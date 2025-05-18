@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.runtime.imgui
+
+import nz.net.ultraq.redhorizon.events.Event
 
 /**
- * An abstraction of the main window's menu bar.  Shared on the scene so that
- * other things can make modifications to the menu.
+ * Triggered when Exit is selected from the main menu.
  *
  * @author Emanuel Rabina
  */
-interface MainMenu {
-
-	final List<MenuItem> optionsMenu = []
-
-	/**
-	 * An additional menu item and the behaviour behind it.
-	 */
-	static abstract class MenuItem {
-
-		/**
-		 * Draw this menu item.
-		 */
-		abstract void render()
-	}
+record ExitEvent() implements Event {
 }

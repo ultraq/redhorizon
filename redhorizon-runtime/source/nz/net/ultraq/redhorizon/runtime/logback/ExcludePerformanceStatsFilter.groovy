@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
+package nz.net.ultraq.redhorizon.runtime.logback
 
 import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
 
+import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.filter.Filter
 import ch.qos.logback.core.spi.FilterReply
 
@@ -26,12 +27,10 @@ import ch.qos.logback.core.spi.FilterReply
  *
  * @author Emanuel Rabina
  */
-// Using E and not ILoggingEvent here otherwise it'll bring in logback-classic
-// and that'll conflict with our tests that use their own SLF4J provider.
-class ExcludePerformanceStatsFilter<E> extends Filter<E> {
+class ExcludePerformanceStatsFilter extends Filter<ILoggingEvent> {
 
 	@Override
-	FilterReply decide(E event) {
+	FilterReply decide(ILoggingEvent event) {
 
 		return event.markerList?.contains(ProfilingExtensions.profilingMarker) ?
 			FilterReply.DENY :

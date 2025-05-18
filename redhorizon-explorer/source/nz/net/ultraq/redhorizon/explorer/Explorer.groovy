@@ -33,9 +33,8 @@ import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.MainMenu.MenuItem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
@@ -62,6 +61,9 @@ import nz.net.ultraq.redhorizon.filetypes.VideoFile
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.VersionReader
+import nz.net.ultraq.redhorizon.runtime.imgui.LogPanel
+import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
+import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
 
 import imgui.ImGui
 import org.slf4j.Logger
@@ -120,22 +122,18 @@ class Explorer implements Application {
 		@Override
 		Integer call() {
 
-			var entries = new CopyOnWriteArrayList<Entry>()
-			var entryList = new EntryList(entries)
-			var nodeList = new NodeList()
 			var options = new ExplorerOptions(
 				maximized: maximized,
 				touchpadInput: touchpadInput
 			)
 
-			var exitCode = new Runtime(new Explorer(entries, entryList, nodeList, options, file))
+			var exitCode = new Runtime(new Explorer(options, file))
 				.withGraphicsConfiguration(new GraphicsConfiguration(
 					clearColour: Colour.GREY,
 					maximized: options.maximized,
 					renderResolution: renderResolution,
 					startWithChrome: true
 				))
-				.withImGuiElements(new LogPanel(), entryList, nodeList)
 				.execute()
 
 			// Save preferences for next time
@@ -171,9 +169,9 @@ class Explorer implements Application {
 	final String version = new VersionReader('runtime.properties').read()
 
 	private final ExplorerOptions options
-	private final List<Entry> entries
-	private final EntryList entryList
-	private final NodeList nodeList
+	private final List<Entry> entries = new CopyOnWriteArrayList<>()
+	private final EntryList entryList = new EntryList(entries)
+	private final NodeList nodeList = new NodeList()
 	private final File openOnLaunch
 	private final ResourceManager resourceManager = new ResourceManager(
 		new File(System.getProperty('user.dir'), 'mix'),
@@ -197,11 +195,8 @@ class Explorer implements Application {
 	 * @param openOnLaunch
 	 *   Optional, a file to open on launch of the explorer.
 	 */
-	Explorer(List<Entry> entries, EntryList entryList, NodeList nodeList, ExplorerOptions options, File openOnLaunch) {
+	Explorer(ExplorerOptions options, File openOnLaunch) {
 
-		this.entries = entries
-		this.entryList = entryList
-		this.nodeList = nodeList
 		this.options = options
 		this.openOnLaunch = openOnLaunch
 	}
@@ -497,7 +492,11 @@ class Explorer implements Application {
 	}
 
 	@Override
-	void start(Scene scene) {
+	void start(Scene scene, ImGuiLayer imGuiLayer) {
+
+		imGuiLayer << new LogPanel()
+		imGuiLayer << entryList
+		imGuiLayer << nodeList
 
 		this.scene = scene
 
@@ -537,7 +536,8 @@ class Explorer implements Application {
 		nodeList.scene = scene
 
 		// Add a menu item for touchpad input
-		scene.gameMenu.optionsMenu << new MenuItem() {
+		var mainMenuBar = imGuiLayer.findChrome(MainMenuBar)
+		mainMenuBar.addOptionsMenuItem(new MenuItem() {
 			@Override
 			void render() {
 				if (ImGui.menuItem('Touchpad input', null, options.touchpadInput)) {
@@ -548,15 +548,15 @@ class Explorer implements Application {
 					}
 				}
 			}
-		}
-		scene.gameMenu.optionsMenu << new MenuItem() {
+		})
+		mainMenuBar.addOptionsMenuItem(new MenuItem() {
 			@Override
 			void render() {
 				if (ImGui.menuItem('Cycle palette', 'P')) {
 					cyclePalette()
 				}
 			}
-		}
+		})
 		removeControlFunctions.addAll(scene.inputRequestHandler.addControls(
 			new KeyControl(GLFW_KEY_P, 'Cycle palette', { -> cyclePalette() }),
 			new KeyControl(GLFW_KEY_UP, 'Select previous', { -> entryList.selectPrevious() }),

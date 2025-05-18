@@ -25,15 +25,16 @@ import nz.net.ultraq.redhorizon.engine.game.GameLogicSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ControlsOverlay
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.DebugOverlay
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.engine.graphics.imgui.GuiEvent.EVENT_TYPE_STOP
+import nz.net.ultraq.redhorizon.runtime.imgui.ControlsOverlay
+import nz.net.ultraq.redhorizon.runtime.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.runtime.imgui.ExitEvent
+import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
+import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
 
+import imgui.ImGui
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -61,7 +62,6 @@ final class Runtime {
 	private final Application application
 
 	private GraphicsConfiguration graphicsConfiguration
-	private ImGuiChrome[] imGuiElements
 	private boolean applicationStopping
 	private Semaphore applicationStoppingSemaphore = new Semaphore(1)
 	private Engine engine
@@ -99,14 +99,10 @@ final class Runtime {
 
 			engine << new GameLogicSystem()
 
+			// Have the Esc key close the application
 			var inputSystem = new InputSystem()
 			inputSystem.on(KeyEvent) { event ->
 				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
-					stop()
-				}
-			}
-			inputSystem.on(GuiEvent) { event ->
-				if (event.type == EVENT_TYPE_STOP) {
 					stop()
 				}
 			}
@@ -116,12 +112,40 @@ final class Runtime {
 			engine << audioSystem
 
 			var graphicsSystem = new GraphicsSystem("${application.name} - ${application.version}", graphicsConfiguration)
-			graphicsSystem.on(EngineSystemReadyEvent) { event ->
-				graphicsSystem.imGuiLayer.addOverlay(new DebugOverlay(inputSystem, true))
-				graphicsSystem.imGuiLayer.addOverlay(new ControlsOverlay(inputSystem))
-				imGuiElements?.each { imGuiElement ->
-					graphicsSystem.imGuiLayer.addChrome(imGuiElement)
+			graphicsSystem.on(EngineSystemReadyEvent) { systemReadyEvent ->
+				var imGuiLayer = graphicsSystem.imGuiLayer
+				var mainMenuBar = new MainMenuBar()
+
+				// Add debug overlay, toggle with D key
+				var debugOverlay = new DebugOverlay(inputSystem, true)
+				imGuiLayer.addOverlay(debugOverlay)
+				mainMenuBar.addOptionsMenuItem(new MenuItem() {
+					@Override
+					void render() {
+						if (ImGui.menuItem('Debug overlay', 'D', debugOverlay.enabled)) {
+							debugOverlay.toggle()
+						}
+					}
+				})
+
+				// Add controls overlay, toggle with C key
+				var controlsOverlay = new ControlsOverlay(inputSystem)
+				imGuiLayer.addOverlay(controlsOverlay)
+				mainMenuBar.addOptionsMenuItem(new MenuItem() {
+					@Override
+					void render() {
+						if (ImGui.menuItem('Controls overlay', 'C', controlsOverlay.enabled)) {
+							controlsOverlay.toggle()
+						}
+					}
+				})
+
+				// Close the application when Exit in the main menu is selected
+				mainMenuBar.on(ExitEvent) { exitEvent ->
+					stop()
 				}
+
+				imGuiLayer << mainMenuBar
 			}
 			graphicsSystem.relay(WindowMaximizedEvent, application)
 			engine << graphicsSystem
@@ -130,7 +154,7 @@ final class Runtime {
 			logger.debug('Starting application...')
 			engine.on(EngineReadyEvent) { event ->
 				engine.scene = scene
-				application.start(scene)
+				application.start(scene, graphicsSystem.imGuiLayer)
 			}
 			engine.start()
 		}
@@ -138,8 +162,9 @@ final class Runtime {
 			logger.error('An error occurred', throwable)
 			return 1
 		}
+
+		// Check we closed everything
 		finally {
-			// Check we closed everything
 			var check = { int resourceCount, String resourceName ->
 				if (resourceCount > 0) {
 					logger.warn("Not all {} closed, {} remaining", resourceName, resourceCount)
@@ -184,15 +209,6 @@ final class Runtime {
 	Runtime withGraphicsConfiguration(GraphicsConfiguration graphicsConfiguration) {
 
 		this.graphicsConfiguration = graphicsConfiguration
-		return this
-	}
-
-	/**
-	 * Configure additional ImGui elements for the window.
-	 */
-	Runtime withImGuiElements(ImGuiChrome... imGuiElements) {
-
-		this.imGuiElements = imGuiElements
 		return this
 	}
 }

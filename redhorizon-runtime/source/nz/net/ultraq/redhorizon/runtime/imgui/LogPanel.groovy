@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.runtime.imgui
 
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLogEvent
+import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLoggingAppender
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -44,8 +48,8 @@ class LogPanel implements ImGuiChrome {
 	LogPanel() {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
-			if (!event.persistentKey) {
-				while (!logLines.offer(event.message)) {
+			if (!event.persistentKey()) {
+				while (!logLines.offer(event.message())) {
 					logLines.poll()
 				}
 				scrollToBottom = true
