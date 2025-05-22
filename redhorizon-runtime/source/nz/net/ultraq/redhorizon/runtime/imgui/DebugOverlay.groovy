@@ -99,7 +99,7 @@ class DebugOverlay implements ImGuiOverlay, Switch<DebugOverlay> {
 		debugWindowSizeY = ImGui.getWindowSizeY() as int
 
 		ImGui.text("Framerate: ${sprintf('%.1f', ImGui.getIO().framerate)}fps, Frametime: ${sprintf('%.1f', 1000 / ImGui.getIO().framerate)}ms")
-		ImGui.text("Memory used: ${String.format('%.2f', memoryUsage)}MB, GCs: ${garbageCollections}")
+		ImGui.text("Memory used: ${String.format('%.0f', memoryUsage)}MB, GCs: ${garbageCollections}")
 		ImGui.text("Scene objects: ${engineStats.sceneObjects.get()}, draw calls: ${engineStats.drawCalls.getAndSet(0)}")
 		ImGui.text("Graphics meshes: ${engineStats.activeMeshes}, textures: ${engineStats.activeTextures}")
 		ImGui.text("Graphics framebuffers: ${engineStats.activeFramebuffers}, uniform buffers: ${engineStats.activeUniformBuffers}")
