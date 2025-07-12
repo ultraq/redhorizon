@@ -41,16 +41,6 @@ subprojects {
 //		resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 //	}
 
-	ext {
-		groovyVersion = '4.0.24'
-		imguiVersion = '1.87.7'
-		jomlVersion = '1.10.8'
-		jomlPrimitivesVersion = '1.10.0'
-		logbackVersion = '1.5.15'
-		lwjglVersion = '3.3.5'
-		picocliVersion = '4.7.5'
-		slf4jVersion = '2.0.16'
-	}
 	ext.targetPlatform = targetPlatform
 
 	dependencies {
