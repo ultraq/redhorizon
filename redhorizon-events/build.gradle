@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+}
+
 description = 'Event system for Red Horizon (something something "Event Horizon"? 🤔)'
 
-dependencies {
-	testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
+// @formatter:off
+configure {
+	var groovyProject = createGroovyProject()
+	configureBase(groovyProject)
+	groovyProject
+		.configureTesting()
+			.withTestDependencies() {
+				testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
+			}
 }
+// @formatter:on

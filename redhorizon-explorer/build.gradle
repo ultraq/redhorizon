@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+}
+
 description = 'A file and media explorer application for viewing classic Command & Conquer game assets'
 
-dependencies {
-	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-runtime')
-	implementation "info.picocli:picocli:${picocliVersion}"
-	implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-	implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
-	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-	implementation "org.joml:joml:${jomlVersion}"
-	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
-	implementation 'org.lwjgl:lwjgl'
-	implementation 'org.lwjgl:lwjgl-glfw'
+// @formatter:off
+configure {
+	var groovyProject = createGroovyProject()
+	configureBase(groovyProject)
+	groovyProject
+		.configureSource()
+			.withDependencies() {
+				implementation project(':redhorizon-classic')
+				implementation project(':redhorizon-runtime')
+				implementation "info.picocli:picocli:${picocliVersion}"
+				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
+				implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
+				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+				implementation 'org.lwjgl:lwjgl'
+				implementation 'org.lwjgl:lwjgl-glfw'
+			}
 }
+// @formatter:on

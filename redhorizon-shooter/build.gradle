@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+}
+
 description = 'A top-down shooter for testing out the game engine'
 
-dependencies {
-	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-explorer')
-	implementation project(':redhorizon-runtime')
-	implementation "info.picocli:picocli:${picocliVersion}"
-	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
-	implementation 'org.lwjgl:lwjgl-glfw'
+// @formatter:off
+configure {
+	var groovyProject = createGroovyProject()
+	configureBase(groovyProject)
+	groovyProject
+		.configureSource()
+			.withDependencies() {
+				implementation project(':redhorizon-classic')
+				implementation project(':redhorizon-explorer')
+				implementation project(':redhorizon-runtime')
+				implementation "info.picocli:picocli:${picocliVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+				implementation 'org.lwjgl:lwjgl-glfw'
+			}
 }
+// @formatter:on

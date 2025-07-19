@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+plugins {
+	id 'idea'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+}
 
-includeBuild 'redhorizon-build'
-include 'redhorizon-classic'
-include 'redhorizon-cli'
-include 'redhorizon-engine'
-include 'redhorizon-events'
-include 'redhorizon-explorer'
-include 'redhorizon-filetypes'
-include 'redhorizon-runtime'
-include 'redhorizon-shooter'
+description = 'Build configuration for Red Horizon projects'
+
+// @formatter:off
+configure {
+	createGroovyGradlePluginProject()
+		.useJavaVersion(21)
+		.useGradlePluginPortal()
+		.configureSource()
+			.withSourceDirectory('source')
+			.withDependencies {
+				implementation 'nz.net.ultraq.gradle:gradle-support:0.5.0'
+			}
+}
+// @formatter:on

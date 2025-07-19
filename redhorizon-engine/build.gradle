@@ -14,28 +14,41 @@
  * limitations under the License.
  */
 
-description = 'Core rendering engine for Red Horizon'
-
-dependencies {
-	implementation project(':redhorizon-events')
-	implementation project(':redhorizon-filetypes')
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
-	implementation "ch.qos.logback:logback-core:${logbackVersion}"
-	implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-	implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
-	implementation "org.joml:joml:${jomlVersion}"
-	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-	implementation 'org.lwjgl:lwjgl'
-	implementation 'org.lwjgl:lwjgl-glfw'
-	implementation 'org.lwjgl:lwjgl-openal'
-	implementation 'org.lwjgl:lwjgl-opengl'
-
-	runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
-	runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
-	['natives-macos-arm64', 'natives-windows'].each { natives ->
-		runtimeOnly "org.lwjgl:lwjgl::${natives}"
-		runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
-		runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"
-		runtimeOnly "org.lwjgl:lwjgl-opengl::${natives}"
-	}
+plugins {
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
 }
+
+description = 'Core game engine for Red Horizon'
+
+// @formatter:off
+configure {
+	var groovyProject = createGroovyProject()
+	configureBase(groovyProject)
+	groovyProject
+		.configureSource()
+			.withDependencies() {
+				implementation project(':redhorizon-events')
+				implementation project(':redhorizon-filetypes')
+				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+				implementation "ch.qos.logback:logback-core:${logbackVersion}"
+				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
+				implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation 'org.lwjgl:lwjgl'
+				implementation 'org.lwjgl:lwjgl-glfw'
+				implementation 'org.lwjgl:lwjgl-openal'
+				implementation 'org.lwjgl:lwjgl-opengl'
+
+				runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
+				runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
+				['natives-macos-arm64', 'natives-windows'].each { natives ->
+					runtimeOnly "org.lwjgl:lwjgl::${natives}"
+					runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
+					runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"
+					runtimeOnly "org.lwjgl:lwjgl-opengl::${natives}"
+				}
+			}
+}
+// @formatter:on

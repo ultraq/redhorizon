@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+}
+
 description = 'Filetypes module for the Red Horizon project'
 
-dependencies {
-	api 'org.reflections:reflections:0.10.2'
-	implementation project(':redhorizon-events')
+// @formatter:off
+configure {
+	var groovyLibraryProject = createGroovyLibraryProject()
+	configureBase(groovyLibraryProject)
+	groovyLibraryProject
+		.configureSource()
+			.withDependencies() {
+				api 'org.reflections:reflections:0.10.2'
+				implementation project(':redhorizon-events')
+			}
 }
+// @formatter:on

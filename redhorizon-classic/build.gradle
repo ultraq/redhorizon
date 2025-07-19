@@ -15,49 +15,55 @@
  */
 
 plugins {
-	id 'maven-publish'
-	id 'com.github.johnrengelman.shadow' version '8.1.1'
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
 }
-apply from: 'https://raw.githubusercontent.com/ultraq/gradle-support/4.3.2/maven-publish-support.gradle'
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
-year = '2007'
 
-dependencies {
-	implementation project(':redhorizon-engine')
-	implementation project(':redhorizon-events')
-	implementation project(':redhorizon-filetypes')
-	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-}
+// @formatter:off
+configure {
+	var groovyProject = createGroovyProject()
+	configureBase(groovyProject)
+	groovyProject
+		.withGroovydocOptions() {
+			overviewText = resources.text.fromString('''
+				A module that bridges the classic C&C file formats for use with the Red Horizon
+				engine.  All of the reverse engineering of the old codecs and files takes place
+				here, and serve as working examples for other programmers.
+			''')
+			// Can't link to these until they get published on maven central themselves
+//			link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
+//			link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
+		}
+		.withShadowJar() {
+			archiveClassifier = ''
+			dependencies {
+				include project(':redhorizon-engine')
+				include project(':redhorizon-events')
+				include project(':redhorizon-filetypes')
+			}
+		}
+		.withSourcesJar()
+		.withGroovydocJar()
+		.configureSource()
+			.withDependencies() {
+				implementation project(':redhorizon-engine')
+				implementation project(':redhorizon-events')
+				implementation project(':redhorizon-filetypes')
+				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+			}
 
-shadowJar {
-	archiveClassifier.set('')
-	dependencies {
-		include(project(':redhorizon-engine'))
-		include(project(':redhorizon-events'))
-		include(project(':redhorizon-filetypes'))
-	}
-}
+	createMavenPublication()
+		.withArtifacts(shadowJar, sourcesJar, groovydocJar)
+		.configurePom() {
+			url = 'https://github.com/ultraq/redhorizon'
+			inceptionYear = '2007'
 
-groovydoc {
-	overviewText = resources.text.fromString('''
-		A module that bridges the classic C&C file formats for use with the Red Horizon
-		engine.  All of the reverse engineering of the old codecs and files takes place
-		here, and serve as working examples for other programmers.
-	''')
-	// Can't link to these until they get published on maven central themselves
-//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
-//	link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
-}
-
-publishing {
-	publications {
-		library(MavenPublication) {
-			artifacts = [shadowJar, sourcesJar, groovydocJar]
+			// Have to manually remove the project nodes since shadow won't do that for us
 			afterEvaluate {
-				// Have to manually remove the project nodes since shadow won't do that for us
-				pom.withXml {
+				withXml {
 					var projectDependencyNodes = []
 					asNode().depthFirst { node ->
 						if (node.name().localPart == 'dependency' && node.get('groupId').text() == 'nz.net.ultraq.redhorizon') {
@@ -70,11 +76,17 @@ publishing {
 				}
 			}
 		}
-	}
+		.useApache20License()
+		.withGitHubScm('ultraq')
+		.withDevelopers([
+			name: 'Emanuel Rabina',
+			email: 'emanuelrabina@gmail.com',
+			url: 'https://www.ultraq.net.nz'
+		])
 }
+// @formatter:on
 
-// Disable module metadata while publishing fat jars - it's incorrect for what
-// we're shipping
-tasks.withType(GenerateModuleMetadata) {
+// Disable module metadata while publishing fat jars - it's incorrect for what we're shipping
+tasks.withType(GenerateModuleMetadata).configureEach {
 	enabled = false
 }

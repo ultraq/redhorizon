@@ -14,64 +14,60 @@
  * limitations under the License.
  */
 
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
-	id 'application'
+	id 'redhorizon-build'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
 }
 
-dependencies {
-	implementation project(':redhorizon-classic')
-	implementation project(':redhorizon-filetypes')
-	implementation project(':redhorizon-explorer')
-	implementation project(':redhorizon-shooter')
-	implementation "ch.qos.logback:logback-core:${logbackVersion}"
-	implementation "info.picocli:picocli:${picocliVersion}"
-	implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-	implementation "org.joml:joml:${jomlVersion}"
-	implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-	implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
-	implementation 'org.lwjgl:lwjgl-glfw'
-	runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
+var os = OperatingSystem.current()
+var targetPlatform = findProperty('targetPlatform') ?:
+	os == OperatingSystem.MAC_OS && System.getProperty('os.arch').startsWith('aarch64') ? 'macos-arm64' : 'windows'
 
-	testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
-	testImplementation 'org.assertj:assertj-core:3.26.3'
+// @formatter:off
+configure {
+	var groovyApplication = createGroovyApplicationProject() {
+		mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizon'
+		applicationName = 'redhorizon'
+		applicationDefaultJvmArgs = ['-Dorg.lwjgl.system.stackSize=10240'] +
+			(targetPlatform.startsWith('macos') ? ['-Dorg.lwjgl.glfw.libname=glfw_async'] : [])
+	}
+	configureBase(groovyApplication)
+	groovyApplication
+		.withJavaCompileOptions() {
+			options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+		}
+		.configureSource()
+			.withDependencies() {
+				implementation project(':redhorizon-classic')
+				implementation project(':redhorizon-filetypes')
+				implementation project(':redhorizon-explorer')
+				implementation project(':redhorizon-shooter')
+				implementation "ch.qos.logback:logback-core:${logbackVersion}"
+				implementation "info.picocli:picocli:${picocliVersion}"
+				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+				implementation 'org.lwjgl:lwjgl-glfw'
+				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
+			}
+		.configureTesting()
+			.withTestDependencies() {
+				testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
+				testImplementation 'org.assertj:assertj-core:3.26.3'
+			}
+
+	createZipDistribution()
+		.withDependenciesIn('libraries')
+		.withSourcesIn('source')
+		.withGroovydocsIn('groovydoc')
 }
+// @formatter:on
 
 configurations {
 	testRuntimeOnly {
 		exclude group: 'ch.qos.logback'
 	}
-}
-
-compileJava {
-	options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
-}
-
-def args = [
-	'-Dorg.lwjgl.system.stackSize=10240'
-]
-if (targetPlatform.startsWith('macos')) {
-	args << '-Dorg.lwjgl.glfw.libname=glfw_async'
-}
-
-application {
-	mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizon'
-	applicationName = 'redhorizon'
-	applicationDefaultJvmArgs = args
-}
-
-distributions {
-	main {
-		contents {
-			// Have to mention explicitly because of the subproject layout
-			from('..') {
-				include 'CHANGELOG.md'
-				include 'LICENSE.txt'
-				include 'README.md'
-			}
-		}
-	}
-}
-
-distTar {
-	enabled = false
 }
