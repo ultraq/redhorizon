@@ -16,16 +16,14 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'Filetypes module for the Red Horizon project'
 
 // @formatter:off
 configure {
-	var groovyLibraryProject = createGroovyLibraryProject()
-	configureBase(groovyLibraryProject)
-	groovyLibraryProject
+	asGroovyLibraryProject()
 		.configureSource()
 			.withDependencies() {
 				api 'org.reflections:reflections:0.10.2'

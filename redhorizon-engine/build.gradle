@@ -16,16 +16,14 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'Core game engine for Red Horizon'
 
 // @formatter:off
 configure {
-	var groovyProject = createGroovyProject()
-	configureBase(groovyProject)
-	groovyProject
+	asGroovyLibraryProject()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-events')

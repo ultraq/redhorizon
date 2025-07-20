@@ -16,16 +16,14 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
 
 // @formatter:off
 configure {
-	var groovyProject = createGroovyProject()
-	configureBase(groovyProject)
-	groovyProject
+	asGroovyLibraryProject()
 		.withGroovydocOptions() {
 			overviewText = resources.text.fromString('''
 				A module that bridges the classic C&C file formats for use with the Red Horizon

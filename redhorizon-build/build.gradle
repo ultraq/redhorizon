@@ -16,7 +16,7 @@
 
 plugins {
 	id 'idea'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'Build configuration for Red Horizon projects'
@@ -29,7 +29,7 @@ configure {
 		.configureSource()
 			.withSourceDirectory('source')
 			.withDependencies {
-				implementation 'nz.net.ultraq.gradle:gradle-support:0.5.0'
+				implementation 'nz.net.ultraq.gradle:gradle-support:0.5.1'
 			}
 }
 // @formatter:on

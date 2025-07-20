@@ -16,16 +16,14 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'A top-down shooter for testing out the game engine'
 
 // @formatter:off
 configure {
-	var groovyProject = createGroovyProject()
-	configureBase(groovyProject)
-	groovyProject
+	asGroovyProject()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-classic')

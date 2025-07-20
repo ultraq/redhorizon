@@ -18,7 +18,7 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 var os = OperatingSystem.current()
@@ -27,14 +27,12 @@ var targetPlatform = findProperty('targetPlatform') ?:
 
 // @formatter:off
 configure {
-	var groovyApplication = createGroovyApplicationProject() {
+	asGroovyApplicationProject() {
 		mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizon'
 		applicationName = 'redhorizon'
 		applicationDefaultJvmArgs = ['-Dorg.lwjgl.system.stackSize=10240'] +
 			(targetPlatform.startsWith('macos') ? ['-Dorg.lwjgl.glfw.libname=glfw_async'] : [])
 	}
-	configureBase(groovyApplication)
-	groovyApplication
 		.withJavaCompileOptions() {
 			options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 		}
@@ -53,7 +51,7 @@ configure {
 				implementation 'org.lwjgl:lwjgl-glfw'
 				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 			}
-		.configureTesting()
+		.configureVerification()
 			.withTestDependencies() {
 				testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
 				testImplementation 'org.assertj:assertj-core:3.26.3'

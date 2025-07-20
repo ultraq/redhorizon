@@ -16,16 +16,14 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'A file and media explorer application for viewing classic Command & Conquer game assets'
 
 // @formatter:off
 configure {
-	var groovyProject = createGroovyProject()
-	configureBase(groovyProject)
-	groovyProject
+	asGroovyProject()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-classic')

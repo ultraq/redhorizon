@@ -16,17 +16,15 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.5.1'
 }
 
 description = 'Event system for Red Horizon (something something "Event Horizon"? 🤔)'
 
 // @formatter:off
 configure {
-	var groovyProject = createGroovyProject()
-	configureBase(groovyProject)
-	groovyProject
-		.configureTesting()
+	asGroovyLibraryProject()
+		.configureVerification()
 			.withTestDependencies() {
 				testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
 			}
