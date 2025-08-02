@@ -38,27 +38,31 @@ class OpenALAudioDevice implements AudioDevice {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenALAudioDevice)
 
-	private final long alDevice
-	private final long alContext
+	private final long device
+	private final long context
 
 	/**
 	 * Create and configure a new sound device with OpenAL.
 	 */
 	OpenALAudioDevice() {
 
-		alDevice = alcOpenDevice((ByteBuffer)null)
-		if (!alDevice) {
+		device = alcOpenDevice((ByteBuffer)null)
+		if (!device) {
 			throw new UnsupportedOperationException('Could not open the default OpenAL device')
 		}
 
-		var alcCapabilities = ALC.createCapabilities(alDevice)
+		var alcCapabilities = ALC.createCapabilities(device)
 		if (!alcCapabilities.OpenALC11) {
 			throw new UnsupportedOperationException('OpenAL device does not support OpenAL 1.1')
 		}
 
-		alContext = alcCreateContext(alDevice, (IntBuffer)null)
+		context = alcCreateContext(device, (IntBuffer)null)
 		makeCurrent()
-		AL.createCapabilities(alcCapabilities)
+
+		var alCapabilities = AL.createCapabilities(alcCapabilities)
+		if (!alCapabilities.OpenAL11) {
+			throw new UnsupportedOperationException('OpenAL device does not support OpenAL 1.1')
+		}
 
 		logger.debug('OpenAL device: {vendor}, {renderer}, {version}', alGetString(AL_VENDOR), alGetString(AL_RENDERER), alGetString(AL_VERSION))
 	}
@@ -66,8 +70,8 @@ class OpenALAudioDevice implements AudioDevice {
 	@Override
 	void close() {
 
-		alcDestroyContext(alContext)
-		alcCloseDevice(alDevice)
+		alcDestroyContext(context)
+		alcCloseDevice(device)
 	}
 
 	@Override
@@ -79,7 +83,7 @@ class OpenALAudioDevice implements AudioDevice {
 	@Override
 	void makeCurrent() {
 
-		alcMakeContextCurrent(alContext)
+		alcMakeContextCurrent(context)
 	}
 
 	@Override
@@ -99,7 +103,7 @@ class OpenALAudioDevice implements AudioDevice {
 
 		try {
 			makeCurrent()
-			closure()
+			return closure()
 		}
 		finally {
 			releaseCurrent()
