@@ -128,7 +128,8 @@ class QuadTree {
 	}
 
 	/**
-	 * Add a child to one of the existing quadrants.
+	 * Add a child to one of the existing quadrants.  This will not perform any
+	 * subdivision of the current quadtree.
 	 */
 	private boolean addToQuadrant(Vector3fc position, Node node) {
 
@@ -139,7 +140,8 @@ class QuadTree {
 			var attempts = 0
 			while (true) {
 				var randomQuadrant = quadrants[randomQuadrantIndex]
-				if (randomQuadrant.add(node)) {
+				var nodePosition = node.globalPosition
+				if (randomQuadrant.area.containsPoint(nodePosition.x(), nodePosition.y(), true) && randomQuadrant.addChild(node)) {
 					return true
 				}
 				else {
