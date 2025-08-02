@@ -46,6 +46,7 @@ configure {
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
+				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-engine')
 				implementation project(':redhorizon-events')
 				implementation project(':redhorizon-filetypes')
