@@ -16,13 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.audio.openal
 
+import nz.net.ultraq.redhorizon.audio.AudioResource
+import nz.net.ultraq.redhorizon.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.Source
+import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
+import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 import nz.net.ultraq.redhorizon.engine.audio.AudioConfiguration
 import nz.net.ultraq.redhorizon.engine.audio.AudioRenderer
-import nz.net.ultraq.redhorizon.engine.audio.AudioResource
-import nz.net.ultraq.redhorizon.engine.audio.Buffer
 import nz.net.ultraq.redhorizon.engine.audio.BufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.BufferDeletedEvent
-import nz.net.ultraq.redhorizon.engine.audio.Source
 import nz.net.ultraq.redhorizon.engine.audio.SourceCreatedEvent
 import nz.net.ultraq.redhorizon.engine.audio.SourceDeletedEvent
 

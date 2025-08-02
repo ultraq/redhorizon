@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.audio
 
 /**
- * An object that contains audio data.
+ * Identifies a resource that can only be created/deleted via the audio system
+ * and its thread.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Buffer implements AudioResource {
-
-	final int bits
-	final int channels
-	final int frequency
+interface AudioResource extends AutoCloseable {
 }

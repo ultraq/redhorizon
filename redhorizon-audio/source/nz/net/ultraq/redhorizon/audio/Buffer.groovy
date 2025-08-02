@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.audio
 
 /**
- * Identifies a resource that can only be created/deleted via the audio system
- * and its thread.
+ * An object that contains audio data.
  *
  * @author Emanuel Rabina
  */
-interface AudioResource extends AutoCloseable {
+interface Buffer extends AudioResource {
+
+	/**
+	 * Get the number of bits per sample.
+	 */
+	int getBits()
+
+	/**
+	 * Get the number of channels.
+	 */
+	int getChannels()
+
+	/**
+	 * Get the sample frequency.
+	 */
+	int getFrequency()
 }

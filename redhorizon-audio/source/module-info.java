@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
-
-import nz.net.ultraq.redhorizon.audio.Buffer
-
-import groovy.transform.TupleConstructor
-
-/**
- * Event triggered when a buffer is deleted.
- *
- * @author Emanuel Rabina
- */
-@TupleConstructor(defaults = false)
-class BufferDeletedEvent extends AudioRendererEvent {
-
-	final Buffer buffer
+module nz.net.ultraq.redhorizon.audio {
+	exports nz.net.ultraq.redhorizon.audio;
+	exports nz.net.ultraq.redhorizon.audio.openal;
 }

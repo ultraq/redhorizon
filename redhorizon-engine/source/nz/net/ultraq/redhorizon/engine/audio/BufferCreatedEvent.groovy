@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.audio.Buffer
+
 import groovy.transform.TupleConstructor
 
 /**

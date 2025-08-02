@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.audio.AudioResource
+import nz.net.ultraq.redhorizon.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.Source
 import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.Vector3fc

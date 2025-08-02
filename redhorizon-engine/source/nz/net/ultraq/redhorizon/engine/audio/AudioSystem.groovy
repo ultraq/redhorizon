@@ -16,10 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.audio.AudioResource
+import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import nz.net.ultraq.redhorizon.engine.EngineStats
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.EngineSystemType
-import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALContext
 import nz.net.ultraq.redhorizon.engine.audio.openal.OpenALRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.AudioElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -49,7 +50,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	private final BlockingQueue<Tuple2<AudioResource, CompletableFuture<Void>>> deletionRequests = new LinkedBlockingQueue<>()
 	private final List<Node> queryResults = []
 
-	private OpenALContext context
+	private OpenALAudioDevice device
 	private OpenALRenderer renderer
 
 	/**
@@ -114,8 +115,8 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	@Override
 	protected void runInit() {
 
-		context = new OpenALContext()
-		context.withCurrent { ->
+		device = new OpenALAudioDevice()
+		device.withCurrent { ->
 			renderer = new OpenALRenderer(config)
 			logger.debug(renderer.toString())
 			EngineStats.instance.attachAudioRenderer(renderer)
@@ -125,7 +126,7 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	@Override
 	protected void runLoop() {
 
-		context.withCurrent { ->
+		device.withCurrent { ->
 			try {
 				while (!Thread.interrupted()) {
 					process { ->
@@ -156,9 +157,9 @@ class AudioSystem extends EngineSystem implements AudioRequests {
 	@Override
 	protected void runShutdown() {
 
-		context.withCurrent { ->
+		device.withCurrent { ->
 			renderer.close()
 		}
-		context.close()
+		device.close()
 	}
 }

@@ -17,6 +17,7 @@
 rootProject.name = 'redhorizon'
 
 includeBuild 'redhorizon-build'
+include 'redhorizon-audio'
 include 'redhorizon-classic'
 include 'redhorizon-cli'
 include 'redhorizon-engine'

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio.openal
+package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.engine.audio.Buffer
-import nz.net.ultraq.redhorizon.engine.audio.Source
+import nz.net.ultraq.redhorizon.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.Source
 
 import static org.lwjgl.openal.AL10.*
 import static org.lwjgl.openal.AL11.AL_UNDETERMINED
@@ -27,16 +27,12 @@ import static org.lwjgl.openal.AL11.AL_UNDETERMINED
  *
  * @author Emanuel Rabina
  */
-class OpenALSource extends Source {
+class OpenALSource implements Source {
 
 	final int sourceId
 
-	// TODO: Currently using a call to the sound hardware for every query, could
-	//       possibly be optimized by storing a local value instead.  This doesn't
-	//       seem to be the bottleneck for us now, so leaving as is.
-
 	/**
-	 * Constructor, creates a new source to which buffers can be attached  later.
+	 * Constructor, creates a new source to which buffers can be attached.
 	 */
 	OpenALSource() {
 
@@ -44,11 +40,12 @@ class OpenALSource extends Source {
 	}
 
 	@Override
-	void attachBuffer(Buffer buffer) {
+	Source attachBuffer(Buffer buffer) {
 
 		if (alGetSourcei(sourceId, AL_BUFFER) == 0) {
 			alSourcei(sourceId, AL_BUFFER, ((OpenALBuffer)buffer).bufferId)
 		}
+		return this
 	}
 
 	@Override
@@ -65,8 +62,6 @@ class OpenALSource extends Source {
 
 	/**
 	 * Return this source's state.
-	 *
-	 * @return
 	 */
 	private int getSourceState() {
 
@@ -98,15 +93,16 @@ class OpenALSource extends Source {
 	}
 
 	@Override
-	void pause() {
+	Source pause() {
 
 		if (!paused) {
 			alSourcePause(sourceId)
 		}
+		return this
 	}
 
 	@Override
-	void play() {
+	Source play() {
 
 		if (!playing) {
 			// Once a buffer is attached or several queued, the source state is one of
@@ -115,6 +111,7 @@ class OpenALSource extends Source {
 				alSourcePlay(sourceId)
 			}
 		}
+		return this
 	}
 
 	@Override
@@ -124,17 +121,19 @@ class OpenALSource extends Source {
 	}
 
 	@Override
-	void rewind() {
+	Source rewind() {
 
 		alSourceRewind(sourceId)
+		return this
 	}
 
 	@Override
-	void stop() {
+	Source stop() {
 
 		if (!stopped) {
 			alSourceStop(sourceId)
 		}
+		return this
 	}
 
 	@Override

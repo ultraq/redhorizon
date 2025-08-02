@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,26 @@ plugins {
 	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
-description = 'Core game engine for Red Horizon'
+description = 'Audio module for the Red Horizon project'
 
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
 		.configureSource()
 			.withDependencies() {
-				implementation project(':redhorizon-audio')
-				implementation project(':redhorizon-events')
-				implementation project(':redhorizon-filetypes')
 				implementation "ch.qos.logback:logback-core:${logbackVersion}"
-				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-				implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-				implementation 'org.lwjgl:lwjgl'
-				implementation 'org.lwjgl:lwjgl-glfw'
-				implementation 'org.lwjgl:lwjgl-openal'
-				implementation 'org.lwjgl:lwjgl-opengl'
+				api 'org.lwjgl:lwjgl'
+				api 'org.lwjgl:lwjgl-openal'
 
-				runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
-				runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
+				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 				['natives-macos-arm64', 'natives-windows'].each { natives ->
 					runtimeOnly "org.lwjgl:lwjgl::${natives}"
-					runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
 					runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"
-					runtimeOnly "org.lwjgl:lwjgl-opengl::${natives}"
 				}
+			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation 'com.tagtraum:ffsampledsp-complete:0.9.53'
 			}
 }
 // @formatter:on

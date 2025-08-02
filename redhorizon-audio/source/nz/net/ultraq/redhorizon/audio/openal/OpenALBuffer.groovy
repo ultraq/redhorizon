@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio.openal
+package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.engine.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.Buffer
 
 import static org.lwjgl.openal.AL10.*
 import static org.lwjgl.system.MemoryStack.stackPush
@@ -28,21 +28,21 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenALBuffer extends Buffer {
+class OpenALBuffer implements Buffer {
 
+	final int bits
+	final int channels
+	final int frequency
 	final int bufferId
 
 	/**
 	 * Constructor, build and populate an OpenAL buffer from sound data.
-	 *
-	 * @param bits
-	 * @param channels
-	 * @param frequency
-	 * @param data
 	 */
 	OpenALBuffer(int bits, int channels, int frequency, ByteBuffer data) {
 
-		super(bits, channels, frequency)
+		this.bits = bits
+		this.channels = channels
+		this.frequency = frequency
 
 		bufferId = alGenBuffers()
 

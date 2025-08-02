@@ -16,6 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
+import nz.net.ultraq.redhorizon.audio.AudioResource
+import nz.net.ultraq.redhorizon.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.Source
+
 import groovy.transform.ImmutableOptions
 import java.nio.ByteBuffer
 import java.util.concurrent.CompletableFuture

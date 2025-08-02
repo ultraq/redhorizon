@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.audio
 
 /**
  * An object through which to play sound data (buffers).
  *
  * @author Emanuel Rabina
  */
-abstract class Source implements AudioResource {
+interface Source extends AudioResource {
 
 	/**
 	 * Attach a static buffer to this source for playback.
 	 *
 	 * @param buffer
+	 * @return This object for chaining.
 	 */
-	abstract void attachBuffer(Buffer buffer)
+	Source attachBuffer(Buffer buffer)
 
 	/**
 	 * Return the number of queued buffers that have been processed for this
@@ -36,43 +37,43 @@ abstract class Source implements AudioResource {
 	 *
 	 * @return Number of processed buffers.
 	 */
-	abstract int buffersProcessed()
+	int buffersProcessed()
 
 	/**
 	 * Return whether this source has an attached static buffer.
 	 */
-	abstract boolean isBufferAttached()
+	boolean isBufferAttached()
 
 	/**
 	 * Rether whether this source is currently paused.
 	 *
 	 * @return
 	 */
-	abstract boolean isPaused()
+	boolean isPaused()
 
 	/**
 	 * Return whether this source is currently playing.
 	 *
 	 * @return
 	 */
-	abstract boolean isPlaying()
+	boolean isPlaying()
 
 	/**
 	 * Return whether this source has stopped playing.
 	 *
 	 * @return
 	 */
-	abstract boolean isStopped()
+	boolean isStopped()
 
 	/**
 	 * Pause playback through this source.
 	 */
-	abstract void pause()
+	Source pause()
 
 	/**
 	 * Start playing sound through this source.
 	 */
-	abstract void play()
+	Source play()
 
 	/**
 	 * Queue buffers on to this source, making this source one that streams sound
@@ -81,20 +82,20 @@ abstract class Source implements AudioResource {
 	 * @param buffers
 	 * @see Source#attachBuffer(Buffer)
 	 */
-	abstract void queueBuffers(Buffer... buffers)
+	void queueBuffers(Buffer... buffers)
 
 	/**
 	 * Rewind a source, resetting its state.
 	 */
-	abstract void rewind()
+	Source rewind()
 
 	/**
 	 * Stop playing the sound through this source.
 	 */
-	abstract void stop()
+	Source stop()
 
 	/**
 	 * Unqueue buffers from this source.
 	 */
-	abstract void unqueueBuffers(Buffer... buffers)
+	void unqueueBuffers(Buffer... buffers)
 }
