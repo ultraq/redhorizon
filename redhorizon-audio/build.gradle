@@ -24,9 +24,13 @@ description = 'Audio module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
+		.withJarOptions() {
+			manifest {
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.audio'
+			}
+		}
 		.configureSource()
 			.withDependencies() {
-				implementation "ch.qos.logback:logback-core:${logbackVersion}"
 				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-openal'
 
