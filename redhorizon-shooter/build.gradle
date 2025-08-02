@@ -31,7 +31,6 @@ configure {
 				implementation project(':redhorizon-runtime')
 				implementation "info.picocli:picocli:${picocliVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 				implementation 'org.lwjgl:lwjgl-glfw'
 			}
 }
