@@ -18,7 +18,7 @@ import org.gradle.internal.os.OperatingSystem
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.6.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 var os = OperatingSystem.current()

@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
+plugins {
+	id 'redhorizon-build' apply false
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.6.0' apply false
+}
+
 description = 'Recreating the original 2D Command & Conquer games'

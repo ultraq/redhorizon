@@ -16,7 +16,7 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.6.0'
+	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'Runtime package for building applications with the Red Horizon engine'
