@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import java.nio.ByteBuffer
@@ -31,6 +32,7 @@ import javax.sound.sampled.AudioSystem
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class AudioCheck extends Specification {
 
 	static {
