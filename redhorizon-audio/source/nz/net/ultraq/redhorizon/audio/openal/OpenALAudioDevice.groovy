@@ -97,16 +97,4 @@ class OpenALAudioDevice implements AudioDevice {
 
 		alListenerf(AL_GAIN, volume)
 	}
-
-	@Override
-	<T> T withCurrent(Closure<T> closure) {
-
-		try {
-			makeCurrent()
-			return closure()
-		}
-		finally {
-			releaseCurrent()
-		}
-	}
 }

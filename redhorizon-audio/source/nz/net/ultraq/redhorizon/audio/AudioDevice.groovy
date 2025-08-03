@@ -58,7 +58,16 @@ interface AudioDevice extends AutoCloseable {
 	 * {@link #releaseCurrent} so that audio commands can be executed in the
 	 * current thread.
 	 */
-	<T> T withCurrent(Closure<T> closure)
+	default <T> T withCurrent(Closure<T> closure) {
+
+		try {
+			makeCurrent()
+			return closure()
+		}
+		finally {
+			releaseCurrent()
+		}
+	}
 
 	/**
 	 * A fluent method for setting the master volume and returning the device so
