@@ -16,12 +16,17 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 
-import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
+import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
 /**
@@ -41,12 +46,9 @@ class OpenGLWindow implements Window {
 	 */
 	OpenGLWindow(int width, int height, String title) {
 
-		glfwSetErrorCallback(new GLFWErrorCallback() {
-			@Override
-			void invoke(int error, long description) {
-				logger.error(getDescription(description))
-			}
-		})
+		glfwSetErrorCallback() { int error, long description ->
+			logger.error(getDescription(description))
+		}
 
 		if (!glfwInit()) {
 			throw new Exception('Unable to initialize GLFW')
@@ -69,12 +71,34 @@ class OpenGLWindow implements Window {
 		glfwSetWindowPos(window, (videoMode.width() / 2) - (width / 2) as int, (videoMode.height() / 2) - (height / 2) as int)
 
 		makeCurrent()
+		setVsync(true)
+
+		var capabilities = GL.createCapabilities()
+		if (capabilities.GL_KHR_debug) {
+			glEnable(GL_DEBUG_OUTPUT)
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
+			glDebugMessageCallback(new GLDebugMessageCallback() {
+				@Override
+				void invoke(int source, int type, int id, int severity, int length, long message, long userParam) {
+					if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+						throw new Exception("OpenGL error: ${getMessage(length, message)}")
+					}
+				}
+			}, 0)
+		}
+
+		logger.debug('OpenGL device: {}, version {}', glGetString(GL_RENDERER), glGetString(GL_VERSION))
+
+		glEnable(GL_DEPTH_TEST)
+		glDepthFunc(GL_LEQUAL)
+		glEnable(GL_BLEND)
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 	}
 
 	@Override
 	void beginFrame() {
 
-		// Anything to do here?
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	}
 
 	@Override
@@ -103,6 +127,15 @@ class OpenGLWindow implements Window {
 		glfwMakeContextCurrent(NULL)
 	}
 
+	/**
+	 * Enable/disable vsync on the window.
+	 */
+	private void setVsync(boolean vsync) {
+
+		this.vsync = vsync
+		glfwSwapInterval(vsync ? 1 : 0)
+	}
+
 	@Override
 	boolean shouldClose() {
 
@@ -119,19 +152,27 @@ class OpenGLWindow implements Window {
 	@Override
 	void toggleBorderlessWindowed() {
 
+		// TODO
 	}
 
 	@Override
 	void toggleVsync() {
 
-		glfwSwapInterval(vsync ? 0 : 1)
-		vsync = !vsync
+		setVsync(!vsync)
 		logger.debug("Vsync ${vsync ? 'enabled' : 'disabled'}")
+	}
+
+	@Override
+	Window withBackgroundColour(Colour colour) {
+
+		glClearColor(colour.r, colour.g, colour.b, colour.a)
+		return this
 	}
 
 	@Override
 	Window withBorderlessWindowed() {
 
+		// TODO
 		return this
 	}
 
@@ -139,14 +180,6 @@ class OpenGLWindow implements Window {
 	Window withMaximized() {
 
 		glfwMaximizeWindow(window)
-		return this
-	}
-
-	@Override
-	Window withVSync() {
-
-		glfwSwapInterval(1)
-		vsync = true
 		return this
 	}
 }

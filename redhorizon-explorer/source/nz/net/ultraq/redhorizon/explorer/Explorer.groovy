@@ -30,7 +30,6 @@ import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
@@ -65,6 +64,7 @@ import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 
+import Colour
 import imgui.ImGui
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

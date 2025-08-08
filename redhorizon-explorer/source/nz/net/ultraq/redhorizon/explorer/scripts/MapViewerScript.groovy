@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.explorer.scripts
 
 import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
-import nz.net.ultraq.redhorizon.engine.graphics.Colour
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
@@ -38,6 +37,7 @@ import nz.net.ultraq.redhorizon.explorer.NodeList
 import nz.net.ultraq.redhorizon.explorer.NodeSelectedEvent
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.explorer.animation.Transition
+import nz.net.ultraq.redhorizon.graphics.Colour
 
 import org.joml.Vector2f
 import org.joml.Vector3f

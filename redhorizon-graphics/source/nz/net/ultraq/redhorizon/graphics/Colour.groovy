@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2020, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
 
 import groovy.transform.TupleConstructor
 
 /**
  * Certain colour values for reference.
- * 
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor
@@ -36,6 +36,7 @@ class Colour {
 	 */
 	static final int FLOATS = 4
 
+	// @formatter:off
 	static final Colour BLACK  = new Colour('Black',  0.0, 0.0, 0.0)
 	static final Colour BLUE   = new Colour('Blue',   0.0, 0.0, 1.0)
 	static final Colour GREEN  = new Colour('Green',  0.0, 1.0, 0.0)
@@ -43,6 +44,7 @@ class Colour {
 	static final Colour RED    = new Colour('Red',    1.0, 0.0, 0.0)
 	static final Colour WHITE  = new Colour('White',  1.0, 1.0, 1.0)
 	static final Colour YELLOW = new Colour('Yellow', 1.0, 1.0, 0.0)
+	// @formatter:on
 
 	final String name
 	final float r
@@ -52,9 +54,6 @@ class Colour {
 
 	/**
 	 * Convert this colour into another type that can represent it.
-	 * 
-	 * @param clazz
-	 * @return
 	 */
 	Object asType(Class clazz) {
 
@@ -69,8 +68,6 @@ class Colour {
 
 	/**
 	 * Return this colour in the form: "Name (r, g, b, a)"
-	 * 
-	 * @return
 	 */
 	@Override
 	String toString() {
@@ -80,9 +77,6 @@ class Colour {
 
 	/**
 	 * Return a new colour from a base one but with a specific alpha value.
-	 * 
-	 * @param alpha
-	 * @return
 	 */
 	Colour withAlpha(float alpha) {
 

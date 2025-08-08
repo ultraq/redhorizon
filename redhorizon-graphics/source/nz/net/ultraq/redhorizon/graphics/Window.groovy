@@ -76,6 +76,11 @@ interface Window extends AutoCloseable {
 	void toggleVsync()
 
 	/**
+	 * Set the background colour of the window.
+	 */
+	Window withBackgroundColour(Colour colour)
+
+	/**
 	 * Surround the given closure with calls to {@link #makeCurrent} and
 	 * {@link #releaseCurrent} so that audio commands can be executed in the
 	 * current thread.
@@ -112,9 +117,4 @@ interface Window extends AutoCloseable {
 	 * Maximize the window
 	 */
 	Window withMaximized()
-
-	/**
-	 * Set vsync on the window.
-	 */
-	Window withVSync()
 }

@@ -64,7 +64,7 @@ class OpenALAudioDevice implements AudioDevice {
 			throw new UnsupportedOperationException('OpenAL device does not support OpenAL 1.1')
 		}
 
-		logger.debug('OpenAL device: {vendor}, {renderer}, {version}', alGetString(AL_VENDOR), alGetString(AL_RENDERER), alGetString(AL_VERSION))
+		logger.debug('OpenAL device: {}, version {}', alGetString(AL_RENDERER), alGetString(AL_VERSION))
 	}
 
 	@Override
