@@ -17,6 +17,7 @@
 plugins {
 	id 'redhorizon-build'
 	id 'nz.net.ultraq.gradle.fluent-configuration'
+	id 'org.javamodularity.moduleplugin' version '1.8.15'
 }
 
 description = 'Audio module for the Red Horizon project'
@@ -24,11 +25,6 @@ description = 'Audio module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
-		.withJarOptions() {
-			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.audio'
-			}
-		}
 		.configureSource()
 			.withDependencies() {
 				api 'org.lwjgl:lwjgl'
@@ -46,3 +42,13 @@ configure {
 			}
 }
 // @formatter:on
+
+compileGroovy {
+	exclude '**/module-info.java'
+}
+
+test {
+	moduleOptions {
+		runOnClasspath = true
+	}
+}
