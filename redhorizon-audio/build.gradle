@@ -24,11 +24,6 @@ description = 'Audio module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
-		.withJarOptions() {
-			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.audio'
-			}
-		}
 		.configureSource()
 			.withDependencies() {
 				api 'org.lwjgl:lwjgl'
@@ -46,3 +41,20 @@ configure {
 			}
 }
 // @formatter:on
+
+sourceSets {
+	main {
+		java {
+			srcDirs = []
+		}
+	}
+}
+
+compileGroovy {
+//	exclude '**/module-info.java'
+	doFirst {
+		options.compilerArgs += [
+			'--module-path', classpath.asPath
+		]
+	}
+}
