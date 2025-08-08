@@ -16,7 +16,6 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'

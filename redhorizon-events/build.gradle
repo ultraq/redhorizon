@@ -16,7 +16,6 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'Event system for Red Horizon (something something "Event Horizon"? 🤔)'
@@ -24,9 +23,10 @@ description = 'Event system for Red Horizon (something something "Event Horizon"
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
-		.configureVerification()
-			.withTestDependencies() {
-				testRuntimeOnly "org.slf4j:slf4j-nop:${slf4jVersion}"
+		.withJarOptions() {
+			manifest {
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.events'
 			}
+		}
 }
 // @formatter:on

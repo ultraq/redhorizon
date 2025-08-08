@@ -16,7 +16,6 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'Core game engine for Red Horizon'

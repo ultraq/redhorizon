@@ -16,7 +16,6 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'A file and media explorer application for viewing classic Command & Conquer game assets'

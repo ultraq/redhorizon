@@ -16,7 +16,6 @@
 
 plugins {
 	id 'redhorizon-build'
-	id 'nz.net.ultraq.gradle.fluent-configuration'
 }
 
 description = 'Audio module for the Red Horizon project'
@@ -34,7 +33,6 @@ configure {
 				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-openal'
 
-				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 				['natives-macos-arm64', 'natives-windows'].each { natives ->
 					runtimeOnly "org.lwjgl:lwjgl::${natives}"
 					runtimeOnly "org.lwjgl:lwjgl-openal::${natives}"
