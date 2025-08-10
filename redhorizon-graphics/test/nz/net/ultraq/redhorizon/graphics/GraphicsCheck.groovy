@@ -35,12 +35,14 @@ class GraphicsCheck extends Specification {
 
 	def "Opens a window"() {
 		when:
-			var window = new OpenGLWindow(800, 600, "Testing")
-				.withBackgroundColour(Colour.WHITE)
-				.show()
-			while (!window.shouldClose()) {
-				window.withFrame { ->
-					// Do something!
+			new OpenGLWindow(800, 600, "Testing").withCloseable { window ->
+				window
+					.withBackgroundColour(Colour.WHITE)
+					.show()
+				while (!window.shouldClose()) {
+					window.withFrame { ->
+						// Do something!
+					}
 				}
 			}
 		then:
