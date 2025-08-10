@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.input
 
 import static org.lwjgl.glfw.GLFW.*
-
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
 
 /**
  * Event for keyboard input.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-@ToString(includeNames = true, includePackage = false)
-class KeyEvent extends InputEvent {
-
-	final int key
-	final int scancode
-	final int action
-	final int mods
+record KeyEvent(int key, int scancode, int action, int mods) implements InputEvent {
 
 	/**
 	 * Return whether this event is a key press for the given key.

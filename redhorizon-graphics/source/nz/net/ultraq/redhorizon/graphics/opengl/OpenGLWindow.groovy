@@ -16,8 +16,10 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -34,7 +36,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindow implements Window {
+class OpenGLWindow implements Window, EventTarget {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
@@ -87,12 +89,17 @@ class OpenGLWindow implements Window {
 			}, 0)
 		}
 
-		logger.debug('OpenGL device: {}, version {}', glGetString(GL_RENDERER), glGetString(GL_VERSION))
+		logger.info('OpenGL device: {}, version {}', glGetString(GL_RENDERER), glGetString(GL_VERSION))
 
 		glEnable(GL_DEPTH_TEST)
 		glDepthFunc(GL_LEQUAL)
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+		// Input callbacks
+		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
+			trigger(new KeyEvent(key, scancode, action, mods))
+		}
 	}
 
 	@Override
@@ -140,6 +147,12 @@ class OpenGLWindow implements Window {
 	boolean shouldClose() {
 
 		return glfwWindowShouldClose(window)
+	}
+
+	@Override
+	void shouldClose(boolean shouldClose) {
+
+		glfwSetWindowShouldClose(window, shouldClose)
 	}
 
 	@Override

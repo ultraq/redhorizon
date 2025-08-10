@@ -26,8 +26,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.runtime.imgui.ControlsOverlay
 import nz.net.ultraq.redhorizon.runtime.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.runtime.imgui.ExitEvent
@@ -39,7 +39,6 @@ import imgui.ImGui
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
 
 import java.util.concurrent.Semaphore
 
@@ -101,7 +100,7 @@ final class Runtime {
 			// Have the Esc key close the application
 			var inputSystem = new InputSystem()
 			inputSystem.on(KeyEvent) { event ->
-				if (event.action == GLFW_PRESS && event.key == GLFW_KEY_ESCAPE) {
+				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
 					stop()
 				}
 			}

@@ -25,9 +25,7 @@ import nz.net.ultraq.redhorizon.engine.game.Command
 import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.GamepadControl
-import nz.net.ultraq.redhorizon.engine.input.InputEvent
 import nz.net.ultraq.redhorizon.engine.input.InputHandler
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
@@ -35,6 +33,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.input.InputEvent
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -123,9 +123,9 @@ class Player extends Node<Player> implements GameObject, InputHandler, Rotatable
 	boolean input(InputEvent inputEvent) {
 
 		if (inputEvent instanceof KeyEvent) {
-			return switch (inputEvent.action) {
+			return switch (inputEvent.action()) {
 				case GLFW_PRESS -> {
-					yield switch (inputEvent.key) {
+					yield switch (inputEvent.key()) {
 						case GLFW_KEY_W -> inputHandled { -> keyboardForwards = true }
 						case GLFW_KEY_S -> inputHandled { -> keyboardBackwards = true }
 						case GLFW_KEY_A -> inputHandled { -> keyboardStrafeLeft = true }
@@ -136,7 +136,7 @@ class Player extends Node<Player> implements GameObject, InputHandler, Rotatable
 					}
 				}
 				case GLFW_RELEASE -> {
-					yield switch (inputEvent.key) {
+					yield switch (inputEvent.key()) {
 						case GLFW_KEY_W -> inputHandled { -> keyboardForwards = false }
 						case GLFW_KEY_S -> inputHandled { -> keyboardBackwards = false }
 						case GLFW_KEY_A -> inputHandled { -> keyboardStrafeLeft = false }

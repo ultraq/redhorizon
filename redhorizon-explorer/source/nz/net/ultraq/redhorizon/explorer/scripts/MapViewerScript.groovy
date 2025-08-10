@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonControl
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
@@ -38,6 +37,7 @@ import nz.net.ultraq.redhorizon.explorer.NodeSelectedEvent
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.explorer.animation.Transition
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -86,8 +86,8 @@ class MapViewerScript extends Script<Map> {
 		if (touchpadInput) {
 			var ctrl = false
 			removeEventListenerFunctions << inputSystem.on(KeyEvent) { event ->
-				if (event.key == GLFW_KEY_LEFT_CONTROL) {
-					ctrl = event.action == GLFW_PRESS || event.action == GLFW_REPEAT
+				if (event.isKeyPress(GLFW_KEY_LEFT_CONTROL, true)) {
+					ctrl = true
 				}
 			}
 			removeEventListenerFunctions << inputSystem.on(ScrollEvent) { event ->

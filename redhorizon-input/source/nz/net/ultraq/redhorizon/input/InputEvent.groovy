@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.input
 
 import nz.net.ultraq.redhorizon.events.Event
 
@@ -23,5 +23,5 @@ import nz.net.ultraq.redhorizon.events.Event
  *
  * @author Emanuel Rabina
  */
-abstract class InputEvent implements Event {
+interface InputEvent extends Event {
 }

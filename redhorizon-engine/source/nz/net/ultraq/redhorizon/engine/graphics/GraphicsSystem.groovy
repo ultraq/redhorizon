@@ -26,8 +26,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.GamepadStateProcessor
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -186,7 +186,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		}
 
 		window.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS && event.key == GLFW_KEY_V) {
+			if (event.isKeyPress(GLFW_KEY_V)) {
 				shouldToggleVsync = true
 			}
 		}

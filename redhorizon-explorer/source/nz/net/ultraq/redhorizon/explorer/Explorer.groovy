@@ -57,6 +57,7 @@ import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.SoundFile
 import nz.net.ultraq.redhorizon.filetypes.VideoFile
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.imgui.LogPanel
@@ -64,7 +65,6 @@ import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
 import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 
-import Colour
 import imgui.ImGui
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

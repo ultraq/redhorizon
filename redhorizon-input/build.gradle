@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
-
-import nz.net.ultraq.redhorizon.input.InputEvent
-
-import groovy.transform.TupleConstructor
-
-/**
- * Event emitted for gamepad axis controls.
- *
- * @author Emanuel Rabina
- */
-@TupleConstructor(defaults = false)
-class GamepadAxisEvent implements InputEvent {
-
-	final int type
-	final float value
+plugins {
+	id 'redhorizon-build'
 }
+
+description = 'Input module for the Red Horizon project'
+
+// @formatter:off
+configure {
+	asGroovyLibraryProject()
+		.withJarOptions() {
+			manifest {
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.input'
+			}
+		}
+		.configureSource()
+		.withDependencies() {
+			implementation project(':redhorizon-events')
+			api 'org.lwjgl:lwjgl-glfw'
+		}
+}
+// @formatter:on

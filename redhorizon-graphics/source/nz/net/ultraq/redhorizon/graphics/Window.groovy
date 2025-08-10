@@ -61,6 +61,11 @@ interface Window extends AutoCloseable {
 	boolean shouldClose()
 
 	/**
+	 * Control the close flag for the window.
+	 */
+	void shouldClose(boolean shouldClose)
+
+	/**
 	 * Show the window.
 	 */
 	Window show()

@@ -30,6 +30,7 @@ configure {
 				api project(':redhorizon-events')
 				api project(':redhorizon-filetypes')
 				api project(':redhorizon-graphics')
+				api project(':redhorizon-input')
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "org.joml:joml:${jomlVersion}"

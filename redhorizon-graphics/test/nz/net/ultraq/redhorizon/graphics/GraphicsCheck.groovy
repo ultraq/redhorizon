@@ -17,9 +17,11 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
 /**
  * A simple test for making sure we can create a window.
@@ -39,6 +41,11 @@ class GraphicsCheck extends Specification {
 				window
 					.withBackgroundColour(Colour.WHITE)
 					.show()
+				window.on(KeyEvent) { event ->
+					if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
+						window.shouldClose(true)
+					}
+				}
 				while (!window.shouldClose()) {
 					window.withFrame { ->
 						// Do something!

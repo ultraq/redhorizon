@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
+import nz.net.ultraq.redhorizon.input.KeyEvent
+
 import static org.lwjgl.glfw.GLFW.*
 
 import java.lang.reflect.Modifier

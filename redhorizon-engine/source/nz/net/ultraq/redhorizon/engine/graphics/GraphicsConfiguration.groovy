@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-
-import static Colour.BLACK
+import nz.net.ultraq.redhorizon.graphics.Colour
+import static nz.net.ultraq.redhorizon.graphics.Colour.BLACK
 
 import groovy.transform.MapConstructor
 import groovy.transform.ToString

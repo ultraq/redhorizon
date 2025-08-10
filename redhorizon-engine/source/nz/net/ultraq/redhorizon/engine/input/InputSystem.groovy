@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.redhorizon.input.InputEvent
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -62,8 +64,8 @@ class InputSystem extends EngineSystem implements InputRequests, EventTarget {
 	void addInputSource(InputSource inputSource) {
 
 		inputSource.on(InputEvent) { event ->
-			if (event instanceof KeyEvent && event.action == GLFW_PRESS) {
-				logger.trace("Key: {}, mods: {}", event.key, event.mods)
+			if (event instanceof KeyEvent && event.action() == GLFW_PRESS) {
+				logger.trace("Key: {}, mods: {}", event.key(), event.mods())
 			}
 			inputEvents << event
 		}

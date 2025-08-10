@@ -41,6 +41,7 @@ configure {
 		.configureVerification()
 			.withTestDependencies() {
 				testImplementation 'com.tagtraum:ffsampledsp-complete:0.9.53'
+				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 			}
 }
 // @formatter:on

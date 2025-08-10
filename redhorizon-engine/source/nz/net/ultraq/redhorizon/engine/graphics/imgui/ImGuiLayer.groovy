@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputSource
-import nz.net.ultraq.redhorizon.engine.input.KeyEvent
 
 import imgui.ImFont
 import imgui.ImFontConfig
