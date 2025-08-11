@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLTexture
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.type.ImBoolean

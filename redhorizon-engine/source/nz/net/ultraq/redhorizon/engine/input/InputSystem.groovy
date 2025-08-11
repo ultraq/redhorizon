@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
-import nz.net.ultraq.redhorizon.events.EventTarget
 import nz.net.ultraq.redhorizon.input.InputEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 

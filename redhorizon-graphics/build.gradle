@@ -30,8 +30,8 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation project(':redhorizon-events')
 				implementation project(':redhorizon-input')
+				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-glfw'

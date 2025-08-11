@@ -30,7 +30,7 @@ configure {
 		}
 		.configureSource()
 		.withDependencies() {
-			implementation project(':redhorizon-events')
+			implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 			api 'org.lwjgl:lwjgl-glfw'
 		}
 }

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.events.Event
-import nz.net.ultraq.redhorizon.events.EventListener
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.eventhorizon.EventListener
 
 import org.lwjgl.glfw.GLFW
 

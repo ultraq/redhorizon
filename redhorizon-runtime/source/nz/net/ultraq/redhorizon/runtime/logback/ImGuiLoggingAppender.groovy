@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime.logback
 
-import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.eventhorizon.EventTarget
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase

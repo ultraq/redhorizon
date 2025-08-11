@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime.imgui
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Triggered when Exit is selected from the main menu.

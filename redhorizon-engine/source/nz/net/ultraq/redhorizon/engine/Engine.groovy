@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

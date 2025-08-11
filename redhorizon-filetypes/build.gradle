@@ -25,8 +25,8 @@ configure {
 	asGroovyLibraryProject()
 		.configureSource()
 			.withDependencies() {
+				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				api 'org.reflections:reflections:0.10.2'
-				implementation project(':redhorizon-events')
 			}
 }
 // @formatter:on

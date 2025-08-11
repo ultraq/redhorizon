@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.input
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Common type for all input events.

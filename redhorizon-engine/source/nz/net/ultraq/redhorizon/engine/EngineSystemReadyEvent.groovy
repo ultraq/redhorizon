@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Used by systems to signal that they have started and are ready to operate on

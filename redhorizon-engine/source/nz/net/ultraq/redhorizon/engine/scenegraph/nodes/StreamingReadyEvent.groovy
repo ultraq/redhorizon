@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Fired when a node that uses streaming data is ready to start accepting data

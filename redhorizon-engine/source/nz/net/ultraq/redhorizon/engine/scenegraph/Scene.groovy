@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.audio.AudioRequests
 import nz.net.ultraq.redhorizon.engine.game.GameObject
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests
@@ -24,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputRequests
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
 import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import org.joml.FrustumIntersection
 import org.joml.Intersectionf

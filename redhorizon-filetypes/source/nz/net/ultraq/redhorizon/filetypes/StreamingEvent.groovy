@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Base class for events emitted by {@link StreamingDecoder}s.

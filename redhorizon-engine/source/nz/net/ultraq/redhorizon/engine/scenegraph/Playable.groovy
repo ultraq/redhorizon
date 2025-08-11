@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
-import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.eventhorizon.EventTarget
 
 /**
  * Trait for media that can be played forward.

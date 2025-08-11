@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.filetypes
 
-import nz.net.ultraq.redhorizon.events.EventTarget
+import nz.net.ultraq.eventhorizon.EventTarget
 
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask

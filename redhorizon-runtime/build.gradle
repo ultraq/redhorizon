@@ -27,10 +27,10 @@ configure {
 			.withDependencies() {
 				api project(':redhorizon-audio')
 				api project(':redhorizon-engine')
-				api project(':redhorizon-events')
 				api project(':redhorizon-filetypes')
 				api project(':redhorizon-graphics')
 				api project(':redhorizon-input')
+				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "org.joml:joml:${jomlVersion}"

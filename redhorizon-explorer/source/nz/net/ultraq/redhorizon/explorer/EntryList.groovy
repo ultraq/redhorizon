@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 import imgui.ImGui
 import imgui.flag.ImGuiSortDirection

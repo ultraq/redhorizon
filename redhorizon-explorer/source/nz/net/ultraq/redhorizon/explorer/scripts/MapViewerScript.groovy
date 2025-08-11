@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
+import nz.net.ultraq.eventhorizon.RemoveEventListenerFunction
 import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.engine.graphics.Window
@@ -31,7 +32,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Outline
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
-import nz.net.ultraq.redhorizon.events.RemoveEventListenerFunction
 import nz.net.ultraq.redhorizon.explorer.NodeList
 import nz.net.ultraq.redhorizon.explorer.NodeSelectedEvent
 import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions

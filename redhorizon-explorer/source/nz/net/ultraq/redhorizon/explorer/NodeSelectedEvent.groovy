@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.events.Event
 
 import groovy.transform.TupleConstructor
 

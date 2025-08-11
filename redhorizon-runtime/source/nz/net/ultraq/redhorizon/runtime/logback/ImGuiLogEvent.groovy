@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime.logback
 
-import nz.net.ultraq.redhorizon.events.Event
+import nz.net.ultraq.eventhorizon.Event
 
 /**
  * Event for log lines that should be captured in the debug overlay.

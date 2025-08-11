@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.events.EventTarget
 
 /**
  * The interface for creating your own application to run using the Red Horizon
