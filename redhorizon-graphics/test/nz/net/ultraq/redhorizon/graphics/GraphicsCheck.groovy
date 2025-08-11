@@ -32,7 +32,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 class GraphicsCheck extends Specification {
 
 	def setupSpec() {
-		System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
+		if (System.isMacOs()) {
+			System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
+		}
 	}
 
 	def "Opens a window"() {
