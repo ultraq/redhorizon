@@ -1,0 +1,107 @@
+/*
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.audio
+
+import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
+import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
+
+import java.nio.ByteBuffer
+
+/**
+ * A sound, which is a convenience class that combines a buffer and source and
+ * other methods so sound data can be played and controlled.
+ *
+ * @author Emanuel Rabina
+ */
+class Sound implements AutoCloseable {
+
+	private final Buffer buffer
+	private final Source source
+
+	/**
+	 * Constructor, sets up a new sound using decoded sound data.
+	 */
+	Sound(int bits, int channels, int frequency, ByteBuffer data) {
+
+		buffer = new OpenALBuffer(bits, channels, frequency, data)
+		source = new OpenALSource().attachBuffer(buffer)
+	}
+
+	@Override
+	void close() {
+
+		source.close()
+		buffer.close()
+	}
+
+	/**
+	 * Return whether the sound is currently paused.
+	 */
+	boolean isPaused() {
+
+		return source.isPaused()
+	}
+
+	/**
+	 * Return whether the sound is currently playing.
+	 */
+	boolean isPlaying() {
+
+		return source.isPlaying()
+	}
+
+	/**
+	 * Return whether the sound is currently stopped.
+	 */
+	boolean isStopped() {
+
+		return source.isStopped()
+	}
+
+	/**
+	 * Pause the sound.
+	 */
+	Sound pause() {
+
+		if (!paused) {
+			source.pause()
+		}
+		return this
+	}
+
+	/**
+	 * Play the sound.
+	 */
+	Sound play() {
+
+		if (!playing) {
+			source.play()
+		}
+		return this
+	}
+
+	/**
+	 * Stop the sound.
+	 */
+	Sound stop() {
+
+		if (!stopped) {
+			source.stop()
+		}
+		return this
+	}
+}

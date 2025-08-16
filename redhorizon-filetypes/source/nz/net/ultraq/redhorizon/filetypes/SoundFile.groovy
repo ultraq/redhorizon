@@ -42,16 +42,12 @@ interface SoundFile extends ResourceFile {
 
 	/**
 	 * Returns uncompressed sound data that can be used for playback.
-	 *
-	 * @return The buffer of sound data.
 	 */
 	ByteBuffer getSoundData()
 
 	/**
 	 * Return whether this file is best read using a streaming strategy, best for
 	 * larger sound files like music tracks.
-	 *
-	 * @return
 	 */
 	default boolean isForStreaming() {
 

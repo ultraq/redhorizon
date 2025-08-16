@@ -17,8 +17,6 @@
 package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
-import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
-import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -44,14 +42,11 @@ class AudioCheck extends Specification {
 			new OpenALAudioDevice().withCloseable { device ->
 				AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
 					AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
-						new OpenALBuffer(16, 2, 44100, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { buffer ->
-							new OpenALSource().withCloseable { source ->
-								source
-									.attachBuffer(buffer)
-									.play()
-								while (source.playing) {
-									Thread.sleep(100)
-								}
+						var audioFormat = pcmStream.format
+						new Sound(audioFormat.sampleSizeInBits, audioFormat.channels, (int)audioFormat.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
+							sound.play()
+							while (sound.playing) {
+								Thread.sleep(100)
 							}
 						}
 					}
