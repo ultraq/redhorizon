@@ -28,16 +28,23 @@ import javax.sound.sampled.AudioSystem
 class OggDecoder implements AudioDecoder {
 
 	@Override
-	int decode(InputStream inputStream) {
+	DecodeSummary decode(InputStream inputStream) {
 
-		AudioSystem.getAudioInputStream(inputStream).withCloseable { oggStream ->
-			AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
+		def (bits, channels, frequency) = AudioSystem.getAudioInputStream(inputStream).withCloseable { oggStream ->
+			return AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
 				var format = pcmStream.format
+				var bits = format.sampleSizeInBits
+				var channels = format.channels
+				var frequency = (int)format.sampleRate
+
 				// NOTE: Not streaming, but only used for a test file so OK?
-				trigger(new SampleDecodedEvent(format.sampleSizeInBits, format.channels, (int)format.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())))
+				trigger(new SampleDecodedEvent(bits, channels, frequency, ByteBuffer.wrapNative(pcmStream.readAllBytes())))
+
+				return new Tuple3<Integer, Integer, Integer>(bits, channels, frequency)
 			}
 		}
-		return 1
+
+		return new DecodeSummary(bits, channels, frequency, 1)
 	}
 
 	@Override

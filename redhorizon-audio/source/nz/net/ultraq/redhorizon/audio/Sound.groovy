@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 import java.nio.ByteBuffer
-import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * A single buffer and source pair, used for simple cases where the sound data
@@ -40,24 +39,16 @@ class Sound implements AutoCloseable {
 	Sound(String fileName, InputStream inputStream) {
 
 		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
-		int bits
-		int channels
-		int frequency
-		var samples = new LinkedBlockingQueue<ByteBuffer>()
+		List<ByteBuffer> samples = []
 		decoder.on(SampleDecodedEvent) { event ->
-			if (!bits && !channels && !frequency) {
-				bits = event.bits()
-				channels = event.channels()
-				frequency = event.frequency()
-			}
 			samples << event.sample()
 		}
-		var count = decoder.decode(inputStream)
-		while (samples.size() != count) {
+		var result = decoder.decode(inputStream)
+		while (samples.size() != result.samples()) {
 			Thread.onSpinWait()
 		}
 
-		buffer = new OpenALBuffer(bits, channels, frequency, ByteBuffer.fromBuffers(samples as ByteBuffer[]))
+		buffer = new OpenALBuffer(result.bits(), result.channels(), result.frequency(), ByteBuffer.fromBuffers(samples as ByteBuffer[]))
 		source = new OpenALSource().attachBuffer(buffer)
 	}
 

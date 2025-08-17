@@ -34,10 +34,8 @@ interface AudioDecoder extends EventTarget {
 	 * Perform the decoding process.  Each sample of data will be emitted as
 	 * {@link SampleDecodedEvent}s, and this method will block until the process
 	 * is complete.
-	 *
-	 * @return The number of samples decoded.
 	 */
-	int decode(InputStream inputStream)
+	DecodeSummary decode(InputStream inputStream)
 
 	/**
 	 * Returns the file extension commonly used by files that this decoder
@@ -50,4 +48,9 @@ interface AudioDecoder extends EventTarget {
 	 */
 	@ImmutableOptions(knownImmutables = ['sample'])
 	static record SampleDecodedEvent(int bits, int channels, int frequency, ByteBuffer sample) implements Event {}
+
+	/**
+	 * The result of the decoding process.
+	 */
+	static record DecodeSummary(int bits, int channels, int frequency, int samples) {}
 }

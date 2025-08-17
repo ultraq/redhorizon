@@ -51,8 +51,8 @@ class AudioCheck extends Specification {
 		when:
 			AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
 				AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
-					var audioFormat = pcmStream.format
-					new Sound(audioFormat.sampleSizeInBits, audioFormat.channels, (int)audioFormat.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
+					var format = pcmStream.format
+					new Sound(format.sampleSizeInBits, format.channels, (int)format.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
 						sound.play()
 						while (sound.playing) {
 							Thread.sleep(100)
