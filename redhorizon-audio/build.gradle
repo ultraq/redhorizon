@@ -30,6 +30,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
+				implementation 'nz.net.ultraq:event-horizon:0.1.0'
 				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-openal'
 

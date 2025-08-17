@@ -37,18 +37,40 @@ class AudioCheck extends Specification {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
 	}
 
-	def "Plays a sound"() {
+	AudioDevice device
+
+	def setup() {
+		device = new OpenALAudioDevice()
+	}
+
+	def cleanup() {
+		device.close()
+	}
+
+	def "Plays a sound - pre-decoded data"() {
 		when:
-			new OpenALAudioDevice().withCloseable { device ->
-				AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
-					AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
-						var audioFormat = pcmStream.format
-						new Sound(audioFormat.sampleSizeInBits, audioFormat.channels, (int)audioFormat.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
-							sound.play()
-							while (sound.playing) {
-								Thread.sleep(100)
-							}
+			AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
+				AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
+					var audioFormat = pcmStream.format
+					new Sound(audioFormat.sampleSizeInBits, audioFormat.channels, (int)audioFormat.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
+						sound.play()
+						while (sound.playing) {
+							Thread.sleep(100)
 						}
+					}
+				}
+			}
+		then:
+			notThrown(Exception)
+	}
+
+	def "Plays a sound - use SPI to decode data"() {
+		when:
+			getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg').withCloseable { inputStream ->
+				new Sound('AudioCheck.ogg', inputStream).withCloseable { sound ->
+					sound.play()
+					while (sound.playing) {
+						Thread.sleep(100)
 					}
 				}
 			}

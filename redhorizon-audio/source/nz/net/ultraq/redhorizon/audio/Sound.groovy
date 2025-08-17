@@ -16,21 +16,50 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 import java.nio.ByteBuffer
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
- * A sound, which is a convenience class that combines a buffer and source and
- * other methods so sound data can be played and controlled.
+ * A single buffer and source pair, used for simple cases where the sound data
+ * is small and will fit in a single buffer.  Best suited for sound effects.
  *
  * @author Emanuel Rabina
  */
 class Sound implements AutoCloseable {
 
-	private final Buffer buffer
 	private final Source source
+	private final Buffer buffer
+
+	/**
+	 * Constructor, sets up a new sound using its name and a stream of data.
+	 */
+	Sound(String fileName, InputStream inputStream) {
+
+		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		int bits
+		int channels
+		int frequency
+		var samples = new LinkedBlockingQueue<ByteBuffer>()
+		decoder.on(SampleDecodedEvent) { event ->
+			if (!bits && !channels && !frequency) {
+				bits = event.bits()
+				channels = event.channels()
+				frequency = event.frequency()
+			}
+			samples << event.sample()
+		}
+		var count = decoder.decode(inputStream)
+		while (samples.size() != count) {
+			Thread.onSpinWait()
+		}
+
+		buffer = new OpenALBuffer(bits, channels, frequency, ByteBuffer.fromBuffers(samples as ByteBuffer[]))
+		source = new OpenALSource().attachBuffer(buffer)
+	}
 
 	/**
 	 * Constructor, sets up a new sound using decoded sound data.
