@@ -27,6 +27,8 @@ import javax.sound.sampled.AudioSystem
  */
 class OggDecoder implements AudioDecoder {
 
+	final String[] supportedFileExtensions = ['ogg']
+
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
 
@@ -45,11 +47,5 @@ class OggDecoder implements AudioDecoder {
 		}
 
 		return new DecodeSummary(bits, channels, frequency, 1)
-	}
-
-	@Override
-	String fileExtension() {
-
-		return 'ogg'
 	}
 }

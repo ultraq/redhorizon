@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 
 /**
  * A class which can decode sound data, the encoding of which can be found by
- * the return value of the {@link #fileExtension} method.
+ * the return value of the {@link #getSupportedFileExtensions} method.
  *
  * @author Emanuel Rabina
  */
@@ -41,7 +41,7 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	 * Returns the file extension commonly used by files that this decoder
 	 * supports.
 	 */
-	String fileExtension()
+	String[] getSupportedFileExtensions()
 
 	/**
 	 * Event for the streaming of a sample of sound data.
@@ -52,5 +52,9 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	/**
 	 * The result of the decoding process.
 	 */
-	static record DecodeSummary(int bits, int channels, int frequency, int samples) {}
+	static record DecodeSummary(int bits, int channels, int frequency, int samples, String fileInformation) {
+		DecodeSummary(int bits, int channels, int frequency, int samples) {
+			this(bits, channels, frequency, samples, null)
+		}
+	}
 }

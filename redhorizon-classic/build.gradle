@@ -52,6 +52,10 @@ configure {
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+			}
 
 	createMavenPublication()
 		.withArtifacts(shadowJar, sourcesJar, groovydocJar)

@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.classic.filedecoders
 
+import nz.net.ultraq.redhorizon.audio.AudioDevice
+import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
-import java.nio.ByteBuffer
-import javax.sound.sampled.AudioFormat.Encoding
-import javax.sound.sampled.AudioSystem
-
 /**
- * A simple class to play back a sound using the audio module.
+ * Check that a sound can be played from an AUD file using the {@link AudFileDecoder}
+ * class for the {@code AudioDecoder} SPI.
  *
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class AudioCheck extends Specification {
+class AudFileDecoderTests extends Specification {
 
 	static {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
@@ -48,27 +47,10 @@ class AudioCheck extends Specification {
 		device.close()
 	}
 
-	def "Plays a sound - use low-level API"() {
+	def "Play an AUD file using the Sound SPI"() {
 		when:
-			AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
-				AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
-					var format = pcmStream.format
-					new Sound(format.sampleSizeInBits, format.channels, (int)format.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
-						sound.play()
-						while (sound.playing) {
-							Thread.sleep(100)
-						}
-					}
-				}
-			}
-		then:
-			notThrown(Exception)
-	}
-
-	def "Plays a sound - use Sound and AudioDecoder SPI"() {
-		when:
-			getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg').withBufferedStream { stream ->
-				new Sound('AudioCheck.ogg', stream).withCloseable { sound ->
+			getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/affirm1.v00').withBufferedStream { stream ->
+				new Sound('affirm1.v00', stream).withCloseable { sound ->
 					sound.play()
 					while (sound.playing) {
 						Thread.sleep(100)

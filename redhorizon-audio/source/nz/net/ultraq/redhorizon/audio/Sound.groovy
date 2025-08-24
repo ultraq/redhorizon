@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 
 /**
@@ -29,6 +32,8 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 class Sound implements AutoCloseable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
 	private final Source source
 	private final Buffer buffer
@@ -47,6 +52,11 @@ class Sound implements AutoCloseable {
 			.decode(inputStream)
 		while (samples.size() != result.samples()) {
 			Thread.onSpinWait()
+		}
+
+		var fileInformation = result.fileInformation()
+		if (fileInformation) {
+			logger.info('{}: {}', fileName, fileInformation)
 		}
 
 		buffer = new OpenALBuffer(result.bits(), result.channels(), result.frequency(), ByteBuffer.fromBuffers(samples as ByteBuffer[]))
