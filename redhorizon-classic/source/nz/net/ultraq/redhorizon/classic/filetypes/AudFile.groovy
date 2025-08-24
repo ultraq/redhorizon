@@ -140,7 +140,7 @@ class AudFile implements SoundFile, Streaming {
 	 * Decode AUD file sound data and emit as {@link StreamingSampleEvent}s.
 	 */
 	@TupleConstructor
-	class AudFileDecoder implements Runnable, EventTarget {
+	class AudFileDecoder implements Runnable, EventTarget<AudFileDecoder> {
 
 		final boolean rateLimit
 

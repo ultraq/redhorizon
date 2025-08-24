@@ -27,7 +27,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
  *
  * @author Emanuel Rabina
  */
-interface Application extends EventTarget {
+interface Application extends EventTarget<Application> {
 
 	/**
 	 * Return the name of the application.  This is displayed in the window title,

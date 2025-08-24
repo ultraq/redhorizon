@@ -23,5 +23,5 @@ import nz.net.ultraq.eventhorizon.EventTarget
  *
  * @author Emanuel Rabina
  */
-interface InputSource extends EventTarget {
+interface InputSource extends EventTarget<InputSource> {
 }

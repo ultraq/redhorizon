@@ -28,7 +28,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface AudioDecoder extends EventTarget {
+interface AudioDecoder extends EventTarget<AudioDecoder> {
 
 	/**
 	 * Perform the decoding process.  Each sample of data will be emitted as

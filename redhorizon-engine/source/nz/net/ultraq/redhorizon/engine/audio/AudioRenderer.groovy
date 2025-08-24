@@ -31,7 +31,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface AudioRenderer extends AutoCloseable, EventTarget {
+interface AudioRenderer extends AutoCloseable, EventTarget<AudioRenderer> {
 
 	/**
 	 * Creates and fills a sound buffer with the given data.

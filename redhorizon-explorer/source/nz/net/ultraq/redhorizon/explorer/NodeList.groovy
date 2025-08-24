@@ -34,7 +34,7 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  *
  * @author Emanuel Rabina
  */
-class NodeList implements EventTarget, ImGuiChrome {
+class NodeList implements EventTarget<NodeList>, ImGuiChrome {
 
 	Scene scene
 	private boolean focused

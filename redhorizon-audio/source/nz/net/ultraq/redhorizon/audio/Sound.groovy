@@ -38,12 +38,13 @@ class Sound implements AutoCloseable {
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
-		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 		List<ByteBuffer> samples = []
-		decoder.on(SampleDecodedEvent) { event ->
-			samples << event.sample()
-		}
-		var result = decoder.decode(inputStream)
+		var result = AudioDecoders
+			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+			.on(SampleDecodedEvent) { event ->
+				samples << event.sample()
+			}
+			.decode(inputStream)
 		while (samples.size() != result.samples()) {
 			Thread.onSpinWait()
 		}

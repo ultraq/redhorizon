@@ -146,7 +146,7 @@ class Animation extends Node<Animation> implements GameObject, GraphicsElement, 
 	/**
 	 * Interface for any source from which frames of animation can be obtained.
 	 */
-	static interface AnimationSource extends EventTarget, SceneEvents {
+	static interface AnimationSource extends EventTarget<AnimationSource>, SceneEvents {
 
 		/**
 		 * Called during {@code render}, return the texture to be used for rendering

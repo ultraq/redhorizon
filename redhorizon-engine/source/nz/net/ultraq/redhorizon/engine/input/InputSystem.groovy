@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.eventhorizon.RemovalToken
 import nz.net.ultraq.redhorizon.engine.EngineSystem
 import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
@@ -38,7 +39,7 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class InputSystem extends EngineSystem implements InputRequests, EventTarget {
+class InputSystem extends EngineSystem implements InputRequests, EventTarget<InputSystem> {
 
 	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
 
@@ -49,11 +50,12 @@ class InputSystem extends EngineSystem implements InputRequests, EventTarget {
 	@Override
 	RemoveControlFunction addControl(Control control) {
 
-		var removeEventFunction = on(control.event, control)
+		var removalToken = new RemovalToken()
+		on(control.event, removalToken, control)
 		trigger(new ControlAddedEvent(control))
 
 		return { ->
-			removeEventFunction.remove()
+			removalToken.remove()
 			trigger(new ControlRemovedEvent(control))
 		}
 	}

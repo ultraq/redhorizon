@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.audio
 
 /**
- * Identifies a resource that can only be created/deleted via the audio system
- * and its thread.
+ * Identifies a low-level audio resource that can only be created/deleted via
+ * the audio system and its thread.
  *
  * @author Emanuel Rabina
  */

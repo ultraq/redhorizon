@@ -30,7 +30,7 @@ import java.util.concurrent.RunnableFuture
  *
  * @author Emanuel Rabina
  */
-class StreamingDecoder extends FutureTask<Void> implements EventTarget {
+class StreamingDecoder extends FutureTask<Void> implements EventTarget<StreamingDecoder> {
 
 	/**
 	 * Constructor, create a decoder with the underlying {@code Runnable},

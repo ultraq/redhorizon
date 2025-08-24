@@ -157,7 +157,7 @@ class WsaFile implements AnimationFile, Streaming {
 	 * Decode WSA file frame data and emit as {@link StreamingFrameEvent}s.
 	 */
 	@TupleConstructor
-	class WsaFileDecoder implements Runnable, EventTarget {
+	class WsaFileDecoder implements Runnable, EventTarget<WsaFileDecoder> {
 
 		final boolean rateLimit
 

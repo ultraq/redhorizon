@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Engine implements EventTarget {
+class Engine implements EventTarget<Engine> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine)
 

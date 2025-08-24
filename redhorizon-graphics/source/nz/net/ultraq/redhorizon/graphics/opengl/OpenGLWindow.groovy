@@ -36,7 +36,7 @@ import static org.lwjgl.system.MemoryUtil.NULL
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindow implements Window, EventTarget {
+class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 

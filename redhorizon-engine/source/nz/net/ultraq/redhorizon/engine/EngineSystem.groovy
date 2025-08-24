@@ -34,7 +34,7 @@ import java.util.concurrent.CyclicBarrier
  *
  * @author Emanuel Rabina
  */
-abstract class EngineSystem implements Runnable, EventTarget {
+abstract class EngineSystem implements Runnable, EventTarget<EngineSystem> {
 
 	private static final Logger logger = LoggerFactory.getLogger(EngineSystem)
 

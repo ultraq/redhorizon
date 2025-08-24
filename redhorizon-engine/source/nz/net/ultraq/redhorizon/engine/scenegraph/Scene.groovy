@@ -46,7 +46,7 @@ import java.util.concurrent.Semaphore
  *
  * @author Emanuel Rabina
  */
-class Scene implements EventTarget {
+class Scene implements EventTarget<Scene> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Scene)
 

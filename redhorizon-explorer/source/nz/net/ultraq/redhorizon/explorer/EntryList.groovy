@@ -39,7 +39,7 @@ import java.text.DecimalFormat
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = 'entries')
-class EntryList implements EventTarget, ImGuiChrome {
+class EntryList implements EventTarget<EntryList>, ImGuiChrome {
 
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 

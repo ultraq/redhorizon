@@ -28,7 +28,7 @@ import ch.qos.logback.core.encoder.Encoder
  *
  * @author Emanuel Rabina
  */
-class ImGuiLoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements EventTarget {
+class ImGuiLoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements EventTarget<ImGuiLoggingAppender> {
 
 	static ImGuiLoggingAppender instance
 

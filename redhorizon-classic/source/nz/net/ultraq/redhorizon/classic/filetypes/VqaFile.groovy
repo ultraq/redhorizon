@@ -224,7 +224,7 @@ class VqaFile implements VideoFile {
 	 * Decode VQA file frame and sound data and emit as {@link StreamingFrameEvent}s
 	 * and {@link StreamingSampleEvent}s respectively.
 	 */
-	class VqaFileDecoder implements Runnable, EventTarget {
+	class VqaFileDecoder implements Runnable, EventTarget<VqaFileDecoder> {
 
 		final boolean rateLimit
 

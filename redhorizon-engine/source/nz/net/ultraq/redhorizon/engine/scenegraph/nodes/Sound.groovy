@@ -129,7 +129,7 @@ class Sound extends Node<Sound> implements AudioElement, Playable {
 	/**
 	 * Interface for any source from which sound data can be obtained.
 	 */
-	static interface SoundSource extends EventTarget, SceneEvents {
+	static interface SoundSource extends EventTarget<SoundSource>, SceneEvents {
 
 		/**
 		 * Called during {@code render}, prepare the sound source for playback.

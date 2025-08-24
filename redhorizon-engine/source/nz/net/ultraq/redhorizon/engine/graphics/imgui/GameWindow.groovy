@@ -39,7 +39,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
-class GameWindow implements ImGuiChrome, EventTarget {
+class GameWindow implements ImGuiChrome, EventTarget<GameWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GameWindow)
 

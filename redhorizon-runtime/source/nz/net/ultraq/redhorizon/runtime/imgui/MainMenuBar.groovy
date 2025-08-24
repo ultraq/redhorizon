@@ -27,7 +27,7 @@ import imgui.ImGui
  *
  * @author Emanuel Rabina
  */
-class MainMenuBar implements ImGuiChrome, EventTarget {
+class MainMenuBar implements ImGuiChrome, EventTarget<MainMenuBar> {
 
 	private final List<MenuItem> optionsMenu = []
 

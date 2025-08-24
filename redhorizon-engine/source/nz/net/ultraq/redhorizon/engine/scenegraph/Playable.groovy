@@ -23,7 +23,7 @@ import nz.net.ultraq.eventhorizon.EventTarget
  *
  * @author Emanuel Rabina
  */
-trait Playable extends EventTarget {
+trait Playable extends EventTarget<Playable> {
 
 	private boolean paused
 	private boolean playing
