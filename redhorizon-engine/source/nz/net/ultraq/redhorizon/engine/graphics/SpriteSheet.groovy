@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+
 import org.joml.primitives.Rectanglef
 
 import groovy.transform.TupleConstructor

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
 
 /**
- * Identifies a resource that can only be created/deleted via the graphics
- * system and its thread.
+ * Identifies a low-level graphics resource that can only be created/deleted via
+ * the graphics system and its thread.
  *
  * @author Emanuel Rabina
  */
