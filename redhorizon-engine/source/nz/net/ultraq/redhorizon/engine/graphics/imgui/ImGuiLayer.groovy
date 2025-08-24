@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import imgui.ImFont
 import imgui.ImFontConfig
@@ -94,8 +95,8 @@ class ImGuiLayer implements AutoCloseable, InputSource {
 		addChrome(gameWindow)
 
 		window.on(KeyEvent) { event ->
-			if (event.action == GLFW_PRESS) {
-				switch (event.key) {
+			if (event.action() == GLFW_PRESS) {
+				switch (event.key()) {
 					case GLFW_KEY_I -> drawUiElements = !drawUiElements
 					case GLFW_KEY_O -> drawOverlays = !drawOverlays
 				}
