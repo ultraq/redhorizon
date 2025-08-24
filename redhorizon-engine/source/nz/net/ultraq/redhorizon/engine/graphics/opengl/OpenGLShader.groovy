@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.Texture
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc

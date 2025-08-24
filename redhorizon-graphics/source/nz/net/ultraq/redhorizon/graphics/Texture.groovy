@@ -14,34 +14,20 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
-
-import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+package nz.net.ultraq.redhorizon.graphics
 
 /**
- * Representation of a single texture to render.
+ * An image to draw on a mesh.
  *
  * @author Emanuel Rabina
  */
-abstract class Texture implements GraphicsResource {
-
-	final int width
-	final int height
-	final Dimension size
+interface Texture extends GraphicsResource {
 
 	/**
-	 * Constructor, create a new texture of the given dimensions.
-	 *
-	 * @param width
-	 * @param height
+	 * Enable the use of this texture for the next rendering commands at the
+	 * currently active texture slot.
 	 */
-	Texture(int width, int height) {
-
-		this.width = width
-		this.height = height
-		size = new Dimension(width, height)
-	}
+	void bind()
 
 	/**
 	 * Enable the use of this texture for the next rendering commands at a given
@@ -51,5 +37,15 @@ abstract class Texture implements GraphicsResource {
 	 *   The texture unit to bind this texture to.  If not specified, then the
 	 *   currently active texture slot is used.
 	 */
-	abstract void bind(int textureUnit = -1)
+	void bind(int textureUnit)
+
+	/**
+	 * Return the height of the texture.
+	 */
+	int getHeight()
+
+	/**
+	 * Return the width of the texture.
+	 */
+	int getWidth()
 }

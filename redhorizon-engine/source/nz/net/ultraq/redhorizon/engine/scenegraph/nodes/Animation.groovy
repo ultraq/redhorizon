@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
@@ -37,6 +36,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
+import nz.net.ultraq.redhorizon.graphics.Texture
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.CompletableFuture

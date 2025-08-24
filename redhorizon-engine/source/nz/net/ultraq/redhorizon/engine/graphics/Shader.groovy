@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+import nz.net.ultraq.redhorizon.graphics.Texture
 
 import org.joml.Matrix4fc
 

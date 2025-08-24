@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.graphics.Texture
 import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
 
 import org.joml.primitives.Rectanglef

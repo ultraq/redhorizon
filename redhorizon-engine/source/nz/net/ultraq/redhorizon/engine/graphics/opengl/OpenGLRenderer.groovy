@@ -32,7 +32,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Uniform
@@ -44,6 +43,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
 import org.joml.Matrix4fc
 import org.joml.Vector2f
@@ -276,7 +277,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	@Override
 	Texture createTexture(int width, int height, ColourFormat format, ByteBuffer data) {
 
-		var texture = new OpenGLTexture(width, height, format, data)
+		var texture = new OpenGLTexture(width, height, format.value, data)
 		trigger(new TextureCreatedEvent(texture))
 		return texture
 	}

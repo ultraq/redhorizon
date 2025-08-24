@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.graphics.Texture
+
 /**
  * A material defines special properties to how a shape should be rendered.
  * These are often uniform values that go into configuring a shader, stored as a

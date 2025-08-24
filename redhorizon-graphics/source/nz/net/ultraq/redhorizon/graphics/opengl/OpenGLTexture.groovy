@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Texture
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.*
+import nz.net.ultraq.redhorizon.graphics.Texture
 
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL13C.GL_TEXTURE0
@@ -33,21 +31,20 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenGLTexture extends Texture {
+class OpenGLTexture implements Texture {
 
 	final int textureId
+	final int width
+	final int height
 
 	/**
 	 * Constructor, builds an empty OpenGL texture whose data will be filled in
 	 * later.
-	 *
-	 * @param width
-	 * @param height
-	 * @param filter
 	 */
 	OpenGLTexture(int width, int height, boolean filter = false) {
 
-		super(width, height)
+		this.width = width
+		this.height = height
 
 		textureId = glGenTextures()
 		glBindTexture(GL_TEXTURE_2D, textureId)
@@ -57,34 +54,30 @@ class OpenGLTexture extends Texture {
 	}
 
 	/**
-	 * Constructor, builds an OpenGL texture from an image bytes.
-	 *
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param data
+	 * Constructor, builds an OpenGL texture from existing image data.
 	 */
-	OpenGLTexture(int width, int height, ColourFormat format, ByteBuffer data) {
+	OpenGLTexture(int width, int height, int colourChannels, ByteBuffer data) {
 
-		super(width, height)
+		this.width = width
+		this.height = height
 
 		textureId = glGenTextures()
 		glBindTexture(GL_TEXTURE_2D, textureId)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-		var colourFormat = switch (format) {
-			case FORMAT_INDEXED -> GL_RED
-			case FORMAT_RGB -> GL_RGB
-			case FORMAT_RGBA -> GL_RGBA
-			default -> 0
+		var colourFormat = switch (colourChannels) {
+			case 1 -> GL_RED
+			case 3 -> GL_RGB
+			case 4 -> GL_RGBA
+			default -> throw new IllegalArgumentException("Colour channels must be 1, 3 or 4")
 		}
 		var textureBuffer = stackPush().withCloseable { stack ->
 			return stack.malloc(data.remaining())
 				.put(data.array(), data.position(), data.remaining())
 				.flip()
 		}
-		var matchesAlignment = (width * format.value) % 4 == 0
+		var matchesAlignment = (width * colourChannels) % 4 == 0
 		if (!matchesAlignment) {
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 		}
@@ -101,7 +94,6 @@ class OpenGLTexture extends Texture {
 
 		return glIsTexture(textureId)
 	}
-
 
 	@Override
 	void bind(int textureUnit = -1) {
