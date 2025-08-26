@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
+
+import org.joml.Vector2f
+
+import groovy.transform.TupleConstructor
 
 /**
- * Interface detailing how a uniform value in a shader is set for a given
- * material.
+ * A description of an input to a shader, whose data comes from a mesh.
  *
  * @author Emanuel Rabina
  */
-interface Uniform<M extends Material> {
+@TupleConstructor
+enum Attribute {
 
-	/**
-	 * Apply the uniform value to the shader using the given material and window
-	 * context.
-	 */
-	void apply(Shader shader, M material, Window window)
+	// @formatter:off
+	POSITION    ('position',   0, Vector2f.FLOATS),
+	COLOUR      ('colour',     1, Colour.FLOATS),
+	TEXTURE_UVS ('textureUVs', 2, Vector2f.FLOATS)
+	// @formatter:on
+
+	final String name
+	final int location
+	final int size
 }

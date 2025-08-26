@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.Attribute
+import nz.net.ultraq.redhorizon.graphics.Uniform
 
 /**
  * Configuration for the Sharp Upscaling shader.

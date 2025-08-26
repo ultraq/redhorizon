@@ -32,6 +32,7 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-input')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-glfw'
@@ -43,6 +44,7 @@ configure {
 					runtimeOnly "org.lwjgl:lwjgl-opengl::${natives}"
 				}
 			}
+			.expandExtensionModuleVersion()
 		.configureVerification()
 			.withTestDependencies() {
 				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"

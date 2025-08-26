@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.Material
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.Uniform
 
 import groovy.transform.PackageScope
 
@@ -33,7 +33,7 @@ import groovy.transform.PackageScope
 class Uniforms {
 
 	static final Uniform framebufferUniform = { Shader shader, Material material, Window window ->
-		shader.setUniformTexture('framebuffer', 0, material.texture)
+		shader.setUniform('framebuffer', 0, material.texture)
 	}
 
 	static final Uniform textureTargetSizeUniform = { Shader shader, Material material, Window window ->

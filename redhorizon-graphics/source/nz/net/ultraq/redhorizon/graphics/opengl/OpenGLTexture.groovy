@@ -88,7 +88,7 @@ class OpenGLTexture implements Texture {
 	}
 
 	/**
-	 * A texture is also considered falsey if it has since been deleted.
+	 * A texture is also considered falsy if it has since been deleted.
 	 */
 	boolean asBoolean() {
 

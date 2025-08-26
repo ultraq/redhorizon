@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
-
-import nz.net.ultraq.redhorizon.graphics.Texture
+package nz.net.ultraq.redhorizon.graphics
 
 /**
  * A material defines special properties to how a shape should be rendered.

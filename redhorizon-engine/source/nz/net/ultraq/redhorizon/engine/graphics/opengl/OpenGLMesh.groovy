@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
+import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Colour
 
 import org.joml.Vector2f

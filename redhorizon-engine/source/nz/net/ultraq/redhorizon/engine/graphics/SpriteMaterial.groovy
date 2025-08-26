@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.graphics.Material
+
 /**
  * A material containing attributes for rendering sprites.
  *

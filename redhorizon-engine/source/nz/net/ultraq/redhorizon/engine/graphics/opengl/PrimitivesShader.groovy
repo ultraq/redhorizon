@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
+import nz.net.ultraq.redhorizon.graphics.Attribute
 
 /**
  * A simple outline shader for primitive objects.

@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.graphics.Attribute
+import nz.net.ultraq.redhorizon.graphics.Uniform
+
 /**
  * The configuration for a shader program, used for building shaders with the
  * renderer.

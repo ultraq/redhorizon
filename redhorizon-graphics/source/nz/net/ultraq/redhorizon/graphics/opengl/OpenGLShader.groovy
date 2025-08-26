@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.Attribute
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.Uniform
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -38,21 +38,26 @@ import java.nio.Buffer
  *
  * @author Emanuel Rabina
  */
-class OpenGLShader extends Shader {
+class OpenGLShader implements Shader {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
 	private static int lastProgramId = 0
 
+	final String name
+	final Attribute[] attributes
+	final Uniform[] uniforms
 	final int programId
 	private final Map<String, Buffer> uniformBuffers = [:]
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
-	 * shaders.
+	 * shader source.
 	 */
 	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms) {
 
-		super(name, attributes, uniforms)
+		this.name = name
+		this.attributes = attributes
+		this.uniforms = uniforms
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation
@@ -124,36 +129,50 @@ class OpenGLShader extends Shader {
 	}
 
 	@Override
-	void setUniform(String name, Object data) {
+	void setUniform(String name, float value) {
+
+		glUniform1f(getUniformLocation(name), value)
+	}
+
+	@Override
+	void setUniform(String name, float[] value) {
 
 		var uniformLocation = getUniformLocation(name)
-
 		stackPush().withCloseable { stack ->
-			switch (data) {
-				case Float -> glUniform1f(uniformLocation, data)
-				case float[] -> {
-					var floatData = (float[])data
-					var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(floatData.length) }
-					buffer.put(0, floatData)
-					switch (floatData.length) {
-						case 2 -> glUniform2fv(uniformLocation, buffer)
-						default -> glUniform1fv(uniformLocation, buffer)
-					}
-				}
-				case Integer -> glUniform1i(uniformLocation, data)
-				case int[] -> glUniform1iv(uniformLocation, (int[])data)
-				case Matrix4fc -> {
-					var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(Matrix4f.FLOATS) }
-					data.get(buffer)
-					glUniformMatrix4fv(uniformLocation, false, buffer)
-				}
-				default -> throw new UnsupportedOperationException("Data type of ${data.class.simpleName} not supported")
+			var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(value.length) }
+			buffer.put(0, value)
+			switch (value.length) {
+				case 2 -> glUniform2fv(uniformLocation, buffer)
+				default -> glUniform1fv(uniformLocation, buffer)
 			}
+			glUniform1fv(getUniformLocation(name), value)
 		}
 	}
 
 	@Override
-	void setUniformTexture(String name, int textureUnit, Texture texture) {
+	void setUniform(String name, int value) {
+
+		glUniform1i(getUniformLocation(name), value)
+	}
+
+	@Override
+	void setUniform(String name, int[] value) {
+
+		glUniform1iv(getUniformLocation(name), value)
+	}
+
+	@Override
+	void setUniform(String name, Matrix4fc value) {
+
+		stackPush().withCloseable { stack ->
+			var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(Matrix4f.FLOATS) }
+			value.get(buffer)
+			glUniformMatrix4fv(getUniformLocation(name), false, buffer)
+		}
+	}
+
+	@Override
+	void setUniform(String name, int textureUnit, Texture texture) {
 
 		glUniform1i(getUniformLocation(name), textureUnit)
 		texture.bind(textureUnit)

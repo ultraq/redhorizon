@@ -34,7 +34,7 @@ class AudioDecoders {
 	static AudioDecoder forFileExtension(String fileExtension) {
 
 		var serviceLoader = ServiceLoader.load(AudioDecoder)
-		for (AudioDecoder decoder : serviceLoader) {
+		for (var decoder : serviceLoader) {
 			if (fileExtension.toLowerCase() in decoder.supportedFileExtensions) {
 				return decoder
 			}

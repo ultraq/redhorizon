@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
-import nz.net.ultraq.redhorizon.engine.graphics.Shader
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
-import nz.net.ultraq.redhorizon.engine.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.Attribute
+import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.Uniform
 
 /**
  * A simple 2D sprite shader.
@@ -35,7 +35,7 @@ class SpriteShader extends ShaderConfig {
 	final Attribute[] attributes = [Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS]
 	final Uniform[] uniforms = [
 		{ Shader shader, SpriteMaterial material, window ->
-			shader.setUniformTexture('mainTexture', 0, material.texture)
+			shader.setUniform('mainTexture', 0, material.texture)
 		},
 		{ Shader shader, SpriteMaterial material, window ->
 			if (material.spriteMetadataBuffer) {

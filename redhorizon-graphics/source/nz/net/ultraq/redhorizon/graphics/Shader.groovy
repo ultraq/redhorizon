@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
-
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
-import nz.net.ultraq.redhorizon.graphics.Texture
+package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Matrix4fc
-
-import groovy.transform.TupleConstructor
 
 /**
  * A shader is a small program that runs on the GPU.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Shader implements GraphicsResource {
+interface Shader extends GraphicsResource {
 
 	static final String UNIFORM_MODEL = 'model'
-
-	final String name
-	final Attribute[] attributes
-	final Uniform[] uniforms
 
 	/**
 	 * Update a shader's uniforms using the given context.
 	 */
-	void applyUniforms(Matrix4fc transform, Material material, Window window) {
+	default void applyUniforms(Matrix4fc transform, Material material, Window window) {
 
 		// Model uniform is universal, so bake this here
 		setUniform(UNIFORM_MODEL, transform)
@@ -49,15 +39,49 @@ abstract class Shader implements GraphicsResource {
 	}
 
 	/**
-	 * Apply a data uniform to the shader.  If {@code data} is an array, it can be
-	 * used to determine the shader type (eg: 2 floats = vec2).
+	 * The attribute values attached to this shader.
 	 */
-	abstract void setUniform(String name, Object data)
+	Attribute[] getAttributes()
+
+	/**
+	 * The name of this shader.
+	 */
+	String getName()
+
+	/**
+	 * The uniform values attached to this shader.
+	 */
+	Uniform[] getUniforms()
+
+	/**
+	 * Apply {@code float} data to a uniform in this shader.
+	 */
+	void setUniform(String name, float value)
+
+	/**
+	 * Apply {@code float[]} data to a uniform in this shader.
+	 */
+	void setUniform(String name, float[] value)
+
+	/**
+	 * Apply {@code int} data to a uniform in this shader.
+	 */
+	void setUniform(String name, int value)
+
+	/**
+	 * Apply {@code int[]} data to a uniform in this shader.
+	 */
+	void setUniform(String name, int[] value)
+
+	/**
+	 * Apply {@code Matrix4fc} data to a uniform in this shader.
+	 */
+	void setUniform(String name, Matrix4fc value)
 
 	/**
 	 * Apply a texture uniform using the given texture ID.
 	 */
-	abstract void setUniformTexture(String name, int textureUnit, Texture texture)
+	void setUniform(String name, int textureUnit, Texture texture)
 
 	/**
 	 * Return the name of this shader program.
@@ -65,9 +89,9 @@ abstract class Shader implements GraphicsResource {
 	 * @return
 	 */
 	@Override
-	String toString() {
+	default String toString() {
 
-		def string = "${name} shader program"
+		var string = "${name} shader program"
 		if (uniforms) {
 			string += " (${uniforms.length}, uniform(s))"
 		}
@@ -77,5 +101,5 @@ abstract class Shader implements GraphicsResource {
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
-	abstract void use()
+	void use()
 }
