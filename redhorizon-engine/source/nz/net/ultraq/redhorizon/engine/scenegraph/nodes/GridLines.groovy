@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -47,11 +47,11 @@ class GridLines extends Node<GridLines> {
 		}
 
 		// TODO: Add support for vertices with different colours
-		var cellLines = new Primitive(MeshType.LINES, new Colour('GridLines-Grey', 0.6, 0.6, 0.6), lines as Vector2f[])
+		var cellLines = new Primitive(Type.LINES, new Colour('GridLines-Grey', 0.6, 0.6, 0.6), lines as Vector2f[])
 		cellLines.name = 'Step lines'
 		addChild(cellLines)
 
-		var originLines = new Primitive(MeshType.LINES, new Colour('GridLines-DarkGrey', 0.2, 0.2, 0.2),
+		var originLines = new Primitive(Type.LINES, new Colour('GridLines-DarkGrey', 0.2, 0.2, 0.2),
 			new Vector2f(range.minX, 0), new Vector2f(range.maxX, 0),
 			new Vector2f(0, range.minX), new Vector2f(0, range.maxX)
 		)

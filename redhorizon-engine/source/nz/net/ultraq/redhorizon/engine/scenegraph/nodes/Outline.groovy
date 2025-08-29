@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -31,7 +31,7 @@ class Outline extends Primitive {
 
 	Outline(Rectanglef bounds, Colour colour, boolean dynamic = false) {
 
-		super(MeshType.LINE_LOOP, colour, bounds as Vector2f[], dynamic)
+		super(Type.LINE_LOOP, colour, bounds as Vector2f[], dynamic)
 		this.bounds { ->
 			set(bounds)
 		}

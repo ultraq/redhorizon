@@ -39,11 +39,6 @@ interface Shader extends GraphicsResource {
 	}
 
 	/**
-	 * The attribute values attached to this shader.
-	 */
-	Attribute[] getAttributes()
-
-	/**
 	 * The name of this shader.
 	 */
 	String getName()

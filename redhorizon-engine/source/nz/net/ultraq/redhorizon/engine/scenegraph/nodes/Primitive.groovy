@@ -16,18 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.scenegraph.nodes
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 
 import org.joml.Vector2f
@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture
  */
 class Primitive extends Node<Primitive> implements GraphicsElement {
 
-	final MeshType type
+	final Type type
 	final Colour colour
 	Vector2f[] points
 	final boolean dynamic
@@ -55,7 +55,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	 * method.  The first describes the line start, the second describes the line
 	 * end.
 	 */
-	Primitive(MeshType type, Colour colour, Vector2f[] points, boolean dynamic = false) {
+	Primitive(Type type, Colour colour, Vector2f[] points, boolean dynamic = false) {
 
 		this.type = type
 		this.colour = colour
@@ -70,7 +70,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 
 		return CompletableFuture.allOf(
 			scene
-				.requestCreateOrGet(type == MeshType.TRIANGLES ?
+				.requestCreateOrGet(type == Type.TRIANGLES ?
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour, dynamic,
 						[0, 1, 3, 1, 2, 3] as int[]) :
 					new MeshRequest(type, new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR), this.points, colour, dynamic))
@@ -116,7 +116,7 @@ class Primitive extends Node<Primitive> implements GraphicsElement {
 	void render(GraphicsRenderer renderer) {
 
 		if (mesh && pointsChanged) {
-			mesh.updateVertices(points)
+			mesh.updateVertexData(points)
 			pointsChanged = false
 		}
 

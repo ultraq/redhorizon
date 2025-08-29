@@ -27,12 +27,11 @@ import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
@@ -44,8 +43,9 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 
 import org.joml.Vector2f
@@ -200,10 +200,10 @@ class Map extends Node<Map> {
 
 		MapLines() {
 
-			addChild(new Primitive(MeshType.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
+			addChild(new Primitive(Type.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
 				name = "XY axis (red)"
 			})
-			addChild(new Primitive(MeshType.LINE_LOOP, Colour.YELLOW.withAlpha(0.8), boundary as Vector2f[]).tap {
+			addChild(new Primitive(Type.LINE_LOOP, Colour.YELLOW.withAlpha(0.8), boundary as Vector2f[]).tap {
 				name = "Map boundary (yellow)"
 			})
 		}
@@ -360,7 +360,7 @@ class Map extends Node<Map> {
 					.thenComposeAsync { meshData ->
 						def (allVertices, allTextureUVs, allIndices) = meshData
 						return scene
-							.requestCreateOrGet(new MeshRequest(MeshType.TRIANGLES,
+							.requestCreateOrGet(new MeshRequest(Type.TRIANGLES,
 								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
 								allVertices, Colour.WHITE, allTextureUVs, false, allIndices))
 							.thenAcceptAsync { newMesh ->

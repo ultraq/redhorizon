@@ -17,49 +17,26 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 
 import org.joml.Vector2f
 
 import groovy.transform.TupleConstructor
 
 /**
- * A mesh defines the shape of an object, and so contain data on points and
- * edges.
+ * A description of an input to a shader, whose data comes from a mesh.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-abstract class Mesh implements GraphicsResource {
+@TupleConstructor
+enum Attribute {
 
-	final int vertexType
-	final VertexBufferLayout layout
-	final Vector2f[] vertices
-	final Colour colour
-	final Vector2f[] textureUVs
-	final boolean dynamic
-	final int[] index
+	// @formatter:off
+	POSITION    ('position',   0, Vector2f.FLOATS),
+	COLOUR      ('colour',     1, Colour.FLOATS),
+	TEXTURE_UVS ('textureUVs', 2, Vector2f.FLOATS)
+	// @formatter:on
 
-	/**
-	 * Use this mesh in upcoming render operations.
-	 */
-	abstract void bind()
-
-	/**
-	 * Update the vertices part of the mesh data.
-	 *
-	 * This is only allowed on meshes that have been configured to be
-	 * {@link #dynamic}.
-	 */
-	abstract void updateVertices(Vector2f[] vertices)
-
-	/**
-	 * The types of mesh that can be created.
-	 */
-	static enum MeshType {
-
-		LINE_LOOP,
-		LINES,
-		TRIANGLES
-	}
+	final String name
+	final int location
+	final int size
 }

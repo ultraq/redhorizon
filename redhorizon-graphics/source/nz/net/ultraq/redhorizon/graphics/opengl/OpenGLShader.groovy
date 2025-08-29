@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.Vertex
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -30,7 +30,6 @@ import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
-import groovy.transform.PackageScope
 import java.nio.Buffer
 
 /**
@@ -44,7 +43,6 @@ class OpenGLShader implements Shader {
 	private static int lastProgramId = 0
 
 	final String name
-	final Attribute[] attributes
 	final Uniform[] uniforms
 	final int programId
 	private final Map<String, Buffer> uniformBuffers = [:]
@@ -53,10 +51,9 @@ class OpenGLShader implements Shader {
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shader source.
 	 */
-	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Attribute[] attributes, Uniform[] uniforms) {
+	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform[] uniforms) {
 
 		this.name = name
-		this.attributes = attributes
 		this.uniforms = uniforms
 
 		/*
@@ -87,8 +84,8 @@ class OpenGLShader implements Shader {
 			glAttachShader(programId, fragmentShaderId)
 
 			// Control binding points for attributes in our shaders
-			attributes.each { attribute ->
-				glBindAttribLocation(programId, attribute.location, attribute.name)
+			Vertex.LAYOUT.each { attribute ->
+				glBindAttribLocation(programId, attribute.location(), attribute.name())
 			}
 
 			glLinkProgram(programId)
@@ -180,18 +177,6 @@ class OpenGLShader implements Shader {
 
 	@Override
 	void use() {
-
-		useProgram(programId)
-	}
-
-	/**
-	 * Set to use the OpenGL shader program with the given ID.
-	 * <p>
-	 * This is only used by the {@link OpenGLRenderer} to reset the program used
-	 * so that program state doesn't bleed into the next one.
-	 */
-	@PackageScope
-	static void useProgram(int programId) {
 
 		if (programId != lastProgramId) {
 			glUseProgram(programId)

@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.TextureRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
@@ -35,6 +34,7 @@ import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
+import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 

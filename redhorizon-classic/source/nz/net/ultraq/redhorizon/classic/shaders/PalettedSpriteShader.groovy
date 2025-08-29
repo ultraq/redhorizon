@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.classic.shaders
 
 import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Uniform
 

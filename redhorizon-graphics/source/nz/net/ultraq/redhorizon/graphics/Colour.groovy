@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor
 
 /**
@@ -24,6 +25,8 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor
+@EqualsAndHashCode
+// TODO: If we're keeping this immutable, it should be a record
 class Colour {
 
 	/**

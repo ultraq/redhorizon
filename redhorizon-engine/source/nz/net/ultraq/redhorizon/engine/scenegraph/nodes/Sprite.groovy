@@ -22,7 +22,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRequest
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.opengl.Shaders
@@ -31,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.filetypes.ImageFile
 import nz.net.ultraq.redhorizon.filetypes.ImagesFile
+import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Shader
 
 import java.nio.ByteBuffer

@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -43,7 +43,7 @@ class Palette extends Node<Palette> {
 			var g = colour[1] & 0xff
 			var b = colour[2] & 0xff
 			var swatch = new Primitive(
-				MeshType.TRIANGLES,
+				Type.TRIANGLES,
 				new Colour("Palette-${i}", r / 256, g / 256, b / 256),
 				new Rectanglef(0, 0, SWATCH_WIDTH, SWATCH_HEIGHT) as Vector2f[]
 			)

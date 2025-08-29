@@ -17,11 +17,12 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 
@@ -49,14 +50,14 @@ interface GraphicsRequests {
 	static record ShaderRequest(ShaderConfig shaderConfig) implements Request<Shader> {}
 
 	@ImmutableOptions(knownImmutables = ['layout', 'colour'])
-	static record MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour,
+	static record MeshRequest(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour,
 		Vector2f[] textureUVs, boolean dynamic, int[] index) implements Request<Mesh> {
 
-		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, boolean dynamic, int[] index) {
+		MeshRequest(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, boolean dynamic, int[] index) {
 			this(type, layout, vertices, colour, null, dynamic, index)
 		}
 
-		MeshRequest(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, boolean dynamic) {
+		MeshRequest(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, boolean dynamic) {
 			this(type, layout, vertices, colour, null, dynamic, null)
 		}
 	}

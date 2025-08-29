@@ -18,12 +18,12 @@ package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Uniform
@@ -64,7 +64,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget<GraphicsRenderer> 
 	/**
 	 * Create a mesh without indices or textureUVs.
 	 */
-	default Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
+	default Mesh createMesh(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour) {
 
 		return createMesh(type, layout, vertices, colour, null, false, null)
 	}
@@ -72,7 +72,7 @@ interface GraphicsRenderer extends AutoCloseable, EventTarget<GraphicsRenderer> 
 	/**
 	 * Create a mesh with all of the mesh parts.
 	 */
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
+	Mesh createMesh(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
 		boolean dynamic, int[] index)
 
 	/**

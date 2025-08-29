@@ -15,26 +15,37 @@
  */
 
 package nz.net.ultraq.redhorizon.graphics
-
-import org.joml.Vector2f
-
-import groovy.transform.TupleConstructor
-
 /**
- * A description of an input to a shader, whose data comes from a mesh.
+ * A mesh defines the shape of an object, and so contain data on points and
+ * edges.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum Attribute {
+interface Mesh extends GraphicsResource {
 
-	// @formatter:off
-	POSITION    ('position',   0, Vector2f.FLOATS),
-	COLOUR      ('colour',     1, Colour.FLOATS),
-	TEXTURE_UVS ('textureUVs', 2, Vector2f.FLOATS)
-	// @formatter:on
+	/**
+	 * Draw this mesh, using the currently-bound shader.
+	 */
+	void draw()
 
-	final String name
-	final int location
-	final int size
+	/**
+	 * Whether or not this mesh is allowed to be updated with new vertex data.
+	 */
+	boolean isDynamic()
+
+	/**
+	 * Update any vertex data in this mesh.  This is only allowed on meshes that
+	 * have been configured to be dynamic (can query using {@link #isDynamic}).
+	 */
+	void updateVertexData(Vertex[] newVertices)
+
+	/**
+	 * The kind of primitive being constructed with the mesh.
+	 */
+	static enum Type {
+
+		LINE_LOOP,
+		LINES,
+		TRIANGLES
+	}
 }

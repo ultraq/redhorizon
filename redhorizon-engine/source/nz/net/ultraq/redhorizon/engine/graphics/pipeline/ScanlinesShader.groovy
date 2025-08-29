@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Uniform
 
 /**

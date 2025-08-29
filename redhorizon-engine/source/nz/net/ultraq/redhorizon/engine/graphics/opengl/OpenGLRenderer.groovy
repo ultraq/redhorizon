@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.opengl
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
+import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
@@ -24,8 +25,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh
-import nz.net.ultraq.redhorizon.engine.graphics.Mesh.MeshType
 import nz.net.ultraq.redhorizon.engine.graphics.MeshCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
@@ -37,13 +36,15 @@ import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
-import nz.net.ultraq.redhorizon.graphics.Attribute
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Uniform
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
@@ -205,10 +206,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 	}
 
 	@Override
-	Mesh createMesh(MeshType type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
+	Mesh createMesh(Type type, VertexBufferLayout layout, Vector2f[] vertices, Colour colour, Vector2f[] textureUVs,
 		boolean dynamic, int[] index) {
 
-		var mesh = new OpenGLMesh(type == MeshType.LINES ? GL_LINES : type == MeshType.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
+		var mesh = new OpenGLMesh(type == Type.LINES ? GL_LINES : type == Type.LINE_LOOP ? GL_LINE_LOOP : GL_TRIANGLES,
 			layout, vertices, colour, textureUVs, dynamic, index)
 		trigger(new MeshCreatedEvent(mesh))
 		return mesh
@@ -238,7 +239,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 	Mesh createSpriteMesh(Rectanglef surface, Rectanglef textureUVs = new Rectanglef(0, 0, 1, 1)) {
 
 		return createMesh(
-			MeshType.TRIANGLES,
+			Type.TRIANGLES,
 			new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
 			surface as Vector2f[],
 			Colour.WHITE,
@@ -329,10 +330,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 			shader.applyUniforms(transform, material, window)
 			mesh.bind()
 			if (mesh.index) {
-				glDrawElements(mesh.vertexType, mesh.index.size(), GL_UNSIGNED_INT, 0)
+				glDrawElements(mesh.type, mesh.index.size(), GL_UNSIGNED_INT, 0)
 			}
 			else {
-				glDrawArrays(mesh.vertexType, 0, mesh.vertices.size())
+				glDrawArrays(mesh.type, 0, mesh.vertices.size())
 			}
 
 			trigger(new DrawEvent())
