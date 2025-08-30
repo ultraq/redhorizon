@@ -73,7 +73,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwSetWindowPos(window, (videoMode.width() / 2) - (width / 2) as int, (videoMode.height() / 2) - (height / 2) as int)
 
 		makeCurrent()
-		setVsync(true)
 
 		var capabilities = GL.createCapabilities()
 		if (capabilities.GL_KHR_debug) {
@@ -134,15 +133,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwMakeContextCurrent(NULL)
 	}
 
-	/**
-	 * Enable/disable vsync on the window.
-	 */
-	private void setVsync(boolean vsync) {
-
-		this.vsync = vsync
-		glfwSwapInterval(vsync ? 1 : 0)
-	}
-
 	@Override
 	boolean shouldClose() {
 
@@ -193,6 +183,14 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	OpenGLWindow withMaximized() {
 
 		glfwMaximizeWindow(window)
+		return this
+	}
+
+	@Override
+	OpenGLWindow withVSync(boolean vsync) {
+
+		glfwSwapInterval(vsync ? 1 : 0)
+		this.vsync = vsync
 		return this
 	}
 }

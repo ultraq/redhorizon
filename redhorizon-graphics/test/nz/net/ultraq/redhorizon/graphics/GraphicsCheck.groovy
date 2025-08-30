@@ -49,6 +49,7 @@ class GraphicsCheck extends Specification {
 		when:
 			var window = new OpenGLWindow(800, 600, "Testing")
 				.withBackgroundColour(Colour.WHITE)
+				.withVSync(true)
 				.show()
 			window.on(KeyEvent) { event ->
 				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
@@ -71,6 +72,7 @@ class GraphicsCheck extends Specification {
 		when:
 			var window = new OpenGLWindow(800, 600, "Testing")
 				.withBackgroundColour(Colour.WHITE)
+				.withVSync(true)
 				.show()
 			window.on(KeyEvent) { event ->
 				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {

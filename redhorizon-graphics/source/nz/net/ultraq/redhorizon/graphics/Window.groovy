@@ -122,4 +122,9 @@ interface Window extends AutoCloseable {
 	 * Maximize the window
 	 */
 	Window withMaximized()
+
+	/**
+	 * Set whether vsync is enabled/disabled for this window.
+	 */
+	Window withVSync(boolean vsync)
 }
