@@ -156,7 +156,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	Window show() {
+	OpenGLWindow show() {
 
 		glfwShowWindow(window)
 		return this
@@ -176,21 +176,21 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	Window withBackgroundColour(Colour colour) {
+	OpenGLWindow withBackgroundColour(Colour colour) {
 
 		glClearColor(colour.r, colour.g, colour.b, colour.a)
 		return this
 	}
 
 	@Override
-	Window withBorderlessWindowed() {
+	OpenGLWindow withBorderlessWindowed() {
 
 		// TODO
 		return this
 	}
 
 	@Override
-	Window withMaximized() {
+	OpenGLWindow withMaximized() {
 
 		glfwMaximizeWindow(window)
 		return this

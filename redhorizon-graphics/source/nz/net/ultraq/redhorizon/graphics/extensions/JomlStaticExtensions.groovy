@@ -32,7 +32,15 @@ class JomlStaticExtensions {
 	 */
 	static int getBYTES(Matrix4f self) {
 
-		return getFLOATS(self) * Float.BYTES
+		return Matrix4f.FLOATS * Float.BYTES
+	}
+
+	/**
+	 * The number of bytes used to represent a {@code Vector3f}.
+	 */
+	static int getBYTES(Vector3f self) {
+
+		return Vector3f.FLOATS * Float.BYTES
 	}
 
 	/**
@@ -48,7 +56,7 @@ class JomlStaticExtensions {
 	 */
 	static int getBYTES(Vector2f self) {
 
-		return getFLOATS(self) * Float.BYTES
+		return Vector2f.FLOATS * Float.BYTES
 	}
 
 	/**

@@ -16,10 +16,11 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
-import nz.net.ultraq.redhorizon.graphics.Uniform
 import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.Window
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -43,15 +44,15 @@ class OpenGLShader implements Shader {
 	private static int lastProgramId = 0
 
 	final String name
-	final Uniform[] uniforms
+	private final Uniforms uniforms
 	final int programId
-	private final Map<String, Buffer> uniformBuffers = [:]
+	protected final Map<String, Buffer> uniformBuffers = [:]
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shader source.
 	 */
-	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniform[] uniforms) {
+	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniforms uniforms) {
 
 		this.name = name
 		this.uniforms = uniforms
@@ -111,6 +112,12 @@ class OpenGLShader implements Shader {
 	}
 
 	@Override
+	void applyUniforms(Matrix4fc transform, Material material, Window window) {
+
+		uniforms.apply(this, transform, material, window)
+	}
+
+	@Override
 	void close() {
 
 		glDeleteProgram(programId)
@@ -120,7 +127,7 @@ class OpenGLShader implements Shader {
 	 * Cached function for looking up a uniform location in a shader program.
 	 */
 	@Memoized
-	private int getUniformLocation(String name) {
+	protected int getUniformLocation(String name) {
 
 		return glGetUniformLocation(programId, name)
 	}

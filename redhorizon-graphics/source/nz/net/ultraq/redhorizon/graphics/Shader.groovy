@@ -25,28 +25,15 @@ import org.joml.Matrix4fc
  */
 interface Shader extends GraphicsResource {
 
-	static final String UNIFORM_MODEL = 'model'
-
 	/**
 	 * Update a shader's uniforms using the given context.
 	 */
-	default void applyUniforms(Matrix4fc transform, Material material, Window window) {
-
-		// Model uniform is universal, so bake this here
-		setUniform(UNIFORM_MODEL, transform)
-
-		uniforms*.apply(this, material, window)
-	}
+	void applyUniforms(Matrix4fc transform, Material material, Window window)
 
 	/**
 	 * The name of this shader.
 	 */
 	String getName()
-
-	/**
-	 * The uniform values attached to this shader.
-	 */
-	Uniform[] getUniforms()
 
 	/**
 	 * Apply {@code float} data to a uniform in this shader.
@@ -86,15 +73,23 @@ interface Shader extends GraphicsResource {
 	@Override
 	default String toString() {
 
-		var string = "${name} shader program"
-		if (uniforms) {
-			string += " (${uniforms.length}, uniform(s))"
-		}
-		return string
+		return "${name} shader program"
 	}
 
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
 	void use()
+
+	/**
+	 * Interface for updating a shader's uniforms.
+	 */
+	@FunctionalInterface
+	static interface Uniforms {
+
+		/**
+		 * Update a shader's uniforms using the given context.
+		 */
+		void apply(Shader shader, Matrix4fc transform, Material material, Window window)
+	}
 }

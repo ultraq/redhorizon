@@ -1,0 +1,47 @@
+/*
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.graphics.opengl
+
+import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.Window
+
+import org.joml.Matrix4fc
+
+/**
+ * A built-in shader for rendering just the primitives provided by the graphics
+ * module.
+ *
+ * @author Emanuel Rabina
+ */
+class BasicShader extends OpenGLShader {
+
+	/**
+	 * Constructor, create the built-in OpenGL shader.
+	 */
+	BasicShader(OpenGLTexture whiteTexture) {
+
+		super('Basic',
+			BasicShader.class.classLoader.getResource('nz/net/ultraq/redhorizon/graphics/opengl/Basic.vert.glsl').withInputStream { it.text },
+			BasicShader.class.classLoader.getResource('nz/net/ultraq/redhorizon/graphics/opengl/Basic.frag.glsl').withInputStream { it.text },
+			{ Shader shader, Matrix4fc transform, Material material, Window window ->
+				shader.setUniform('model', transform)
+//				shader.setUniform('mainTexture', 0, material.texture ?: whiteTexture)
+			}
+		)
+	}
+}

@@ -46,7 +46,7 @@ class OpenGLMesh implements Mesh {
 	/**
 	 * Constructor, creates a new OpenGL mesh.
 	 */
-	OpenGLMesh(Type type, Vertex[] vertices, boolean dynamic, int[] index) {
+	OpenGLMesh(Type type, Vertex[] vertices, boolean dynamic = false, int[] index = null) {
 
 		this.type = type
 		this.vertices = vertices
@@ -68,23 +68,24 @@ class OpenGLMesh implements Mesh {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
 		stackPush().withCloseable { stack ->
 			var vertexBuffer = vertices
-				.inject(stack.mallocFloat(Vertex.FLOATS * vertices.size())) { vertexBuffer, vertex ->
+				.inject(stack.mallocFloat(Vertex.FLOATS * vertices.length)) { vertexBuffer, vertex ->
 					return vertexBuffer.put(vertex as float[])
 				}
 				.flip()
 			glBufferData(GL_ARRAY_BUFFER, vertexBuffer, dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW)
 		}
 
-		Vertex.LAYOUT.each { attribute ->
+		Vertex.LAYOUT.inject(0) { offset, attribute ->
 			glEnableVertexAttribArray(attribute.location())
-			glVertexAttribPointer(attribute.location(), attribute.size(), GL_FLOAT, false, Vertex.BYTES, attribute.offset())
+			glVertexAttribPointer(attribute.location(), attribute.sizeInFloats(), GL_FLOAT, false, Vertex.BYTES, offset)
+			return offset + attribute.sizeInFloats()
 		}
 
 		if (index) {
 			elementBufferId = glGenBuffers()
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
 			stackPush().withCloseable { stack ->
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, stack.mallocInt(index.size()).put(index).flip(), GL_STATIC_DRAW)
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, stack.ints(index).flip(), GL_STATIC_DRAW)
 			}
 		}
 		else {

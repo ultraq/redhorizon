@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Vector2f
+import org.joml.Vector3f
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.TupleConstructor
 
 /**
  * A vertex is a point in a mesh, and all of its accompanying data for use in
@@ -31,32 +31,42 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 @EqualsAndHashCode
 class Vertex {
 
 	/**
-	 * The number of {@code byte}s used to represent a vertex.
+	 * An attribute list that describes the layout of the data in a vertex.
 	 */
-	static final int BYTES = Vector2f.BYTES + Colour.BYTES + Vector2f.BYTES
+	static Attribute[] LAYOUT = [
+		new Attribute('position', 0, Vector3f.FLOATS),
+//		new Attribute('colour', 1, Colour.FLOATS),
+//		new Attribute('textureUVs', 2, Vector2f.FLOATS)
+	]
 
 	/**
 	 * The number of {@code float}s used to represent a vertex.
 	 */
-	static final int FLOATS = Vector2f.FLOATS + Colour.FLOATS + Vector2f.FLOATS
+	static final int FLOATS = LAYOUT.sum { it.sizeInFloats() } as int
 
 	/**
-	 * An attribute list that describes the layout of the data in a vertex.
+	 * The number of {@code byte}s used to represent a vertex.
 	 */
-	static List<Attribute> LAYOUT = [
-		new Attribute('position', 0, Vector2f.FLOATS, 0),
-		new Attribute('colour', 1, Colour.FLOATS, Vector2f.BYTES),
-		new Attribute('textureUVs', 2, Vector2f.FLOATS, Vector2f.BYTES + Colour.BYTES)
-	]
+	static final int BYTES = FLOATS * Float.BYTES
 
-	Vector2f position
+	Vector3f position
 	Colour colour
 	Vector2f textureUVs
+
+	/**
+	 * Constructor, create a vertex with position, colour, and texture
+	 * coordinates.
+	 */
+	Vertex(Vector3f position, Colour colour, Vector2f textureUVs = new Vector2f(0, 0)) {
+
+		this.position = position
+		this.colour = colour
+		this.textureUVs = textureUVs
+	}
 
 	/**
 	 * Convert this vertex into another type that can represent it.
@@ -65,9 +75,9 @@ class Vertex {
 
 		switch (clazz) {
 			case float[] -> new float[]{
-				position.x, position.y,
-				colour.r, colour.g, colour.b, colour.a,
-				textureUVs.x, textureUVs.y
+				position.x, position.y, position.z,
+//				colour.r, colour.g, colour.b, colour.a,
+//				textureUVs.x, textureUVs.y
 			}
 			default -> throw new IllegalArgumentException("Cannot convert Vertex to ${clazz}")
 		}
@@ -89,5 +99,5 @@ class Vertex {
 	 * An attribute of a vertex describes a part of its data.  eg: a vertex has
 	 * positional data so will have a position attribute.
 	 */
-	static record Attribute(String name, int location, int size, int offset) {}
+	static record Attribute(String name, int location, int sizeInFloats) {}
 }
