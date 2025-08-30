@@ -48,7 +48,7 @@ class GraphicsCheck extends Specification {
 	def "Opens a window"() {
 		when:
 			var window = new OpenGLWindow(800, 600, "Testing")
-				.withBackgroundColour(Colour.WHITE)
+				.withBackgroundColour(Colour.GREY)
 				.withVSync(true)
 				.show()
 			window.on(KeyEvent) { event ->
@@ -71,7 +71,7 @@ class GraphicsCheck extends Specification {
 	def "Draws a triangle"() {
 		when:
 			var window = new OpenGLWindow(800, 600, "Testing")
-				.withBackgroundColour(Colour.WHITE)
+				.withBackgroundColour(Colour.GREY)
 				.withVSync(true)
 				.show()
 			window.on(KeyEvent) { event ->

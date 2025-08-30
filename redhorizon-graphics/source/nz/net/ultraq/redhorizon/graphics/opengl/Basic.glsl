@@ -16,20 +16,31 @@
 
 #version 410 core
 
+#pragma stage vertex
+in vec4 position;
+in vec4 colour;
+//out vec4 v_vertexColour;
+//layout (std140) uniform Camera {
+//	mat4 projection;
+//	mat4 view;
+//};
+uniform mat4 model;
+
+void main() {
+	//	gl_Position = projection * view * model * position;
+	gl_Position = model * position;
+	//	v_vertexColour = colour;
+	//	v_textureUVs = textureUVs;
+}
+
+#pragma stage fragment
 in vec4 v_vertexColour;
 //in vec2 v_textureUVs;
-
 out vec4 fragmentColour;
-
 //uniform sampler2D mainTexture;
 
-/**
- * A simple fragment shader that can be used to render the primitives provided in
- * the graphics module.
- */
 void main() {
-
-//	fragmentColour = texture(mainTexture, v_textureUVs);
-//	fragmentColour = v_vertexColour;
+	//	fragmentColour = texture(mainTexture, v_textureUVs);
+	//	fragmentColour = v_vertexColour;
 	fragmentColour = vec4(1, 0, 0, 1);
 }

@@ -16,11 +16,10 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.LibRetroShaderReader
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Vertex
-import nz.net.ultraq.redhorizon.graphics.Window
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -38,13 +37,12 @@ import java.nio.Buffer
  *
  * @author Emanuel Rabina
  */
-class OpenGLShader implements Shader {
+abstract class OpenGLShader implements Shader {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
 	private static int lastProgramId = 0
 
 	final String name
-	private final Uniforms uniforms
 	final int programId
 	protected final Map<String, Buffer> uniformBuffers = [:]
 
@@ -52,10 +50,11 @@ class OpenGLShader implements Shader {
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
 	 * shader source.
 	 */
-	OpenGLShader(String name, String vertexShaderSource, String fragmentShaderSource, Uniforms uniforms) {
+	OpenGLShader(String name, String shaderSourcePath) {
 
 		this.name = name
-		this.uniforms = uniforms
+
+		def (vertexShaderSource, fragmentShaderSource) = new LibRetroShaderReader().read(shaderSourcePath)
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation
@@ -109,12 +108,6 @@ class OpenGLShader implements Shader {
 
 		glDeleteShader(vertexShaderId)
 		glDeleteShader(fragmentShaderId)
-	}
-
-	@Override
-	void applyUniforms(Matrix4fc transform, Material material, Window window) {
-
-		uniforms.apply(this, transform, material, window)
 	}
 
 	@Override

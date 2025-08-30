@@ -161,7 +161,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void toggleVsync() {
 
-		setVsync(!vsync)
+		this.vsync = !vsync
+		glfwSwapInterval(vsync ? 1 : 0)
 		logger.debug("Vsync ${vsync ? 'enabled' : 'disabled'}")
 	}
 
@@ -189,8 +190,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	OpenGLWindow withVSync(boolean vsync) {
 
-		glfwSwapInterval(vsync ? 1 : 0)
 		this.vsync = vsync
+		glfwSwapInterval(vsync ? 1 : 0)
 		return this
 	}
 }
