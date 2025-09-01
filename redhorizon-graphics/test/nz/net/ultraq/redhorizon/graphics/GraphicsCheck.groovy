@@ -45,17 +45,26 @@ class GraphicsCheck extends Specification {
 		}
 	}
 
-	def "Opens a window"() {
-		when:
-			var window = new OpenGLWindow(800, 600, "Testing")
-				.withBackgroundColour(Colour.GREY)
-				.withVSync(true)
-				.show()
-			window.on(KeyEvent) { event ->
+	OpenGLWindow window
+
+	def setup() {
+		window = new OpenGLWindow(800, 600, "Testing")
+			.withBackgroundColour(Colour.GREY)
+			.withVSync(true)
+			.on(KeyEvent) { event ->
 				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
 					window.shouldClose(true)
 				}
 			}
+	}
+
+	def cleanup() {
+		window?.close()
+	}
+
+	def "Opens a window"() {
+		when:
+			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					// Do something!
@@ -64,21 +73,10 @@ class GraphicsCheck extends Specification {
 			}
 		then:
 			notThrown(Exception)
-		cleanup:
-			window?.close()
 	}
 
 	def "Draws a triangle"() {
-		when:
-			var window = new OpenGLWindow(800, 600, "Testing")
-				.withBackgroundColour(Colour.GREY)
-				.withVSync(true)
-				.show()
-			window.on(KeyEvent) { event ->
-				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
-					window.shouldClose(true)
-				}
-			}
+		given:
 			var whiteTexture = new OpenGLTexture(1, 1, 4, ByteBuffer.allocateNative(4).put(Colour.WHITE as byte[]).flip())
 			var shader = new BasicShader(whiteTexture)
 			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
@@ -88,6 +86,8 @@ class GraphicsCheck extends Specification {
 			})
 			var transform = new Matrix4f()
 			var material = new Material()
+		when:
+			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
@@ -102,6 +102,5 @@ class GraphicsCheck extends Specification {
 			triangle?.close()
 			shader?.close()
 			whiteTexture?.close()
-			window?.close()
 	}
 }

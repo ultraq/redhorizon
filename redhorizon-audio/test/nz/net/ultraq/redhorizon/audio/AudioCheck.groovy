@@ -33,7 +33,7 @@ import javax.sound.sampled.AudioSystem
 @IgnoreIf({ env.CI })
 class AudioCheck extends Specification {
 
-	static {
+	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
 	}
 
@@ -49,33 +49,38 @@ class AudioCheck extends Specification {
 	}
 
 	def "Plays a sound - use low-level API"() {
+		given:
+			var oggStream = AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg'))
+			var pcmStream = AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream)
+			var format = pcmStream.format
+			var sound = new Sound(format.sampleSizeInBits, format.channels, (int)format.sampleRate,
+				ByteBuffer.wrapNative(pcmStream.readAllBytes()))
 		when:
-			AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')).withCloseable { oggStream ->
-				AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
-					var format = pcmStream.format
-					new Sound(format.sampleSizeInBits, format.channels, (int)format.sampleRate, ByteBuffer.wrapNative(pcmStream.readAllBytes())).withCloseable { sound ->
-						sound.play()
-						while (sound.playing) {
-							Thread.sleep(100)
-						}
-					}
-				}
+			sound.play()
+			while (sound.playing) {
+				Thread.sleep(100)
 			}
 		then:
 			notThrown(Exception)
+		cleanup:
+			sound?.close()
+			pcmStream?.close()
+			oggStream?.close()
 	}
 
 	def "Plays a sound - use Sound and AudioDecoder SPI"() {
+		given:
+			var oggStream = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')
+			var sound = new Sound('AudioCheck.ogg', oggStream)
 		when:
-			getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg').withBufferedStream { stream ->
-				new Sound('AudioCheck.ogg', stream).withCloseable { sound ->
-					sound.play()
-					while (sound.playing) {
-						Thread.sleep(100)
-					}
-				}
+			sound.play()
+			while (sound.playing) {
+				Thread.sleep(100)
 			}
 		then:
 			notThrown(Exception)
+		cleanup:
+			sound?.close()
+			oggStream?.close()
 	}
 }
