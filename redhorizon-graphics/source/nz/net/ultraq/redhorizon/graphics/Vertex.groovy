@@ -39,8 +39,8 @@ class Vertex {
 	 */
 	static Attribute[] LAYOUT = [
 		new Attribute('position', 0, Vector3f.FLOATS),
-//		new Attribute('colour', 1, Colour.FLOATS),
-//		new Attribute('textureUVs', 2, Vector2f.FLOATS)
+		new Attribute('colour', 1, Colour.FLOATS),
+		new Attribute('textureUVs', 2, Vector2f.FLOATS)
 	]
 
 	/**
@@ -76,8 +76,8 @@ class Vertex {
 		switch (clazz) {
 			case float[] -> new float[]{
 				position.x, position.y, position.z,
-//				colour.r, colour.g, colour.b, colour.a,
-//				textureUVs.x, textureUVs.y
+				colour.r, colour.g, colour.b, colour.a,
+				textureUVs.x, textureUVs.y
 			}
 			default -> throw new IllegalArgumentException("Cannot convert Vertex to ${clazz}")
 		}
@@ -99,5 +99,13 @@ class Vertex {
 	 * An attribute of a vertex describes a part of its data.  eg: a vertex has
 	 * positional data so will have a position attribute.
 	 */
-	static record Attribute(String name, int location, int sizeInFloats) {}
+	static record Attribute(String name, int location, int sizeInFloats) {
+
+		/**
+		 * The size of the attribute data, in bytes.
+		 */
+		int sizeInBytes() {
+			return sizeInFloats * Float.BYTES
+		}
+	}
 }

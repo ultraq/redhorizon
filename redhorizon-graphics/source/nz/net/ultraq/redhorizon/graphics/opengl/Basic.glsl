@@ -19,7 +19,9 @@
 #pragma stage vertex
 in vec4 position;
 in vec4 colour;
-//out vec4 v_vertexColour;
+in vec2 textureUVs;
+out vec4 v_vertexColour;
+out vec2 v_textureUVs;
 //layout (std140) uniform Camera {
 //	mat4 projection;
 //	mat4 view;
@@ -27,20 +29,18 @@ in vec4 colour;
 uniform mat4 model;
 
 void main() {
-	//	gl_Position = projection * view * model * position;
+//	gl_Position = projection * view * model * position;
 	gl_Position = model * position;
-	//	v_vertexColour = colour;
-	//	v_textureUVs = textureUVs;
+	v_vertexColour = colour;
+	v_textureUVs = textureUVs;
 }
 
 #pragma stage fragment
 in vec4 v_vertexColour;
-//in vec2 v_textureUVs;
+in vec2 v_textureUVs;
 out vec4 fragmentColour;
-//uniform sampler2D mainTexture;
+uniform sampler2D mainTexture;
 
 void main() {
-	//	fragmentColour = texture(mainTexture, v_textureUVs);
-	//	fragmentColour = v_vertexColour;
-	fragmentColour = vec4(1, 0, 0, 1);
+		fragmentColour = texture(mainTexture, v_textureUVs) * v_vertexColour;
 }

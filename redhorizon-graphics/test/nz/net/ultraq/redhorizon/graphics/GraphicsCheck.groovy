@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.graphics
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
@@ -28,8 +27,6 @@ import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-
-import java.nio.ByteBuffer
 
 /**
  * A simple test for making sure we can create a window.
@@ -77,8 +74,7 @@ class GraphicsCheck extends Specification {
 
 	def "Draws a triangle"() {
 		given:
-			var whiteTexture = new OpenGLTexture(1, 1, 4, ByteBuffer.allocateNative(4).put(Colour.WHITE as byte[]).flip())
-			var shader = new BasicShader(whiteTexture)
+			var shader = new BasicShader()
 			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 				new Vertex(new Vector3f(0.0, 0.5, 0.0), Colour.RED),
 				new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.RED),
@@ -101,6 +97,5 @@ class GraphicsCheck extends Specification {
 		cleanup:
 			triangle?.close()
 			shader?.close()
-			whiteTexture?.close()
 	}
 }

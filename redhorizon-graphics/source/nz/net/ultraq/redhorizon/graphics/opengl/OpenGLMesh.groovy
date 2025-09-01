@@ -46,7 +46,7 @@ class OpenGLMesh implements Mesh {
 	/**
 	 * Constructor, creates a new OpenGL mesh.
 	 */
-	OpenGLMesh(Type type, Vertex[] vertices, boolean dynamic = false, int[] index = null) {
+	OpenGLMesh(Type type, Vertex[] vertices, int[] index = null, boolean dynamic = false) {
 
 		this.type = type
 		this.vertices = vertices
@@ -78,7 +78,7 @@ class OpenGLMesh implements Mesh {
 		Vertex.LAYOUT.inject(0) { offset, attribute ->
 			glEnableVertexAttribArray(attribute.location())
 			glVertexAttribPointer(attribute.location(), attribute.sizeInFloats(), GL_FLOAT, false, Vertex.BYTES, offset)
-			return offset + attribute.sizeInFloats()
+			return offset + attribute.sizeInBytes()
 		}
 
 		if (index) {

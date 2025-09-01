@@ -16,10 +16,13 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Window
 
 import org.joml.Matrix4fc
+
+import java.nio.ByteBuffer
 
 /**
  * A built-in shader for rendering just the primitives provided by the graphics
@@ -34,16 +37,23 @@ class BasicShader extends OpenGLShader {
 	/**
 	 * Constructor, create the built-in OpenGL shader.
 	 */
-	BasicShader(OpenGLTexture whiteTexture) {
+	BasicShader() {
 
 		super('Basic', 'nz/net/ultraq/redhorizon/graphics/opengl/Basic.glsl')
-		this.whiteTexture = whiteTexture
+		whiteTexture = new OpenGLTexture(1, 1, 4, ByteBuffer.allocateNative(4).put(Colour.WHITE as byte[]).flip())
 	}
 
 	@Override
 	void applyUniforms(Matrix4fc transform, Material material, Window window) {
 
 		setUniform('model', transform)
-//		setUniform('mainTexture', 0, material.texture ?: whiteTexture)
+		setUniform('mainTexture', 0, material.texture ?: whiteTexture)
+	}
+
+	@Override
+	void close() {
+
+		whiteTexture.close()
+		super.close()
 	}
 }
