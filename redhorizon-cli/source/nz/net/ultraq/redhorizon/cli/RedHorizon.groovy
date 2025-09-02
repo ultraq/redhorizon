@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.cli
 
-import nz.net.ultraq.redhorizon.cli.converter.Converter
 import nz.net.ultraq.redhorizon.cli.mixtools.Mix
 import nz.net.ultraq.redhorizon.explorer.Explorer
 import nz.net.ultraq.redhorizon.shooter.Shooter
@@ -40,7 +39,6 @@ import picocli.CommandLine.IVersionProvider
 	description = 'The Red Horizon command-line interface',
 	mixinStandardHelpOptions = true,
 	subcommands = [
-		Converter,
 		Explorer.CliWrapper,
 		Mix,
 		Shooter.CliWrapper

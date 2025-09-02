@@ -220,7 +220,12 @@ class OpenGLRenderer implements GraphicsRenderer {
 
 		var shader = shaders.find { shader -> shader.name == name }
 		if (!shader) {
-			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms)
+			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms) {
+				@Override
+				void applyUniforms(Matrix4fc transform, Material material, nz.net.ultraq.redhorizon.graphics.Window window) {
+
+				}
+			}
 			shaders << shader
 
 			// Link uniform buffers with the shader if applicable
