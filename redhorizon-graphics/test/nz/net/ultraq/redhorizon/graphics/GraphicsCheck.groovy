@@ -87,8 +87,8 @@ class GraphicsCheck extends Specification {
 			var shader = new BasicShader()
 			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 				new Vertex(new Vector3f(0.0, 0.5, 0.0), Colour.RED),
-				new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.RED),
-				new Vertex(new Vector3f(0.5, -0.5, 0.0), Colour.RED)
+				new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.GREEN),
+				new Vertex(new Vector3f(0.5, -0.5, 0.0), Colour.BLUE)
 			})
 			var transform = new Matrix4f()
 			var material = new Material()
@@ -119,7 +119,7 @@ class GraphicsCheck extends Specification {
 					new Vertex(new Vector3f(0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(1, 1)),
 					new Vertex(new Vector3f(-0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(0, 1))
 				},
-				new int[]{ 0, 1, 2, 0, 2, 3 })
+				new int[]{ 0, 1, 2, 2, 3, 0 })
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
 			var bufferedImage = ImageIO.read(imageStream)
 			var width = bufferedImage.width
@@ -154,6 +154,28 @@ class GraphicsCheck extends Specification {
 			texture?.close()
 			imageStream?.close()
 			quad?.close()
+			shader?.close()
+	}
+
+	def "Draws an image - using Image and ImageDecoder SPI"() {
+		given:
+			var shader = new BasicShader()
+			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
+			var image = new Image('GraphicsCheck.png', imageStream)
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.withFrame { ->
+					var shaderContext = shader.use()
+					image.draw(shaderContext)
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			image?.close()
+			imageStream?.close()
 			shader?.close()
 	}
 }

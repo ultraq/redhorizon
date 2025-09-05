@@ -46,6 +46,16 @@ interface Window extends AutoCloseable {
 	void endFrame()
 
 	/**
+	 * Get the height of this window.
+	 */
+	int getHeight()
+
+	/**
+	 * Get the width of this window.
+	 */
+	int getWidth()
+
+	/**
 	 * Makes the context current on the executing thread.
 	 */
 	void makeCurrent()

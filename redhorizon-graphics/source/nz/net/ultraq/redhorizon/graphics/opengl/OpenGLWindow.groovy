@@ -40,6 +40,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
+	final int width
+	final int height
 	private final long window
 	private boolean vsync
 
@@ -47,6 +49,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	 * Create and configure a new window with OpenGL.
 	 */
 	OpenGLWindow(int width, int height, String title) {
+
+		this.width = width
+		this.height = height
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))

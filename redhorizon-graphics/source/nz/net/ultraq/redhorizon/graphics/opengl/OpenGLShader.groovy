@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.LibRetroShaderReader
 import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.ShaderContext
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Vertex
 
@@ -176,11 +177,12 @@ abstract class OpenGLShader implements Shader {
 	}
 
 	@Override
-	void use() {
+	ShaderContext use() {
 
 		if (programId != lastProgramId) {
 			glUseProgram(programId)
 			lastProgramId = programId
 		}
+		return this
 	}
 }

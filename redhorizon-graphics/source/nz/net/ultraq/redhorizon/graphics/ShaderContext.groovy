@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-#version 410 core
+package nz.net.ultraq.redhorizon.graphics
 
-#pragma stage vertex
-in vec4 position;
-in vec4 colour;
-in vec2 textureUVs;
-out vec4 v_vertexColour;
-out vec2 v_textureUVs;
-//layout (std140) uniform Camera {
-//	mat4 projection;
-//	mat4 view;
-//};
-uniform mat4 model;
+import org.joml.Matrix4fc
 
-void main() {
-	//	gl_Position = projection * view * model * position;
-	gl_Position = model * position;
-	v_vertexColour = colour;
-	v_textureUVs = textureUVs;
-}
+/**
+ * The part of the shader that can be given to other graphics objects for the
+ * application of uniform data like transforms and textures.
+ *
+ * @author Emanuel Rabina
+ */
+interface ShaderContext {
 
-#pragma stage fragment
-in vec4 v_vertexColour;
-in vec2 v_textureUVs;
-out vec4 fragmentColour;
-uniform sampler2D mainTexture;
-
-void main() {
-	fragmentColour = texture(mainTexture, v_textureUVs) * v_vertexColour;
+	/**
+	 * Update a shader's uniforms using the given context.
+	 */
+	void applyUniforms(Matrix4fc transform, Material material, Window window)
 }

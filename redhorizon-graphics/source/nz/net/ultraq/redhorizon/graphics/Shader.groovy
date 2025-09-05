@@ -23,12 +23,7 @@ import org.joml.Matrix4fc
  *
  * @author Emanuel Rabina
  */
-interface Shader extends GraphicsResource {
-
-	/**
-	 * Update a shader's uniforms using the given context.
-	 */
-	void applyUniforms(Matrix4fc transform, Material material, Window window)
+interface Shader extends ShaderContext, GraphicsResource {
 
 	/**
 	 * The name of this shader.
@@ -67,8 +62,6 @@ interface Shader extends GraphicsResource {
 
 	/**
 	 * Return the name of this shader program.
-	 *
-	 * @return
 	 */
 	@Override
 	default String toString() {
@@ -79,17 +72,5 @@ interface Shader extends GraphicsResource {
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
-	void use()
-
-	/**
-	 * Interface for updating a shader's uniforms.
-	 */
-	@FunctionalInterface
-	static interface Uniforms {
-
-		/**
-		 * Update a shader's uniforms using the given context.
-		 */
-		void apply(Shader shader, Matrix4fc transform, Material material, Window window)
-	}
+	ShaderContext use()
 }
