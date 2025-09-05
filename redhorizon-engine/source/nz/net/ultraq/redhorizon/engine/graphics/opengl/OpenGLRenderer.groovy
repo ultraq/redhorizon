@@ -30,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.MeshDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.engine.graphics.TextureCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.TextureDeletedEvent
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.UniformBufferDeletedEvent
@@ -43,7 +44,6 @@ import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
-import nz.net.ultraq.redhorizon.graphics.Uniform
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture

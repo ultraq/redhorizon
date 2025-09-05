@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
-import nz.net.ultraq.redhorizon.graphics.Uniform
 
 import org.joml.Matrix4fc
 import org.joml.Vector2f

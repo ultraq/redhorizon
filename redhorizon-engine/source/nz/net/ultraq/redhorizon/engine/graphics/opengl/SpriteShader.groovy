@@ -19,8 +19,8 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.ShaderConfig
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Uniform
 
 /**
  * A simple 2D sprite shader.

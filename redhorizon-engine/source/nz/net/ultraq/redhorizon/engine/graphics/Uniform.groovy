@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.engine.graphics
+
+import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Shader
 
 /**
  * Interface detailing how a uniform value in a shader is set for a given

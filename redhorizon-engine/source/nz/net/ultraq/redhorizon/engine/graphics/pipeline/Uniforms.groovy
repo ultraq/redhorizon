@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
+import nz.net.ultraq.redhorizon.engine.graphics.Uniform
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Uniform
 
 import groovy.transform.PackageScope
 
