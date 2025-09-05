@@ -134,7 +134,8 @@ class GraphicsCheck extends Specification {
 						var alpha = (byte)(pixel >> 24)
 						acc.put(red).put(green).put(blue).put(alpha)
 					}
-					.flip())
+					.flip()
+					.flipVertical(width, height, colourChannels))
 			var transform = new Matrix4f()
 			var material = new Material(texture: texture)
 		when:

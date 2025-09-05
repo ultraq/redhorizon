@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.filetypes.extensions
 
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.Palette
 
 import groovy.transform.CompileStatic
@@ -46,121 +45,5 @@ class ByteBufferImageExtensions {
 		}
 		self.rewind()
 		return dest.flip()
-	}
-
-	/**
-	 * If an image buffer contains an image less than the specified dimensions,
-	 * return an image buffer padded with 0s such that it will appear in the
-	 * center.
-	 */
-	static ByteBuffer center(ByteBuffer self, int imageWidth, int imageHeight, int targetWidth, int targetHeight) {
-
-		if (imageWidth < targetWidth || imageHeight < targetHeight) {
-			var newTileImageData = ByteBuffer.allocateNative(targetWidth * targetHeight)
-			var xOffset = Math.floor((targetWidth - imageWidth) / 2 as int) as int
-			var yOffset = Math.floor((targetHeight - imageHeight) / 2 as int) as int
-			imageHeight.times { y ->
-				imageWidth.times { x ->
-					newTileImageData.put(((yOffset + y) * targetWidth) + (xOffset + x), self.get((y * imageWidth) + x))
-				}
-			}
-			return newTileImageData
-		}
-		return self
-	}
-
-	/**
-	 * Creates a single overall image buffer from a series of smaller image
-	 * buffers.
-	 *
-	 * @param self
-	 * @param width Width of each image.
-	 * @param height Height of each image
-	 * @param format
-	 * @param imagesX Number of images to fit on the X axis.
-	 * @return Single combined image buffer.
-	 */
-	static ByteBuffer combine(ByteBuffer[] self, int width, int height, ColourFormat format, int imagesX) {
-
-		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
-		var compileWidth = width * format.value * imagesX as int
-		var compileHeight = height * imagesY
-		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
-
-		// For each image
-		self.eachWithIndex { image, i ->
-			var compilationPointer = (i / imagesX as int) * (compileWidth * height) + ((i % imagesX) * width)
-
-			// For each vertical line of pixels in the current image
-			height.times { y ->
-				compilation
-					.position(compilationPointer)
-					.put(image, width * format.value)
-				compilationPointer += compileWidth
-			}
-			image.rewind()
-		}
-		return compilation.rewind()
-	}
-
-	/**
-	 * Return a new image buffer where the pixel data on the vertical axis has
-	 * been flipped.  This is used to make the Y axis of an image format, where
-	 * often 0 means the top row of pixels, match a coordinate system where 0
-	 * means the bottom row of pixels.
-	 *
-	 * @param self
-	 * @param width Width of the image.
-	 * @param height Height of the image.
-	 * @param format The number of colour channels in each pixel.
-	 * @return A new buffer with the horizontal pixel data flipped.
-	 */
-	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, ColourFormat format) {
-
-		def flippedImageBuffer = ByteBuffer.allocateNative(self.capacity())
-		def rowSize = width * format.value
-		height.times { y ->
-			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
-		}
-		return flippedImageBuffer.flip()
-	}
-
-	/**
-	 * Flip a series of image buffers.  Calls {@link #flipVertical} for each
-	 * buffer in the array.
-	 *
-	 * @param self
-	 * @param width Width of each image.
-	 * @param height Height of each image.
-	 * @param format The number of colour channels in each pixel.
-	 * @return A new array of buffers whose pixel data has been flipped.
-	 */
-	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, ColourFormat format) {
-
-		return self.collect { image -> flipVertical(image, width, height, format) } as ByteBuffer[]
-	}
-
-	/**
-	 * Take the image data for a single image and split it into several smaller
-	 * images of the given dimensions.
-	 */
-	static ByteBuffer[] split(ByteBuffer self, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
-
-		def imagesAcross = sourceWidth / targetWidth as int
-		def numImages = imagesAcross * (sourceHeight / targetHeight) as int
-		def targetSize = targetWidth * targetHeight as int
-		def images = new ByteBuffer[numImages].collect { ByteBuffer.allocateNative(targetSize) } as ByteBuffer[]
-
-		for (int pointer = 0; pointer < targetSize; pointer += sourceWidth) {
-			def frame = (pointer / imagesAcross as int) * sourceWidth + (pointer * sourceWidth)
-
-			// Fill the target frame with 1 row from the current pointer
-			images[frame].put(self, sourceWidth)
-		}
-
-		images*.rewind()
-		self.rewind()
-
-		return images
 	}
 }
