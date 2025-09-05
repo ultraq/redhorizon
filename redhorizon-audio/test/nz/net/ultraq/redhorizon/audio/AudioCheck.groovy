@@ -21,12 +21,11 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
-import java.nio.ByteBuffer
-import javax.sound.sampled.AudioFormat.Encoding
-import javax.sound.sampled.AudioSystem
-
 /**
  * A simple class to play back a sound using the audio module.
+ *
+ * <p>The audio file used for testing is {@code bong_001.ogg} from
+ * <a href="https://kenney.nl/assets/interface-sounds">Kenney's Interface Sounds</a>.
  *
  * @author Emanuel Rabina
  */
@@ -46,26 +45,6 @@ class AudioCheck extends Specification {
 
 	def cleanup() {
 		device.close()
-	}
-
-	def "Plays a sound - use low-level API"() {
-		given:
-			var oggStream = AudioSystem.getAudioInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg'))
-			var pcmStream = AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream)
-			var format = pcmStream.format
-			var sound = new Sound(format.sampleSizeInBits, format.channels, (int)format.sampleRate,
-				ByteBuffer.wrapNative(pcmStream.readAllBytes()))
-		when:
-			sound.play()
-			while (sound.playing) {
-				Thread.sleep(100)
-			}
-		then:
-			notThrown(Exception)
-		cleanup:
-			sound?.close()
-			pcmStream?.close()
-			oggStream?.close()
 	}
 
 	def "Plays a sound - use Sound and AudioDecoder SPI"() {

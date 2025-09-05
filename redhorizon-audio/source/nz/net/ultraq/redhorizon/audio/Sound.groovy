@@ -40,6 +40,10 @@ class Sound implements AutoCloseable {
 
 	/**
 	 * Constructor, sets up a new sound using its name and a stream of data.
+	 *
+	 * <p>The file extension is the hint used to determine which available
+	 * {@link AudioDecoder} (registered using Java SPI) is capable of decoding the
+	 * stream.
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
@@ -59,24 +63,15 @@ class Sound implements AutoCloseable {
 			logger.info('{}: {}', fileName, fileInformation)
 		}
 
-		buffer = new OpenALBuffer(result.bits(), result.channels(), result.frequency(), ByteBuffer.fromBuffers(samples as ByteBuffer[]))
-		source = new OpenALSource().attachBuffer(buffer)
-	}
-
-	/**
-	 * Constructor, sets up a new sound using decoded sound data.
-	 */
-	Sound(int bits, int channels, int frequency, ByteBuffer data) {
-
-		buffer = new OpenALBuffer(bits, channels, frequency, data)
+		buffer = new OpenALBuffer(result.bits(), result.channels(), result.frequency(), ByteBuffer.fromBuffers(*samples))
 		source = new OpenALSource().attachBuffer(buffer)
 	}
 
 	@Override
 	void close() {
 
-		source.close()
-		buffer.close()
+		source?.close()
+		buffer?.close()
 	}
 
 	/**
