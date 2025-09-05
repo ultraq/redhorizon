@@ -25,7 +25,7 @@ import javax.sound.sampled.AudioSystem
  *
  * @author Emanuel Rabina
  */
-class OggDecoder implements AudioDecoder {
+class OggAudioDecoder implements AudioDecoder {
 
 	final String[] supportedFileExtensions = ['ogg']
 

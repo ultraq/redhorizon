@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.audio
 import java.nio.file.ProviderNotFoundException
 
 /**
- * Locate sound data decoders using Java SPI.
+ * Locate {@link AudioDecoder}s using Java SPI.
  *
  * @author Emanuel Rabina
  */
