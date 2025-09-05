@@ -19,17 +19,26 @@ package nz.net.ultraq.redhorizon.graphics
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Matrix4f
+import org.joml.Vector2f
 import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
+import java.nio.ByteBuffer
+import javax.imageio.ImageIO
+
 /**
- * A simple test for making sure we can create a window.
+ * A simple test for making sure we can render objects using the graphics
+ * module.
+ *
+ * <p>The image file used for testing is {@code ship_0000.png} from
+ * <a href="https://kenney.nl/assets/pixel-shmup">Kenney's Pixel Shmup</a>.
  *
  * @author Emanuel Rabina
  */
@@ -37,6 +46,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 class GraphicsCheck extends Specification {
 
 	def setupSpec() {
+		System.setProperty('org.lwjgl.system.stackSize', '10240')
 		if (System.isMacOs()) {
 			System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
 		}
@@ -87,7 +97,7 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
-					shader.applyUniforms(transform, material, window)
+					shader.applyUniforms(transform, material, null)
 					triangle.draw()
 				}
 				Thread.yield()
@@ -96,6 +106,53 @@ class GraphicsCheck extends Specification {
 			notThrown(Exception)
 		cleanup:
 			triangle?.close()
+			shader?.close()
+	}
+
+	def "Draws a texture"() {
+		given:
+			var shader = new BasicShader()
+			var quad = new OpenGLMesh(Type.TRIANGLES,
+				new Vertex[]{
+					new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.WHITE, new Vector2f(0, 0)),
+					new Vertex(new Vector3f(0.5, -0.5, 0.0), Colour.WHITE, new Vector2f(1, 0)),
+					new Vertex(new Vector3f(0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(1, 1)),
+					new Vertex(new Vector3f(-0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(0, 1))
+				},
+				new int[]{ 0, 1, 2, 0, 2, 3 })
+			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
+			var bufferedImage = ImageIO.read(imageStream)
+			var width = bufferedImage.width
+			var height = bufferedImage.height
+			var colourChannels = bufferedImage.colorModel.numComponents
+			var texture = new OpenGLTexture(width, height, colourChannels,
+				bufferedImage.getRGB(0, 0, width, height, null, 0, width)
+					.inject(ByteBuffer.allocateNative(width * height * colourChannels)) { ByteBuffer acc, pixel ->
+						var red = (byte)(pixel >> 16)
+						var green = (byte)(pixel >> 8)
+						var blue = (byte)(pixel)
+						var alpha = (byte)(pixel >> 24)
+						acc.put(red).put(green).put(blue).put(alpha)
+					}
+					.flip())
+			var transform = new Matrix4f()
+			var material = new Material(texture: texture)
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.withFrame { ->
+					shader.use()
+					shader.applyUniforms(transform, material, null)
+					quad.draw()
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			texture?.close()
+			imageStream?.close()
+			quad?.close()
 			shader?.close()
 	}
 }

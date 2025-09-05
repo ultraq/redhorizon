@@ -85,7 +85,7 @@ class OpenGLMesh implements Mesh {
 			elementBufferId = glGenBuffers()
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferId)
 			stackPush().withCloseable { stack ->
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, stack.ints(index).flip(), GL_STATIC_DRAW)
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, stack.ints(index), GL_STATIC_DRAW)
 			}
 		}
 		else {

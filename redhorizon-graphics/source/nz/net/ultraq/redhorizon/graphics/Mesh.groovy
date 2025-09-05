@@ -15,6 +15,7 @@
  */
 
 package nz.net.ultraq.redhorizon.graphics
+
 /**
  * A mesh defines the shape of an object, and so contain data on points and
  * edges.
