@@ -72,5 +72,5 @@ interface Shader extends ShaderContext, GraphicsResource {
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
-	ShaderContext use()
+	void use()
 }

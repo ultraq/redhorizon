@@ -86,10 +86,16 @@ class GraphicsCheck extends Specification {
 		given:
 			var shader = new BasicShader()
 			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
-				new Vertex(new Vector3f(0.0, 0.5, 0.0), Colour.RED),
-				new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.GREEN),
-				new Vertex(new Vector3f(0.5, -0.5, 0.0), Colour.BLUE)
+				new Vertex(new Vector3f(0, 3, 0), Colour.RED),
+				new Vertex(new Vector3f(-3, -3, 0), Colour.GREEN),
+				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
 			})
+			var projection = new Matrix4f().setOrthoSymmetric(10, 10, 0, 10)
+			var view = new Matrix4f().setLookAt(
+				0, 0, 10,
+				0, 0, 0,
+				0, 1, 0
+			)
 			var transform = new Matrix4f()
 			var material = new Material()
 		when:
@@ -97,6 +103,8 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
+					shader.setUniform('projection', projection)
+					shader.setUniform('view', view)
 					shader.applyUniforms(transform, material, null)
 					triangle.draw()
 				}
@@ -114,10 +122,10 @@ class GraphicsCheck extends Specification {
 			var shader = new BasicShader()
 			var quad = new OpenGLMesh(Type.TRIANGLES,
 				new Vertex[]{
-					new Vertex(new Vector3f(-0.5, -0.5, 0.0), Colour.WHITE, new Vector2f(0, 0)),
-					new Vertex(new Vector3f(0.5, -0.5, 0.0), Colour.WHITE, new Vector2f(1, 0)),
-					new Vertex(new Vector3f(0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(1, 1)),
-					new Vertex(new Vector3f(-0.5, 0.5, 0.0), Colour.WHITE, new Vector2f(0, 1))
+					new Vertex(new Vector3f(-3, -3, 0.0), Colour.WHITE, new Vector2f(0, 0)),
+					new Vertex(new Vector3f(3, -3, 0.0), Colour.WHITE, new Vector2f(1, 0)),
+					new Vertex(new Vector3f(3, 3, 0.0), Colour.WHITE, new Vector2f(1, 1)),
+					new Vertex(new Vector3f(-3, 3, 0.0), Colour.WHITE, new Vector2f(0, 1))
 				},
 				new int[]{ 0, 1, 2, 2, 3, 0 })
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
@@ -136,6 +144,12 @@ class GraphicsCheck extends Specification {
 					}
 					.flip()
 					.flipVertical(width, height, colourChannels))
+			var projection = new Matrix4f().setOrthoSymmetric(10, 10, 0, 10)
+			var view = new Matrix4f().setLookAt(
+				0, 0, 10,
+				0, 0, 0,
+				0, 1, 0
+			)
 			var transform = new Matrix4f()
 			var material = new Material(texture: texture)
 		when:
@@ -143,6 +157,8 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
+					shader.setUniform('view', view)
+					shader.setUniform('projection', projection)
 					shader.applyUniforms(transform, material, null)
 					quad.draw()
 				}
@@ -162,12 +178,20 @@ class GraphicsCheck extends Specification {
 			var shader = new BasicShader()
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
 			var image = new Image('GraphicsCheck.png', imageStream)
+			var projection = new Matrix4f().setOrthoSymmetric(100, 100, 0, 10)
+			var view = new Matrix4f().setLookAt(
+				16, 16, 10,
+				16, 16, 0,
+				0, 1, 0
+			)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					var shaderContext = shader.use()
-					image.draw(shaderContext)
+					shader.use()
+					shader.setUniform('view', view)
+					shader.setUniform('projection', projection)
+					image.draw(shader)
 				}
 				Thread.yield()
 			}

@@ -65,8 +65,7 @@ class Image implements AutoCloseable {
 		instances.incrementAndGet()
 		texture = new OpenGLTexture(result.width(), result.height(), result.colourChannels(), result.data())
 		material = new Material(texture: texture)
-//		transform = new Matrix4f().scale(result.width(), result.height(), 1)
-		transform = new Matrix4f().scale(2)
+		transform = new Matrix4f().scale(result.width(), result.height(), 1)
 	}
 
 	@Override
@@ -81,8 +80,8 @@ class Image implements AutoCloseable {
 
 	/**
 	 * Create the single mesh used for all image instances.  It's the image/model
-	 * transform that will size and positionthe mesh to match what the image needs
-	 * on rendering.
+	 * transform that will size and position the mesh to match what the image
+	 * needs on rendering.
 	 */
 	private static Mesh createImageMesh() {
 
