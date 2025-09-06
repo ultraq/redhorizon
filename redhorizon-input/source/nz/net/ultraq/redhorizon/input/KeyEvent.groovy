@@ -28,7 +28,7 @@ record KeyEvent(int key, int scancode, int action, int mods) implements InputEve
 	/**
 	 * Return whether this event is a key press for the given key.
 	 */
-	boolean isKeyPress(int key, boolean includeRepeat = false) {
+	boolean keyPressed(int key, boolean includeRepeat = false) {
 
 		return this.key == key && action == GLFW_PRESS || (action == GLFW_REPEAT && includeRepeat)
 	}
@@ -36,7 +36,7 @@ record KeyEvent(int key, int scancode, int action, int mods) implements InputEve
 	/**
 	 * Return whether this event is a key release for the given key.
 	 */
-	boolean isKeyRelease(int key) {
+	boolean keyReleased(int key) {
 
 		return this.key == key && action == GLFW_RELEASE
 	}

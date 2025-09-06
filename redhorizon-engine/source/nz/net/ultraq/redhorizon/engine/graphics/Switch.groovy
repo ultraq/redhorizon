@@ -47,7 +47,7 @@ trait Switch<T extends Switch> {
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPass') Closure closure = null) {
 
 		inputSystem.on(KeyEvent) { event ->
-			if (event.isKeyPress(key)) {
+			if (event.keyPressed(key)) {
 				toggle()
 				if (closure) {
 					closure(this)

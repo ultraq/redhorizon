@@ -50,7 +50,7 @@ class ImageDecoderTests extends Specification {
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
-				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
+				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
 					window.shouldClose(true)
 				}
 			}

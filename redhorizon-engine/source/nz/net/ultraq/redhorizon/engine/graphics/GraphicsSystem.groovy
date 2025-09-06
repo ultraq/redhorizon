@@ -187,7 +187,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 		}
 
 		window.on(KeyEvent) { event ->
-			if (event.isKeyPress(GLFW_KEY_V)) {
+			if (event.keyPressed(GLFW_KEY_V)) {
 				shouldToggleVsync = true
 			}
 		}

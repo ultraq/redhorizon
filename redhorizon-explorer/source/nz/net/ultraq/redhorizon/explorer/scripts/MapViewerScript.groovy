@@ -87,7 +87,7 @@ class MapViewerScript extends Script<Map> {
 			var ctrl = false
 			removeEventListenerTokens << new RemovalToken()
 			inputSystem.on(KeyEvent, removeEventListenerTokens.last()) { event ->
-				if (event.isKeyPress(GLFW_KEY_LEFT_CONTROL, true)) {
+				if (event.keyPressed(GLFW_KEY_LEFT_CONTROL, true)) {
 					ctrl = true
 				}
 			}

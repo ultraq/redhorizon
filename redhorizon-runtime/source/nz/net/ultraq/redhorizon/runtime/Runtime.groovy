@@ -100,7 +100,7 @@ final class Runtime {
 			// Have the Esc key close the application
 			var inputSystem = new InputSystem()
 			inputSystem.on(KeyEvent) { event ->
-				if (event.isKeyPress(GLFW_KEY_ESCAPE)) {
+				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
 					stop()
 				}
 			}
