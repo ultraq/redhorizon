@@ -41,10 +41,19 @@ interface ImageDecoder {
 	/**
 	 * The result of the decoding process.
 	 */
-	@ImmutableOptions(knownImmutables = ['data'])
-	record DecodeSummary(int width, int height, int colourChannels, ByteBuffer data, String fileInformation) {
-		DecodeSummary(int width, int height, int colourChannels, ByteBuffer data) {
-			this(width, height, colourChannels, data, null)
+	@ImmutableOptions(knownImmutables = ['data', 'palette'])
+	record DecodeSummary(int width, int height, int channels, ByteBuffer data, Palette palette, String fileInformation) {
+
+		DecodeSummary(int width, int height, int channels, ByteBuffer data, Palette palette) {
+			this(width, height, channels, data, palette, null)
+		}
+
+		DecodeSummary(int width, int height, int channels, ByteBuffer data, String fileInformation) {
+			this(width, height, channels, data, null, fileInformation)
+		}
+
+		DecodeSummary(int width, int height, int channels, ByteBuffer data) {
+			this(width, height, channels, data, null, null)
 		}
 	}
 }

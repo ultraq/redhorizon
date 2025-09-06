@@ -30,7 +30,7 @@ import spock.lang.Specification
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class AudFileDecoderTests extends Specification {
+class AudioDecoderTests extends Specification {
 
 	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')

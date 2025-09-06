@@ -63,7 +63,10 @@ class Image implements AutoCloseable {
 
 		mesh = imageMesh
 		instances.incrementAndGet()
-		texture = new OpenGLTexture(result.width(), result.height(), result.colourChannels(), result.data())
+		var palette = result.palette()
+		texture = palette ?
+			new OpenGLTexture(result.width(), result.height(), palette.channels, result.data().applyPalette(palette)) :
+			new OpenGLTexture(result.width(), result.height(), result.channels(), result.data())
 		material = new Material(texture: texture)
 		transform = new Matrix4f().scale(result.width(), result.height(), 1)
 	}

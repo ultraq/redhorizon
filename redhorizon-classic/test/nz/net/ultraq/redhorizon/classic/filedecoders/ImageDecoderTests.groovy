@@ -34,7 +34,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class PcxFileDecoderTests extends Specification {
+class ImageDecoderTests extends Specification {
 
 	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
@@ -69,6 +69,36 @@ class PcxFileDecoderTests extends Specification {
 			var view = new Matrix4f().setLookAt(
 				320, 200, 10,
 				320, 200, 0,
+				0, 1, 0
+			)
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.withFrame { ->
+					shader.use()
+					shader.setUniform('view', view)
+					shader.setUniform('projection', projection)
+					image.draw(shader)
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			shader?.close()
+			image?.close()
+			inputStream?.close()
+	}
+
+	def "Draw a CPS file using the Image SPI"() {
+		given:
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/alipaper.cps'))
+			var image = new Image('alipaper.cps', inputStream)
+			var shader = new BasicShader()
+			var projection = new Matrix4f().setOrthoSymmetric(320, 240, 0, 10)
+			var view = new Matrix4f().setLookAt(
+				160, 100, 10,
+				160, 100, 0,
 				0, 1, 0
 			)
 		when:

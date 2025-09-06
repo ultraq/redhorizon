@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics.extensions
 
+import nz.net.ultraq.redhorizon.graphics.Palette
+
 import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
@@ -26,6 +28,24 @@ import java.nio.ByteBuffer
  */
 @CompileStatic
 class ByteBufferImageExtensions {
+
+	/**
+	 * Applies a palette to indexed image data, returning a buffer of full colour
+	 * image data.
+	 *
+	 * @param self
+	 * @param palette Palette data to use.
+	 * @return A new {@code ByteBuffer} of the combined indexed and palette data.
+	 */
+	static ByteBuffer applyPalette(ByteBuffer self, Palette palette) {
+
+		var dest = ByteBuffer.allocateNative(self.limit() * palette.channels)
+		while (self.hasRemaining()) {
+			dest.put(palette[self.get() & 0xff])
+		}
+		self.rewind()
+		return dest.flip()
+	}
 
 	/**
 	 * If an image buffer contains an image less than the specified dimensions,
@@ -55,14 +75,14 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of each image.
 	 * @param height Height of each image
-	 * @param colourChannels
+	 * @param channels
 	 * @param imagesX Number of images to fit on the X axis.
 	 * @return Single combined image buffer.
 	 */
-	static ByteBuffer combine(ByteBuffer[] self, int width, int height, int colourChannels, int imagesX) {
+	static ByteBuffer combine(ByteBuffer[] self, int width, int height, int channels, int imagesX) {
 
 		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
-		var compileWidth = width * colourChannels * imagesX as int
+		var compileWidth = width * channels * imagesX as int
 		var compileHeight = height * imagesY
 		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
 
@@ -74,7 +94,7 @@ class ByteBufferImageExtensions {
 			height.times { y ->
 				compilation
 					.position(compilationPointer)
-					.put(image, width * colourChannels)
+					.put(image, width * channels)
 				compilationPointer += compileWidth
 			}
 			image.rewind()
@@ -91,13 +111,13 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of the image.
 	 * @param height Height of the image.
-	 * @param colourChannels The number of colour channels in each pixel.
+	 * @param channels The number of colour channels in each pixel.
 	 * @return A new buffer with the horizontal pixel data flipped.
 	 */
-	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, int colourChannels) {
+	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, int channels) {
 
 		var flippedImageBuffer = ByteBuffer.allocateNative(self.capacity())
-		var rowSize = width * colourChannels
+		var rowSize = width * channels
 		height.times { y ->
 			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
 		}
@@ -111,11 +131,11 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of each image.
 	 * @param height Height of each image.
-	 * @param colourChannels The number of colour channels in each pixel.
+	 * @param channels The number of colour channels in each pixel.
 	 * @return A new array of buffers whose pixel data has been flipped.
 	 */
-	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, int colourChannels) {
+	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, int channels) {
 
-		return self.collect { image -> flipVertical(image, width, height, colourChannels) } as ByteBuffer[]
+		return self.collect { image -> flipVertical(image, width, height, channels) } as ByteBuffer[]
 	}
 }

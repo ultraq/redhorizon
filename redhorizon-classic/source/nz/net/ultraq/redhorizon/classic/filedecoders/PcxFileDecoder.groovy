@@ -16,11 +16,10 @@
 
 package nz.net.ultraq.redhorizon.classic.filedecoders
 
-import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.codecs.RunLengthEncoding
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
+import nz.net.ultraq.redhorizon.graphics.Palette
 
 import java.nio.ByteBuffer
 
@@ -50,7 +49,8 @@ class PcxFileDecoder implements ImageDecoder {
 	static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
 
 	static final int PALETTE_COLOURS      = 256
-	static final int PALETTE_SIZE         = PALETTE_COLOURS * FORMAT_RGB.value
+	static final int PALETTE_CHANNELS     = 3
+	static final int PALETTE_SIZE         = PALETTE_COLOURS * PALETTE_CHANNELS
 	static final int PALETTE_PADDING_SIZE = 1
 	// @formatter:on
 
@@ -114,13 +114,11 @@ class PcxFileDecoder implements ImageDecoder {
 			}
 		}
 		indexData.flip()
+		indexData = indexData.flipVertical(width, height, 1)
 
 		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
-		var palette = new Palette(PALETTE_COLOURS, FORMAT_RGB, paletteData)
+		var palette = new Palette(PALETTE_COLOURS, PALETTE_CHANNELS, paletteData)
 
-		// Apply palette to raw image data to create the final image
-		var imageData = indexData.applyPalette(palette).flipVertical(width, height, 3)
-
-		return new DecodeSummary(width, height, 3, imageData, "PCX file, ${width}x${height}, 24-bit w/ 256 colour palette")
+		return new DecodeSummary(width, height, 1, indexData, palette, "PCX file, ${width}x${height}, 24-bit w/ 256 colour palette")
 	}
 }

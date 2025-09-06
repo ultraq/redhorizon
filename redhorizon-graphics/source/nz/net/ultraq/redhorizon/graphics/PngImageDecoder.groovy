@@ -35,11 +35,11 @@ class PngImageDecoder implements ImageDecoder {
 		var bufferedImage = ImageIO.read(inputStream)
 		var width = bufferedImage.width
 		var height = bufferedImage.height
-		var colourChannels = bufferedImage.colorModel.numComponents
+		var channels = bufferedImage.colorModel.numComponents
 
-		return new DecodeSummary(width, height, colourChannels,
+		return new DecodeSummary(width, height, channels,
 			bufferedImage.getRGB(0, 0, width, height, null, 0, width)
-				.inject(ByteBuffer.allocateNative(width * height * colourChannels)) { ByteBuffer acc, pixel ->
+				.inject(ByteBuffer.allocateNative(width * height * channels)) { ByteBuffer acc, pixel ->
 					var red = (byte)(pixel >> 16)
 					var green = (byte)(pixel >> 8)
 					var blue = (byte)(pixel)
@@ -47,6 +47,6 @@ class PngImageDecoder implements ImageDecoder {
 					acc.put(red).put(green).put(blue).put(alpha)
 				}
 				.flip()
-				.flipVertical(width, height, colourChannels))
+				.flipVertical(width, height, channels))
 	}
 }

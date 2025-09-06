@@ -132,10 +132,10 @@ class GraphicsCheck extends Specification {
 			var bufferedImage = ImageIO.read(imageStream)
 			var width = bufferedImage.width
 			var height = bufferedImage.height
-			var colourChannels = bufferedImage.colorModel.numComponents
-			var texture = new OpenGLTexture(width, height, colourChannels,
+			var channels = bufferedImage.colorModel.numComponents
+			var texture = new OpenGLTexture(width, height, channels,
 				bufferedImage.getRGB(0, 0, width, height, null, 0, width)
-					.inject(ByteBuffer.allocateNative(width * height * colourChannels)) { ByteBuffer acc, pixel ->
+					.inject(ByteBuffer.allocateNative(width * height * channels)) { ByteBuffer acc, pixel ->
 						var red = (byte)(pixel >> 16)
 						var green = (byte)(pixel >> 8)
 						var blue = (byte)(pixel)
@@ -143,8 +143,8 @@ class GraphicsCheck extends Specification {
 						acc.put(red).put(green).put(blue).put(alpha)
 					}
 					.flip()
-					.flipVertical(width, height, colourChannels))
-			var projection = new Matrix4f().setOrthoSymmetric(10, 10, 0, 10)
+					.flipVertical(width, height, channels))
+			var projection = new Matrix4f().setOrthoSymmetric(8, 6, 0, 10)
 			var view = new Matrix4f().setLookAt(
 				0, 0, 10,
 				0, 0, 0,
@@ -178,7 +178,7 @@ class GraphicsCheck extends Specification {
 			var shader = new BasicShader()
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
 			var image = new Image('GraphicsCheck.png', imageStream)
-			var projection = new Matrix4f().setOrthoSymmetric(100, 100, 0, 10)
+			var projection = new Matrix4f().setOrthoSymmetric(80, 60, 0, 10)
 			var view = new Matrix4f().setLookAt(
 				16, 16, 10,
 				16, 16, 0,

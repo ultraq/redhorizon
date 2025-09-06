@@ -56,7 +56,7 @@ class OpenGLTexture implements Texture {
 	/**
 	 * Constructor, builds an OpenGL texture from existing image data.
 	 */
-	OpenGLTexture(int width, int height, int colourChannels, ByteBuffer data) {
+	OpenGLTexture(int width, int height, int channels, ByteBuffer data) {
 
 		this.width = width
 		this.height = height
@@ -66,7 +66,7 @@ class OpenGLTexture implements Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-		var colourFormat = switch (colourChannels) {
+		var colourFormat = switch (channels) {
 			case 1 -> GL_RED
 			case 3 -> GL_RGB
 			case 4 -> GL_RGBA
@@ -77,7 +77,7 @@ class OpenGLTexture implements Texture {
 				.put(data.array(), data.position(), data.remaining())
 				.flip()
 		}
-		var matchesAlignment = (width * colourChannels) % 4 == 0
+		var matchesAlignment = (width * channels) % 4 == 0
 		if (!matchesAlignment) {
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 		}
