@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
 

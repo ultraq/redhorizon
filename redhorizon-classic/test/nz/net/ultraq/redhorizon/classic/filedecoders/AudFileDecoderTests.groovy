@@ -32,7 +32,7 @@ import spock.lang.Specification
 @IgnoreIf({ env.CI })
 class AudFileDecoderTests extends Specification {
 
-	static {
+	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
 	}
 
@@ -49,15 +49,16 @@ class AudFileDecoderTests extends Specification {
 
 	def "Play an AUD file using the Sound SPI"() {
 		when:
-			getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/affirm1.v00').withBufferedStream { stream ->
-				new Sound('affirm1.v00', stream).withCloseable { sound ->
-					sound.play()
-					while (sound.playing) {
-						Thread.sleep(100)
-					}
-				}
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/affirm1.v00'))
+			var sound = new Sound('affirm1.v00', inputStream)
+			sound.play()
+			while (sound.playing) {
+				Thread.sleep(100)
 			}
 		then:
 			notThrown(Exception)
+		cleanup:
+			sound?.close()
+			inputStream?.close()
 	}
 }
