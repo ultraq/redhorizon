@@ -28,10 +28,31 @@ configure {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.input'
 			}
 		}
+		.withSourcesJar()
+		.withGroovydocJar()
 		.configureSource()
-		.withDependencies() {
-			implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
-			api 'org.lwjgl:lwjgl-glfw'
+			.withDependencies() {
+				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
+				api 'org.lwjgl:lwjgl-glfw'
+			}
+
+	createMavenPublication()
+		.withArtifacts(jar, sourcesJar, groovydocJar)
+		.configurePom() {
+			url = 'https://github.com/ultraq/redhorizon'
+			inceptionYear = '2025'
 		}
+			.useApache20License()
+			.withGitHubScm('ultraq')
+			.withDevelopers([
+				name: 'Emanuel Rabina',
+				email: 'emanuelrabina@gmail.com',
+				url: 'https://www.ultraq.net.nz'
+			])
+		.publishToMavenCentral(
+			findProperty('mavenCentral.publisher.username'),
+			findProperty('mavenCentral.publisher.password'),
+			'nz.net.ultraq'
+		)
 }
 // @formatter:on
