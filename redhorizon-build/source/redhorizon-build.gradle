@@ -21,7 +21,7 @@ plugins {
 
 // @formatter:off
 configure {
-	createGroovyProject()
+	createGroovyLibraryProject()
 		.useJavaVersion(21)
 		.useMavenCentralRepositories()
 		.configureSource()
@@ -29,9 +29,8 @@ configure {
 			.withDependencies() {
 				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.0.0-SNAPSHOT'
 				implementation 'nz.net.ultraq.groovy:groovy-profiling-extensions:0.10.0'
-				implementation "org.apache.groovy:groovy:${groovyVersion}"
-				implementation platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
-				implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+				api "org.apache.groovy:groovy:${groovyVersion}"
+				api "org.slf4j:slf4j-api:${slf4jVersion}"
 			}
 			.expandExtensionModuleVersion()
 			.expand('**/*.properties', [version: version])
