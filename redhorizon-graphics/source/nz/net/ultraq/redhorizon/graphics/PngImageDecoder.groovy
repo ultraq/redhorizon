@@ -43,8 +43,12 @@ class PngImageDecoder implements ImageDecoder {
 					var red = (byte)(pixel >> 16)
 					var green = (byte)(pixel >> 8)
 					var blue = (byte)(pixel)
-					var alpha = (byte)(pixel >> 24)
-					acc.put(red).put(green).put(blue).put(alpha)
+					acc.put(red).put(green).put(blue)
+					if (channels == 4) {
+						var alpha = (byte)(pixel >> 24)
+						acc.put(alpha)
+					}
+					return acc
 				}
 				.flip()
 				.flipVertical(width, height, channels))
