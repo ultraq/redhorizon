@@ -20,16 +20,17 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
-import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
+import static org.lwjgl.glfw.GLFWErrorCallback.*
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.KHRDebug.*
-import static org.lwjgl.system.MemoryUtil.NULL
+import static org.lwjgl.system.MemoryUtil.*
 
 /**
  * A window using OpenGL as the API.
@@ -103,6 +104,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
 			trigger(new KeyEvent(key, scancode, action, mods))
+		}
+		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
+			trigger(new MouseButtonEvent(button, action, mods))
 		}
 	}
 

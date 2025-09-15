@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.engine.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.input.KeyControl
 import nz.net.ultraq.redhorizon.engine.input.MouseButtonControl
-import nz.net.ultraq.redhorizon.engine.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
 import nz.net.ultraq.redhorizon.engine.input.ScrollEvent
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
@@ -38,6 +37,7 @@ import nz.net.ultraq.redhorizon.explorer.animation.EasingFunctions
 import nz.net.ultraq.redhorizon.explorer.animation.Transition
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
 import org.joml.Vector2f
 import org.joml.Vector3f
