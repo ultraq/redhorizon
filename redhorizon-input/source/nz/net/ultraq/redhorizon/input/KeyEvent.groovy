@@ -30,7 +30,7 @@ record KeyEvent(int key, int scancode, int action, int mods) implements InputEve
 	 */
 	boolean keyPressed(int key, boolean includeRepeat = false) {
 
-		return this.key == key && action == GLFW_PRESS || (action == GLFW_REPEAT && includeRepeat)
+		return this.key == key && (action == GLFW_PRESS || (action == GLFW_REPEAT && includeRepeat))
 	}
 
 	/**
