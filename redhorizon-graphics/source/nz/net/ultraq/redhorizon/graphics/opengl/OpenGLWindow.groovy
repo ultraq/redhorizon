@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
@@ -107,6 +108,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
 			trigger(new MouseButtonEvent(button, action, mods))
+		}
+		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
+			trigger(new CursorPositionEvent(xpos, ypos))
 		}
 	}
 

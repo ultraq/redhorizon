@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
-
-import nz.net.ultraq.redhorizon.input.InputEvent
+package nz.net.ultraq.redhorizon.input
 
 import groovy.transform.TupleConstructor
 
