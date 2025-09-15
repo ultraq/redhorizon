@@ -65,6 +65,6 @@ class OggAudioDecoder implements AudioDecoder {
 		}
 
 		return new DecodeSummary(bits, channels, frequency, numSamples,
-			"Ogg file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}")
+			"OGG file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}")
 	}
 }

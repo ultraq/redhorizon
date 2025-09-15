@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.eventhorizon.EventTarget
+
 import groovy.transform.ImmutableOptions
 import java.nio.ByteBuffer
 
@@ -25,10 +28,12 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface ImageDecoder {
+interface ImageDecoder extends EventTarget<ImageDecoder> {
 
 	/**
-	 * Perform the decoding process.
+	 * Perform the decoding process.  The image will be emitted in an
+	 * {@link FrameDecodedEvent} and this method will block until the process is
+	 * complete.
 	 */
 	DecodeSummary decode(InputStream inputStream)
 
@@ -39,21 +44,21 @@ interface ImageDecoder {
 	String[] getSupportedFileExtensions()
 
 	/**
-	 * The result of the decoding process.
+	 * Event for the streaming of a frame of image data.
 	 */
 	@ImmutableOptions(knownImmutables = ['data', 'palette'])
-	record DecodeSummary(int width, int height, int channels, ByteBuffer data, Palette palette, String fileInformation) {
-
-		DecodeSummary(int width, int height, int channels, ByteBuffer data, Palette palette) {
-			this(width, height, channels, data, palette, null)
+	record FrameDecodedEvent(int width, int height, int channels, ByteBuffer data, Palette palette) implements Event {
+		FrameDecodedEvent(int width, int height, int channels, ByteBuffer data) {
+			this(width, height, channels, data, null)
 		}
+	}
 
-		DecodeSummary(int width, int height, int channels, ByteBuffer data, String fileInformation) {
-			this(width, height, channels, data, null, fileInformation)
-		}
-
-		DecodeSummary(int width, int height, int channels, ByteBuffer data) {
-			this(width, height, channels, data, null, null)
+	/**
+	 * The result of the decoding process.
+	 */
+	record DecodeSummary(int width, int height, int channels, int frames, String fileInformation) {
+		DecodeSummary(int width, int height, int channels, int frames) {
+			this(width, height, channels, frames, null)
 		}
 	}
 }

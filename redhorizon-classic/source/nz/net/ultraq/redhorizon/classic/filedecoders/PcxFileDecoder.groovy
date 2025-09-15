@@ -119,6 +119,8 @@ class PcxFileDecoder implements ImageDecoder {
 		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 		var palette = new Palette(PALETTE_COLOURS, PALETTE_CHANNELS, paletteData)
 
-		return new DecodeSummary(width, height, 1, indexData, palette, "PCX file, ${width}x${height}, 24-bit w/ 256 colour palette")
+		trigger(new FrameDecodedEvent(width, height, 1, indexData, palette))
+
+		return new DecodeSummary(width, height, 1, 1, "PCX file, ${width}x${height}, 24-bit w/ 256 colour palette")
 	}
 }

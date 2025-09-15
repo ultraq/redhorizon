@@ -47,12 +47,12 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	 * Event for the streaming of a sample of sound data.
 	 */
 	@ImmutableOptions(knownImmutables = ['sample'])
-	static record SampleDecodedEvent(int bits, int channels, int frequency, ByteBuffer sample) implements Event {}
+	record SampleDecodedEvent(int bits, int channels, int frequency, ByteBuffer sample) implements Event {}
 
 	/**
 	 * The result of the decoding process.
 	 */
-	static record DecodeSummary(int bits, int channels, int frequency, int samples, String fileInformation) {
+	record DecodeSummary(int bits, int channels, int frequency, int samples, String fileInformation) {
 		DecodeSummary(int bits, int channels, int frequency, int samples) {
 			this(bits, channels, frequency, samples, null)
 		}

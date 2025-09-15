@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
@@ -26,6 +27,7 @@ import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -52,9 +54,18 @@ class Image implements AutoCloseable {
 	 */
 	Image(String fileName, InputStream inputStream) {
 
+		ByteBuffer imageData = null
+		Palette palette = null
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+			.on(FrameDecodedEvent) { event ->
+				imageData = event.data()
+				palette = event.palette()
+			}
 			.decode(inputStream)
+		while (!imageData) {
+			Thread.onSpinWait()
+		}
 
 		var fileInformation = result.fileInformation()
 		if (fileInformation) {
@@ -63,10 +74,9 @@ class Image implements AutoCloseable {
 
 		mesh = imageMesh
 		instances.incrementAndGet()
-		var palette = result.palette()
 		texture = palette ?
-			new OpenGLTexture(result.width(), result.height(), palette.channels, result.data().applyPalette(palette)) :
-			new OpenGLTexture(result.width(), result.height(), result.channels(), result.data())
+			new OpenGLTexture(result.width(), result.height(), palette.channels, imageData.applyPalette(palette)) :
+			new OpenGLTexture(result.width(), result.height(), result.channels(), imageData)
 		material = new Material(texture: texture)
 		transform = new Matrix4f().scale(result.width(), result.height(), 1)
 	}

@@ -80,7 +80,9 @@ class CpsFileDecoder implements ImageDecoder {
 		var dest = ByteBuffer.allocateNative(imageSize)
 		var indexData = new LCW().decode(source, dest).flipVertical(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS)
 
-		return new DecodeSummary(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS, indexData, palette,
+		trigger(new FrameDecodedEvent(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS, indexData, palette))
+
+		return new DecodeSummary(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS, 1,
 			"CPS file, ${IMAGE_WIDTH}x${IMAGE_HEIGHT}, 8-bit ${palette ? 'w/ internal palette' : '(no palette)'}")
 	}
 }
