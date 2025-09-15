@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.input
 
+import static org.lwjgl.glfw.GLFW.*
+
 import groovy.transform.TupleConstructor
 
 /**
@@ -29,4 +31,20 @@ class MouseButtonEvent implements InputEvent {
 	final int button
 	final int action
 	final int mods
+
+	/**
+	 * Return whether this event is for a button press for the given button.
+	 */
+	boolean buttonPressed(int button) {
+
+		return this.button == button && action == GLFW_PRESS
+	}
+
+	/**
+	 * Return whether this event is for a button release for the given button.
+	 */
+	boolean buttonReleased(int button) {
+
+		return this.button == button && action == GLFW_RELEASE
+	}
 }
