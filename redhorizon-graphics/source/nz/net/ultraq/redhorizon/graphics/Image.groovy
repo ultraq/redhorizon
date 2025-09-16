@@ -28,7 +28,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * A simple texture and rectangle mesh pair for displaying a 2D image in a
@@ -40,14 +39,12 @@ class Image implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Image)
 
-	@Lazy
-	private static volatile Mesh imageMesh = { createImageMesh() }()
-	private static AtomicInteger instances = new AtomicInteger()
-
 	private final Mesh mesh
 	private final Texture texture
+	final int width
+	final int height
 	final Material material
-	final Matrix4f transform
+	final Matrix4f transform = new Matrix4f()
 
 	/**
 	 * Constructor, create a new image using its name and a stream of data.
@@ -72,13 +69,22 @@ class Image implements AutoCloseable {
 			logger.info('{}: {}', fileName, fileInformation)
 		}
 
-		mesh = imageMesh
-		instances.incrementAndGet()
+		width = result.width()
+		height = result.height()
+
+		mesh = new OpenGLMesh(Type.TRIANGLES,
+			new Vertex[]{
+				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
+				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
+				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
+				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
+			},
+			new int[]{ 0, 1, 2, 2, 3, 0 }
+		)
 		texture = palette ?
-			new OpenGLTexture(result.width(), result.height(), palette.channels, imageData.applyPalette(palette)) :
-			new OpenGLTexture(result.width(), result.height(), result.channels(), imageData)
+			new OpenGLTexture(width, height, palette.channels, imageData.applyPalette(palette)) :
+			new OpenGLTexture(width, height, result.channels(), imageData)
 		material = new Material(texture: texture)
-		transform = new Matrix4f().scale(result.width(), result.height(), 1)
 	}
 
 	@Override
@@ -86,27 +92,6 @@ class Image implements AutoCloseable {
 
 		texture?.close()
 		mesh?.close()
-		if (instances.decrementAndGet() == 0) {
-			imageMesh?.close()
-		}
-	}
-
-	/**
-	 * Create the single mesh used for all image instances.  It's the image/model
-	 * transform that will size and position the mesh to match what the image
-	 * needs on rendering.
-	 */
-	private static Mesh createImageMesh() {
-
-		return new OpenGLMesh(Type.TRIANGLES,
-			new Vertex[]{
-				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-				new Vertex(new Vector3f(1, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
-				new Vertex(new Vector3f(1, 1, 0), Colour.WHITE, new Vector2f(1, 1)),
-				new Vertex(new Vector3f(0, 1, 0), Colour.WHITE, new Vector2f(0, 1))
-			},
-			new int[]{ 0, 1, 2, 2, 3, 0 }
-		)
 	}
 
 	/**

@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.input.KeyEvent
 import org.joml.Matrix4f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Check that a PCX file can be read and rendered using the {@link PcxFileDecoder}
