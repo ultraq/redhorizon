@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-nz.net.ultraq.redhorizon.audio.OggAudioDecoder
+nz.net.ultraq.redhorizon.audio.FFSampledSPAudioDecoder

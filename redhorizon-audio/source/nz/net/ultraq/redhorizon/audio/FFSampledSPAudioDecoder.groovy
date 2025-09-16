@@ -21,22 +21,22 @@ import javax.sound.sampled.AudioFormat.Encoding
 import javax.sound.sampled.AudioSystem
 
 /**
- * A sound decoder for OGG files.  This implementation is a wrapper around the
- * OGG decoding provided by the <a href="https://github.com/hendriks73/ffsampledsp">ffsamplessp</a>
- * project, which in turn provides the decoder for use with the
- * {@code javax.sound.samples} package.
+ * A sound decoder for file formats provided in the
+ * <a href="https://github.com/hendriks73/ffsampledsp">ffsamplessp</a> project,
+ * which in turn provides the decoder for use with the {@code javax.sound.samples}
+ * package.
  *
  * @author Emanuel Rabina
  */
-class OggAudioDecoder implements AudioDecoder {
+class FFSampledSPAudioDecoder implements AudioDecoder {
 
-	final String[] supportedFileExtensions = ['ogg']
+	final String[] supportedFileExtensions = ['mp3', 'ogg']
 
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
 
-		def (bits, channels, frequency, numSamples) = AudioSystem.getAudioInputStream(inputStream).withCloseable { oggStream ->
-			return AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, oggStream).withCloseable { pcmStream ->
+		def (encoding, bits, channels, frequency, numSamples) = AudioSystem.getAudioInputStream(inputStream).withCloseable { encodedStream ->
+			return AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, encodedStream).withCloseable { pcmStream ->
 				var format = pcmStream.format
 				var bits = format.sampleSizeInBits
 				var channels = format.channels
@@ -60,11 +60,12 @@ class OggAudioDecoder implements AudioDecoder {
 					}
 				}
 
-				return new Tuple4<Integer, Integer, Integer, Integer>(bits, channels, frequency, numFrames)
+				return new Tuple5<Encoding, Integer, Integer, Integer, Integer>(
+					encodedStream.format.encoding, bits, channels, frequency, numFrames)
 			}
 		}
 
 		return new DecodeSummary(bits, channels, frequency, numSamples,
-			"OGG file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}")
+			"${encoding} file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}")
 	}
 }
