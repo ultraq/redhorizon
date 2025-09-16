@@ -116,7 +116,7 @@ interface Window extends AutoCloseable {
 	 * closure and surrounding it with the necessary {@link #beginFrame} and
 	 * {@link #endFrame} calls.
 	 */
-	default void withFrame(Closure<Void> closure) {
+	default void withFrame(Closure closure) {
 
 		beginFrame()
 		closure()
