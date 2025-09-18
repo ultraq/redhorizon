@@ -33,8 +33,12 @@ configure {
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation("org.joml:joml:${jomlVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
 				implementation 'org.lwjgl:lwjgl'
 				implementation 'org.lwjgl:lwjgl-glfw'
 				implementation 'org.lwjgl:lwjgl-openal'

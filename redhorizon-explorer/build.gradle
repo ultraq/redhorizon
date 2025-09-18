@@ -31,8 +31,12 @@ configure {
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation 'nz.net.ultraq.preferences:preferences:3.1.0'
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation("org.joml:joml:${jomlVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
 				implementation 'org.lwjgl:lwjgl'
 				implementation 'org.lwjgl:lwjgl-glfw'
 			}

@@ -44,8 +44,6 @@ configure {
 				implementation "ch.qos.logback:logback-core:${logbackVersion}"
 				implementation "info.picocli:picocli:${picocliVersion}"
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 			}
 		.configureVerification()

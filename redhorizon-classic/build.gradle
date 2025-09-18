@@ -51,7 +51,9 @@ configure {
 				implementation project(':redhorizon-input')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
 			}
 		.configureVerification()
 			.withTestDependencies() {

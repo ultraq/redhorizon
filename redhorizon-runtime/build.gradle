@@ -33,8 +33,12 @@ configure {
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation("org.joml:joml:${jomlVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
 				implementation 'org.lwjgl:lwjgl-glfw'
 			}
 }
