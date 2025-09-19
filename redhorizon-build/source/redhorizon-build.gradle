@@ -27,7 +27,7 @@ configure {
 		.configureSource()
 			.withSourceDirectory('source')
 			.withDependencies() {
-				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.0.0-SNAPSHOT'
+				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.0.0'
 				implementation 'nz.net.ultraq.groovy:groovy-profiling-extensions:0.10.0'
 				api "org.apache.groovy:groovy:${groovyVersion}"
 				api "org.slf4j:slf4j-api:${slf4jVersion}"
