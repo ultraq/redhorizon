@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
+import nz.net.ultraq.redhorizon.input.InputSource
 
 import org.lwjgl.glfw.GLFWGamepadState
 import static org.lwjgl.glfw.GLFW.*

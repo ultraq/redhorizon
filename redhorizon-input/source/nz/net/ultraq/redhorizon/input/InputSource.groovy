@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.input
 
 import nz.net.ultraq.eventhorizon.EventTarget
 
 /**
- * Any event target made for the input engine.
+ * A marker interface for any event target that will emit any of the input
+ * events in this module.
  *
  * @author Emanuel Rabina
  */

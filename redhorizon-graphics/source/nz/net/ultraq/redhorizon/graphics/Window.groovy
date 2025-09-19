@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.input.InputSource
+
 /**
  * The video interface through which the graphics are rendered.  One must first
  * be created before any other graphics operations can be performed.
@@ -33,7 +35,7 @@ package nz.net.ultraq.redhorizon.graphics
  *
  * @author Emanuel Rabina
  */
-interface Window extends AutoCloseable {
+interface Window extends AutoCloseable, InputSource {
 
 	/**
 	 * Clear the framebuffer to start rendering a new frame.

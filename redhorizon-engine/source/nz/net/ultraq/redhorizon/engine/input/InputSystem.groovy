@@ -23,11 +23,12 @@ import nz.net.ultraq.redhorizon.engine.EngineSystemType
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.WindowCreatedEvent
 import nz.net.ultraq.redhorizon.input.InputEvent
+import nz.net.ultraq.redhorizon.input.InputSource
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS
+import static org.lwjgl.glfw.GLFW.*
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.BrokenBarrierException

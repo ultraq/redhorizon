@@ -33,6 +33,9 @@ configure {
 		.configureSource()
 			.withDependencies() {
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
+					exclude group: 'org.jetbrains.kotlin'
+				}
 				api platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 				api 'org.lwjgl:lwjgl-glfw'
 			}

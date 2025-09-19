@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics
 
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.input.InputSource
 
 /**
  * The window device/handle, and related operations.

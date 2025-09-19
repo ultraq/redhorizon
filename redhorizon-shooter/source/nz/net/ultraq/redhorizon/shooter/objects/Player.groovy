@@ -152,7 +152,7 @@ class Player extends Node<Player> implements GameObject, InputHandler, Rotatable
 		if (inputEvent instanceof CursorPositionEvent) {
 			inputHandled { ->
 				lookAt
-					.set(inputEvent.xPos, scene.window.size.height() - inputEvent.yPos)
+					.set(inputEvent.xPos(), scene.window.size.height() - inputEvent.yPos())
 					.div(scene.window.renderToWindowScale)
 			}
 		}

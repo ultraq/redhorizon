@@ -83,7 +83,7 @@ class GraphicsSystem extends EngineSystem implements GraphicsRequests {
 	 */
 	private void checkScreenMode(MouseButtonEvent event) {
 
-		if (event.button == GLFW_MOUSE_BUTTON_1 && event.action == GLFW_RELEASE) {
+		if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
 			def clickTime = System.currentTimeMillis()
 			if (clickTime - lastClickTime < 300) {
 				shouldToggleFullScreen = true

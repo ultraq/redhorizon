@@ -61,7 +61,7 @@ class MouseButtonControl extends Control<MouseButtonEvent> {
 	@Override
 	void handleEvent(MouseButtonEvent event) {
 
-		if (event.button == button && event.mods == modifier) {
+		if (event.button() == button && event.mods() == modifier) {
 			handler()
 		}
 	}

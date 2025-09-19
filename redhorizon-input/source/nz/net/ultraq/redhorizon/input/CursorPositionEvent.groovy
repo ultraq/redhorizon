@@ -16,16 +16,10 @@
 
 package nz.net.ultraq.redhorizon.input
 
-import groovy.transform.TupleConstructor
-
 /**
  * Event for cursor movement.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class CursorPositionEvent implements InputEvent {
-
-	final double xPos
-	final double yPos
+record CursorPositionEvent(double xPos, double yPos) implements InputEvent {
 }

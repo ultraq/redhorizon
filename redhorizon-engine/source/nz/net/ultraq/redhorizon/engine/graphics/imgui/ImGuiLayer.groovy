@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
 import nz.net.ultraq.redhorizon.engine.graphics.Window
-import nz.net.ultraq.redhorizon.engine.input.InputSource
+import nz.net.ultraq.redhorizon.input.InputSource
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import imgui.ImFont
@@ -30,9 +30,8 @@ import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static imgui.flag.ImGuiConfigFlags.DockingEnable
-import static imgui.flag.ImGuiDockNodeFlags.NoResize
-import static imgui.flag.ImGuiDockNodeFlags.PassthruCentralNode
+import static imgui.flag.ImGuiConfigFlags.*
+import static imgui.flag.ImGuiDockNodeFlags.*
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 import static org.lwjgl.glfw.GLFW.*

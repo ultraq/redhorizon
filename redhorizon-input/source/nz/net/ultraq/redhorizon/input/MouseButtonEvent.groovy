@@ -18,19 +18,12 @@ package nz.net.ultraq.redhorizon.input
 
 import static org.lwjgl.glfw.GLFW.*
 
-import groovy.transform.TupleConstructor
-
 /**
  * Event for mouse input
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class MouseButtonEvent implements InputEvent {
-
-	final int button
-	final int action
-	final int mods
+record MouseButtonEvent(int button, int action, int mods) implements InputEvent {
 
 	/**
 	 * Return whether this event is for a button press for the given button.

@@ -143,13 +143,13 @@ class MapViewerScript extends Script<Map> {
 			}
 			removeEventListenerTokens << new RemovalToken()
 			inputSystem.on(MouseButtonEvent, removeEventListenerTokens.last()) { event ->
-				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-					if (event.action == GLFW_PRESS) {
+				if (event.button() == GLFW_MOUSE_BUTTON_LEFT) {
+					if (event.action() == GLFW_PRESS) {
 						if (gameWindow ? gameWindow.hovered : true) {
 							dragging = true
 						}
 					}
-					else if (event.action == GLFW_RELEASE) {
+					else if (event.action() == GLFW_RELEASE) {
 						dragging = false
 					}
 				}
