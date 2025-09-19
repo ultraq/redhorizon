@@ -130,4 +130,13 @@ class Sound implements AutoCloseable {
 		}
 		return this
 	}
+
+	/**
+	 * Set the volume of the sound.
+	 */
+	Sound withVolume(float volume) {
+
+		source.withVolume(volume)
+		return this
+	}
 }

@@ -98,4 +98,9 @@ interface Source extends AudioResource {
 	 * Unqueue buffers from this source.
 	 */
 	void unqueueBuffers(Buffer... buffers)
+
+	/**
+	 * Set the volume of the source.
+	 */
+	Source withVolume(float volume)
 }

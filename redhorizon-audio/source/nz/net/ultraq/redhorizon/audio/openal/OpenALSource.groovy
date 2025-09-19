@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.audio.Buffer
 import nz.net.ultraq.redhorizon.audio.Source
 
 import static org.lwjgl.openal.AL10.*
-import static org.lwjgl.openal.AL11.AL_UNDETERMINED
+import static org.lwjgl.openal.AL11.*
 
 /**
  * OpenAL-specific source implementation.
@@ -140,5 +140,12 @@ class OpenALSource implements Source {
 	void unqueueBuffers(Buffer... buffers) {
 
 		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
+	}
+
+	@Override
+	Source withVolume(float volume) {
+
+		alSourcef(sourceId, AL_GAIN, volume)
+		return this
 	}
 }
