@@ -34,6 +34,7 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-input')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
+				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation("org.joml:joml:${jomlVersion}") {
 					exclude group: 'org.jetbrains.kotlin'
 				}

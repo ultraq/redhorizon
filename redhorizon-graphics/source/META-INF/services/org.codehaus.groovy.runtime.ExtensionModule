@@ -17,4 +17,3 @@
 moduleName = redhorizon-graphics
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.graphics.extensions.ByteBufferImageExtensions
-staticExtensionClasses = nz.net.ultraq.redhorizon.graphics.extensions.JomlStaticExtensions

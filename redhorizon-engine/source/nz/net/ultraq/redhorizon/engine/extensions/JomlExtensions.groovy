@@ -106,18 +106,6 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Set a rectangle to represent the given values.
-	 */
-	static Rectanglef set(Rectanglef self, float minX, float minY, float maxX, float maxY) {
-
-		self.minX = minX
-		self.minY = minY
-		self.maxX = maxX
-		self.maxY = maxY
-		return self
-	}
-
-	/**
 	 * Test whether an XY plane represented by a rectangle is within this frustum.
 	 */
 	static boolean testPlaneXY(FrustumIntersection self, Rectanglef plane) {
