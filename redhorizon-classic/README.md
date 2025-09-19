@@ -20,10 +20,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-classic`
-
-Check the [project releases](https://github.com/ultraq/redhorizon/releases)
-for a list of available versions.  Each release page also includes a
-downloadable JAR if you want to manually add it to your project classpath.
+ - Version: `0.35.0`
 
 
 Codecs
@@ -75,3 +72,10 @@ package](source/nz/net/ultraq/redhorizon/classic/filetypes):
    Full motion video file for briefing videos and cutscenes.
  - **WSA**:
    Full screen animations, contain no sound.
+
+
+API
+---
+
+Browse the online groovydocs for the full API:
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-classic

@@ -22,6 +22,18 @@ development.
 Installation
 ------------
 
+Currently, this project consists of several modules in an attempt to prove out
+various parts of the overall engine. The first standalone modules are:
+
+ - [`redhorizon-audio`](redhorizon-audio)
+ - [`redhorizon-graphics`](redhorizon-graphics)
+ - [`redhorizon-input`](redhorizon-input)
+
+Instructions for use in projects can be found in each of those subproject
+READMEs.
+
+### Other releases
+
 To use the CLI tools (file conversion, playing back audio/video, viewing
 maps/units), check [the `redhorizon-cli` project](redhorizon-cli) for
 installation instructions.

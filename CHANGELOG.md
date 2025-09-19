@@ -2,6 +2,25 @@
 Changelog
 =========
 
+### 0.40.0
+
+The latest release in a long time, the 0.40.x versions signify a shift to trying
+to release smaller, standalone pieces for building games, in an effort to prove
+the overall engine.  The first modules to be released are `redhorizon-audio`,
+`redhorizon-graphics`, and `redhorizon-input`, with instructions for use in
+their respective READMEs.
+
+As a way to try prove these components, I'm building some small games based on
+tutorials around the internet, swapping out the libraries used in those
+tutorials for my own from this project, and hopefully improving them along the
+way.  The first project to trial these is
+[redhorizon-libgdx-simplegame](https://github.com/ultraq/redhorizon-libgdx-simplegame).
+
+After this version however, I may stop keeping this changelog up to date, as
+well as creating GitHub releases with each tag, as things are still so far from
+completion that adding all of the minutae around release management will just
+detract from getting stuff done 🙇‍♂️
+
 ### 0.35.0
  - The `redhorizon-classic` module is now up on Maven central, allowing Java/JVM
    developers to use it as a way of reading classic C&C files or decoding C&C
