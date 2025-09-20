@@ -136,7 +136,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	void beginFrame() {
+	void clear() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	}
@@ -149,16 +149,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	void endFrame() {
-
-		glfwSwapBuffers(window)
-		glfwPollEvents()
-	}
-
-	@Override
 	void makeCurrent() {
 
 		glfwMakeContextCurrent(window)
+	}
+
+	@Override
+	void pollEvents() {
+
+		glfwPollEvents()
 	}
 
 	@Override
@@ -184,6 +183,12 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		glfwShowWindow(window)
 		return this
+	}
+
+	@Override
+	void swapBuffers() {
+
+		glfwSwapBuffers(window)
 	}
 
 	@Override

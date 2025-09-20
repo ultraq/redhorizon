@@ -38,14 +38,10 @@ import nz.net.ultraq.redhorizon.input.InputSource
 interface Window extends AutoCloseable, InputSource {
 
 	/**
-	 * Clear the framebuffer to start rendering a new frame.
+	 * Clear the framebuffer with the current clear colour.  Usually called to
+	 * start rendering a new frame.
 	 */
-	void beginFrame()
-
-	/**
-	 * Finish rendering by swapping buffers and polling window input events.
-	 */
-	void endFrame()
+	void clear()
 
 	/**
 	 * Get the height of this window.
@@ -61,6 +57,11 @@ interface Window extends AutoCloseable, InputSource {
 	 * Makes the context current on the executing thread.
 	 */
 	void makeCurrent()
+
+	/**
+	 * Poll for and process all pending events.
+	 */
+	void pollEvents()
 
 	/**
 	 * Releases the context that is current on the executing thread.
@@ -81,6 +82,11 @@ interface Window extends AutoCloseable, InputSource {
 	 * Show the window.
 	 */
 	Window show()
+
+	/**
+	 * Swap the front/back buffers to push the rendered result to the screen.
+	 */
+	void swapBuffers()
 
 	/**
 	 * Switch between windowed and borderless windowed modes.
@@ -115,14 +121,15 @@ interface Window extends AutoCloseable, InputSource {
 
 	/**
 	 * Convenience method for keeping all frame-rendering commands within the
-	 * closure and surrounding it with the necessary {@link #beginFrame} and
-	 * {@link #endFrame} calls.
+	 * closure and surrounding it with the necessary {@link #clear},
+	 * {@link #swapBuffers}, and {@link #pollEvents} calls.
 	 */
 	default void withFrame(Closure closure) {
 
-		beginFrame()
+		clear()
 		closure()
-		endFrame()
+		swapBuffers()
+		pollEvents()
 	}
 
 	/**
