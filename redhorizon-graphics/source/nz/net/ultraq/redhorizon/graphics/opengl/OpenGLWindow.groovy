@@ -50,7 +50,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title, boolean useContentScaling = false) {
+	OpenGLWindow(int width, int height, String title, boolean allowResizing = false, boolean useContentScaling = false) {
 
 		this.width = width
 		this.height = height
@@ -64,6 +64,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
+		glfwWindowHint(GLFW_RESIZABLE, allowResizing ? GLFW_TRUE : GLFW_FALSE)
 		if (useContentScaling) {
 			glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
 			glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
