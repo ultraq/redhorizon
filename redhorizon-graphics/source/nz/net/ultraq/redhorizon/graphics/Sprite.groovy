@@ -32,6 +32,8 @@ import org.joml.Vector3f
 class Sprite implements AutoCloseable {
 
 	private final Mesh mesh
+	final int width
+	final int height
 	final Material material
 	final Matrix4f transform = new Matrix4f()
 
@@ -40,6 +42,8 @@ class Sprite implements AutoCloseable {
 	 */
 	Sprite(Image image, int width = image.width, int height = image.height) {
 
+		this.width = width
+		this.height = height
 		mesh = new OpenGLMesh(Type.TRIANGLES,
 			new Vertex[]{
 				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
@@ -49,7 +53,6 @@ class Sprite implements AutoCloseable {
 			},
 			new int[]{ 0, 1, 2, 2, 3, 0 }
 		)
-
 		material = new Material(texture: image.texture)
 	}
 
