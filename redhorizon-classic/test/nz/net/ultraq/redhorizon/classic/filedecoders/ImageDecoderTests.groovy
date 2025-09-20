@@ -47,7 +47,7 @@ class ImageDecoderTests extends Specification {
 	OpenGLWindow window
 
 	def setup() {
-		window = new OpenGLWindow(800, 600, "Testing")
+		window = new OpenGLWindow(800, 600, "Testing", true)
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->

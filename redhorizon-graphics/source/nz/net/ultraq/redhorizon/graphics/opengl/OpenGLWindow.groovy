@@ -50,7 +50,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title) {
+	OpenGLWindow(int width, int height, String title, boolean useContentScaling = false) {
 
 		this.width = width
 		this.height = height
@@ -64,8 +64,10 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
-		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
-		glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
+		if (useContentScaling) {
+			glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
+			glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
+		}
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
@@ -81,9 +83,12 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwSetWindowAspectRatio(window, width, height)
 		var primaryMonitor = glfwGetPrimaryMonitor()
 		var videoMode = glfwGetVideoMode(primaryMonitor)
-		var contentScalePointer = new float[1]
-		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
-		var contentScale = contentScalePointer[0]
+		var contentScale = 1f
+		if (useContentScaling) {
+			var contentScalePointer = new float[1]
+			glfwGetWindowContentScale(window, contentScalePointer, new float[1])
+			contentScale = contentScalePointer[0]
+		}
 		glfwSetWindowPos(window,
 			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
 			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
