@@ -37,7 +37,17 @@ configure {
 					exclude group: 'org.jetbrains.kotlin'
 				}
 				api platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
+				api 'org.lwjgl:lwjgl'
 				api 'org.lwjgl:lwjgl-glfw'
+
+				['natives-macos-arm64', 'natives-windows'].each { natives ->
+					runtimeOnly "org.lwjgl:lwjgl::${natives}"
+					runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"
+				}
+			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 			}
 
 	createMavenPublication()
