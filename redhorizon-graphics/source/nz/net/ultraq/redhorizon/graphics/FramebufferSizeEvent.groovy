@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-
-import groovy.transform.TupleConstructor
 
 /**
- * Fired when the framebuffer size changes, like when moving the window between
- * monitors with different DPIs.
+ * Fired when the framebuffer size changes, like when resizing the window or
+ * moving the window between monitors with different DPIs.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class FramebufferSizeEvent implements Event {
-
-	final Dimension framebufferSize
-	final Dimension windowSize
-	final Dimension targetResolution
+record FramebufferSizeEvent(int width, int height) implements Event {
 }

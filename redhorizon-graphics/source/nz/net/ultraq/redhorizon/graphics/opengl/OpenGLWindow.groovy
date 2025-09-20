@@ -64,7 +64,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
 		glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
@@ -79,6 +78,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			throw new Exception('Failed to create a window')
 		}
 
+		glfwSetWindowAspectRatio(window, width, height)
 		var primaryMonitor = glfwGetPrimaryMonitor()
 		var videoMode = glfwGetVideoMode(primaryMonitor)
 		var contentScalePointer = new float[1]
@@ -88,8 +88,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
 			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
 
+		// Track framebuffer size changes from window size changes
+		glfwSetFramebufferSizeCallback(window) { long window, int newWidth, int newHeight ->
+			logger.debug('Framebuffer changed to {}x{}', newWidth, newHeight)
+			glViewport(0, 0, newWidth, newHeight)
+		}
+
 		makeCurrent()
 
+		// Enable debug mode if supported (Windows)
 		var capabilities = GL.createCapabilities()
 		if (capabilities.GL_KHR_debug) {
 			glEnable(GL_DEBUG_OUTPUT)

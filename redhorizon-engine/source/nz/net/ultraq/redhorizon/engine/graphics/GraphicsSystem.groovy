@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.engine.graphics.pipeline.RenderPipeline
 import nz.net.ultraq.redhorizon.engine.input.GamepadStateProcessor
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
+import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent

@@ -19,15 +19,15 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.engine.graphics.FramebufferSizeEvent
+import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
 import imgui.ImGui
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static imgui.flag.ImGuiCond.FirstUseEver
-import static imgui.flag.ImGuiStyleVar.WindowPadding
+import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 
 import groovy.transform.TupleConstructor
