@@ -63,6 +63,10 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			throw new Exception('Unable to initialize GLFW')
 		}
 
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
+		glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
@@ -77,7 +81,12 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		var primaryMonitor = glfwGetPrimaryMonitor()
 		var videoMode = glfwGetVideoMode(primaryMonitor)
-		glfwSetWindowPos(window, (videoMode.width() / 2) - (width / 2) as int, (videoMode.height() / 2) - (height / 2) as int)
+		var contentScalePointer = new float[1]
+		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
+		var contentScale = contentScalePointer[0]
+		glfwSetWindowPos(window,
+			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
+			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
 
 		makeCurrent()
 

@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filedecoders
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
+import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -64,6 +65,7 @@ class ImageDecoderTests extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/alipaper.pcx'))
 			var image = new Image('alipaper.pcx', inputStream)
+			var sprite = new Sprite(image)
 			var shader = new BasicShader()
 			var projection = new Matrix4f().setOrthoSymmetric(640, 480, 0, 10)
 			var view = new Matrix4f().setLookAt(
@@ -78,7 +80,7 @@ class ImageDecoderTests extends Specification {
 					shader.use()
 					shader.setUniform('view', view)
 					shader.setUniform('projection', projection)
-					image.draw(shader)
+					sprite.draw(shader)
 				}
 				Thread.yield()
 			}
@@ -86,6 +88,7 @@ class ImageDecoderTests extends Specification {
 			notThrown(Exception)
 		cleanup:
 			shader?.close()
+			sprite?.close()
 			image?.close()
 			inputStream?.close()
 	}
@@ -94,6 +97,7 @@ class ImageDecoderTests extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/alipaper.cps'))
 			var image = new Image('alipaper.cps', inputStream)
+			var sprite = new Sprite(image)
 			var shader = new BasicShader()
 			var projection = new Matrix4f().setOrthoSymmetric(320, 240, 0, 10)
 			var view = new Matrix4f().setLookAt(
@@ -108,7 +112,7 @@ class ImageDecoderTests extends Specification {
 					shader.use()
 					shader.setUniform('view', view)
 					shader.setUniform('projection', projection)
-					image.draw(shader)
+					sprite.draw(shader)
 				}
 				Thread.yield()
 			}
@@ -116,6 +120,7 @@ class ImageDecoderTests extends Specification {
 			notThrown(Exception)
 		cleanup:
 			shader?.close()
+			sprite?.close()
 			image?.close()
 			inputStream?.close()
 	}
