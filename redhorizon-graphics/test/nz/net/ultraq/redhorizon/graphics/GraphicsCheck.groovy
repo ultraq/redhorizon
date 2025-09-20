@@ -28,7 +28,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.*
 
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
@@ -173,11 +173,12 @@ class GraphicsCheck extends Specification {
 			shader?.close()
 	}
 
-	def "Draws an image - using Image and ImageDecoder SPI"() {
+	def "Draws a sprite - using Image and ImageDecoder SPI"() {
 		given:
 			var shader = new BasicShader()
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
 			var image = new Image('GraphicsCheck.png', imageStream)
+			var sprite = new Sprite(image)
 			var projection = new Matrix4f().setOrthoSymmetric(80, 60, 0, 10)
 			var view = new Matrix4f().setLookAt(
 				16, 16, 10,
@@ -191,13 +192,14 @@ class GraphicsCheck extends Specification {
 					shader.use()
 					shader.setUniform('view', view)
 					shader.setUniform('projection', projection)
-					image.draw(shader)
+					sprite.draw(shader)
 				}
 				Thread.yield()
 			}
 		then:
 			notThrown(Exception)
 		cleanup:
+			sprite?.close()
 			image?.close()
 			imageStream?.close()
 			shader?.close()

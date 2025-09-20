@@ -17,21 +17,16 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
-import org.joml.Matrix4f
-import org.joml.Vector2f
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import java.nio.ByteBuffer
 
 /**
- * A simple texture and rectangle mesh pair for displaying a 2D image in a
- * scene.
+ * A resource for loading image files into textures, for re-use in other
+ * graphics objects.
  *
  * @author Emanuel Rabina
  */
@@ -39,12 +34,9 @@ class Image implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Image)
 
-	private final Mesh mesh
-	private final Texture texture
+	final Texture texture
 	final int width
 	final int height
-	final Material material
-	final Matrix4f transform = new Matrix4f()
 
 	/**
 	 * Constructor, create a new image using its name and a stream of data.
@@ -72,34 +64,14 @@ class Image implements AutoCloseable {
 		width = result.width()
 		height = result.height()
 
-		mesh = new OpenGLMesh(Type.TRIANGLES,
-			new Vertex[]{
-				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
-				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
-				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
-			},
-			new int[]{ 0, 1, 2, 2, 3, 0 }
-		)
 		texture = palette ?
 			new OpenGLTexture(width, height, palette.channels, imageData.applyPalette(palette)) :
 			new OpenGLTexture(width, height, result.channels(), imageData)
-		material = new Material(texture: texture)
 	}
 
 	@Override
 	void close() {
 
 		texture?.close()
-		mesh?.close()
-	}
-
-	/**
-	 * Draw this image, using the current shader.
-	 */
-	void draw(ShaderContext shaderContext) {
-
-		shaderContext.applyUniforms(transform, material, null)
-		mesh.draw()
 	}
 }
