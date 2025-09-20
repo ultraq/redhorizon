@@ -96,7 +96,7 @@ interface Window extends AutoCloseable, InputSource {
 	/**
 	 * Switch between vertical sync being anabled/disabled.
 	 */
-	void toggleVsync()
+	void toggleVSync()
 
 	/**
 	 * Set the background colour of the window.

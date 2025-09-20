@@ -198,7 +198,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	void toggleVsync() {
+	void toggleVSync() {
 
 		this.vsync = !vsync
 		glfwSwapInterval(vsync ? 1 : 0)
