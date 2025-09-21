@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -42,18 +43,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
-	final int width
-	final int height
+	int framebufferWidth
+	int framebufferHeight
 	private final long window
 	private boolean vsync
 
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title, boolean allowResizing = false, boolean useContentScaling = false) {
-
-		this.width = width
-		this.height = height
+	OpenGLWindow(int width, int height, String title, boolean useContentScaling = false) {
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
@@ -64,7 +62,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
-		glfwWindowHint(GLFW_RESIZABLE, allowResizing ? GLFW_TRUE : GLFW_FALSE)
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
 		if (useContentScaling) {
 			glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
 			glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
@@ -81,7 +79,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			throw new Exception('Failed to create a window')
 		}
 
-		glfwSetWindowAspectRatio(window, width, height)
 		var primaryMonitor = glfwGetPrimaryMonitor()
 		var videoMode = glfwGetVideoMode(primaryMonitor)
 		var contentScale = 1f
@@ -94,10 +91,19 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
 			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
 
+		// Get the initial framebuffer size
+		var widthPointer = new int[1]
+		var heightPointer = new int[1]
+		glfwGetFramebufferSize(window, widthPointer, heightPointer)
+		framebufferWidth = widthPointer[0]
+		framebufferHeight = heightPointer[0]
+
 		// Track framebuffer size changes from window size changes
 		glfwSetFramebufferSizeCallback(window) { long window, int newWidth, int newHeight ->
 			logger.debug('Framebuffer changed to {}x{}', newWidth, newHeight)
-			glViewport(0, 0, newWidth, newHeight)
+			framebufferWidth = newWidth
+			framebufferHeight = newHeight
+			trigger(new FramebufferSizeEvent(newWidth, newHeight))
 		}
 
 		makeCurrent()
@@ -167,6 +173,16 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwMakeContextCurrent(NULL)
 	}
 
+	/**
+	 * Set the vsync state on the window.
+	 */
+	private void setVSync(boolean vsync) {
+
+		this.vsync = vsync
+		glfwSwapInterval(vsync ? 1 : 0)
+		logger.debug("VSync ${vsync ? 'enabled' : 'disabled'}")
+	}
+
 	@Override
 	boolean shouldClose() {
 
@@ -201,9 +217,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void toggleVSync() {
 
-		this.vsync = !vsync
-		glfwSwapInterval(vsync ? 1 : 0)
-		logger.debug("Vsync ${vsync ? 'enabled' : 'disabled'}")
+		setVSync(!this.vsync)
 	}
 
 	@Override
@@ -230,8 +244,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	OpenGLWindow withVSync(boolean vsync) {
 
-		this.vsync = vsync
-		glfwSwapInterval(vsync ? 1 : 0)
+		setVSync(vsync)
 		return this
 	}
 }

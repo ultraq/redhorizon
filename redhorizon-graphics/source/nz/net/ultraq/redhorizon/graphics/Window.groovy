@@ -44,14 +44,14 @@ interface Window extends AutoCloseable, InputSource {
 	void clear()
 
 	/**
-	 * Get the height of this window.
+	 * Get the height of the framebuffer.
 	 */
-	int getHeight()
+	int getFramebufferHeight()
 
 	/**
-	 * Get the width of this window.
+	 * Get the height of the framebuffer.
 	 */
-	int getWidth()
+	int getFramebufferWidth()
 
 	/**
 	 * Makes the context current on the executing thread.

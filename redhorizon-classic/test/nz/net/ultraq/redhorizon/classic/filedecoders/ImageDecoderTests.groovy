@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filedecoders
 
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Sprite
@@ -23,7 +24,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
-import org.joml.Matrix4f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
@@ -67,19 +67,15 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.pcx', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var projection = new Matrix4f().setOrthoSymmetric(640, 480, 0, 10)
-			var view = new Matrix4f().setLookAt(
-				320, 200, 10,
-				320, 200, 0,
-				0, 1, 0
-			)
+			var camera = new Camera(640, 480)
+				.attachWindow(window)
+			camera.view.translate(-320, -200, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
-					shader.setUniform('view', view)
-					shader.setUniform('projection', projection)
+					camera.update(shader)
 					sprite.draw(shader)
 				}
 				Thread.yield()
@@ -99,19 +95,15 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.cps', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var projection = new Matrix4f().setOrthoSymmetric(320, 240, 0, 10)
-			var view = new Matrix4f().setLookAt(
-				160, 100, 10,
-				160, 100, 0,
-				0, 1, 0
-			)
+			var camera = new Camera(320, 240)
+				.attachWindow(window)
+			camera.view.translate(-160, -100, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
 					shader.use()
-					shader.setUniform('view', view)
-					shader.setUniform('projection', projection)
+					camera.update(shader)
 					sprite.draw(shader)
 				}
 				Thread.yield()
