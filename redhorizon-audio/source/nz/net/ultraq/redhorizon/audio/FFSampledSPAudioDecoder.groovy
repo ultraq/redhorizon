@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 import javax.sound.sampled.AudioFormat.Encoding
 import javax.sound.sampled.AudioSystem
@@ -30,42 +33,42 @@ import javax.sound.sampled.AudioSystem
  */
 class FFSampledSPAudioDecoder implements AudioDecoder {
 
+	private static final Logger logger = LoggerFactory.getLogger(FFSampledSPAudioDecoder)
+
 	final String[] supportedFileExtensions = ['mp3', 'ogg']
 
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
 
-		def (encoding, bits, channels, frequency, numSamples) = AudioSystem.getAudioInputStream(inputStream).withCloseable { encodedStream ->
+		logger.debug('Decoding started')
+
+		def (encoding, bits, channels, frequency, buffers) = AudioSystem.getAudioInputStream(inputStream).withCloseable { encodedStream ->
 			return AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, encodedStream).withCloseable { pcmStream ->
 				var format = pcmStream.format
 				var bits = format.sampleSizeInBits
 				var channels = format.channels
 				var frequency = (int)format.sampleRate
-				var frameLength = pcmStream.frameLength
-				var numFrames = 0
+				var buffers = 0
 
-				// No frame length, read everything in one go
-				if (frameLength == AudioSystem.NOT_SPECIFIED) {
-					trigger(new SampleDecodedEvent(bits, channels, frequency, ByteBuffer.wrapNative(pcmStream.readAllBytes())))
-					numFrames = 1
-				}
-				// Decode frame-by-frame
-				else {
-					while (numFrames < frameLength && !Thread.interrupted()) {
-						var frameBytes = new byte[format.frameSize]
-						pcmStream.read(frameBytes)
-						trigger(new SampleDecodedEvent(bits, channels, frequency, ByteBuffer.wrapNative(frameBytes)))
-						numFrames++
-						Thread.yield()
+				// Create our own chunk size of 8KB
+				while (!Thread.interrupted()) {
+					var audioChunk = pcmStream.readNBytes(8192)
+					trigger(new SampleDecodedEvent(bits, channels, frequency, ByteBuffer.wrapNative(audioChunk)))
+					buffers++
+					if (audioChunk.length < 8192) {
+						break
 					}
+					Thread.yield()
 				}
+
+				logger.debug('Decoding complete')
 
 				return new Tuple5<Encoding, Integer, Integer, Integer, Integer>(
-					encodedStream.format.encoding, bits, channels, frequency, numFrames)
+					encodedStream.format.encoding, bits, channels, frequency, buffers)
 			}
 		}
 
-		return new DecodeSummary(bits, channels, frequency, numSamples,
+		return new DecodeSummary(bits, channels, frequency, buffers,
 			"${encoding} file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}")
 	}
 }

@@ -46,15 +46,15 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	/**
 	 * Event for the streaming of a sample of sound data.
 	 */
-	@ImmutableOptions(knownImmutables = ['sample'])
-	record SampleDecodedEvent(int bits, int channels, int frequency, ByteBuffer sample) implements Event {}
+	@ImmutableOptions(knownImmutables = ['buffer'])
+	record SampleDecodedEvent(int bits, int channels, int frequency, ByteBuffer buffer) implements Event {}
 
 	/**
 	 * The result of the decoding process.
 	 */
-	record DecodeSummary(int bits, int channels, int frequency, int samples, String fileInformation) {
-		DecodeSummary(int bits, int channels, int frequency, int samples) {
-			this(bits, channels, frequency, samples, null)
+	record DecodeSummary(int bits, int channels, int frequency, int buffers, String fileInformation) {
+		DecodeSummary(int bits, int channels, int frequency, int buffers) {
+			this(bits, channels, frequency, buffers, null)
 		}
 	}
 }

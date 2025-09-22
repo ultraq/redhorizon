@@ -75,6 +75,12 @@ class OpenALSource implements Source {
 	}
 
 	@Override
+	boolean isLooping() {
+
+		return alGetSourcei(sourceId, AL_LOOPING) == AL_TRUE
+	}
+
+	@Override
 	boolean isPaused() {
 
 		return sourceState == AL_PAUSED
@@ -140,6 +146,13 @@ class OpenALSource implements Source {
 	void unqueueBuffers(Buffer... buffers) {
 
 		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
+	}
+
+	@Override
+	Source withLooping(boolean looping) {
+
+		alSourcei(sourceId, AL_LOOPING, looping ? AL_TRUE : AL_FALSE)
+		return this
 	}
 
 	@Override

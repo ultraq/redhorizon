@@ -45,6 +45,11 @@ interface Source extends AudioResource {
 	boolean isBufferAttached()
 
 	/**
+	 * Return whether this source is set to loop or not.
+	 */
+	boolean isLooping()
+
+	/**
 	 * Rether whether this source is currently paused.
 	 *
 	 * @return
@@ -98,6 +103,11 @@ interface Source extends AudioResource {
 	 * Unqueue buffers from this source.
 	 */
 	void unqueueBuffers(Buffer... buffers)
+
+	/**
+	 * Set whether this source loops.
+	 */
+	Source withLooping(boolean looping)
 
 	/**
 	 * Set the volume of the source.

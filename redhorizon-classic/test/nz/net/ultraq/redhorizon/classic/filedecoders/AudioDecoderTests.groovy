@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.filedecoders
 
 import nz.net.ultraq.redhorizon.audio.AudioDevice
+import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 
@@ -47,7 +48,7 @@ class AudioDecoderTests extends Specification {
 		device.close()
 	}
 
-	def "Play an AUD file using the Sound SPI"() {
+	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		when:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/affirm1.v00'))
 			var sound = new Sound('affirm1.v00', inputStream)
@@ -59,6 +60,22 @@ class AudioDecoderTests extends Specification {
 			notThrown(Exception)
 		cleanup:
 			sound?.close()
+			inputStream?.close()
+	}
+
+	def "Play an AUD music track using the AudioDecoder SPI"() {
+		when:
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/fac1226m.aud'))
+			var music = new Music('fac1226m.aud', inputStream)
+			music.play()
+			while (music.playing) {
+				music.updateStream()
+				Thread.sleep(100)
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			music?.close()
 			inputStream?.close()
 	}
 }
