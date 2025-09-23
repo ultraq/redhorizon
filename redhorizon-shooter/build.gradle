@@ -29,9 +29,7 @@ configure {
 				implementation project(':redhorizon-explorer')
 				implementation project(':redhorizon-runtime')
 				implementation "info.picocli:picocli:${picocliVersion}"
-				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}") {
-					exclude group: 'org.jetbrains.kotlin'
-				}
+				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}")
 				implementation 'org.lwjgl:lwjgl-glfw'
 			}
 }
