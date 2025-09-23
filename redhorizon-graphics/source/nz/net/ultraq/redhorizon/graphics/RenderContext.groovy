@@ -19,15 +19,35 @@ package nz.net.ultraq.redhorizon.graphics
 import org.joml.Matrix4fc
 
 /**
- * The part of the shader that can be given to other graphics objects for the
- * application of uniform data like transforms and textures.
+ * A set of rendering commands that can be used by objects while this context is
+ * valid.  These include shortcuts to applying uniforms to a shader without
+ * requiring knowledge of how the shader is constructed.
  *
  * @author Emanuel Rabina
  */
-interface ShaderContext {
+abstract class RenderContext {
 
 	/**
-	 * Update a shader's uniforms using the given context.
+	 * Set a whole host of material attributes.
 	 */
-	void applyUniforms(Matrix4fc transform, Material material, Window window)
+	void setMaterial(Material material) {
+	}
+
+	/**
+	 * Set the model matrix uniform.
+	 */
+	void setModelMatrix(Matrix4fc model) {
+	}
+
+	/**
+	 * Set the projection matrix uniform.
+	 */
+	void setProjectionMatrix(Matrix4fc projection) {
+	}
+
+	/**
+	 * Set the view matrix uniform.
+	 */
+	void setViewMatrix(Matrix4fc view) {
+	}
 }

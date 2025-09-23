@@ -65,9 +65,10 @@ class Sprite implements AutoCloseable {
 	/**
 	 * Draw this sprite, using the currently-bound shader.
 	 */
-	void draw(ShaderContext shaderContext) {
+	void draw(RenderContext renderContext) {
 
-		shaderContext.applyUniforms(transform, material, null)
+		renderContext.setModelMatrix(transform)
+		renderContext.setMaterial(material)
 		mesh.draw()
 	}
 }

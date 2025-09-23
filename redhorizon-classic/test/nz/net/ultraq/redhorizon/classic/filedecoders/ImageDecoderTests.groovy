@@ -74,9 +74,9 @@ class ImageDecoderTests extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					shader.use()
-					camera.update(shader)
-					sprite.draw(shader)
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					sprite.draw(renderContext)
 				}
 				Thread.yield()
 			}
@@ -102,9 +102,9 @@ class ImageDecoderTests extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					shader.use()
-					camera.update(shader)
-					sprite.draw(shader)
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					sprite.draw(renderContext)
 				}
 				Thread.yield()
 			}

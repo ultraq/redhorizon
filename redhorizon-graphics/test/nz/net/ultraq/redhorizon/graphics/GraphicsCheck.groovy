@@ -92,14 +92,13 @@ class GraphicsCheck extends Specification {
 			})
 			var camera = new Camera(10, 10)
 			var transform = new Matrix4f()
-			var material = new Material()
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					shader.use()
-					camera.update(shader)
-					shader.applyUniforms(transform, material, null)
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					renderContext.setModelMatrix(transform)
 					triangle.draw()
 				}
 				Thread.yield()
@@ -145,9 +144,10 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					shader.use()
-					camera.update(shader)
-					shader.applyUniforms(transform, material, null)
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					renderContext.setModelMatrix(transform)
+					renderContext.setMaterial(material)
 					quad.draw()
 				}
 				Thread.yield()
@@ -174,9 +174,9 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					shader.use()
-					camera.update(shader)
-					sprite.draw(shader)
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					sprite.draw(renderContext)
 				}
 				Thread.yield()
 			}

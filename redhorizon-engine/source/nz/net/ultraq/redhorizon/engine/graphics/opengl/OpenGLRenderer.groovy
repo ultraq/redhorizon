@@ -42,6 +42,7 @@ import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.RenderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
@@ -221,8 +222,8 @@ class OpenGLRenderer implements GraphicsRenderer {
 		if (!shader) {
 			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms) {
 				@Override
-				void applyUniforms(Matrix4fc transform, Material material, nz.net.ultraq.redhorizon.graphics.Window window) {
-
+				protected RenderContext createRenderContext() {
+					return null
 				}
 			}
 			shaders << shader

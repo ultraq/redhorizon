@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Material
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.RenderContext
 
 import org.joml.Matrix4fc
 
@@ -44,16 +44,36 @@ class BasicShader extends OpenGLShader {
 	}
 
 	@Override
-	void applyUniforms(Matrix4fc transform, Material material, Window window) {
-
-		setUniform('model', transform)
-		setUniform('mainTexture', 0, material.texture ?: whiteTexture)
-	}
-
-	@Override
 	void close() {
 
 		whiteTexture.close()
 		super.close()
+	}
+
+	@Override
+	protected RenderContext createRenderContext() {
+
+		return new RenderContext() {
+
+			@Override
+			void setMaterial(Material material) {
+				setUniform('mainTexture', 0, material.texture ?: whiteTexture)
+			}
+
+			@Override
+			void setModelMatrix(Matrix4fc model) {
+				setUniform('model', model)
+			}
+
+			@Override
+			void setProjectionMatrix(Matrix4fc projection) {
+				setUniform('projection', projection)
+			}
+
+			@Override
+			void setViewMatrix(Matrix4fc view) {
+				setUniform('view', view)
+			}
+		}
 	}
 }

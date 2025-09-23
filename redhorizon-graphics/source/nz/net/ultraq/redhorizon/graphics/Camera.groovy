@@ -106,14 +106,13 @@ class Camera {
 	/**
 	 * Update rendering with the camera state.
 	 */
-	void update(Shader shader) {
+	void update(RenderContext renderContext) {
 
-		// TODO: Render context?
 		if (viewportChanged) {
 			glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			viewportChanged = false
 		}
-		shader.setUniform('projection', projection)
-		shader.setUniform('view', view)
+		renderContext.setProjectionMatrix(projection)
+		renderContext.setViewMatrix(view)
 	}
 }
