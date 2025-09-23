@@ -69,7 +69,7 @@ class AudioDecoderTests extends Specification {
 			var music = new Music('fac1226m.aud', inputStream)
 			music.play()
 			while (music.playing) {
-				music.updateStream()
+				music.update()
 				Thread.sleep(100)
 			}
 		then:

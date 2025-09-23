@@ -53,7 +53,7 @@ class Music implements AutoCloseable {
 		while (streamingEvents.remainingCapacity() != 0) {
 			Thread.onSpinWait()
 		}
-		updateStream()
+		update()
 	}
 
 	@Override
@@ -125,7 +125,7 @@ class Music implements AutoCloseable {
 	 * Called within the context of the audio device thread to update the
 	 * streaming data for the music track.
 	 */
-	void updateStream() {
+	void update() {
 
 		var buffers = streamingEvents.drain().collect { event ->
 			return new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
