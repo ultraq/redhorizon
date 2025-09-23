@@ -149,6 +149,12 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
+	long getHandle() {
+
+		return window
+	}
+
+	@Override
 	void close() {
 
 		glfwDestroyWindow(window)

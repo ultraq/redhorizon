@@ -46,6 +46,8 @@ configure {
 				api 'org.lwjgl:lwjgl-glfw'
 				api 'org.lwjgl:lwjgl-opengl'
 
+				runtimeOnly "io.github.spair:imgui-java-natives-macos:${imguiVersion}"
+				runtimeOnly "io.github.spair:imgui-java-natives-windows:${imguiVersion}"
 				['natives-macos-arm64', 'natives-windows'].each { natives ->
 					runtimeOnly "org.lwjgl:lwjgl::${natives}"
 					runtimeOnly "org.lwjgl:lwjgl-glfw::${natives}"

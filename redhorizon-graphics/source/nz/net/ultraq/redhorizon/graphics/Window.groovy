@@ -54,6 +54,11 @@ interface Window extends AutoCloseable, InputSource {
 	int getFramebufferWidth()
 
 	/**
+	 * Return the current window handle.
+	 */
+	long getHandle()
+
+	/**
 	 * Makes the context current on the executing thread.
 	 */
 	void makeCurrent()
