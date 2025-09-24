@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.imgui.FpsCounter
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
@@ -54,22 +53,20 @@ class GraphicsCheck extends Specification {
 	}
 
 	OpenGLWindow window
-	FpsCounter fpsCounter
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
+			.withFpsCounter()
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
 					window.shouldClose(true)
 				}
 			}
-		fpsCounter = new FpsCounter(window)
 	}
 
 	def cleanup() {
-		fpsCounter?.close()
 		window?.close()
 	}
 
@@ -78,16 +75,12 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					fpsCounter.withFrame { ->
-						// Do something!
-					}
-					Thread.yield()
+					// Do something!
 				}
+				Thread.yield()
 			}
 		then:
 			notThrown(Exception)
-		cleanup:
-			fpsCounter?.close()
 	}
 
 	def "Draws a triangle"() {
@@ -105,14 +98,12 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					fpsCounter.withFrame { ->
-						var renderContext = shader.use()
-						camera.update(renderContext)
-						renderContext.setModelMatrix(transform)
-						triangle.draw()
-					}
-					Thread.yield()
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					renderContext.setModelMatrix(transform)
+					triangle.draw()
 				}
+				Thread.yield()
 			}
 		then:
 			notThrown(Exception)
@@ -156,15 +147,13 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					fpsCounter.withFrame { ->
-						var renderContext = shader.use()
-						camera.update(renderContext)
-						renderContext.setModelMatrix(transform)
-						renderContext.setMaterial(material)
-						quad.draw()
-					}
-					Thread.yield()
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					renderContext.setModelMatrix(transform)
+					renderContext.setMaterial(material)
+					quad.draw()
 				}
+				Thread.yield()
 			}
 		then:
 			notThrown(Exception)
@@ -188,13 +177,11 @@ class GraphicsCheck extends Specification {
 			window.show()
 			while (!window.shouldClose()) {
 				window.withFrame { ->
-					fpsCounter.withFrame { ->
-						var renderContext = shader.use()
-						camera.update(renderContext)
-						sprite.draw(renderContext)
-					}
-					Thread.yield()
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					sprite.draw(renderContext)
 				}
+				Thread.yield()
 			}
 		then:
 			notThrown(Exception)

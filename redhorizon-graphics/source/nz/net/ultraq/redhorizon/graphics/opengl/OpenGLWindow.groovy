@@ -20,6 +20,8 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.FpsCounter
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
@@ -46,7 +48,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	int framebufferWidth
 	int framebufferHeight
 	private final long window
+	private final ImGuiContext imGuiContext
 	private boolean vsync
+	private FpsCounter fpsCounter
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -140,6 +144,10 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos, ypos))
 		}
+
+		// Create an ImGui context - might as well bake it into the window as we're
+		// gonna be using it a lot
+		imGuiContext = new ImGuiContext(window)
 	}
 
 	@Override
@@ -231,6 +239,25 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		glClearColor(colour.r, colour.g, colour.b, colour.a)
 		return this
+	}
+
+	@Override
+	OpenGLWindow withFpsCounter() {
+
+		fpsCounter = new FpsCounter(imGuiContext)
+		return this
+	}
+
+	@Override
+	void withFrame(Closure closure) {
+
+		clear()
+		imGuiContext.withFrame { ->
+			fpsCounter?.render()
+			closure()
+		}
+		swapBuffers()
+		pollEvents()
 	}
 
 	@Override

@@ -17,15 +17,10 @@
 package nz.net.ultraq.redhorizon.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
-import nz.net.ultraq.redhorizon.graphics.Window
 
 import imgui.ImFont
-import imgui.ImFontConfig
 import imgui.ImGui
-import imgui.gl3.ImGuiImplGl3
-import imgui.glfw.ImGuiImplGlfw
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiConfigFlags.*
 import static imgui.flag.ImGuiWindowFlags.*
 
 /**
@@ -35,60 +30,25 @@ import static imgui.flag.ImGuiWindowFlags.*
  */
 class FpsCounter implements GraphicsResource {
 
-	private final ImGuiImplGl3 imGuiGl3
-	private final ImGuiImplGlfw imGuiGlfw
-	private final ImFont robotoFont
 	private final ImFont robotoMonoFont
 	private int width = 300
 
 	/**
 	 * Constructor, create a new FPS counter tied to an existing window.
 	 */
-	FpsCounter(Window window) {
+	FpsCounter(ImGuiContext imGuiContext) {
 
-		imGuiGlfw = new ImGuiImplGlfw()
-		imGuiGl3 = new ImGuiImplGl3()
-		ImGui.createContext()
-
-		var io = ImGui.getIO()
-		io.setConfigFlags(DockingEnable)
-
-		var fontConfig1 = new ImFontConfig()
-		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 20, fontConfig1)
-		}
-		fontConfig1.destroy()
-		io.setFontDefault(robotoFont)
-
-		var fontConfig2 = new ImFontConfig()
-		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 20, fontConfig2)
-		}
-		fontConfig2.destroy()
-
-		imGuiGlfw.init(window.handle, true)
-		imGuiGl3.init('#version 410 core')
+		robotoMonoFont = imGuiContext.robotoMonoFont
 	}
 
 	@Override
 	void close() {
-
-		imGuiGl3.shutdown()
-		imGuiGlfw.shutdown()
-		ImGui.destroyContext()
 	}
 
 	/**
-	 * Automatically mark the beginning and end of a frame as before and after the
-	 * execution of the given closure.
+	 * Draw the FPS counter in the upper right corner of the window.
 	 */
-	void withFrame(Closure closure) {
-
-		imGuiGl3.newFrame()
-		imGuiGlfw.newFrame()
-		ImGui.newFrame()
-
-		closure()
+	void render() {
 
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
@@ -102,8 +62,5 @@ class FpsCounter implements GraphicsResource {
 		ImGui.end()
 
 		ImGui.popFont()
-
-		ImGui.render()
-		imGuiGl3.renderDrawData(ImGui.getDrawData())
 	}
 }

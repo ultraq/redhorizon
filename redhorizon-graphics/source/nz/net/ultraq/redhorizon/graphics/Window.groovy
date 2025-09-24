@@ -125,17 +125,16 @@ interface Window extends AutoCloseable, InputSource {
 	}
 
 	/**
+	 * Include an FPS counter with the window.
+	 */
+	Window withFpsCounter()
+
+	/**
 	 * Convenience method for keeping all frame-rendering commands within the
 	 * closure and surrounding it with the necessary {@link #clear},
 	 * {@link #swapBuffers}, and {@link #pollEvents} calls.
 	 */
-	default void withFrame(Closure closure) {
-
-		clear()
-		closure()
-		swapBuffers()
-		pollEvents()
-	}
+	void withFrame(Closure closure)
 
 	/**
 	 * Make the window the size of the monitor, aka: "Borderless windowed mode".
