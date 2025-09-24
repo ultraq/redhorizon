@@ -157,16 +157,18 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	long getHandle() {
+	void close() {
 
-		return window
+		fpsCounter?.close()
+		imGuiContext.close()
+		glfwDestroyWindow(window)
+		glfwTerminate()
 	}
 
 	@Override
-	void close() {
+	long getHandle() {
 
-		glfwDestroyWindow(window)
-		glfwTerminate()
+		return window
 	}
 
 	@Override
@@ -242,6 +244,13 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
+	OpenGLWindow withBorderlessWindowed() {
+
+		// TODO
+		return this
+	}
+
+	@Override
 	OpenGLWindow withFpsCounter() {
 
 		fpsCounter = new FpsCounter(imGuiContext)
@@ -258,13 +267,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 		swapBuffers()
 		pollEvents()
-	}
-
-	@Override
-	OpenGLWindow withBorderlessWindowed() {
-
-		// TODO
-		return this
 	}
 
 	@Override
