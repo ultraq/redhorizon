@@ -14,30 +14,38 @@
  * limitations under the License.
  */
 
-#version 410 core
+package nz.net.ultraq.redhorizon.scenegraph
 
-#pragma stage vertex
-in vec4 position;
-in vec4 colour;
-in vec2 textureUVs;
-out vec4 v_vertexColour;
-out vec2 v_textureUVs;
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
 
-void main() {
-	gl_Position = projection * view * model * position;
-	v_vertexColour = colour;
-	v_textureUVs = textureUVs;
-}
+import org.joml.Vector3fc
 
-#pragma stage fragment
-in vec4 v_vertexColour;
-in vec2 v_textureUVs;
-out vec4 fragmentColour;
-uniform sampler2D mainTexture;
+/**
+ * An element of a scene.
+ *
+ * @author Emanuel Rabina
+ */
+interface Node {
 
-void main() {
-	fragmentColour = texture(mainTexture, v_textureUVs) * v_vertexColour;
+	/**
+	 * Return the position of this node.
+	 */
+	Vector3fc getPosition()
+
+	/**
+	 * Set the position of this node.
+	 */
+	void setPosition(float x, float y, float z)
+
+	/**
+	 * Set the position of this node.
+	 */
+	default void setPosition(Vector3fc position) {
+
+		setPosition(position.x(), position.y(), position.z())
+	}
+
+	/**
+	 * Alter the position of this node through translation.
+	 */
+	void translate(float x, float y, float z)
 }

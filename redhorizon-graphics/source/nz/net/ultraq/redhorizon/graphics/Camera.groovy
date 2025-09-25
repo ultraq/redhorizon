@@ -17,9 +17,11 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.RemovalToken
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.joml.primitives.Rectanglei
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,16 +32,17 @@ import static org.lwjgl.opengl.GL11.*
  *
  * @author Emanuel Rabina
  */
-class Camera {
+class Camera implements Node {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
 	private final Rectanglei viewport
 	private boolean viewportChanged
 	private RemovalToken windowResizeToken
-	final Matrix4f projection
-	final Matrix4f view
+	private final Matrix4f projection
+	private final Matrix4f view
 	private final Matrix4f viewProjection = new Matrix4f()
+	private final Vector3f position = new Vector3f()
 
 	/**
 	 * Constructor, create a new 2D camera with the given view dimensions.
@@ -87,6 +90,24 @@ class Camera {
 		}
 
 		return this
+	}
+
+	@Override
+	Vector3fc getPosition() {
+
+		return view.getTranslation(position)
+	}
+
+	@Override
+	void setPosition(float x, float y, float z) {
+
+		view.setTranslation(x, y, z)
+	}
+
+	@Override
+	void translate(float x, float y, float z) {
+
+		view.translate(-x, -y, -z)
 	}
 
 	/**

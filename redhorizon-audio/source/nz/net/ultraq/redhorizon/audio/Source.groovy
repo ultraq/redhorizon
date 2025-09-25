@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import org.joml.Vector3fc
+
 /**
  * An object through which to play sound data (buffers).
  *
@@ -93,6 +95,19 @@ interface Source extends AudioResource {
 	 * Rewind a source, resetting its state.
 	 */
 	Source rewind()
+
+	/**
+	 * Set the position of a source.
+	 */
+	void setPosition(float x, float y, float z)
+
+	/**
+	 * Set the position of a source.
+	 */
+	default void setPosition(Vector3fc position) {
+
+		setPosition(position.x(), position.y(), position.z())
+	}
 
 	/**
 	 * Stop playing the sound through this source.

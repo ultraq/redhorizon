@@ -134,6 +134,12 @@ class OpenALSource implements Source {
 	}
 
 	@Override
+	void setPosition(float x, float y, float z) {
+
+		alSource3f(sourceId, AL_POSITION, x, y, z)
+	}
+
+	@Override
 	Source stop() {
 
 		if (!stopped) {

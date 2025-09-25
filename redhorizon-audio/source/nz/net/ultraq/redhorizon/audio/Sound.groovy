@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.audio
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
+import nz.net.ultraq.redhorizon.scenegraph.AbstractNode
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +32,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Sound implements AutoCloseable {
+class Sound extends AbstractNode implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
@@ -129,6 +130,14 @@ class Sound implements AutoCloseable {
 			source.stop()
 		}
 		return this
+	}
+
+	/**
+	 * Update the state of the sound with the audio device.
+	 */
+	void update() {
+
+		source.setPosition(position)
 	}
 
 	/**

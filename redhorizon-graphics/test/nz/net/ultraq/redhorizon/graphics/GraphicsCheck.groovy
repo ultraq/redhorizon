@@ -172,7 +172,7 @@ class GraphicsCheck extends Specification {
 			var sprite = new Sprite(image)
 			var camera = new Camera(80, 60)
 				.attachWindow(window)
-			camera.view.translate(-16, -16, 0)
+				.translate(16, 16, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {

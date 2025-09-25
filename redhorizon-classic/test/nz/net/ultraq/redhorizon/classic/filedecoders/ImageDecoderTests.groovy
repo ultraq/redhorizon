@@ -70,7 +70,7 @@ class ImageDecoderTests extends Specification {
 			var shader = new BasicShader()
 			var camera = new Camera(640, 480)
 				.attachWindow(window)
-			camera.view.translate(-320, -200, 0)
+				.translate(320, 200, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
@@ -98,7 +98,7 @@ class ImageDecoderTests extends Specification {
 			var shader = new BasicShader()
 			var camera = new Camera(320, 240)
 				.attachWindow(window)
-			camera.view.translate(-160, -100, 0)
+				.translate(160, 100, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {

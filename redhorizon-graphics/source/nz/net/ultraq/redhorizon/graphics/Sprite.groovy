@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
+import nz.net.ultraq.redhorizon.scenegraph.AbstractNode
 
-import org.joml.Matrix4f
 import org.joml.Vector2f
 import org.joml.Vector3f
 
@@ -29,13 +29,12 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Sprite implements AutoCloseable {
+class Sprite extends AbstractNode implements AutoCloseable {
 
-	private final Mesh mesh
 	final int width
 	final int height
-	final Material material
-	final Matrix4f transform = new Matrix4f()
+	private final Mesh mesh
+	private final Material material
 
 	/**
 	 * Constructor, create a new sprite out of an existing image.

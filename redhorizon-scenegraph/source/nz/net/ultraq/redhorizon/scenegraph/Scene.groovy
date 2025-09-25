@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-#version 410 core
+package nz.net.ultraq.redhorizon.scenegraph
 
-#pragma stage vertex
-in vec4 position;
-in vec4 colour;
-in vec2 textureUVs;
-out vec4 v_vertexColour;
-out vec2 v_textureUVs;
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
+/**
+ * A scene is a collection of nodes, with parent/child relationships, that
+ * represent the state of all or part of the game world.
+ *
+ * @author Emanuel Rabina
+ */
+class Scene {
 
-void main() {
-	gl_Position = projection * view * model * position;
-	v_vertexColour = colour;
-	v_textureUVs = textureUVs;
-}
+	private final List<Node> nodes = []
 
-#pragma stage fragment
-in vec4 v_vertexColour;
-in vec2 v_textureUVs;
-out vec4 fragmentColour;
-uniform sampler2D mainTexture;
+	/**
+	 * Add a node to this scene.
+	 */
+	Scene addNode(Node node) {
 
-void main() {
-	fragmentColour = texture(mainTexture, v_textureUVs) * v_vertexColour;
+		nodes << node
+		return this
+	}
+
+	/**
+	 * An overload of the << operator as an alias for {@link #addNode(Node)}.
+	 */
+	Scene leftShift(Node node) {
+
+		return addNode(node)
+	}
 }

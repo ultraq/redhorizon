@@ -54,6 +54,7 @@ class AudioCheck extends Specification {
 		when:
 			sound.play()
 			while (sound.playing) {
+				sound.update()
 				Thread.sleep(100)
 			}
 		then:
