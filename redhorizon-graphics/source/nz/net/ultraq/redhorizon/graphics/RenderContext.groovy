@@ -25,29 +25,25 @@ import org.joml.Matrix4fc
  *
  * @author Emanuel Rabina
  */
-abstract class RenderContext {
+interface RenderContext {
 
 	/**
 	 * Set a whole host of material attributes.
 	 */
-	void setMaterial(Material material) {
-	}
+	void setMaterial(Material material)
 
 	/**
 	 * Set the model matrix uniform.
 	 */
-	void setModelMatrix(Matrix4fc model) {
-	}
+	void setModelMatrix(Matrix4fc model)
 
 	/**
 	 * Set the projection matrix uniform.
 	 */
-	void setProjectionMatrix(Matrix4fc projection) {
-	}
+	void setProjectionMatrix(Matrix4fc projection)
 
 	/**
 	 * Set the view matrix uniform.
 	 */
-	void setViewMatrix(Matrix4fc view) {
-	}
+	void setViewMatrix(Matrix4fc view)
 }
