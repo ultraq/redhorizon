@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
 /**
  * Check that a PCX file can be read and rendered using the {@link PcxFileDecoder}
@@ -68,8 +68,7 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.pcx', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var camera = new Camera(640, 480)
-				.attachWindow(window)
+			var camera = new Camera(640, 480, window)
 				.translate(320, 200, 0)
 		when:
 			window.show()
@@ -96,8 +95,7 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.cps', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var camera = new Camera(320, 240)
-				.attachWindow(window)
+			var camera = new Camera(320, 240, window)
 				.translate(160, 100, 0)
 		when:
 			window.show()

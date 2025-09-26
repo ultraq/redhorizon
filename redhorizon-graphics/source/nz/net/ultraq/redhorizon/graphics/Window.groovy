@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.input.InputSource
 
+import org.joml.primitives.Rectanglei
+
 /**
  * The video interface through which the graphics are rendered.  One must first
  * be created before any other graphics operations can be performed.
@@ -35,7 +37,7 @@ import nz.net.ultraq.redhorizon.input.InputSource
  *
  * @author Emanuel Rabina
  */
-interface Window extends AutoCloseable, InputSource {
+interface Window extends InputSource, AutoCloseable {
 
 	/**
 	 * Clear the framebuffer with the current clear colour.  Usually called to
@@ -44,19 +46,9 @@ interface Window extends AutoCloseable, InputSource {
 	void clear()
 
 	/**
-	 * Get the height of the framebuffer.
+	 * Get the viewport used for rendering to the window.
 	 */
-	int getFramebufferHeight()
-
-	/**
-	 * Get the height of the framebuffer.
-	 */
-	int getFramebufferWidth()
-
-	/**
-	 * Return the current window handle.
-	 */
-	long getHandle()
+	Rectanglei getViewport()
 
 	/**
 	 * Makes the context current on the executing thread.
