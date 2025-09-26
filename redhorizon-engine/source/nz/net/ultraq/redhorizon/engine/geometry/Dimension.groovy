@@ -28,9 +28,6 @@ record Dimension(int width, int height) {
 	/**
 	 * Convert this object into another that can also represent width/height
 	 * values.
-	 *
-	 * @param clazz
-	 * @return
 	 */
 	Object asType(Class clazz) {
 
@@ -46,9 +43,6 @@ record Dimension(int width, int height) {
 	/**
 	 * Calculate and return a new {@code Dimension} which fits into this current
 	 * dimension while respecting the given aspect ratio.
-	 *
-	 * @param fitAspectRatio
-	 * @return
 	 */
 	Dimension calculateFit(float fitAspectRatio) {
 
@@ -66,8 +60,6 @@ record Dimension(int width, int height) {
 
 	/**
 	 * Return the aspect ratio of these dimensions.
-	 *
-	 * @return
 	 */
 	float getAspectRatio() {
 
@@ -77,9 +69,6 @@ record Dimension(int width, int height) {
 	/**
 	 * Return a new {@code Dimension} whose width/height values are multiplied by
 	 * the given value.
-	 *
-	 * @param right
-	 * @return
 	 */
 	Dimension multiply(float right) {
 
@@ -89,9 +78,6 @@ record Dimension(int width, int height) {
 	/**
 	 * Return a new {@code Dimension} whose width/height values are multiplied by
 	 * the first/second values of the given array.
-	 *
-	 * @param right
-	 * @return
 	 */
 	Dimension multiply(float[] right) {
 
