@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 
 /**
  * A object that contains ImGui content to render and takes up window space.

@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.opengl
+package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.PostProcessingRenderContext
+import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.Vertex
 
-import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D
+import org.joml.Vector2f
+import org.joml.Vector3f
+import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL30C.*
 
 /**
@@ -27,25 +34,37 @@ import static org.lwjgl.opengl.GL30C.*
  *
  * @author Emanuel Rabina
  */
-class OpenGLFramebuffer extends Framebuffer {
+class OpenGLFramebuffer implements Framebuffer {
 
-	final int framebufferId
-	final int depthBufferId
+	private final Mesh fullScreenQuad
+	private final Texture colourTexture
+	final int width
+	final int height
+	private final int framebufferId
+	private final int depthBufferId
 
 	/**
 	 * Constructor, create a new OpenGL framebuffer for rendering into.
-	 *
-	 * @param width
-	 * @param height
-	 * @param colourTexture
 	 */
-	OpenGLFramebuffer(int width, int height, OpenGLTexture colourTexture) {
+	OpenGLFramebuffer(int width, int height) {
 
-		super(colourTexture)
+		this.width = width
+		this.height = height
+
+		fullScreenQuad = new OpenGLMesh(Type.TRIANGLES,
+			new Vertex[]{
+				new Vertex(new Vector3f(-1, -1, 0), Colour.WHITE, new Vector2f(0, 0)),
+				new Vertex(new Vector3f(1, -1, 0), Colour.WHITE, new Vector2f(1, 0)),
+				new Vertex(new Vector3f(1, 1, 0), Colour.WHITE, new Vector2f(1, 1)),
+				new Vertex(new Vector3f(-1, 1, 0), Colour.WHITE, new Vector2f(0, 1))
+			},
+			new int[]{ 0, 1, 2, 2, 3, 0 }
+		)
 
 		framebufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 
+		colourTexture = new OpenGLTexture(width, height)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
 
 		// Depth buffer attachment
@@ -66,6 +85,14 @@ class OpenGLFramebuffer extends Framebuffer {
 
 		glDeleteFramebuffers(framebufferId)
 		glDeleteRenderbuffers(depthBufferId)
-		texture.close()
+		colourTexture.close()
+		fullScreenQuad.close()
+	}
+
+	@Override
+	void draw(PostProcessingRenderContext renderContext) {
+
+		renderContext.setFramebufferTexture(colourTexture)
+		fullScreenQuad.draw()
 	}
 }

@@ -14,26 +14,33 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
-
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
-import nz.net.ultraq.redhorizon.graphics.Texture
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.graphics
 
 /**
- * A section of memory that can be drawn to like a screen, but that can then be
- * used as input for further rendering steps.
+ * A section of memory that can be drawn to like a screen, and can then be used
+ * as input for further rendering steps.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-abstract class Framebuffer implements GraphicsResource {
-
-	final Texture texture
+interface Framebuffer extends GraphicsResource {
 
 	/**
 	 * Use this framebuffer in upcoming rendering operations.
 	 */
-	abstract void bind()
+	void bind()
+
+	/**
+	 * Draw the contents of the framebuffer to the current render target.
+	 */
+	void draw(PostProcessingRenderContext renderContext)
+
+	/**
+	 * Get the height of the framebuffer.
+	 */
+	int getHeight()
+
+	/**
+	 * Get the width of the framebuffer.
+	 */
+	int getWidth()
 }

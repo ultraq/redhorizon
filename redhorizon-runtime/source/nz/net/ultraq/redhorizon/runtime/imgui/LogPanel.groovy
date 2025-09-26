@@ -16,15 +16,15 @@
 
 package nz.net.ultraq.redhorizon.runtime.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLogEvent
 import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLoggingAppender
 
 import imgui.ImGui
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.FirstUseEver
+import static imgui.flag.ImGuiCond.*
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue

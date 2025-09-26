@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.pipeline
 
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.Switch
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 
 /**
  * A single rendering pass with a specific framebuffer as the rendering target.

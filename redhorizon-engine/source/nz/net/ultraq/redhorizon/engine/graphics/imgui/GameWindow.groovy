@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
