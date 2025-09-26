@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics.opengl
 import nz.net.ultraq.redhorizon.engine.geometry.Dimension
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute
 import nz.net.ultraq.redhorizon.engine.graphics.DrawEvent
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferCreatedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.FramebufferDeletedEvent
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
@@ -37,6 +36,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
 import nz.net.ultraq.redhorizon.engine.graphics.Window
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.graphics.Material
@@ -45,6 +45,7 @@ import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.RenderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture

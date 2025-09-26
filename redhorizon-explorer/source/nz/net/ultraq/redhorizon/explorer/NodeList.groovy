@@ -17,16 +17,16 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 
 import imgui.ImGui
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.FirstUseEver
-import static imgui.flag.ImGuiStyleVar.WindowPadding
+import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiTreeNodeFlags.*
 
 /**

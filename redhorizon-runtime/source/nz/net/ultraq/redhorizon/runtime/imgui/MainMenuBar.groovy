@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.runtime.imgui
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 
 import imgui.ImGui
 

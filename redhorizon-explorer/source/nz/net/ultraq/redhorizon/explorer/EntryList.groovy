@@ -17,17 +17,17 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 
 import imgui.ImGui
 import imgui.flag.ImGuiSortDirection
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.FirstUseEver
-import static imgui.flag.ImGuiFocusedFlags.ChildWindows
-import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
-import static imgui.flag.ImGuiStyleVar.WindowPadding
+import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiFocusedFlags.*
+import static imgui.flag.ImGuiSelectableFlags.*
+import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiTableFlags.*
 
 import groovy.transform.TupleConstructor
