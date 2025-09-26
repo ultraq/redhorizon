@@ -28,7 +28,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
@@ -91,8 +91,7 @@ class GraphicsCheck extends Specification {
 				new Vertex(new Vector3f(-3, -3, 0), Colour.GREEN),
 				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
 			})
-			var camera = new Camera(10, 10)
-				.attachWindow(window)
+			var camera = new Camera(10, 10, window)
 			var transform = new Matrix4f()
 		when:
 			window.show()
@@ -139,8 +138,7 @@ class GraphicsCheck extends Specification {
 					}
 					.flip()
 					.flipVertical(width, height, channels))
-			var camera = new Camera(8, 6)
-				.attachWindow(window)
+			var camera = new Camera(8, 6, window)
 			var transform = new Matrix4f()
 			var material = new Material(texture: texture)
 		when:
@@ -170,9 +168,8 @@ class GraphicsCheck extends Specification {
 			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
 			var image = new Image('GraphicsCheck.png', imageStream)
 			var sprite = new Sprite(image)
-			var camera = new Camera(80, 60)
-				.attachWindow(window)
-				.translate(16, 16, 0)
+			var camera = new Camera(80, 60, window)
+				.translate(-16, -16, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {

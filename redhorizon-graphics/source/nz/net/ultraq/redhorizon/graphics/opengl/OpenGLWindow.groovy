@@ -26,15 +26,16 @@ import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
+import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
-import static org.lwjgl.glfw.GLFWErrorCallback.*
+import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.KHRDebug.*
-import static org.lwjgl.system.MemoryUtil.*
+import static org.lwjgl.system.MemoryUtil.NULL
 
 /**
  * A window using OpenGL as the API.
@@ -45,10 +46,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
-	int framebufferWidth
-	int framebufferHeight
 	private final long window
 	private final ImGuiContext imGuiContext
+	Rectanglei viewport
 	private boolean vsync
 	private FpsCounter fpsCounter
 
@@ -99,14 +99,26 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		var widthPointer = new int[1]
 		var heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		framebufferWidth = widthPointer[0]
-		framebufferHeight = heightPointer[0]
+		var framebufferWidth = widthPointer[0]
+		var framebufferHeight = heightPointer[0]
+		viewport = new Rectanglei(0, 0, framebufferWidth, framebufferHeight)
 
 		// Track framebuffer size changes from window size changes
+		var viewportWidth = framebufferWidth
+		var viewportHeight = framebufferHeight
 		glfwSetFramebufferSizeCallback(window) { long window, int newWidth, int newHeight ->
 			logger.debug('Framebuffer changed to {}x{}', newWidth, newHeight)
 			framebufferWidth = newWidth
 			framebufferHeight = newHeight
+
+			var scale = Math.min(framebufferWidth / viewportWidth, framebufferHeight / viewportHeight)
+			viewportWidth = (int)(viewportWidth * scale)
+			viewportHeight = (int)(viewportHeight * scale)
+			var viewportX = (framebufferWidth - viewportWidth) / 2 as int
+			var viewportY = (framebufferHeight - viewportHeight) / 2 as int
+			viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
+			logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
+			glViewport(viewportX, viewportY, viewportWidth, viewportHeight)
 			trigger(new FramebufferSizeEvent(newWidth, newHeight))
 		}
 
@@ -163,12 +175,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		imGuiContext.close()
 		glfwDestroyWindow(window)
 		glfwTerminate()
-	}
-
-	@Override
-	long getHandle() {
-
-		return window
 	}
 
 	@Override
@@ -262,8 +268,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		clear()
 		imGuiContext.withFrame { ->
-			fpsCounter?.render()
 			closure()
+			fpsCounter?.render()
 		}
 		swapBuffers()
 		pollEvents()
