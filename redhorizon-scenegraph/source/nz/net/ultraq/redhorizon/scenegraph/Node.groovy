@@ -16,7 +16,8 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
-
+import org.joml.Matrix4f
+import org.joml.Vector3f
 import org.joml.Vector3fc
 
 /**
@@ -24,22 +25,31 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-interface Node {
+class Node<T extends Node> {
+
+	private final Vector3f position = new Vector3f()
+	protected final Matrix4f transform = new Matrix4f()
 
 	/**
 	 * Return the position of this node.
 	 */
-	Vector3fc getPosition()
+	Vector3fc getPosition() {
+
+		return transform.getTranslation(position)
+	}
 
 	/**
 	 * Set the position of this node.
 	 */
-	void setPosition(float x, float y, float z)
+	void setPosition(float x, float y, float z) {
+
+		transform.setTranslation(x, y, z)
+	}
 
 	/**
 	 * Set the position of this node.
 	 */
-	default void setPosition(Vector3fc position) {
+	void setPosition(Vector3fc position) {
 
 		setPosition(position.x(), position.y(), position.z())
 	}
@@ -47,5 +57,9 @@ interface Node {
 	/**
 	 * Alter the position of this node through translation.
 	 */
-	void translate(float x, float y, float z)
+	T translate(float x, float y, float z) {
+
+		transform.translate(x, y, z)
+		return (T)this
+	}
 }

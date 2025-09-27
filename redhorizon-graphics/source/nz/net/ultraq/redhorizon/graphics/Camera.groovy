@@ -25,14 +25,14 @@ import org.joml.Vector3fc
 import org.joml.primitives.Rectanglei
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11.*
+import static org.lwjgl.opengl.GL11.glViewport
 
 /**
  * The player's view into the world.
  *
  * @author Emanuel Rabina
  */
-class Camera implements Node {
+class Camera extends Node<Camera> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
@@ -105,9 +105,10 @@ class Camera implements Node {
 	}
 
 	@Override
-	void translate(float x, float y, float z) {
+	Camera translate(float x, float y, float z) {
 
 		view.translate(-x, -y, -z)
+		return this
 	}
 
 	/**

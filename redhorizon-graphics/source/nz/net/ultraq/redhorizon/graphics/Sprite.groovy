@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
-import nz.net.ultraq.redhorizon.scenegraph.AbstractNode
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -29,7 +29,7 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Sprite extends AbstractNode implements AutoCloseable {
+class Sprite extends Node<Sprite> implements AutoCloseable {
 
 	final int width
 	final int height

@@ -36,7 +36,7 @@ class Scene {
 	}
 
 	/**
-	 * An overload of the << operator as an alias for {@link #addNode(Node)}.
+	 * An overload of {@code <<} as an alias for {@link #addNode(Node)}.
 	 */
 	Scene leftShift(Node node) {
 

@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.audio
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
-import nz.net.ultraq.redhorizon.scenegraph.AbstractNode
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -31,7 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class Music extends AbstractNode implements AutoCloseable {
+class Music extends Node<Music> implements AutoCloseable {
 
 	private final Source source
 	private final AudioDecoder decoder
