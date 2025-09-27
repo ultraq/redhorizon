@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
+import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -36,6 +37,9 @@ import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryUtil.NULL
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * A window using OpenGL as the API.
@@ -48,14 +52,16 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private final long window
 	private final ImGuiContext imGuiContext
-	Rectanglei viewport
+	private float contentScale
+	private Vector2i framebufferSize
+	final Rectanglei viewport
 	private boolean vsync
 	private FpsCounter fpsCounter
 
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title, boolean useContentScaling = false) {
+	OpenGLWindow(int framebufferWidth, int framebufferHeight, String title) {
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
@@ -67,10 +73,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
-		if (useContentScaling) {
-			glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
-			glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
-		}
+		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
+		glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
@@ -78,49 +82,31 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 
-		window = glfwCreateWindow(width, height, title, NULL, NULL)
+		window = glfwCreateWindow(framebufferWidth, framebufferHeight, title, NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create a window')
 		}
 
-		var primaryMonitor = glfwGetPrimaryMonitor()
-		var videoMode = glfwGetVideoMode(primaryMonitor)
-		var contentScale = 1f
-		if (useContentScaling) {
-			var contentScalePointer = new float[1]
-			glfwGetWindowContentScale(window, contentScalePointer, new float[1])
-			contentScale = contentScalePointer[0]
+		contentScale = getAndTrackContentScale { newContentScale ->
+			contentScale = newContentScale
 		}
-		glfwSetWindowPos(window,
-			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
-			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
 
-		// Get the initial framebuffer size
-		var widthPointer = new int[1]
-		var heightPointer = new int[1]
-		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		var framebufferWidth = widthPointer[0]
-		var framebufferHeight = heightPointer[0]
-		viewport = new Rectanglei(0, 0, framebufferWidth, framebufferHeight)
+		framebufferSize = getAndTrackFramebufferSize { width, height ->
+			framebufferSize.set(width, height)
 
-		// Track framebuffer size changes from window size changes
-		var viewportWidth = framebufferWidth
-		var viewportHeight = framebufferHeight
-		glfwSetFramebufferSizeCallback(window) { long window, int newWidth, int newHeight ->
-			logger.debug('Framebuffer changed to {}x{}', newWidth, newHeight)
-			framebufferWidth = newWidth
-			framebufferHeight = newHeight
-
-			var scale = Math.min(framebufferWidth / viewportWidth, framebufferHeight / viewportHeight)
-			viewportWidth = (int)(viewportWidth * scale)
-			viewportHeight = (int)(viewportHeight * scale)
-			var viewportX = (framebufferWidth - viewportWidth) / 2 as int
-			var viewportY = (framebufferHeight - viewportHeight) / 2 as int
+			var scale = Math.min(width / viewport.lengthX(), height / viewport.lengthY())
+			var viewportWidth = (int)(viewport.lengthX() * scale)
+			var viewportHeight = (int)(viewport.lengthY() * scale)
+			var viewportX = (width - viewportWidth) / 2 as int
+			var viewportY = (height - viewportHeight) / 2 as int
 			viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
 			logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			glViewport(viewportX, viewportY, viewportWidth, viewportHeight)
-			trigger(new FramebufferSizeEvent(newWidth, newHeight))
+
+			trigger(new FramebufferSizeEvent(framebufferWidth, height))
 		}
+
+		viewport = new Rectanglei(0, 0, framebufferSize.x, framebufferSize.y)
 
 		makeCurrent()
 
@@ -163,6 +149,22 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
+	OpenGLWindow centerToScreen() {
+
+		var widthPointer = new int[1]
+		var heightPointer = new int[1]
+		glfwGetWindowSize(window, widthPointer, heightPointer)
+		var width = widthPointer[0]
+		var height = heightPointer[0]
+
+		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
+		glfwSetWindowPos(window,
+			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
+			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
+		return this
+	}
+
+	@Override
 	void clear() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -175,6 +177,45 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		imGuiContext.close()
 		glfwDestroyWindow(window)
 		glfwTerminate()
+	}
+
+	/**
+	 * Return the current content scale and add a listener to the window for any
+	 * changes, which will be passed to the {@code closure}.
+	 */
+	private float getAndTrackContentScale(@ClosureParams(value = SimpleType, options = 'float') Closure closure) {
+
+		var contentScalePointer = new float[1]
+		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
+		var contentScale = contentScalePointer[0]
+		logger.debug('Content scale is {}', contentScale)
+
+		glfwSetWindowContentScaleCallback(window) { long window, float xscale, float yscale ->
+			logger.debug('Content scale changed to {}', xscale)
+			closure(xscale)
+		}
+
+		return contentScale
+	}
+
+	/**
+	 * Return the current framebuffer size and add a listener to the window for
+	 * any changes, which will be passed to the {@code closure}.
+	 */
+	private Vector2i getAndTrackFramebufferSize(@ClosureParams(value = SimpleType, options = ['int', 'int']) Closure closure) {
+
+		var widthPointer = new int[1]
+		var heightPointer = new int[1]
+		glfwGetFramebufferSize(window, widthPointer, heightPointer)
+		var framebufferSize = new Vector2i(widthPointer[0], heightPointer[0])
+		logger.debug('Framebuffer size is {}x{}', framebufferSize.x, framebufferSize.y)
+
+		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
+			logger.debug('Framebuffer size changed to {}x{}', width, height)
+			closure(width, height)
+		}
+
+		return framebufferSize
 	}
 
 	@Override
