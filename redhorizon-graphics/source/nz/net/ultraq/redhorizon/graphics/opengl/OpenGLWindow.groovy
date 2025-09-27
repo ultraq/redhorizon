@@ -52,7 +52,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 	private final long window
 	private final ImGuiContext imGuiContext
-	private float contentScale
+	float contentScale
 	private Vector2i framebufferSize
 	final Rectanglei viewport
 	private boolean vsync
@@ -140,7 +140,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
-			trigger(new CursorPositionEvent(xpos, ypos))
+			// On macOS, adjust the cursor position by the scaling factor to account
+			// for the difference between the framebuffer size (reported w/ retina
+			// scaling) and the cursor position (not reported w/ retina scaling)
+			if (System.isMacOs()) {
+				trigger(new CursorPositionEvent(xpos * contentScale, ypos * contentScale))
+			}
+			else {
+				trigger(new CursorPositionEvent(xpos, ypos))
+			}
 		}
 
 		// Create an ImGui context - might as well bake it into the window as we're
@@ -159,8 +167,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
 		glfwSetWindowPos(window,
-			(videoMode.width() / 2) - ((width * contentScale) / 2) as int,
-			(videoMode.height() / 2) - ((height * contentScale) / 2) as int)
+			(videoMode.width() / 2) - (width / 2) as int,
+			(videoMode.height() / 2) - (height / 2) as int)
 		return this
 	}
 

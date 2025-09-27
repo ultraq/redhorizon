@@ -51,6 +51,11 @@ interface Window extends InputSource, AutoCloseable {
 	void clear()
 
 	/**
+	 * Get the content scaling factor for the window.
+	 */
+	float getContentScale()
+
+	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()

@@ -76,13 +76,20 @@ class Camera extends Node<Camera> {
 	 * @param winX
 	 * @param winY
 	 * @param result A vector to store the result in.
+	 * @return The {@code result} vector.
 	 */
-	void unproject(float winX, float winY, Vector3f result) {
+	Vector3f unproject(float winX, float winY, Vector3f result) {
 
 		var viewport = window.viewport
-		projection.mulAffine(view, viewProjection).unproject(winX, winY, 0,
-			new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
-			result)
+		var contentScale = window.contentScale
+		return projection.mulAffine(view, viewProjection)
+			.unproject(
+				winX / contentScale as float,
+				winY / contentScale as float,
+				0,
+				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
+				result)
+			.mul(contentScale)
 	}
 
 	/**
