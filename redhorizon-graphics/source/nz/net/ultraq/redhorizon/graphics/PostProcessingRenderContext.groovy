@@ -17,16 +17,15 @@
 package nz.net.ultraq.redhorizon.graphics
 
 /**
- * A set of rendering commands that can be used by objects while this context is
- * valid.  These include shortcuts to applying uniforms to a shader without
- * requiring knowledge of how the shader is constructed.
+ * A render context for post-processing stages, which are usually rendering from
+ * one framebuffer to another or the screen.
  *
  * @author Emanuel Rabina
  */
-interface RenderContext {
+interface PostProcessingRenderContext extends RenderContext {
 
 	/**
-	 * Set a framebuffer as a rendering target.
+	 * Set which framebuffer is being used to draw to the next render target.
 	 */
-	void setRenderTarget(Framebuffer framebuffer)
+	void setFramebufferTexture(Texture texture)
 }

@@ -17,10 +17,12 @@
 package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Material
-import nz.net.ultraq.redhorizon.graphics.RenderContext
+import nz.net.ultraq.redhorizon.graphics.SceneRenderContext
 
 import org.joml.Matrix4fc
+import static org.lwjgl.opengl.GL30C.*
 
 import java.nio.ByteBuffer
 
@@ -30,7 +32,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class BasicShader extends OpenGLShader {
+class BasicShader extends OpenGLShader<SceneRenderContext> {
 
 	private final OpenGLTexture whiteTexture
 
@@ -51,9 +53,9 @@ class BasicShader extends OpenGLShader {
 	}
 
 	@Override
-	protected RenderContext createRenderContext() {
+	protected SceneRenderContext createRenderContext() {
 
-		return new RenderContext() {
+		return new SceneRenderContext() {
 
 			@Override
 			void setMaterial(Material material) {
@@ -68,6 +70,17 @@ class BasicShader extends OpenGLShader {
 			@Override
 			void setProjectionMatrix(Matrix4fc projection) {
 				setUniform('projection', projection)
+			}
+
+			@Override
+			void setRenderTarget(Framebuffer framebuffer) {
+
+				if (framebuffer) {
+					framebuffer.bind()
+				}
+				else {
+					glBindFramebuffer(GL_FRAMEBUFFER, 0)
+				}
 			}
 
 			@Override

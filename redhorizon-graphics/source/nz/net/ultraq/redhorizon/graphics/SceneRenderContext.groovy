@@ -16,17 +16,32 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import org.joml.Matrix4fc
+
 /**
- * A set of rendering commands that can be used by objects while this context is
- * valid.  These include shortcuts to applying uniforms to a shader without
- * requiring knowledge of how the shader is constructed.
+ * A render context for drawing elements in a scene.
  *
  * @author Emanuel Rabina
  */
-interface RenderContext {
+interface SceneRenderContext extends RenderContext {
 
 	/**
-	 * Set a framebuffer as a rendering target.
+	 * Set a whole host of material attributes.
 	 */
-	void setRenderTarget(Framebuffer framebuffer)
+	void setMaterial(Material material)
+
+	/**
+	 * Set the model matrix uniform.
+	 */
+	void setModelMatrix(Matrix4fc model)
+
+	/**
+	 * Set the projection matrix uniform.
+	 */
+	void setProjectionMatrix(Matrix4fc projection)
+
+	/**
+	 * Set the view matrix uniform.
+	 */
+	void setViewMatrix(Matrix4fc view)
 }

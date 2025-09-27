@@ -23,7 +23,7 @@ import org.joml.Matrix4fc
  *
  * @author Emanuel Rabina
  */
-interface Shader extends GraphicsResource {
+interface Shader<TRenderContext extends RenderContext> extends GraphicsResource {
 
 	/**
 	 * The name of this shader.
@@ -72,5 +72,5 @@ interface Shader extends GraphicsResource {
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
-	RenderContext use()
+	TRenderContext use()
 }
