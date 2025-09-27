@@ -26,9 +26,9 @@ import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL11C.GL_TRUE
 import static org.lwjgl.opengl.GL20C.*
-import static org.lwjgl.system.MemoryStack.*
+import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
 import java.nio.Buffer
@@ -38,7 +38,7 @@ import java.nio.Buffer
  *
  * @author Emanuel Rabina
  */
-abstract class OpenGLShader implements Shader {
+abstract class OpenGLShader<TRenderContext extends RenderContext> implements Shader<TRenderContext> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
 	private static int lastProgramId = 0
@@ -47,7 +47,7 @@ abstract class OpenGLShader implements Shader {
 	final int programId
 	protected final Map<String, Buffer> uniformBuffers = [:]
 	@Lazy
-	protected RenderContext renderContext = { createRenderContext() }()
+	protected TRenderContext renderContext = { createRenderContext() }()
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
@@ -122,7 +122,7 @@ abstract class OpenGLShader implements Shader {
 	/**
 	 * Create the render context to use for rendering with this shader.
 	 */
-	protected abstract RenderContext createRenderContext()
+	protected abstract TRenderContext createRenderContext()
 
 	/**
 	 * Cached function for looking up a uniform location in a shader program.
@@ -184,7 +184,7 @@ abstract class OpenGLShader implements Shader {
 	}
 
 	@Override
-	RenderContext use() {
+	TRenderContext use() {
 
 		if (programId != lastProgramId) {
 			glUseProgram(programId)

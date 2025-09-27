@@ -88,7 +88,7 @@ class Camera extends Node<Camera> {
 	/**
 	 * Update rendering with the camera state.
 	 */
-	void update(RenderContext renderContext) {
+	void update(SceneRenderContext renderContext) {
 
 		renderContext.setProjectionMatrix(projection)
 		renderContext.setViewMatrix(view)
