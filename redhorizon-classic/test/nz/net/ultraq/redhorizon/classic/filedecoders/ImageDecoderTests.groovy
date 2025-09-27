@@ -48,6 +48,7 @@ class ImageDecoderTests extends Specification {
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
+			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withFpsCounter()
 			.withVSync(true)
