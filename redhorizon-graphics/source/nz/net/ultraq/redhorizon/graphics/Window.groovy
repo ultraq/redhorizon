@@ -40,6 +40,11 @@ import org.joml.primitives.Rectanglei
 interface Window extends InputSource, AutoCloseable {
 
 	/**
+	 * Center the window to the screen.
+	 */
+	Window centerToScreen()
+
+	/**
 	 * Clear the framebuffer with the current clear colour.  Usually called to
 	 * start rendering a new frame.
 	 */
