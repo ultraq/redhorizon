@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
  * Interface for anything that wants to be able to traverse the scene graph.
@@ -25,12 +25,9 @@ package nz.net.ultraq.redhorizon.engine.scenegraph
 interface SceneVisitor {
 
 	/**
-	 * Allow visiting any scene element.
+	 * Visiting any node.
 	 *
-	 * @param element
-	 * @return
-	 * {@code true} if the visit can continue to this node's children, {@code
-	 * false} otherwise.
+	 * @param node
 	 */
-	boolean visit(Node element)
+	void visit(Node node)
 }

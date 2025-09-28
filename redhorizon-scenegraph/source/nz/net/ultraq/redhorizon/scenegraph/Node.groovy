@@ -27,8 +27,38 @@ import org.joml.Vector3fc
  */
 class Node<T extends Node> {
 
+	String name
+	final List<Node> children = []
+	Node parent
 	private final Vector3f position = new Vector3f()
 	protected final Matrix4f transform = new Matrix4f()
+
+	/**
+	 * Add a child node to this node.
+	 */
+	T addChild(Node child) {
+
+		children.add(child)
+		child.parent = this
+		return (T)this
+	}
+
+	/**
+	 * An overload of {@code <<} as an alias for {@link #addChild(Node)}.
+	 */
+	void leftShift(Node child) {
+
+		addChild(child)
+	}
+
+	/**
+	 * Returns this node's name.  Used for the scene overview and debugging,
+	 * defaults to the class name of the node.
+	 */
+	String getName() {
+
+		return name ?: this.class.simpleName
+	}
 
 	/**
 	 * Return the position of this node.
@@ -36,6 +66,15 @@ class Node<T extends Node> {
 	Vector3fc getPosition() {
 
 		return transform.getTranslation(position)
+	}
+
+	/**
+	 * Walk up the scene graph to locate and return the scene to which this node
+	 * belongs.
+	 */
+	protected Scene getScene() {
+
+		return parent?.getScene()
 	}
 
 	/**
@@ -61,5 +100,14 @@ class Node<T extends Node> {
 
 		transform.translate(x, y, z)
 		return (T)this
+	}
+
+	/**
+	 * Traverse this node and all of its children.
+	 */
+	void traverse(SceneVisitor visitor) {
+
+		visitor.visit(this)
+		children*.traverse(visitor)
 	}
 }

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scenegraph
 
 import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Scriptable
+import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f

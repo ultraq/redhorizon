@@ -24,22 +24,24 @@ package nz.net.ultraq.redhorizon.scenegraph
  */
 class Scene {
 
-	private final List<Node> nodes = []
+	@Delegate(includes = ['addChild', 'leftShift', 'traverse'], interfaces = false)
+	private final Node root = new RootNode()
 
 	/**
-	 * Add a node to this scene.
+	 * A special instance of {@link Node} that is always present in the scene.
 	 */
-	Scene addNode(Node node) {
+	private class RootNode extends Node<RootNode> {
 
-		nodes << node
-		return this
-	}
+		@Override
+		protected Scene getScene() {
 
-	/**
-	 * An overload of {@code <<} as an alias for {@link #addNode(Node)}.
-	 */
-	Scene leftShift(Node node) {
+			return Scene.this
+		}
 
-		return addNode(node)
+		@Override
+		void traverse(SceneVisitor visitor) {
+
+			children*.traverse(visitor)
+		}
 	}
 }
