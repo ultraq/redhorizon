@@ -78,6 +78,16 @@ class Node<T extends Node> {
 	}
 
 	/**
+	 * Remove a child node from this node.
+	 */
+	T removeChild(Node child) {
+
+		children.remove(child)
+		child.parent = null
+		return (T)this
+	}
+
+	/**
 	 * Set the position of this node.
 	 */
 	void setPosition(float x, float y, float z) {
