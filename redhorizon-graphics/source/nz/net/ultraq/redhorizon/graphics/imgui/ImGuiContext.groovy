@@ -47,18 +47,18 @@ class ImGuiContext implements GraphicsResource {
 		ImGui.createContext()
 
 		var io = ImGui.getIO()
-		io.setConfigFlags(DockingEnable)
+		io.setConfigFlags(DockingEnable | ViewportsEnable)
 
 		var fontConfig1 = new ImFontConfig()
 		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 20, fontConfig1)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, fontConfig1)
 		}
 		fontConfig1.destroy()
 		io.setFontDefault(robotoFont)
 
 		var fontConfig2 = new ImFontConfig()
 		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 20, fontConfig2)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, fontConfig2)
 		}
 		fontConfig2.destroy()
 
@@ -89,5 +89,7 @@ class ImGuiContext implements GraphicsResource {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
+		ImGui.updatePlatformWindows()
+		ImGui.renderPlatformWindowsDefault()
 	}
 }

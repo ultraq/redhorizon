@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.input.InputSource
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.primitives.Rectanglei
 
@@ -38,6 +39,16 @@ import org.joml.primitives.Rectanglei
  * @author Emanuel Rabina
  */
 interface Window extends InputSource, AutoCloseable {
+
+	/**
+	 * Include an FPS counter with the window.
+	 */
+	Window addFpsCounter()
+
+	/**
+	 * Include a node list with the window.
+	 */
+	Window addNodeList(Scene scene)
 
 	/**
 	 * Center the window to the screen.
@@ -130,11 +141,6 @@ interface Window extends InputSource, AutoCloseable {
 			releaseCurrent()
 		}
 	}
-
-	/**
-	 * Include an FPS counter with the window.
-	 */
-	Window withFpsCounter()
 
 	/**
 	 * Convenience method for keeping all frame-rendering commands within the

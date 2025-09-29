@@ -59,7 +59,6 @@ class GraphicsCheck extends Specification {
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
-			.withFpsCounter()
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
 					window.shouldClose(true)

@@ -52,7 +52,7 @@ class FpsCounter implements GraphicsResource {
 
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos((float)(viewport.sizeX - width), viewport.workPosY)
+		ImGui.setNextWindowPos((float)(viewport.workPosX + viewport.sizeX - width), viewport.workPosY)
 		ImGui.pushFont(robotoMonoFont)
 
 		ImGui.begin('Debug overlay', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)

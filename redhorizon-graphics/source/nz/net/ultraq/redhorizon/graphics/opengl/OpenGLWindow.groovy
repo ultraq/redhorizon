@@ -22,9 +22,11 @@ import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.FpsCounter
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
@@ -57,6 +59,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	final Rectanglei viewport
 	private boolean vsync
 	private FpsCounter fpsCounter
+	private NodeList nodeList
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -157,6 +160,20 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
+	OpenGLWindow addFpsCounter() {
+
+		fpsCounter = new FpsCounter(imGuiContext)
+		return this
+	}
+
+	@Override
+	OpenGLWindow addNodeList(Scene scene) {
+
+		nodeList = new NodeList(scene)
+		return this
+	}
+
+	@Override
 	OpenGLWindow centerToScreen() {
 
 		var widthPointer = new int[1]
@@ -181,6 +198,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void close() {
 
+		nodeList?.close()
 		fpsCounter?.close()
 		imGuiContext.close()
 		glfwDestroyWindow(window)
@@ -306,18 +324,13 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow withFpsCounter() {
-
-		fpsCounter = new FpsCounter(imGuiContext)
-		return this
-	}
-
-	@Override
 	void withFrame(Closure closure) {
 
+		makeCurrent() // Make the context current again because multi-viewports takes it
 		clear()
 		imGuiContext.withFrame { ->
 			closure()
+			nodeList?.render()
 			fpsCounter?.render()
 		}
 		swapBuffers()

@@ -17,34 +17,40 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
-import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Vector3f
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
 /**
- * Testing how scaling affects things like framebuffer size and cursor position.
+ * A simple test to see the ImGui elements in action.
  *
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class CursorPositionCheck extends Specification {
+class ImGuiElementsCheck extends Specification {
 
-	private static Logger logger = LoggerFactory.getLogger(CursorPositionCheck)
+	def setupSpec() {
+		System.setProperty('org.lwjgl.system.stackSize', '10240')
+		if (System.isMacOs()) {
+			System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
+		}
+	}
 
+	Scene scene
 	OpenGLWindow window
 
 	def setup() {
+		scene = new Scene()
 		window = new OpenGLWindow(800, 600, "Testing")
+			.addFpsCounter()
+			.addNodeList(scene)
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
-			.addFpsCounter()
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
 					window.shouldClose(true)
@@ -56,36 +62,24 @@ class CursorPositionCheck extends Specification {
 		window?.close()
 	}
 
-	def 'Check cursor position'() {
+	def 'Shows an FPS counter, node list'() {
+		given:
+			var node = new Node().tap {
+				name = 'Parent'
+			}
+			scene << node
+			node << new Node().tap {
+				name = 'Child 1'
+			}
+			node << new Node().tap {
+				name = 'Child 2'
+			}
 		when:
-			var camera = new Camera(800, 600, window)
-				.translate(400, 300, 0)
-			var unprojectionResult = new Vector3f()
-			var inputEventHandler = new InputEventHandler()
-				.addInputSource(window)
-			var cursorPositionTimer = 0f
 			window.show()
-
-			var lastUpdateTimeMs = System.currentTimeMillis()
-
 			while (!window.shouldClose()) {
-				var currentTimeMs = System.currentTimeMillis()
-				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
-
 				window.withFrame { ->
 					// Do something!
 				}
-
-				cursorPositionTimer += delta
-				var cursorPosition = inputEventHandler.cursorPosition()
-				var unprojectedCursorPosition = camera.unproject(cursorPosition.x, cursorPosition.y, unprojectionResult)
-				if (cursorPositionTimer > 1f) {
-					logger.info('Cursor position: {}, {}', cursorPosition.x, cursorPosition.y)
-					logger.info('World-projected cursor position: {}, {}', unprojectedCursorPosition.x, unprojectedCursorPosition.y)
-					cursorPositionTimer = 0
-				}
-
-				lastUpdateTimeMs = currentTimeMs
 				Thread.yield()
 			}
 		then:

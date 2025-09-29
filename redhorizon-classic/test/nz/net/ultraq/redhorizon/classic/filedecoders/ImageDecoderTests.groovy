@@ -48,9 +48,9 @@ class ImageDecoderTests extends Specification {
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
+			.addFpsCounter()
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
-			.withFpsCounter()
 			.withVSync(true)
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {

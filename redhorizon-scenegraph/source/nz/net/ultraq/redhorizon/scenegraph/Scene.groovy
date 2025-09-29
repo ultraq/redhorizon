@@ -25,7 +25,7 @@ package nz.net.ultraq.redhorizon.scenegraph
 class Scene {
 
 	@Delegate(includes = ['addChild', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
-	private final Node root = new RootNode()
+	final Node root = new RootNode()
 
 	/**
 	 * A special instance of {@link Node} that is always present in the scene.
