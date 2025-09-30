@@ -24,6 +24,7 @@ import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
 import static imgui.flag.ImGuiConfigFlags.*
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Setup necessary to include ImGui in the rendering pipeline.
@@ -89,7 +90,9 @@ class ImGuiContext implements GraphicsResource {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
+		var currentContext = glfwGetCurrentContext()
 		ImGui.updatePlatformWindows()
 		ImGui.renderPlatformWindowsDefault()
+		glfwMakeContextCurrent(currentContext)
 	}
 }

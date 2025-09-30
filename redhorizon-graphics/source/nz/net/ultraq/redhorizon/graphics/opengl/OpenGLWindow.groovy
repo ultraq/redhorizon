@@ -326,7 +326,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void withFrame(Closure closure) {
 
-		makeCurrent() // Make the context current again because multi-viewports takes it
 		clear()
 		imGuiContext.withFrame { ->
 			closure()
