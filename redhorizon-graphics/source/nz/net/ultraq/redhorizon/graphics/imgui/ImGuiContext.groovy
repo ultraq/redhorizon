@@ -65,7 +65,6 @@ class ImGuiContext implements GraphicsResource {
 
 		imGuiGlfw.init(windowHandle, true)
 		imGuiGl3.init('#version 410 core')
-
 	}
 
 	@Override
