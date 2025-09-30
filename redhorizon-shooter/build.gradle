@@ -29,7 +29,7 @@ configure {
 				implementation project(':redhorizon-explorer')
 				implementation project(':redhorizon-runtime')
 				implementation "info.picocli:picocli:${picocliVersion}"
-				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}")
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 				implementation 'org.lwjgl:lwjgl-glfw'
 			}
 }

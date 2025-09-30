@@ -33,8 +33,8 @@ configure {
 		.configureSource()
 			.withDependencies() {
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
-				implementation("org.joml:joml:${jomlVersion}")
-				implementation("org.joml:joml-primitives:${jomlPrimitivesVersion}")
+				implementation "org.joml:joml:${jomlVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 
 	createMavenPublication()
