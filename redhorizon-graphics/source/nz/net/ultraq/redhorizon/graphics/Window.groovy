@@ -68,16 +68,6 @@ interface Window extends RenderTarget, InputSource, AutoCloseable {
 	float getContentScale()
 
 	/**
-	 * Get the height of the framebuffer.
-	 */
-	int getFramebufferHeight()
-
-	/**
-	 * Get the width of the framebuffer.
-	 */
-	int getFramebufferWidth()
-
-	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()

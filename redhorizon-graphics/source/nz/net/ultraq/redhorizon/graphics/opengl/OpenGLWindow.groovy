@@ -105,7 +105,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			var viewportY = (height - viewportHeight) / 2 as int
 			viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
 			logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
-			glViewport(viewportX, viewportY, viewportWidth, viewportHeight)
 
 			trigger(new FramebufferSizeEvent(framebufferWidth, height))
 		}
@@ -243,18 +242,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		return framebufferSize
-	}
-
-	@Override
-	int getFramebufferHeight() {
-
-		return framebufferSize.y
-	}
-
-	@Override
-	int getFramebufferWidth() {
-
-		return framebufferSize.x
 	}
 
 	@Override

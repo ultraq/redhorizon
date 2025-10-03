@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.graphics.Vertex
 
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglei
 import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D
 import static org.lwjgl.opengl.GL30C.*
 
@@ -36,10 +37,11 @@ import static org.lwjgl.opengl.GL30C.*
  */
 class OpenGLFramebuffer implements Framebuffer {
 
-	private final Mesh fullScreenQuad
-	final Texture colourTexture
 	final int width
 	final int height
+	final Rectanglei viewport
+	private final Mesh fullScreenQuad
+	private final Texture colourTexture
 	private final int framebufferId
 	private final int depthBufferId
 
@@ -50,6 +52,7 @@ class OpenGLFramebuffer implements Framebuffer {
 
 		this.width = width
 		this.height = height
+		viewport = new Rectanglei(0, 0, width, height)
 
 		fullScreenQuad = new OpenGLMesh(Type.TRIANGLES,
 			new Vertex[]{
@@ -72,9 +75,6 @@ class OpenGLFramebuffer implements Framebuffer {
 		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferId)
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height)
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBufferId)
-//		glBindRenderbuffer(GL_RENDERBUFFER, 0)
-//
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 	}
 
 	@Override

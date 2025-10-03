@@ -54,6 +54,8 @@ class ScreenShader extends OpenGLShader<PostProcessingRenderContext> {
 				renderTarget.use()
 				glClear(GL_COLOR_BUFFER_BIT)
 				glDisable(GL_DEPTH_TEST)
+				var viewport = renderTarget.viewport
+				glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			}
 		}
 	}

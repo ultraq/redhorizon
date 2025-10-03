@@ -77,6 +77,8 @@ class BasicShader extends OpenGLShader<SceneRenderContext> {
 				renderTarget.use()
 				glEnable(GL_DEPTH_TEST)
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+				var viewport = renderTarget.viewport
+				glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			}
 
 			@Override

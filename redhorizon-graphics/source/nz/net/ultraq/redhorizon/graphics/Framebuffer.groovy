@@ -37,12 +37,6 @@ interface Framebuffer extends RenderTarget, GraphicsResource {
 	int getHeight()
 
 	/**
-	 * Get the underlying texture that would have been drawn to in the last render
-	 * pass.
-	 */
-	Texture getColourTexture()
-
-	/**
 	 * Get the width of the framebuffer.
 	 */
 	int getWidth()

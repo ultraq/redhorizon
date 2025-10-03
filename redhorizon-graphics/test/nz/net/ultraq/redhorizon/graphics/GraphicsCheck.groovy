@@ -116,7 +116,7 @@ class GraphicsCheck extends Specification {
 	def "Draws a triangle - to a framebuffer then to the screen"() {
 		given:
 			var basicShader = new BasicShader()
-			var framebuffer = new OpenGLFramebuffer(window.framebufferWidth, window.framebufferHeight)
+			var framebuffer = new OpenGLFramebuffer(320, 240)
 			var screenShader = new ScreenShader()
 			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 				new Vertex(new Vector3f(0, 3, 0), Colour.RED),

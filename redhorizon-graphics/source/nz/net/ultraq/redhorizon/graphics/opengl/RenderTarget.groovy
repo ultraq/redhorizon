@@ -16,12 +16,19 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import org.joml.primitives.Rectanglei
+
 /**
  * A render target is anything that can be drawn to as part of a render pass.
  *
  * @author Emanuel Rabina
  */
 interface RenderTarget {
+
+	/**
+	 * Get the viewport that should be used for drawing to this render target.
+	 */
+	Rectanglei getViewport()
 
 	/**
 	 * Use this render target in upcoming rendering operations.
