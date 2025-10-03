@@ -14,35 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+#version 410 core
 
+#pragma stage vertex
+in vec4 position;
+in vec2 textureUVs;
+out vec2 v_textureUVs;
 
-import org.joml.Matrix4fc
+void main() {
+	gl_Position = position;
+	v_textureUVs = textureUVs;
+}
 
-/**
- * A render context for drawing elements in a scene.
- *
- * @author Emanuel Rabina
- */
-interface SceneRenderContext extends RenderContext {
+#pragma stage fragment
+in vec2 v_textureUVs;
+out vec4 fragmentColour;
+uniform sampler2D framebuffer;
 
-	/**
-	 * Set a whole host of material attributes.
-	 */
-	void setMaterial(Material material)
-
-	/**
-	 * Set the model matrix uniform.
-	 */
-	void setModelMatrix(Matrix4fc model)
-
-	/**
-	 * Set the projection matrix uniform.
-	 */
-	void setProjectionMatrix(Matrix4fc projection)
-
-	/**
-	 * Set the view matrix uniform.
-	 */
-	void setViewMatrix(Matrix4fc view)
+void main() {
+	fragmentColour = texture(framebuffer, v_textureUVs);
 }

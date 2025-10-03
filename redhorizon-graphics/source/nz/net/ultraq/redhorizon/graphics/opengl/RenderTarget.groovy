@@ -14,35 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
-
-
-import org.joml.Matrix4fc
+package nz.net.ultraq.redhorizon.graphics.opengl
 
 /**
- * A render context for drawing elements in a scene.
+ * A render target is anything that can be drawn to as part of a render pass.
  *
  * @author Emanuel Rabina
  */
-interface SceneRenderContext extends RenderContext {
+interface RenderTarget {
 
 	/**
-	 * Set a whole host of material attributes.
+	 * Use this render target in upcoming rendering operations.
 	 */
-	void setMaterial(Material material)
-
-	/**
-	 * Set the model matrix uniform.
-	 */
-	void setModelMatrix(Matrix4fc model)
-
-	/**
-	 * Set the projection matrix uniform.
-	 */
-	void setProjectionMatrix(Matrix4fc projection)
-
-	/**
-	 * Set the view matrix uniform.
-	 */
-	void setViewMatrix(Matrix4fc view)
+	void use()
 }

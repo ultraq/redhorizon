@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.opengl.RenderTarget
+
 /**
  * A set of rendering commands that can be used by objects while this context is
  * valid.  These include shortcuts to applying uniforms to a shader without
@@ -26,7 +28,7 @@ package nz.net.ultraq.redhorizon.graphics
 interface RenderContext {
 
 	/**
-	 * Set a framebuffer as a rendering target.
+	 * Set the render target for subsequent draw calls.
 	 */
-	void setRenderTarget(Framebuffer framebuffer)
+	void setRenderTarget(RenderTarget renderTarget)
 }

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.opengl.RenderTarget
 import nz.net.ultraq.redhorizon.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -38,7 +39,7 @@ import org.joml.primitives.Rectanglei
  *
  * @author Emanuel Rabina
  */
-interface Window extends InputSource, AutoCloseable {
+interface Window extends RenderTarget, InputSource, AutoCloseable {
 
 	/**
 	 * Include an FPS counter with the window.
@@ -65,6 +66,16 @@ interface Window extends InputSource, AutoCloseable {
 	 * Get the content scaling factor for the window.
 	 */
 	float getContentScale()
+
+	/**
+	 * Get the height of the framebuffer.
+	 */
+	int getFramebufferHeight()
+
+	/**
+	 * Get the width of the framebuffer.
+	 */
+	int getFramebufferWidth()
 
 	/**
 	 * Get the viewport used for rendering to the window.

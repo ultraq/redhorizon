@@ -16,18 +16,15 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.opengl.RenderTarget
+
 /**
  * A section of memory that can be drawn to like a screen, and can then be used
  * as input for further rendering steps.
  *
  * @author Emanuel Rabina
  */
-interface Framebuffer extends GraphicsResource {
-
-	/**
-	 * Use this framebuffer in upcoming rendering operations.
-	 */
-	void bind()
+interface Framebuffer extends RenderTarget, GraphicsResource {
 
 	/**
 	 * Draw the contents of the framebuffer to the current render target.
@@ -38,6 +35,12 @@ interface Framebuffer extends GraphicsResource {
 	 * Get the height of the framebuffer.
 	 */
 	int getHeight()
+
+	/**
+	 * Get the underlying texture that would have been drawn to in the last render
+	 * pass.
+	 */
+	Texture getColourTexture()
 
 	/**
 	 * Get the width of the framebuffer.

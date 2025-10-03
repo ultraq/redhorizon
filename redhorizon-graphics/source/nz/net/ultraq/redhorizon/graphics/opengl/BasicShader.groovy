@@ -17,12 +17,11 @@
 package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.SceneRenderContext
 
 import org.joml.Matrix4fc
-import static org.lwjgl.opengl.GL30C.*
+import static org.lwjgl.opengl.GL11C.*
 
 import java.nio.ByteBuffer
 
@@ -73,14 +72,11 @@ class BasicShader extends OpenGLShader<SceneRenderContext> {
 			}
 
 			@Override
-			void setRenderTarget(Framebuffer framebuffer) {
+			void setRenderTarget(RenderTarget renderTarget) {
 
-				if (framebuffer) {
-					framebuffer.bind()
-				}
-				else {
-					glBindFramebuffer(GL_FRAMEBUFFER, 0)
-				}
+				renderTarget.use()
+				glEnable(GL_DEPTH_TEST)
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 			}
 
 			@Override

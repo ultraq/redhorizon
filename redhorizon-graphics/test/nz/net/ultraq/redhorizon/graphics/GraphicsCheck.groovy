@@ -18,9 +18,11 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.graphics.opengl.ScreenShader
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Matrix4f
@@ -109,6 +111,46 @@ class GraphicsCheck extends Specification {
 		cleanup:
 			triangle?.close()
 			shader?.close()
+	}
+
+	def "Draws a triangle - to a framebuffer then to the screen"() {
+		given:
+			var basicShader = new BasicShader()
+			var framebuffer = new OpenGLFramebuffer(window.framebufferWidth, window.framebufferHeight)
+			var screenShader = new ScreenShader()
+			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
+				new Vertex(new Vector3f(0, 3, 0), Colour.RED),
+				new Vertex(new Vector3f(-3, -3, 0), Colour.GREEN),
+				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
+			})
+			var camera = new Camera(10, 10, window)
+			var transform = new Matrix4f()
+			var material = new Material()
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.withFrame { ->
+
+					// Draw to framebuffer
+					var sceneRenderContext = basicShader.use()
+					sceneRenderContext.setRenderTarget(framebuffer)
+					camera.update(sceneRenderContext)
+					sceneRenderContext.setModelMatrix(transform)
+					sceneRenderContext.setMaterial(material)
+					triangle.draw()
+
+					// Draw to window
+					var postProcessingRenderContext = screenShader.use()
+					postProcessingRenderContext.setRenderTarget(window)
+					framebuffer.draw(postProcessingRenderContext)
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			triangle?.close()
+			basicShader?.close()
 	}
 
 	def "Draws a texture"() {

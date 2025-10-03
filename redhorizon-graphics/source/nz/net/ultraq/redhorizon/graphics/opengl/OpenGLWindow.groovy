@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
 import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryUtil.NULL
 
@@ -245,6 +246,18 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
+	int getFramebufferHeight() {
+
+		return framebufferSize.y
+	}
+
+	@Override
+	int getFramebufferWidth() {
+
+		return framebufferSize.x
+	}
+
+	@Override
 	void makeCurrent() {
 
 		glfwMakeContextCurrent(window)
@@ -307,6 +320,12 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	void toggleVSync() {
 
 		setVSync(!this.vsync)
+	}
+
+	@Override
+	void use() {
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 	}
 
 	@Override

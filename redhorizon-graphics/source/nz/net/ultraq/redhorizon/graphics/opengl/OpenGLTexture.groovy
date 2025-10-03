@@ -19,8 +19,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 import nz.net.ultraq.redhorizon.graphics.Texture
 
 import static org.lwjgl.opengl.GL11C.*
-import static org.lwjgl.opengl.GL13C.GL_TEXTURE0
-import static org.lwjgl.opengl.GL13C.glActiveTexture
+import static org.lwjgl.opengl.GL13C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 import static org.lwjgl.system.MemoryUtil.NULL
 
@@ -51,6 +50,7 @@ class OpenGLTexture implements Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+//		glBindTexture(GL_TEXTURE_2D, 0)
 	}
 
 	/**
