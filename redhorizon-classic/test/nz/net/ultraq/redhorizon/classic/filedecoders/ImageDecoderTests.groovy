@@ -47,7 +47,7 @@ class ImageDecoderTests extends Specification {
 	OpenGLWindow window
 
 	def setup() {
-		window = new OpenGLWindow(800, 600, "Testing")
+		window = new OpenGLWindow(800, 500, "Testing")
 			.addFpsCounter()
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
@@ -69,15 +69,16 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.pcx', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var camera = new Camera(640, 480, window)
+			var camera = new Camera(640, 400, window)
 				.translate(320, 200, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					sprite.draw(renderContext)
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						sprite.draw(shaderContext)
+					}
 				}
 				Thread.yield()
 			}
@@ -96,15 +97,16 @@ class ImageDecoderTests extends Specification {
 			var image = new Image('alipaper.cps', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
-			var camera = new Camera(320, 240, window)
+			var camera = new Camera(320, 200, window)
 				.translate(160, 100, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					sprite.draw(renderContext)
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						sprite.draw(shaderContext)
+					}
 				}
 				Thread.yield()
 			}

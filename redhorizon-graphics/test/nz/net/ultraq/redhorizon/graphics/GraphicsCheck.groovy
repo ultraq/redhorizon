@@ -76,7 +76,7 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
+				window.useWindow { ->
 					// Do something!
 				}
 				Thread.yield()
@@ -98,11 +98,12 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					renderContext.setModelMatrix(transform)
-					triangle.draw()
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						shaderContext.setModelMatrix(transform)
+						triangle.draw()
+					}
 				}
 				Thread.yield()
 			}
@@ -129,20 +130,22 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
 
-					// Draw to framebuffer
-					var sceneRenderContext = basicShader.use()
-					sceneRenderContext.setRenderTarget(framebuffer)
-					camera.update(sceneRenderContext)
-					sceneRenderContext.setModelMatrix(transform)
-					sceneRenderContext.setMaterial(material)
-					triangle.draw()
+				// Draw to framebuffer
+				framebuffer.useFramebuffer { ->
+					basicShader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						shaderContext.setModelMatrix(transform)
+						shaderContext.setMaterial(material)
+						triangle.draw()
+					}
+				}
 
-					// Draw to window
-					var postProcessingRenderContext = screenShader.use()
-					postProcessingRenderContext.setRenderTarget(window)
-					framebuffer.draw(postProcessingRenderContext)
+				// Draw to window
+				window.useWindow { ->
+					screenShader.useShader { shaderContext ->
+						framebuffer.draw(shaderContext)
+					}
 				}
 				Thread.yield()
 			}
@@ -186,12 +189,13 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					renderContext.setModelMatrix(transform)
-					renderContext.setMaterial(material)
-					quad.draw()
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						shaderContext.setModelMatrix(transform)
+						shaderContext.setMaterial(material)
+						quad.draw()
+					}
 				}
 				Thread.yield()
 			}
@@ -215,10 +219,11 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					sprite.draw(renderContext)
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						sprite.draw(shaderContext)
+					}
 				}
 				Thread.yield()
 			}
@@ -252,14 +257,15 @@ class GraphicsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
-					var renderContext = shader.use()
-					camera.update(renderContext)
-					sprite.draw(renderContext)
-					// This is being used as a way to reset to using the white texture.
-					// There should be some better way to do this.
-					renderContext.setMaterial(material)
-					boundingArea.draw()
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						sprite.draw(shaderContext)
+						// This is being used as a way to reset to using the white texture.
+						// There should be some better way to do this.
+						shaderContext.setMaterial(material)
+						boundingArea.draw()
+					}
 				}
 				Thread.yield()
 			}

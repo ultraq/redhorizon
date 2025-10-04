@@ -20,14 +20,14 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.PostProcessingRenderContext
+import nz.net.ultraq.redhorizon.graphics.PostProcessingShaderContext
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Vertex
 
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglei
-import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D
+import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL30C.*
 
 /**
@@ -36,6 +36,8 @@ import static org.lwjgl.opengl.GL30C.*
  * @author Emanuel Rabina
  */
 class OpenGLFramebuffer implements Framebuffer {
+
+	private static final Deque<Integer> framebufferStack = new ArrayDeque<>([0])
 
 	final int width
 	final int height
@@ -87,15 +89,19 @@ class OpenGLFramebuffer implements Framebuffer {
 	}
 
 	@Override
-	void draw(PostProcessingRenderContext renderContext) {
+	void draw(PostProcessingShaderContext shaderContext) {
 
-		renderContext.setFramebufferTexture(colourTexture)
+		shaderContext.setFramebufferTexture(colourTexture)
 		fullScreenQuad.draw()
 	}
 
 	@Override
-	void use() {
+	void useFramebuffer(Closure closure) {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
+		glEnable(GL_DEPTH_TEST)
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+		glViewport(0, 0, width, height)
+		closure()
 	}
 }

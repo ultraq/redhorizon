@@ -77,7 +77,7 @@ class ImGuiElementsCheck extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.withFrame { ->
+				window.useWindow { ->
 					// Do something!
 				}
 				Thread.yield()

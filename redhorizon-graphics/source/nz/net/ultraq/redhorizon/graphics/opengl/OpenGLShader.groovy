@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.LibRetroShaderReader
-import nz.net.ultraq.redhorizon.graphics.RenderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.ShaderContext
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Vertex
 
@@ -31,6 +31,8 @@ import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.FromString
 import java.nio.Buffer
 
 /**
@@ -38,16 +40,15 @@ import java.nio.Buffer
  *
  * @author Emanuel Rabina
  */
-abstract class OpenGLShader<TRenderContext extends RenderContext> implements Shader<TRenderContext> {
+abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Shader<TShaderContext> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLShader)
-	private static int lastProgramId = 0
 
 	final String name
 	final int programId
 	protected final Map<String, Buffer> uniformBuffers = [:]
 	@Lazy
-	protected TRenderContext renderContext = { createRenderContext() }()
+	protected TShaderContext renderContext = { createShaderContext() }()
 
 	/**
 	 * Constructor, build an OpenGL shader program from the vertex and fragment
@@ -122,7 +123,7 @@ abstract class OpenGLShader<TRenderContext extends RenderContext> implements Sha
 	/**
 	 * Create the render context to use for rendering with this shader.
 	 */
-	protected abstract TRenderContext createRenderContext()
+	protected abstract TShaderContext createShaderContext()
 
 	/**
 	 * Cached function for looking up a uniform location in a shader program.
@@ -184,13 +185,9 @@ abstract class OpenGLShader<TRenderContext extends RenderContext> implements Sha
 	}
 
 	@Override
-	TRenderContext use() {
+	void useShader(@ClosureParams(value = FromString, options = 'TShaderContext') Closure closure) {
 
-		if (programId != lastProgramId) {
-			glUseProgram(programId)
-			lastProgramId = programId
-		}
-
-		return renderContext
+		glUseProgram(programId)
+		closure(renderContext)
 	}
 }

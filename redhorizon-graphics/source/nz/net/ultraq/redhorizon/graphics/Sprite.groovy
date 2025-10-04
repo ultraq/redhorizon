@@ -39,7 +39,7 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	 */
 	Sprite(Image image, int width = image.width, int height = image.height) {
 
-		super(width, height)
+		super(width, height, 0)
 		mesh = new OpenGLMesh(Type.TRIANGLES,
 			new Vertex[]{
 				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
@@ -61,7 +61,7 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	/**
 	 * Draw this sprite, using the currently-bound shader.
 	 */
-	void draw(SceneRenderContext renderContext) {
+	void draw(SceneShaderContext renderContext) {
 
 		renderContext.setModelMatrix(transform)
 		renderContext.setMaterial(material)

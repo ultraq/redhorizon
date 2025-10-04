@@ -42,8 +42,8 @@ import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.RenderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.ShaderContext
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
@@ -60,7 +60,7 @@ import org.lwjgl.opengl.GLDebugMessageCallback
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.*
-import static org.lwjgl.opengl.GL20C.*
+import static org.lwjgl.opengl.GL20C.GL_MAX_FRAGMENT_UNIFORM_COMPONENTS
 import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.opengl.GL31C.*
 import static org.lwjgl.opengl.KHRDebug.*
@@ -223,7 +223,7 @@ class OpenGLRenderer implements GraphicsRenderer {
 		if (!shader) {
 			shader = new OpenGLShader(name, vertexShaderSource, fragmentShaderSource, attributes, uniforms) {
 				@Override
-				protected RenderContext createRenderContext() {
+				protected ShaderContext createShaderContext() {
 					return null
 				}
 			}

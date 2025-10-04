@@ -72,7 +72,7 @@ class CursorPositionCheck extends Specification {
 				var currentTimeMs = System.currentTimeMillis()
 				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 
-				window.withFrame { ->
+				window.useWindow { ->
 					// Do something!
 				}
 

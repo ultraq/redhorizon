@@ -311,9 +311,18 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	void use() {
+	void useWindow(Closure closure) {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+		clear()
+		glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
+		imGuiContext.withFrame { ->
+			closure()
+			nodeList?.render()
+			fpsCounter?.render()
+		}
+		swapBuffers()
+		pollEvents()
 	}
 
 	@Override
@@ -328,19 +337,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		// TODO
 		return this
-	}
-
-	@Override
-	void withFrame(Closure closure) {
-
-		clear()
-		imGuiContext.withFrame { ->
-			closure()
-			nodeList?.render()
-			fpsCounter?.render()
-		}
-		swapBuffers()
-		pollEvents()
 	}
 
 	@Override

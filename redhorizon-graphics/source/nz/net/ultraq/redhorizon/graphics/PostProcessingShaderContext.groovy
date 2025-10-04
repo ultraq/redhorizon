@@ -16,33 +16,16 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-
-import org.joml.Matrix4fc
-
 /**
- * A render context for drawing elements in a scene.
+ * A render context for post-processing stages, which are usually rendering from
+ * one framebuffer to another or the screen.
  *
  * @author Emanuel Rabina
  */
-interface SceneRenderContext extends RenderContext {
+interface PostProcessingShaderContext extends ShaderContext {
 
 	/**
-	 * Set a whole host of material attributes.
+	 * Set which framebuffer is being used to draw to the next render target.
 	 */
-	void setMaterial(Material material)
-
-	/**
-	 * Set the model matrix uniform.
-	 */
-	void setModelMatrix(Matrix4fc model)
-
-	/**
-	 * Set the projection matrix uniform.
-	 */
-	void setProjectionMatrix(Matrix4fc projection)
-
-	/**
-	 * Set the view matrix uniform.
-	 */
-	void setViewMatrix(Matrix4fc view)
+	void setFramebufferTexture(Texture texture)
 }

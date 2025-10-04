@@ -16,10 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.PostProcessingRenderContext
+import nz.net.ultraq.redhorizon.graphics.PostProcessingShaderContext
 import nz.net.ultraq.redhorizon.graphics.Texture
-
-import static org.lwjgl.opengl.GL11C.*
 
 /**
  * A shader that just renders a framebuffer to the screen.  Used as the last
@@ -27,7 +25,7 @@ import static org.lwjgl.opengl.GL11C.*
  *
  * @author Emanuel Rabina
  */
-class ScreenShader extends OpenGLShader<PostProcessingRenderContext> {
+class ScreenShader extends OpenGLShader<PostProcessingShaderContext> {
 
 	/**
 	 * Constructor, creates the built-in texture-to-screen shader.
@@ -38,24 +36,14 @@ class ScreenShader extends OpenGLShader<PostProcessingRenderContext> {
 	}
 
 	@Override
-	protected PostProcessingRenderContext createRenderContext() {
+	protected PostProcessingShaderContext createShaderContext() {
 
-		return new PostProcessingRenderContext() {
+		return new PostProcessingShaderContext() {
 
 			@Override
 			void setFramebufferTexture(Texture texture) {
 
 				setUniform('framebuffer', 0, texture)
-			}
-
-			@Override
-			void setRenderTarget(RenderTarget renderTarget) {
-
-				renderTarget.use()
-				glClear(GL_COLOR_BUFFER_BIT)
-				glDisable(GL_DEPTH_TEST)
-				var viewport = renderTarget.viewport
-				glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			}
 		}
 	}

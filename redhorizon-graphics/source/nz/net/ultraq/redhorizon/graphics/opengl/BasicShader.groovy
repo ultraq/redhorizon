@@ -18,10 +18,9 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Material
-import nz.net.ultraq.redhorizon.graphics.SceneRenderContext
+import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 
 import org.joml.Matrix4fc
-import static org.lwjgl.opengl.GL11C.*
 
 import java.nio.ByteBuffer
 
@@ -31,7 +30,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class BasicShader extends OpenGLShader<SceneRenderContext> {
+class BasicShader extends OpenGLShader<SceneShaderContext> {
 
 	private final OpenGLTexture whiteTexture
 
@@ -52,9 +51,9 @@ class BasicShader extends OpenGLShader<SceneRenderContext> {
 	}
 
 	@Override
-	protected SceneRenderContext createRenderContext() {
+	protected SceneShaderContext createShaderContext() {
 
-		return new SceneRenderContext() {
+		return new SceneShaderContext() {
 
 			@Override
 			void setMaterial(Material material) {
@@ -69,16 +68,6 @@ class BasicShader extends OpenGLShader<SceneRenderContext> {
 			@Override
 			void setProjectionMatrix(Matrix4fc projection) {
 				setUniform('projection', projection)
-			}
-
-			@Override
-			void setRenderTarget(RenderTarget renderTarget) {
-
-				renderTarget.use()
-				glEnable(GL_DEPTH_TEST)
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-				var viewport = renderTarget.viewport
-				glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 			}
 
 			@Override

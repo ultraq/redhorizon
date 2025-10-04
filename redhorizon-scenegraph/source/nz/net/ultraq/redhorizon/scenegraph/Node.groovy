@@ -40,9 +40,17 @@ class Node<T extends Node> {
 	protected final Matrix4f _transform = new Matrix4f()
 
 	/**
+	 * Default constructor, create a new node that takes up no space in the scene.
+	 */
+	Node() {
+
+		this(0, 0, 0)
+	}
+
+	/**
 	 * Constructor, create a new node that takes up space in the scene.
 	 */
-	protected Node(float width = 0, float height = 0, float depth = 0) {
+	Node(float width, float height, float depth) {
 
 		_boundingVolume.set(0, 0, 0, width, height, depth)
 		_boundingArea.set(0, 0, width, height)

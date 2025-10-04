@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.opengl.RenderTarget
 import nz.net.ultraq.redhorizon.input.InputSource
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -39,7 +38,7 @@ import org.joml.primitives.Rectanglei
  *
  * @author Emanuel Rabina
  */
-interface Window extends RenderTarget, InputSource, AutoCloseable {
+interface Window extends InputSource, AutoCloseable {
 
 	/**
 	 * Include an FPS counter with the window.
@@ -118,6 +117,13 @@ interface Window extends RenderTarget, InputSource, AutoCloseable {
 	void toggleVSync()
 
 	/**
+	 * Convenience method for keeping all frame-rendering commands within the
+	 * closure and surrounding it with the necessary {@link #clear},
+	 * {@link #swapBuffers}, and {@link #pollEvents} calls.
+	 */
+	void useWindow(Closure closure)
+
+	/**
 	 * Set the background colour of the window.
 	 */
 	Window withBackgroundColour(Colour colour)
@@ -142,13 +148,6 @@ interface Window extends RenderTarget, InputSource, AutoCloseable {
 			releaseCurrent()
 		}
 	}
-
-	/**
-	 * Convenience method for keeping all frame-rendering commands within the
-	 * closure and surrounding it with the necessary {@link #clear},
-	 * {@link #swapBuffers}, and {@link #pollEvents} calls.
-	 */
-	void withFrame(Closure closure)
 
 	/**
 	 * Maximize the window

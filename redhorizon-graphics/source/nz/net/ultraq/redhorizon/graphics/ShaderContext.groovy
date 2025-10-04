@@ -16,19 +16,12 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.opengl.RenderTarget
-
 /**
- * A set of rendering commands that can be used by objects while this context is
- * valid.  These include shortcuts to applying uniforms to a shader without
- * requiring knowledge of how the shader is constructed.
+ * A set of rendering commands that can be used by objects while this shader is
+ * valid.  These are shortcuts to applying uniforms to a shader without required
+ * knowledge of how the shader is constructed.
  *
  * @author Emanuel Rabina
  */
-interface RenderContext {
-
-	/**
-	 * Set the render target for subsequent draw calls.
-	 */
-	void setRenderTarget(RenderTarget renderTarget)
+interface ShaderContext {
 }

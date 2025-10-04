@@ -18,12 +18,15 @@ package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Matrix4fc
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.FromString
+
 /**
  * A shader is a small program that runs on the GPU.
  *
  * @author Emanuel Rabina
  */
-interface Shader<TRenderContext extends RenderContext> extends GraphicsResource {
+interface Shader<TShaderContext extends ShaderContext> extends GraphicsResource {
 
 	/**
 	 * The name of this shader.
@@ -72,5 +75,5 @@ interface Shader<TRenderContext extends RenderContext> extends GraphicsResource 
 	/**
 	 * Enable the use of this shader for the next rendering commands.
 	 */
-	TRenderContext use()
+	void useShader(@ClosureParams(value = FromString, options = 'TShaderContext') Closure closure)
 }
