@@ -15,6 +15,7 @@
  */
 
 package nz.net.ultraq.redhorizon.graphics
+
 /**
  * A render context for post-processing stages, which are usually rendering from
  * one framebuffer to another or the screen.

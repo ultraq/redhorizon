@@ -31,8 +31,6 @@ import org.joml.Vector3f
  */
 class Sprite extends Node<Sprite> implements AutoCloseable {
 
-	final int width
-	final int height
 	private final Mesh mesh
 	private final Material material
 
@@ -41,8 +39,7 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	 */
 	Sprite(Image image, int width = image.width, int height = image.height) {
 
-		this.width = width
-		this.height = height
+		super(width, height)
 		mesh = new OpenGLMesh(Type.TRIANGLES,
 			new Vertex[]{
 				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),

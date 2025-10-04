@@ -17,8 +17,12 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
+import org.joml.primitives.AABBf
+import org.joml.primitives.AABBfc
+import org.joml.primitives.Rectanglef
 
 /**
  * An element of a scene.
@@ -30,8 +34,19 @@ class Node<T extends Node> {
 	String name
 	final List<Node> children = []
 	Node parent
-	private final Vector3f position = new Vector3f()
-	protected final Matrix4f transform = new Matrix4f()
+	protected final Vector3f _position = new Vector3f()
+	protected final Rectanglef _boundingArea = new Rectanglef()
+	protected final AABBf _boundingVolume = new AABBf()
+	protected final Matrix4f _transform = new Matrix4f()
+
+	/**
+	 * Constructor, create a new node that takes up space in the scene.
+	 */
+	protected Node(float width = 0, float height = 0, float depth = 0) {
+
+		_boundingVolume.set(0, 0, 0, width, height, depth)
+		_boundingArea.set(0, 0, width, height)
+	}
 
 	/**
 	 * Add a child node to this node.
@@ -40,6 +55,10 @@ class Node<T extends Node> {
 
 		children.add(child)
 		child.parent = this
+
+		_boundingVolume.expand(child.boundingVolume)
+		_boundingArea.expand(child.boundingArea)
+
 		return (T)this
 	}
 
@@ -49,6 +68,38 @@ class Node<T extends Node> {
 	void leftShift(Node child) {
 
 		addChild(child)
+	}
+
+	/**
+	 * Return the bounding area of this node.
+	 */
+	Rectanglef getBoundingArea() {
+
+		return _boundingArea
+	}
+
+	/**
+	 * Return the bounding volume of this node.
+	 */
+	AABBfc getBoundingVolume() {
+
+		return _boundingVolume
+	}
+
+	/**
+	 * Get the depth of this node.
+	 */
+	float getDepth() {
+
+		return _boundingVolume.lengthZ()
+	}
+
+	/**
+	 * Get the height of this node.
+	 */
+	float getHeight() {
+
+		return _boundingVolume.lengthY()
 	}
 
 	/**
@@ -65,7 +116,7 @@ class Node<T extends Node> {
 	 */
 	Vector3fc getPosition() {
 
-		return transform.getTranslation(position)
+		return _transform.getTranslation(_position)
 	}
 
 	/**
@@ -78,12 +129,40 @@ class Node<T extends Node> {
 	}
 
 	/**
+	 * Get the local transform of this node.
+	 */
+	Matrix4fc getTransform() {
+
+		return _transform
+	}
+
+	/**
+	 * Get the width of this node.
+	 */
+	float getWidth() {
+
+		return _boundingVolume.lengthX()
+	}
+
+	/**
 	 * Remove a child node from this node.
 	 */
 	T removeChild(Node child) {
 
 		children.remove(child)
 		child.parent = null
+
+		var width = getWidth()
+		var height = getHeight()
+		var depth = getDepth()
+		var position = getPosition()
+		_boundingVolume.set(0, 0, 0, width, height, depth).translate(position)
+		_boundingArea.set(0, 0, width, height).translate(position.x(), position.y())
+		children.each { remainingChild ->
+			_boundingVolume.expand(remainingChild.boundingVolume)
+			_boundingArea.expand(remainingChild.boundingArea)
+		}
+
 		return (T)this
 	}
 
@@ -92,7 +171,9 @@ class Node<T extends Node> {
 	 */
 	void setPosition(float x, float y, float z) {
 
-		transform.setTranslation(x, y, z)
+		_transform.setTranslation(x, y, z)
+		_boundingVolume.set(0, 0, 0, width, height, depth).translate(x, y, z)
+		_boundingArea.set(0, 0, width, height).translate(x, y)
 	}
 
 	/**
@@ -108,7 +189,9 @@ class Node<T extends Node> {
 	 */
 	T translate(float x, float y, float z) {
 
-		transform.translate(x, y, z)
+		_transform.translate(x, y, z)
+		_boundingVolume.translate(x, y, z)
+		_boundingArea.translate(x, y)
 		return (T)this
 	}
 

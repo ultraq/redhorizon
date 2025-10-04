@@ -134,6 +134,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glDepthFunc(GL_LEQUAL)
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+		glEnable(GL_LINE_SMOOTH)
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->

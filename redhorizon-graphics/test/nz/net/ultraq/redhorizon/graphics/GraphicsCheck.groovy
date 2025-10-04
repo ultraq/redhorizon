@@ -230,4 +230,45 @@ class GraphicsCheck extends Specification {
 			imageStream?.close()
 			shader?.close()
 	}
+
+	def 'Draw sprite bounding area'() {
+		given:
+			var shader = new BasicShader()
+			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
+			var image = new Image('GraphicsCheck.png', imageStream)
+			var sprite = new Sprite(image)
+			var spriteBoundingArea = sprite.boundingArea
+			var boundingArea = new OpenGLMesh(Type.LINE_LOOP,
+				new Vertex[]{
+					new Vertex(new Vector3f(spriteBoundingArea.minX, spriteBoundingArea.minY, 1), Colour.RED),
+					new Vertex(new Vector3f(spriteBoundingArea.maxX, spriteBoundingArea.minY, 1), Colour.RED),
+					new Vertex(new Vector3f(spriteBoundingArea.maxX, spriteBoundingArea.maxY, 1), Colour.RED),
+					new Vertex(new Vector3f(spriteBoundingArea.minX, spriteBoundingArea.maxY, 1), Colour.RED)
+				},
+				new int[]{ 0, 1, 2, 3 })
+			var camera = new Camera(80, 60, window)
+				.translate(16, 16, 0)
+			var material = new Material()
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.withFrame { ->
+					var renderContext = shader.use()
+					camera.update(renderContext)
+					sprite.draw(renderContext)
+					// This is being used as a way to reset to using the white texture.
+					// There should be some better way to do this.
+					renderContext.setMaterial(material)
+					boundingArea.draw()
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			sprite?.close()
+			image?.close()
+			imageStream?.close()
+			shader?.close()
+	}
 }

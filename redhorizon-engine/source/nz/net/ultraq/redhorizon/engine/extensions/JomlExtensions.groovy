@@ -87,25 +87,6 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Expand the borders of a rectangle to include another rectangle.
-	 */
-	static Rectanglef expand(Rectanglef self, Rectanglef other) {
-
-		return expand(self, other.minX, other.minY, other.maxX, other.maxY)
-	}
-
-	/**
-	 * Expand the borders of a rectangle to include a given points representing
-	 * another rectangle.
-	 */
-	static Rectanglef expand(Rectanglef self, float minX, float minY, float maxX, float maxY) {
-
-		self.setMin(Math.min(self.minX, minX), Math.min(self.minY, minY))
-		self.setMax(Math.max(self.maxX, maxX), Math.max(self.maxY, maxY))
-		return self
-	}
-
-	/**
 	 * Test whether an XY plane represented by a rectangle is within this frustum.
 	 */
 	static boolean testPlaneXY(FrustumIntersection self, Rectanglef plane) {
