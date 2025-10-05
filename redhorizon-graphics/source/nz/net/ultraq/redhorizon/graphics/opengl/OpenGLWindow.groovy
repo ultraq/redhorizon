@@ -183,7 +183,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		// Create an ImGui context - might as well bake it into the window as we're
 		// gonna be using it a lot
-		imGuiContext = new ImGuiContext(window)
+		imGuiContext = new ImGuiContext(window, contentScale)
 	}
 
 	@Override

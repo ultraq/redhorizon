@@ -41,7 +41,7 @@ class ImGuiContext implements GraphicsResource {
 	/**
 	 * Constructor, set up ImGui for the given window.
 	 */
-	ImGuiContext(long windowHandle) {
+	ImGuiContext(long windowHandle, float contentScale) {
 
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -52,14 +52,14 @@ class ImGuiContext implements GraphicsResource {
 
 		var fontConfig1 = new ImFontConfig()
 		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, fontConfig1)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig1)
 		}
 		fontConfig1.destroy()
 		io.setFontDefault(robotoFont)
 
 		var fontConfig2 = new ImFontConfig()
 		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, fontConfig2)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig2)
 		}
 		fontConfig2.destroy()
 
