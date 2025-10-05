@@ -107,9 +107,9 @@ interface Window extends InputSource, AutoCloseable {
 	void swapBuffers()
 
 	/**
-	 * Switch between windowed and borderless windowed modes.
+	 * Switch between windowed and fullscreen modes.
 	 */
-	void toggleBorderlessWindowed()
+	void toggleFullScreen()
 
 	/**
 	 * Switch between vertical sync being anabled/disabled.

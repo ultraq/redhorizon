@@ -58,7 +58,7 @@ configure {
 			.expandExtensionModuleVersion()
 		.configureVerification()
 			.withTestDependencies() {
-				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
 			}
 
 	createMavenPublication()

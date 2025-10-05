@@ -54,11 +54,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
 	private final long window
-	private final ImGuiContext imGuiContext
 	float contentScale
 	private Vector2i framebufferSize
 	final Rectanglei viewport
+	private boolean fullScreen
 	private boolean vsync
+	private long lastClickTime
+	private final Rectanglei lastWindowPositionAndSize = new Rectanglei()
+
+	private final ImGuiContext imGuiContext
 	private FpsCounter fpsCounter
 	private NodeList nodeList
 
@@ -96,17 +100,20 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		framebufferSize = getAndTrackFramebufferSize { width, height ->
-			framebufferSize.set(width, height)
+			// Width/height will be 0 if the window is minimized
+			if (width && height) {
+				framebufferSize.set(width, height)
 
-			var scale = Math.min(width / viewport.lengthX(), height / viewport.lengthY())
-			var viewportWidth = (int)(viewport.lengthX() * scale)
-			var viewportHeight = (int)(viewport.lengthY() * scale)
-			var viewportX = (width - viewportWidth) / 2 as int
-			var viewportY = (height - viewportHeight) / 2 as int
-			viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
-			logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
+				var scale = Math.min(width / viewport.lengthX(), height / viewport.lengthY())
+				var viewportWidth = (int)(viewport.lengthX() * scale)
+				var viewportHeight = (int)(viewport.lengthY() * scale)
+				var viewportX = (width - viewportWidth) / 2 as int
+				var viewportY = (height - viewportHeight) / 2 as int
+				viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
+				logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 
-			trigger(new FramebufferSizeEvent(framebufferWidth, height))
+				trigger(new FramebufferSizeEvent(framebufferWidth, height))
+			}
 		}
 
 		viewport = new Rectanglei(0, 0, framebufferSize.x, framebufferSize.y)
@@ -152,6 +159,21 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			}
 			else {
 				trigger(new CursorPositionEvent(xpos, ypos))
+			}
+		}
+
+		// Window features
+		on(MouseButtonEvent) { event ->
+			// Implementation of double-click being used to toggle between windowed
+			// and full screen modes.  This isn't natively supported in GLFW given
+			// platform differences in double-click behaviour, so we have to roll it
+			// ourselves.
+			if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
+				var clickTime = System.currentTimeMillis()
+				if (clickTime - lastClickTime < 300) {
+					toggleFullScreen()
+				}
+				lastClickTime = clickTime
 			}
 		}
 
@@ -217,7 +239,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		var contentScale = contentScalePointer[0]
 		logger.debug('Content scale is {}', contentScale)
 
-		glfwSetWindowContentScaleCallback(window) { long window, float xscale, float yscale ->
+		glfwSetWindowContentScaleCallback(window) { window, xscale, yscale ->
 			logger.debug('Content scale changed to {}', xscale)
 			closure(xscale)
 		}
@@ -237,7 +259,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		var framebufferSize = new Vector2i(widthPointer[0], heightPointer[0])
 		logger.debug('Framebuffer size is {}x{}', framebufferSize.x, framebufferSize.y)
 
-		glfwSetFramebufferSizeCallback(window) { long window, int width, int height ->
+		glfwSetFramebufferSizeCallback(window) { window, width, height ->
 			logger.debug('Framebuffer size changed to {}x{}', width, height)
 			closure(width, height)
 		}
@@ -299,9 +321,40 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	void toggleBorderlessWindowed() {
+	void toggleFullScreen() {
 
-		// TODO
+		// Switch to window mode
+		if (fullScreen) {
+			logger.debug('Switching to windowed mode')
+			glfwSetWindowMonitor(window, NULL,
+				lastWindowPositionAndSize.minX, lastWindowPositionAndSize.minY,
+				lastWindowPositionAndSize.lengthX(), lastWindowPositionAndSize.lengthY(),
+				-1)
+		}
+
+		// Switch to full screen mode
+		else {
+			logger.debug('Switching to full screen mode')
+
+			var xPointer = new int[1]
+			var yPointer = new int[1]
+			var widthPointer = new int[1]
+			var heightPointer = new int[1]
+			glfwGetWindowPos(window, xPointer, yPointer)
+			var x = xPointer[0]
+			var y = yPointer[0]
+			glfwGetWindowSize(window, widthPointer, heightPointer)
+			var width = widthPointer[0]
+			var height = heightPointer[0]
+			logger.debug('Window position and size before maximizing is {}x{}, {}x{}', x, y, width, height)
+			lastWindowPositionAndSize.set(x, y, x + width, y + height)
+
+			var primaryMonitor = glfwGetPrimaryMonitor()
+			var videoMode = glfwGetVideoMode(primaryMonitor)
+			glfwSetWindowMonitor(window, primaryMonitor, 0, 0, videoMode.width(), videoMode.height(), videoMode.refreshRate())
+		}
+
+		fullScreen = !fullScreen
 	}
 
 	@Override
