@@ -16,13 +16,18 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Mesh
+import nz.net.ultraq.redhorizon.graphics.PostProcessingShaderContext
+import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.Vertex
 
+import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL15C.*
-import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray
-import static org.lwjgl.opengl.GL20C.glVertexAttribPointer
+import static org.lwjgl.opengl.GL20C.*
 import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.system.MemoryStack.stackPush
 
@@ -32,6 +37,8 @@ import static org.lwjgl.system.MemoryStack.stackPush
  * @author Emanuel Rabina
  */
 class OpenGLMesh implements Mesh {
+
+	private static final Matrix4fc IDENTITY_MATRIX = new Matrix4f()
 
 	private final Type type
 	private final Vertex[] vertices
@@ -102,7 +109,34 @@ class OpenGLMesh implements Mesh {
 	}
 
 	@Override
-	void draw() {
+	void close() {
+
+		if (elementBufferId) {
+			glDeleteBuffers(elementBufferId)
+		}
+		glDeleteBuffers(vertexBufferId)
+		glDeleteVertexArrays(vertexArrayId)
+	}
+
+	@Override
+	void draw(SceneShaderContext shaderContext, Material material = null, Matrix4fc transform = IDENTITY_MATRIX) {
+
+		shaderContext.setMaterial(material)
+		shaderContext.setModelMatrix(transform)
+		drawMesh()
+	}
+
+	@Override
+	void draw(PostProcessingShaderContext shaderContext, Texture texture) {
+
+		shaderContext.setFramebufferTexture(texture)
+		drawMesh()
+	}
+
+	/**
+	 * Draw this mesh.
+	 */
+	private void drawMesh() {
 
 		glBindVertexArray(vertexArrayId)
 		if (index) {
@@ -111,16 +145,6 @@ class OpenGLMesh implements Mesh {
 		else {
 			glDrawArrays(mode, 0, vertices.length)
 		}
-	}
-
-	@Override
-	void close() {
-
-		if (elementBufferId) {
-			glDeleteBuffers(elementBufferId)
-		}
-		glDeleteBuffers(vertexBufferId)
-		glDeleteVertexArrays(vertexArrayId)
 	}
 
 	@Override

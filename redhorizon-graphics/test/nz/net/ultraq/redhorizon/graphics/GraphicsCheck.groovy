@@ -101,8 +101,7 @@ class GraphicsCheck extends Specification {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						shaderContext.setModelMatrix(transform)
-						triangle.draw()
+						triangle.draw(shaderContext, null, transform)
 					}
 				}
 				Thread.yield()
@@ -135,9 +134,7 @@ class GraphicsCheck extends Specification {
 				framebuffer.useFramebuffer { ->
 					basicShader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						shaderContext.setModelMatrix(transform)
-						shaderContext.setMaterial(material)
-						triangle.draw()
+						triangle.draw(shaderContext, material, transform)
 					}
 				}
 
@@ -192,9 +189,7 @@ class GraphicsCheck extends Specification {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						shaderContext.setModelMatrix(transform)
-						shaderContext.setMaterial(material)
-						quad.draw()
+						quad.draw(shaderContext, material, transform)
 					}
 				}
 				Thread.yield()
@@ -261,10 +256,7 @@ class GraphicsCheck extends Specification {
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
 						sprite.draw(shaderContext)
-						// This is being used as a way to reset to using the white texture.
-						// There should be some better way to do this.
-						shaderContext.setMaterial(material)
-						boundingArea.draw()
+						boundingArea.draw(shaderContext, material)
 					}
 				}
 				Thread.yield()

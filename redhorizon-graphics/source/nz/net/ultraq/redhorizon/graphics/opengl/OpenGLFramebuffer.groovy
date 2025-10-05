@@ -37,8 +37,6 @@ import static org.lwjgl.opengl.GL30C.*
  */
 class OpenGLFramebuffer implements Framebuffer {
 
-	private static final Deque<Integer> framebufferStack = new ArrayDeque<>([0])
-
 	final int width
 	final int height
 	final Rectanglei viewport
@@ -91,8 +89,7 @@ class OpenGLFramebuffer implements Framebuffer {
 	@Override
 	void draw(PostProcessingShaderContext shaderContext) {
 
-		shaderContext.setFramebufferTexture(colourTexture)
-		fullScreenQuad.draw()
+		fullScreenQuad.draw(shaderContext, colourTexture)
 	}
 
 	@Override

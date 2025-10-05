@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import org.joml.Matrix4fc
+
 /**
  * A mesh defines the shape of an object, and so contain data on points and
  * edges.
@@ -25,9 +27,19 @@ package nz.net.ultraq.redhorizon.graphics
 interface Mesh extends GraphicsResource {
 
 	/**
-	 * Draw this mesh, using the currently-bound shader.
+	 * Draw this mesh using default material and transform properties.
 	 */
-	void draw()
+	void draw(SceneShaderContext shaderContext)
+
+	/**
+	 * Draw this mesh using supplied material and transform properties.
+	 */
+	void draw(SceneShaderContext shaderContext, Material material, Matrix4fc transform)
+
+	/**
+	 * Draw this mesh with a post-processing shader,
+	 */
+	void draw(PostProcessingShaderContext shaderContext, Texture texture)
 
 	/**
 	 * Whether or not this mesh is allowed to be updated with new vertex data.
