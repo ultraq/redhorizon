@@ -129,11 +129,6 @@ interface Window extends InputSource, AutoCloseable {
 	Window withBackgroundColour(Colour colour)
 
 	/**
-	 * Make the window the size of the monitor, aka: "Borderless windowed mode".
-	 */
-	Window withBorderlessWindowed()
-
-	/**
 	 * Surround the given closure with calls to {@link #makeCurrent} and
 	 * {@link #releaseCurrent} so that audio commands can be executed in the
 	 * current thread.

@@ -386,13 +386,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow withBorderlessWindowed() {
-
-		// TODO
-		return this
-	}
-
-	@Override
 	OpenGLWindow withMaximized() {
 
 		glfwMaximizeWindow(window)
