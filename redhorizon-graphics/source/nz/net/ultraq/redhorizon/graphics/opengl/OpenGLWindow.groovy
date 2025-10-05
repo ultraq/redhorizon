@@ -163,17 +163,21 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		}
 
 		// Window features
-		on(MouseButtonEvent) { event ->
-			// Implementation of double-click being used to toggle between windowed
-			// and full screen modes.  This isn't natively supported in GLFW given
-			// platform differences in double-click behaviour, so we have to roll it
-			// ourselves.
-			if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
-				var clickTime = System.currentTimeMillis()
-				if (clickTime - lastClickTime < 300) {
-					toggleFullScreen()
+
+		// Implementation of double-click being used to toggle between windowed and
+		// full screen modes.  This isn't natively supported in GLFW given platform
+		// differences in double-click behaviour, so we have to roll it ourselves.
+		// This is for Windows only, as on macOS fullscreen apps should get their
+		// own space, which GLFW will not do.
+		if (System.isWindows()) {
+			on(MouseButtonEvent) { event ->
+				if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
+					var clickTime = System.currentTimeMillis()
+					if (clickTime - lastClickTime < 300) {
+						toggleFullScreen()
+					}
+					lastClickTime = clickTime
 				}
-				lastClickTime = clickTime
 			}
 		}
 
