@@ -41,9 +41,15 @@ import org.joml.primitives.Rectanglei
 interface Window extends InputSource, AutoCloseable {
 
 	/**
-	 * Include an FPS counter with the window.
+	 * Include an FPS counter with the window, with a default update rate of every
+	 * frame.
 	 */
 	Window addFpsCounter()
+
+	/**
+	 * Include an FPS counter with the window, using the specified update rate.
+	 */
+	Window addFpsCounter(float updateRateSeconds)
 
 	/**
 	 * Include a node list with the window.

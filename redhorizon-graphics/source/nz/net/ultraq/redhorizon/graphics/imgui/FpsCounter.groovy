@@ -31,14 +31,20 @@ import static imgui.flag.ImGuiWindowFlags.*
 class FpsCounter implements GraphicsResource {
 
 	private final ImFont robotoMonoFont
+	private final float updateRateSeconds
+	private long lastUpdateTimeMs = System.currentTimeMillis()
+	private float updateTimer
+	private float framerate
 	private int width = 300
 
 	/**
 	 * Constructor, create a new FPS counter tied to an existing window.
 	 */
-	FpsCounter(ImGuiContext imGuiContext) {
+	FpsCounter(ImGuiContext imGuiContext, float updateRateSeconds) {
 
 		robotoMonoFont = imGuiContext.robotoMonoFont
+		this.updateRateSeconds = updateRateSeconds
+		updateTimer = updateRateSeconds // So we get a result the moment the counter is shown
 	}
 
 	@Override
@@ -50,6 +56,15 @@ class FpsCounter implements GraphicsResource {
 	 */
 	void render() {
 
+		var currentTimeMs = System.currentTimeMillis()
+		var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
+		updateTimer += delta
+		if (updateTimer > updateRateSeconds) {
+			framerate = ImGui.getIO().framerate
+			updateTimer -= updateRateSeconds
+		}
+		lastUpdateTimeMs = currentTimeMs
+
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.setNextWindowPos((float)(viewport.workPosX + viewport.sizeX - width), viewport.workPosY)
@@ -57,7 +72,6 @@ class FpsCounter implements GraphicsResource {
 
 		ImGui.begin('Debug overlay', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
 		width = (int)ImGui.getWindowSizeX()
-		var framerate = ImGui.getIO().framerate
 		ImGui.text("FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms")
 		ImGui.end()
 

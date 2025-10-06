@@ -187,9 +187,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow addFpsCounter() {
+	OpenGLWindow addFpsCounter(float updateRateSeconds = 0f) {
 
-		fpsCounter = new FpsCounter(imGuiContext)
+		fpsCounter = new FpsCounter(imGuiContext, updateRateSeconds)
 		return this
 	}
 
