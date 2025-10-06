@@ -58,7 +58,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	private Vector2i framebufferSize
 	final Rectanglei viewport
 	private boolean fullScreen
-	private boolean vsync
+	private int interval
 	private long lastClickTime
 	private final Rectanglei lastWindowPositionAndSize = new Rectanglei()
 
@@ -292,11 +292,11 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	/**
 	 * Set the vsync state on the window.
 	 */
-	private void setVSync(boolean vsync) {
+	private void setVSync(int interval) {
 
-		this.vsync = vsync
-		glfwSwapInterval(vsync ? 1 : 0)
-		logger.debug("VSync ${vsync ? 'enabled' : 'disabled'}")
+		this.interval = interval
+		glfwSwapInterval(interval)
+		logger.debug("VSync x${interval}")
 	}
 
 	@Override
@@ -364,7 +364,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void toggleVSync() {
 
-		setVSync(!this.vsync)
+		setVSync(Math.wrap(interval + 1, 0, 5))
 	}
 
 	@Override
@@ -399,7 +399,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	OpenGLWindow withVSync(boolean vsync) {
 
-		setVSync(vsync)
+		setVSync(vsync ? 1 : 0)
 		return this
 	}
 }
