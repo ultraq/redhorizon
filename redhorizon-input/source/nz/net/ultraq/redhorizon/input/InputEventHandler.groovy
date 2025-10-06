@@ -30,8 +30,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class InputEventHandler {
 
-	private final Map<Integer, Boolean> keyStates = new ConcurrentHashMap<>()
-	private final Map<Integer, Boolean> mouseButtonStates = new ConcurrentHashMap<>()
+	private final Map<Integer, Boolean> keyPressedStates = new ConcurrentHashMap<>()
+	private final Map<Integer, Boolean> mouseButtonPressedStates = new ConcurrentHashMap<>()
 	private final Vector2f cursorPosition = new Vector2f()
 
 	/**
@@ -42,14 +42,14 @@ class InputEventHandler {
 		inputSource.on(InputEvent) { event ->
 			if (event instanceof KeyEvent) {
 				if (event.action() == GLFW_PRESS) {
-					keyStates[event.key()] = true
+					keyPressedStates[event.key()] = true
 				}
 				else if (event.action() == GLFW_RELEASE) {
-					keyStates[event.key()] = false
+					keyPressedStates[event.key()] = false
 				}
 			}
 			else if (event instanceof MouseButtonEvent) {
-				mouseButtonStates[event.button()] = event.action() == GLFW_PRESS
+				mouseButtonPressedStates[event.button()] = event.action() == GLFW_PRESS
 			}
 			else if (event instanceof CursorPositionEvent) {
 				cursorPosition.set(event.xPos(), event.yPos())
@@ -68,10 +68,20 @@ class InputEventHandler {
 
 	/**
 	 * Return whether the given key is currently pressed.
+	 *
+	 * @param key
+	 * @param once
+	 *   If {@code true}, then this method will only return {@code true} the first
+	 *   time this method is called and the key is pressed.  Further calls for the
+	 *   same key will return {@code false} until it is pressed again.
 	 */
-	boolean keyPressed(int key) {
+	boolean keyPressed(int key, boolean once = false) {
 
-		return keyStates[key]
+		var result = keyPressedStates[key]
+		if (result && once) {
+			keyPressedStates[key] = false
+		}
+		return result
 	}
 
 	/**
@@ -79,6 +89,6 @@ class InputEventHandler {
 	 */
 	boolean mouseButtonPressed(int button) {
 
-		return mouseButtonStates[button]
+		return mouseButtonPressedStates[button]
 	}
 }

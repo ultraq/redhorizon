@@ -56,6 +56,20 @@ class InputEventHandlerTests extends Specification {
 			}
 	}
 
+	def "Key is considered pressed just once when 'once' is specified"() {
+		given:
+			var inputSource = new TestInputSource()
+			var eventHandler = new InputEventHandler()
+				.addInputSource(inputSource)
+		when:
+			inputSource.trigger(new KeyEvent(GLFW_KEY_A, 0, GLFW_PRESS, 0))
+		then:
+			new PollingConditions().eventually { ->
+				assert eventHandler.keyPressed(GLFW_KEY_A, true)
+			}
+			!eventHandler.keyPressed(GLFW_KEY_A)
+	}
+
 	def "Mouse button is considered 'pressed' after the mouse button press event"() {
 		given:
 			var inputSource = new TestInputSource()

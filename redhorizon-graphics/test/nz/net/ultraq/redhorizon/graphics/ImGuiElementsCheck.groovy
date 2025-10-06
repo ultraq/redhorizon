@@ -17,13 +17,14 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * A simple test to see the ImGui elements in action.
@@ -64,6 +65,8 @@ class ImGuiElementsCheck extends Specification {
 
 	def 'Shows an FPS counter, node list'() {
 		given:
+			var eventHandler = new InputEventHandler()
+				.addInputSource(window)
 			var node = new Node().tap {
 				name = 'Parent'
 			}
@@ -79,6 +82,10 @@ class ImGuiElementsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					// Do something!
+
+					if (eventHandler.keyPressed(GLFW_KEY_V, true)) {
+						window.toggleVSync()
+					}
 				}
 				Thread.yield()
 			}
