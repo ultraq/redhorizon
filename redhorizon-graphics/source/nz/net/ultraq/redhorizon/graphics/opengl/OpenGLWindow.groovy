@@ -296,7 +296,17 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		this.interval = interval
 		glfwSwapInterval(interval)
-		logger.debug("VSync x${interval}")
+		logger.debug(
+			'VSync x{} ({})',
+			interval,
+			switch (interval) {
+				case 0 -> 'disabled'
+				case 1 -> 'enabled'
+				case 2 -> '1/2 refresh'
+				case 3 -> '1/3 refresh'
+				case 4 -> '1/4 refresh'
+			}
+		)
 	}
 
 	@Override
@@ -364,7 +374,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void toggleVSync() {
 
-		setVSync(Math.wrap(interval + 1, 0, 5))
+		setVSync(Math.wrap(interval + 1, 0, System.isWindows() ? 5 : 2))
 	}
 
 	@Override
