@@ -42,7 +42,6 @@ class ScreenShader extends OpenGLShader<PostProcessingShaderContext> {
 
 			@Override
 			void setFramebufferTexture(Texture texture) {
-
 				setUniform('framebuffer', 0, texture)
 			}
 		}

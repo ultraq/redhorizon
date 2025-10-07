@@ -69,7 +69,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int framebufferWidth, int framebufferHeight, String title) {
+	OpenGLWindow(int width, int height, String title) {
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
@@ -90,7 +90,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 
-		window = glfwCreateWindow(framebufferWidth, framebufferHeight, title, NULL, NULL)
+		window = glfwCreateWindow(width, height, title, NULL, NULL)
 		if (window == NULL) {
 			throw new Exception('Failed to create a window')
 		}
@@ -99,20 +99,20 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			contentScale = newContentScale
 		}
 
-		framebufferSize = getAndTrackFramebufferSize { width, height ->
+		framebufferSize = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
-			if (width && height) {
-				framebufferSize.set(width, height)
+			if (newWidth && newHeight) {
+				framebufferSize.set(newWidth, newHeight)
 
-				var scale = Math.min(width / viewport.lengthX(), height / viewport.lengthY())
+				var scale = Math.min(newWidth / viewport.lengthX(), newHeight / viewport.lengthY())
 				var viewportWidth = (int)(viewport.lengthX() * scale)
 				var viewportHeight = (int)(viewport.lengthY() * scale)
-				var viewportX = (width - viewportWidth) / 2 as int
-				var viewportY = (height - viewportHeight) / 2 as int
+				var viewportX = (newWidth - viewportWidth) / 2 as int
+				var viewportY = (newHeight - viewportHeight) / 2 as int
 				viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
 				logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 
-				trigger(new FramebufferSizeEvent(framebufferWidth, height))
+				trigger(new FramebufferSizeEvent(width, newHeight))
 			}
 		}
 

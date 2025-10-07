@@ -145,13 +145,14 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 
 		var uniformLocation = getUniformLocation(name)
 		stackPush().withCloseable { stack ->
-			var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(value.length) }
-			buffer.put(0, value)
+			var buffer = uniformBuffers
+				.getOrCreate(name) { -> stack.mallocFloat(value.length) }
+				.put(value)
+				.flip()
 			switch (value.length) {
 				case 2 -> glUniform2fv(uniformLocation, buffer)
 				default -> glUniform1fv(uniformLocation, buffer)
 			}
-			glUniform1fv(getUniformLocation(name), value)
 		}
 	}
 

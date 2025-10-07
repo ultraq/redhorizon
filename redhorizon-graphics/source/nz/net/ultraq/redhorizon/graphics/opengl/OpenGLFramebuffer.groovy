@@ -48,7 +48,7 @@ class OpenGLFramebuffer implements Framebuffer {
 	/**
 	 * Constructor, create a new OpenGL framebuffer for rendering into.
 	 */
-	OpenGLFramebuffer(int width, int height) {
+	OpenGLFramebuffer(int width, int height, boolean filter = false) {
 
 		this.width = width
 		this.height = height
@@ -67,7 +67,7 @@ class OpenGLFramebuffer implements Framebuffer {
 		framebufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 
-		colourTexture = new OpenGLTexture(width, height)
+		colourTexture = new OpenGLTexture(width, height, filter)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
 
 		// Depth buffer attachment
