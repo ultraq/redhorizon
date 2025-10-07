@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -54,8 +53,11 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
 	private final long window
-	float contentScale
-	private Vector2i framebufferSize
+	int width
+	int height
+	private int framebufferWidth
+	private int framebufferHeight
+	final float renderScale
 	final Rectanglei viewport
 	private boolean fullScreen
 	private int interval
@@ -71,6 +73,9 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	 */
 	OpenGLWindow(int width, int height, String title) {
 
+		this.width = width
+		this.height = height
+
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
 		}
@@ -81,8 +86,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
-		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE)
-		glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
@@ -91,18 +94,15 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 
 		window = glfwCreateWindow(width, height, title, NULL, NULL)
-		if (window == NULL) {
+		if (!window) {
 			throw new Exception('Failed to create a window')
 		}
 
-		contentScale = getAndTrackContentScale { newContentScale ->
-			contentScale = newContentScale
-		}
-
-		framebufferSize = getAndTrackFramebufferSize { newWidth, newHeight ->
+		(framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
-				framebufferSize.set(newWidth, newHeight)
+				framebufferWidth = newWidth
+				framebufferHeight = newHeight
 
 				var scale = Math.min(newWidth / viewport.lengthX(), newHeight / viewport.lengthY())
 				var viewportWidth = (int)(viewport.lengthX() * scale)
@@ -116,7 +116,8 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			}
 		}
 
-		viewport = new Rectanglei(0, 0, framebufferSize.x, framebufferSize.y)
+		renderScale = framebufferWidth / width
+		viewport = new Rectanglei(0, 0, framebufferWidth, framebufferHeight)
 
 		makeCurrent()
 
@@ -151,15 +152,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			trigger(new MouseButtonEvent(button, action, mods))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
-			// On macOS, adjust the cursor position by the scaling factor to account
-			// for the difference between the framebuffer size (reported w/ retina
-			// scaling) and the cursor position (not reported w/ retina scaling)
-			if (System.isMacOs()) {
-				trigger(new CursorPositionEvent(xpos * contentScale, ypos * contentScale))
-			}
-			else {
-				trigger(new CursorPositionEvent(xpos, ypos))
-			}
+			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
 		}
 
 		// Window features
@@ -168,7 +161,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 		// full screen modes.  This isn't natively supported in GLFW given platform
 		// differences in double-click behaviour, so we have to roll it ourselves.
 		// This is for Windows only, as on macOS fullscreen apps should get their
-		// own space, which GLFW will not do.
+		// own space which GLFW will not do.
 		if (System.isWindows()) {
 			on(MouseButtonEvent) { event ->
 				if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
@@ -183,7 +176,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		// Create an ImGui context - might as well bake it into the window as we're
 		// gonna be using it a lot
-		imGuiContext = new ImGuiContext(window, System.isMacOs() ? 1f : contentScale)
+		imGuiContext = new ImGuiContext(window, getContentScale() / renderScale as float)
 	}
 
 	@Override
@@ -233,21 +226,14 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	}
 
 	/**
-	 * Return the current content scale and add a listener to the window for any
-	 * changes, which will be passed to the {@code closure}.
+	 * Return the current content scale.
 	 */
-	private float getAndTrackContentScale(@ClosureParams(value = SimpleType, options = 'float') Closure closure) {
+	private float getContentScale() {
 
 		var contentScalePointer = new float[1]
 		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
 		var contentScale = contentScalePointer[0]
 		logger.debug('Content scale is {}', contentScale)
-
-		glfwSetWindowContentScaleCallback(window) { window, xscale, yscale ->
-			logger.debug('Content scale changed to {}', xscale)
-			closure(xscale)
-		}
-
 		return contentScale
 	}
 
@@ -255,20 +241,22 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	 * Return the current framebuffer size and add a listener to the window for
 	 * any changes, which will be passed to the {@code closure}.
 	 */
-	private Vector2i getAndTrackFramebufferSize(@ClosureParams(value = SimpleType, options = ['int', 'int']) Closure closure) {
+	private Tuple2<Integer, Integer> getAndTrackFramebufferSize(
+		@ClosureParams(value = SimpleType, options = ['int', 'int']) Closure closure) {
 
 		var widthPointer = new int[1]
 		var heightPointer = new int[1]
 		glfwGetFramebufferSize(window, widthPointer, heightPointer)
-		var framebufferSize = new Vector2i(widthPointer[0], heightPointer[0])
-		logger.debug('Framebuffer size is {}x{}', framebufferSize.x, framebufferSize.y)
+		var width = widthPointer[0]
+		var height = heightPointer[0]
+		logger.debug('Framebuffer size is {}x{}', width, height)
 
-		glfwSetFramebufferSizeCallback(window) { window, width, height ->
-			logger.debug('Framebuffer size changed to {}x{}', width, height)
-			closure(width, height)
+		glfwSetFramebufferSizeCallback(window) { window, newWidth, newHeight ->
+			logger.debug('Framebuffer size changed to {}x{}', newWidth, newHeight)
+			closure(newWidth, newHeight)
 		}
 
-		return framebufferSize
+		return new Tuple2<>(width, height)
 	}
 
 	@Override

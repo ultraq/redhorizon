@@ -68,14 +68,26 @@ interface Window extends InputSource, AutoCloseable {
 	void clear()
 
 	/**
-	 * Get the content scaling factor for the window.
+	 * Return the height of the window contents.
 	 */
-	float getContentScale()
+	int getHeight()
+
+	/**
+	 * Get the scaling factor between the window size and the framebuffer size.
+	 * On most systems this should be 1, but on macOS with retina screens, it's
+	 * 2.
+	 */
+	float getRenderScale()
 
 	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()
+
+	/**
+	 * Return the width of the window contents.
+	 */
+	int getWidth()
 
 	/**
 	 * Makes the context current on the executing thread.
