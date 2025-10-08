@@ -109,7 +109,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 				var viewportHeight = (int)(viewport.lengthY() * scale)
 				var viewportX = (newWidth - viewportWidth) / 2 as int
 				var viewportY = (newHeight - viewportHeight) / 2 as int
-				viewport.set(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight)
+				viewport.setMin(viewportX, viewportY).setLengths(viewportWidth, viewportHeight)
 				logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 
 				trigger(new FramebufferSizeEvent(width, newHeight))
@@ -349,7 +349,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 			var width = widthPointer[0]
 			var height = heightPointer[0]
 			logger.debug('Window position and size before maximizing is {}x{}, {}x{}', x, y, width, height)
-			lastWindowPositionAndSize.set(x, y, x + width, y + height)
+			lastWindowPositionAndSize.setMin(x, y).setLengths(width, height)
 
 			var primaryMonitor = glfwGetPrimaryMonitor()
 			var videoMode = glfwGetVideoMode(primaryMonitor)

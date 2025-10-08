@@ -14,7 +14,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-scenegraph`
- - Version: `0.40.2`
+ - Version: `0.40.3`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
 of available versions.

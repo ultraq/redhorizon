@@ -23,11 +23,12 @@ Installation
 ------------
 
 Currently, this project consists of several modules in an attempt to prove out
-various parts of the overall engine. The first standalone modules are:
+various parts of the overall engine. These standalone modules are:
 
  - [`redhorizon-audio`](redhorizon-audio)
  - [`redhorizon-graphics`](redhorizon-graphics)
  - [`redhorizon-input`](redhorizon-input)
+ - [`redhorizon-scenegraph`](redhorizon-scenegraph)
 
 Instructions for use in projects can be found in each of those subproject
 READMEs.
