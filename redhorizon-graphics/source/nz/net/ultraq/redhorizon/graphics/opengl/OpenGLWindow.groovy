@@ -59,6 +59,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	private int framebufferHeight
 	final float renderScale
 	final Rectanglei viewport
+	private boolean centered
 	private boolean fullScreen
 	private int interval
 	private long lastClickTime
@@ -196,6 +197,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	OpenGLWindow centerToScreen() {
 
+		centered = true
 		var widthPointer = new int[1]
 		var heightPointer = new int[1]
 		glfwGetWindowSize(window, widthPointer, heightPointer)
@@ -275,6 +277,18 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	void releaseCurrent() {
 
 		glfwMakeContextCurrent(NULL)
+	}
+
+	@Override
+	OpenGLWindow scaleToFit() {
+
+		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
+		// Subtract some value from the monitor size to account for any window and OS chrome
+		var scale = Math.floor(Math.max((videoMode.width() * 0.90) / width, (videoMode.height() * 0.90) / height)) as int
+		width *= scale
+		height *= scale
+		glfwSetWindowSize(window, width, height)
+		return centered ? centerToScreen() : this
 	}
 
 	/**

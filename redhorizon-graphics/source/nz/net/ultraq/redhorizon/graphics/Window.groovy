@@ -58,6 +58,8 @@ interface Window extends InputSource, AutoCloseable {
 
 	/**
 	 * Center the window to the screen.
+	 *
+	 * <p>This may be called after the window has been shown.
 	 */
 	Window centerToScreen()
 
@@ -103,6 +105,17 @@ interface Window extends InputSource, AutoCloseable {
 	 * Releases the context that is current on the executing thread.
 	 */
 	void releaseCurrent()
+
+	/**
+	 * Scale the window width/height by the largest whole number that will still
+	 * allow the window to fit within the default monitor.  If not positioned
+	 * correctly, this can make the window fall outside of the screen, so you can
+	 * follow this up with a call to {@link #centerToScreen} to bring the window
+	 * back into view.
+	 *
+	 * <p>This may be called after the window has been shown.
+	 */
+	Window scaleToFit()
 
 	/**
 	 * Return whether or not the underlying window has signalled to be closed.
