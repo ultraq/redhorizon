@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filedecoders
+package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.AudioDecoder
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit

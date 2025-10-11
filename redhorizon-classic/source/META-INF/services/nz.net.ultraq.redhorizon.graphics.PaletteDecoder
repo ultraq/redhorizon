@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-nz.net.ultraq.redhorizon.classic.filedecoders.PalFileDecoder
+nz.net.ultraq.redhorizon.classic.filetypes.PalFileDecoder

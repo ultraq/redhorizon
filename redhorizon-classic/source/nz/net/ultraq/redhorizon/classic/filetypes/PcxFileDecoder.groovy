@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filedecoders
+package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.filetypes.codecs.RunLengthEncoding
 import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream

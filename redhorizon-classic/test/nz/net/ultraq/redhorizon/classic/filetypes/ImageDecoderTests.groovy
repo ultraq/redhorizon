@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filedecoders
+package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.Camera
@@ -68,7 +68,7 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw a PCX file using the Image SPI"() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/alipaper.pcx'))
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.pcx'))
 			var image = new Image('alipaper.pcx', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
@@ -96,7 +96,7 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw a CPS file using the Image SPI"() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/alipaper.cps'))
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.cps'))
 			var image = new Image('alipaper.cps', inputStream)
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
@@ -124,11 +124,11 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw an SHP file using the Image SPI"() {
 		given:
-			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/4tnk.shp').withBufferedStream { stream ->
+			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/4tnk.shp').withBufferedStream { stream ->
 				return new SpriteSheet('4tnk.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet)
-			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/temperat.pal').withBufferedStream { stream ->
+			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/temperat.pal').withBufferedStream { stream ->
 				return new Palette('temperat.pal', stream)
 			}
 			var palettedSpriteShader = new PalettedSpriteShader()

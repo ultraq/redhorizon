@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filedecoders
+package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.AudioDevice
 import nz.net.ultraq.redhorizon.audio.Music
@@ -50,7 +50,7 @@ class AudioDecoderTests extends Specification {
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		when:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/affirm1.v00'))
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/affirm1.v00'))
 			var sound = new Sound('affirm1.v00', inputStream)
 			sound.play()
 			while (sound.playing) {

@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-nz.net.ultraq.redhorizon.classic.filedecoders.CpsFileDecoder
-nz.net.ultraq.redhorizon.classic.filedecoders.PcxFileDecoder
-nz.net.ultraq.redhorizon.classic.filedecoders.ShpFileDecoder
+nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
+nz.net.ultraq.redhorizon.classic.filetypes.PcxFileDecoder
+nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDecoder
