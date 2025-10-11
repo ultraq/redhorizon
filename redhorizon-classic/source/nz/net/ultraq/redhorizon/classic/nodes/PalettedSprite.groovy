@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.classic.nodes
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
@@ -44,7 +43,7 @@ class PalettedSprite extends Sprite implements FactionColours {
 
 	private boolean factionChanged
 	private boolean adjustmentMapChanged
-	private final PalettedSpriteMaterial palettedSpriteMaterial = new PalettedSpriteMaterial()
+//	private final PalettedSpriteMaterial palettedSpriteMaterial = new PalettedSpriteMaterial()
 
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.

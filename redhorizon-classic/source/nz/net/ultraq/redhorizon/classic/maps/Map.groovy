@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
@@ -261,7 +260,7 @@ class Map extends Node<Map> {
 		private final List<MapTile> mapTiles = []
 		private Mesh fullMesh
 		private Shader shader
-		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
+//		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
 
 		MapPack() {
 

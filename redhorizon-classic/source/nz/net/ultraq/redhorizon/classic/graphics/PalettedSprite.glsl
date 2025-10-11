@@ -38,8 +38,7 @@ in vec4 v_vertexColour;
 in vec2 v_textureUVs;
 out vec4 fragmentColour;
 uniform sampler2D indexTexture;
-// The following could all be sampler1Ds to save on data transferred
-//uniform int[256] adjustmentMap;
+uniform sampler2D adjustmentMap;
 uniform sampler2D palette;
 uniform sampler2D alphaMask;
 
@@ -51,7 +50,7 @@ void main() {
 	//  - where an alpha mask is applied
 	//  - (and then the usual step of applying the vertex colouring)
 	vec2 index = vec2(texture(indexTexture, v_textureUVs).x, 1);
-	//	index = adjustmentMap[index];
+	index = vec2(texture(adjustmentMap, index).x, 1);
 	vec4 colour = vec4(texture(palette, index).rgb, 1);
 	colour *= texture(alphaMask, index);
 	fragmentColour = colour * v_vertexColour;

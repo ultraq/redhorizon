@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
@@ -131,6 +132,18 @@ class ImageDecoderTests extends Specification {
 				return new SpriteSheet('4tnk.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet)
+			var faction = Faction.RED
+			var adjustmentMapBuffer = ByteBuffer.allocateNative(256)
+			256.times { i ->
+				if (i in 80..95) {
+					adjustmentMapBuffer.put(faction.colours[i - 80] as byte)
+				}
+				else {
+					adjustmentMapBuffer.put(i as byte)
+				}
+			}
+			adjustmentMapBuffer.flip()
+			var adjustmentMap = new OpenGLTexture(256, 1, 1, adjustmentMapBuffer)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/temperat.pal').withBufferedStream { stream ->
 				return new Palette('temperat.pal', stream)
 			}
@@ -166,6 +179,7 @@ class ImageDecoderTests extends Specification {
 				window.useWindow { ->
 					palettedSpriteShader.useShader { shaderContext ->
 						camera.update(shaderContext)
+						shaderContext.setAdjustmentMap(adjustmentMap)
 						shaderContext.setPalette(palette)
 						shaderContext.setAlphaMask(alphaMask)
 						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))

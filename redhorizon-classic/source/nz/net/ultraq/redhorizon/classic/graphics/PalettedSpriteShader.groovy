@@ -45,15 +45,19 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 		return new PalettedSpriteShaderContext() {
 
 			@Override
+			void setAdjustmentMap(Texture adjustmentMap) {
+				setUniform('adjustmentMap', 1, adjustmentMap)
+			}
+
+			@Override
 			void setAlphaMask(Texture alphaMask) {
-				setUniform('alphaMask', 2, alphaMask)
+				setUniform('alphaMask', 3, alphaMask)
 			}
 
 			@Override
 			void setMaterial(Material material) {
 				setUniform('indexTexture', 0, material.texture)
 				setUniform('frameXY', material.frameXY)
-//				setUniform('adjustmentMap', material.adjustmentMap)
 			}
 
 			@Override
@@ -63,7 +67,7 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 
 			@Override
 			void setPalette(Palette palette) {
-				setUniform('palette', 1, palette.texture)
+				setUniform('palette', 2, palette.texture)
 			}
 
 			@Override
@@ -82,6 +86,11 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 	 * A shader context for drawing palette-based sprites in a scene.
 	 */
 	interface PalettedSpriteShaderContext extends SceneShaderContext {
+
+		/**
+		 * Set an adjustment map to apply atop the palette.
+		 */
+		void setAdjustmentMap(Texture adjustmentMap)
 
 		/**
 		 * Set the alpha mask to apply atop the palette.
