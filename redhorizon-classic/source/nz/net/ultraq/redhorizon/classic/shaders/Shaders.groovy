@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.classic.shaders
 
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
+
 /**
  * A collection of shaders used by this module.
  *

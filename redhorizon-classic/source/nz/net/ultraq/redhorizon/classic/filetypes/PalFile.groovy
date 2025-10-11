@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 
 /**
  * Implementation of the PAL file, which is an array of 256 colours (in VGA
@@ -28,16 +27,12 @@ import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_RGB
 @FileExtensions('pal')
 class PalFile extends VgaPalette {
 
-	private static final int PALETTE_SIZE = 256
-
 	/**
 	 * Constructor, builds a PAL file from an input stream.
-	 *
-	 * @param input
 	 */
 	PalFile(InputStream inputStream) {
 
-		super(PALETTE_SIZE, FORMAT_RGB, inputStream)
+		super(256, 3, inputStream)
 	}
 
 	@Override

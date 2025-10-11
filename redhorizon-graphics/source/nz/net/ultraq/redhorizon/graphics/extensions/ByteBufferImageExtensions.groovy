@@ -81,7 +81,7 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer combine(ByteBuffer[] self, int width, int height, int channels, int imagesX) {
 
-		var imagesY = Math.ceil((self.length / imagesX).doubleValue()) as int
+		var imagesY = Math.ceil(self.length / imagesX as double) as int
 		var compileWidth = width * channels * imagesX as int
 		var compileHeight = height * imagesY
 		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)

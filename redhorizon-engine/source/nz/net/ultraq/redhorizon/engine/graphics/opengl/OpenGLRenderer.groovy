@@ -336,10 +336,10 @@ class OpenGLRenderer implements GraphicsRenderer {
 			shader.applyUniforms(transform, material, window)
 			mesh.bind()
 			if (mesh.index) {
-				glDrawElements(mesh.type, mesh.index.size(), GL_UNSIGNED_INT, 0)
+				glDrawElements(mesh.type, mesh.index.colours(), GL_UNSIGNED_INT, 0)
 			}
 			else {
-				glDrawArrays(mesh.type, 0, mesh.vertices.size())
+				glDrawArrays(mesh.type, 0, mesh.vertices.colours())
 			}
 
 			trigger(new DrawEvent())

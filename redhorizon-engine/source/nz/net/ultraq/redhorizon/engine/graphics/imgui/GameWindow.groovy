@@ -26,8 +26,8 @@ import imgui.ImGui
 import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static imgui.flag.ImGuiCond.*
-import static imgui.flag.ImGuiStyleVar.*
+import static imgui.flag.ImGuiCond.FirstUseEver
+import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiWindowFlags.*
 
 import groovy.transform.TupleConstructor
@@ -75,7 +75,7 @@ class GameWindow implements ImGuiChrome, EventTarget<GameWindow> {
 		imgui.internal.ImGui.dockBuilderDockWindow('Game', dockspaceId)
 		imgui.internal.ImGui.dockBuilderFinish(dockspaceId)
 
-		var framebufferSize = sceneFramebufferResult.texture.size
+		var framebufferSize = sceneFramebufferResult.texture.colours
 		var windowSize = new Dimension(ImGui.contentRegionMaxX as int, ImGui.contentRegionMaxY as int)
 		var imageSizeX = windowSize.width()
 		var imageSizeY = windowSize.height()

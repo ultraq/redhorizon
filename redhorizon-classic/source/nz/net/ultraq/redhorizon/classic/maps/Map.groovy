@@ -22,9 +22,9 @@ import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
-import nz.net.ultraq.redhorizon.classic.resources.PalettedSpriteMaterial
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.engine.graphics.Attribute

@@ -38,7 +38,7 @@ class VgaPalette extends Palette {
 		size.times { i ->
 			var rgb = new byte[channels]
 			bytes.get(rgb)
-			palette[i] = rgb.collect { it << 2 }
+			colourData[i] = rgb.collect { it << 2 }
 		}
 	}
 
@@ -49,7 +49,7 @@ class VgaPalette extends Palette {
 
 		super(size, channels)
 		size.times { i ->
-			palette[i] = input.readNBytes(channels).collect { it << 2 }
+			colourData[i] = input.readNBytes(channels).collect { it << 2 }
 		}
 	}
 }

@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.resources
+package nz.net.ultraq.redhorizon.classic.graphics
 
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
-import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
+import nz.net.ultraq.redhorizon.graphics.Material
+import nz.net.ultraq.redhorizon.graphics.Palette
+
+import org.joml.Vector4f
 
 /**
  * A material specific to paletted sprites.
  *
  * @author Emanuel Rabina
  */
-class PalettedSpriteMaterial extends SpriteMaterial {
+class PalettedSpriteMaterial extends Material {
 
 	private static final int[] IDENTITY_MAP = 0..255
+	private static final Vector4f[] NO_ALPHA_MASK = 256.collect { new Vector4f(1, 1, 1, 1) }
 
 	int[] adjustmentMap = IDENTITY_MAP
-
-	UniformBuffer paletteMetadataBuffer
+	Palette palette
+	Vector4f[] alphaMask = NO_ALPHA_MASK
 }

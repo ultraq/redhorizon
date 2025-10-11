@@ -16,10 +16,13 @@
 
 package nz.net.ultraq.redhorizon.classic.filedecoders
 
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
+import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Sprite
+import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -47,7 +50,7 @@ class ImageDecoderTests extends Specification {
 	OpenGLWindow window
 
 	def setup() {
-		window = new OpenGLWindow(800, 500, "Testing")
+		window = new OpenGLWindow(640, 400, "Testing")
 			.addFpsCounter()
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
@@ -117,5 +120,51 @@ class ImageDecoderTests extends Specification {
 			sprite?.close()
 			image?.close()
 			inputStream?.close()
+	}
+
+	def "Draw an SHP file using the Image SPI"() {
+		given:
+			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/4tnk.shp').withBufferedStream { stream ->
+				return new SpriteSheet('4tnk.shp', stream)
+			}
+			var sprite = new Sprite(spriteSheet)
+			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/temperat.pal').withBufferedStream { stream ->
+				return new Palette('temperat.pal', stream)
+			}
+			var palettedSpriteShader = new PalettedSpriteShader()
+			var camera = new Camera(320, 200, window)
+				.translate(24, 24, 0)
+			var timer = 0
+			var frame = 0
+		when:
+			window.show()
+			var lastUpdateTimeMs = System.currentTimeMillis()
+			while (!window.shouldClose()) {
+				var currentTimeMs = System.currentTimeMillis()
+				var deltaMs = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
+				lastUpdateTimeMs = currentTimeMs
+
+				timer += deltaMs
+				if (timer > 0.5f) {
+					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
+					timer -= 0.5f
+				}
+
+				window.useWindow { ->
+					palettedSpriteShader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						shaderContext.setPalette(palette)
+						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))
+					}
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			palettedSpriteShader?.close()
+			palette?.close()
+			sprite?.close()
+			spriteSheet?.close()
 	}
 }

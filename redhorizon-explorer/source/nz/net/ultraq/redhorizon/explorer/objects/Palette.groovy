@@ -37,7 +37,7 @@ class Palette extends Node<Palette> {
 
 	Palette(PalFile palFile) {
 
-		for (var i = 0; i < palFile.size; i++) {
+		for (var i = 0; i < palFile.colours; i++) {
 			var colour = palFile[i]
 			var r = colour[0] & 0xff
 			var g = colour[1] & 0xff

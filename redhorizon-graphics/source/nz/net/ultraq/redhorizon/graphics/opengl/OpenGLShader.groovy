@@ -24,6 +24,10 @@ import nz.net.ultraq.redhorizon.graphics.Vertex
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
+import org.joml.Vector2f
+import org.joml.Vector2fc
+import org.joml.Vector4f
+import org.joml.Vector4fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.GL_TRUE
@@ -141,15 +145,15 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 	}
 
 	@Override
-	void setUniform(String name, float[] value) {
+	void setUniform(String name, float[] values) {
 
 		var uniformLocation = getUniformLocation(name)
 		stackPush().withCloseable { stack ->
 			var buffer = uniformBuffers
-				.getOrCreate(name) { -> stack.mallocFloat(value.length) }
-				.put(value)
+				.getOrCreate(name) { -> stack.mallocFloat(values.length) }
+				.put(values)
 				.flip()
-			switch (value.length) {
+			switch (values.length) {
 				case 2 -> glUniform2fv(uniformLocation, buffer)
 				default -> glUniform1fv(uniformLocation, buffer)
 			}
@@ -163,9 +167,9 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 	}
 
 	@Override
-	void setUniform(String name, int[] value) {
+	void setUniform(String name, int[] values) {
 
-		glUniform1iv(getUniformLocation(name), value)
+		glUniform1iv(getUniformLocation(name), values)
 	}
 
 	@Override
@@ -175,6 +179,33 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 			var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(Matrix4f.FLOATS) }
 			value.get(buffer)
 			glUniformMatrix4fv(getUniformLocation(name), false, buffer)
+		}
+	}
+
+	@Override
+	void setUniform(String name, Vector2fc value) {
+
+		var uniformLocation = getUniformLocation(name)
+		stackPush().withCloseable { stack ->
+			var buffer = uniformBuffers
+				.getOrCreate(name) { -> stack.mallocFloat(Vector2f.FLOATS) }
+				.put(value.x(), value.y())
+				.flip()
+			glUniform2fv(uniformLocation, buffer)
+		}
+	}
+
+	@Override
+	void setUniform(String name, Vector4fc[] values) {
+
+		var uniformLocation = getUniformLocation(name)
+		stackPush().withCloseable { stack ->
+			var buffer = uniformBuffers.getOrCreate(name) { -> stack.mallocFloat(values.length * Vector4f.FLOATS) }
+			values.each { value ->
+				buffer.put(value.x(), value.y(), value.z(), value.w())
+			}
+			buffer.flip()
+			glUniform4fv(uniformLocation, buffer)
 		}
 	}
 

@@ -31,25 +31,48 @@ import org.joml.Vector3f
  */
 class Sprite extends Node<Sprite> implements AutoCloseable {
 
+	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
+	private static final Vector2f defaultFramePosition = new Vector2f(0, 0)
+
+	private final Vertex[] vertices
 	private final Mesh mesh
 	private final Material material
+	private final float frameWidth
+	private final float frameHeight
+
+	/**
+	 * Constructor, create a new sprite.
+	 */
+	private Sprite(int width, int height, float frameWidth, float frameHeight) {
+
+		super(width, height, 0)
+		this.frameWidth = frameWidth
+		this.frameHeight = frameHeight
+		vertices = new Vertex[]{
+			new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
+			new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
+			new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
+			new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, frameHeight))
+		}
+		mesh = new OpenGLMesh(Type.TRIANGLES, vertices, index)
+	}
 
 	/**
 	 * Constructor, create a new sprite out of an existing image.
 	 */
-	Sprite(Image image, int width = image.width, int height = image.height) {
+	Sprite(Image image) {
 
-		super(width, height, 0)
-		mesh = new OpenGLMesh(Type.TRIANGLES,
-			new Vertex[]{
-				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
-				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
-				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
-			},
-			new int[]{ 0, 1, 2, 2, 3, 0 }
-		)
+		this(image.width, image.height, 1f, 1f)
 		material = new Material(texture: image.texture)
+	}
+
+	/**
+	 * Constructor, create a new sprite from a sprite sheet.
+	 */
+	Sprite(SpriteSheet spriteSheet) {
+
+		this(spriteSheet.width, spriteSheet.height, spriteSheet.width / spriteSheet.texture.width, spriteSheet.height / spriteSheet.texture.height)
+		material = new Material(texture: spriteSheet.texture)
 	}
 
 	@Override
@@ -59,10 +82,12 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	}
 
 	/**
-	 * Draw this sprite, using the currently-bound shader.
+	 * Draw this sprite, using the currently-bound shader and optionally selecting
+	 * a frame in the sprite sheet.
 	 */
-	void draw(SceneShaderContext shaderContext) {
+	void draw(SceneShaderContext shaderContext, Vector2f framePosition = defaultFramePosition) {
 
+		material.frameXY = framePosition
 		mesh.draw(shaderContext, material, transform)
 	}
 }

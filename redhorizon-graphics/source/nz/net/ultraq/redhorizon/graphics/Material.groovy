@@ -16,15 +16,19 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import org.joml.Vector2f
+
 /**
- * A material defines special properties to how a shape should be rendered.
- * These are often uniform values that go into configuring a shader, stored as a
- * general-purpose {@code Map}, with extensions used to simplify access to that
- * map.
+ * A material is a set of properties applied to the shape being rendered, often
+ * being used to configure a shader.
+ *
+ * This particular base material only defines a texture, with subclasses being
+ * used to add other properties.
  *
  * @author Emanuel Rabina
  */
 class Material {
 
 	Texture texture
+	Vector2f frameXY
 }
