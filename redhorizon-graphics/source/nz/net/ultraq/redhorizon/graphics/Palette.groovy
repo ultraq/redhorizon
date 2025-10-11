@@ -16,6 +16,12 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
+
+import org.joml.Vector4f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.nio.ByteBuffer
 
 /**
@@ -23,71 +29,106 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Palette {
+class Palette implements AutoCloseable {
+
+	private static final Logger logger = LoggerFactory.getLogger(Palette)
 
 	/**
 	 * The number of colours in the palette.
 	 */
-	final int size
+	final int colours
 
 	/**
 	 * The number of colour channels described by each colour.
 	 */
 	final int channels
 
-	protected final byte[][] palette
+	final byte[][] colourData
+	final Texture texture
 
-	/**
-	 * Constructor, build the palette parts but without any data.
-	 */
-	protected Palette(int size, int channels) {
-
-		this.size = size
-		this.channels = channels
-		this.palette = new byte[size][channels]
-	}
+	protected Vector4f[] asVec4s
 
 	/**
 	 * Constructor, create a palette from a data buffer.
 	 */
-	Palette(int size, int channels, ByteBuffer paletteData) {
+	Palette(int colours, int channels, ByteBuffer paletteData) {
 
-		this(size, channels)
-		size.times { i ->
-			palette[i] = new byte[channels]
-			paletteData.get(palette[i])
-		}
-	}
-
-	/**
-	 * Constructor, create a palette from an inputstream.
-	 */
-	Palette(int size, int channels, InputStream inputStream) {
-
-		this(size, channels)
-		size.times { i ->
-			palette[i] = inputStream.readNBytes(channels)
-		}
-	}
-
-	/**
-	 * Constructor, create a palette from an existing colour table.
-	 */
-	Palette(int size, int channels, byte[][] palette) {
-
-		this.size = size
+		this.colours = colours
 		this.channels = channels
-		this.palette = palette
+		colourData = new byte[colours][channels]
+		colours.times { i ->
+			var colour = new byte[channels]
+			paletteData.get(colour)
+			colourData[i] = colour
+		}
+		texture = new OpenGLTexture(colours, 1, channels, paletteData)
 	}
 
 	/**
-	 * Return the colour data at the specified index.
-	 *
-	 * @param index Position in the palette.
-	 * @return {@code byte} values representing the requested colour.
+	 * Constructor, create a palette from an inputstream and the
+	 * {@link PaletteDecoder} SPI.
+	 */
+	Palette(String fileName, InputStream inputStream) {
+
+		var result = PaletteDecoders
+			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+			.decode(inputStream)
+
+		var fileInformation = result.fileInformation()
+		if (fileInformation) {
+			logger.info('{}: {}', fileName, fileInformation)
+		}
+
+		colours = result.colours()
+		channels = result.channels()
+		colourData = result.colourData()
+
+		var colourBuffer = ByteBuffer.allocateNative(colours * 4)
+		colourData.each { colour ->
+			colourBuffer.put(colour).put(1)
+		}
+		colourBuffer.flip()
+		texture = new OpenGLTexture(colours, 1, channels, colourBuffer)
+	}
+
+	/**
+	 * Coerce the palette to one of many supported types.
+	 */
+	Object asType(Class clazz) {
+
+		switch (clazz) {
+			case Vector4f[] -> {
+				if (asVec4s == null) {
+					asVec4s = new Vector4f[colours]
+					colours.times { i ->
+						asVec4s[i] = new Vector4f(
+							(colourData[i][0] & 0xff) / 256 as float,
+							(colourData[i][1] & 0xff) / 256 as float,
+							(colourData[i][2] & 0xff) / 256 as float,
+							1
+						)
+					}
+				}
+				yield asVec4s
+			}
+			default -> {
+				throw new UnsupportedOperationException("Cannot coerce palette to ${clazz}")
+			}
+		}
+	}
+
+	@Override
+	void close() {
+
+		texture?.close()
+	}
+
+	/**
+	 * An overload of the {@code []} operator to get the colour data at the
+	 * specified index.
 	 */
 	byte[] getAt(int index) {
 
-		return palette[index]
+		return colourData[index]
 	}
 }
