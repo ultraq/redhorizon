@@ -16,3 +16,4 @@
 
 nz.net.ultraq.redhorizon.classic.filedecoders.CpsFileDecoder
 nz.net.ultraq.redhorizon.classic.filedecoders.PcxFileDecoder
+nz.net.ultraq.redhorizon.classic.filedecoders.ShpFileDecoder
