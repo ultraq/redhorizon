@@ -24,12 +24,15 @@ import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+
+import java.nio.ByteBuffer
 
 /**
  * Check that a PCX file can be read and rendered using the {@link PcxFileDecoder}
@@ -131,6 +134,16 @@ class ImageDecoderTests extends Specification {
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/temperat.pal').withBufferedStream { stream ->
 				return new Palette('temperat.pal', stream)
 			}
+			var alphaMaskBuffer = ByteBuffer.allocateNative(256 * 4)
+			256.times { i ->
+				switch (i) {
+					case 0 -> alphaMaskBuffer.put(new byte[]{ 0, 0, 0, 0 })
+					case 4 -> alphaMaskBuffer.put(new byte[]{ 0, 0, 0, 128 })
+					default -> alphaMaskBuffer.put(new byte[]{ 255, 255, 255, 255 })
+				}
+			}
+			alphaMaskBuffer.flip()
+			var alphaMask = new OpenGLTexture(256, 1, 4, alphaMaskBuffer)
 			var palettedSpriteShader = new PalettedSpriteShader()
 			var camera = new Camera(320, 200, window)
 				.translate(24, 24, 0)
@@ -145,15 +158,16 @@ class ImageDecoderTests extends Specification {
 				lastUpdateTimeMs = currentTimeMs
 
 				timer += deltaMs
-				if (timer > 0.5f) {
+				if (timer > 0.25f) {
 					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
-					timer -= 0.5f
+					timer -= 0.25f
 				}
 
 				window.useWindow { ->
 					palettedSpriteShader.useShader { shaderContext ->
 						camera.update(shaderContext)
 						shaderContext.setPalette(palette)
+						shaderContext.setAlphaMask(alphaMask)
 						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))
 					}
 				}

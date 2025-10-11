@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
-import org.joml.Vector4f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -45,8 +44,6 @@ class Palette implements AutoCloseable {
 
 	final byte[][] colourData
 	final Texture texture
-
-	protected Vector4f[] asVec4s
 
 	/**
 	 * Constructor, create a palette from a data buffer.
@@ -89,32 +86,6 @@ class Palette implements AutoCloseable {
 		}
 		colourBuffer.flip()
 		texture = new OpenGLTexture(colours, 1, channels, colourBuffer)
-	}
-
-	/**
-	 * Coerce the palette to one of many supported types.
-	 */
-	Object asType(Class clazz) {
-
-		switch (clazz) {
-			case Vector4f[] -> {
-				if (asVec4s == null) {
-					asVec4s = new Vector4f[colours]
-					colours.times { i ->
-						asVec4s[i] = new Vector4f(
-							(colourData[i][0] & 0xff) / 256 as float,
-							(colourData[i][1] & 0xff) / 256 as float,
-							(colourData[i][2] & 0xff) / 256 as float,
-							1
-						)
-					}
-				}
-				yield asVec4s
-			}
-			default -> {
-				throw new UnsupportedOperationException("Cannot coerce palette to ${clazz}")
-			}
-		}
 	}
 
 	@Override

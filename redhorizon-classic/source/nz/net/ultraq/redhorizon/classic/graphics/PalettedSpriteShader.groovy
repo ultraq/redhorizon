@@ -19,10 +19,10 @@ package nz.net.ultraq.redhorizon.classic.graphics
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 
 import org.joml.Matrix4fc
-import org.joml.Vector4f
 
 /**
  * A 2D sprite shader for palette-based sprites.
@@ -45,11 +45,15 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 		return new PalettedSpriteShaderContext() {
 
 			@Override
+			void setAlphaMask(Texture alphaMask) {
+				setUniform('alphaMask', 2, alphaMask)
+			}
+
+			@Override
 			void setMaterial(Material material) {
 				setUniform('indexTexture', 0, material.texture)
 				setUniform('frameXY', material.frameXY)
 //				setUniform('adjustmentMap', material.adjustmentMap)
-//				setUniform('alphaMask', material.alphaMask)
 			}
 
 			@Override
@@ -59,7 +63,7 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 
 			@Override
 			void setPalette(Palette palette) {
-				setUniform('palette', palette as Vector4f[])
+				setUniform('palette', 1, palette.texture)
 			}
 
 			@Override
@@ -78,6 +82,11 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 	 * A shader context for drawing palette-based sprites in a scene.
 	 */
 	interface PalettedSpriteShaderContext extends SceneShaderContext {
+
+		/**
+		 * Set the alpha mask to apply atop the palette.
+		 */
+		void setAlphaMask(Texture alphaMask)
 
 		/**
 		 * Set the palette to use.
