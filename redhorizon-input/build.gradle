@@ -23,6 +23,10 @@ description = 'Input module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
+		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
+		}
 		.withJarOptions() {
 			manifest {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.input'
@@ -32,7 +36,7 @@ configure {
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				api platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 				api 'org.lwjgl:lwjgl'

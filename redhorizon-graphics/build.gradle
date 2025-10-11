@@ -23,6 +23,14 @@ description = 'Graphics module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
+		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
+			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+		}
 		.withJarOptions() {
 			manifest {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.graphics'

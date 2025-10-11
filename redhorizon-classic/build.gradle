@@ -30,15 +30,8 @@ configure {
 				here, and serve as working examples for other programmers.
 			''')
 			// Can't link to these until they get published on maven central themselves
-//			link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-events/${version}/", 'nz.net.ultraq.redhorizon.events.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 //			link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
-		}
-		.withShadowJar() {
-			archiveClassifier = ''
-			dependencies {
-				include project(':redhorizon-engine')
-				include project(':redhorizon-filetypes')
-			}
 		}
 		.withSourcesJar()
 		.withGroovydocJar()
@@ -55,29 +48,14 @@ configure {
 			}
 		.configureVerification()
 			.withTestDependencies() {
-				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
 			}
 
 	createMavenPublication()
-		.withArtifacts(shadowJar, sourcesJar, groovydocJar)
+		.withArtifacts(groovydocJar)
 		.configurePom() {
 			url = 'https://github.com/ultraq/redhorizon'
-			inceptionYear = '2007'
-
-			// Have to manually remove the project nodes since shadow won't do that for us
-			afterEvaluate {
-				withXml {
-					var projectDependencyNodes = []
-					asNode().depthFirst { node ->
-						if (node.name().localPart == 'dependency' && node.get('groupId').text() == 'nz.net.ultraq.redhorizon') {
-							projectDependencyNodes << node
-						}
-					}
-					projectDependencyNodes.each { node ->
-						node.parent().remove(node)
-					}
-				}
-			}
+			inceptionYear = '2025'
 		}
 		.useApache20License()
 		.withGitHubScm('ultraq')
@@ -86,10 +64,10 @@ configure {
 			email: 'emanuelrabina@gmail.com',
 			url: 'https://www.ultraq.net.nz'
 		])
+		.publishToMavenCentral(
+			findProperty('mavenCentral.publisher.username'),
+			findProperty('mavenCentral.publisher.password'),
+			'nz.net.ultraq'
+		)
 }
 // @formatter:on
-
-// Disable module metadata while publishing fat jars - it's incorrect for what we're shipping
-tasks.withType(GenerateModuleMetadata).configureEach {
-	enabled = false
-}

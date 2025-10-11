@@ -26,7 +26,7 @@ import javax.sound.sampled.AudioSystem
 /**
  * A sound decoder for file formats provided in the
  * <a href="https://github.com/hendriks73/ffsampledsp">ffsamplessp</a> project,
- * which in turn provides the decoder for use with the {@code javax.sound.samples}
+ * which in turn provides the decoder for use with the {@code javax.sound.sampled}
  * package.
  *
  * @author Emanuel Rabina

@@ -23,6 +23,10 @@ description = 'Scenegraph module for the Red Horizon project'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
+		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
+		}
 		.withJarOptions() {
 			manifest {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.scenegraph'
