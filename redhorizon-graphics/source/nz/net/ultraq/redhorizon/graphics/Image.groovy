@@ -48,7 +48,7 @@ class Image implements AutoCloseable {
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(FrameDecodedEvent) { event ->
-				imageData = event.data()
+				imageData = event.data().flipVertical(event.width(), event.height(), event.channels())
 				palette = event.palette()
 			}
 			.decode(inputStream)

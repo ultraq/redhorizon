@@ -114,7 +114,6 @@ class PcxFileDecoder implements ImageDecoder {
 			}
 		}
 		indexData.flip()
-		indexData = indexData.flipVertical(width, height, 1)
 
 		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
 		var palette = new Palette(PALETTE_COLOURS, PALETTE_CHANNELS, paletteData)

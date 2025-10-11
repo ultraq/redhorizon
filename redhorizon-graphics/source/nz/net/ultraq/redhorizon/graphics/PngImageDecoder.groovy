@@ -50,7 +50,6 @@ class PngImageDecoder implements ImageDecoder {
 				return acc
 			}
 			.flip()
-			.flipVertical(width, height, channels)
 
 		trigger(new FrameDecodedEvent(width, height, channels, imageData))
 
