@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -31,7 +31,7 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  *
  * @author Emanuel Rabina
  */
-class NodeList implements GraphicsResource {
+class NodeList {
 
 	private final Scene scene
 	private Node selectedNode
@@ -42,10 +42,6 @@ class NodeList implements GraphicsResource {
 	NodeList(Scene scene) {
 
 		this.scene = scene
-	}
-
-	@Override
-	void close() {
 	}
 
 	/**

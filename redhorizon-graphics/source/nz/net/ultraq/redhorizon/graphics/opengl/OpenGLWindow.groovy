@@ -220,8 +220,6 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 	@Override
 	void close() {
 
-		nodeList?.close()
-		fpsCounter?.close()
 		imGuiContext.close()
 		glfwDestroyWindow(window)
 		glfwTerminate()

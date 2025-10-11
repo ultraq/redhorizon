@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
 
 import imgui.ImFont
 import imgui.ImGui
@@ -28,7 +27,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class FpsCounter implements GraphicsResource {
+class FpsCounter {
 
 	private final ImFont robotoMonoFont
 	private final float updateRateSeconds
@@ -45,10 +44,6 @@ class FpsCounter implements GraphicsResource {
 		robotoMonoFont = imGuiContext.robotoMonoFont
 		this.updateRateSeconds = updateRateSeconds
 		updateTimer = updateRateSeconds // So we get a result the moment the counter is shown
-	}
-
-	@Override
-	void close() {
 	}
 
 	/**
