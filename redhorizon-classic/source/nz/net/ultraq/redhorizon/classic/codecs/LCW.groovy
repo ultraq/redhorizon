@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.classic.codecs
 
-import nz.net.ultraq.redhorizon.filetypes.codecs.Decoder
-import nz.net.ultraq.redhorizon.filetypes.codecs.Encoder
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

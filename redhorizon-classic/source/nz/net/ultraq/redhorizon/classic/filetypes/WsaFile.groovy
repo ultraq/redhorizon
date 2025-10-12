@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.XORDelta
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 import nz.net.ultraq.redhorizon.filetypes.AnimationFile
 import nz.net.ultraq.redhorizon.filetypes.ColourFormat
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
@@ -26,7 +27,6 @@ import nz.net.ultraq.redhorizon.filetypes.Palette
 import nz.net.ultraq.redhorizon.filetypes.Streaming
 import nz.net.ultraq.redhorizon.filetypes.StreamingDecoder
 import nz.net.ultraq.redhorizon.filetypes.StreamingFrameEvent
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

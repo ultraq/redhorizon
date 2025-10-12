@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import nz.net.ultraq.redhorizon.classic.io.NativeRandomAccessFile
 import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
 import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.io.NativeRandomAccessFile
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore

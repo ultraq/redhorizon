@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.filetypes.codecs.RunLengthEncoding
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.classic.codecs.RunLengthEncoding
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder
 import nz.net.ultraq.redhorizon.graphics.Palette
 

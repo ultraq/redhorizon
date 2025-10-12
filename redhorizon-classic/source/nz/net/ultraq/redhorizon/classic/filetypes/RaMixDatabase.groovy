@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 
 /**
  * Mix files created with an old DOS tool, RA-MIXer, embedded something of a

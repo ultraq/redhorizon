@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 
 import groovy.transform.PackageScope
 
@@ -24,7 +24,7 @@ import groovy.transform.PackageScope
  * Header for a "chunk" in a VQA file.  Each chunk header consists of a 4-letter
  * name, then the length of the data that follows in big-endian order.  Rounding
  * out the chunk will be the data afterwards.
- * 
+ *
  * @author Emanuel Rabina
  */
 @PackageScope
@@ -38,7 +38,7 @@ class VqaChunkHeader {
 
 	/**
 	 * Constructor, read a chunk header from the input stream.
-	 * 
+	 *
 	 * @param input
 	 */
 	VqaChunkHeader(NativeDataInputStream input) {
@@ -49,7 +49,7 @@ class VqaChunkHeader {
 
 	/**
 	 * Returns whether or not the chunk data that follows is compressed.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isDataCompressed() {

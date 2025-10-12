@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.filetypes.io
+package nz.net.ultraq.redhorizon.classic.io
 
 import java.nio.ByteOrder
 
 /**
  * A variant of {@link DataInputStream} that reads primitive types respecting
  * the native byte order of the underlying platform.
- * 
+ *
  * @author Emanuel Rabina
  */
 class NativeDataInputStream extends InputStream implements DataInput, NativeReader {
@@ -35,8 +35,6 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	/**
 	 * Constructor, wraps the given input stream so that values read from it are
 	 * in native byte order.
-	 * 
-	 * @param inputStream
 	 */
 	NativeDataInputStream(InputStream inputStream) {
 
@@ -46,8 +44,6 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 
 	/**
 	 * Returns the number of bytes read in the stream so far.
-	 * 
-	 * @return
 	 */
 	int getBytesRead() {
 
@@ -77,9 +73,6 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	/**
 	 * Reads an {@code int} value, respecting the byte order of the underlying
 	 * platform.
-	 * 
-	 * @param self
-	 * @return
 	 */
 	@Override
 	int readInt() {
@@ -90,9 +83,6 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	/**
 	 * Reads a {@code short} value, respecting the byte order of the underlying
 	 * platform.
-	 * 
-	 * @param self
-	 * @return
 	 */
 	@Override
 	short readShort() {
@@ -103,9 +93,6 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	/**
 	 * Reads an unsigned {@code short} value, returning it as an {@code int} as
 	 * that is the next primitive able to hold the unsigned value.
-	 * 
-	 * @param self
-	 * @return
 	 */
 	int readUnsignedShort() {
 

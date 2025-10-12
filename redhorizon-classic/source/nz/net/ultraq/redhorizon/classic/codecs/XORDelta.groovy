@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,9 +15,6 @@
  */
 
 package nz.net.ultraq.redhorizon.classic.codecs
-
-import nz.net.ultraq.redhorizon.filetypes.codecs.Decoder
-import nz.net.ultraq.redhorizon.filetypes.codecs.Encoder
 
 import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
@@ -44,7 +41,7 @@ import java.nio.ByteBuffer
  *   <li>10000000 11c c v = Xor the next c bytes with v.</li>
  *   <li>1ccccccc = Skip the next c bytes.</li>
  * </ol>
- * 
+ *
  * @author Emanuel Rabina
  */
 @CompileStatic
@@ -87,7 +84,7 @@ class XORDelta implements Encoder, Decoder {
 
 	/**
 	 * Create a new decoder using an XOR source of the given size.
-	 * 
+	 *
 	 * @param frameSize
 	 */
 	XORDelta(int frameSize) {
@@ -97,7 +94,7 @@ class XORDelta implements Encoder, Decoder {
 
 	/**
 	 * Change the base frame being used for the next {@link #decode} operation.
-	 * 
+	 *
 	 * @param deltaSource
 	 * @return This codec for chaining.
 	 */
@@ -276,9 +273,9 @@ class XORDelta implements Encoder, Decoder {
 	 * </ul>
 	 * Buffer positions are restored after this method is through, and no
 	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @param base	 Data the Format40 is based off.
+	 * @param base   Data the Format40 is based off.
 	 * @return An integer value indicating that this number of bytes can be
 	 * 		   encoded using the skip command, or 0 if the following bytes
 	 * 		   aren't good for the skip command.
@@ -312,9 +309,9 @@ class XORDelta implements Encoder, Decoder {
 	 * </ul>
 	 * Buffer positions are restored after this method is through, and no
 	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @param base	 Data the Format40 is based off.
+	 * @param base   Data the Format40 is based off.
 	 * @return An integer value indicating that this number of bytes can be
 	 * 		   encoded using the fill command, or 0 if the following bytes
 	 * 		   aren't good for the fill command.
@@ -351,9 +348,9 @@ class XORDelta implements Encoder, Decoder {
 	 * </ul>
 	 * Buffer positions are restored after this method is through, and no
 	 * alterations are made to the source data.
-	 * 
+	 *
 	 * @param source Original raw data.
-	 * @param base	 Data the Format40 is based off.
+	 * @param base   Data the Format40 is based off.
 	 * @return An integer value indicating that this number of bytes can be
 	 * 		   encoded using the XOR command.  Unlike other methods, this
 	 * 		   check always returns a positive number.

@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
 import nz.net.ultraq.redhorizon.classic.codecs.RLEZero
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 
 import java.nio.ByteBuffer
 
@@ -81,7 +81,7 @@ import java.nio.ByteBuffer
  *     0 = Fixed-length lookup table (16 bytes), 1 = Variable-length lookup table</li>
  * </ul>
  * And after this image header is the image data.
- * 
+ *
  * @author Emanuel Rabina
  */
 @SuppressWarnings('GrFinalVariableAccess')
@@ -99,7 +99,7 @@ class ShpFileDune2 {
 
 	/**
 	 * Constructor, creates a new SHP file from the given file data.
-	 * 
+	 *
 	 * @param input
 	 */
 	ShpFileDune2(InputStream inputStream) {
@@ -147,7 +147,7 @@ class ShpFileDune2 {
 
 	/**
 	 * Returns some information on this Dune 2 SHP file.
-	 * 
+	 *
 	 * @return Dune 2 SHP file info.
 	 */
 	@Override

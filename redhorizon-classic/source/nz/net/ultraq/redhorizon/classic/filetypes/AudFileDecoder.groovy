@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 import nz.net.ultraq.redhorizon.audio.AudioDecoder
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
-import nz.net.ultraq.redhorizon.filetypes.io.NativeDataInputStream
+import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
