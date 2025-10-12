@@ -35,12 +35,13 @@ class OpenGLTexture implements Texture {
 	final int textureId
 	final int width
 	final int height
+	private final int colourFormat
 
 	/**
 	 * Constructor, builds an empty OpenGL texture whose data will be filled in
 	 * later.
 	 */
-	OpenGLTexture(int width, int height, boolean filter = false) {
+	OpenGLTexture(int width, int height, int channels, boolean filter = false) {
 
 		this.width = width
 		this.height = height
@@ -49,7 +50,14 @@ class OpenGLTexture implements Texture {
 		glBindTexture(GL_TEXTURE_2D, textureId)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+
+		colourFormat = switch (channels) {
+			case 1 -> GL_RED
+			case 3 -> GL_RGB
+			case 4 -> GL_RGBA
+			default -> throw new IllegalArgumentException("Colour channels must be 1, 3 or 4")
+		}
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, NULL)
 	}
 
 	/**
@@ -65,7 +73,7 @@ class OpenGLTexture implements Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-		var colourFormat = switch (channels) {
+		colourFormat = switch (channels) {
 			case 1 -> GL_RED
 			case 3 -> GL_RGB
 			case 4 -> GL_RGBA
@@ -107,5 +115,16 @@ class OpenGLTexture implements Texture {
 	void close() {
 
 		glDeleteTextures(textureId)
+	}
+
+	@Override
+	void update(ByteBuffer newTextureData) {
+
+		stackPush().withCloseable { stack ->
+			var textureBuffer = stack.malloc(newTextureData.remaining())
+				.put(newTextureData.array(), newTextureData.position(), newTextureData.remaining())
+				.flip()
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, colourFormat, GL_UNSIGNED_BYTE, textureBuffer)
+		}
 	}
 }

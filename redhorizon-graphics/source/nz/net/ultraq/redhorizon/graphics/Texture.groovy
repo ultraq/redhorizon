@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import java.nio.ByteBuffer
+
 /**
  * An image to draw on a mesh.
  *
@@ -48,4 +50,9 @@ interface Texture extends GraphicsResource {
 	 * Return the width of the texture.
 	 */
 	int getWidth()
+
+	/**
+	 * Update the texture data.
+	 */
+	void update(ByteBuffer newTextureData)
 }

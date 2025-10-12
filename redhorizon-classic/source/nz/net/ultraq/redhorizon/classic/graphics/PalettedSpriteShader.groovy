@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.classic.graphics
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 
 import org.joml.Matrix4fc
@@ -45,13 +44,13 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 		return new PalettedSpriteShaderContext() {
 
 			@Override
-			void setAdjustmentMap(Texture adjustmentMap) {
-				setUniform('adjustmentMap', 1, adjustmentMap)
+			void setAdjustmentMap(FactionAdjustmentMap adjustmentMap) {
+				setUniform('adjustmentMap', 1, adjustmentMap.texture)
 			}
 
 			@Override
-			void setAlphaMask(Texture alphaMask) {
-				setUniform('alphaMask', 3, alphaMask)
+			void setAlphaMask(AlphaMask alphaMask) {
+				setUniform('alphaMask', 3, alphaMask.texture)
 			}
 
 			@Override
@@ -90,12 +89,12 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 		/**
 		 * Set an adjustment map to apply atop the palette.
 		 */
-		void setAdjustmentMap(Texture adjustmentMap)
+		void setAdjustmentMap(FactionAdjustmentMap adjustmentMap)
 
 		/**
 		 * Set the alpha mask to apply atop the palette.
 		 */
-		void setAlphaMask(Texture alphaMask)
+		void setAlphaMask(AlphaMask alphaMask)
 
 		/**
 		 * Set the palette to use.

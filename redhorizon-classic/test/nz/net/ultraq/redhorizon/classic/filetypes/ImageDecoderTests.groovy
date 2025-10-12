@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
+import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
@@ -25,15 +27,12 @@ import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-
-import java.nio.ByteBuffer
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Check that a PCX file can be read and rendered using the {@link PcxFileDecoder}
@@ -133,35 +132,23 @@ class ImageDecoderTests extends Specification {
 			}
 			var sprite = new Sprite(spriteSheet)
 			var faction = Faction.RED
-			var adjustmentMapBuffer = ByteBuffer.allocateNative(256)
-			256.times { i ->
-				if (i in 80..95) {
-					adjustmentMapBuffer.put(faction.colours[i - 80] as byte)
-				}
-				else {
-					adjustmentMapBuffer.put(i as byte)
-				}
-			}
-			adjustmentMapBuffer.flip()
-			var adjustmentMap = new OpenGLTexture(256, 1, 1, adjustmentMapBuffer)
+			var adjustmentMap = new FactionAdjustmentMap(faction)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/temperat.pal').withBufferedStream { stream ->
 				return new Palette('temperat.pal', stream)
 			}
-			var alphaMaskBuffer = ByteBuffer.allocateNative(256 * 4)
-			256.times { i ->
-				switch (i) {
-					case 0 -> alphaMaskBuffer.put(new byte[]{ 0, 0, 0, 0 })
-					case 4 -> alphaMaskBuffer.put(new byte[]{ 0, 0, 0, 128 })
-					default -> alphaMaskBuffer.put(new byte[]{ 255, 255, 255, 255 })
-				}
-			}
-			alphaMaskBuffer.flip()
-			var alphaMask = new OpenGLTexture(256, 1, 4, alphaMaskBuffer)
+			var alphaMask = new AlphaMask()
 			var palettedSpriteShader = new PalettedSpriteShader()
 			var camera = new Camera(320, 200, window)
 				.translate(24, 24, 0)
 			var timer = 0
 			var frame = 0
+			window.on(KeyEvent) { event ->
+				if (event.keyPressed(GLFW_KEY_P)) {
+					var factions = Faction.values()
+					faction = factions[Math.wrap(faction.ordinal() + 1, 0, factions.length)]
+					adjustmentMap.setFaction(faction)
+				}
+			}
 		when:
 			window.show()
 			var lastUpdateTimeMs = System.currentTimeMillis()
@@ -180,6 +167,7 @@ class ImageDecoderTests extends Specification {
 					palettedSpriteShader.useShader { shaderContext ->
 						camera.update(shaderContext)
 						shaderContext.setAdjustmentMap(adjustmentMap)
+						adjustmentMap.update()
 						shaderContext.setPalette(palette)
 						shaderContext.setAlphaMask(alphaMask)
 						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))
