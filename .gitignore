@@ -7,14 +7,14 @@
 /mods
 
 build/
-
-*.aud
-*.cps
-*.ini
-*.log
-*.mix
-*.pcx
-*.shp
-*.v00
-*.vqa
-*.wsa
+imgui.ini
+/*.aud
+/*.cps
+/*.ini
+/*.log
+/*.mix
+/*.pcx
+/*.shp
+/*.v00
+/*.vqa
+/*.wsa
