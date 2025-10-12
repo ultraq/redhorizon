@@ -32,12 +32,12 @@ class VgaPalette extends Palette {
 	/**
 	 * Constructor, create a palette using the given data.
 	 */
-	VgaPalette(int size, int channels, ByteBuffer bytes) {
+	VgaPalette(int size, int channels, ByteBuffer paletteData) {
 
 		super(size, channels)
 		size.times { i ->
 			var rgb = new byte[channels]
-			bytes.get(rgb)
+			paletteData.get(rgb)
 			colourData[i] = rgb.collect { it << 2 }
 		}
 	}
@@ -45,11 +45,11 @@ class VgaPalette extends Palette {
 	/**
 	 * Constructor, create a palette from an inputstream.
 	 */
-	VgaPalette(int size, int channels, InputStream input) {
+	VgaPalette(int size, int channels, InputStream inputStream) {
 
 		super(size, channels)
 		size.times { i ->
-			colourData[i] = input.readNBytes(channels).collect { it << 2 }
+			colourData[i] = inputStream.readNBytes(channels).collect { it << 2 }
 		}
 	}
 }

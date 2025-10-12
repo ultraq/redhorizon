@@ -46,13 +46,21 @@ class Palette implements AutoCloseable {
 	final Texture texture
 
 	/**
-	 * Constructor, create a palette from a data buffer.
+	 * Constructor, create a palette to hold colours of the given size.
 	 */
-	Palette(int colours, int channels, ByteBuffer paletteData) {
+	protected Palette(int colours, int channels) {
 
 		this.colours = colours
 		this.channels = channels
 		colourData = new byte[colours][channels]
+	}
+
+	/**
+	 * Constructor, create a palette from a data buffer.
+	 */
+	Palette(int colours, int channels, ByteBuffer paletteData) {
+
+		this(colours, channels)
 		colours.times { i ->
 			var colour = new byte[channels]
 			paletteData.get(colour)
