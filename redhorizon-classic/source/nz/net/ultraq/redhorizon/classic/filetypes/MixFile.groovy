@@ -17,8 +17,6 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.io.NativeRandomAccessFile
-import nz.net.ultraq.redhorizon.filetypes.ArchiveFile
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions
 
 import groovy.transform.TupleConstructor
 import java.util.concurrent.Semaphore
@@ -36,8 +34,7 @@ import java.util.concurrent.Semaphore
  *
  * @author Emanuel Rabina
  */
-@FileExtensions('mix')
-class MixFile implements ArchiveFile<MixEntry> {
+class MixFile implements AutoCloseable {
 
 	private static final short FLAG_CHECKSUM = 0x0001
 	private static final short FLAG_ENCRYPTED = 0x0002
@@ -50,16 +47,14 @@ class MixFile implements ArchiveFile<MixEntry> {
 
 	/**
 	 * Constructor, open a MIX file for the given File object.
-	 *
-	 * @param file
 	 */
 	MixFile(File file) {
 
 		input = new NativeRandomAccessFile(file)
 
 		// Find out if this file has a checksum/encryption
-		def bufferBits = input.readShort()
-		def flag = input.readShort()
+		var bufferBits = input.readShort()
+		var flag = input.readShort()
 		if ((bufferBits == 0) && (flag & FLAG_ENCRYPTED)) {
 			delegate = new MixFileDelegateEncrypted(input)
 		}
@@ -72,17 +67,13 @@ class MixFile implements ArchiveFile<MixEntry> {
 	/**
 	 * Calculates an ID for a {@link MixEntry} given the original file name
 	 * for the entry to which it is referring to.
-	 *
-	 * @param filename The original filename of the item in the MIX body.
-	 * @return The ID of the entry from the filename.
 	 */
 	static int calculateId(String filename) {
 
-		def name = filename.toUpperCase()
-		def id = 0
-
-		for (def i = 0; i < name.length();) {
-			def a = 0
+		var name = filename.toUpperCase()
+		var id = 0
+		for (var i = 0; i < name.length();) {
+			var a = 0
 			4.times { j ->
 				a >>>= 8
 				if (i < name.length()) {
@@ -115,17 +106,13 @@ class MixFile implements ArchiveFile<MixEntry> {
 	}
 
 	/**
-	 * Returns an entry which describes an item's place in the MIX file.
-	 *
-	 * @param name Name of the item and the record.
-	 * @return Entry for the item, or {@code null} if the item doesn't exist in
-	 *         the file.
+	 * Returns an entry which describes an item's place in the MIX file, or
+	 * {@code null} if the item doesn't exist in the file.
 	 */
-	@Override
 	MixEntry getEntry(String name) {
 
-		def itemId = calculateId(name)
-		def entry = entries.find { entry -> entry.id == itemId }
+		var itemId = calculateId(name)
+		var entry = entries.find { entry -> entry.id == itemId }
 		if (entry) {
 			entry.name = name
 			return entry
@@ -133,7 +120,9 @@ class MixFile implements ArchiveFile<MixEntry> {
 		return null
 	}
 
-	@Override
+	/**
+	 * Returns an input stream to the entry in the mix file.
+	 */
 	InputStream getEntryData(MixEntry entry) {
 
 		return new MixEntryInputStream(baseEntryOffset, entry)
@@ -148,7 +137,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 	 * making file accesses synchronous.
 	 */
 	@TupleConstructor
-	class MixEntryInputStream extends InputStream {
+	private class MixEntryInputStream extends InputStream {
 
 		final int baseEntryOffset
 		final MixEntry entry
@@ -190,8 +179,8 @@ class MixFile implements ArchiveFile<MixEntry> {
 					return -1
 				}
 				input.seek(baseEntryOffset + entry.offset + lastPosition)
-				def toRead = Math.min(len, entry.size - lastPosition)
-				def bytesRead = input.read(b, off, toRead)
+				var toRead = Math.min(len, entry.size - lastPosition)
+				var bytesRead = input.read(b, off, toRead)
 				lastPosition += bytesRead
 				return bytesRead
 			}
@@ -207,7 +196,7 @@ class MixFile implements ArchiveFile<MixEntry> {
 		long skip(long n) {
 
 			return inputSemaphore.acquireAndRelease { ->
-				def toSkip = Math.min(n, entry.size - lastPosition)
+				var toSkip = Math.min(n, entry.size - lastPosition)
 				lastPosition += toSkip
 				return toSkip
 			}

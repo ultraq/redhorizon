@@ -29,9 +29,7 @@ configure {
 				engine.  All of the reverse engineering of the old codecs and files takes place
 				here, and serve as working examples for other programmers.
 			''')
-			// Can't link to these until they get published on maven central themselves
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
-//			link("https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-filetypes/${version}/", 'nz.net.ultraq.redhorizon.filetypes.')
 		}
 		.withSourcesJar()
 		.withGroovydocJar()

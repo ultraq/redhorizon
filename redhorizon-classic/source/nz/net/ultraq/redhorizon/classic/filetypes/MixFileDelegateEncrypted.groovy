@@ -1,12 +1,12 @@
-/* 
+/*
  * Copyright 2019, Emanuel Rabina (http://www.ultraq.net.nz/)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * A MIX file specific to the encrypted format found in the Red Alert game.
  * Used as a delegate for {@link MixFile}.
- * 
+ *
  * @author Emanuel Rabina
  */
 @PackageScope
@@ -41,21 +41,19 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 	/**
 	 * Constructor, start building out a MIX file using the spec from the Red
 	 * Alert game.
-	 * 
-	 * @param input
 	 */
 	MixFileDelegateEncrypted(DataInput input) {
 
 		// Retrieve the Blowfish key used for decrypting the header and file entry index
-		def keySource = ByteBuffer.wrapNative(input.readBytes(MixFileKey.SIZE_KEY_SOURCE))
-		def key = new MixFileKey().calculateKey(keySource)
-		def blowfishSecretKey = new SecretKeySpec(key.array(), 'Blowfish')
-		def blowfishCipher = Cipher.getInstance('Blowfish/ECB/NoPadding')
+		var keySource = ByteBuffer.wrapNative(input.readBytes(MixFileKey.SIZE_KEY_SOURCE))
+		var key = new MixFileKey().calculateKey(keySource)
+		var blowfishSecretKey = new SecretKeySpec(key.array(), 'Blowfish')
+		var blowfishCipher = Cipher.getInstance('Blowfish/ECB/NoPadding')
 		blowfishCipher.init(Cipher.DECRYPT_MODE, blowfishSecretKey)
 
 		// Decrypt the first block to obtain the header
-		def headerEncryptedBytes = input.readBytes(SIZE_ENCRYPTED_BLOCK)
-		def headerDecryptedBuffer = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
+		var headerEncryptedBytes = input.readBytes(SIZE_ENCRYPTED_BLOCK)
+		var headerDecryptedBuffer = ByteBuffer.allocateNative(SIZE_ENCRYPTED_BLOCK)
 		blowfishCipher.doFinal(headerEncryptedBytes, 0, headerEncryptedBytes.length, headerDecryptedBuffer.array(), 0)
 
 		numEntries = headerDecryptedBuffer.getShort()
@@ -63,12 +61,12 @@ class MixFileDelegateEncrypted extends MixFileDelegate {
 
 		// Knowing the number of entries ahead, decrypt as many 8 byte blocks that
 		// fit the index, reading it and the 2 unread bytes from the first block
-		def numBytesForIndex = (int)Math.ceil((MixEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
-		def indexEncryptedBytes = input.readBytes(numBytesForIndex)
-		def indexDecryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
+		var numBytesForIndex = (int)Math.ceil((MixEntry.SIZE * numEntries) / SIZE_ENCRYPTED_BLOCK) * 8
+		var indexEncryptedBytes = input.readBytes(numBytesForIndex)
+		var indexDecryptedBuffer = ByteBuffer.allocateNative(numBytesForIndex)
 		blowfishCipher.doFinal(indexEncryptedBytes, 0, indexEncryptedBytes.length, indexDecryptedBuffer.array(), 0)
 
-		def decryptedIndexBuffer = ByteBuffer.allocateNative(numBytesForIndex + 2)
+		var decryptedIndexBuffer = ByteBuffer.allocateNative(numBytesForIndex + 2)
 			.put(headerDecryptedBuffer)
 			.put(indexDecryptedBuffer)
 			.rewind()

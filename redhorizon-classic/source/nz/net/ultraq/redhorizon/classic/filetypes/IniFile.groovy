@@ -20,8 +20,6 @@ import nz.net.ultraq.redhorizon.classic.codecs.PackData
 import nz.net.ultraq.redhorizon.classic.maps.InfantryLine
 import nz.net.ultraq.redhorizon.classic.maps.StructureLine
 import nz.net.ultraq.redhorizon.classic.maps.UnitLine
-import nz.net.ultraq.redhorizon.filetypes.FileExtensions
-import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 import java.nio.ByteBuffer
 import java.util.regex.Pattern
@@ -33,8 +31,7 @@ import java.util.regex.Pattern
  *
  * @author Emanuel Rabina
  */
-@FileExtensions('ini')
-class IniFile implements ResourceFile {
+class IniFile {
 
 	private static final Pattern COMMENT_PATTERN = ~/^\s*;.*/
 	private static final Pattern SECTION_PATTERN = ~/\[(.+)\](\s*;.*)?/
