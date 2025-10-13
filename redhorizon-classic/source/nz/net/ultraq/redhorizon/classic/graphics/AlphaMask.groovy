@@ -26,7 +26,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class AlphaMask {
+class AlphaMask implements AutoCloseable {
 
 	final Texture texture
 
@@ -45,5 +45,11 @@ class AlphaMask {
 		}
 		alphaMaskBuffer.flip()
 		texture = new OpenGLTexture(256, 1, 4, alphaMaskBuffer)
+	}
+
+	@Override
+	void close() {
+
+		texture?.close()
 	}
 }

@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class FactionAdjustmentMap {
+class FactionAdjustmentMap implements AutoCloseable {
 
 	private Faction faction
 	private boolean factionChanged
@@ -78,5 +78,11 @@ class FactionAdjustmentMap {
 			texture.update(buffer)
 			factionChanged = false
 		}
+	}
+
+	@Override
+	void close() {
+
+		texture?.close()
 	}
 }

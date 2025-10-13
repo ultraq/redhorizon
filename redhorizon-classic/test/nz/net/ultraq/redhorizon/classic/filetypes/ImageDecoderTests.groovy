@@ -178,6 +178,8 @@ class ImageDecoderTests extends Specification {
 		then:
 			notThrown(Exception)
 		cleanup:
+			alphaMask?.close()
+			adjustmentMap?.close()
 			palettedSpriteShader?.close()
 			palette?.close()
 			sprite?.close()
