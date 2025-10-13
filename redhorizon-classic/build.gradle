@@ -37,9 +37,9 @@ configure {
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
+				compileOnly project(':redhorizon-engine')
+				compileOnly project(':redhorizon-filetypes')
 				implementation project(':redhorizon-audio')
-				implementation project(':redhorizon-engine')
-				implementation project(':redhorizon-filetypes')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
