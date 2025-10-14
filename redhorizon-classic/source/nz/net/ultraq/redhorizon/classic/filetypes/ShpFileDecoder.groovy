@@ -51,16 +51,16 @@ class ShpFileDecoder implements ImageDecoder {
 		var input = new NativeDataInputStream(inputStream)
 
 		// File header
-		var numImages = input.readShort() & 0xffff
+		var numImages = input.readUnsignedShort()
 		assert numImages > 0
 
 		var x = input.readShort()
 		var y = input.readShort()
 
-		var width = input.readShort() & 0xffff
+		var width = input.readUnsignedShort()
 		assert width > 0
 
-		var height = input.readShort() & 0xffff
+		var height = input.readUnsignedShort()
 		assert height > 0
 
 		var delta = input.readShort()

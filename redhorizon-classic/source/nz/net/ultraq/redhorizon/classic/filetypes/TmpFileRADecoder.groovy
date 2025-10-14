@@ -45,13 +45,13 @@ class TmpFileRADecoder implements ImageDecoder {
 		var input = new NativeDataInputStream(inputStream)
 
 		// File header
-		var width = input.readShort() & 0xffff
+		var width = input.readUnsignedShort()
 		assert width == 24 : 'Tile width should be 24 pixels'
 
-		var height = input.readShort() & 0xffff
+		var height = input.readUnsignedShort()
 		assert height == 24 : 'Tile height should be 24 pixels'
 
-		var numImages = input.readShort() & 0xffff
+		var numImages = input.readUnsignedShort()
 
 		var zero1 = input.readShort()
 		assert zero1 == 0
