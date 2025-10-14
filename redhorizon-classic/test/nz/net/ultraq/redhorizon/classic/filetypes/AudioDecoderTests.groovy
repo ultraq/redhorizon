@@ -65,7 +65,7 @@ class AudioDecoderTests extends Specification {
 
 	def "Play an AUD music track using the AudioDecoder SPI"() {
 		when:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filedecoders/fac1226m.aud'))
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/fac1226m.aud'))
 			var music = new Music('fac1226m.aud', inputStream)
 			music.play()
 			while (music.playing) {

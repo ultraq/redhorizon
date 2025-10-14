@@ -36,7 +36,9 @@ class Music extends Node<Music> implements AutoCloseable {
 	private final Source source
 	private final AudioDecoder decoder
 	private final BlockingQueue<SampleDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(32)
+	private final List<SampleDecodedEvent> eventDrain = []
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
+	private final List<Buffer> bufferDrain = []
 
 	/**
 	 * Constructor, set up a new music track using its name and a stream of data.
@@ -129,7 +131,8 @@ class Music extends Node<Music> implements AutoCloseable {
 
 		source.setPosition(position)
 
-		var buffers = streamingEvents.drain().collect { event ->
+		eventDrain.clear()
+		var buffers = streamingEvents.drain(eventDrain).collect { event ->
 			return new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
 		}
 		source.queueBuffers(*buffers)
@@ -138,7 +141,8 @@ class Music extends Node<Music> implements AutoCloseable {
 		if (!source.looping) {
 			var buffersProcessed = source.buffersProcessed()
 			if (buffersProcessed) {
-				var processedBuffers = streamedBuffers.drain(buffersProcessed)
+				bufferDrain.clear()
+				var processedBuffers = streamedBuffers.drain(bufferDrain, buffersProcessed)
 				source.unqueueBuffers(*processedBuffers)
 				processedBuffers*.close()
 			}
