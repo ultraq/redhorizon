@@ -18,12 +18,8 @@ package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Texture
-import static nz.net.ultraq.redhorizon.filetypes.ColourFormat.FORMAT_INDEXED
-
-import org.joml.primitives.Rectanglef
 
 import java.nio.ByteBuffer
 
@@ -46,8 +42,8 @@ class TileSet implements GraphicsElement {
 
 	final Palette palette
 
-	private final List<ImagesFile> tileFileList = []
-	private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
+//	private final List<ImagesFile> tileFileList = []
+//	private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
 	private Texture texture
 
 	/**
@@ -66,37 +62,37 @@ class TileSet implements GraphicsElement {
 	 *
 	 * @param tilesFile
 	 */
-	void addTiles(ImagesFile tilesFile) {
-
-		if (tilesFile.format != FORMAT_INDEXED) {
-			throw new IllegalArgumentException('Texture atlas currently only supports indexed image data')
-		}
-
-		// File already added
-		if (tileFileList.contains(tilesFile)) {
-			return
-		}
-
-		// Find the last available Y axis to insert this image data into
-		def yStart = tileFileList.inject(0) { acc, images ->
-			return acc + images.height
-		}
-
-		// Insert image data into the next rows here
-		def tileWidth = tilesFile.width * palette.format.value
-		tilesFile.imagesData.eachWithIndex { imageData, i ->
-			def colouredImageData = imageData.applyPalette(palette)
-			tilesFile.height.times { y ->
-				tilesetData
-					.position(((yStart + y) * tilesetWidth * palette.format.value) + (i * tileWidth))
-					.put(colouredImageData.array(), colouredImageData.position() + (y * tileWidth), tileWidth)
-			}
-		}
-		tilesetData.rewind()
-
-		tileFileList << tilesFile
-		tileFileMap << [(tilesFile): yStart]
-	}
+//	void addTiles(ImagesFile tilesFile) {
+//
+//		if (tilesFile.format != FORMAT_INDEXED) {
+//			throw new IllegalArgumentException('Texture atlas currently only supports indexed image data')
+//		}
+//
+//		// File already added
+//		if (tileFileList.contains(tilesFile)) {
+//			return
+//		}
+//
+//		// Find the last available Y axis to insert this image data into
+//		def yStart = tileFileList.inject(0) { acc, images ->
+//			return acc + images.height
+//		}
+//
+//		// Insert image data into the next rows here
+//		def tileWidth = tilesFile.width * palette.format.value
+//		tilesFile.imagesData.eachWithIndex { imageData, i ->
+//			def colouredImageData = imageData.applyPalette(palette)
+//			tilesFile.height.times { y ->
+//				tilesetData
+//					.position(((yStart + y) * tilesetWidth * palette.format.value) + (i * tileWidth))
+//					.put(colouredImageData.array(), colouredImageData.position() + (y * tileWidth), tileWidth)
+//			}
+//		}
+//		tilesetData.rewind()
+//
+//		tileFileList << tilesFile
+//		tileFileMap << [(tilesFile): yStart]
+//	}
 
 	void delete(GraphicsRenderer renderer) {
 
@@ -111,17 +107,17 @@ class TileSet implements GraphicsElement {
 	 * @param frame
 	 * @return
 	 */
-	Rectanglef getCoordinates(ImagesFile tileFile, int frame) {
-
-		def xStart = tileFile.width * frame
-		def yStart = tileFileMap[tileFile]
-		return new Rectanglef(
-			xStart / tilesetWidth,
-			1 - ((yStart + tileFile.height) / tilesetHeight),
-			(xStart + tileFile.width) / tilesetWidth,
-			1 - (yStart / tilesetHeight)
-		)
-	}
+//	Rectanglef getCoordinates(ImagesFile tileFile, int frame) {
+//
+//		def xStart = tileFile.width * frame
+//		def yStart = tileFileMap[tileFile]
+//		return new Rectanglef(
+//			xStart / tilesetWidth,
+//			1 - ((yStart + tileFile.height) / tilesetHeight),
+//			(xStart + tileFile.width) / tilesetWidth,
+//			1 - (yStart / tilesetHeight)
+//		)
+//	}
 
 	/**
 	 * Return the texture underlying this tileset, if available.

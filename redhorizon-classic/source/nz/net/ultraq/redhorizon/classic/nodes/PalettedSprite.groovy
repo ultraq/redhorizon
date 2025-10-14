@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.UniformBufferRe
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteMaterial
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.graphics.Shader
 
 import groovy.transform.Memoized
@@ -48,10 +47,10 @@ class PalettedSprite extends Sprite implements FactionColours {
 	/**
 	 * Constructor, build this sprite from a sprite sheet file.
 	 */
-	PalettedSprite(ImagesFile imagesFile) {
-
-		super(imagesFile)
-	}
+//	PalettedSprite(ImagesFile imagesFile) {
+//
+//		super(imagesFile)
+//	}
 
 	/**
 	 * Constructor, build this sprite from an existing sprite sheet.

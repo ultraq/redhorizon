@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.UniformBuffer
 import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.filetypes.Palette
+import nz.net.ultraq.redhorizon.graphics.Palette
 
 import org.joml.FrustumIntersection
 

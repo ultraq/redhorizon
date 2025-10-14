@@ -31,12 +31,8 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
 import nz.net.ultraq.redhorizon.engine.scenegraph.Node
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Shader
-import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_HEIGHT
-import static nz.net.ultraq.redhorizon.classic.maps.Map.TILE_WIDTH
 
 import org.joml.Vector3f
 
@@ -61,7 +57,7 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	final PartitionHint partitionHint = PartitionHint.SMALL_AREA
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
-	final ImagesFile imagesFile
+//	final ImagesFile imagesFile
 	final UnitData unitData
 	final UnitBody body
 	final UnitTurret turret
@@ -73,68 +69,68 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	private float accAnimationTime
 	private SpriteSheet spriteSheet
 
-	Unit(ImagesFile imagesFile, UnitData unitData) {
-
-		this.imagesFile = imagesFile
-		this.unitData = unitData
-
-		bounds { ->
-			setMax(imagesFile.width, imagesFile.height)
-		}
-
-		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
-			return CompletableFuture.completedFuture(spriteSheet)
-		}, unitData)
-		addChild(body)
-
-		if (unitData.shpFile.parts.turret) {
-			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
-				return CompletableFuture.completedFuture(spriteSheet)
-			}).tap {
-				layer = Layer.UP_ONE
-			}
-			addChild(turret)
-		}
-		else {
-			turret = null
-		}
-	}
+//	Unit(ImagesFile imagesFile, UnitData unitData) {
+//
+//		this.imagesFile = imagesFile
+//		this.unitData = unitData
+//
+//		bounds { ->
+//			setMax(imagesFile.width, imagesFile.height)
+//		}
+//
+//		body = new UnitBody(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
+//			return CompletableFuture.completedFuture(spriteSheet)
+//		}, unitData)
+//		addChild(body)
+//
+//		if (unitData.shpFile.parts.turret) {
+//			turret = new UnitTurret(imagesFile.width, imagesFile.height, imagesFile.numImages, { _ ->
+//				return CompletableFuture.completedFuture(spriteSheet)
+//			}).tap {
+//				layer = Layer.UP_ONE
+//			}
+//			addChild(turret)
+//		}
+//		else {
+//			turret = null
+//		}
+//	}
 
 	/**
 	 * TODO: This method signature sucks 😅  Need a better way to add components
 	 *       like this to a unit.  Time to revisit ECS stuffs...
 	 */
-	void addBib(ImagesFile bibFile) {
-
-		var structureWidthInCells = Math.ceil(width / TILE_WIDTH) as int
-
-		var bibImageData = bibFile.imagesData.combine(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
-		var bibWidth = TILE_WIDTH * structureWidthInCells
-		var bibHeight = TILE_HEIGHT * 2
-
-		bib = new PalettedSprite(bibWidth, bibHeight, 1, 1f, 1f, { scene ->
-			return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
-		})
-		bib.name = "Bib"
-		bib.setPosition(0, -TILE_HEIGHT)
-		bib.layer = Layer.DOWN_THREE
-		bib.partitionHint = PartitionHint.SMALL_AREA
-
-		addChild(bib)
-	}
+//	void addBib(ImagesFile bibFile) {
+//
+//		var structureWidthInCells = Math.ceil(width / TILE_WIDTH) as int
+//
+//		var bibImageData = bibFile.imagesData.combine(bibFile.width, bibFile.height, bibFile.format, structureWidthInCells)
+//		var bibWidth = TILE_WIDTH * structureWidthInCells
+//		var bibHeight = TILE_HEIGHT * 2
+//
+//		bib = new PalettedSprite(bibWidth, bibHeight, 1, 1f, 1f, { scene ->
+//			return scene.requestCreateOrGet(new SpriteSheetRequest(bibWidth, bibHeight, ColourFormat.FORMAT_INDEXED, bibImageData))
+//		})
+//		bib.name = "Bib"
+//		bib.setPosition(0, -TILE_HEIGHT)
+//		bib.layer = Layer.DOWN_THREE
+//		bib.partitionHint = PartitionHint.SMALL_AREA
+//
+//		addChild(bib)
+//	}
 
 	/**
 	 * Adds a second body to this unit.  Used for special cases like the weapons
 	 * factory where the garage door is a separate sprite file.
 	 */
-	void addBody(ImagesFile imagesFile, UnitData unitData) {
-
-		body2 = new UnitBody(imagesFile, unitData).tap {
-			name = "UnitBody2"
-			layer = Layer.UP_ONE
-		}
-		addChild(body2)
-	}
+//	void addBody(ImagesFile imagesFile, UnitData unitData) {
+//
+//		body2 = new UnitBody(imagesFile, unitData).tap {
+//			name = "UnitBody2"
+//			layer = Layer.UP_ONE
+//		}
+//		addChild(body2)
+//	}
 
 	/**
 	 * Add a generated shadow to this unit.
@@ -238,11 +234,11 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 
 		private final UnitData unitData
 
-		UnitBody(ImagesFile imagesFile, UnitData unitData) {
-
-			super(imagesFile)
-			this.unitData = unitData
-		}
+//		UnitBody(ImagesFile imagesFile, UnitData unitData) {
+//
+//			super(imagesFile)
+//			this.unitData = unitData
+//		}
 
 		UnitBody(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
 

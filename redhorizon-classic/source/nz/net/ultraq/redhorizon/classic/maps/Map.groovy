@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
-import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
 import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.shaders.Shaders
@@ -39,8 +38,6 @@ import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
 import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
 import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
-import nz.net.ultraq.redhorizon.filetypes.ColourFormat
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
@@ -156,34 +153,34 @@ class Map extends Node<Map> {
 	 */
 	private class TileSet {
 
-		private final List<ImagesFile> tileFileList = []
-		private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
+//		private final List<ImagesFile> tileFileList = []
+//		private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
 		private int numTiles = 0
 		private SpriteSheet spriteSheet
 
 		/**
 		 * Add more tiles to the tileset.
 		 */
-		void addTiles(ImagesFile tilesFile) {
-
-			if (tilesFile.width > TILE_WIDTH || tilesFile.height > TILE_HEIGHT) {
-				throw new IllegalArgumentException('Cannot use a tile file whose dimensions exceed 24x24')
-			}
-
-			if (!tileFileList.contains(tilesFile)) {
-				tileFileList << tilesFile
-				tileFileMap << [(tilesFile): numTiles]
-				numTiles += tilesFile.numImages
-			}
-		}
+//		void addTiles(ImagesFile tilesFile) {
+//
+//			if (tilesFile.width > TILE_WIDTH || tilesFile.height > TILE_HEIGHT) {
+//				throw new IllegalArgumentException('Cannot use a tile file whose dimensions exceed 24x24')
+//			}
+//
+//			if (!tileFileList.contains(tilesFile)) {
+//				tileFileList << tilesFile
+//				tileFileMap << [(tilesFile): numTiles]
+//				numTiles += tilesFile.numImages
+//			}
+//		}
 
 		/**
 		 * Return the index into the spritesheet for the given tile file and frame.
 		 */
-		int getFrame(ImagesFile tileFile, int tileIndex) {
-
-			return tileFileMap[tileFile] + tileIndex
-		}
+//		int getFrame(ImagesFile tileFile, int tileIndex) {
+//
+//			return tileFileMap[tileFile] + tileIndex
+//		}
 	}
 
 	/**
