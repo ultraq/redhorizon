@@ -96,7 +96,7 @@ class AudFileDecoder implements AudioDecoder {
 			trigger(new SampleDecodedEvent(bits, channels, frequency, sample))
 
 			numSamples++
-			Thread.yield()
+			Thread.sleep(20)
 		}
 
 		logger.debug('Decoding complete')

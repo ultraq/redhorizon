@@ -21,27 +21,40 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
  * A source backed by an unknown number of sound buffers, used for streaming
  * large amounts of sound data.  Best suited for music tracks.
  *
+ * <p>Input streams will be decoded in a separate thread and loaded over time
+ * without getting too ahead of the current playback position.  Whichever thread
+ * is used for updating audio will need to call {@link #update} periodically to
+ * keep the music track fed.
+ *
  * @author Emanuel Rabina
  */
 class Music extends Node<Music> implements AutoCloseable {
 
+	private static final Logger logger = LoggerFactory.getLogger(Music)
+
 	private final Source source
 	private final AudioDecoder decoder
-	private final BlockingQueue<SampleDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(32)
+	private final ExecutorService executor = Executors.newSingleThreadExecutor()
+	private final BlockingQueue<SampleDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(16)
 	private final List<SampleDecodedEvent> eventDrain = []
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 	private final List<Buffer> bufferDrain = []
 
 	/**
-	 * Constructor, set up a new music track using its name and a stream of data.
+	 * Constructor, set up streaming of the given music track.
 	 */
 	Music(String fileName, InputStream inputStream) {
 
@@ -50,7 +63,15 @@ class Music extends Node<Music> implements AutoCloseable {
 			.on(SampleDecodedEvent) { event ->
 				streamingEvents << event
 			}
-		decoder.decode(inputStream)
+		executor.submit { ->
+			Thread.currentThread().name = "Music track ${fileName} :: Decoding"
+			var result = decoder.decode(inputStream)
+			logger.debug('{} decoded after {} samples', fileName, result.buffers())
+			var fileInformation = result.fileInformation()
+			if (fileInformation) {
+				logger.info('{}: {}', fileName, fileInformation)
+			}
+		}
 
 		// Let the decode buffer fill up first
 		while (streamingEvents.remainingCapacity() != 0) {
@@ -62,6 +83,7 @@ class Music extends Node<Music> implements AutoCloseable {
 	@Override
 	void close() {
 
+		executor.close()
 		source.stop()
 		streamedBuffers*.close()
 		source.close()
