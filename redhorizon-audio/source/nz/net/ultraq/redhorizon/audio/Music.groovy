@@ -34,10 +34,9 @@ import java.util.concurrent.LinkedBlockingQueue
  * A source backed by an unknown number of sound buffers, used for streaming
  * large amounts of sound data.  Best suited for music tracks.
  *
- * <p>Input streams will be decoded in a separate thread and loaded over time
- * without getting too ahead of the current playback position.  Whichever thread
- * is used for updating audio will need to call {@link #update} periodically to
- * keep the music track fed.
+ * <p>Input streams will be decoded in a separate thread and loaded over time.
+ * Whichever thread is used for updating audio will need to call {@link #update}
+ * periodically to keep the music track fed.
  *
  * @author Emanuel Rabina
  */
@@ -46,7 +45,6 @@ class Music extends Node<Music> implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(Music)
 
 	private final Source source
-	private final AudioDecoder decoder
 	private final ExecutorService executor = Executors.newSingleThreadExecutor()
 	private final BlockingQueue<SampleDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(16)
 	private final List<SampleDecodedEvent> eventDrain = []
@@ -59,7 +57,7 @@ class Music extends Node<Music> implements AutoCloseable {
 	Music(String fileName, InputStream inputStream) {
 
 		source = new OpenALSource()
-		decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(SampleDecodedEvent) { event ->
 				streamingEvents << event
 			}

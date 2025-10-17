@@ -19,3 +19,4 @@ nz.net.ultraq.redhorizon.classic.filetypes.PcxFileDecoder
 nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDecoder
 nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
 nz.net.ultraq.redhorizon.classic.filetypes.TmpFileTDDecoder
+nz.net.ultraq.redhorizon.classic.filetypes.WsaFileDecoder

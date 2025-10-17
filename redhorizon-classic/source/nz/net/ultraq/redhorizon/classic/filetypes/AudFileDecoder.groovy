@@ -73,6 +73,8 @@ class AudFileDecoder implements AudioDecoder {
 		var bits = (flags & FLAG_16BIT) ? 16 : 8
 		var channels = (flags & FLAG_STEREO) ? 2 : 1
 
+		trigger(new HeaderDecodedEvent(bits, channels, frequency))
+
 		// File body
 		var numSamples = 0
 		var decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
