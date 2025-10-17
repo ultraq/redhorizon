@@ -164,8 +164,9 @@ class GraphicsCheck extends Specification {
 					new Vertex(new Vector3f(-2, 2, 0.0), Colour.WHITE, new Vector2f(0, 1))
 				},
 				new int[]{ 0, 1, 2, 2, 3, 0 })
-			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
-			var bufferedImage = ImageIO.read(imageStream)
+			var bufferedImage = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png').withBufferedStream { stream ->
+				return ImageIO.read(stream)
+			}
 			var width = bufferedImage.width
 			var height = bufferedImage.height
 			var channels = bufferedImage.colorModel.numComponents
@@ -198,7 +199,6 @@ class GraphicsCheck extends Specification {
 			notThrown(Exception)
 		cleanup:
 			texture?.close()
-			imageStream?.close()
 			quad?.close()
 			shader?.close()
 	}
@@ -206,8 +206,9 @@ class GraphicsCheck extends Specification {
 	def "Draws a sprite - using Image and ImageDecoder SPI"() {
 		given:
 			var shader = new BasicShader()
-			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
-			var image = new Image('GraphicsCheck.png', imageStream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png').withBufferedStream { stream ->
+				return new Image('GraphicsCheck.png', stream)
+			}
 			var sprite = new Sprite(image)
 			var camera = new Camera(80, 60, window)
 				.translate(16, 16, 0)
@@ -227,7 +228,6 @@ class GraphicsCheck extends Specification {
 		cleanup:
 			sprite?.close()
 			image?.close()
-			imageStream?.close()
 			shader?.close()
 	}
 

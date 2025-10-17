@@ -71,8 +71,9 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw a PCX file using the Image SPI"() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.pcx'))
-			var image = new Image('alipaper.pcx', inputStream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.pcx').withBufferedStream { stream ->
+				return new Image('alipaper.pcx', stream)
+			}
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
 			var camera = new Camera(640, 400, window)
@@ -94,13 +95,13 @@ class ImageDecoderTests extends Specification {
 			shader?.close()
 			sprite?.close()
 			image?.close()
-			inputStream?.close()
 	}
 
 	def "Draw a CPS file using the Image SPI"() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.cps'))
-			var image = new Image('alipaper.cps', inputStream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.cps').withBufferedStream { stream ->
+				return new Image('alipaper.cps', stream)
+			}
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
@@ -122,7 +123,6 @@ class ImageDecoderTests extends Specification {
 			shader?.close()
 			sprite?.close()
 			image?.close()
-			inputStream?.close()
 	}
 
 	def "Draw an SHP file using the Image SPI"() {
@@ -154,10 +154,10 @@ class ImageDecoderTests extends Specification {
 			var lastUpdateTimeMs = System.currentTimeMillis()
 			while (!window.shouldClose()) {
 				var currentTimeMs = System.currentTimeMillis()
-				var deltaMs = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
+				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 				lastUpdateTimeMs = currentTimeMs
 
-				timer += deltaMs
+				timer += delta
 				if (timer > 0.25f) {
 					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
 					timer -= 0.25f
