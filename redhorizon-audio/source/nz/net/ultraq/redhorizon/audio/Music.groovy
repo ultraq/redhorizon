@@ -50,6 +50,7 @@ class Music extends Node<Music> implements AutoCloseable {
 	private final List<SampleDecodedEvent> eventDrain = []
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 	private final List<Buffer> bufferDrain = []
+	private boolean decodingError
 
 	/**
 	 * Constructor, set up streaming of the given music track.
@@ -63,11 +64,17 @@ class Music extends Node<Music> implements AutoCloseable {
 			}
 		executor.submit { ->
 			Thread.currentThread().name = "Music track ${fileName} :: Decoding"
-			var result = decoder.decode(inputStream)
-			logger.debug('{} decoded after {} samples', fileName, result.buffers())
-			var fileInformation = result.fileInformation()
-			if (fileInformation) {
-				logger.info('{}: {}', fileName, fileInformation)
+			try {
+				var result = decoder.decode(inputStream)
+				logger.debug('{} decoded after {} samples', fileName, result.buffers())
+				var fileInformation = result.fileInformation()
+				if (fileInformation) {
+					logger.info('{}: {}', fileName, fileInformation)
+				}
+			}
+			catch (Exception ex) {
+				logger.error('Failed to decode music track', ex)
+				decodingError = true
 			}
 		}
 
@@ -148,6 +155,10 @@ class Music extends Node<Music> implements AutoCloseable {
 	 * Update the streaming data for the music track.
 	 */
 	void update() {
+
+		if (decodingError) {
+			throw new IllegalStateException('An error occurred decoding the music track')
+		}
 
 		source.setPosition(position)
 

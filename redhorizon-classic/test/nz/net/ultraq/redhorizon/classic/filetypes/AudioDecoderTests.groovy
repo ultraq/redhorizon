@@ -50,8 +50,9 @@ class AudioDecoderTests extends Specification {
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		when:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/affirm1.v00'))
-			var sound = new Sound('affirm1.v00', inputStream)
+			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/affirm1.v00').withBufferedStream { stream ->
+				return new Sound('affirm1.v00', stream)
+			}
 			sound.play()
 			while (sound.playing) {
 				Thread.sleep(100)
@@ -60,7 +61,6 @@ class AudioDecoderTests extends Specification {
 			notThrown(Exception)
 		cleanup:
 			sound?.close()
-			inputStream?.close()
 	}
 
 	def "Play an AUD music track using the AudioDecoder SPI"() {
