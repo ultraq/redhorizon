@@ -68,6 +68,8 @@ class ShpFileDecoder implements ImageDecoder {
 
 		var flags = input.readShort()
 
+		trigger(new HeaderDecodedEvent(width, height, 1, numImages, -1f))
+
 		// numImages() + 2 for the 0 offset and EOF pointer
 		var imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->

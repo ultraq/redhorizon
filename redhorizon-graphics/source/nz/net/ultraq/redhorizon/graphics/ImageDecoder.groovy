@@ -44,6 +44,17 @@ interface ImageDecoder extends EventTarget<ImageDecoder> {
 	String[] getSupportedFileExtensions()
 
 	/**
+	 * Event for the decoding of the header information.  This is most useful if
+	 * the image data is being streamed and we need to know some information ahead
+	 * of starting that.
+	 */
+	record HeaderDecodedEvent(int width, int height, int channels, int numFrames, float frameRate) implements Event {
+		HeaderDecodedEvent(int width, int height, int channels) {
+			this(width, height, channels, -1, -1f)
+		}
+	}
+
+	/**
 	 * Event for the streaming of a frame of image data.
 	 */
 	@ImmutableOptions(knownImmutables = ['data', 'palette'])

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
 import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
@@ -56,6 +57,7 @@ class ImageDecoderTests extends Specification {
 		window = new OpenGLWindow(640, 400, "Testing")
 			.addFpsCounter()
 			.centerToScreen()
+			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
@@ -184,5 +186,38 @@ class ImageDecoderTests extends Specification {
 			palette?.close()
 			sprite?.close()
 			spriteSheet?.close()
+	}
+
+	def "Play a WSA file using the Image SPI"() {
+		given:
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/africa.wsa'))
+			var animation = new Animation('africa.wsa', inputStream)
+			var shader = new BasicShader()
+			var camera = new Camera(320, 200, window)
+				.translate(160, 100, 0)
+		when:
+			window.show()
+			animation.play()
+			var lastUpdateTimeMs = System.currentTimeMillis()
+			while (!window.shouldClose() && animation.playing) {
+				var currentTimeMs = System.currentTimeMillis()
+				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
+				lastUpdateTimeMs = currentTimeMs
+
+				window.useWindow { ->
+					shader.useShader { shaderContext ->
+						camera.update(shaderContext)
+						animation.update(delta)
+						animation.draw(shaderContext)
+					}
+				}
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			shader?.close()
+			animation?.close()
+			inputStream?.close()
 	}
 }
