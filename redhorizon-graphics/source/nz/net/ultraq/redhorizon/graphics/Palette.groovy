@@ -40,7 +40,7 @@ class Palette implements AutoCloseable {
 	/**
 	 * The number of colour channels described by each colour.
 	 */
-	final int channels
+	final int format
 
 	final byte[][] colourData
 	final Texture texture
@@ -48,25 +48,25 @@ class Palette implements AutoCloseable {
 	/**
 	 * Constructor, create a palette to hold colours of the given size.
 	 */
-	protected Palette(int colours, int channels) {
+	protected Palette(int colours, int format) {
 
 		this.colours = colours
-		this.channels = channels
-		colourData = new byte[colours][channels]
+		this.format = format
+		colourData = new byte[colours][format]
 	}
 
 	/**
 	 * Constructor, create a palette from a data buffer.
 	 */
-	Palette(int colours, int channels, ByteBuffer paletteData) {
+	Palette(int colours, int format, ByteBuffer paletteData) {
 
-		this(colours, channels)
+		this(colours, format)
 		colours.times { i ->
-			var colour = new byte[channels]
+			var colour = new byte[format]
 			paletteData.get(colour)
 			colourData[i] = colour
 		}
-		texture = new OpenGLTexture(colours, 1, channels, paletteData)
+		texture = new OpenGLTexture(colours, 1, format, paletteData)
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Palette implements AutoCloseable {
 		}
 
 		colours = result.colours()
-		channels = result.channels()
+		format = result.format()
 		colourData = result.colourData()
 
 		var colourBuffer = ByteBuffer.allocateNative(colours * 4)
@@ -93,7 +93,7 @@ class Palette implements AutoCloseable {
 			colourBuffer.put(colour).put(1)
 		}
 		colourBuffer.flip()
-		texture = new OpenGLTexture(colours, 1, channels, colourBuffer)
+		texture = new OpenGLTexture(colours, 1, format, colourBuffer)
 	}
 
 	@Override

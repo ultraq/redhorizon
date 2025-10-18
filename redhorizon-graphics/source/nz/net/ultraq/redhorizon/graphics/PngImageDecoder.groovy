@@ -35,15 +35,15 @@ class PngImageDecoder implements ImageDecoder {
 		var bufferedImage = ImageIO.read(inputStream)
 		var width = bufferedImage.width
 		var height = bufferedImage.height
-		var channels = bufferedImage.colorModel.numComponents
+		var format = bufferedImage.colorModel.numComponents
 
 		var imageData = bufferedImage.getRGB(0, 0, width, height, null, 0, width)
-			.inject(ByteBuffer.allocateNative(width * height * channels)) { ByteBuffer acc, pixel ->
+			.inject(ByteBuffer.allocateNative(width * height * format)) { ByteBuffer acc, pixel ->
 				var red = (byte)(pixel >> 16)
 				var green = (byte)(pixel >> 8)
 				var blue = (byte)(pixel)
 				acc.put(red).put(green).put(blue)
-				if (channels == 4) {
+				if (format == 4) {
 					var alpha = (byte)(pixel >> 24)
 					acc.put(alpha)
 				}
@@ -51,9 +51,9 @@ class PngImageDecoder implements ImageDecoder {
 			}
 			.flip()
 
-		trigger(new FrameDecodedEvent(width, height, channels, imageData))
+		trigger(new FrameDecodedEvent(width, height, format, imageData))
 
-		return new DecodeSummary(width, height, channels, 1,
-			"PNG file, ${width}x${height}, ${channels == 4 ? '32' : '24'}-bit colour")
+		return new DecodeSummary(width, height, format, 1,
+			"PNG file, ${width}x${height}, ${format == 4 ? '32' : '24'}-bit colour")
 	}
 }

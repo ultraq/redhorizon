@@ -101,7 +101,7 @@ class WsaFileDecoder implements ImageDecoder {
 				var indexedFrame = xorDelta.decode(deltaFrame, ByteBuffer.allocateNative(frameSize))
 				return indexedFrame.applyPalette(palette)
 			}
-			trigger(new FrameDecodedEvent(width, height, palette.channels, colouredFrame))
+			trigger(new FrameDecodedEvent(width, height, palette.format, colouredFrame))
 			Thread.yield()
 		}
 

@@ -41,7 +41,7 @@ class OpenGLTexture implements Texture {
 	 * Constructor, builds an empty OpenGL texture whose data will be filled in
 	 * later.
 	 */
-	OpenGLTexture(int width, int height, int channels, boolean filter = false) {
+	OpenGLTexture(int width, int height, int format, boolean filter = false) {
 
 		this.width = width
 		this.height = height
@@ -51,11 +51,11 @@ class OpenGLTexture implements Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter ? GL_LINEAR : GL_NEAREST)
 
-		colourFormat = switch (channels) {
+		colourFormat = switch (format) {
 			case 1 -> GL_RED
 			case 3 -> GL_RGB
 			case 4 -> GL_RGBA
-			default -> throw new IllegalArgumentException("Colour channels must be 1, 3 or 4")
+			default -> throw new IllegalArgumentException("Colour format must be 1, 3 or 4")
 		}
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, colourFormat, GL_UNSIGNED_BYTE, NULL)
 	}
@@ -63,7 +63,7 @@ class OpenGLTexture implements Texture {
 	/**
 	 * Constructor, builds an OpenGL texture from existing image data.
 	 */
-	OpenGLTexture(int width, int height, int channels, ByteBuffer data) {
+	OpenGLTexture(int width, int height, int format, ByteBuffer data) {
 
 		this.width = width
 		this.height = height
@@ -73,18 +73,18 @@ class OpenGLTexture implements Texture {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-		colourFormat = switch (channels) {
+		colourFormat = switch (format) {
 			case 1 -> GL_RED
 			case 3 -> GL_RGB
 			case 4 -> GL_RGBA
-			default -> throw new IllegalArgumentException("Colour channels must be 1, 3 or 4")
+			default -> throw new IllegalArgumentException("Colour format must be 1, 3 or 4")
 		}
 		var textureBuffer = stackPush().withCloseable { stack ->
 			return stack.malloc(data.remaining())
 				.put(data.array(), data.position(), data.remaining())
 				.flip()
 		}
-		var matchesAlignment = (width * channels) % 4 == 0
+		var matchesAlignment = (width * format) % 4 == 0
 		if (!matchesAlignment) {
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
 		}

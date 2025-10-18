@@ -48,9 +48,9 @@ interface ImageDecoder extends EventTarget<ImageDecoder> {
 	 * the image data is being streamed and we need to know some information ahead
 	 * of starting that.
 	 */
-	record HeaderDecodedEvent(int width, int height, int channels, int numFrames, float frameRate) implements Event {
-		HeaderDecodedEvent(int width, int height, int channels) {
-			this(width, height, channels, -1, -1f)
+	record HeaderDecodedEvent(int width, int height, int format, int frames, float frameRate) implements Event {
+		HeaderDecodedEvent(int width, int height, int format) {
+			this(width, height, format, -1, -1f)
 		}
 	}
 
@@ -58,18 +58,18 @@ interface ImageDecoder extends EventTarget<ImageDecoder> {
 	 * Event for the streaming of a frame of image data.
 	 */
 	@ImmutableOptions(knownImmutables = ['data', 'palette'])
-	record FrameDecodedEvent(int width, int height, int channels, ByteBuffer data, Palette palette) implements Event {
-		FrameDecodedEvent(int width, int height, int channels, ByteBuffer data) {
-			this(width, height, channels, data, null)
+	record FrameDecodedEvent(int width, int height, int format, ByteBuffer data, Palette palette) implements Event {
+		FrameDecodedEvent(int width, int height, int format, ByteBuffer data) {
+			this(width, height, format, data, null)
 		}
 	}
 
 	/**
 	 * The result of the decoding process.
 	 */
-	record DecodeSummary(int width, int height, int channels, int frames, String fileInformation) {
-		DecodeSummary(int width, int height, int channels, int frames) {
-			this(width, height, channels, frames, null)
+	record DecodeSummary(int width, int height, int format, int frames, String fileInformation) {
+		DecodeSummary(int width, int height, int format, int frames) {
+			this(width, height, format, frames, null)
 		}
 	}
 }

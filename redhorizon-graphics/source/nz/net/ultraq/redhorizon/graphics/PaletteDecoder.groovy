@@ -38,5 +38,5 @@ interface PaletteDecoder {
 	/**
 	 * The result of the decoding process.
 	 */
-	record DecodeResult(int colours, int channels, byte[][] colourData, String fileInformation) {}
+	record DecodeResult(int colours, int format, byte[][] colourData, String fileInformation) {}
 }

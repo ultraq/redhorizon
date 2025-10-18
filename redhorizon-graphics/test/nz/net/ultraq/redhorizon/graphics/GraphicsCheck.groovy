@@ -169,10 +169,10 @@ class GraphicsCheck extends Specification {
 			}
 			var width = bufferedImage.width
 			var height = bufferedImage.height
-			var channels = bufferedImage.colorModel.numComponents
-			var texture = new OpenGLTexture(width, height, channels,
+			var format = bufferedImage.colorModel.numComponents
+			var texture = new OpenGLTexture(width, height, format,
 				bufferedImage.getRGB(0, 0, width, height, null, 0, width)
-					.inject(ByteBuffer.allocateNative(width * height * channels)) { ByteBuffer acc, pixel ->
+					.inject(ByteBuffer.allocateNative(width * height * format)) { ByteBuffer acc, pixel ->
 						var red = (byte)(pixel >> 16)
 						var green = (byte)(pixel >> 8)
 						var blue = (byte)(pixel)
@@ -180,7 +180,7 @@ class GraphicsCheck extends Specification {
 						acc.put(red).put(green).put(blue).put(alpha)
 					}
 					.flip()
-					.flipVertical(width, height, channels))
+					.flipVertical(width, height, format))
 			var camera = new Camera(8, 6, window)
 			var transform = new Matrix4f()
 			var material = new Material(texture: texture)

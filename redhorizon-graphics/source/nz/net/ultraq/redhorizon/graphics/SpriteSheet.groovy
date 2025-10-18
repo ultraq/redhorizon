@@ -41,7 +41,7 @@ class SpriteSheet implements AutoCloseable {
 	private volatile List<ByteBuffer> imageData = []
 	final int width
 	final int height
-	private final int channels
+	private final int format
 	final int numFrames
 	private final int framesX
 	private final float frameWidth
@@ -57,7 +57,7 @@ class SpriteSheet implements AutoCloseable {
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(FrameDecodedEvent) { event ->
-				imageData << event.data().flipVertical(event.width(), event.height(), event.channels())
+				imageData << event.data().flipVertical(event.width(), event.height(), event.format())
 			}
 			.decode(inputStream)
 		while (imageData.size() != result.frames()) {
@@ -71,14 +71,14 @@ class SpriteSheet implements AutoCloseable {
 
 		width = result.width()
 		height = result.height()
-		channels = result.channels()
+		format = result.format()
 		numFrames = result.frames()
 		framesX = MAX_TEXTURE_WIDTH / width as int
 
-		var textureData = (imageData as ByteBuffer[]).combine(width, height, channels, framesX)
+		var textureData = (imageData as ByteBuffer[]).combine(width, height, format, framesX)
 		var textureWidth = width * framesX
 		var textureHeight = height * Math.ceil(result.frames() / framesX) as int
-		texture = new OpenGLTexture(textureWidth, textureHeight, channels, textureData)
+		texture = new OpenGLTexture(textureWidth, textureHeight, format, textureData)
 
 		frameWidth = width / textureWidth
 		frameHeight = height / textureHeight

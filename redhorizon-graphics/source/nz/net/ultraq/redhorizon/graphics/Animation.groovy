@@ -73,7 +73,7 @@ class Animation extends Node<Animation> implements AutoCloseable {
 			.on(HeaderDecodedEvent) { event ->
 				width = playbackWidth ?: event.width()
 				height = playbackHeight ?: event.height()
-				numFrames = event.numFrames()
+				numFrames = event.frames()
 				frameRate = event.frameRate()
 				streamingEvents = new ArrayBlockingQueue<>(frameRate as int)
 			}
@@ -174,8 +174,8 @@ class Animation extends Node<Animation> implements AutoCloseable {
 		if (!frames[framesAhead]) {
 			eventDrain.clear()
 			streamingEvents.drain(eventDrain, framesAhead - currentFrame).each { event ->
-				frames << new OpenGLTexture(event.width(), event.height(), event.channels(),
-					event.data().flipVertical(event.width(), event.height(), event.channels()))
+				frames << new OpenGLTexture(event.width(), event.height(), event.format(),
+					event.data().flipVertical(event.width(), event.height(), event.format()))
 			}
 		}
 

@@ -27,19 +27,19 @@ import nz.net.ultraq.redhorizon.graphics.PaletteDecoder
 class PalFileDecoder implements PaletteDecoder {
 
 	private static final int COLOURS = 256
-	private static final int CHANNELS = 3
+	private static final int FORMAT = 3
 
 	final String[] supportedFileExtensions = ['pal']
 
 	@Override
 	DecodeResult decode(InputStream inputStream) {
 
-		var colourData = new byte[COLOURS][CHANNELS]
+		var colourData = new byte[COLOURS][FORMAT]
 		COLOURS.times { i ->
 			// VGA palettes used 6 bits per channel for a total of 0-63 colour values.
 			// Left-shift those values by 2 to reach a 0-255 colour range.
-			colourData[i] = inputStream.readNBytes(CHANNELS).collect { it << 2 }
+			colourData[i] = inputStream.readNBytes(FORMAT).collect { it << 2 }
 		}
-		return new DecodeResult(COLOURS, CHANNELS, colourData, 'PAL file, 256 colour VGA palette (6 bits per pixel)')
+		return new DecodeResult(COLOURS, FORMAT, colourData, 'PAL file, 256 colour VGA palette (6 bits per pixel)')
 	}
 }

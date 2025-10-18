@@ -45,9 +45,9 @@ class CpsFileDecoder implements ImageDecoder {
 
 	static final int IMAGE_WIDTH = 320
 	static final int IMAGE_HEIGHT = 200
-	static final int IMAGE_CHANNELS = 1
+	static final int IMAGE_FORMAT = 1
 	static final int PALETTE_COLOURS = 256
-	static final int PALETTE_CHANNELS = 3
+	static final int PALETTE_FORMAT = 3
 
 	final String[] supportedFileExtensions = ['cps']
 
@@ -71,7 +71,7 @@ class CpsFileDecoder implements ImageDecoder {
 		// Optional palette
 		Palette palette = null
 		if (paletteSize) {
-			palette = new VgaPalette(PALETTE_COLOURS, PALETTE_CHANNELS, input)
+			palette = new VgaPalette(PALETTE_COLOURS, PALETTE_FORMAT, input)
 		}
 
 		// Indexed image data
@@ -79,9 +79,9 @@ class CpsFileDecoder implements ImageDecoder {
 		var dest = ByteBuffer.allocateNative(imageSize)
 		var indexData = new LCW().decode(source, dest)
 
-		trigger(new FrameDecodedEvent(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS, indexData, palette))
+		trigger(new FrameDecodedEvent(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_FORMAT, indexData, palette))
 
-		return new DecodeSummary(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS, 1,
+		return new DecodeSummary(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_FORMAT, 1,
 			"CPS file, ${IMAGE_WIDTH}x${IMAGE_HEIGHT}, 8-bit ${palette ? 'w/ internal palette' : '(no palette)'}")
 	}
 }

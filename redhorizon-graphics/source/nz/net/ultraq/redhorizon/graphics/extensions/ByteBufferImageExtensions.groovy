@@ -39,7 +39,7 @@ class ByteBufferImageExtensions {
 	 */
 	static ByteBuffer applyPalette(ByteBuffer self, Palette palette) {
 
-		var dest = ByteBuffer.allocateNative(self.limit() * palette.channels)
+		var dest = ByteBuffer.allocateNative(self.limit() * palette.format)
 		while (self.hasRemaining()) {
 			dest.put(palette[self.get() & 0xff])
 		}
@@ -75,14 +75,14 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of each image.
 	 * @param height Height of each image
-	 * @param channels
+	 * @param format
 	 * @param imagesX Number of images to fit on the X axis.
 	 * @return Single combined image buffer.
 	 */
-	static ByteBuffer combine(ByteBuffer[] self, int width, int height, int channels, int imagesX) {
+	static ByteBuffer combine(ByteBuffer[] self, int width, int height, int format, int imagesX) {
 
 		var imagesY = Math.ceil(self.length / imagesX as double) as int
-		var compileWidth = width * channels * imagesX as int
+		var compileWidth = width * format * imagesX as int
 		var compileHeight = height * imagesY
 		var compilation = ByteBuffer.allocateNative(compileWidth * compileHeight)
 
@@ -94,7 +94,7 @@ class ByteBufferImageExtensions {
 			height.times { y ->
 				compilation
 					.position(compilationPointer)
-					.put(image, width * channels)
+					.put(image, width * format)
 				compilationPointer += compileWidth
 			}
 			image.rewind()
@@ -111,13 +111,13 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of the image.
 	 * @param height Height of the image.
-	 * @param channels The number of colour channels in each pixel.
+	 * @param format The number of colour channels in each pixel.
 	 * @return A new buffer with the horizontal pixel data flipped.
 	 */
-	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, int channels) {
+	static ByteBuffer flipVertical(ByteBuffer self, int width, int height, int format) {
 
 		var flippedImageBuffer = ByteBuffer.allocateNative(self.capacity())
-		var rowSize = width * channels
+		var rowSize = width * format
 		height.times { y ->
 			flippedImageBuffer.put(self.array(), rowSize * (height - 1 - y), rowSize)
 		}
@@ -131,11 +131,11 @@ class ByteBufferImageExtensions {
 	 * @param self
 	 * @param width Width of each image.
 	 * @param height Height of each image.
-	 * @param channels The number of colour channels in each pixel.
+	 * @param format The number of colour channels in each pixel.
 	 * @return A new array of buffers whose pixel data has been flipped.
 	 */
-	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, int channels) {
+	static ByteBuffer[] flipVertical(ByteBuffer[] self, int width, int height, int format) {
 
-		return self.collect { image -> flipVertical(image, width, height, channels) } as ByteBuffer[]
+		return self.collect { image -> flipVertical(image, width, height, format) } as ByteBuffer[]
 	}
 }

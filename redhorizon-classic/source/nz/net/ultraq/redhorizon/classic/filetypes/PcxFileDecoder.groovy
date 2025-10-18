@@ -49,8 +49,8 @@ class PcxFileDecoder implements ImageDecoder {
 	static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
 
 	static final int PALETTE_COLOURS      = 256
-	static final int PALETTE_CHANNELS     = 3
-	static final int PALETTE_SIZE         = PALETTE_COLOURS * PALETTE_CHANNELS
+	static final int PALETTE_FORMAT       = 3
+	static final int PALETTE_SIZE         = PALETTE_COLOURS * PALETTE_FORMAT
 	static final int PALETTE_PADDING_SIZE = 1
 	// @formatter:on
 
@@ -116,7 +116,7 @@ class PcxFileDecoder implements ImageDecoder {
 		indexData.flip()
 
 		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
-		var palette = new Palette(PALETTE_COLOURS, PALETTE_CHANNELS, paletteData)
+		var palette = new Palette(PALETTE_COLOURS, PALETTE_FORMAT, paletteData)
 
 		trigger(new FrameDecodedEvent(width, height, 1, indexData, palette))
 

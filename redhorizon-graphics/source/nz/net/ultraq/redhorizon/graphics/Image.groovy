@@ -48,7 +48,7 @@ class Image implements AutoCloseable {
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(FrameDecodedEvent) { event ->
-				imageData = event.data().flipVertical(event.width(), event.height(), event.channels())
+				imageData = event.data().flipVertical(event.width(), event.height(), event.format())
 				palette = event.palette()
 			}
 			.decode(inputStream)
@@ -65,8 +65,8 @@ class Image implements AutoCloseable {
 		height = result.height()
 
 		texture = palette ?
-			new OpenGLTexture(width, height, palette.channels, imageData.applyPalette(palette)) :
-			new OpenGLTexture(width, height, result.channels(), imageData)
+			new OpenGLTexture(width, height, palette.format, imageData.applyPalette(palette)) :
+			new OpenGLTexture(width, height, result.format(), imageData)
 	}
 
 	@Override
