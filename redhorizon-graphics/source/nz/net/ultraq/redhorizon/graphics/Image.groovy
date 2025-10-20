@@ -34,6 +34,7 @@ class Image implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Image)
 
+	private volatile ByteBuffer imageData
 	final Texture texture
 	final int width
 	final int height
@@ -43,7 +44,6 @@ class Image implements AutoCloseable {
 	 */
 	Image(String fileName, InputStream inputStream) {
 
-		ByteBuffer imageData = null
 		Palette palette = null
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))

@@ -51,7 +51,6 @@ class WsaFileDecoder implements ImageDecoder {
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
 
-		logger.debug('Decoding started')
 		var input = new NativeDataInputStream(inputStream)
 
 		// File header
@@ -69,7 +68,7 @@ class WsaFileDecoder implements ImageDecoder {
 
 		var delta = input.readUnsignedShort() + 37 // https://github.com/ultraq/redhorizon/issues/4
 
-		var flags = input.readShort()
+		var flags = input.readUnsignedShort()
 		assert (flags & 0x0001) == flags
 
 		// Frame offsets
@@ -93,7 +92,7 @@ class WsaFileDecoder implements ImageDecoder {
 		var lcw = new LCW()
 
 		// Decode frame by frame
-		for (var frame = 0; frame < numFrames && !Thread.currentThread().interrupted; frame++) {
+		for (var frame = 0; frame < numFrames && !Thread.interrupted(); frame++) {
 			var colouredFrame = average('Decoding frame', 1f, logger) { ->
 				var deltaFrame = lcw.decode(
 					ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
@@ -103,11 +102,8 @@ class WsaFileDecoder implements ImageDecoder {
 				return indexedFrame.applyPalette(palette)
 			}
 			trigger(new FrameDecodedEvent(width, height, palette.channels, colouredFrame))
-
-			Thread.sleep(20)
+			Thread.yield()
 		}
-
-		logger.debug('Decoding complete')
 
 		return new DecodeSummary(width, height, 3, numFrames,
 			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}, ${numFrames} frames")

@@ -38,6 +38,7 @@ class SpriteSheet implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(SpriteSheet)
 	private static final int MAX_TEXTURE_WIDTH = 1024
 
+	private volatile List<ByteBuffer> imageData = []
 	final int width
 	final int height
 	private final int channels
@@ -53,7 +54,6 @@ class SpriteSheet implements AutoCloseable {
 	 */
 	SpriteSheet(String fileName, InputStream inputStream) {
 
-		List<ByteBuffer> imageData = []
 		var result = ImageDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(FrameDecodedEvent) { event ->

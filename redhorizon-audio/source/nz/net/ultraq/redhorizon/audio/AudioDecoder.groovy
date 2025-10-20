@@ -48,7 +48,7 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	 * the audio data is being streamed and we need to know some information ahead
 	 * of starting that.
 	 */
-	record HeaderDecodedEvent(int bits, int channels, int frequency) implements Event {}
+	record HeaderDecodedEvent(int bits, int channels, int frequency, int fileSize) implements Event {}
 
 	/**
 	 * Event for the streaming of a sample of sound data.

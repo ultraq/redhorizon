@@ -57,7 +57,7 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	private int currentFrame
 	private int lastFrame
 	private final ExecutorService executor = Executors.newSingleThreadExecutor()
-	private final BlockingQueue<FrameDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(32)
+	private volatile BlockingQueue<FrameDecodedEvent> streamingEvents
 	private final List<FrameDecodedEvent> eventDrain = []
 	private boolean decodingError
 	private Mesh mesh
@@ -75,6 +75,7 @@ class Animation extends Node<Animation> implements AutoCloseable {
 				height = event.height()
 				numFrames = event.numFrames()
 				frameRate = event.frameRate()
+				streamingEvents = new ArrayBlockingQueue<>(frameRate as int)
 			}
 			.on(FrameDecodedEvent) { event ->
 				streamingEvents << event
@@ -82,6 +83,7 @@ class Animation extends Node<Animation> implements AutoCloseable {
 		executor.submit { ->
 			Thread.currentThread().name = "Animation ${fileName} :: Decoding"
 			try {
+				logger.debug('Animation decoding of {} started', fileName)
 				var result = decoder.decode(inputStream)
 				logger.debug('{} decoded after {} frames', fileName, result.frames())
 				var fileInformation = result.fileInformation()
@@ -96,7 +98,7 @@ class Animation extends Node<Animation> implements AutoCloseable {
 		}
 
 		// Let the decode buffer fill up first
-		while (streamingEvents.remainingCapacity() != 0) {
+		while (!streamingEvents || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
 
@@ -167,13 +169,15 @@ class Animation extends Node<Animation> implements AutoCloseable {
 			throw new IllegalStateException('An error occurred decoding the animation')
 		}
 
-		// Process pending events
-		eventDrain.clear()
-		var textures = streamingEvents.drain(eventDrain).collect { event ->
-			return new OpenGLTexture(event.width(), event.height(), event.channels(),
-				event.data().flipVertical(event.width(), event.height(), event.channels()))
+		// Buffer the animation
+		var framesAhead = Math.min(currentFrame + frameRate, numFrames - 1) as int
+		if (!frames[framesAhead]) {
+			eventDrain.clear()
+			streamingEvents.drain(eventDrain, framesAhead - currentFrame).each { event ->
+				frames << new OpenGLTexture(event.width(), event.height(), event.channels(),
+					event.data().flipVertical(event.width(), event.height(), event.channels()))
+			}
 		}
-		frames.addAll(textures)
 
 		// Advance the current frame (if playing)
 		if (playing) {

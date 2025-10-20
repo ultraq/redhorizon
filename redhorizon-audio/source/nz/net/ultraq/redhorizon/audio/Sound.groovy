@@ -36,6 +36,7 @@ class Sound extends Node<Sound> implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
+	private volatile List<ByteBuffer> buffers = []
 	private final Source source
 	private final Buffer buffer
 
@@ -48,7 +49,6 @@ class Sound extends Node<Sound> implements AutoCloseable {
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
-		List<ByteBuffer> buffers = []
 		var result = AudioDecoders
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(SampleDecodedEvent) { event ->

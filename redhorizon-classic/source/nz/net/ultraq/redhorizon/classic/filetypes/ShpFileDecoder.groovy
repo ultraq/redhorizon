@@ -74,7 +74,7 @@ class ShpFileDecoder implements ImageDecoder {
 		var imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->
 			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
-			assert imageInfo.offsetFormat == 0 || imageInfo.offsetFormat in [FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
+			assert imageInfo.offsetFormat in [0, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 			imageOffsets[i] = imageInfo
 		}
 

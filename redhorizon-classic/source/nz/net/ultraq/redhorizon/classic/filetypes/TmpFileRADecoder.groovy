@@ -53,7 +53,7 @@ class TmpFileRADecoder implements ImageDecoder {
 
 		var numImages = input.readUnsignedShort()
 
-		var zero1 = input.readShort()
+		var zero1 = input.readUnsignedShort()
 		assert zero1 == 0
 
 		var tilesX = input.readShort()

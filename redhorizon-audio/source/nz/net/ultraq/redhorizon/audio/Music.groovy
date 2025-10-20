@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import nz.net.ultraq.redhorizon.audio.AudioDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
@@ -46,8 +47,11 @@ class Music extends Node<Music> implements AutoCloseable {
 
 	private final Source source
 	private final ExecutorService executor = Executors.newSingleThreadExecutor()
-	private final BlockingQueue<SampleDecodedEvent> streamingEvents = new ArrayBlockingQueue<>(16)
+	private volatile BlockingQueue<SampleDecodedEvent> streamingEvents
+	private int readAhead
 	private final List<SampleDecodedEvent> eventDrain = []
+	private int buffersQueued
+	private int buffersPlayed
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
 	private final List<Buffer> bufferDrain = []
 	private boolean decodingError
@@ -59,12 +63,26 @@ class Music extends Node<Music> implements AutoCloseable {
 
 		source = new OpenALSource()
 		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+			.on(HeaderDecodedEvent) { event ->
+				var bits = event.bits()
+				var channels = event.channels()
+				var frequency = event.frequency()
+				var fileSize = event.fileSize()
+				var duration = fileSize / (frequency * channels * (bits / 8))
+				logger.debug('Estimated track duration: {}:{}', duration / 60 as int, duration % 60 as int)
+				// For an AUD file chunk size of 2KB
+				// TODO: Can we derive a good read-ahead value from the info available?
+				readAhead = fileSize / duration / 2048 as int
+				logger.debug('Read-ahead of {} chunks', readAhead)
+				streamingEvents = new ArrayBlockingQueue<>(readAhead)
+			}
 			.on(SampleDecodedEvent) { event ->
 				streamingEvents << event
 			}
 		executor.submit { ->
 			Thread.currentThread().name = "Music track ${fileName} :: Decoding"
 			try {
+				logger.debug('Music decoding of {} started', fileName)
 				var result = decoder.decode(inputStream)
 				logger.debug('{} decoded after {} samples', fileName, result.buffers())
 				var fileInformation = result.fileInformation()
@@ -79,7 +97,7 @@ class Music extends Node<Music> implements AutoCloseable {
 		}
 
 		// Let the decode buffer fill up first
-		while (streamingEvents.remainingCapacity() != 0) {
+		while (!streamingEvents || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
 		update()
@@ -162,20 +180,28 @@ class Music extends Node<Music> implements AutoCloseable {
 
 		source.setPosition(position)
 
-		eventDrain.clear()
-		var buffers = streamingEvents.drain(eventDrain).collect { event ->
-			return new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
+		// Buffer the music
+		var buffersAhead = buffersPlayed - buffersQueued + readAhead
+		if (buffersAhead > 0) {
+			eventDrain.clear()
+			streamingEvents.drain(eventDrain, buffersAhead).each { event ->
+				var buffer = new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
+				source.queueBuffers(buffer)
+				streamedBuffers << buffer
+			}
+			buffersQueued += buffersAhead
 		}
-		source.queueBuffers(*buffers)
-		streamedBuffers.addAll(buffers)
 
+		// Close any used buffers
 		if (!source.looping) {
 			var buffersProcessed = source.buffersProcessed()
 			if (buffersProcessed) {
+				buffersPlayed += buffersProcessed
 				bufferDrain.clear()
-				var processedBuffers = streamedBuffers.drain(bufferDrain, buffersProcessed)
-				source.unqueueBuffers(*processedBuffers)
-				processedBuffers*.close()
+				streamedBuffers.drain(bufferDrain, buffersProcessed).each { buffer ->
+					source.unqueueBuffers(buffer)
+					buffer.close()
+				}
 			}
 		}
 	}

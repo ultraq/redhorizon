@@ -66,7 +66,7 @@ class CpsFileDecoder implements ImageDecoder {
 		assert imageSize == IMAGE_SIZE : "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
 
 		var paletteSize = input.readShort()
-		assert paletteSize == 0 || paletteSize == PALETTE_SIZE : "CPS palette size isn't 0 or 768"
+		assert paletteSize in [0, PALETTE_SIZE] : "CPS palette size isn't 0 or 768"
 
 		// Optional palette
 		Palette palette = null
