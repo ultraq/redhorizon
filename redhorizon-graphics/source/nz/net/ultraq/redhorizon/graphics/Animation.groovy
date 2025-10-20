@@ -67,12 +67,12 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	/**
 	 * Constructor, set up a new animation from its name and a stream of data.
 	 */
-	Animation(String fileName, InputStream inputStream) {
+	Animation(String fileName, InputStream inputStream, int playbackWidth = 0, int playbackHeight = 0) {
 
 		var decoder = ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(HeaderDecodedEvent) { event ->
-				width = event.width()
-				height = event.height()
+				width = playbackWidth ?: event.width()
+				height = playbackHeight ?: event.height()
 				numFrames = event.numFrames()
 				frameRate = event.frameRate()
 				streamingEvents = new ArrayBlockingQueue<>(frameRate as int)

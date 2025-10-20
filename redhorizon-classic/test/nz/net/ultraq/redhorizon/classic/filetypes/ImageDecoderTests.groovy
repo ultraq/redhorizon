@@ -36,8 +36,8 @@ import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
 
 /**
- * Check that a PCX file can be read and rendered using the {@link PcxFileDecoder}
- * class for the {@code ImageDecoder} SPI.
+ * Check that images can be read and rendered using the {@code ImageDecoder}
+ * SPI.
  *
  * @author Emanuel Rabina
  */
@@ -191,10 +191,10 @@ class ImageDecoderTests extends Specification {
 	def "Play a WSA file using the Image SPI"() {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/africa.wsa'))
-			var animation = new Animation('africa.wsa', inputStream)
+			var animation = new Animation('africa.wsa', inputStream, 266, 200)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
-				.translate(160, 100, 0)
+				.translate(133, 100, 0)
 		when:
 			window.show()
 			animation.play()

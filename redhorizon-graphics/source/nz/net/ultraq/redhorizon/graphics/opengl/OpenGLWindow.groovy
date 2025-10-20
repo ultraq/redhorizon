@@ -282,7 +282,7 @@ class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
 
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
 		// Subtract some value from the monitor size to account for any window and OS chrome
-		var scale = Math.floor(Math.max((videoMode.width() * 0.90) / width, (videoMode.height() * 0.90) / height)) as int
+		var scale = Math.floor(Math.min((videoMode.width() * 0.90) / width, (videoMode.height() * 0.90) / height)) as int
 		width *= scale
 		height *= scale
 		glfwSetWindowSize(window, width, height)
