@@ -43,12 +43,20 @@ interface ImageDecoder extends EventTarget<ImageDecoder> {
 	 */
 	String[] getSupportedFileExtensions()
 
+	interface ImageInfoEvent extends Event {
+		int width()
+		int height()
+		int format()
+		int frames()
+		float frameRate()
+	}
+
 	/**
 	 * Event for the decoding of the header information.  This is most useful if
 	 * the image data is being streamed and we need to know some information ahead
 	 * of starting that.
 	 */
-	record HeaderDecodedEvent(int width, int height, int format, int frames, float frameRate) implements Event {
+	record HeaderDecodedEvent(int width, int height, int format, int frames, float frameRate) implements ImageInfoEvent {
 		HeaderDecodedEvent(int width, int height, int format) {
 			this(width, height, format, -1, -1f)
 		}

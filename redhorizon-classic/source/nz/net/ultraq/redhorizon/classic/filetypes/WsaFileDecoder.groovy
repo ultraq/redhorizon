@@ -90,22 +90,29 @@ class WsaFileDecoder implements ImageDecoder {
 		var frameSize = width * height
 		var xorDelta = new XORDelta(frameSize)
 		var lcw = new LCW()
+		var framesDecoded = 0
 
 		// Decode frame by frame
-		for (var frame = 0; frame < numFrames && !Thread.interrupted(); frame++) {
-			var colouredFrame = average('Decoding frame', 1f, logger) { ->
-				var deltaFrame = lcw.decode(
-					ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
-					ByteBuffer.allocateNative(delta)
-				)
-				var indexedFrame = xorDelta.decode(deltaFrame, ByteBuffer.allocateNative(frameSize))
-				return indexedFrame.applyPalette(palette)
+		try {
+			for (var frame = 0; frame < numFrames && !Thread.currentThread().interrupted; frame++) {
+				var colouredFrame = average('Decoding frame', 1f, logger) { ->
+					var deltaFrame = lcw.decode(
+						ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
+						ByteBuffer.allocateNative(delta)
+					)
+					var indexedFrame = xorDelta.decode(deltaFrame, ByteBuffer.allocateNative(frameSize))
+					return indexedFrame.applyPalette(palette)
+				}
+				trigger(new FrameDecodedEvent(width, height, palette.format, colouredFrame))
+				framesDecoded++
+				Thread.yield()
 			}
-			trigger(new FrameDecodedEvent(width, height, palette.format, colouredFrame))
-			Thread.yield()
+		}
+		catch (InterruptedException ignored) {
+			logger.debug('Decoding was interrupted')
 		}
 
-		return new DecodeSummary(width, height, 3, numFrames,
+		return new DecodeSummary(width, height, 3, framesDecoded,
 			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}, ${numFrames} frames")
 	}
 }

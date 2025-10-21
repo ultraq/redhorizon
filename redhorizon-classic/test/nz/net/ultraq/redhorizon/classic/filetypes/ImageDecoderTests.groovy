@@ -213,6 +213,7 @@ class ImageDecoderTests extends Specification {
 				}
 				Thread.yield()
 			}
+			animation.stop()
 		then:
 			notThrown(Exception)
 		cleanup:

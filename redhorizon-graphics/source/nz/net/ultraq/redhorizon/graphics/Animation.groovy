@@ -16,8 +16,11 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.HeaderDecodedEvent
+import nz.net.ultraq.redhorizon.graphics.ImageDecoder.ImageInfoEvent
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
@@ -32,6 +35,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 /**
  * A series of frames taken from any {@link ImageDecoder}-supported type, with
@@ -43,7 +47,7 @@ import java.util.concurrent.Executors
  *
  * @author Emanuel Rabina
  */
-class Animation extends Node<Animation> implements AutoCloseable {
+class Animation extends Node<Animation> implements AutoCloseable, EventTarget<Animation> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
@@ -53,10 +57,12 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	private int numFrames
 	private float frameRate
 	private boolean playing
+	private boolean stopped = true
 	private float playTimer
 	private int currentFrame
 	private int lastFrame
-	private final ExecutorService executor = Executors.newSingleThreadExecutor()
+	private ExecutorService executor
+	private Future<?> decodingTask
 	private volatile BlockingQueue<FrameDecodedEvent> streamingEvents
 	private final List<FrameDecodedEvent> eventDrain = []
 	private boolean decodingError
@@ -80,7 +86,8 @@ class Animation extends Node<Animation> implements AutoCloseable {
 			.on(FrameDecodedEvent) { event ->
 				streamingEvents << event
 			}
-		executor.submit { ->
+		executor = Executors.newSingleThreadExecutor()
+		decodingTask = executor.submit { ->
 			Thread.currentThread().name = "Animation ${fileName} :: Decoding"
 			try {
 				logger.debug('Animation decoding of {} started', fileName)
@@ -98,25 +105,40 @@ class Animation extends Node<Animation> implements AutoCloseable {
 		}
 
 		// Let the decode buffer fill up first
-		while (!streamingEvents || streamingEvents.remainingCapacity()) {
+		while (streamingEvents == null || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
-
-		// Mesh for each of the frames to render into
-		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
-			new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-			new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
-			new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
-			new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
-		}, index)
-
 		update(0f)
+	}
+
+	/**
+	 * Constructor, set up streaming from an image event source.
+	 */
+	Animation(EventTarget<? extends EventTarget> imageSource, int eventCapacity, int playbackWidth = 0, int playbackHeight = 0) {
+
+		streamingEvents = new ArrayBlockingQueue<>(eventCapacity)
+
+		var playbackReadyTriggered = false
+		imageSource
+			.on(ImageInfoEvent) { event ->
+				width = playbackWidth ?: event.width()
+				height = playbackHeight ?: event.height()
+				numFrames = event.frames()
+				frameRate = event.frameRate()
+			}
+			.on(FrameDecodedEvent) { event ->
+				streamingEvents << event
+				if (!streamingEvents.remainingCapacity() && !playbackReadyTriggered) {
+					trigger(new PlaybackReadyEvent())
+					playbackReadyTriggered = true
+				}
+			}
 	}
 
 	@Override
 	void close() {
 
-		executor.close()
+		executor?.close()
 		frames.eachWithIndex { frame, index ->
 			if (frame) {
 				frame.close()
@@ -129,8 +151,19 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	 */
 	void draw(SceneShaderContext shaderContext) {
 
-		material.texture = frames[currentFrame]
-		mesh.draw(shaderContext, material, transform)
+		if (!mesh && width && height) {
+			mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
+				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
+				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
+				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
+				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
+			}, index)
+		}
+		var frame = frames[currentFrame]
+		if (frame) {
+			material.texture = frames[currentFrame]
+			mesh.draw(shaderContext, material, transform)
+		}
 	}
 
 	/**
@@ -142,12 +175,23 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	}
 
 	/**
+	 * Return whether the animation is currently stopped.
+	 */
+	boolean isStopped() {
+
+		return stopped
+	}
+
+	/**
 	 * Play the animation.
 	 */
 	Animation play() {
 
-		playing = true
-		playTimer = 0
+		if (!playing) {
+			playing = true
+			stopped = false
+			playTimer = 0
+		}
 		return this
 	}
 
@@ -156,7 +200,11 @@ class Animation extends Node<Animation> implements AutoCloseable {
 	 */
 	Animation stop() {
 
-		playing = false
+		if (!stopped) {
+			playing = false
+			stopped = true
+			decodingTask?.cancel(true)
+		}
 		return this
 	}
 
@@ -202,4 +250,10 @@ class Animation extends Node<Animation> implements AutoCloseable {
 			lastFrame = currentFrame
 		}
 	}
+
+	/**
+	 * For signalling that the animation is ready to play when driven from an
+	 * external source.
+	 */
+	static record PlaybackReadyEvent() implements Event {}
 }

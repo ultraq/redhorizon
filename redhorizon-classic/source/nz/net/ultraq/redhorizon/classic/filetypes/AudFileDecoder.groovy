@@ -76,22 +76,27 @@ class AudFileDecoder implements AudioDecoder {
 		trigger(new HeaderDecodedEvent(bits, channels, frequency, uncompressedSize))
 
 		// File body
-		var numSamples = 0
 		var decoder = type == TYPE_IMA_ADPCM ? new IMAADPCM16bit() : new WSADPCM8bit()
+		var framesDecoded = 0
 
 		// Decompress the aud file data by chunks
 		var headerSize = input.bytesRead
-		while (input.bytesRead < headerSize + compressedSize && !Thread.interrupted()) {
-			var sample = average('Decoding sample', 1f, logger) { ->
-				var chunkHeader = input.readChunkHeader()
-				return decoder.decode(input.readChunkData(chunkHeader), ByteBuffer.allocateNative(chunkHeader.uncompressedSize()))
+		try {
+			while (input.bytesRead < headerSize + compressedSize && !Thread.currentThread().interrupted) {
+				var sample = average('Decoding sample', 1f, logger) { ->
+					var chunkHeader = input.readChunkHeader()
+					return decoder.decode(input.readChunkData(chunkHeader), ByteBuffer.allocateNative(chunkHeader.uncompressedSize()))
+				}
+				trigger(new SampleDecodedEvent(bits, channels, frequency, sample))
+				framesDecoded++
+				Thread.yield()
 			}
-			trigger(new SampleDecodedEvent(bits, channels, frequency, sample))
-			numSamples++
-			Thread.yield()
+		}
+		catch (InterruptedException ignored) {
+			logger.debug('Decoding was interrupted')
 		}
 
-		return new DecodeSummary(bits, channels, frequency, numSamples, [
+		return new DecodeSummary(bits, channels, frequency, framesDecoded, [
 			"AUD file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
 			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : 'IMA ADPCM'} algorithm",
 			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
@@ -108,17 +113,17 @@ class AudFileDecoder implements AudioDecoder {
 		final NativeDataInputStream input
 
 		/**
-		 * Read the next chunk header at the current position.
-		 */
-		AudChunkHeader readChunkHeader() {
-			return new AudChunkHeader(input.readShort(), input.readShort(), input.readInt())
-		}
-
-		/**
 		 * Read the chunk data following the header.
 		 */
 		ByteBuffer readChunkData(AudChunkHeader header) {
 			return ByteBuffer.wrapNative(input.readNBytes(header.compressedSize))
+		}
+
+		/**
+		 * Read the next chunk header at the current position.
+		 */
+		AudChunkHeader readChunkHeader() {
+			return new AudChunkHeader(input.readShort(), input.readShort(), input.readInt())
 		}
 	}
 

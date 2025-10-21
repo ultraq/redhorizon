@@ -43,12 +43,19 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	 */
 	String[] getSupportedFileExtensions()
 
+	interface TrackInfoEvent extends Event {
+		int bits()
+		int channels()
+		int frequency()
+		long fileSize()
+	}
+
 	/**
 	 * Event for the decoding of the header information.  This is most useful if
 	 * the audio data is being streamed and we need to know some information ahead
 	 * of starting that.
 	 */
-	record HeaderDecodedEvent(int bits, int channels, int frequency, int fileSize) implements Event {}
+	record HeaderDecodedEvent(int bits, int channels, int frequency, long fileSize) implements TrackInfoEvent {}
 
 	/**
 	 * Event for the streaming of a sample of sound data.

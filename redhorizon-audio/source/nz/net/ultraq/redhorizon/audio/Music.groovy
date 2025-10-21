@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
@@ -29,6 +31,7 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -41,12 +44,13 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class Music extends Node<Music> implements AutoCloseable {
+class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Music)
 
 	private final Source source
-	private final ExecutorService executor = Executors.newSingleThreadExecutor()
+	private ExecutorService executor
+	private Future<?> decodingTask
 	private volatile BlockingQueue<SampleDecodedEvent> streamingEvents
 	private int readAhead
 	private final List<SampleDecodedEvent> eventDrain = []
@@ -62,24 +66,27 @@ class Music extends Node<Music> implements AutoCloseable {
 	Music(String fileName, InputStream inputStream) {
 
 		source = new OpenALSource()
+		var fileSize
+		var duration
 		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(HeaderDecodedEvent) { event ->
 				var bits = event.bits()
 				var channels = event.channels()
 				var frequency = event.frequency()
-				var fileSize = event.fileSize()
-				var duration = fileSize / (frequency * channels * (bits / 8))
+				fileSize = event.fileSize()
+				duration = fileSize / (frequency * channels * (bits / 8))
 				logger.debug('Estimated track duration: {}:{}', duration / 60 as int, duration % 60 as int)
-				// For an AUD file chunk size of 2KB
-				// TODO: Can we derive a good read-ahead value from the info available?
-				readAhead = fileSize / duration / 2048 as int
-				logger.debug('Read-ahead of {} chunks', readAhead)
-				streamingEvents = new ArrayBlockingQueue<>(readAhead)
 			}
 			.on(SampleDecodedEvent) { event ->
+				if (streamingEvents == null) {
+					readAhead = fileSize / duration / event.buffer().capacity()
+					logger.debug('Read-ahead of {} chunks', readAhead)
+					streamingEvents = new ArrayBlockingQueue<>(readAhead)
+				}
 				streamingEvents << event
 			}
-		executor.submit { ->
+		executor = Executors.newSingleThreadExecutor()
+		decodingTask = executor.submit { ->
 			Thread.currentThread().name = "Music track ${fileName} :: Decoding"
 			try {
 				logger.debug('Music decoding of {} started', fileName)
@@ -97,16 +104,35 @@ class Music extends Node<Music> implements AutoCloseable {
 		}
 
 		// Let the decode buffer fill up first
-		while (!streamingEvents || streamingEvents.remainingCapacity()) {
+		while (streamingEvents == null || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
 		update()
 	}
 
+	/**
+	 * Constructor, set up streaming from an audio event source.
+	 */
+	Music(EventTarget<? extends EventTarget> audioSource, int eventCapacity) {
+
+		source = new OpenALSource()
+		streamingEvents = new ArrayBlockingQueue<>(eventCapacity)
+		readAhead = eventCapacity
+
+		var playbackReadyTriggered = false
+		audioSource.on(SampleDecodedEvent) { event ->
+			streamingEvents << event
+			if (!streamingEvents.remainingCapacity() && !playbackReadyTriggered) {
+				trigger(new PlaybackReadyEvent())
+				playbackReadyTriggered = true
+			}
+		}
+	}
+
 	@Override
 	void close() {
 
-		executor.close()
+		executor?.close()
 		source.stop()
 		streamedBuffers*.close()
 		source.close()
@@ -165,6 +191,7 @@ class Music extends Node<Music> implements AutoCloseable {
 
 		if (!stopped) {
 			source.stop()
+			decodingTask?.cancel(true)
 		}
 		return this
 	}
@@ -223,4 +250,10 @@ class Music extends Node<Music> implements AutoCloseable {
 		source.withVolume(volume)
 		return this
 	}
+
+	/**
+	 * For signalling that the animation is ready to play when driven from an
+	 * external source.
+	 */
+	static record PlaybackReadyEvent() implements Event {}
 }
