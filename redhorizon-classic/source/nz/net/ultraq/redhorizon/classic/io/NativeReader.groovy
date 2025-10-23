@@ -34,9 +34,9 @@ trait NativeReader {
 	 */
 	int readLittleEndian(int numBytes) {
 
-		def result = 0
-		for (def i = 0; i < numBytes; i++) {
-			def b = read()
+		var result = 0
+		for (var i = 0; i < numBytes; i++) {
+			var b = read()
 			if (b < 0) {
 				throw new EOFException()
 			}

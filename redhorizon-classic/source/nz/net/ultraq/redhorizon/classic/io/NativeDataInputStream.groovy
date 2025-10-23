@@ -66,8 +66,9 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Override
 	int read() {
 
+		var result = dis.read()
 		bytesRead++
-		return dis.read()
+		return result
 	}
 
 	/**
@@ -104,5 +105,21 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 
 		bytesRead = markAt
 		dis.reset()
+	}
+
+	@Override
+	long skip(long n) {
+
+		var result = dis.skip(n)
+		bytesRead += n
+		return result
+	}
+
+	@Override
+	int skipBytes(int n) {
+
+		var result = dis.skipBytes(n)
+		bytesRead += n
+		return result
 	}
 }
