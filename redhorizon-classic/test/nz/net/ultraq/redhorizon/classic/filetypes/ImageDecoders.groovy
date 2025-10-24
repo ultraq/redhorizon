@@ -42,7 +42,7 @@ import static org.lwjgl.glfw.GLFW.*
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class ImageDecoderTests extends Specification {
+class ImageDecoders extends Specification {
 
 	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
@@ -73,8 +73,8 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw a PCX file using the Image SPI"() {
 		given:
-			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.pcx').withBufferedStream { stream ->
-				return new Image('alipaper.pcx', stream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Image_alipaper.pcx').withBufferedStream { stream ->
+				return new Image('ImageDecoders_Image_alipaper.pcx', stream)
 			}
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
@@ -101,8 +101,8 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw a CPS file using the Image SPI"() {
 		given:
-			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/alipaper.cps').withBufferedStream { stream ->
-				return new Image('alipaper.cps', stream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Image_alipaper.cps').withBufferedStream { stream ->
+				return new Image('ImageDecoders_Image_alipaper.cps', stream)
 			}
 			var sprite = new Sprite(image)
 			var shader = new BasicShader()
@@ -129,14 +129,14 @@ class ImageDecoderTests extends Specification {
 
 	def "Draw an SHP file using the Image SPI"() {
 		given:
-			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/4tnk.shp').withBufferedStream { stream ->
-				return new SpriteSheet('4tnk.shp', stream)
+			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_SpriteSheet_4tnk.shp').withBufferedStream { stream ->
+				return new SpriteSheet('ImageDecoders_SpriteSheet_4tnk.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet)
 			var faction = Faction.RED
 			var adjustmentMap = new FactionAdjustmentMap(faction)
-			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/temperat.pal').withBufferedStream { stream ->
-				return new Palette('temperat.pal', stream)
+			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Palette_temperat.pal').withBufferedStream { stream ->
+				return new Palette('ImageDecoders_Palette_temperat.pal', stream)
 			}
 			var alphaMask = new AlphaMask()
 			var palettedSpriteShader = new PalettedSpriteShader()
@@ -190,8 +190,8 @@ class ImageDecoderTests extends Specification {
 
 	def "Play a WSA file using the Image SPI"() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/africa.wsa'))
-			var animation = new Animation('africa.wsa', inputStream, 266, 200)
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
+			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream, 266, 200)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 				.translate(133, 100, 0)

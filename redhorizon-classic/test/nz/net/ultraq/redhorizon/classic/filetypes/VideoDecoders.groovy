@@ -33,7 +33,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
  *
  * @author Emanuel Rabina
  */
-class VideoDecoderTests extends Specification {
+class VideoDecoders extends Specification {
 
 	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
@@ -68,8 +68,8 @@ class VideoDecoderTests extends Specification {
 
 	def 'Play a VQA file using the VideoDecoder SPI'() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/gdi1.vqa'))
-			var video = new Video('gdi1.vqa', inputStream, 320, 188)
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
+			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream, 320, 188)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 				.translate(160, 94, 0)

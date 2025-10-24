@@ -49,8 +49,8 @@ class AudioCheck extends Specification {
 
 	def "Plays a sound - use Sound and AudioDecoder SPI"() {
 		given:
-			var oggStream = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck.ogg')
-			var sound = new Sound('AudioCheck.ogg', oggStream)
+			var oggStream = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck_Sound_bong_001.ogg')
+			var sound = new Sound('AudioCheck_Sound_bong_001.ogg', oggStream)
 		when:
 			sound.play()
 			while (sound.playing) {

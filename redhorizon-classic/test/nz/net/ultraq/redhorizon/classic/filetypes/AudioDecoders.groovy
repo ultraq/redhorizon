@@ -31,7 +31,7 @@ import spock.lang.Specification
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class AudioDecoderTests extends Specification {
+class AudioDecoders extends Specification {
 
 	def setupSpec() {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
@@ -50,8 +50,8 @@ class AudioDecoderTests extends Specification {
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		when:
-			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/affirm1.v00').withBufferedStream { stream ->
-				return new Sound('affirm1.v00', stream)
+			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_AudSoundEffect.v00').withBufferedStream { stream ->
+				return new Sound('AudioDecoders_AudSoundEffect.v00', stream)
 			}
 			sound.play()
 			while (sound.playing) {
@@ -65,8 +65,8 @@ class AudioDecoderTests extends Specification {
 
 	def "Play an AUD music track using the AudioDecoder SPI"() {
 		when:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/fac1226m.aud'))
-			var music = new Music('fac1226m.aud', inputStream)
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_AudMusicTrack.aud'))
+			var music = new Music('AudioDecoders_AudMusicTrack.aud', inputStream)
 			music.play()
 			while (music.playing) {
 				music.update()

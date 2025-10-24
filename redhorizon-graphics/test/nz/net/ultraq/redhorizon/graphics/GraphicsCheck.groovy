@@ -20,20 +20,15 @@ import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.graphics.opengl.ScreenShader
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Matrix4f
-import org.joml.Vector2f
 import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-
-import java.nio.ByteBuffer
-import javax.imageio.ImageIO
 
 /**
  * A simple test for making sure we can render objects using the graphics
@@ -153,61 +148,11 @@ class GraphicsCheck extends Specification {
 			basicShader?.close()
 	}
 
-	def "Draws a texture"() {
-		given:
-			var shader = new BasicShader()
-			var quad = new OpenGLMesh(Type.TRIANGLES,
-				new Vertex[]{
-					new Vertex(new Vector3f(-2, -2, 0.0), Colour.WHITE, new Vector2f(0, 0)),
-					new Vertex(new Vector3f(2, -2, 0.0), Colour.WHITE, new Vector2f(1, 0)),
-					new Vertex(new Vector3f(2, 2, 0.0), Colour.WHITE, new Vector2f(1, 1)),
-					new Vertex(new Vector3f(-2, 2, 0.0), Colour.WHITE, new Vector2f(0, 1))
-				},
-				new int[]{ 0, 1, 2, 2, 3, 0 })
-			var bufferedImage = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png').withBufferedStream { stream ->
-				return ImageIO.read(stream)
-			}
-			var width = bufferedImage.width
-			var height = bufferedImage.height
-			var format = bufferedImage.colorModel.numComponents
-			var texture = new OpenGLTexture(width, height, format,
-				bufferedImage.getRGB(0, 0, width, height, null, 0, width)
-					.inject(ByteBuffer.allocateNative(width * height * format)) { ByteBuffer acc, pixel ->
-						var red = (byte)(pixel >> 16)
-						var green = (byte)(pixel >> 8)
-						var blue = (byte)(pixel)
-						var alpha = (byte)(pixel >> 24)
-						acc.put(red).put(green).put(blue).put(alpha)
-					}
-					.flip()
-					.flipVertical(width, height, format))
-			var camera = new Camera(8, 6, window)
-			var transform = new Matrix4f()
-			var material = new Material(texture: texture)
-		when:
-			window.show()
-			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						quad.draw(shaderContext, material, transform)
-					}
-				}
-				Thread.yield()
-			}
-		then:
-			notThrown(Exception)
-		cleanup:
-			texture?.close()
-			quad?.close()
-			shader?.close()
-	}
-
 	def "Draws a sprite - using Image and ImageDecoder SPI"() {
 		given:
 			var shader = new BasicShader()
-			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png').withBufferedStream { stream ->
-				return new Image('GraphicsCheck.png', stream)
+			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck_Texture_ship0000.png').withBufferedStream { stream ->
+				return new Image('GraphicsCheck_Texture_ship0000.png', stream)
 			}
 			var sprite = new Sprite(image)
 			var camera = new Camera(80, 60, window)
@@ -234,8 +179,8 @@ class GraphicsCheck extends Specification {
 	def 'Draw sprite bounding area'() {
 		given:
 			var shader = new BasicShader()
-			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck.png')
-			var image = new Image('GraphicsCheck.png', imageStream)
+			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck_Texture_ship0000.png')
+			var image = new Image('GraphicsCheck_Texture_ship0000.png', imageStream)
 			var sprite = new Sprite(image)
 			var spriteBoundingArea = sprite.boundingArea
 			var boundingArea = new OpenGLMesh(Type.LINE_LOOP,
