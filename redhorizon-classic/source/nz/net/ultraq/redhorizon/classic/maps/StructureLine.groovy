@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.engine.geometry.Point
+import org.joml.Vector2f
 
 import groovy.transform.TupleConstructor
 
@@ -31,7 +31,7 @@ class StructureLine implements ObjectLine {
 	final String faction
 	final String type
 	final float health
-	final Point coords
+	final Vector2f coords
 	final float heading
 	final String trigger
 	final boolean rebuildable
@@ -50,7 +50,7 @@ class StructureLine implements ObjectLine {
 			lineParts[0],
 			lineParts[1],
 			100 / 256 * Integer.parseInt(lineParts[2]),
-			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
+			Integer.parseInt(lineParts[3]).asCellCoords(),
 			360 / 256 * Float.parseFloat(lineParts[4]) as float,
 			triggerName != "None" ? triggerName : null,
 			lineParts[6] == "1",

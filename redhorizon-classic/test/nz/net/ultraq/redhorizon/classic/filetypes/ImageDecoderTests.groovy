@@ -160,9 +160,9 @@ class ImageDecoderTests extends Specification {
 				lastUpdateTimeMs = currentTimeMs
 
 				timer += delta
-				if (timer > 0.25f) {
+				if (timer > 0.1f) {
 					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
-					timer -= 0.25f
+					timer -= 0.1f
 				}
 
 				window.useWindow { ->

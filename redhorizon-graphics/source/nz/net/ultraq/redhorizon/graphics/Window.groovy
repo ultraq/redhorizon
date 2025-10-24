@@ -38,7 +38,7 @@ import org.joml.primitives.Rectanglei
  *
  * @author Emanuel Rabina
  */
-interface Window extends InputSource, AutoCloseable {
+interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoCloseable {
 
 	/**
 	 * Include an FPS counter with the window, with a default update rate of every

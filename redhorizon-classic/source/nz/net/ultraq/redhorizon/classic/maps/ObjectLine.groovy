@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.engine.geometry.Point
+import org.joml.Vector2f
 
 /**
  * Common properties for lines that represent faction object data.
@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.engine.geometry.Point
  */
 interface ObjectLine {
 
-	Point getCoords()
+	Vector2f getCoords()
 
 	String getFaction()
 

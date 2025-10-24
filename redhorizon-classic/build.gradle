@@ -35,7 +35,6 @@ configure {
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
-				compileOnly project(':redhorizon-engine')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')

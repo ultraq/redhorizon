@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.engine.geometry.Point
+import org.joml.Vector2f
 
 import groovy.transform.TupleConstructor
 
@@ -31,7 +31,7 @@ class InfantryLine implements ObjectLine {
 	final String faction
 	final String type
 	final float health
-	final Point coords
+	final Vector2f coords
 	final int cellPos
 	final String action
 	final float heading
@@ -49,7 +49,7 @@ class InfantryLine implements ObjectLine {
 			lineParts[0],
 			lineParts[1],
 			100 / 256 * Integer.parseInt(lineParts[2]),
-			new Point(Integer.parseInt(lineParts[3]).asCellCoords()),
+			Integer.parseInt(lineParts[3]).asCellCoords(),
 			Integer.parseInt(lineParts[4]),
 			lineParts[5],
 			360 / 256 * Float.parseFloat(lineParts[6]) as float,

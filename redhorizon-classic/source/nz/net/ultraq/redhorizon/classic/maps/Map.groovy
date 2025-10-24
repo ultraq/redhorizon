@@ -17,31 +17,9 @@
 package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
-import nz.net.ultraq.redhorizon.classic.filetypes.RulesFile
-import nz.net.ultraq.redhorizon.classic.nodes.Layer
-import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
-import nz.net.ultraq.redhorizon.classic.shaders.Shaders
 import nz.net.ultraq.redhorizon.classic.units.Unit
-import nz.net.ultraq.redhorizon.engine.graphics.Attribute
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.MeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.graphics.VertexBufferLayout
-import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.NodeListDisplayHint
-import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Primitive
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Mesh
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
@@ -51,8 +29,6 @@ import org.slf4j.LoggerFactory
 import groovy.transform.ImmutableOptions
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.FromString
-import java.nio.ByteBuffer
-import java.util.concurrent.CompletableFuture
 
 /**
  * A map on which a mission or skirmish can take place.
@@ -75,62 +51,62 @@ class Map extends Node<Map> {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
-	private final ResourceManager resourceManager
-	private final RulesFile rules
+//	private final ResourceManager resourceManager
+//	private final RulesFile rules
 
 	/**
 	 * Constructor, create a new map from a map file.
 	 */
-	Map(MapFile mapFile, ResourceManager resourceManager) {
-
-		this.mapFile = mapFile
-		this.resourceManager = resourceManager
-
-		var mapSection = mapFile.mapSection
-		theater = Theater.valueOf(mapSection.theater())
-
-		var mapXY = new Vector2f(mapSection.x(), mapSection.y())
-		var mapWH = new Vector2f(mapXY).add(mapSection.width(), mapSection.height())
-		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
-
-		var waypoints = mapFile.waypointsData
-		var waypoint98 = waypoints[98]
-		initialPosition = waypoint98.asCellCoords().asWorldCoords(1)
-
-		bounds { ->
-			set(MAX_BOUNDS)
-		}
-
-		// Rules file needed for some object configuration
-		var rulesIni = resourceManager.loadFile('rules.ini', IniFile)
-		rules = rulesIni as RulesFile
-
-		addChild(new MapBackground().tap {
-			layer = Layer.MAP_BACKGROUND
-		})
-		addChild(new MapPack().tap {
-			layer = Layer.MAP_PACK
-		})
-		addChild(new OverlayPack().tap {
-			layer = Layer.OVERLAY_PACK
-		})
-		addChild(new Terrain().tap {
-			layer = Layer.SPRITES
-		})
-		addChild(new Structures().tap {
-			layer = Layer.SPRITES
-		})
-		addChild(new Units().tap {
-			layer = Layer.SPRITES
-		})
-		addChild(new Infantry().tap {
-			layer = Layer.SPRITES
-		})
-
-		addChild(new MapLines().tap {
-			layer = Layer.OVERLAY
-		})
-	}
+//	Map(MapFile mapFile, ResourceManager resourceManager) {
+//
+//		this.mapFile = mapFile
+//		this.resourceManager = resourceManager
+//
+//		var mapSection = mapFile.mapSection
+//		theater = Theater.valueOf(mapSection.theater())
+//
+//		var mapXY = new Vector2f(mapSection.x(), mapSection.y())
+//		var mapWH = new Vector2f(mapXY).add(mapSection.width(), mapSection.height())
+//		boundary = new Rectanglef(mapXY.asWorldCoords(), mapWH.asWorldCoords()).makeValid()
+//
+//		var waypoints = mapFile.waypointsData
+//		var waypoint98 = waypoints[98]
+//		initialPosition = waypoint98.asCellCoords().asWorldCoords(1)
+//
+//		bounds { ->
+//			set(MAX_BOUNDS)
+//		}
+//
+//		// Rules file needed for some object configuration
+//		var rulesIni = resourceManager.loadFile('rules.ini', IniFile)
+//		rules = rulesIni as RulesFile
+//
+//		addChild(new MapBackground().tap {
+//			layer = Layer.MAP_BACKGROUND
+//		})
+//		addChild(new MapPack().tap {
+//			layer = Layer.MAP_PACK
+//		})
+//		addChild(new OverlayPack().tap {
+//			layer = Layer.OVERLAY_PACK
+//		})
+//		addChild(new Terrain().tap {
+//			layer = Layer.SPRITES
+//		})
+//		addChild(new Structures().tap {
+//			layer = Layer.SPRITES
+//		})
+//		addChild(new Units().tap {
+//			layer = Layer.SPRITES
+//		})
+//		addChild(new Infantry().tap {
+//			layer = Layer.SPRITES
+//		})
+//
+//		addChild(new MapLines().tap {
+//			layer = Layer.OVERLAY
+//		})
+//	}
 
 	/**
 	 * Return some information about this map.
@@ -155,8 +131,8 @@ class Map extends Node<Map> {
 
 //		private final List<ImagesFile> tileFileList = []
 //		private final java.util.Map<ImagesFile, Integer> tileFileMap = [:]
-		private int numTiles = 0
-		private SpriteSheet spriteSheet
+//		private int numTiles = 0
+//		private SpriteSheet spriteSheet
 
 		/**
 		 * Add more tiles to the tileset.
@@ -193,15 +169,15 @@ class Map extends Node<Map> {
 		private static final Vector2f Y_AXIS_MIN = new Vector2f(0, -3072)
 		private static final Vector2f Y_AXIS_MAX = new Vector2f(0, 3072)
 
-		MapLines() {
-
-			addChild(new Primitive(Type.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
-				name = "XY axis (red)"
-			})
-			addChild(new Primitive(Type.LINE_LOOP, Colour.YELLOW.withAlpha(0.8), boundary as Vector2f[]).tap {
-				name = "Map boundary (yellow)"
-			})
-		}
+//		MapLines() {
+//
+//			addChild(new Primitive(Type.LINES, Colour.RED.withAlpha(0.8), X_AXIS_MIN, X_AXIS_MAX, Y_AXIS_MIN, Y_AXIS_MAX).tap {
+//				name = "XY axis (red)"
+//			})
+//			addChild(new Primitive(Type.LINE_LOOP, Colour.YELLOW.withAlpha(0.8), boundary as Vector2f[]).tap {
+//				name = "Map boundary (yellow)"
+//			})
+//		}
 	}
 
 	/**
@@ -210,9 +186,9 @@ class Map extends Node<Map> {
 	private class MapBackground extends Node<MapBackground> {
 
 		String name = "MapBackground - ${theater.label}"
-		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
+//		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
 
-		private final PalettedSprite backgroundSprite
+//		private final PalettedSprite backgroundSprite
 
 		MapBackground() {
 
@@ -230,11 +206,11 @@ class Map extends Node<Map> {
 			var repeatX = backgroundWidth / spriteWidth as float
 			var repeatY = backgroundHeight / spriteHeight as float
 
-			backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
-				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
-			})
-			backgroundSprite.setPosition(boundary.minX, boundary.minY)
-			addChild(backgroundSprite)
+//			backgroundSprite = new PalettedSprite(backgroundWidth, backgroundHeight, tileFile.numImages, repeatX, repeatY, { scene ->
+//				return scene.requestCreateOrGet(new SpriteSheetRequest(spriteWidth, spriteHeight, tileFile.format, imageData))
+//			})
+//			backgroundSprite.setPosition(boundary.minX, boundary.minY)
+//			addChild(backgroundSprite)
 		}
 	}
 
@@ -249,271 +225,271 @@ class Map extends Node<Map> {
 	/**
 	 * The "MapPack" layer of a Red Alert map.
 	 */
-	private class MapPack extends Node<MapPack> implements GraphicsElement {
-
-		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
-
-		private final TileSet tileSet = new TileSet()
-		private final List<MapTile> mapTiles = []
-		private Mesh fullMesh
-		private Shader shader
-//		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
-
-		MapPack() {
-
-			var tileData = mapFile.mapPackData
-
-			TILES_X.times { y ->
-				TILES_Y.times { x ->
-
-					// Get the byte representing the tile
-					var tileValOffset = y * TILES_Y + x
-					var tileVal = tileData.getShort(tileValOffset * 2)
-					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
-
-					// Retrieve the appropriate tile, skip empty and default tiles
-					if (tileVal != 0xff && tileVal != -1 && tileVal != 0) {
-						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
-
-						// Some unknown tile types still coming through?
-						if (!tile) {
-							logger.warn('Skipping unknown mappack tile type: {}', tileVal)
-							return
-						}
-						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
-
-						// Skip references to invalid tiles
-						if (tilePic >= tileFile.numImages) {
-							logger.warn('Skipping unknown mappack tile image: {} pic: {}', tileVal, tilePic)
-							return
-						}
-
-						tileSet.addTiles(tileFile)
-						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
-						mapTiles << mapTile
-
-						bounds { ->
-							expand(
-								mapTile.position().x,
-								mapTile.position().y,
-								mapTile.position().x + TILE_WIDTH as float,
-								mapTile.position().y + TILE_HEIGHT as float
-							)
-						}
-					}
-				}
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "MapPack - ${mapTiles.size()} tiles"
-		}
-
-		@Override
-		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
-
-			return CompletableFuture.allOf(
-				CompletableFuture.supplyAsync { ->
-					return tileSet.tileFileList
-						.collect { tileFile ->
-							return tileFile.imagesData.collect { imageData ->
-								return imageData.center(tileFile.width, tileFile.height, TILE_WIDTH, TILE_HEIGHT)
-							}
-						}
-						.flatten() as ByteBuffer[]
-				}
-					.thenComposeAsync { allTileImageData ->
-						return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
-					}
-					.thenApplyAsync { newSpriteSheet ->
-						tileSet.spriteSheet = newSpriteSheet
-						material.with {
-							texture = newSpriteSheet.texture
-							frame = 0
-							frameStepX = newSpriteSheet.frameStepX
-							frameStepY = newSpriteSheet.frameStepY
-							framesHorizontal = newSpriteSheet.framesHorizontal
-							framesVertical = newSpriteSheet.framesVertical
-						}
-						return newSpriteSheet
-					}
-					.thenApplyAsync { spriteSheet ->
-						List<Vector2f> allVertices = []
-						List<Vector2f> allTextureUVs = []
-						List<Integer> allIndices = []
-						var indexOffset = 0
-						mapTiles.each { mapTile ->
-							allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
-							allTextureUVs.addAll(spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
-							allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
-							indexOffset += 4
-						}
-						return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
-					}
-					.thenComposeAsync { meshData ->
-						def (allVertices, allTextureUVs, allIndices) = meshData
-						return scene
-							.requestCreateOrGet(new MeshRequest(Type.TRIANGLES,
-								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
-								allVertices, Colour.WHITE, allTextureUVs, false, allIndices))
-							.thenAcceptAsync { newMesh ->
-								fullMesh = newMesh
-							}
-					},
-				scene
-					.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
-					.thenAcceptAsync { requestedShader ->
-						shader = requestedShader
-					}
-			)
-		}
-
-		@Override
-		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
-
-			return scene.requestDelete(fullMesh, tileSet.spriteSheet)
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			if (fullMesh && shader && material.texture) {
-				renderer.draw(fullMesh, globalTransform, shader, material)
-			}
-		}
-	}
+//	private class MapPack extends Node<MapPack> implements GraphicsElement {
+//
+//		final PartitionHint partitionHint = PartitionHint.LARGE_AREA
+//
+//		private final TileSet tileSet = new TileSet()
+//		private final List<MapTile> mapTiles = []
+//		private Mesh fullMesh
+//		private Shader shader
+////		private PalettedSpriteMaterial material = new PalettedSpriteMaterial()
+//
+//		MapPack() {
+//
+//			var tileData = mapFile.mapPackData
+//
+//			TILES_X.times { y ->
+//				TILES_Y.times { x ->
+//
+//					// Get the byte representing the tile
+//					var tileValOffset = y * TILES_Y + x
+//					var tileVal = tileData.getShort(tileValOffset * 2)
+//					var tilePic = tileData.get(TILES_X * TILES_Y * 2 + tileValOffset) & 0xff
+//
+//					// Retrieve the appropriate tile, skip empty and default tiles
+//					if (tileVal != 0xff && tileVal != -1 && tileVal != 0) {
+//						var tile = MapRAMapPackTile.values().find { tile -> tile.value == tileVal }
+//
+//						// Some unknown tile types still coming through?
+//						if (!tile) {
+//							logger.warn('Skipping unknown mappack tile type: {}', tileVal)
+//							return
+//						}
+//						var tileFile = resourceManager.loadFile(tile.name + theater.ext, TmpFileRA)
+//
+//						// Skip references to invalid tiles
+//						if (tilePic >= tileFile.numImages) {
+//							logger.warn('Skipping unknown mappack tile image: {} pic: {}', tileVal, tilePic)
+//							return
+//						}
+//
+//						tileSet.addTiles(tileFile)
+//						var mapTile = new MapTile(new Vector2f(x, y).asWorldCoords(1), tileSet.getFrame(tileFile, tilePic))
+//						mapTiles << mapTile
+//
+//						bounds { ->
+//							expand(
+//								mapTile.position().x,
+//								mapTile.position().y,
+//								mapTile.position().x + TILE_WIDTH as float,
+//								mapTile.position().y + TILE_HEIGHT as float
+//							)
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		@Override
+//		String getName() {
+//
+//			return "MapPack - ${mapTiles.size()} tiles"
+//		}
+//
+//		@Override
+//		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+//
+//			return CompletableFuture.allOf(
+//				CompletableFuture.supplyAsync { ->
+//					return tileSet.tileFileList
+//						.collect { tileFile ->
+//							return tileFile.imagesData.collect { imageData ->
+//								return imageData.center(tileFile.width, tileFile.height, TILE_WIDTH, TILE_HEIGHT)
+//							}
+//						}
+//						.flatten() as ByteBuffer[]
+//				}
+//					.thenComposeAsync { allTileImageData ->
+//						return scene.requestCreateOrGet(new SpriteSheetRequest(TILE_WIDTH, TILE_HEIGHT, ColourFormat.FORMAT_INDEXED, allTileImageData))
+//					}
+//					.thenApplyAsync { newSpriteSheet ->
+//						tileSet.spriteSheet = newSpriteSheet
+//						material.with {
+//							texture = newSpriteSheet.texture
+//							frame = 0
+//							frameStepX = newSpriteSheet.frameStepX
+//							frameStepY = newSpriteSheet.frameStepY
+//							framesHorizontal = newSpriteSheet.framesHorizontal
+//							framesVertical = newSpriteSheet.framesVertical
+//						}
+//						return newSpriteSheet
+//					}
+//					.thenApplyAsync { spriteSheet ->
+//						List<Vector2f> allVertices = []
+//						List<Vector2f> allTextureUVs = []
+//						List<Integer> allIndices = []
+//						var indexOffset = 0
+//						mapTiles.each { mapTile ->
+//							allVertices.addAll(new Rectanglef(0, 0, TILE_WIDTH, TILE_HEIGHT).translate(mapTile.position()) as Vector2f[])
+//							allTextureUVs.addAll(spriteSheet[mapTile.frameInTileSet()] as Vector2f[])
+//							allIndices.addAll([0, 1, 2, 0, 2, 3].collect { index -> index + indexOffset })
+//							indexOffset += 4
+//						}
+//						return new Tuple3<Vector2f[], Vector2f[], int[]>(allVertices as Vector2f[], allTextureUVs as Vector2f[], allIndices as int[])
+//					}
+//					.thenComposeAsync { meshData ->
+//						def (allVertices, allTextureUVs, allIndices) = meshData
+//						return scene
+//							.requestCreateOrGet(new MeshRequest(Type.TRIANGLES,
+//								new VertexBufferLayout(Attribute.POSITION, Attribute.COLOUR, Attribute.TEXTURE_UVS),
+//								allVertices, Colour.WHITE, allTextureUVs, false, allIndices))
+//							.thenAcceptAsync { newMesh ->
+//								fullMesh = newMesh
+//							}
+//					},
+//				scene
+//					.requestCreateOrGet(new ShaderRequest(Shaders.palettedSpriteShader))
+//					.thenAcceptAsync { requestedShader ->
+//						shader = requestedShader
+//					}
+//			)
+//		}
+//
+//		@Override
+//		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+//
+//			return scene.requestDelete(fullMesh, tileSet.spriteSheet)
+//		}
+//
+//		@Override
+//		void render(GraphicsRenderer renderer) {
+//
+//			if (fullMesh && shader && material.texture) {
+//				renderer.draw(fullMesh, globalTransform, shader, material)
+//			}
+//		}
+//	}
 
 	/**
 	 * The "OverlayPack" layer of a Red Alert map.
 	 */
-	private class OverlayPack extends Node<OverlayPack> {
-
-		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-
-		private int numTiles = 0
-
-		OverlayPack() {
-
-			var tileData = mapFile.overlayPackData
-			java.util.Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
-
-			TILES_X.times { y ->
-				TILES_Y.times { x ->
-
-					// Get the byte representing the tile
-					var tileVal = tileData.get()
-
-					// Retrieve the appropriate tile, skip empty tiles
-					if (tileVal != -1) {
-						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
-
-						// Some unknown tile types still coming through?
-						if (!tile) {
-							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
-							return
-						}
-
-						tileTypes << [(new Vector2f(x, y)): tile]
-					}
-				}
-			}
-
-			// Now that the tiles are all assembled, build the appropriate image
-			// representation for them
-			tileTypes.each { tilePos, tile ->
-				var tileFile = tile.isWall || tile.useShp ?
-					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
-					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
-				var imageVariant = 0
-
-				// Select the proper orientation for wall tiles
-				if (tile.isWall) {
-					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
-						imageVariant |= 0x01
-					}
-					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
-						imageVariant |= 0x02
-					}
-					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
-						imageVariant |= 0x04
-					}
-					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
-						imageVariant |= 0x08
-					}
-				}
-				// Select the proper density for resources
-				else if (tile.isResource) {
-					var adjacent = (-1..1).inject(0) { accY, y ->
-						return accY + (-1..1).inject(0) { accX, x ->
-							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
-								return accX + 1
-							}
-							return accX
-						}
-					}
-					imageVariant = tile.name().startsWith('GEM') ?
-						adjacent / 3 as int :
-						3 + adjacent
-				}
-
-				var overlay = new PalettedSprite(tileFile)
-				overlay.name = "${tile.name} - Variant ${imageVariant}"
-				overlay.frame = imageVariant
-				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
-				overlay.partitionHint = PartitionHint.SMALL_AREA
-
-				addChild(overlay)
-
-				numTiles++
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "OverlayPack - ${numTiles} tiles"
-		}
-	}
+//	private class OverlayPack extends Node<OverlayPack> {
+//
+//		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
+//		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+//
+//		private int numTiles = 0
+//
+//		OverlayPack() {
+//
+//			var tileData = mapFile.overlayPackData
+//			java.util.Map<Vector2f, MapRAOverlayPackTile> tileTypes = [:]
+//
+//			TILES_X.times { y ->
+//				TILES_Y.times { x ->
+//
+//					// Get the byte representing the tile
+//					var tileVal = tileData.get()
+//
+//					// Retrieve the appropriate tile, skip empty tiles
+//					if (tileVal != -1) {
+//						var tile = MapRAOverlayPackTile.values().find { tile -> tile.value == tileVal }
+//
+//						// Some unknown tile types still coming through?
+//						if (!tile) {
+//							logger.warn('Skipping unknown overlay tile type: {}', tileVal)
+//							return
+//						}
+//
+//						tileTypes << [(new Vector2f(x, y)): tile]
+//					}
+//				}
+//			}
+//
+//			// Now that the tiles are all assembled, build the appropriate image
+//			// representation for them
+//			tileTypes.each { tilePos, tile ->
+//				var tileFile = tile.isWall || tile.useShp ?
+//					resourceManager.loadFile("${tile.name}.shp", ShpFile) :
+//					resourceManager.loadFile(tile.name + theater.ext, ShpFile)
+//				var imageVariant = 0
+//
+//				// Select the proper orientation for wall tiles
+//				if (tile.isWall) {
+//					if (tileTypes[new Vector2f(tilePos).add(0, -1)] == tile) {
+//						imageVariant |= 0x01
+//					}
+//					if (tileTypes[new Vector2f(tilePos).add(1, 0)] == tile) {
+//						imageVariant |= 0x02
+//					}
+//					if (tileTypes[new Vector2f(tilePos).add(0, 1)] == tile) {
+//						imageVariant |= 0x04
+//					}
+//					if (tileTypes[new Vector2f(tilePos).add(-1, 0)] == tile) {
+//						imageVariant |= 0x08
+//					}
+//				}
+//				// Select the proper density for resources
+//				else if (tile.isResource) {
+//					var adjacent = (-1..1).inject(0) { accY, y ->
+//						return accY + (-1..1).inject(0) { accX, x ->
+//							if (x != 0 && y != 0 && tileTypes[new Vector2f(tilePos).add(x, y)]?.isResource) {
+//								return accX + 1
+//							}
+//							return accX
+//						}
+//					}
+//					imageVariant = tile.name().startsWith('GEM') ?
+//						adjacent / 3 as int :
+//						3 + adjacent
+//				}
+//
+//				var overlay = new PalettedSprite(tileFile)
+//				overlay.name = "${tile.name} - Variant ${imageVariant}"
+//				overlay.frame = imageVariant
+//				overlay.position = new Vector2f(tilePos).asWorldCoords(1)
+//				overlay.partitionHint = PartitionHint.SMALL_AREA
+//
+//				addChild(overlay)
+//
+//				numTiles++
+//			}
+//		}
+//
+//		@Override
+//		String getName() {
+//
+//			return "OverlayPack - ${numTiles} tiles"
+//		}
+//	}
 
 	/**
 	 * The "Terrain" layer of a Red Alert map.
 	 */
-	private class Terrain extends Node<Terrain> {
-
-		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
-
-		Terrain() {
-
-			var terrainData = mapFile.terrainData
-			terrainData.each { cell, terrainType ->
-				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
-				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT as int)
-
-				var terrain = new PalettedSprite(terrainFile)
-				terrain.name = "Terrain ${terrainType}"
-				terrain.position = cellPosXY
-				terrain.partitionHint = PartitionHint.SMALL_AREA
-				addChild(terrain)
-			}
-		}
-
-		@Override
-		String getName() {
-
-			return "Terrain - ${children.size()} objects"
-		}
-	}
+//	private class Terrain extends Node<Terrain> {
+//
+//		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
+//		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+//
+//		Terrain() {
+//
+//			var terrainData = mapFile.terrainData
+//			terrainData.each { cell, terrainType ->
+//				var terrainFile = resourceManager.loadFile(terrainType + theater.ext, ShpFile)
+//				var cellPosXY = (cell as int).asCellCoords().asWorldCoords(terrainFile.height / TILE_HEIGHT as int)
+//
+//				var terrain = new PalettedSprite(terrainFile)
+//				terrain.name = "Terrain ${terrainType}"
+//				terrain.position = cellPosXY
+//				terrain.partitionHint = PartitionHint.SMALL_AREA
+//				addChild(terrain)
+//			}
+//		}
+//
+//		@Override
+//		String getName() {
+//
+//			return "Terrain - ${children.size()} objects"
+//		}
+//	}
 
 	/**
 	 * Common class for the faction units/structures of the map.
 	 */
 	private abstract class FactionObjects<T extends FactionObjects, L extends ObjectLine> extends Node<T> {
 
-		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
+//		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 
 		Unit createObject(L objectLine,
 			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
@@ -558,7 +534,7 @@ class Map extends Node<Map> {
 	 */
 	private class Units extends FactionObjects<Units, UnitLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+//		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Units() {
 
@@ -585,7 +561,7 @@ class Map extends Node<Map> {
 	 */
 	private class Infantry extends FactionObjects<Infantry, InfantryLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+//		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Infantry() {
 
@@ -618,7 +594,7 @@ class Map extends Node<Map> {
 	 */
 	private class Structures extends FactionObjects<Structures, StructureLine> {
 
-		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
+//		final NodeListDisplayHint nodeListDisplayHint = NodeListDisplayHint.START_COLLAPSED
 
 		Structures() {
 

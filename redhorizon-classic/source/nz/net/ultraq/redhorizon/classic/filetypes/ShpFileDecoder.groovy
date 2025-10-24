@@ -41,6 +41,7 @@ class ShpFileDecoder implements ImageDecoder {
 	static final byte FORMAT_LCW       = (byte)0x80
 	static final byte FORMAT_XOR_BASE  = (byte)0x40
 	static final byte FORMAT_XOR_CHAIN = (byte)0x20
+	static final byte FORMAT_NONE      = (byte)0x00
 	// @formatter:on
 
 	String[] supportedFileExtensions = ['shp']
@@ -74,7 +75,7 @@ class ShpFileDecoder implements ImageDecoder {
 		var imageOffsets = new ShpImageInfo[numImages + 2]
 		imageOffsets.length.times { i ->
 			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
-			assert imageInfo.offsetFormat in [0, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
+			assert imageInfo.offsetFormat in [FORMAT_NONE, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
 			imageOffsets[i] = imageInfo
 		}
 

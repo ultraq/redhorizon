@@ -18,25 +18,9 @@ package nz.net.ultraq.redhorizon.classic.units
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.nodes.FactionColours
-import nz.net.ultraq.redhorizon.classic.nodes.Layer
-import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
 import nz.net.ultraq.redhorizon.classic.nodes.Rotatable
-import nz.net.ultraq.redhorizon.classic.shaders.Shaders
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRenderer
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.ShaderRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteMeshRequest
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.engine.scenegraph.GraphicsElement
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.PartitionHint
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.graphics.Mesh
-import nz.net.ultraq.redhorizon.graphics.Shader
-
-import org.joml.Vector3f
-
-import java.util.concurrent.CompletableFuture
+import nz.net.ultraq.redhorizon.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
  * A unit is a controllable object in the game.  As part of the Explorer
@@ -54,16 +38,16 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	 */
 	static final String DEFAULT_STATE = "default"
 
-	final PartitionHint partitionHint = PartitionHint.SMALL_AREA
+//	final PartitionHint partitionHint = PartitionHint.SMALL_AREA
 
 	// TODO: Should this type of file be renamed to better reflect its purpose?
 //	final ImagesFile imagesFile
-	final UnitData unitData
-	final UnitBody body
-	final UnitTurret turret
-	UnitBody body2
-	PalettedSprite bib
-	UnitShadow shadow
+//	final UnitData unitData
+//	final UnitBody body
+//	final UnitTurret turret
+//	UnitBody body2
+//	Sprite bib
+//	UnitShadow shadow
 
 	private int stateIndex = 0
 	private float accAnimationTime
@@ -137,13 +121,13 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	 *
 	 * TODO: This is a good candidate for a component in an ECS.
 	 */
-	void addShadow() {
-
-		shadow = new UnitShadow().tap {
-			layer = Layer.DOWN_ONE
-		}
-		addChild(shadow)
-	}
+//	void addShadow() {
+//
+//		shadow = new UnitShadow().tap {
+//			layer = Layer.DOWN_ONE
+//		}
+//		addChild(shadow)
+//	}
 
 	/**
 	 * Return the number of degrees it takes to rotate the unit left/right in
@@ -162,21 +146,21 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 		return unitData.shpFile.states[stateIndex].name
 	}
 
-	@Override
-	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
-
-		return scene
-			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
-			.thenAcceptAsync { newSpriteSheet ->
-				spriteSheet = newSpriteSheet
-			}
-	}
-
-	@Override
-	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
-
-		return scene.requestDelete(spriteSheet)
-	}
+//	@Override
+//	CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+//
+//		return scene
+//			.requestCreateOrGet(new SpriteSheetRequest(imagesFile.width, imagesFile.height, imagesFile.format, imagesFile.imagesData))
+//			.thenAcceptAsync { newSpriteSheet ->
+//				spriteSheet = newSpriteSheet
+//			}
+//	}
+//
+//	@Override
+//	CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+//
+//		return scene.requestDelete(spriteSheet)
+//	}
 
 	/**
 	 * Adjust the heading of the unit counter-clockwise enough to utilize its next
@@ -230,119 +214,119 @@ class Unit extends Node<Unit> implements FactionColours, Rotatable {
 	/**
 	 * Script to control the sprite representing the unit's main body.
 	 */
-	private class UnitBody extends PalettedSprite {
-
-		private final UnitData unitData
-
+//	private class UnitBody extends Sprite {
+//
+//		private final UnitData unitData
+//
 //		UnitBody(ImagesFile imagesFile, UnitData unitData) {
 //
 //			super(imagesFile)
 //			this.unitData = unitData
 //		}
 
-		UnitBody(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
+//		UnitBody(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator, UnitData unitData) {
+//
+//			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
+//			this.unitData = unitData
+//		}
+//
+//		@Override
+//		void update(float delta) {
+//
+//			// Update region in spritesheet to match heading and currently-playing animation
+//			if (spriteSheet) {
+//				var currentState = unitData.shpFile.states[stateIndex]
+//				var headings = currentState.headings
+//				var frames = currentState.frames
+//				var degreesPerHeading = 360f / headings
+//
+//				// NOTE: C&C unit headings were ordered in a counter-clockwise order
+//				//       (maybe to match how radians work?), the reverse from how
+//				//       degrees-based headings are done.
+//				var closestHeading = Math.round(heading / degreesPerHeading)
+//				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
+//				var animationFrame = frames > 1 ? Math.floor((float)(accAnimationTime * FRAMERATE)) % frames as int : 0
+//				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
+//			}
+//
+//			accAnimationTime += delta
+//			super.update(delta)
+//		}
+//	}
 
-			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
-			this.unitData = unitData
-		}
+//	/**
+//	 * Script to control the sprite representing the unit's turret.
+//	 */
+//	private class UnitTurret extends PalettedSprite {
+//
+//		UnitTurret(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
+//			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
+//		}
+//
+//		@Override
+//		void update(float delta) {
+//
+//			if (spriteSheet) {
+//				var turretHeadings = unitData.shpFile.parts.turret.headings
+//				var closestTurretHeading = Math.round(heading / degreesPerHeading)
+//				var turretRotationFrame = closestTurretHeading ? turretHeadings - closestTurretHeading as int : 0
+//				frame = unitData.shpFile.parts.body.headings + turretRotationFrame
+//			}
+//
+//			super.update(delta)
+//		}
+//	}
 
-		@Override
-		void update(float delta) {
-
-			// Update region in spritesheet to match heading and currently-playing animation
-			if (spriteSheet) {
-				var currentState = unitData.shpFile.states[stateIndex]
-				var headings = currentState.headings
-				var frames = currentState.frames
-				var degreesPerHeading = 360f / headings
-
-				// NOTE: C&C unit headings were ordered in a counter-clockwise order
-				//       (maybe to match how radians work?), the reverse from how
-				//       degrees-based headings are done.
-				var closestHeading = Math.round(heading / degreesPerHeading)
-				var rotationFrame = closestHeading ? (headings - closestHeading) * frames as int : 0
-				var animationFrame = frames > 1 ? Math.floor((float)(accAnimationTime * FRAMERATE)) % frames as int : 0
-				frame = unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
-			}
-
-			accAnimationTime += delta
-			super.update(delta)
-		}
-	}
-
-	/**
-	 * Script to control the sprite representing the unit's turret.
-	 */
-	private class UnitTurret extends PalettedSprite {
-
-		UnitTurret(int width, int height, int numImages, SpriteSheetGenerator spriteSheetGenerator) {
-			super(width, height, numImages, 1f, 1f, spriteSheetGenerator)
-		}
-
-		@Override
-		void update(float delta) {
-
-			if (spriteSheet) {
-				var turretHeadings = unitData.shpFile.parts.turret.headings
-				var closestTurretHeading = Math.round(heading / degreesPerHeading)
-				var turretRotationFrame = closestTurretHeading ? turretHeadings - closestTurretHeading as int : 0
-				frame = unitData.shpFile.parts.body.headings + turretRotationFrame
-			}
-
-			super.update(delta)
-		}
-	}
-
-	/**
-	 * A generated unit shadow.  Used mainly for aircraft which draw a silhouette
-	 * of the unit on the ground beneath them.
-	 */
-	private class UnitShadow extends Node<UnitShadow> implements GraphicsElement {
-
-		private static final Vector3f offset = new Vector3f(0f, -20f, 0f)
-
-		final String name = 'Shadow'
-
-		private Mesh mesh
-		private Shader shader
-
-		UnitShadow() {
-
-			bounds { ->
-				set(body.bounds)
-			}
-			transform { ->
-				translate(offset)
-			}
-		}
-
-		@Override
-		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
-
-			return CompletableFuture.allOf(
-				scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
-					.thenAcceptAsync { newMesh ->
-						mesh = newMesh
-					},
-				scene.requestCreateOrGet(new ShaderRequest(Shaders.shadowShader))
-					.thenAcceptAsync { shadowShader ->
-						shader = shadowShader
-					}
-			)
-		}
-
-		@Override
-		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
-
-			return scene.requestDelete(mesh)
-		}
-
-		@Override
-		void render(GraphicsRenderer renderer) {
-
-			if (mesh && shader && body.material) {
-				renderer.draw(mesh, globalTransform, shader, body.material)
-			}
-		}
-	}
+//	/**
+//	 * A generated unit shadow.  Used mainly for aircraft which draw a silhouette
+//	 * of the unit on the ground beneath them.
+//	 */
+//	private class UnitShadow extends Node<UnitShadow> implements GraphicsElement {
+//
+//		private static final Vector3f offset = new Vector3f(0f, -20f, 0f)
+//
+//		final String name = 'Shadow'
+//
+//		private Mesh mesh
+//		private Shader shader
+//
+//		UnitShadow() {
+//
+//			bounds { ->
+//				set(body.bounds)
+//			}
+//			transform { ->
+//				translate(offset)
+//			}
+//		}
+//
+//		@Override
+//		CompletableFuture<Void> onSceneAddedAsync(Scene scene) {
+//
+//			return CompletableFuture.allOf(
+//				scene.requestCreateOrGet(new SpriteMeshRequest(bounds, spriteSheet.textureRegion))
+//					.thenAcceptAsync { newMesh ->
+//						mesh = newMesh
+//					},
+//				scene.requestCreateOrGet(new ShaderRequest(Shaders.shadowShader))
+//					.thenAcceptAsync { shadowShader ->
+//						shader = shadowShader
+//					}
+//			)
+//		}
+//
+//		@Override
+//		CompletableFuture<Void> onSceneRemovedAsync(Scene scene) {
+//
+//			return scene.requestDelete(mesh)
+//		}
+//
+//		@Override
+//		void render(GraphicsRenderer renderer) {
+//
+//			if (mesh && shader && body.material) {
+//				renderer.draw(mesh, globalTransform, shader, body.material)
+//			}
+//		}
+//	}
 }

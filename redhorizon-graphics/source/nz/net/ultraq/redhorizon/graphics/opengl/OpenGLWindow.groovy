@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
@@ -48,7 +47,7 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindow implements Window, EventTarget<OpenGLWindow> {
+class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
