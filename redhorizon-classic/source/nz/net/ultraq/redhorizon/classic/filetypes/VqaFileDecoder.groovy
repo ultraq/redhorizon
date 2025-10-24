@@ -29,7 +29,6 @@ import nz.net.ultraq.redhorizon.graphics.VideoDecoder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor
 import java.nio.ByteBuffer
 import java.text.DecimalFormat
@@ -222,17 +221,6 @@ class VqaFileDecoder implements VideoDecoder {
 	}
 
 	/**
-	 * Decode the "codebook", a lookup table of values used for creating a frame
-	 * of video data.
-	 */
-	private ByteBuffer decodeCodebook(VqaChunkHeader chunkHeader, ByteBuffer data) {
-
-		return chunkHeader.compressed ?
-			lcw.decode(data, ByteBuffer.allocateNative(numBlocks * blockSize)) :
-			data
-	}
-
-	/**
 	 * Decodes a frame of video, found in a VPT* chunk.
 	 *
 	 * @param data The VPT chunk data.
@@ -242,23 +230,6 @@ class VqaFileDecoder implements VideoDecoder {
 	 */
 	private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook, Palette vqaPalette) {
 
-		return decodeFrame(data, codeBook).applyPalette(vqaPalette)
-	}
-
-	/**
-	 * Decodes a frame of a video, found in a VPT* chunk.
-	 *
-	 * <p>This method was split from the other one of the same name so it could be
-	 * optimized for performance, utilizing {@code @CompileStatic} and mostly
-	 * standard Java coding.
-	 *
-	 * @param data The VPT chunk data.
-	 * @param codeBook Current lookup table for screen block data.
-	 * @return A fully decoded frame of video.
-	 */
-	@CompileStatic
-	private ByteBuffer decodeFrame(ByteBuffer data, ByteBuffer codeBook) {
-
 		var frameBytes = ByteBuffer.allocateNative(width * height)
 
 		// Decode block by block
@@ -266,8 +237,8 @@ class VqaFileDecoder implements VideoDecoder {
 			var framePointer = (block / blocksX as int) * width + (block * blockWidth)
 
 			// Get the proper lookup value for the block
-			var loByte = data.get(block) & 0xff
-			var hiByte = data.get(block + numBlocks) & 0xff
+			var loByte = data.getUnsignedByte(block)
+			var hiByte = data.getUnsignedByte(block + numBlocks)
 
 			// Fill the block with 1 colour
 			if (hiByte == modifier) {
@@ -285,7 +256,7 @@ class VqaFileDecoder implements VideoDecoder {
 				}
 			}
 		}
-		return frameBytes.rewind()
+		return frameBytes.applyPalette(vqaPalette)
 	}
 
 	/**
@@ -365,7 +336,6 @@ class VqaFileDecoder implements VideoDecoder {
 	private static record VqaChunkHeader(String name, int length) {
 		static final BYTES = 8
 		static final String SUFFIX_UNCOMPRESSED = "0"
-		static final String SUFFIX_COMPRESSED = "Z"
 
 		/**
 		 * Returns whether or not the chunk data that follows is compressed.
