@@ -68,8 +68,8 @@ class VideoDecoderTests extends Specification {
 
 	def 'Play a VQA file using the VideoDecoder SPI'() {
 		given:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/gdi1.vqa'))
-			var video = new Video('gd1i.vqa', inputStream, 320, 188)
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/samdie.vqa'))
+			var video = new Video('samdie.vqa', inputStream, 320, 188)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 				.translate(160, 94, 0)
@@ -97,5 +97,6 @@ class VideoDecoderTests extends Specification {
 		cleanup:
 			shader?.close()
 			video?.close()
+			inputStream?.close()
 	}
 }
