@@ -67,7 +67,7 @@ class OpenGLFramebuffer implements Framebuffer {
 		framebufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 
-		colourTexture = new OpenGLTexture(width, height, filter)
+		colourTexture = new OpenGLTexture(width, height, 4, filter)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
 
 		// Depth buffer attachment
