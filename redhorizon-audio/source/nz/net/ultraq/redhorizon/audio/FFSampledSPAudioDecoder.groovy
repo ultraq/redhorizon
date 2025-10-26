@@ -50,6 +50,8 @@ class FFSampledSPAudioDecoder implements AudioDecoder {
 				var frequency = (int)format.sampleRate
 				var buffers = 0
 
+				trigger(new HeaderDecodedEvent(bits, channels, frequency))
+
 				// Create our own chunk size of 8KB
 				while (!Thread.interrupted()) {
 					var audioChunk = pcmStream.readNBytes(8192)

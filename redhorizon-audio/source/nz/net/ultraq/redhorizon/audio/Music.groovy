@@ -52,7 +52,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 	private ExecutorService executor
 	private Future<?> decodingTask
 	private volatile BlockingQueue<SampleDecodedEvent> streamingEvents
-	private int readAhead
+	private int readAhead = 16
 	private final List<SampleDecodedEvent> eventDrain = []
 	private int buffersQueued
 	private int buffersPlayed
@@ -66,20 +66,24 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 	Music(String fileName, InputStream inputStream) {
 
 		source = new OpenALSource()
-		var fileSize
-		var duration
+		var fileSize = 0
+		var duration = 0
 		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(HeaderDecodedEvent) { event ->
 				var bits = event.bits()
 				var channels = event.channels()
 				var frequency = event.frequency()
 				fileSize = event.fileSize()
-				duration = fileSize / (frequency * channels * (bits / 8))
+				if (fileSize) {
+					duration = fileSize / (frequency * channels * (bits / 8)) as int
+				}
 				logger.debug('Estimated track duration: {}:{}', duration / 60 as int, duration % 60 as int)
 			}
 			.on(SampleDecodedEvent) { event ->
 				if (streamingEvents == null) {
-					readAhead = fileSize / duration / event.buffer().capacity()
+					if (fileSize && duration) {
+						readAhead = fileSize / duration / event.buffer().capacity() as int
+					}
 					logger.debug('Read-ahead of {} chunks', readAhead)
 					streamingEvents = new ArrayBlockingQueue<>(readAhead)
 				}
