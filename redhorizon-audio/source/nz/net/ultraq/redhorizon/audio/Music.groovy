@@ -76,8 +76,8 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 				fileSize = event.fileSize()
 				if (fileSize) {
 					duration = fileSize / (frequency * channels * (bits / 8)) as int
+					logger.debug('Estimated track duration: {}:{}', duration / 60 as int, duration % 60 as int)
 				}
-				logger.debug('Estimated track duration: {}:{}', duration / 60 as int, duration % 60 as int)
 			}
 			.on(SampleDecodedEvent) { event ->
 				if (streamingEvents == null) {
@@ -211,8 +211,9 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 
 		source.setPosition(position)
 
-		// Buffer the music
-		var buffersAhead = buffersPlayed - buffersQueued + readAhead
+		// Buffer the music.  A looping track will never have processed buffers, so
+		// just pile on some number to the source.
+		var buffersAhead = !source.looping ? buffersPlayed - buffersQueued + readAhead : 8
 		if (buffersAhead > 0) {
 			eventDrain.clear()
 			streamingEvents.drain(eventDrain, buffersAhead).each { event ->
@@ -223,16 +224,14 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 			buffersQueued += buffersAhead
 		}
 
-		// Close any used buffers
-		if (!source.looping) {
-			var buffersProcessed = source.buffersProcessed()
-			if (buffersProcessed) {
-				buffersPlayed += buffersProcessed
-				bufferDrain.clear()
-				streamedBuffers.drain(bufferDrain, buffersProcessed).each { buffer ->
-					source.unqueueBuffers(buffer)
-					buffer.close()
-				}
+		// Close any used buffers (n/a for looping tracks)
+		var buffersProcessed = source.buffersProcessed()
+		if (buffersProcessed) {
+			buffersPlayed += buffersProcessed
+			bufferDrain.clear()
+			streamedBuffers.drain(bufferDrain, buffersProcessed).each { buffer ->
+				source.unqueueBuffers(buffer)
+				buffer.close()
 			}
 		}
 	}

@@ -50,8 +50,8 @@ class AudioDecoders extends Specification {
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		when:
-			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_AudSoundEffect.v00').withBufferedStream { stream ->
-				return new Sound('AudioDecoders_AudSoundEffect.v00', stream)
+			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
+				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
 			}
 			sound.play()
 			while (sound.playing) {
@@ -65,8 +65,9 @@ class AudioDecoders extends Specification {
 
 	def "Play an AUD music track using the AudioDecoder SPI"() {
 		when:
-			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_AudMusicTrack.aud'))
-			var music = new Music('AudioDecoders_AudMusicTrack.aud', inputStream)
+			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
+			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
+//				.withLooping(true)
 			music.play()
 			while (music.playing) {
 				music.update()
