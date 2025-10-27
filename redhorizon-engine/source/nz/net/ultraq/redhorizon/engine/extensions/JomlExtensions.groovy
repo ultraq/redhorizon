@@ -64,17 +64,6 @@ class JomlExtensions {
 	}
 
 	/**
-	 * Update a rectangle's values so each point is equidistant from an 0,0 point
-	 * as if on a plot.
-	 */
-	static Rectanglef center(Rectanglef self) {
-
-		var halfLengthX = self.lengthX() / 2 as float
-		var halfLengthY = self.lengthY() / 2 as float
-		return set(self, -halfLengthX, -halfLengthY, halfLengthX, halfLengthY)
-	}
-
-	/**
 	 * Check if this rectangle contains the given point {@code (x, y)}.  If {@code
 	 * includeBoudary} is set, then we also include whether the point lies on the
 	 * edge of the rectangle and count it as included if so.
