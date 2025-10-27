@@ -41,6 +41,6 @@ uniform sampler2D indexTexture;
 
 void main() {
 	vec2 index = vec2(texture(indexTexture, v_textureUVs).x, 1);
-	vec4 colour = vec4(0, 0, 0, index == 0 ? 0 : 0.5);
+	vec4 colour = vec4(0, 0, 0, index.x == 0 ? 0 : 0.5);
 	fragmentColour = colour * v_vertexColour;
 }

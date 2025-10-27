@@ -36,8 +36,6 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 
 	private final Mesh mesh
 	private final Material material
-	private final float frameWidth
-	private final float frameHeight
 
 	/**
 	 * Constructor, create a new sprite.
@@ -45,8 +43,6 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	private Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture) {
 
 		super(width, height, 0)
-		this.frameWidth = frameWidth
-		this.frameHeight = frameHeight
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 			new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
 			new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),

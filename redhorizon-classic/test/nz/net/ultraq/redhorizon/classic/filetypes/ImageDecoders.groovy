@@ -135,8 +135,8 @@ class ImageDecoders extends Specification {
 			var sprite = new Sprite(spriteSheet)
 			var faction = Faction.RED
 			var adjustmentMap = new FactionAdjustmentMap(faction)
-			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Palette_temperat.pal').withBufferedStream { stream ->
-				return new Palette('ImageDecoders_Palette_temperat.pal', stream)
+			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
+				return new Palette('Palette_temperat.pal', stream)
 			}
 			var alphaMask = new AlphaMask()
 			var palettedSpriteShader = new PalettedSpriteShader()
