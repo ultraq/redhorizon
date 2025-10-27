@@ -40,12 +40,6 @@ out vec4 fragmentColour;
 uniform sampler2D indexTexture;
 
 void main() {
-	// The final colour is obtained from:
-	//  - index value sampled from the texture
-	//  - run through an adjustment map (eg: for different faction colours)
-	//  - a colour is then pulled from the palette
-	//  - where an alpha mask is applied
-	//  - (and then the usual step of applying the vertex colouring)
 	vec2 index = vec2(texture(indexTexture, v_textureUVs).x, 1);
 	vec4 colour = vec4(0, 0, 0, index == 0 ? 0 : 0.5);
 	fragmentColour = colour * v_vertexColour;
