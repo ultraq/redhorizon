@@ -41,7 +41,7 @@ class OpenGLFramebuffer implements Framebuffer {
 	final int height
 	final Rectanglei viewport
 	private final Mesh fullScreenQuad
-	private final Texture colourTexture
+	final Texture texture
 	private final int framebufferId
 	private final int depthBufferId
 
@@ -67,8 +67,8 @@ class OpenGLFramebuffer implements Framebuffer {
 		framebufferId = glGenFramebuffers()
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 
-		colourTexture = new OpenGLTexture(width, height, 4, filter)
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourTexture.textureId, 0)
+		texture = new OpenGLTexture(width, height, 4, filter)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.textureId, 0)
 
 		// Depth buffer attachment
 		depthBufferId = glGenRenderbuffers()
@@ -82,14 +82,14 @@ class OpenGLFramebuffer implements Framebuffer {
 
 		glDeleteFramebuffers(framebufferId)
 		glDeleteRenderbuffers(depthBufferId)
-		colourTexture.close()
+		texture.close()
 		fullScreenQuad.close()
 	}
 
 	@Override
 	void draw(PostProcessingShaderContext shaderContext) {
 
-		fullScreenQuad.draw(shaderContext, colourTexture)
+		fullScreenQuad.draw(shaderContext, texture)
 	}
 
 	@Override
@@ -97,6 +97,7 @@ class OpenGLFramebuffer implements Framebuffer {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 		glEnable(GL_DEPTH_TEST)
+		glDepthFunc(GL_LEQUAL)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 		glViewport(0, 0, width, height)
 		closure()

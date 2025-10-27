@@ -35,6 +35,11 @@ interface Framebuffer extends GraphicsResource {
 	int getHeight()
 
 	/**
+	 * Get the underlying texture used in this framebuffer.
+	 */
+	Texture getTexture()
+
+	/**
 	 * Get the width of the framebuffer.
 	 */
 	int getWidth()

@@ -53,6 +53,9 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 
 	/**
 	 * Include a node list with the window.
+	 *
+	 * <p>Note that by doing this, ImGui's docking mode will be enabled so that
+	 * you can place the node list where you like.
 	 */
 	Window addNodeList(Scene scene)
 
@@ -143,14 +146,19 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	void toggleFullScreen()
 
 	/**
+	 * Switch between having ImGui windows rendered or not.
+	 */
+	void toggleImGuiWindows()
+
+	/**
 	 * Switch between vertical sync being anabled/disabled.
 	 */
 	void toggleVSync()
 
 	/**
-	 * Convenience method for keeping all frame-rendering commands within the
-	 * closure and surrounding it with the necessary {@link #clear},
-	 * {@link #swapBuffers}, and {@link #pollEvents} calls.
+	 * Convenience method for using the window as the render target.  The closure
+	 * will be surrounded with the necessary {@link #clear}, {@link #swapBuffers},
+	 * and {@link #pollEvents} calls.
 	 */
 	void useWindow(Closure closure)
 

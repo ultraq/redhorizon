@@ -86,6 +86,9 @@ class ImGuiElementsCheck extends Specification {
 					if (eventHandler.keyPressed(GLFW_KEY_V, true)) {
 						window.toggleVSync()
 					}
+					if (eventHandler.keyPressed(GLFW_KEY_I, true)) {
+						window.toggleImGuiWindows()
+					}
 				}
 				Thread.yield()
 			}

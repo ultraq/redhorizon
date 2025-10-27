@@ -26,6 +26,9 @@ import imgui.glfw.ImGuiImplGlfw
 import static imgui.flag.ImGuiConfigFlags.*
 import static org.lwjgl.glfw.GLFW.*
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * Setup necessary to include ImGui in the rendering pipeline.
  *
@@ -79,13 +82,14 @@ class ImGuiContext implements GraphicsResource {
 	 * Automatically mark the beginning and end of a frame as before and after the
 	 * execution of the given closure.
 	 */
-	void withFrame(Closure closure) {
+	void withFrame(boolean createDockspace, @ClosureParams(value = SimpleType, options = 'int') Closure closure) {
 
 		imGuiGl3.newFrame()
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
 
-		closure()
+		var dockspaceId = createDockspace ? ImGui.dockSpaceOverViewport() : 0
+		closure(dockspaceId)
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())

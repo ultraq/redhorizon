@@ -17,9 +17,11 @@
 package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.FpsCounter
+import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
@@ -63,10 +65,14 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private int interval
 	private long lastClickTime
 	private final Rectanglei lastWindowPositionAndSize = new Rectanglei()
+	private final Framebuffer framebuffer
+	private final ScreenShader screenShader
 
 	private final ImGuiContext imGuiContext
+	private final GameWindow gameWindow
 	private FpsCounter fpsCounter
 	private NodeList nodeList
+	private boolean showImGuiWindows
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -138,8 +144,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 		logger.info('OpenGL device: {}, version {}', glGetString(GL_RENDERER), glGetString(GL_VERSION))
 
-		glEnable(GL_DEPTH_TEST)
-		glDepthFunc(GL_LEQUAL)
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
@@ -173,9 +177,16 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 			}
 		}
 
+		// This framebuffer will be used as the render target for the window, so
+		// that we can either send it to ImGui if enabled, or straight to the screen
+		// if not.
+		framebuffer = new OpenGLFramebuffer(width, height)
+		screenShader = new ScreenShader()
+
 		// Create an ImGui context - might as well bake it into the window as we're
 		// gonna be using it a lot
 		imGuiContext = new ImGuiContext(window, getContentScale() / renderScale as float)
+		gameWindow = new GameWindow()
 	}
 
 	@Override
@@ -189,6 +200,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow addNodeList(Scene scene) {
 
 		nodeList = new NodeList(scene)
+		showImGuiWindows = true
 		return this
 	}
 
@@ -212,7 +224,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	@Override
 	void clear() {
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+		glClear(GL_COLOR_BUFFER_BIT)
 	}
 
 	@Override
@@ -221,18 +233,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		imGuiContext.close()
 		glfwDestroyWindow(window)
 		glfwTerminate()
-	}
-
-	/**
-	 * Return the current content scale.
-	 */
-	private float getContentScale() {
-
-		var contentScalePointer = new float[1]
-		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
-		var contentScale = contentScalePointer[0]
-		logger.debug('Content scale is {}', contentScale)
-		return contentScale
 	}
 
 	/**
@@ -255,6 +255,18 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 
 		return new Tuple2<>(width, height)
+	}
+
+	/**
+	 * Return the current content scale.
+	 */
+	private float getContentScale() {
+
+		var contentScalePointer = new float[1]
+		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
+		var contentScale = contentScalePointer[0]
+		logger.debug('Content scale is {}', contentScale)
+		return contentScale
 	}
 
 	@Override
@@ -370,6 +382,12 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
+	void toggleImGuiWindows() {
+
+		showImGuiWindows = !showImGuiWindows
+	}
+
+	@Override
 	void toggleVSync() {
 
 		setVSync(Math.wrap(interval + 1, 0, System.isWindows() ? 5 : 2))
@@ -378,12 +396,25 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	@Override
 	void useWindow(Closure closure) {
 
+		// Render everything out to the internal framebuffer
+		framebuffer.useFramebuffer(closure)
+
+		// Then render everything to the screen, either via ImGui or the underlying window
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+		glDisable(GL_DEPTH_TEST)
 		clear()
 		glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
-		imGuiContext.withFrame { ->
-			closure()
-			nodeList?.render()
+
+		imGuiContext.withFrame(showImGuiWindows) { dockspaceId ->
+			if (dockspaceId) {
+				gameWindow.render(dockspaceId, framebuffer)
+				nodeList.render()
+			}
+			else {
+				screenShader.useShader { shaderContext ->
+					framebuffer.draw(shaderContext)
+				}
+			}
 			fpsCounter?.render()
 		}
 		swapBuffers()
