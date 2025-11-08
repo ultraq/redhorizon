@@ -118,7 +118,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 				viewport.setMin(viewportX, viewportY).setLengths(viewportWidth, viewportHeight)
 				logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 
-				trigger(new FramebufferSizeEvent(width, newHeight))
+				trigger(new FramebufferSizeEvent(newWidth, newHeight))
 			}
 		}
 
