@@ -29,15 +29,6 @@ import org.joml.primitives.Rectanglef
 class JomlExtensions {
 
 	/**
-	 * Consider a {@code Vector2f} truthy if it is non-null and has non-zero
-	 * values.
-	 */
-	static boolean asBoolean(Vector2f self) {
-
-		return self != null && self.length() != 0
-	}
-
-	/**
 	 * Return an array of points {@code Vector2f}s, each representing a point of
 	 * this rectangle.
 	 */
