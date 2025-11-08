@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.io
 
 import java.nio.ByteOrder
+import java.util.function.Supplier
 
 /**
  * A variant of {@link DataInputStream} that reads primitive types respecting
@@ -66,9 +67,24 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Override
 	int read() {
 
-		var result = dis.read()
-		bytesRead++
+		return readIncrementBytesRead(1, dis::read)
+	}
+
+	/**
+	 * Perform the given operation, incrementing the number of bytes read by the
+	 * given value.
+	 */
+	private <T> T readIncrementBytesRead(int bytes, Supplier<T> reader) {
+
+		var result = reader()
+		bytesRead += bytes
 		return result
+	}
+
+	@Override
+	byte readByte() {
+
+		return readIncrementBytesRead(1, dis::readByte)
 	}
 
 	/**
@@ -78,7 +94,13 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Override
 	int readInt() {
 
-		return isLittleEndian ? readLittleEndian(4) : dis.readInt()
+		return isLittleEndian ? readLittleEndian(4) : readIncrementBytesRead(4, dis::readInt)
+	}
+
+	@Override
+	byte[] readNBytes(int len) {
+
+		return readIncrementBytesRead(len, () -> dis.readNBytes(len))
 	}
 
 	/**
@@ -88,7 +110,13 @@ class NativeDataInputStream extends InputStream implements DataInput, NativeRead
 	@Override
 	short readShort() {
 
-		return isLittleEndian ? readLittleEndian(2) : dis.readShort()
+		return isLittleEndian ? readLittleEndian(2) : readIncrementBytesRead(2, dis::readShort)
+	}
+
+	@Override
+	int readUnsignedByte() {
+
+		return readIncrementBytesRead(1, dis::readUnsignedByte)
 	}
 
 	/**
