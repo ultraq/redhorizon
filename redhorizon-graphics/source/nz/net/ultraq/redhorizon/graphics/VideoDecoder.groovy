@@ -20,6 +20,8 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.TrackInfoEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.ImageInfoEvent
 
+import java.nio.file.ProviderNotFoundException
+
 /**
  * A combination audio and video decoder for streaming video files.
  *
@@ -33,6 +35,23 @@ interface VideoDecoder extends EventTarget<VideoDecoder> {
 	 * as {@code FrameDecodedEvent}s.
 	 */
 	DecodeSummary decode(InputStream inputStream)
+
+	/**
+	 * Locate a video decoder for the given file extension.
+	 *
+	 * NOTE: The following will build fine, but IntelliJ will complain about
+	 *       static interface methods until Groovy 5 support is added.
+	 */
+	static VideoDecoder forFileExtension(String fileExtension) {
+
+		var serviceLoader = ServiceLoader.load(VideoDecoder)
+		for (var decoder : serviceLoader) {
+			if (fileExtension.toLowerCase() in decoder.getSupportedFileExtensions()) {
+				return decoder
+			}
+		}
+		throw new ProviderNotFoundException("No decoder found for file extension ${fileExtension}")
+	}
 
 	/**
 	 * Returns the file extension commonly used by files that this decoder

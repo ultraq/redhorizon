@@ -21,6 +21,7 @@ import nz.net.ultraq.eventhorizon.EventTarget
 
 import groovy.transform.ImmutableOptions
 import java.nio.ByteBuffer
+import java.nio.file.ProviderNotFoundException
 
 /**
  * A class which can decode sound data, the encoding of which can be found by
@@ -36,6 +37,23 @@ interface AudioDecoder extends EventTarget<AudioDecoder> {
 	 * is complete.
 	 */
 	DecodeSummary decode(InputStream inputStream)
+
+	/**
+	 * Locate a sound data decoder for the given file extension.
+	 *
+	 * NOTE: The following will build fine, but IntelliJ will complain about
+	 *       static interface methods until Groovy 5 support is added.
+	 */
+	static AudioDecoder forFileExtension(String fileExtension) {
+
+		var serviceLoader = ServiceLoader.load(AudioDecoder)
+		for (var decoder : serviceLoader) {
+			if (fileExtension.toLowerCase() in decoder.getSupportedFileExtensions()) {
+				return decoder
+			}
+		}
+		throw new ProviderNotFoundException("No decoder found for file extension ${fileExtension}")
+	}
 
 	/**
 	 * Returns the file extension commonly used by files that this decoder

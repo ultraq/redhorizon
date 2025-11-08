@@ -75,7 +75,7 @@ class Palette implements AutoCloseable {
 	 */
 	Palette(String fileName, InputStream inputStream) {
 
-		var result = PaletteDecoders
+		var result = PaletteDecoder
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.decode(inputStream)
 

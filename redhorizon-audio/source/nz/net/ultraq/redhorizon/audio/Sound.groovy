@@ -49,7 +49,7 @@ class Sound extends Node<Sound> implements AutoCloseable {
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
-		var result = AudioDecoders
+		var result = AudioDecoder
 			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(SampleDecodedEvent) { event ->
 				buffers << event.buffer()

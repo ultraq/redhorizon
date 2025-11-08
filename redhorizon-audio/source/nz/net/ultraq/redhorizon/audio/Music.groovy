@@ -68,7 +68,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 		source = new OpenALSource()
 		var fileSize = 0
 		var duration = 0
-		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		var decoder = AudioDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(HeaderDecodedEvent) { event ->
 				var bits = event.bits()
 				var channels = event.channels()

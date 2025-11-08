@@ -54,7 +54,7 @@ class Video extends Node<Video> implements AutoCloseable {
 	@SuppressWarnings('UnnecessaryQualifiedReference')
 	Video(String fileName, InputStream inputStream, int playbackWidth = 0, int playbackHeight = 0) {
 
-		var decoder = VideoDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		var decoder = VideoDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 
 		animation = new Animation(decoder, 31, playbackWidth, playbackHeight)
 			.on(Animation.PlaybackReadyEvent) { event ->

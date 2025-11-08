@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import java.nio.file.ProviderNotFoundException
+
 /**
  * A class for decoding palette files to create {@link Palette} objects.
  *
@@ -28,6 +30,23 @@ interface PaletteDecoder {
 	 * returned result.
 	 */
 	DecodeResult decode(InputStream inputStream)
+
+	/**
+	 * Locate a palette decoder for the given file extension.
+	 *
+	 * NOTE: The following will build fine, but IntelliJ will complain about
+	 *       static interface methods until Groovy 5 support is added.
+	 */
+	static PaletteDecoder forFileExtension(String fileExtension) {
+
+		var serviceLoader = ServiceLoader.load(PaletteDecoder)
+		for (var decoder in serviceLoader) {
+			if (fileExtension.toLowerCase() in decoder.getSupportedFileExtensions()) {
+				return decoder
+			}
+		}
+		throw new ProviderNotFoundException("No decoder found for file extension ${fileExtension}")
+	}
 
 	/**
 	 * Returns the file extension commonly used by files that this decoder
