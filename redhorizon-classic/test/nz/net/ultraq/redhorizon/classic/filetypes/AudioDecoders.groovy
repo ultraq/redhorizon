@@ -54,8 +54,8 @@ class AudioDecoders extends Specification {
 				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
 			}
 			sound.play()
-			while (sound.playing) {
-				Thread.sleep(100)
+			while (!sound.stopped) {
+				Thread.sleep(500)
 			}
 		then:
 			notThrown(Exception)
@@ -69,9 +69,9 @@ class AudioDecoders extends Specification {
 			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
 //				.withLooping(true)
 			music.play()
-			while (music.playing) {
+			while (!music.stopped) {
 				music.update()
-				Thread.sleep(100)
+				Thread.sleep(500)
 			}
 		then:
 			notThrown(Exception)

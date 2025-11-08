@@ -53,9 +53,9 @@ class AudioCheck extends Specification {
 			var sound = new Sound('AudioCheck_Sound_bong_001.ogg', oggStream)
 		when:
 			sound.play()
-			while (sound.playing) {
+			while (!sound.stopped) {
 				sound.update()
-				Thread.sleep(100)
+				Thread.sleep(500)
 			}
 		then:
 			notThrown(Exception)
