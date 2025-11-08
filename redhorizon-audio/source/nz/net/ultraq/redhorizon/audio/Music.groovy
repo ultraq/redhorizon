@@ -52,7 +52,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 	private ExecutorService executor
 	private Future<?> decodingTask
 	private volatile BlockingQueue<SampleDecodedEvent> streamingEvents
-	private int readAhead = 16
+	private int readAhead = 64
 	private final List<SampleDecodedEvent> eventDrain = []
 	private int buffersQueued
 	private int buffersPlayed
@@ -82,7 +82,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 			.on(SampleDecodedEvent) { event ->
 				if (streamingEvents == null) {
 					if (fileSize && duration) {
-						readAhead = fileSize / duration / event.buffer().capacity() as int
+						readAhead = (fileSize / duration / event.buffer().capacity()) * 3 as int
 					}
 					logger.debug('Read-ahead of {} chunks', readAhead)
 					streamingEvents = new ArrayBlockingQueue<>(readAhead)
@@ -136,6 +136,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 	@Override
 	void close() {
 
+		decodingTask?.cancel(true)
 		executor?.close()
 		source.stop()
 		streamedBuffers*.close()
@@ -211,9 +212,8 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 
 		source.setPosition(position)
 
-		// Buffer the music.  A looping track will never have processed buffers, so
-		// just pile on some number to the source.
-		var buffersAhead = !source.looping ? buffersPlayed - buffersQueued + readAhead : 8
+		// Buffer the music
+		var buffersAhead = !source.looping ? buffersPlayed - buffersQueued + readAhead : readAhead
 		if (buffersAhead > 0) {
 			eventDrain.clear()
 			streamingEvents.drain(eventDrain, buffersAhead).each { event ->
