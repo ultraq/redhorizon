@@ -43,14 +43,10 @@ class ImGuiElementsCheck extends Specification {
 		}
 	}
 
-	Scene scene
 	OpenGLWindow window
 
 	def setup() {
-		scene = new Scene()
 		window = new OpenGLWindow(800, 600, "Testing")
-			.addDebugOverlay(new DebugOverlay())
-			.addNodeList(new NodeList(scene))
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
@@ -62,13 +58,13 @@ class ImGuiElementsCheck extends Specification {
 	}
 
 	def cleanup() {
+
 		window?.close()
 	}
 
-	def 'Shows an FPS counter, node list'() {
+	def 'Shows a debug overlay, node list'() {
 		given:
-			var eventHandler = new InputEventHandler()
-				.addInputSource(window)
+			var scene = new Scene()
 			var node = new Node().tap {
 				name = 'Parent'
 			}
@@ -79,8 +75,15 @@ class ImGuiElementsCheck extends Specification {
 			node << new Node().tap {
 				name = 'Child 2'
 			}
+			var camera = new Camera(800, 600, window)
+			var eventHandler = new InputEventHandler()
+				.addInputSource(window)
 		when:
-			window.show()
+			window
+				.addDebugOverlay(new DebugOverlay()
+					.withCursorTracking(camera))
+				.addNodeList(new NodeList(scene))
+				.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					// Do something!
