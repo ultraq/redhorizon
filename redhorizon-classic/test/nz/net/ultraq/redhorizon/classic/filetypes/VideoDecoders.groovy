@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Video
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -49,7 +50,7 @@ class VideoDecoders extends Specification {
 		device = new OpenALAudioDevice()
 			.withMasterVolume(0.5f)
 		window = new OpenGLWindow(640, 400, "Testing")
-			.addFpsCounter()
+			.addDebugOverlay(new DebugOverlay())
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)

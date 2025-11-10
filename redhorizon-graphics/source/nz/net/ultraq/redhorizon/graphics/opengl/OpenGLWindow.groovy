@@ -20,14 +20,13 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.FpsCounter
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
@@ -70,7 +69,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private final ImGuiContext imGuiContext
 	private final GameWindow gameWindow
-	private FpsCounter fpsCounter
+	private DebugOverlay debugOverlay
 	private NodeList nodeList
 	private boolean showImGuiWindows
 
@@ -190,16 +189,16 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow addFpsCounter(float updateRateSeconds = 0f) {
+	OpenGLWindow addDebugOverlay(DebugOverlay debugOverlay) {
 
-		fpsCounter = new FpsCounter(imGuiContext, updateRateSeconds)
+		this.debugOverlay = debugOverlay.withInternals(imGuiContext, this)
 		return this
 	}
 
 	@Override
-	OpenGLWindow addNodeList(Scene scene) {
+	OpenGLWindow addNodeList(NodeList nodeList) {
 
-		nodeList = new NodeList(scene)
+		this.nodeList = nodeList
 		showImGuiWindows = true
 		return this
 	}
@@ -415,7 +414,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 					framebuffer.draw(shaderContext)
 				}
 			}
-			fpsCounter?.render()
+			debugOverlay?.render()
 		}
 		swapBuffers()
 		pollEvents()

@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -47,8 +49,8 @@ class ImGuiElementsCheck extends Specification {
 	def setup() {
 		scene = new Scene()
 		window = new OpenGLWindow(800, 600, "Testing")
-			.addFpsCounter()
-			.addNodeList(scene)
+			.addDebugOverlay(new DebugOverlay())
+			.addNodeList(new NodeList(scene))
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)

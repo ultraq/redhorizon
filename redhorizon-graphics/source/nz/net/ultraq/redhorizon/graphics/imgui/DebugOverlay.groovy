@@ -16,32 +16,39 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
+import nz.net.ultraq.redhorizon.graphics.Camera
+import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 
 import imgui.ImFont
 import imgui.ImGui
 import imgui.type.ImBoolean
+import org.joml.Vector2f
+import org.joml.Vector3f
 import static imgui.flag.ImGuiWindowFlags.*
 
 /**
- * A basic FPS counter overlay build using ImGui.
+ * A configurable debug overlay starting with just an FPS counter.
  *
  * @author Emanuel Rabina
  */
-class FpsCounter {
+class DebugOverlay {
 
-	private final ImFont robotoMonoFont
 	private final float updateRateSeconds
+	private Camera camera
+	private ImFont robotoMonoFont
+	private final Vector2f cursorPosition = new Vector2f()
+	private final Vector3f worldPosition = new Vector3f()
 	private long lastUpdateTimeMs = System.currentTimeMillis()
 	private float updateTimer
 	private float framerate
 	private int width = 300
 
 	/**
-	 * Constructor, create a new FPS counter tied to an existing window.
+	 * Constructor, create a new FPS counter.
 	 */
-	FpsCounter(ImGuiContext imGuiContext, float updateRateSeconds) {
+	DebugOverlay(float updateRateSeconds = 0f) {
 
-		robotoMonoFont = imGuiContext.robotoMonoFont
 		this.updateRateSeconds = updateRateSeconds
 		updateTimer = updateRateSeconds // So we get a result the moment the counter is shown
 	}
@@ -68,8 +75,37 @@ class FpsCounter {
 		ImGui.begin('Debug overlay', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
 		width = (int)ImGui.getWindowSizeX()
 		ImGui.text("FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms")
+		if (camera) {
+			ImGui.text("Cursor: ${sprintf('%.1f', cursorPosition.x)}, ${sprintf('%.1f', cursorPosition.y)}")
+			ImGui.text("World: ${sprintf('%.1f', worldPosition.x)}, ${sprintf('%.1f', worldPosition.y)}")
+		}
 		ImGui.end()
 
 		ImGui.popFont()
+	}
+
+	/**
+	 * Include cursor position debugging in the overlay.
+	 */
+	DebugOverlay withCursorTracking(Camera camera) {
+
+		this.camera = camera
+		return this
+	}
+
+	/**
+	 * Further configure this overlay to work.  Used internally by the
+	 * {@link Window}.
+	 */
+	DebugOverlay withInternals(ImGuiContext imGuiContext, Window window) {
+
+		robotoMonoFont = imGuiContext.robotoMonoFont
+		if (camera) {
+			window.on(CursorPositionEvent) { event ->
+				cursorPosition.set(event.xPos(), event.yPos())
+				camera.unproject(cursorPosition.x, cursorPosition.y, worldPosition)
+			}
+		}
+		return this
 	}
 }

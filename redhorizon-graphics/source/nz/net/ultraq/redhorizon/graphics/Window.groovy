@@ -16,8 +16,9 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.InputSource
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.primitives.Rectanglei
 
@@ -41,15 +42,9 @@ import org.joml.primitives.Rectanglei
 interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoCloseable {
 
 	/**
-	 * Include an FPS counter with the window, with a default update rate of every
-	 * frame.
+	 * Include a debug overlay with the window.
 	 */
-	Window addFpsCounter()
-
-	/**
-	 * Include an FPS counter with the window, using the specified update rate.
-	 */
-	Window addFpsCounter(float updateRateSeconds)
+	Window addDebugOverlay(DebugOverlay debugOverlay)
 
 	/**
 	 * Include a node list with the window.
@@ -57,7 +52,7 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	 * <p>Note that by doing this, ImGui's docking mode will be enabled so that
 	 * you can place the node list where you like.
 	 */
-	Window addNodeList(Scene scene)
+	Window addNodeList(NodeList nodeList)
 
 	/**
 	 * Center the window to the screen.

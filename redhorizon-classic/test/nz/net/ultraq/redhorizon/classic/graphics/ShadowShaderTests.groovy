@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
@@ -46,7 +47,7 @@ class ShadowShaderTests extends Specification {
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
-			.addFpsCounter()
+			.addDebugOverlay(new DebugOverlay())
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
