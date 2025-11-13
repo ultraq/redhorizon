@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.InputSource
 
+import org.joml.Vector2f
 import org.joml.primitives.Rectanglei
 
 /**
@@ -68,26 +69,14 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	void clear()
 
 	/**
-	 * Return the height of the window contents.
+	 * Get the size of the window.
 	 */
-	int getHeight()
-
-	/**
-	 * Get the scaling factor between the window size and the framebuffer size.
-	 * On most systems this should be 1, but on macOS with retina screens, it's
-	 * 2.
-	 */
-	float getRenderScale()
+	Vector2f getSize()
 
 	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()
-
-	/**
-	 * Return the width of the window contents.
-	 */
-	int getWidth()
 
 	/**
 	 * Makes the context current on the executing thread.

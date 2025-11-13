@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
+import org.joml.Vector2f
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -48,16 +49,13 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
+@SuppressWarnings('GrFinalVariableAccess')
 class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
 
 	private final long window
-	int width
-	int height
-	private int framebufferWidth
-	private int framebufferHeight
-	final float renderScale
+	final Vector2f size
 	final Rectanglei viewport
 	private boolean centered
 	private boolean fullScreen
@@ -78,8 +76,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	 */
 	OpenGLWindow(int width, int height, String title) {
 
-		this.width = width
-		this.height = height
+		size = new Vector2f(width, height)
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
@@ -98,19 +95,16 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 
+		logger.debug('Creating window of size {}x{}', width, height)
 		window = glfwCreateWindow(width, height, title, NULL, NULL)
 		if (!window) {
 			throw new Exception('Failed to create a window')
 		}
 
-		(framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
+		var renderScale = 0f
+		def (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
-				this.width = newWidth * renderScale as int
-				this.height = newHeight * renderScale as int
-				framebufferWidth = newWidth
-				framebufferHeight = newHeight
-
 				var scale = Math.min(newWidth / viewport.lengthX(), newHeight / viewport.lengthY())
 				var viewportWidth = (int)(viewport.lengthX() * scale)
 				var viewportHeight = (int)(viewport.lengthY() * scale)
@@ -209,12 +203,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow centerToScreen() {
 
 		centered = true
-		var widthPointer = new int[1]
-		var heightPointer = new int[1]
-		glfwGetWindowSize(window, widthPointer, heightPointer)
-		var width = widthPointer[0]
-		var height = heightPointer[0]
-
+		def (width, height) = getWindowSize()
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
 		glfwSetWindowPos(window,
 			(videoMode.width() / 2) - (width / 2) as int,
@@ -270,6 +259,28 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		return contentScale
 	}
 
+	/**
+	 * Return the current window position.
+	 */
+	private Tuple2<Integer, Integer> getWindowPosition() {
+
+		var xPointer = new int[1]
+		var yPointer = new int[1]
+		glfwGetWindowPos(window, xPointer, yPointer)
+		return new Tuple2<>(xPointer[0], yPointer[0])
+	}
+
+	/**
+	 * Return the current window size.
+	 */
+	private Tuple2<Integer, Integer> getWindowSize() {
+
+		var widthPointer = new int[1]
+		var heightPointer = new int[1]
+		glfwGetWindowSize(window, widthPointer, heightPointer)
+		return new Tuple2<>(widthPointer[0], heightPointer[0])
+	}
+
 	@Override
 	void makeCurrent() {
 
@@ -292,10 +303,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow scaleToFit() {
 
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
+		def (width, height) = getWindowSize()
+
 		// Subtract some value from the monitor size to account for any window and OS chrome
 		var scale = Math.floor(Math.min((videoMode.width() * 0.90) / width, (videoMode.height() * 0.90) / height)) as int
 		width *= scale
 		height *= scale
+		logger.debug('Scaling window to {}x{}', width, height)
 		glfwSetWindowSize(window, width, height)
 		return centered ? centerToScreen() : this
 	}
@@ -360,20 +374,10 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		// Switch to full screen mode
 		else {
 			logger.debug('Switching to full screen mode')
-
-			var xPointer = new int[1]
-			var yPointer = new int[1]
-			var widthPointer = new int[1]
-			var heightPointer = new int[1]
-			glfwGetWindowPos(window, xPointer, yPointer)
-			var x = xPointer[0]
-			var y = yPointer[0]
-			glfwGetWindowSize(window, widthPointer, heightPointer)
-			var width = widthPointer[0]
-			var height = heightPointer[0]
+			def (x, y) = getWindowPosition()
+			def (width, height) = getWindowSize()
 			logger.debug('Window position and size before maximizing is {}x{}, {}x{}', x, y, width, height)
 			lastWindowPositionAndSize.setMin(x, y).setLengths(width, height)
-
 			var primaryMonitor = glfwGetPrimaryMonitor()
 			var videoMode = glfwGetVideoMode(primaryMonitor)
 			glfwSetWindowMonitor(window, primaryMonitor, 0, 0, videoMode.width(), videoMode.height(), videoMode.refreshRate())
