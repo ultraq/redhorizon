@@ -81,15 +81,18 @@ class Camera extends Node<Camera> {
 	Vector3f unproject(float winX, float winY, Vector3f result) {
 
 		var viewport = window.viewport
-		var renderScale = window.renderScale
+//		var renderScale = window.renderScale
 		return projection.mulAffine(view, viewProjection)
 			.unproject(
-				winX / renderScale as float,
-				winY / renderScale as float,
+//				winX / renderScale as float,
+//				winY / renderScale as float,
+				winX,
+				winY,
 				0,
 				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
 				result)
-			.mul(renderScale)
+//			.mul(renderScale)
+			.mul(1f, -1f, 1f)
 	}
 
 	/**

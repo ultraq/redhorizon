@@ -106,6 +106,8 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		(framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
+				this.width = newWidth * renderScale as int
+				this.height = newHeight * renderScale as int
 				framebufferWidth = newWidth
 				framebufferHeight = newHeight
 
