@@ -26,6 +26,7 @@ Currently, this project consists of several modules in an attempt to prove out
 various parts of the overall engine. These standalone modules are:
 
  - [`redhorizon-audio`](redhorizon-audio)
+ - [`redhorizon-classic`](redhorizon-classic)
  - [`redhorizon-graphics`](redhorizon-graphics)
  - [`redhorizon-input`](redhorizon-input)
  - [`redhorizon-scenegraph`](redhorizon-scenegraph)
