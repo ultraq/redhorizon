@@ -19,5 +19,11 @@ jobs:
         if: ${{ failure() }}
         with:
           name: build-reports
-          path: redhorizon-engine/build/reports/
+          path: |
+            redhorizon/build/reports/
+            redhorizon-audio/build/reports/
+            redhorizon-classic/build/reports/
+            redhorizon-graphics/build/reports/
+            redhorizon-input/build/reports/
+            redhorizon-scenegraph/build/reports/
           retention-days: 30
