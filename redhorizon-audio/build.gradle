@@ -58,7 +58,7 @@ configure {
 		.withArtifacts(groovydocJar)
 		.configurePom() {
 			url = 'https://github.com/ultraq/redhorizon'
-			inceptionYear = '2025'
+			inceptionYear = '2007'
 		}
 			.useApache20License()
 			.withGitHubScm('ultraq')
