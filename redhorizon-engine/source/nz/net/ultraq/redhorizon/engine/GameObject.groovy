@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
  *
  * @author Emanuel Rabina
  */
-class GameObject<TGameObject extends GameObject> extends Node<TGameObject> {
+class GameObject<TGameObject extends GameObject, TGameContext extends GameContext> extends Node<TGameObject> {
 
 	private String scriptName
 
@@ -36,7 +36,7 @@ class GameObject<TGameObject extends GameObject> extends Node<TGameObject> {
 	 *   Time, in seconds, since the last time this method was called.
 	 * @param context
 	 */
-	void update(float delta, GameContext context) {
+	void update(float delta, TGameContext context) {
 
 		if (scriptName) {
 			var script = context.scriptEngine().loadScriptClass(scriptName) as GameObjectScript

@@ -16,15 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.graphics.Camera
+
 /**
- * A custom class for any script used during the game update phase.
+ * Interface for the collection of objects that are useful for rendering.
  *
  * @author Emanuel Rabina
  */
-interface GameObjectScript<TGameObject extends GameObject, TGameContext extends GameContext> {
+interface GraphicsContext {
 
-	/**
-	 * Actions to perform when the object is being updated.
-	 */
-	void update(TGameObject gameObject, float delta, TGameContext context)
+	Camera camera()
 }

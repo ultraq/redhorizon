@@ -21,10 +21,10 @@ package nz.net.ultraq.redhorizon.engine
  *
  * @author Emanuel Rabina
  */
-interface GraphicsObject {
+interface GraphicsObject<TGraphicsContext extends GraphicsContext> {
 
 	/**
 	 * Render the element for display.
 	 */
-	void render(GraphicsContext context)
+	void render(TGraphicsContext context)
 }

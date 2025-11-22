@@ -19,14 +19,17 @@ package nz.net.ultraq.redhorizon.engine
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
-import groovy.transform.ImmutableOptions
-
 /**
- * A collection of objects that are useful for game logic and updating state.
- * Created so we don't have to pass so much stuff around in constructors.
+ * Interface for a collection of objects that are useful for game logic and
+ * updating state.
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['scriptEngine', 'inputEventHandler', 'camera'])
-record GameContext(ScriptEngine scriptEngine, InputEventHandler inputEventHandler, Camera camera) {
+interface GameContext {
+
+	Camera camera()
+
+	InputEventHandler inputEventHandler()
+
+	ScriptEngine scriptEngine()
 }
