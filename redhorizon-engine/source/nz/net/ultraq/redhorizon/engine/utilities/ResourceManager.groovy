@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.utilities
 
+import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
@@ -50,6 +52,30 @@ class ResourceManager implements AutoCloseable {
 		}
 		resources << image
 		return image
+	}
+
+	/**
+	 * Load a music stream from an audio file.
+	 */
+	Music loadMusic(String path) {
+
+		var music = getResourceAsStream(path).withBufferedStream { stream ->
+			return new Music(path, stream)
+		}
+		resources << music
+		return music
+	}
+
+	/**
+	 * Load a sound effect from an audio file.
+	 */
+	Sound loadSound(String path) {
+
+		var sound = getResourceAsStream(path).withBufferedStream { stream ->
+			return new Sound(path, stream)
+		}
+		resources << sound
+		return sound
 	}
 
 	/**

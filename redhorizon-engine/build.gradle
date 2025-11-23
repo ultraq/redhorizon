@@ -35,6 +35,7 @@ configure {
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
+				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
 				implementation project(':redhorizon-scenegraph')
