@@ -24,6 +24,9 @@ import org.joml.primitives.AABBf
 import org.joml.primitives.AABBfc
 import org.joml.primitives.Rectanglef
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * An element of a scene.
  *
@@ -71,11 +74,33 @@ class Node<T extends Node> {
 	}
 
 	/**
-	 * An overload of {@code <<} as an alias for {@link #addChild(Node)}.
+	 * Locate the first ancestor node that satisfies the given predicate.
+	 *
+	 * @param predicate
+	 * @return
+	 *   The matching node, or {@code null} if no match is found.
 	 */
-	void leftShift(Node child) {
+	Node findAncestor(@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node') Closure<Boolean> predicate) {
 
-		addChild(child)
+		if (parent) {
+			return predicate(parent) ? parent : parent.findAncestor(predicate)
+		}
+		return null
+	}
+
+	/**
+	 * Locate the first descendent from this node that satisfies the given
+	 * predicate.
+	 *
+	 * @param predicate
+	 * @return
+	 *   The matching node, or {@code null} if no match is found.
+	 */
+	Node findDescendent(@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node') Closure<Boolean> predicate) {
+
+		return children.find { node ->
+			return predicate(node) ? node : node.findDescendent(predicate)
+		}
 	}
 
 	/**
@@ -150,6 +175,14 @@ class Node<T extends Node> {
 	float getWidth() {
 
 		return _boundingVolume.lengthX()
+	}
+
+	/**
+	 * An overload of {@code <<} as an alias for {@link #addChild(Node)}.
+	 */
+	void leftShift(Node child) {
+
+		addChild(child)
 	}
 
 	/**

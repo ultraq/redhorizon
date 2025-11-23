@@ -24,7 +24,7 @@ package nz.net.ultraq.redhorizon.scenegraph
  */
 class Scene {
 
-	@Delegate(includes = ['addChild', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
+	@Delegate(includes = ['addChild', 'findAncestor', 'findDescendent', 'leftShift', 'removeChild', 'traverse'], interfaces = false)
 	final Node root = new RootNode()
 
 	/**
