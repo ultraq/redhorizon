@@ -59,10 +59,12 @@ class ResourceManager implements AutoCloseable {
 	 */
 	Music loadMusic(String path) {
 
-		var music = getResourceAsStream(path).withBufferedStream { stream ->
-			return new Music(path, stream)
-		}
+		var musicStream = new BufferedInputStream(getResourceAsStream(path))
+		resources << musicStream
+
+		var music = new Music(path, musicStream)
 		resources << music
+
 		return music
 	}
 
