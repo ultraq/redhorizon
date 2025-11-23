@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.utilities
 
+import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 
@@ -37,6 +38,18 @@ class ResourceManager implements AutoCloseable {
 	void close() {
 
 		resources*.close()
+	}
+
+	/**
+	 * Load an image asset from an image file.
+	 */
+	Image loadImage(String path) {
+
+		var image = getResourceAsStream(path).withBufferedStream { stream ->
+			return new Image(path, stream)
+		}
+		resources << image
+		return image
 	}
 
 	/**
