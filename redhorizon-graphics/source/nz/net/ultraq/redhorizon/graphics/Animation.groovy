@@ -24,8 +24,8 @@ import nz.net.ultraq.redhorizon.graphics.ImageDecoder.ImageInfoEvent
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.slf4j.Logger
@@ -47,7 +47,7 @@ import java.util.concurrent.Future
  *
  * @author Emanuel Rabina
  */
-class Animation extends Node<Animation> implements AutoCloseable, EventTarget<Animation> {
+class Animation implements AutoCloseable, EventTarget<Animation> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
@@ -149,7 +149,7 @@ class Animation extends Node<Animation> implements AutoCloseable, EventTarget<An
 	/**
 	 * Draw the current frame of the animation.
 	 */
-	void draw(SceneShaderContext shaderContext) {
+	void draw(SceneShaderContext shaderContext, Matrix4fc transform) {
 
 		if (!mesh && width && height) {
 			mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{

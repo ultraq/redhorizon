@@ -65,16 +65,10 @@ class ImGuiElementsCheck extends Specification {
 	def 'Shows a debug overlay, node list'() {
 		given:
 			var scene = new Scene()
-			var node = new Node().tap {
-				name = 'Parent'
-			}
+			var node = new Node().withName('Parent')
 			scene << node
-			node << new Node().tap {
-				name = 'Child 1'
-			}
-			node << new Node().tap {
-				name = 'Child 2'
-			}
+			node << new Node().withName('Child 1')
+			node << new Node().withName('Child 2')
 			var camera = new Camera(800, 600, window)
 			var eventHandler = new InputEventHandler()
 				.addInputSource(window)

@@ -17,8 +17,9 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import org.joml.Matrix4fc
+import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -36,7 +37,7 @@ import java.util.concurrent.Future
  *
  * @author Emanuel Rabina
  */
-class Video extends Node<Video> implements AutoCloseable {
+class Video implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Video)
 
@@ -86,7 +87,7 @@ class Video extends Node<Video> implements AutoCloseable {
 		while (!(animationReady && musicReady)) {
 			Thread.onSpinWait()
 		}
-		update(0f)
+		update(0f, new Vector3f())
 	}
 
 	@Override
@@ -100,9 +101,9 @@ class Video extends Node<Video> implements AutoCloseable {
 	/**
 	 * Draw the current frame of the video.
 	 */
-	void draw(SceneShaderContext shaderContext) {
+	void draw(SceneShaderContext shaderContext, Matrix4fc transform) {
 
-		animation.draw(shaderContext)
+		animation.draw(shaderContext, transform)
 	}
 
 	/**
@@ -137,9 +138,9 @@ class Video extends Node<Video> implements AutoCloseable {
 	/**
 	 * Update the streaming data for the video.
 	 */
-	void update(float delta) {
+	void update(float delta, Vector3f position) {
 
 		animation.update(delta)
-		music.update()
+		music.update(position)
 	}
 }

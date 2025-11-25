@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 
+import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -38,6 +39,7 @@ class AudioDecoders extends Specification {
 	}
 
 	AudioDevice device
+	Vector3f position = new Vector3f()
 
 	def setup() {
 		device = new OpenALAudioDevice()
@@ -70,7 +72,7 @@ class AudioDecoders extends Specification {
 //				.withLooping(true)
 			music.play()
 			while (!music.stopped) {
-				music.update()
+				music.update(position)
 				Thread.sleep(500)
 			}
 		then:

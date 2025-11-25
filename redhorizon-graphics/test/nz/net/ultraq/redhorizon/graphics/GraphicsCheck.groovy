@@ -48,6 +48,7 @@ class GraphicsCheck extends Specification {
 	}
 
 	OpenGLWindow window
+	Matrix4f transform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
@@ -87,7 +88,6 @@ class GraphicsCheck extends Specification {
 				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
 			})
 			var camera = new Camera(10, 10, window)
-			var transform = new Matrix4f()
 		when:
 			window.show()
 			while (!window.shouldClose()) {
@@ -121,7 +121,7 @@ class GraphicsCheck extends Specification {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						sprite.draw(shaderContext)
+						sprite.draw(shaderContext, transform)
 					}
 				}
 				Thread.yield()
@@ -131,45 +131,6 @@ class GraphicsCheck extends Specification {
 		cleanup:
 			sprite?.close()
 			image?.close()
-			shader?.close()
-	}
-
-	def 'Draw sprite bounding area'() {
-		given:
-			var shader = new BasicShader()
-			var imageStream = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck_Texture_ship0000.png')
-			var image = new Image('GraphicsCheck_Texture_ship0000.png', imageStream)
-			var sprite = new Sprite(image)
-			var spriteBoundingArea = sprite.boundingArea
-			var boundingArea = new OpenGLMesh(Type.LINE_LOOP,
-				new Vertex[]{
-					new Vertex(new Vector3f(spriteBoundingArea.minX, spriteBoundingArea.minY, 1), Colour.RED),
-					new Vertex(new Vector3f(spriteBoundingArea.maxX, spriteBoundingArea.minY, 1), Colour.RED),
-					new Vertex(new Vector3f(spriteBoundingArea.maxX, spriteBoundingArea.maxY, 1), Colour.RED),
-					new Vertex(new Vector3f(spriteBoundingArea.minX, spriteBoundingArea.maxY, 1), Colour.RED)
-				},
-				new int[]{ 0, 1, 2, 3 })
-			var camera = new Camera(80, 60, window)
-				.translate(16, 16, 0)
-			var material = new Material()
-		when:
-			window.show()
-			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						sprite.draw(shaderContext)
-						boundingArea.draw(shaderContext, material)
-					}
-				}
-				Thread.yield()
-			}
-		then:
-			notThrown(Exception)
-		cleanup:
-			sprite?.close()
-			image?.close()
-			imageStream?.close()
 			shader?.close()
 	}
 }

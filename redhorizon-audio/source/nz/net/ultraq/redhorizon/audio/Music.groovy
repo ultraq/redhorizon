@@ -22,8 +22,9 @@ import nz.net.ultraq.redhorizon.audio.AudioDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -44,7 +45,7 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
+class Music implements AutoCloseable, EventTarget<Music> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Music)
 
@@ -111,7 +112,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 		while (streamingEvents == null || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
-		update()
+		update(new Vector3f())
 	}
 
 	/**
@@ -204,7 +205,7 @@ class Music extends Node<Music> implements AutoCloseable, EventTarget<Music> {
 	/**
 	 * Update the streaming data for the music track.
 	 */
-	void update() {
+	void update(Vector3fc position) {
 
 		if (decodingError) {
 			throw new IllegalStateException('An error occurred decoding the music track')

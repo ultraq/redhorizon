@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
-
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.Vector3fc
@@ -27,11 +25,11 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-class Camera extends Node<Camera> {
+class Camera {
 
 	private final Window window
-	final Matrix4f projection
-	final Matrix4f view
+	private final Matrix4f projection
+	private final Matrix4f view
 	private final Matrix4f viewProjection = new Matrix4f()
 	private final Vector3f position = new Vector3f()
 
@@ -51,19 +49,33 @@ class Camera extends Node<Camera> {
 		)
 	}
 
-	@Override
+	/**
+	 * Return the position of the camera.
+	 */
 	Vector3fc getPosition() {
 
 		return view.getTranslation(position)
 	}
 
-	@Override
+	/**
+	 * Set the position of the camera.
+	 */
+	void setPosition(Vector3fc position) {
+
+		setPosition(position.x(), position.y(), position.z())
+	}
+
+	/**
+	 * Set the position of the camera.
+	 */
 	void setPosition(float x, float y, float z) {
 
 		view.setTranslation(x, y, z)
 	}
 
-	@Override
+	/**
+	 * Adjust the position of the camera.
+	 */
 	Camera translate(float x, float y, float z) {
 
 		view.translate(-x, -y, -z)

@@ -32,6 +32,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
+import org.joml.Matrix4f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
@@ -53,6 +54,7 @@ class ImageDecoders extends Specification {
 	}
 
 	OpenGLWindow window
+	Matrix4f transform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
@@ -87,7 +89,7 @@ class ImageDecoders extends Specification {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						sprite.draw(shaderContext)
+						sprite.draw(shaderContext, transform)
 					}
 				}
 				Thread.yield()
@@ -115,7 +117,7 @@ class ImageDecoders extends Specification {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
-						sprite.draw(shaderContext)
+						sprite.draw(shaderContext, transform)
 					}
 				}
 				Thread.yield()
@@ -173,7 +175,7 @@ class ImageDecoders extends Specification {
 						adjustmentMap.update()
 						shaderContext.setPalette(palette)
 						shaderContext.setAlphaMask(alphaMask)
-						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))
+						sprite.draw(shaderContext, transform, spriteSheet.getFramePosition(frame))
 					}
 				}
 				Thread.yield()
@@ -209,7 +211,7 @@ class ImageDecoders extends Specification {
 					shader.useShader { shaderContext ->
 						camera.update(shaderContext)
 						animation.update(delta)
-						animation.draw(shaderContext)
+						animation.draw(shaderContext, transform)
 					}
 				}
 				Thread.yield()

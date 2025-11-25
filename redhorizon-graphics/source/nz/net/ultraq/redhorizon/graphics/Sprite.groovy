@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 
@@ -29,11 +29,13 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Sprite extends Node<Sprite> implements AutoCloseable {
+class Sprite implements AutoCloseable {
 
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 	private static final Vector2f defaultFramePosition = new Vector2f(0, 0)
 
+	final int width
+	final int height
 	private final Mesh mesh
 	private final Material material
 
@@ -42,7 +44,8 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	 */
 	private Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture) {
 
-		super(width, height, 0)
+		this.width = width
+		this.height = height
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 			new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
 			new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
@@ -80,7 +83,7 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	 * Draw this sprite, using the currently-bound shader and optionally selecting
 	 * a frame in the sprite sheet.
 	 */
-	void draw(SceneShaderContext shaderContext, Vector2f framePosition = defaultFramePosition) {
+	void draw(SceneShaderContext shaderContext, Matrix4fc transform, Vector2f framePosition = defaultFramePosition) {
 
 		material.frameXY = framePosition
 		mesh.draw(shaderContext, material, globalTransform)
