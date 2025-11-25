@@ -26,6 +26,7 @@ import org.joml.primitives.Rectanglef
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * An element of a scene.
@@ -34,9 +35,10 @@ import groovy.transform.stc.SimpleType
  */
 class Node<T extends Node> {
 
-	String name
-	final List<Node> children = []
-	Node parent
+	private String name
+	protected Node parent
+	final List<Node> children = new CopyOnWriteArrayList<>()
+
 	protected final Vector3f _position = new Vector3f()
 	protected final Rectanglef _boundingArea = new Rectanglef()
 	protected final AABBf _boundingVolume = new AABBf()
@@ -243,5 +245,23 @@ class Node<T extends Node> {
 
 		visitor.visit(this)
 		children*.traverse(visitor)
+	}
+
+	/**
+	 * Set the name of this node.
+	 */
+	T withName(String name) {
+
+		this.name = name
+		return (T)this
+	}
+
+	/**
+	 * Set the position of and return this node.
+	 */
+	T withPosition(float x, float y, float z) {
+
+		setPosition(x, y, z)
+		return (T)this
 	}
 }
