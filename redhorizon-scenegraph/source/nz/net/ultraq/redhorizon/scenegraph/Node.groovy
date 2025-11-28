@@ -33,7 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> {
+class Node<T extends Node> implements Visitable {
 
 	private String name
 	protected Node parent
@@ -262,9 +262,7 @@ class Node<T extends Node> {
 		return (T)this
 	}
 
-	/**
-	 * Traverse this node and all of its children.
-	 */
+	@Override
 	void traverse(SceneVisitor visitor) {
 
 		visitor.visit(this)

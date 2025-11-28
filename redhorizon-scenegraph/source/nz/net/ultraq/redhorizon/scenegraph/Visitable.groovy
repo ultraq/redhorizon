@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,18 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 /**
- * Interface for anything that wants to be able to traverse the scene graph.
+ * Any object in a scene which can be traversed by a {@link SceneVisitor}.
  *
  * @author Emanuel Rabina
  */
-@FunctionalInterface
-interface SceneVisitor {
+interface Visitable {
 
 	/**
-	 * Visit any object that can be visited.
+	 * Accept a visit from a scene visitor, continuing the visit to any other
+	 * related objects.
 	 */
-	void visit(Visitable visitable)
+	default void traverse(SceneVisitor visitor) {
+
+		visitor.visit(this)
+	}
 }

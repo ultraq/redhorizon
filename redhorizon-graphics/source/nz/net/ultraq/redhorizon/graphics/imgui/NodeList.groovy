@@ -55,8 +55,10 @@ class NodeList {
 
 		// File list
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
-			scene.root.children.each { child ->
-				renderNodeAndChildren(child)
+			scene.traverse { it ->
+				if (it instanceof Node) {
+					renderNodeAndChildren(it)
+				}
 			}
 			ImGui.endListBox()
 		}
