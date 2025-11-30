@@ -83,6 +83,6 @@ class Sprite extends Node<Sprite> implements AutoCloseable {
 	void draw(SceneShaderContext shaderContext, Vector2f framePosition = defaultFramePosition) {
 
 		material.frameXY = framePosition
-		mesh.draw(shaderContext, material, transform)
+		mesh.draw(shaderContext, material, globalTransform)
 	}
 }

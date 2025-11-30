@@ -43,6 +43,8 @@ class Node<T extends Node> {
 	protected final Rectanglef _boundingArea = new Rectanglef()
 	protected final AABBf _boundingVolume = new AABBf()
 	protected final Matrix4f _transform = new Matrix4f()
+	protected final Matrix4f _globalTransform = new Matrix4f()
+	protected final Vector3f _globalPosition = new Vector3f()
 
 	/**
 	 * Default constructor, create a new node that takes up no space in the scene.
@@ -127,6 +129,28 @@ class Node<T extends Node> {
 	float getDepth() {
 
 		return _boundingVolume.lengthZ()
+	}
+
+	/**
+	 * Return the global position of this node.  That is, the local position
+	 * multiplied by every local position of the node's ancestors.
+	 */
+	Vector3f getGlobalPosition() {
+
+		return globalTransform.getTranslation(_globalPosition)
+	}
+
+	/**
+	 * Return the global transform of this node.  That is, the local transform
+	 * multiplied by every local transform of the node's ancestors.
+	 */
+	Matrix4f getGlobalTransform() {
+
+		_globalTransform.set(transform)
+		if (parent) {
+			_globalTransform.mul(parent.globalTransform)
+		}
+		return _globalTransform
 	}
 
 	/**
