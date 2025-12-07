@@ -26,6 +26,8 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
+import org.joml.Matrix4f
+import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -47,6 +49,8 @@ class VideoDecoders extends Specification {
 
 	AudioDevice device
 	OpenGLWindow window
+	Matrix4f transform = new Matrix4f()
+	Vector3f position = transform.getTranslation(new Vector3f())
 
 	def setup() {
 		device = new OpenALAudioDevice()
@@ -87,9 +91,10 @@ class VideoDecoders extends Specification {
 
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
+						camera.render(shaderContext)
 						video.update(delta)
-						video.draw(shaderContext)
+						video.render(shaderContext, transform)
+						video.render(position)
 					}
 				}
 				Thread.yield()

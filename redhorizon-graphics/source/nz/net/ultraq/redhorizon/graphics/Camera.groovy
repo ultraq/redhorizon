@@ -58,6 +58,15 @@ class Camera {
 	}
 
 	/**
+	 * Update rendering with the camera state.
+	 */
+	void render(SceneShaderContext renderContext) {
+
+		renderContext.setProjectionMatrix(projection)
+		renderContext.setViewMatrix(view)
+	}
+
+	/**
 	 * Set the position of the camera.
 	 */
 	void setPosition(Vector3fc position) {
@@ -101,14 +110,5 @@ class Camera {
 				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
 				result)
 			.mul(1f, -1f, 1f)
-	}
-
-	/**
-	 * Update rendering with the camera state.
-	 */
-	void update(SceneShaderContext renderContext) {
-
-		renderContext.setProjectionMatrix(projection)
-		renderContext.setViewMatrix(view)
 	}
 }

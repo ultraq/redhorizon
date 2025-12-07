@@ -147,26 +147,6 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 	}
 
 	/**
-	 * Draw the current frame of the animation.
-	 */
-	void draw(SceneShaderContext shaderContext, Matrix4fc transform) {
-
-		if (!mesh && width && height) {
-			mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
-				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
-				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
-				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
-			}, index)
-		}
-		var frame = frames[currentFrame]
-		if (frame) {
-			material.texture = frames[currentFrame]
-			mesh.draw(shaderContext, material, transform)
-		}
-	}
-
-	/**
 	 * Return whether the animation is currently playing.
 	 */
 	boolean isPlaying() {
@@ -193,6 +173,26 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 			playTimer = 0
 		}
 		return this
+	}
+
+	/**
+	 * Draw the current frame of the animation.
+	 */
+	void render(SceneShaderContext shaderContext, Matrix4fc transform) {
+
+		if (!mesh && width && height) {
+			mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
+				new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
+				new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(1, 0)),
+				new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(1, 1)),
+				new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, 1))
+			}, index)
+		}
+		var frame = frames[currentFrame]
+		if (frame) {
+			material.texture = frames[currentFrame]
+			mesh.render(shaderContext, material, transform)
+		}
 	}
 
 	/**

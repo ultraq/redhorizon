@@ -88,8 +88,8 @@ class ImageDecoders extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						sprite.draw(shaderContext, transform)
+						camera.render(shaderContext)
+						sprite.render(shaderContext, transform)
 					}
 				}
 				Thread.yield()
@@ -116,8 +116,8 @@ class ImageDecoders extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						sprite.draw(shaderContext, transform)
+						camera.render(shaderContext)
+						sprite.render(shaderContext, transform)
 					}
 				}
 				Thread.yield()
@@ -170,12 +170,12 @@ class ImageDecoders extends Specification {
 
 				window.useWindow { ->
 					palettedSpriteShader.useShader { shaderContext ->
-						camera.update(shaderContext)
+						camera.render(shaderContext)
 						shaderContext.setAdjustmentMap(adjustmentMap)
 						adjustmentMap.update()
 						shaderContext.setPalette(palette)
 						shaderContext.setAlphaMask(alphaMask)
-						sprite.draw(shaderContext, transform, spriteSheet.getFramePosition(frame))
+						sprite.render(shaderContext, transform, spriteSheet.getFramePosition(frame))
 					}
 				}
 				Thread.yield()
@@ -209,9 +209,9 @@ class ImageDecoders extends Specification {
 
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
+						camera.render(shaderContext)
 						animation.update(delta)
-						animation.draw(shaderContext, transform)
+						animation.render(shaderContext, transform)
 					}
 				}
 				Thread.yield()

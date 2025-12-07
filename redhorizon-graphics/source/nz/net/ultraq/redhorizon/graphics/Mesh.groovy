@@ -27,24 +27,24 @@ import org.joml.Matrix4fc
 interface Mesh extends GraphicsResource {
 
 	/**
+	 * Whether or not this mesh is allowed to be updated with new vertex data.
+	 */
+	boolean isDynamic()
+
+	/**
 	 * Draw this mesh using default material and transform properties.
 	 */
-	void draw(SceneShaderContext shaderContext)
+	void render(SceneShaderContext shaderContext)
 
 	/**
 	 * Draw this mesh using supplied material and transform properties.
 	 */
-	void draw(SceneShaderContext shaderContext, Material material, Matrix4fc transform)
+	void render(SceneShaderContext shaderContext, Material material, Matrix4fc transform)
 
 	/**
 	 * Draw this mesh with a post-processing shader,
 	 */
-	void draw(PostProcessingShaderContext shaderContext, Texture texture)
-
-	/**
-	 * Whether or not this mesh is allowed to be updated with new vertex data.
-	 */
-	boolean isDynamic()
+	void render(PostProcessingShaderContext shaderContext, Texture texture)
 
 	/**
 	 * Update any vertex data in this mesh.  This is only allowed on meshes that

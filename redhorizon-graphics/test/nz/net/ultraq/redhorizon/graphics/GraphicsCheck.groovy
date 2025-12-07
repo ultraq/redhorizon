@@ -93,8 +93,8 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						triangle.draw(shaderContext, null, transform)
+						camera.render(shaderContext)
+						triangle.render(shaderContext, null, transform)
 					}
 				}
 				Thread.yield()
@@ -120,8 +120,8 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						sprite.draw(shaderContext, transform)
+						camera.render(shaderContext)
+						sprite.render(shaderContext, transform)
 					}
 				}
 				Thread.yield()

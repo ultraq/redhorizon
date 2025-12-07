@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
+import org.joml.Matrix4f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -44,6 +45,7 @@ class ShadowShaderTests extends Specification {
 	}
 
 	OpenGLWindow window
+	Matrix4f transform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
@@ -90,8 +92,8 @@ class ShadowShaderTests extends Specification {
 
 				window.useWindow { ->
 					shadowShader.useShader { shaderContext ->
-						camera.update(shaderContext)
-						sprite.draw(shaderContext, spriteSheet.getFramePosition(frame))
+						camera.render(shaderContext)
+						sprite.render(shaderContext, transform, spriteSheet.getFramePosition(frame))
 					}
 				}
 				Thread.yield()

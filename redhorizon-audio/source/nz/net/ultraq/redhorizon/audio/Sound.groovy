@@ -111,6 +111,14 @@ class Sound implements AutoCloseable {
 	}
 
 	/**
+	 * Update the state of the sound with the audio device.
+	 */
+	void render(Vector3fc position) {
+
+		source.setPosition(position)
+	}
+
+	/**
 	 * Play the sound.
 	 */
 	Sound play() {
@@ -130,14 +138,6 @@ class Sound implements AutoCloseable {
 			source.stop()
 		}
 		return this
-	}
-
-	/**
-	 * Update the state of the sound with the audio device.
-	 */
-	void update(Vector3fc position) {
-
-		source.setPosition(position)
 	}
 
 	/**

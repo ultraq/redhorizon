@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
-import org.joml.Vector3f
 import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -112,7 +111,7 @@ class Music implements AutoCloseable, EventTarget<Music> {
 		while (streamingEvents == null || streamingEvents.remainingCapacity()) {
 			Thread.onSpinWait()
 		}
-		update(new Vector3f())
+		update()
 	}
 
 	/**
@@ -191,6 +190,14 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	}
 
 	/**
+	 * Continue playback of the music track.
+	 */
+	void render(Vector3fc position) {
+
+		source.setPosition(position)
+	}
+
+	/**
 	 * Stop the music.
 	 */
 	Music stop() {
@@ -205,13 +212,11 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	/**
 	 * Update the streaming data for the music track.
 	 */
-	void update(Vector3fc position) {
+	void update() {
 
 		if (decodingError) {
 			throw new IllegalStateException('An error occurred decoding the music track')
 		}
-
-		source.setPosition(position)
 
 		// Buffer the music
 		var buffersAhead = !source.looping ? buffersPlayed - buffersQueued + readAhead : readAhead

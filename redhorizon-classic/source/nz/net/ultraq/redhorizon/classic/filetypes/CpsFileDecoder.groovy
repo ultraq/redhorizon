@@ -40,7 +40,7 @@ class CpsFileDecoder implements ImageDecoder {
 	static final short COMPRESSION_LCW   = 0x0004
 
 	static final int IMAGE_SIZE = 64000  // 320x200
-	static final int PALETTE_SIZE = 768
+	static final short PALETTE_SIZE = 768
 	// @formatter:on
 
 	static final int IMAGE_WIDTH = 320

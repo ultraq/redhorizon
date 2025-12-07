@@ -56,7 +56,7 @@ class AudioCheck extends Specification {
 		when:
 			sound.play()
 			while (!sound.stopped) {
-				sound.update(position)
+				sound.render(position)
 				Thread.sleep(500)
 			}
 		then:

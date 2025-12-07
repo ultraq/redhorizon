@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.graphics
 import nz.net.ultraq.redhorizon.audio.Music
 
 import org.joml.Matrix4fc
-import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -87,7 +87,7 @@ class Video implements AutoCloseable {
 		while (!(animationReady && musicReady)) {
 			Thread.onSpinWait()
 		}
-		update(0f, new Vector3f())
+		update(0f)
 	}
 
 	@Override
@@ -96,14 +96,6 @@ class Video implements AutoCloseable {
 		executor.close()
 		music.close()
 		animation.close()
-	}
-
-	/**
-	 * Draw the current frame of the video.
-	 */
-	void draw(SceneShaderContext shaderContext, Matrix4fc transform) {
-
-		animation.draw(shaderContext, transform)
 	}
 
 	/**
@@ -125,6 +117,22 @@ class Video implements AutoCloseable {
 	}
 
 	/**
+	 * Draw the current frame of the video.
+	 */
+	void render(SceneShaderContext shaderContext, Matrix4fc transform) {
+
+		animation.render(shaderContext, transform)
+	}
+
+	/**
+	 * Continue playback of the audio stream for this video.
+	 */
+	void render(Vector3fc position) {
+
+		music.render(position)
+	}
+
+	/**
 	 * Stop the video.
 	 */
 	Video stop() {
@@ -138,9 +146,9 @@ class Video implements AutoCloseable {
 	/**
 	 * Update the streaming data for the video.
 	 */
-	void update(float delta, Vector3f position) {
+	void update(float delta) {
 
 		animation.update(delta)
-		music.update(position)
+		music.update()
 	}
 }

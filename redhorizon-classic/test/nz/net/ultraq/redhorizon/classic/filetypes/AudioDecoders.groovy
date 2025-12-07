@@ -72,7 +72,8 @@ class AudioDecoders extends Specification {
 //				.withLooping(true)
 			music.play()
 			while (!music.stopped) {
-				music.update(position)
+				music.update()
+				music.render(position)
 				Thread.sleep(500)
 			}
 		then:

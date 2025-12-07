@@ -83,9 +83,9 @@ class Sprite implements AutoCloseable {
 	 * Draw this sprite, using the currently-bound shader and optionally selecting
 	 * a frame in the sprite sheet.
 	 */
-	void draw(SceneShaderContext shaderContext, Matrix4fc transform, Vector2f framePosition = defaultFramePosition) {
+	void render(SceneShaderContext shaderContext, Matrix4fc transform, Vector2f framePosition = defaultFramePosition) {
 
 		material.frameXY = framePosition
-		mesh.draw(shaderContext, material, globalTransform)
+		mesh.render(shaderContext, material, transform)
 	}
 }

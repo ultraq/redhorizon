@@ -89,7 +89,7 @@ class OpenGLFramebuffer implements Framebuffer {
 	@Override
 	void draw(PostProcessingShaderContext shaderContext) {
 
-		fullScreenQuad.draw(shaderContext, texture)
+		fullScreenQuad.render(shaderContext, texture)
 	}
 
 	@Override

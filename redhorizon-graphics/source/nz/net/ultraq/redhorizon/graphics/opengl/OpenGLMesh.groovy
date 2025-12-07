@@ -119,24 +119,24 @@ class OpenGLMesh implements Mesh {
 	}
 
 	@Override
-	void draw(SceneShaderContext shaderContext, Material material = null, Matrix4fc transform = IDENTITY_MATRIX) {
+	void render(SceneShaderContext shaderContext, Material material = null, Matrix4fc transform = IDENTITY_MATRIX) {
 
 		shaderContext.setMaterial(material)
 		shaderContext.setModelMatrix(transform)
-		drawMesh()
+		renderMesh()
 	}
 
 	@Override
-	void draw(PostProcessingShaderContext shaderContext, Texture texture) {
+	void render(PostProcessingShaderContext shaderContext, Texture texture) {
 
 		shaderContext.setFramebufferTexture(texture)
-		drawMesh()
+		renderMesh()
 	}
 
 	/**
 	 * Draw this mesh.
 	 */
-	private void drawMesh() {
+	private void renderMesh() {
 
 		glBindVertexArray(vertexArrayId)
 		if (index) {
