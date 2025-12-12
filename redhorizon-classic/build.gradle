@@ -38,6 +38,7 @@ configure {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
+				implementation project(':redhorizon-scenegraph')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"

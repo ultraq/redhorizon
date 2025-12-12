@@ -23,9 +23,6 @@ description = 'Core game engine for Red Horizon'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
-		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
-		}
 		.withJarOptions() {
 			manifest {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.engine'
@@ -37,8 +34,6 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
-				implementation project(':redhorizon-input')
-				implementation project(':redhorizon-scenegraph')
 			}
 
 	createMavenPublication()
