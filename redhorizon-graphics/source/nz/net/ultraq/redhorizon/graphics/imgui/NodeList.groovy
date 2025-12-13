@@ -25,24 +25,19 @@ import static imgui.flag.ImGuiCond.FirstUseEver
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTreeNodeFlags.*
 
+import groovy.transform.TupleConstructor
+
 /**
  * An ImGui panel showing how the scene is currently structured.
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false, includes = ['scene'])
 class NodeList implements ImGuiComponent {
 
 	final boolean requiresDockspace = true
-	private final Scene scene
+	final Scene scene
 	private Node selectedNode
-
-	/**
-	 * Constructor, tie this node list to the current ImGui context and scene.
-	 */
-	NodeList(Scene scene) {
-
-		this.scene = scene
-	}
 
 	@Override
 	void render() {
