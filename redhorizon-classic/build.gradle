@@ -47,24 +47,5 @@ configure {
 			.withTestDependencies() {
 				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
 			}
-
-	createMavenPublication()
-		.withArtifacts(groovydocJar)
-		.configurePom() {
-			url = 'https://github.com/ultraq/redhorizon'
-			inceptionYear = '2007'
-		}
-		.useApache20License()
-		.withGitHubScm('ultraq')
-		.withDevelopers([
-			name: 'Emanuel Rabina',
-			email: 'emanuelrabina@gmail.com',
-			url: 'https://www.ultraq.net.nz'
-		])
-		.publishToMavenCentral(
-			findProperty('mavenCentral.publisher.username'),
-			findProperty('mavenCentral.publisher.password'),
-			'nz.net.ultraq'
-		)
 }
 // @formatter:on
