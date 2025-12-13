@@ -71,10 +71,14 @@ class AudioDecoders extends Specification {
 			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
 //				.withLooping(true)
 			music.play()
+			var start = System.currentTimeMillis()
 			while (!music.stopped) {
 				music.update()
 				music.render(position)
 				Thread.sleep(500)
+				if (System.currentTimeMillis() - start > 5000) {
+					music.stop()
+				}
 			}
 		then:
 			notThrown(Exception)

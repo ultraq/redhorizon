@@ -56,7 +56,7 @@ class VideoDecoders extends Specification {
 		device = new OpenALAudioDevice()
 			.withMasterVolume(0.5f)
 		window = new OpenGLWindow(640, 400, "Testing")
-			.addDebugOverlay(new DebugOverlay())
+			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)

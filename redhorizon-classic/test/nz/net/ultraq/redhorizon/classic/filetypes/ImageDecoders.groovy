@@ -58,7 +58,7 @@ class ImageDecoders extends Specification {
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
-			.addDebugOverlay(new DebugOverlay())
+			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
