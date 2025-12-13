@@ -20,10 +20,9 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
@@ -67,9 +66,8 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private final ImGuiContext imGuiContext
 	private final GameWindow gameWindow
-	private DebugOverlay debugOverlay
-	private NodeList nodeList
-	private boolean showImGuiWindows
+	private List<ImGuiComponent> imGuiComponents = []
+	private boolean createDockspace
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -185,17 +183,10 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow addDebugOverlay(DebugOverlay debugOverlay) {
+	Window addImGuiComponent(ImGuiComponent imGuiComponent) {
 
-		this.debugOverlay = debugOverlay.withInternals(imGuiContext, this)
-		return this
-	}
-
-	@Override
-	OpenGLWindow addNodeList(NodeList nodeList) {
-
-		this.nodeList = nodeList
-		showImGuiWindows = true
+		imGuiComponents << imGuiComponent.configureFromWindow(imGuiContext, this)
+		createDockspace |= imGuiComponent.requiresDockspace
 		return this
 	}
 
@@ -410,17 +401,18 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		clear()
 		glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
 
-		imGuiContext.withFrame(showImGuiWindows) { dockspaceId ->
+		imGuiContext.withFrame(createDockspace) { dockspaceId ->
 			if (dockspaceId) {
 				gameWindow.render(dockspaceId, framebuffer)
-				nodeList.render()
 			}
 			else {
 				screenShader.useShader { shaderContext ->
 					framebuffer.draw(shaderContext)
 				}
 			}
-			debugOverlay?.render()
+			imGuiComponents.each { imGuiComponent ->
+				imGuiComponent.render()
+			}
 		}
 		swapBuffers()
 		pollEvents()

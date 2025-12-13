@@ -74,9 +74,9 @@ class ImGuiElementsCheck extends Specification {
 				.addInputSource(window)
 		when:
 			window
-				.addDebugOverlay(new DebugOverlay()
+				.addImGuiComponent(new DebugOverlay()
 					.withCursorTracking(camera))
-				.addNodeList(new NodeList(scene))
+				.addImGuiComponent(new NodeList(scene))
 				.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->

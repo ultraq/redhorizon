@@ -32,7 +32,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay {
+class DebugOverlay implements ImGuiComponent {
 
 	private final float updateRateSeconds
 	private Camera camera
@@ -53,9 +53,20 @@ class DebugOverlay {
 		updateTimer = updateRateSeconds // So we get a result the moment the counter is shown
 	}
 
-	/**
-	 * Draw the FPS counter in the upper right corner of the window.
-	 */
+	@Override
+	ImGuiComponent configureFromWindow(ImGuiContext imGuiContext, Window window) {
+
+		robotoMonoFont = imGuiContext.robotoMonoFont
+		if (camera) {
+			window.on(CursorPositionEvent) { event ->
+				cursorPosition.set(event.xPos(), event.yPos())
+				camera.unproject(cursorPosition.x, cursorPosition.y, worldPosition)
+			}
+		}
+		return this
+	}
+
+	@Override
 	void render() {
 
 		var currentTimeMs = System.currentTimeMillis()
@@ -90,22 +101,6 @@ class DebugOverlay {
 	DebugOverlay withCursorTracking(Camera camera) {
 
 		this.camera = camera
-		return this
-	}
-
-	/**
-	 * Further configure this overlay to work.  Used internally by the
-	 * {@link Window}.
-	 */
-	DebugOverlay withInternals(ImGuiContext imGuiContext, Window window) {
-
-		robotoMonoFont = imGuiContext.robotoMonoFont
-		if (camera) {
-			window.on(CursorPositionEvent) { event ->
-				cursorPosition.set(event.xPos(), event.yPos())
-				camera.unproject(cursorPosition.x, cursorPosition.y, worldPosition)
-			}
-		}
 		return this
 	}
 }

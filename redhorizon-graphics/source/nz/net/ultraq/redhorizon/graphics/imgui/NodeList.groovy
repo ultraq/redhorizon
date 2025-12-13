@@ -30,8 +30,9 @@ import static imgui.flag.ImGuiTreeNodeFlags.*
  *
  * @author Emanuel Rabina
  */
-class NodeList {
+class NodeList implements ImGuiComponent {
 
+	final boolean requiresDockspace = true
 	private final Scene scene
 	private Node selectedNode
 
@@ -43,9 +44,7 @@ class NodeList {
 		this.scene = scene
 	}
 
-	/**
-	 * Draw the node list as a floating window.
-	 */
+	@Override
 	void render() {
 
 		ImGui.setNextWindowSize(250, 400, FirstUseEver)
