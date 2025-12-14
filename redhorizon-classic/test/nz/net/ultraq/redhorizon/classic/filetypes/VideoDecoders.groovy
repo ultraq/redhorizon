@@ -49,8 +49,7 @@ class VideoDecoders extends Specification {
 
 	AudioDevice device
 	OpenGLWindow window
-	Matrix4f transform = new Matrix4f()
-	Vector3f position = transform.getTranslation(new Vector3f())
+	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		device = new OpenALAudioDevice()
@@ -77,9 +76,11 @@ class VideoDecoders extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream, 320, 188)
+			var videoTransform = new Matrix4f()
+				.translate(-160, -94, 0)
+			var videoPosition = new Vector3f() // Should move the "ears" to the video position too, but we haven't
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
-				.translate(160, 94, 0)
 		when:
 			window.show()
 			video.play()
@@ -91,10 +92,10 @@ class VideoDecoders extends Specification {
 
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
+						camera.render(shaderContext, cameraTransform)
 						video.update(delta)
-						video.render(shaderContext, transform)
-						video.render(position)
+						video.render(shaderContext, videoTransform)
+						video.render(videoPosition)
 					}
 				}
 				Thread.yield()

@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.joml.Matrix4f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
@@ -44,6 +45,7 @@ class ImGuiElementsCheck extends Specification {
 	}
 
 	OpenGLWindow window
+	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
@@ -75,7 +77,7 @@ class ImGuiElementsCheck extends Specification {
 		when:
 			window
 				.addImGuiComponent(new DebugOverlay()
-					.withCursorTracking(camera))
+					.withCursorTracking(camera, cameraTransform))
 				.addImGuiComponent(new NodeList(scene))
 				.show()
 			while (!window.shouldClose()) {

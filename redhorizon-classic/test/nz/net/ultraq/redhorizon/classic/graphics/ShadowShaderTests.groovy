@@ -45,7 +45,7 @@ class ShadowShaderTests extends Specification {
 	}
 
 	OpenGLWindow window
-	Matrix4f transform = new Matrix4f()
+	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
@@ -71,9 +71,10 @@ class ShadowShaderTests extends Specification {
 				return new SpriteSheet('ShadowShaderTests_Shadow_mig.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet)
+			var spriteTransform = new Matrix4f()
+				.translate(-24, -24, 0)
 			var shadowShader = new ShadowShader()
 			var camera = new Camera(320, 200, window)
-				.translate(24, 24, 0)
 			var timer = 0
 			var frame = 0
 		when:
@@ -92,8 +93,8 @@ class ShadowShaderTests extends Specification {
 
 				window.useWindow { ->
 					shadowShader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						sprite.render(shaderContext, transform, spriteSheet.getFramePosition(frame))
+						camera.render(shaderContext, cameraTransform)
+						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
 					}
 				}
 				Thread.yield()

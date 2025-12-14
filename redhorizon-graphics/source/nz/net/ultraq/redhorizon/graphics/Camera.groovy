@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector3f
-import org.joml.Vector3fc
 
 /**
  * The player's view into the world.
@@ -31,7 +31,7 @@ class Camera {
 	private final Matrix4f projection
 	private final Matrix4f view
 	private final Matrix4f viewProjection = new Matrix4f()
-	private final Vector3f position = new Vector3f()
+	private final Matrix4f viewTransform = new Matrix4f()
 
 	/**
 	 * Constructor, create a new 2D camera with the given view dimensions.
@@ -50,45 +50,12 @@ class Camera {
 	}
 
 	/**
-	 * Return the position of the camera.
-	 */
-	Vector3fc getPosition() {
-
-		return view.getTranslation(position)
-	}
-
-	/**
 	 * Update rendering with the camera state.
 	 */
-	void render(SceneShaderContext renderContext) {
+	void render(SceneShaderContext renderContext, Matrix4fc transform) {
 
 		renderContext.setProjectionMatrix(projection)
-		renderContext.setViewMatrix(view)
-	}
-
-	/**
-	 * Set the position of the camera.
-	 */
-	void setPosition(Vector3fc position) {
-
-		setPosition(position.x(), position.y(), position.z())
-	}
-
-	/**
-	 * Set the position of the camera.
-	 */
-	void setPosition(float x, float y, float z) {
-
-		view.setTranslation(x, y, z)
-	}
-
-	/**
-	 * Adjust the position of the camera.
-	 */
-	Camera translate(float x, float y, float z) {
-
-		view.translate(-x, -y, -z)
-		return this
+		renderContext.setViewMatrix(view.mul(transform, viewTransform))
 	}
 
 	/**
@@ -99,10 +66,10 @@ class Camera {
 	 * @param result A vector to store the result in.
 	 * @return The {@code result} vector.
 	 */
-	Vector3f unproject(float winX, float winY, Vector3f result) {
+	Vector3f unproject(float winX, float winY, Matrix4fc transform, Vector3f result) {
 
 		var viewport = window.viewport
-		return projection.mulAffine(view, viewProjection)
+		return projection.mulAffine(view.mul(transform, viewTransform), viewProjection)
 			.unproject(
 				winX,
 				winY,

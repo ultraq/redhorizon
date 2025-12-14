@@ -54,7 +54,7 @@ class ImageDecoders extends Specification {
 	}
 
 	OpenGLWindow window
-	Matrix4f transform = new Matrix4f()
+	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
@@ -80,16 +80,17 @@ class ImageDecoders extends Specification {
 				return new Image('ImageDecoders_Image_alipaper.pcx', stream)
 			}
 			var sprite = new Sprite(image)
+			var spriteTransform = new Matrix4f()
+				.translate(-320, -200, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(640, 400, window)
-				.translate(320, 200, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						sprite.render(shaderContext, transform)
+						camera.render(shaderContext, cameraTransform)
+						sprite.render(shaderContext, spriteTransform)
 					}
 				}
 				Thread.yield()
@@ -108,16 +109,17 @@ class ImageDecoders extends Specification {
 				return new Image('ImageDecoders_Image_alipaper.cps', stream)
 			}
 			var sprite = new Sprite(image)
+			var spriteTransform = new Matrix4f()
+				.translate(-160, -100, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
-				.translate(160, 100, 0)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						sprite.render(shaderContext, transform)
+						camera.render(shaderContext, cameraTransform)
+						sprite.render(shaderContext, spriteTransform)
 					}
 				}
 				Thread.yield()
@@ -136,6 +138,8 @@ class ImageDecoders extends Specification {
 				return new SpriteSheet('ImageDecoders_SpriteSheet_4tnk.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet)
+			var spriteTransform = new Matrix4f()
+				.translate(-24, -24, 0)
 			var faction = Faction.RED
 			var adjustmentMap = new FactionAdjustmentMap(faction)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
@@ -144,7 +148,6 @@ class ImageDecoders extends Specification {
 			var alphaMask = new AlphaMask()
 			var palettedSpriteShader = new PalettedSpriteShader()
 			var camera = new Camera(320, 200, window)
-				.translate(24, 24, 0)
 			var timer = 0
 			var frame = 0
 			window.on(KeyEvent) { event ->
@@ -170,12 +173,12 @@ class ImageDecoders extends Specification {
 
 				window.useWindow { ->
 					palettedSpriteShader.useShader { shaderContext ->
-						camera.render(shaderContext)
+						camera.render(shaderContext, cameraTransform)
 						shaderContext.setAdjustmentMap(adjustmentMap)
 						adjustmentMap.update()
 						shaderContext.setPalette(palette)
 						shaderContext.setAlphaMask(alphaMask)
-						sprite.render(shaderContext, transform, spriteSheet.getFramePosition(frame))
+						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
 					}
 				}
 				Thread.yield()
@@ -195,9 +198,10 @@ class ImageDecoders extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
 			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream, 266, 200)
+			var animationTransform = new Matrix4f()
+				.translate(-133, -100, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
-				.translate(133, 100, 0)
 		when:
 			window.show()
 			animation.play()
@@ -209,9 +213,9 @@ class ImageDecoders extends Specification {
 
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
+						camera.render(shaderContext, cameraTransform)
 						animation.update(delta)
-						animation.render(shaderContext, transform)
+						animation.render(shaderContext, animationTransform)
 					}
 				}
 				Thread.yield()

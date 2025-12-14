@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import imgui.ImFont
 import imgui.ImGui
 import imgui.type.ImBoolean
+import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 import static imgui.flag.ImGuiWindowFlags.*
@@ -36,6 +37,7 @@ class DebugOverlay implements ImGuiComponent {
 
 	private final float updateRateSeconds
 	private Camera camera
+	private Matrix4fc cameraTransform
 	private ImFont robotoMonoFont
 	private final Vector2f cursorPosition = new Vector2f()
 	private final Vector3f worldPosition = new Vector3f()
@@ -60,7 +62,7 @@ class DebugOverlay implements ImGuiComponent {
 		if (camera) {
 			window.on(CursorPositionEvent) { event ->
 				cursorPosition.set(event.xPos(), event.yPos())
-				camera.unproject(cursorPosition.x, cursorPosition.y, worldPosition)
+				camera.unproject(cursorPosition.x, cursorPosition.y, cameraTransform, worldPosition)
 			}
 		}
 		return this
@@ -98,9 +100,10 @@ class DebugOverlay implements ImGuiComponent {
 	/**
 	 * Include cursor position debugging in the overlay.
 	 */
-	DebugOverlay withCursorTracking(Camera camera) {
+	DebugOverlay withCursorTracking(Camera camera, Matrix4fc cameraTransform) {
 
 		this.camera = camera
+		this.cameraTransform = cameraTransform
 		return this
 	}
 }
