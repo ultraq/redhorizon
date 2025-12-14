@@ -33,7 +33,7 @@ class Scene {
 	private class RootNode extends Node<RootNode> {
 
 		@Override
-		protected Scene getScene() {
+		Scene getScene() {
 
 			return Scene.this
 		}

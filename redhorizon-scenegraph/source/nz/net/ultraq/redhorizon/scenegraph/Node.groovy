@@ -182,7 +182,7 @@ class Node<T extends Node> implements Visitable {
 	 * Walk up the scene graph to locate and return the scene to which this node
 	 * belongs.
 	 */
-	protected Scene getScene() {
+	Scene getScene() {
 
 		return parent?.getScene()
 	}
