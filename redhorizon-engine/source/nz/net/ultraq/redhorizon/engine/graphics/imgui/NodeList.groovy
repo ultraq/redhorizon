@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.scenegraph.Named
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -54,6 +55,12 @@ class NodeList implements ImGuiComponent {
 				if (it instanceof Node) {
 					renderNodeAndChildren(it)
 				}
+				else if (it instanceof Named) {
+					var flags = SpanFullWidth | OpenOnArrow | DefaultOpen | Leaf
+					if (ImGui.treeNodeEx(it.name, flags)) {
+						ImGui.treePop()
+					}
+				}
 			}
 			ImGui.endListBox()
 		}
@@ -73,7 +80,7 @@ class NodeList implements ImGuiComponent {
 		if (node == selectedNode) {
 			flags |= Selected
 		}
-		if (ImGui.treeNodeEx(node.name ?: '(no name)', flags)) {
+		if (ImGui.treeNodeEx(node.name, flags)) {
 			if (ImGui.isItemClicked() && !ImGui.isItemToggledOpen()) {
 				selectedNode = node
 			}
