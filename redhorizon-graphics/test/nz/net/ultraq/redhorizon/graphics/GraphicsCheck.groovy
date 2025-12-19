@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
@@ -52,6 +53,7 @@ class GraphicsCheck extends Specification {
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
+			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)

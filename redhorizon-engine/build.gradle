@@ -23,6 +23,14 @@ description = 'Core game engine for Red Horizon'
 // @formatter:off
 configure {
 	asGroovyLibraryProject()
+		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+		}
 		.withJarOptions() {
 			manifest {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.engine'
@@ -34,6 +42,14 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
+				implementation project(':redhorizon-input')
+				implementation project(':redhorizon-scenegraph')
+				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
+			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 			}
 }
 // @formatter:on

@@ -24,12 +24,11 @@ description = 'Graphics module for the Red Horizon project'
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
-			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
-			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
 			manifest {
@@ -42,7 +41,6 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-input')
-				implementation project(':redhorizon-scenegraph')
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"

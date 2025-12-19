@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.redhorizon.graphics.Camera
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
-import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyEvent

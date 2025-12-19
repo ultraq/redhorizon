@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.imgui
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
