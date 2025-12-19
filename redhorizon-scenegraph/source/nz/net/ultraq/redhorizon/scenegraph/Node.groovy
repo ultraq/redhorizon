@@ -33,7 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> implements Visitable {
+class Node<T extends Node> implements Named, Visitable {
 
 	private String name
 	protected Node parent
@@ -162,8 +162,8 @@ class Node<T extends Node> implements Visitable {
 	}
 
 	/**
-	 * Returns this node's name.  Used for the scene overview and debugging,
-	 * defaults to the class name of the node.
+	 * Returns this node's name, defaulting to the class name if not set using
+	 * {@link #withName(String)}.
 	 */
 	String getName() {
 
