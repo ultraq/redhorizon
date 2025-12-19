@@ -35,6 +35,15 @@ trait Named<T extends Named> {
 	}
 
 	/**
+	 * Return whether or not a custom name has been set for this object.
+	 * @return
+	 */
+	boolean hasCustomName() {
+
+		return name != null
+	}
+
+	/**
 	 * Set the name of this object.
 	 */
 	T withName(String name) {
