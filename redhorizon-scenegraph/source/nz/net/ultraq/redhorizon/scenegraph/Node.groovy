@@ -33,9 +33,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> implements Named, Visitable {
+class Node<T extends Node> implements Named<T>, Visitable {
 
-	private String name
 	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()
 
@@ -162,15 +161,6 @@ class Node<T extends Node> implements Named, Visitable {
 	}
 
 	/**
-	 * Returns this node's name, defaulting to the class name if not set using
-	 * {@link #withName(String)}.
-	 */
-	String getName() {
-
-		return name ?: this.class.simpleName
-	}
-
-	/**
 	 * Return the position of this node.
 	 */
 	Vector3fc getPosition() {
@@ -267,15 +257,6 @@ class Node<T extends Node> implements Named, Visitable {
 
 		visitor.visit(this)
 		children*.traverse(visitor)
-	}
-
-	/**
-	 * Set the name of this node.
-	 */
-	T withName(String name) {
-
-		this.name = name
-		return (T)this
 	}
 
 	/**

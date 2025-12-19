@@ -21,10 +21,25 @@ package nz.net.ultraq.redhorizon.scenegraph
  *
  * @author Emanuel Rabina
  */
-interface Named {
+trait Named<T extends Named> {
+
+	private String name
 
 	/**
-	 * The name of this object.
+	 * Returns this object's name, defaulting to the class name if not set using
+	 * {@link #withName(String)}.
 	 */
-	String getName()
+	String getName() {
+
+		return name ?: this.class.simpleName
+	}
+
+	/**
+	 * Set the name of this object.
+	 */
+	T withName(String name) {
+
+		this.name = name
+		return (T)this
+	}
 }
