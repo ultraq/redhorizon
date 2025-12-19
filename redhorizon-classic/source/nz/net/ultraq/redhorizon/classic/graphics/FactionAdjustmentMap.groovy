@@ -56,6 +56,12 @@ class FactionAdjustmentMap implements AutoCloseable {
 		texture = new OpenGLTexture(256, 1, 1, buffer)
 	}
 
+	@Override
+	void close() {
+
+		texture?.close()
+	}
+
 	/**
 	 * Set the faction to use.  This will cause the adjustment map to be updated
 	 * with the next call to {@link #update()}.
@@ -78,11 +84,5 @@ class FactionAdjustmentMap implements AutoCloseable {
 			texture.update(buffer)
 			factionChanged = false
 		}
-	}
-
-	@Override
-	void close() {
-
-		texture?.close()
 	}
 }
