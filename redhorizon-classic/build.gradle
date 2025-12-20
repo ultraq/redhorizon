@@ -29,13 +29,19 @@ configure {
 				engine.  All of the reverse engineering of the old codecs and files takes place
 				here, and serve as working examples for other programmers.
 			''')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withSourcesJar()
 		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-audio')
+				implementation project(':redhorizon-engine')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
 				implementation project(':redhorizon-scenegraph')
