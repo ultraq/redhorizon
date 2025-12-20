@@ -23,14 +23,14 @@ import nz.net.ultraq.redhorizon.engine.Entity
  *
  * @author Emanuel Rabina
  */
-abstract class EntityScript {
+abstract class EntityScript<T extends Entity> {
 
-	protected Entity entity
+	protected T entity
 
 	/**
 	 * Set the entity this script is attached to.
 	 */
-	void setEntity(Entity entity) {
+	void setEntity(T entity) {
 
 		this.entity = entity
 	}

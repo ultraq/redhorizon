@@ -2,6 +2,18 @@
 Changelog
 =========
 
+### 0.41.0
+
+While the 0.40.x versions focused on smaller standalone modules for use in any
+sort of context requiring audio/graphics, the 0.41.x versions will focus on the
+`redhorizon-engine` package to build out more game-specific functions.  eg: an
+attempt at an Entity Component System (ECS) to help manage scenes with lots of
+objects and capabilities.
+
+Again, I'll be using/building some small projects outside of this repo to try
+things out.  Notably, [redhorizon-shooter](https://github.com/ultraq/redhorizon-shooter)
+and [redhorizon-unity-asteroids](https://github.com/ultraq/redhorizon-unity-asteroids).
+
 ### 0.40.0
 
 The latest release in a long time, the 0.40.x versions signify a shift to trying

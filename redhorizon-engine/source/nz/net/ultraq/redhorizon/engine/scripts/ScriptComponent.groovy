@@ -22,7 +22,6 @@ package nz.net.ultraq.redhorizon.engine.scripts
  */
 class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 
-	final String name = "ScriptComponent - ${scriptName}"
 	private final ScriptEngine scriptEngine
 	private final String scriptName
 	private final Map<String, Object> extraProperties
@@ -43,9 +42,13 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 
 		var script = scriptEngine.loadScriptClass(scriptName) as EntityScript
 		script.entity = parent
+
+		// TODO: These extra properties could probably be defined w/ @Inject so
+		//       added during script creation in ScriptEngine
 		extraProperties.each { key, value ->
 			script[key] = value
 		}
+
 		script.update(delta)
 	}
 }
