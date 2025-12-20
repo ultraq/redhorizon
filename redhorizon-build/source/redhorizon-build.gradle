@@ -37,9 +37,8 @@ configure {
 		.configureVerification()
 			.withTestDirectory('test')
 			.withTestDependencies() {
+				testImplementation "org.mockito:mockito-core:${mockitoVersion}"
 				testImplementation "org.spockframework:spock-core:${spockVersion}"
-				testImplementation "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
-				testImplementation "org.objenesis:objenesis:${objenesisVersion}"
 			}
 			.useJUnitJupiter()
 
