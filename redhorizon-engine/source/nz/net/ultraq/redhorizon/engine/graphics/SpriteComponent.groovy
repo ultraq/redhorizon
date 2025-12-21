@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Sprite
@@ -36,16 +37,30 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 	final Sprite sprite
 	final Vector2f framePosition = new Vector2f()
 	final Matrix4f transform = new Matrix4f()
+	final Image image
 	final SpriteSheet spriteSheet
 	final Class<? extends Shader> shaderClass
 	private final Matrix4f globalTransform = new Matrix4f()
 	private final Vector3f _position = new Vector3f()
 
 	/**
+	 * Constructor, use the given image for the sprite.
+	 */
+	SpriteComponent(Image image, Class<? extends Shader> shaderClass) {
+
+		this.image = image
+		this.spriteSheet = null
+		this.shaderClass = shaderClass
+
+		sprite = new Sprite(image)
+	}
+
+	/**
 	 * Constructor, use the given sprite sheet for the sprite.
 	 */
 	SpriteComponent(SpriteSheet spriteSheet, Class<? extends Shader> shaderClass) {
 
+		this.image = null
 		this.spriteSheet = spriteSheet
 		this.shaderClass = shaderClass
 
