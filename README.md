@@ -27,6 +27,7 @@ various parts of the overall engine. These standalone modules are:
 
  - [`redhorizon-audio`](redhorizon-audio)
  - [`redhorizon-classic`](redhorizon-classic)
+ - [`redhorizon-engine`](redhorizon-engine)
  - [`redhorizon-graphics`](redhorizon-graphics)
  - [`redhorizon-input`](redhorizon-input)
  - [`redhorizon-scenegraph`](redhorizon-scenegraph)
