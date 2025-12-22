@@ -44,8 +44,8 @@ class SpriteSheet implements AutoCloseable {
 	private final int format
 	final int numFrames
 	private final int framesX
-	private final float frameWidth
-	private final float frameHeight
+	final int frameWidth
+	final int frameHeight
 	final Texture texture
 	private final Vector2f framePosition = new Vector2f()
 
@@ -80,8 +80,8 @@ class SpriteSheet implements AutoCloseable {
 		var textureHeight = height * Math.ceil(result.frames() / framesX) as int
 		texture = new OpenGLTexture(textureWidth, textureHeight, format, textureData)
 
-		frameWidth = width / textureWidth
-		frameHeight = height / textureHeight
+		frameWidth = width / textureWidth as int
+		frameHeight = height / textureHeight as int
 	}
 
 	@Override
@@ -96,8 +96,8 @@ class SpriteSheet implements AutoCloseable {
 	 */
 	Vector2f getFramePosition(int index) {
 
-		var x = (index % framesX) * frameWidth as float
-		var y = ((index / framesX) as int) * frameHeight as float
+		var x = (index % framesX) * frameWidth
+		var y = ((index / framesX) as int) * frameHeight
 		return framePosition.set(x, y)
 	}
 }

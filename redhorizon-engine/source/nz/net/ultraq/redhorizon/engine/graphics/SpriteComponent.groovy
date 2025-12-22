@@ -40,6 +40,8 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 	final Image image
 	final SpriteSheet spriteSheet
 	final Class<? extends Shader> shaderClass
+	final int width
+	final int height
 	private final Matrix4f globalTransform = new Matrix4f()
 	private final Vector3f _position = new Vector3f()
 
@@ -51,6 +53,8 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 		this.image = image
 		this.spriteSheet = null
 		this.shaderClass = shaderClass
+		this.width = image.width
+		this.height = image.height
 
 		sprite = new Sprite(image)
 	}
@@ -63,6 +67,8 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 		this.image = null
 		this.spriteSheet = spriteSheet
 		this.shaderClass = shaderClass
+		this.width = spriteSheet.frameWidth
+		this.height = spriteSheet.frameHeight
 
 		sprite = new Sprite(spriteSheet)
 	}
