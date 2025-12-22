@@ -30,7 +30,7 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 	 * Constructor, set the script engine, the script to have it keep tabs on for
 	 * dynamic reloading, and any additional properties on the script to set.
 	 */
-	ScriptComponent(ScriptEngine scriptEngine, String scriptName, Map<String, Object> extraProperties) {
+	ScriptComponent(ScriptEngine scriptEngine, String scriptName, Map<String, Object> extraProperties = null) {
 
 		this.scriptEngine = scriptEngine
 		this.scriptName = scriptName
@@ -45,7 +45,7 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 
 		// TODO: These extra properties could probably be defined w/ @Inject so
 		//       added during script creation in ScriptEngine
-		extraProperties.each { key, value ->
+		extraProperties?.each { key, value ->
 			script[key] = value
 		}
 
