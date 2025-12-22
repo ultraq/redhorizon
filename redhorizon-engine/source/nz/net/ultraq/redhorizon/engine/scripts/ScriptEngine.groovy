@@ -48,21 +48,27 @@ class ScriptEngine {
 	 * instantiated.  If called and the script has not changed, then the existing
 	 * class instance will be returned.  Only when a script has changed will the
 	 * script class be recreated.
+	 *
+	 * @return
+	 *   A tuple of the script and whether or not it was loaded fresh by this
+	 *   method.
 	 */
-	Object loadScriptClass(String scriptName) {
+	Tuple2<Object, Boolean> loadScriptClass(String scriptName) {
 
 		var script = scripts[scriptName]
 		var scriptClass = scriptEngine.loadScriptByName(scriptName)
-		if (!script || script.class != scriptClass) {
-			if (!script) {
-				logger.debug('Loading script {} for the first time', scriptName)
-			}
-			else {
-				logger.debug('Script {} has changed, reloading', scriptName)
-			}
-			script = scriptClass.getDeclaredConstructor().newInstance()
-			scripts[scriptName] = script
+		if (script && script.class == scriptClass) {
+			return new Tuple2(script, false)
 		}
-		return script
+
+		if (!script) {
+			logger.debug('Loading script {} for the first time', scriptName)
+		}
+		else {
+			logger.debug('Script {} has changed, reloading', scriptName)
+		}
+		script = scriptClass.getDeclaredConstructor().newInstance()
+		scripts[scriptName] = script
+		return new Tuple2(script, true)
 	}
 }

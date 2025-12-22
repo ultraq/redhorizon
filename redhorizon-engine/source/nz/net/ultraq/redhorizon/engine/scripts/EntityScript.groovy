@@ -28,11 +28,10 @@ abstract class EntityScript<T extends Entity> {
 	protected T entity
 
 	/**
-	 * Set the entity this script is attached to.
+	 * Called when a script is first started, can be overridden to set up the
+	 * script.
 	 */
-	void setEntity(T entity) {
-
-		this.entity = entity
+	void init() {
 	}
 
 	/**

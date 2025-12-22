@@ -15,40 +15,29 @@
  */
 
 package nz.net.ultraq.redhorizon.engine.scripts
+
+import groovy.transform.TupleConstructor
+
 /**
  * Perform the logic written in the provided entity script.
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 
-	private final ScriptEngine scriptEngine
-	private final String scriptName
-	private final Map<String, Object> extraProperties
-
-	/**
-	 * Constructor, set the script engine, the script to have it keep tabs on for
-	 * dynamic reloading, and any additional properties on the script to set.
-	 */
-	ScriptComponent(ScriptEngine scriptEngine, String scriptName, Map<String, Object> extraProperties = null) {
-
-		this.scriptEngine = scriptEngine
-		this.scriptName = scriptName
-		this.extraProperties = extraProperties
-	}
+	final ScriptEngine scriptEngine
+	final String scriptName
 
 	@Override
 	void update(float delta) {
 
-		var script = scriptEngine.loadScriptClass(scriptName) as EntityScript
-		script.entity = parent
-
-		// TODO: These extra properties could probably be defined w/ @Inject so
-		//       added during script creation in ScriptEngine
-		extraProperties?.each { key, value ->
-			script[key] = value
+		def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName)
+		var script = scriptObject as EntityScript
+		if (isNew) {
+			script.entity = parent
+			script.init()
 		}
-
 		script.update(delta)
 	}
 }
