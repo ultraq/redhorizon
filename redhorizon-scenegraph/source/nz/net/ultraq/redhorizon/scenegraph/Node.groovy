@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import org.joml.Matrix4f
-import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
 import org.joml.primitives.AABBf
@@ -180,7 +179,7 @@ class Node<T extends Node> implements Named<T>, Visitable {
 	/**
 	 * Get the local transform of this node.
 	 */
-	Matrix4fc getTransform() {
+	Matrix4f getTransform() {
 
 		return _transform
 	}
