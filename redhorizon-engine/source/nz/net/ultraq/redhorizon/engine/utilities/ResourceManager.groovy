@@ -47,7 +47,7 @@ class ResourceManager implements AutoCloseable {
 	 */
 	Image loadImage(String path) {
 
-		var image = getResourceAsStream(path).withBufferedStream { stream ->
+		var image = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
 			return new Image(path, stream)
 		}
 		resources << image
@@ -59,7 +59,7 @@ class ResourceManager implements AutoCloseable {
 	 */
 	Music loadMusic(String path) {
 
-		var musicStream = new BufferedInputStream(getResourceAsStream(path))
+		var musicStream = new BufferedInputStream(getResourceAsStream(resolvePath(path)))
 		resources << musicStream
 
 		var music = new Music(path, musicStream)
@@ -73,7 +73,7 @@ class ResourceManager implements AutoCloseable {
 	 */
 	Sound loadSound(String path) {
 
-		var sound = getResourceAsStream(path).withBufferedStream { stream ->
+		var sound = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
 			return new Sound(path, stream)
 		}
 		resources << sound
@@ -85,7 +85,7 @@ class ResourceManager implements AutoCloseable {
 	 */
 	SpriteSheet loadSpriteSheet(String path) {
 
-		var spriteSheet = getResourceAsStream(pathPrefix + path).withBufferedStream { stream ->
+		var spriteSheet = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
 			return new SpriteSheet(path, stream)
 		}
 		resources << spriteSheet
@@ -97,10 +97,19 @@ class ResourceManager implements AutoCloseable {
 	 */
 	Palette loadPalette(String path) {
 
-		var palette = getResourceAsStream(pathPrefix + path).withBufferedStream { stream ->
+		var palette = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
 			return new Palette(path, stream)
 		}
 		resources << palette
 		return palette
+	}
+
+	/**
+	 * Combine the configured path prefix with the requested path to obtain the
+	 * full path.
+	 */
+	private String resolvePath(String path) {
+
+		return [pathPrefix, path].joinAndNormalize('/')
 	}
 }
