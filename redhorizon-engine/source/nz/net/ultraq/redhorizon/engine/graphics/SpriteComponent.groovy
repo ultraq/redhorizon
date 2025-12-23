@@ -67,8 +67,8 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 		this.image = null
 		this.spriteSheet = spriteSheet
 		this.shaderClass = shaderClass
-		this.width = spriteSheet.frameWidth
-		this.height = spriteSheet.frameHeight
+		this.width = spriteSheet.width
+		this.height = spriteSheet.height
 
 		sprite = new Sprite(spriteSheet)
 	}
