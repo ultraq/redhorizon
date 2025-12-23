@@ -93,6 +93,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1)
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE)
 
+		// Check dimensions don't exceed the monitor - leads to weird display errors on macOS
+		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
+		if (width > videoMode.width() || height > videoMode.height()) {
+			throw new IllegalArgumentException("Cannot create window (${width}x${height}) " +
+				"as it is larger than the monitor (${videoMode.width()}x${videoMode.height()})")
+		}
+
 		logger.debug('Creating window of size {}x{}', width, height)
 		window = glfwCreateWindow(width, height, title, NULL, NULL)
 		if (!window) {
