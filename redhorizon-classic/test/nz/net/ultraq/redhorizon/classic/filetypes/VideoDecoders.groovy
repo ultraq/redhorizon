@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
@@ -41,9 +42,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 class VideoDecoders extends Specification {
 
 	def setupSpec() {
-		System.setProperty('org.lwjgl.system.stackSize', '10240')
+		Configuration.STACK_SIZE.set(10240)
 		if (System.isMacOs()) {
-			System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
+			Configuration.GLFW_LIBRARY_NAME.set('glfw_async')
 		}
 	}
 

@@ -25,10 +25,6 @@ import spock.lang.Specification
  */
 class OpenGLWindowTests extends Specification {
 
-	def setup() {
-		System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
-	}
-
 	def 'Cannot create a window larger than the monitor size'() {
 		when:
 			new OpenGLWindow(3840, 2160, 'Very large window')

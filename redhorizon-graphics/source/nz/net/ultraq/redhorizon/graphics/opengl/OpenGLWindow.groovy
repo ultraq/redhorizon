@@ -31,6 +31,7 @@ import org.joml.Vector2f
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
+import org.lwjgl.system.Configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -52,6 +53,11 @@ import groovy.transform.stc.SimpleType
 class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLWindow)
+	static {
+		if (System.isMacOs()) {
+			Configuration.GLFW_LIBRARY_NAME.set('glfw_async')
+		}
+	}
 
 	private final long window
 	final Vector2f size

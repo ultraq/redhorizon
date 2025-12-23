@@ -26,6 +26,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Matrix4f
+import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
@@ -39,9 +40,9 @@ import static org.lwjgl.glfw.GLFW.*
 class ImGuiElementsCheck extends Specification {
 
 	def setupSpec() {
-		System.setProperty('org.lwjgl.system.stackSize', '10240')
+		Configuration.STACK_SIZE.set(10240)
 		if (System.isMacOs()) {
-			System.setProperty('org.lwjgl.glfw.libname', 'glfw_async')
+			Configuration.GLFW_LIBRARY_NAME.set('glfw_async')
 		}
 	}
 
