@@ -16,25 +16,50 @@
 
 package nz.net.ultraq.redhorizon.engine.scripts
 
-import groovy.transform.TupleConstructor
-
 /**
  * Perform the logic written in the provided entity script.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 
 	final ScriptEngine scriptEngine
 	final String scriptName
+	final Class<? extends EntityScript> scriptClass
+	private EntityScript script
+
+	/**
+	 * Constructor, set the script used to a Groovy file on the engine's script
+	 * path.
+	 */
+	ScriptComponent(ScriptEngine scriptEngine, String scriptName) {
+
+		this.scriptEngine = scriptEngine
+		this.scriptName = scriptName
+	}
+
+	/**
+	 * Constructor, set the script used to a Groovy class.
+	 */
+	ScriptComponent(ScriptEngine scriptEngine, Class<? extends EntityScript> scriptClass) {
+
+		this.scriptEngine = scriptEngine
+		this.scriptClass = scriptClass
+	}
 
 	@Override
 	void update(float delta) {
 
-		def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName)
-		var script = scriptObject as EntityScript
-		if (isNew) {
+		if (scriptName) {
+			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
+			if (isNew) {
+				script = scriptObject as EntityScript
+				script.entity = parent
+				script.init()
+			}
+		}
+		else if (!script && scriptClass) {
+			script = scriptClass.getDeclaredConstructor().newInstance()
 			script.entity = parent
 			script.init()
 		}

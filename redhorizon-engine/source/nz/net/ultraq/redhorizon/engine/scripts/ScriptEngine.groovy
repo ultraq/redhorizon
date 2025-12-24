@@ -30,7 +30,7 @@ class ScriptEngine {
 	private static final Logger logger = LoggerFactory.getLogger(ScriptEngine)
 
 	private final GroovyScriptEngine scriptEngine
-	private final Map<String, Object> scripts = [:]
+	private final Map<Object, Object> scripts = [:]
 
 	/**
 	 * Constructor, creates a new script engine.
@@ -49,13 +49,19 @@ class ScriptEngine {
 	 * class instance will be returned.  Only when a script has changed will the
 	 * script class be recreated.
 	 *
+	 * @param scriptName
+	 *   The name of the script to load, relative to the asset URL set in the
+	 *   constructor.
+	 * @param key
+	 *   An object to key the loaded script with.  This is so that the same script
+	 *   file can have a different instance for different objects.
 	 * @return
 	 *   A tuple of the script and whether or not it was loaded fresh by this
 	 *   method.
 	 */
-	Tuple2<Object, Boolean> loadScriptClass(String scriptName) {
+	Tuple2<Object, Boolean> loadScriptClass(String scriptName, Object key) {
 
-		var script = scripts[scriptName]
+		var script = scripts[key]
 		var scriptClass = scriptEngine.loadScriptByName("${scriptName}.groovy")
 		if (script && script.class == scriptClass) {
 			return new Tuple2(script, false)
@@ -68,7 +74,7 @@ class ScriptEngine {
 			logger.debug('Script {} has changed, reloading', scriptName)
 		}
 		script = scriptClass.getDeclaredConstructor().newInstance()
-		scripts[scriptName] = script
+		scripts[key] = script
 		return new Tuple2(script, true)
 	}
 }
