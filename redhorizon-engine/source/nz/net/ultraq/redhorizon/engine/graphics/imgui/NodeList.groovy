@@ -48,12 +48,10 @@ class NodeList implements ImGuiComponent {
 		ImGui.begin('Scene', new ImBoolean(true))
 		ImGui.popStyleVar()
 
-		// File list
+		// Node list
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
-			scene.traverse { visitable ->
-				if (visitable instanceof Node) {
-					renderNodeAndChildren(visitable)
-				}
+			scene.root.children.each { child ->
+				renderNode(child)
 			}
 			ImGui.endListBox()
 		}
@@ -64,7 +62,7 @@ class NodeList implements ImGuiComponent {
 	/**
 	 * Create an entry in the UI for each node and its children.
 	 */
-	private void renderNodeAndChildren(Node node) {
+	private void renderNode(Node node) {
 
 		var flags = SpanFullWidth | OpenOnArrow | DefaultOpen
 		if (!node.children) {
@@ -78,7 +76,7 @@ class NodeList implements ImGuiComponent {
 				selectedNode = node
 			}
 			node.children.each { child ->
-				renderNodeAndChildren(child)
+				renderNode(child)
 			}
 			ImGui.treePop()
 		}

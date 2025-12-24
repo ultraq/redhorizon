@@ -37,11 +37,5 @@ class Scene {
 
 			return Scene.this
 		}
-
-		@Override
-		void traverse(SceneVisitor visitor) {
-
-			children*.traverse(visitor)
-		}
 	}
 }
