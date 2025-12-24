@@ -56,7 +56,7 @@ class ScriptEngine {
 	Tuple2<Object, Boolean> loadScriptClass(String scriptName) {
 
 		var script = scripts[scriptName]
-		var scriptClass = scriptEngine.loadScriptByName(scriptName)
+		var scriptClass = scriptEngine.loadScriptByName("${scriptName}.groovy")
 		if (script && script.class == scriptClass) {
 			return new Tuple2(script, false)
 		}
