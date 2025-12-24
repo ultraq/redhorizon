@@ -66,11 +66,22 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	}
 
 	/**
-	 * Return all components that match the given predicate.
+	 * Return all components of the given class.
+	 *
+	 * @param type
+	 * @param results
+	 *   If provided, then the matching components will be appended to this list.
+	 *   Use this parameter to avoid the list allocation normally created by this
+	 *   method.
 	 */
-	<T extends Component> List<T> findComponents(Closure predicate) {
+	<T extends Component> List<T> findComponentsByType(Class<T> type, List<T> results = []) {
 
-		return (List<T>)components.findAll(predicate)
+		components.each { component ->
+			if (type.isInstance(component)) {
+				results << (T)component
+			}
+		}
+		return results
 	}
 
 	@Override
