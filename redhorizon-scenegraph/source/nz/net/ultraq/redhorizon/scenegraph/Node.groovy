@@ -102,6 +102,14 @@ class Node<T extends Node> implements Named<T>, Visitable {
 	}
 
 	/**
+	 * Return this node's parent, or {@code null} if it has none.
+	 */
+	Node getParent() {
+
+		return parent
+	}
+
+	/**
 	 * Return the position of this node.
 	 */
 	Vector3fc getPosition() {
