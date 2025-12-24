@@ -159,6 +159,12 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	}
 
 	/**
+	 * Enable double-clicking the window to toggle fullscreen (Windows only).
+	 * @return
+	 */
+	Window withDoubleClickForFullscreen()
+
+	/**
 	 * Maximize the window
 	 */
 	Window withMaximized()

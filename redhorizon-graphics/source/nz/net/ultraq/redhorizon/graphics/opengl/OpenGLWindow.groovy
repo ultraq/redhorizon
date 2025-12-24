@@ -65,6 +65,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private boolean centered
 	private boolean fullScreen
 	private int interval
+	private boolean doubleClickForFullscreenEnabled
 	private long lastClickTime
 	private final Rectanglei lastWindowPositionAndSize = new Rectanglei()
 	private final Framebuffer framebuffer
@@ -162,25 +163,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
-		}
-
-		// Window features
-
-		// Implementation of double-click being used to toggle between windowed and
-		// full screen modes.  This isn't natively supported in GLFW given platform
-		// differences in double-click behaviour, so we have to roll it ourselves.
-		// This is for Windows only, as on macOS fullscreen apps should get their
-		// own space which GLFW will not do.
-		if (System.isWindows()) {
-			on(MouseButtonEvent) { event ->
-				if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
-					var clickTime = System.currentTimeMillis()
-					if (clickTime - lastClickTime < 300) {
-						toggleFullScreen()
-					}
-					lastClickTime = clickTime
-				}
-			}
 		}
 
 		// This framebuffer will be used as the render target for the window, so
@@ -435,6 +417,29 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow withBackgroundColour(Colour colour) {
 
 		glClearColor(colour.r, colour.g, colour.b, colour.a)
+		return this
+	}
+
+	@Override
+	OpenGLWindow withDoubleClickForFullscreen() {
+
+		// Implementation of double-click being used to toggle between windowed and
+		// full screen modes.  This isn't natively supported in GLFW given platform
+		// differences in double-click behaviour, so we have to roll it ourselves.
+		// This is for Windows only, as on macOS fullscreen apps should get their
+		// own space which GLFW will not do.
+		if (System.isWindows() && !doubleClickForFullscreenEnabled) {
+			on(MouseButtonEvent) { event ->
+				if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
+					var clickTime = System.currentTimeMillis()
+					if (clickTime - lastClickTime < 300) {
+						toggleFullScreen()
+					}
+					lastClickTime = clickTime
+				}
+			}
+			doubleClickForFullscreenEnabled = true
+		}
 		return this
 	}
 
