@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
 import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.*
 import static org.lwjgl.opengl.KHRDebug.*
 import static org.lwjgl.system.MemoryUtil.NULL
@@ -409,6 +410,14 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		// Then render everything to the screen, either via ImGui or the underlying window
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 		glDisable(GL_DEPTH_TEST)
+
+		// Reset shader program when switching framebuffer.  Fixes an issue w/
+		// nVidia on Windows where calling glClear() would then cause the following
+		// error:
+		// "Program/shader state performance warning: Vertex shader in program X
+		// is being recompiled based on GL state"
+		glUseProgram(0)
+
 		clear()
 		glViewport(_viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
 

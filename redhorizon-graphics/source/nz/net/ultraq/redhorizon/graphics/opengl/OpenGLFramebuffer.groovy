@@ -28,6 +28,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglei
 import static org.lwjgl.opengl.GL11C.*
+import static org.lwjgl.opengl.GL20C.glUseProgram
 import static org.lwjgl.opengl.GL30C.*
 
 /**
@@ -98,6 +99,14 @@ class OpenGLFramebuffer implements Framebuffer {
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 		glEnable(GL_DEPTH_TEST)
 		glDepthFunc(GL_LEQUAL)
+
+		// Reset shader program when switching framebuffer.  Fixes an issue w/
+		// nVidia on Windows where calling glClear() would then cause the following
+		// error:
+		// "Program/shader state performance warning: Vertex shader in program X
+		// is being recompiled based on GL state"
+		glUseProgram(0)
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 		glViewport(0, 0, width, height)
 		closure()
