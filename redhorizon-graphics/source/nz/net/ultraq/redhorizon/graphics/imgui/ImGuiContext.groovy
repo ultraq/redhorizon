@@ -23,8 +23,7 @@ import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
-import static imgui.flag.ImGuiConfigFlags.*
-import static org.lwjgl.glfw.GLFW.*
+import static imgui.flag.ImGuiConfigFlags.DockingEnable
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -51,7 +50,7 @@ class ImGuiContext implements GraphicsResource {
 		ImGui.createContext()
 
 		var io = ImGui.getIO()
-		io.setConfigFlags(DockingEnable | ViewportsEnable)
+		io.setConfigFlags(DockingEnable)
 
 		var fontConfig1 = new ImFontConfig()
 		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
@@ -93,9 +92,5 @@ class ImGuiContext implements GraphicsResource {
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())
-		var currentContext = glfwGetCurrentContext()
-		ImGui.updatePlatformWindows()
-		ImGui.renderPlatformWindowsDefault()
-		glfwMakeContextCurrent(currentContext)
 	}
 }

@@ -61,7 +61,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private final long window
 	final Vector2f size
-	final Rectanglei viewport
+	private final Rectanglei _viewport
 	private boolean centered
 	private boolean fullScreen
 	private int interval
@@ -75,6 +75,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private final GameWindow gameWindow
 	private List<ImGuiComponent> imGuiComponents = []
 	private boolean createDockspace
+	private Rectanglei imguiViewport = new Rectanglei()
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -117,20 +118,20 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		def (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
-				var scale = Math.min(newWidth / viewport.lengthX(), newHeight / viewport.lengthY())
-				var viewportWidth = (int)(viewport.lengthX() * scale)
-				var viewportHeight = (int)(viewport.lengthY() * scale)
+				var scale = Math.min(newWidth / _viewport.lengthX(), newHeight / _viewport.lengthY())
+				var viewportWidth = (int)(_viewport.lengthX() * scale)
+				var viewportHeight = (int)(_viewport.lengthY() * scale)
 				var viewportX = (newWidth - viewportWidth) / 2 as int
 				var viewportY = (newHeight - viewportHeight) / 2 as int
-				viewport.setMin(viewportX, viewportY).setLengths(viewportWidth, viewportHeight)
-				logger.debug('Viewport updated: {}, {}, {}, {}', viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
+				_viewport.setMin(viewportX, viewportY).setLengths(viewportWidth, viewportHeight)
+				logger.debug('Viewport updated: {}, {}, {}, {}', _viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
 
 				trigger(new FramebufferSizeEvent(newWidth, newHeight))
 			}
 		}
 
 		renderScale = framebufferWidth / width
-		viewport = new Rectanglei(0, 0, framebufferWidth, framebufferHeight)
+		_viewport = new Rectanglei(0, 0, framebufferWidth, framebufferHeight)
 
 		makeCurrent()
 
@@ -243,6 +244,21 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		var contentScale = contentScalePointer[0]
 		logger.debug('Content scale is {}', contentScale)
 		return contentScale
+	}
+
+	/**
+	 * Return the viewport into which the scene is being rendered.  If ImGui
+	 * docking is being used, then this will be the area that the primary
+	 * framebuffer is occupying in the overall window.  Otherwise, it's just the
+	 * window.
+	 */
+	Rectanglei getViewport() {
+
+		return createDockspace ?
+			imguiViewport
+				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
+				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int) :
+			_viewport
 	}
 
 	/**
@@ -394,7 +410,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 		glDisable(GL_DEPTH_TEST)
 		clear()
-		glViewport(viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY())
+		glViewport(_viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
 
 		imGuiContext.withFrame(createDockspace) { dockspaceId ->
 			if (dockspaceId) {

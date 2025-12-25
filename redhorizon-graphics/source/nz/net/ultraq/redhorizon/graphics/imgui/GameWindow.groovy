@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
 import imgui.ImGui
 import imgui.ImGuiWindowClass
+import imgui.ImVec2
 import imgui.flag.ImGuiDockNodeFlags
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiStyleVar.*
@@ -36,6 +37,15 @@ import static imgui.flag.ImGuiWindowFlags.NoDecoration
 class GameWindow {
 
 	private static final ImBoolean imBooleanTrue = new ImBoolean(true)
+	private static final ImGuiWindowClass gameWindowClass = new ImGuiWindowClass().tap {
+		dockNodeFlagsOverrideSet = ImGuiDockNodeFlags.AutoHideTabBar
+	}
+
+	float lastImageX = 0f
+	float lastImageY = 0f
+	float lastImageWidth = 0f
+	float lastImageHeight = 0f
+	private ImVec2 windowPos = new ImVec2()
 
 	/**
 	 * Draw the game window into which the scene will be rendered.
@@ -44,16 +54,15 @@ class GameWindow {
 
 		imgui.internal.ImGui.dockBuilderDockWindow('Game', dockspaceId)
 
-		var windowClass = new ImGuiWindowClass()
-		windowClass.dockNodeFlagsOverrideSet = ImGuiDockNodeFlags.AutoHideTabBar
-		ImGui.setNextWindowClass(windowClass)
+		ImGui.setNextWindowClass(gameWindowClass)
 		ImGui.pushStyleVar(WindowBorderSize, 0f)
 		ImGui.pushStyleVar(WindowPadding, 0f, 0f)
 		ImGui.pushStyleVar(WindowRounding, 0f)
 		ImGui.begin('Game', imBooleanTrue, NoDecoration)
 
-		var windowWidth = ImGui.contentRegionAvailX
-		var windowHeight = ImGui.contentRegionAvailY
+		ImGui.getWindowPos(windowPos)
+		var windowWidth = ImGui.getContentRegionAvailX()
+		var windowHeight = ImGui.getContentRegionAvailY()
 		var windowAspectRatio = windowWidth / windowHeight
 		var framebufferAspectRatio = framebuffer.width / framebuffer.height
 		var imageSizeX = windowWidth
@@ -82,5 +91,10 @@ class GameWindow {
 
 		ImGui.popStyleVar(3)
 		ImGui.end()
+
+		lastImageX = cursorX + windowPos.x as float
+		lastImageY = cursorY + windowPos.y as float
+		lastImageWidth = imageSizeX
+		lastImageHeight = imageSizeY
 	}
 }

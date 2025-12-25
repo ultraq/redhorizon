@@ -50,8 +50,9 @@ class ImGuiElementsCheck extends Specification {
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(800, 600, "Testing")
+		window = new OpenGLWindow(800, 500, "Testing")
 			.centerToScreen()
+			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
@@ -73,7 +74,7 @@ class ImGuiElementsCheck extends Specification {
 			scene << node
 			node << new Node().withName('Child 1')
 			node << new Node().withName('Child 2')
-			var camera = new Camera(800, 600, window)
+			var camera = new Camera(800, 500, window)
 			var eventHandler = new InputEventHandler()
 				.addInputSource(window)
 		when:
