@@ -97,6 +97,15 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 	}
 
 	/**
+	 * Adjust the rotation of this sprite.
+	 */
+	SpriteComponent rotate(float angleX, float angleY, float angleZ) {
+
+		transform.rotateXYZ(angleX, angleY, angleZ)
+		return this
+	}
+
+	/**
 	 * Update the local position of the sprite component.
 	 */
 	void setPosition(float x, float y, float z) {

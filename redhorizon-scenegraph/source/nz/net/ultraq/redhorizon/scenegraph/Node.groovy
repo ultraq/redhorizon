@@ -153,6 +153,15 @@ class Node<T extends Node> implements Named<T>, Visitable {
 	}
 
 	/**
+	 * Adjust the rotation of this node.
+	 */
+	T rotate(float angleX, float angleY, float angleZ) {
+
+		_transform.rotateXYZ(angleX, angleY, angleZ)
+		return (T)this
+	}
+
+	/**
 	 * Adjust the size of this node.
 	 */
 	T scale(float scaleX, float scaleY, float scaleZ) {
