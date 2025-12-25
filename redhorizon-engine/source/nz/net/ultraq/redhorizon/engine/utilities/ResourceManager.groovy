@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 
+import groovy.transform.Memoized
 import groovy.transform.TupleConstructor
 
 /**
@@ -45,6 +46,7 @@ class ResourceManager implements AutoCloseable {
 	/**
 	 * Load an image asset from an image file.
 	 */
+	@Memoized
 	Image loadImage(String path) {
 
 		var image = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
@@ -71,6 +73,7 @@ class ResourceManager implements AutoCloseable {
 	/**
 	 * Load a sound effect from an audio file.
 	 */
+	@Memoized
 	Sound loadSound(String path) {
 
 		var sound = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
@@ -83,6 +86,7 @@ class ResourceManager implements AutoCloseable {
 	/**
 	 * Load a sprite sheet from an image file.
 	 */
+	@Memoized
 	SpriteSheet loadSpriteSheet(String path) {
 
 		var spriteSheet = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
@@ -95,6 +99,7 @@ class ResourceManager implements AutoCloseable {
 	/**
 	 * Load a palette from a palette file.
 	 */
+	@Memoized
 	Palette loadPalette(String path) {
 
 		var palette = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
