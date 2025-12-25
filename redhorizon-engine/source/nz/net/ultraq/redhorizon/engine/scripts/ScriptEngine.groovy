@@ -31,6 +31,7 @@ class ScriptEngine {
 
 	private final GroovyScriptEngine scriptEngine
 	private final Map<Object, Object> scripts = [:]
+	private final Map<Object, Object> scriptInstances = [:]
 
 	/**
 	 * Constructor, creates a new script engine.
@@ -61,20 +62,24 @@ class ScriptEngine {
 	 */
 	Tuple2<Object, Boolean> loadScriptClass(String scriptName, Object key) {
 
-		var script = scripts[key]
+		var script = scripts[scriptName]
 		var scriptClass = scriptEngine.loadScriptByName("${scriptName}.groovy")
-		if (script && script.class == scriptClass) {
-			return new Tuple2(script, false)
-		}
-
 		if (!script) {
 			logger.debug('Loading script {} for the first time', scriptName)
 		}
-		else {
+		else if (script != scriptClass) {
 			logger.debug('Script {} has changed, reloading', scriptName)
 		}
-		script = scriptClass.getDeclaredConstructor().newInstance()
-		scripts[key] = script
-		return new Tuple2(script, true)
+		scripts[scriptName] = scriptClass
+
+		var scriptInstance = scriptInstances[key]
+		if (scriptInstance?.class == scriptClass) {
+			return new Tuple2(scriptInstance, false)
+		}
+
+		logger.debug('Creating new script instance of {}', scriptClass.simpleName)
+		scriptInstance = scriptClass.getDeclaredConstructor().newInstance()
+		scriptInstances[key] = scriptInstance
+		return new Tuple2(scriptInstance, true)
 	}
 }
