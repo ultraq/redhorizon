@@ -78,7 +78,6 @@ class VideoDecoders extends Specification {
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream, 320, 188)
 			var videoTransform = new Matrix4f()
-				.translate(-160, -94, 0)
 			var videoPosition = new Vector3f() // Should move the "ears" to the video position too, but we haven't
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)

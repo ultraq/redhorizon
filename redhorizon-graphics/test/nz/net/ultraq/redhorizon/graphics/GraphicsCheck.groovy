@@ -118,7 +118,6 @@ class GraphicsCheck extends Specification {
 			}
 			var sprite = new Sprite(image)
 			var spriteTransform = new Matrix4f()
-				.translate(-16, -16, 0)
 			var camera = new Camera(80, 60, window)
 		when:
 			window.show()

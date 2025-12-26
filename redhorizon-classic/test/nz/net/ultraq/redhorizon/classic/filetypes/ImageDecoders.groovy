@@ -82,7 +82,6 @@ class ImageDecoders extends Specification {
 			}
 			var sprite = new Sprite(image)
 			var spriteTransform = new Matrix4f()
-				.translate(-320, -200, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(640, 400, window)
 		when:
@@ -111,7 +110,6 @@ class ImageDecoders extends Specification {
 			}
 			var sprite = new Sprite(image)
 			var spriteTransform = new Matrix4f()
-				.translate(-160, -100, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 		when:
@@ -140,7 +138,6 @@ class ImageDecoders extends Specification {
 			}
 			var sprite = new Sprite(spriteSheet)
 			var spriteTransform = new Matrix4f()
-				.translate(-24, -24, 0)
 			var faction = Faction.RED
 			var adjustmentMap = new FactionAdjustmentMap(faction)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
@@ -200,7 +197,6 @@ class ImageDecoders extends Specification {
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
 			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream, 266, 200)
 			var animationTransform = new Matrix4f()
-				.translate(-133, -100, 0)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 		when:

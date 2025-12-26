@@ -47,10 +47,10 @@ class Sprite implements AutoCloseable {
 		this.width = width
 		this.height = height
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
-			new Vertex(new Vector3f(0, 0, 0), Colour.WHITE, new Vector2f(0, 0)),
-			new Vertex(new Vector3f(width, 0, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
-			new Vertex(new Vector3f(width, height, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
-			new Vertex(new Vector3f(0, height, 0), Colour.WHITE, new Vector2f(0, frameHeight))
+			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(0, 0)),
+			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
+			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
+			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.WHITE, new Vector2f(0, frameHeight))
 		}, index)
 		material = new Material(texture: texture)
 	}

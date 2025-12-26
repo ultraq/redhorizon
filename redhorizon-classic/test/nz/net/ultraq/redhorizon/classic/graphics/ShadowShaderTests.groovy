@@ -52,7 +52,6 @@ class ShadowShaderTests extends Specification {
 		window = new OpenGLWindow(640, 400, "Testing")
 			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
-			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
@@ -73,7 +72,6 @@ class ShadowShaderTests extends Specification {
 			}
 			var sprite = new Sprite(spriteSheet)
 			var spriteTransform = new Matrix4f()
-				.translate(-24, -24, 0)
 			var shadowShader = new ShadowShader()
 			var camera = new Camera(320, 200, window)
 			var timer = 0
