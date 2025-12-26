@@ -50,6 +50,14 @@ class Camera {
 	}
 
 	/**
+	 * Return a view-projection matrix for the given transform.
+	 */
+	Matrix4fc getViewProjection(Matrix4fc transform) {
+
+		return projection.mulAffine(view.mul(transform, viewTransform), viewProjection)
+	}
+
+	/**
 	 * Update rendering with the camera state.
 	 */
 	void render(SceneShaderContext renderContext, Matrix4fc transform) {
@@ -69,7 +77,7 @@ class Camera {
 	Vector3f unproject(float winX, float winY, Matrix4fc transform, Vector3f result) {
 
 		var viewport = window.viewport
-		return projection.mulAffine(view.mul(transform, viewTransform), viewProjection)
+		return getViewProjection(transform)
 			.unproject(
 				winX,
 				winY,

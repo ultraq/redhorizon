@@ -66,6 +66,14 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	}
 
 	/**
+	 * Return the first component of the given class.
+	 */
+	<T extends Component> T findComponentByType(Class<T> type) {
+
+		return findComponent { type.isInstance(it) }
+	}
+
+	/**
 	 * Return all components of the given class.
 	 *
 	 * @param type

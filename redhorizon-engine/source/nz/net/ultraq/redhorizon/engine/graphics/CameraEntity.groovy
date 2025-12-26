@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Window
 
+import org.joml.Matrix4fc
 import org.joml.Vector3f
 
 /**
@@ -39,6 +40,14 @@ class CameraEntity extends Entity<CameraEntity> {
 	CameraEntity(int sceneWidth, int sceneHeight, Window window) {
 
 		camera = addAndReturnComponent(new CameraComponent(sceneWidth, sceneHeight, window)).camera
+	}
+
+	/**
+	 * Return a view-projection matrix for the camera.
+	 */
+	Matrix4fc getViewProjection() {
+
+		return camera.getViewProjection(transform)
 	}
 
 	/**
