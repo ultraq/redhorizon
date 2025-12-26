@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
+
 /**
  * Any object in the scene that should be updated periodically.
  *
@@ -40,7 +43,7 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	/**
 	 * Add a component to this entity, and return the component.
 	 */
-	<TComponent extends Component> TComponent addAndReturnComponent(TComponent component) {
+	<T extends Component> T addAndReturnComponent(T component) {
 
 		addComponent(component)
 		return component
@@ -59,7 +62,8 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	/**
 	 * Return the first component that matches the given predicate.
 	 */
-	<T extends Component> T findComponent(Closure predicate) {
+	<T extends Component> T findComponent(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.engine.Component') Closure predicate) {
 
 		return (T)components.find(predicate)
 	}
@@ -89,5 +93,15 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 			}
 		}
 		return results
+	}
+
+	/**
+	 * Remove a component from this entity.
+	 */
+	T removeComponent(Component component) {
+
+		components.remove(component)
+		component.entity = null
+		return (T)this
 	}
 }
