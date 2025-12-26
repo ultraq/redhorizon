@@ -62,6 +62,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private final long window
 	final Vector2f size
+	private float renderScale
 	private final Rectanglei _viewport
 	private boolean centered
 	private boolean fullScreen
@@ -77,6 +78,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private List<ImGuiComponent> imGuiComponents = []
 	private boolean createDockspace
 	private Rectanglei imguiViewport = new Rectanglei()
+	private boolean showImGuiWindows = true
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -115,7 +117,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 			throw new Exception('Failed to create a window')
 		}
 
-		var renderScale = 0f
 		def (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
@@ -255,10 +256,11 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	 */
 	Rectanglei getViewport() {
 
-		return createDockspace ?
+		return showImGuiWindows ?
 			imguiViewport
 				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
-				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int) :
+				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int)
+				.scale(renderScale as int) :
 			_viewport
 	}
 
@@ -421,7 +423,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		clear()
 		glViewport(_viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
 
-		imGuiContext.withFrame(createDockspace) { dockspaceId ->
+		imGuiContext.withFrame(createDockspace && showImGuiWindows) { dockspaceId ->
 			if (dockspaceId) {
 				gameWindow.render(dockspaceId, framebuffer)
 			}
