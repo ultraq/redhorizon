@@ -522,11 +522,11 @@ class Map extends Node<Map> {
 			}
 		}
 
-		@Override
-		String getName() {
-
-			return "${this.class.simpleName} - ${children.size()} units"
-		}
+//		@Override
+//		String getName() {
+//
+//			return "${this.class.simpleName} - ${children.size()} units"
+//		}
 	}
 
 	/**

@@ -25,7 +25,7 @@ package nz.net.ultraq.redhorizon.scenegraph
 interface SceneVisitor {
 
 	/**
-	 * Visit any object that can be visited.
+	 * Visit any node.
 	 */
-	void visit(Visitable visitable)
+	void visit(Node node)
 }

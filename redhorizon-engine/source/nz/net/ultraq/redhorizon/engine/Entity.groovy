@@ -17,14 +17,13 @@
 package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.scenegraph.Node
-import nz.net.ultraq.redhorizon.scenegraph.SceneVisitor
 
 /**
  * Any object in the scene that should be updated periodically.
  *
  * @author Emanuel Rabina
  */
-class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
+class Entity<T extends Entity> extends Node<T> implements Named<T>, AutoCloseable {
 
 	private List<Component> components = []
 
@@ -90,15 +89,5 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 			}
 		}
 		return results
-	}
-
-	@Override
-	void traverse(SceneVisitor visitor) {
-
-		visitor.visit(this)
-		components.each { component ->
-			visitor.visit(component)
-		}
-		children*.traverse(visitor)
 	}
 }

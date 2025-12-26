@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.scenegraph.Named
-import nz.net.ultraq.redhorizon.scenegraph.Visitable
-
 import groovy.transform.Memoized
 
 /**
@@ -26,7 +23,7 @@ import groovy.transform.Memoized
  *
  * @author Emanuel Rabina
  */
-abstract class Component<T extends Component> implements Named<T>, Visitable {
+abstract class Component<T extends Component> implements Named<T> {
 
 	protected Entity entity
 

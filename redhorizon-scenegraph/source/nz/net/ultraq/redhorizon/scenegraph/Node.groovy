@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> implements Named<T>, Visitable {
+class Node<T extends Node> {
 
 	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()
@@ -195,7 +195,9 @@ class Node<T extends Node> implements Named<T>, Visitable {
 		return (T)this
 	}
 
-	@Override
+	/**
+	 * Traverse this node and all of its children.
+	 */
 	void traverse(SceneVisitor visitor) {
 
 		visitor.visit(this)
