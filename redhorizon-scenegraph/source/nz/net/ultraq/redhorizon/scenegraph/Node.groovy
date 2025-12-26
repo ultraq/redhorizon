@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.scenegraph
 
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
 
@@ -36,8 +37,10 @@ class Node<T extends Node> implements Named<T> {
 
 	protected final Matrix4f _transform = new Matrix4f()
 	protected final Vector3f _position = new Vector3f()
+	protected final Vector3f _rotation = new Vector3f()
 	protected final Matrix4f _globalTransform = new Matrix4f()
 	protected final Vector3f _globalPosition = new Vector3f()
+	protected final Vector3f _globalRotation = new Vector3f()
 
 	/**
 	 * Add a child node to this node.
@@ -83,22 +86,29 @@ class Node<T extends Node> implements Named<T> {
 	 * Return the global position of this node.  That is, the local position
 	 * multiplied by every local position of the node's ancestors.
 	 */
-	Vector3f getGlobalPosition() {
+	Vector3fc getGlobalPosition() {
 
 		return globalTransform.getTranslation(_globalPosition)
+	}
+
+	/**
+	 * Return the global rotation of this node.  That is, the local rotation
+	 * multiplied by every local rotation of the node's ancestors.
+	 */
+	Vector3fc getGlobalRotation() {
+
+		return globalTransform.getEulerAnglesXYZ(_globalRotation)
 	}
 
 	/**
 	 * Return the global transform of this node.  That is, the local transform
 	 * multiplied by every local transform of the node's ancestors.
 	 */
-	Matrix4f getGlobalTransform() {
+	Matrix4fc getGlobalTransform() {
 
-		_globalTransform.set(transform)
-		if (parent) {
-			_globalTransform.mul(parent.globalTransform)
-		}
-		return _globalTransform
+		return parent ?
+			parent.globalTransform.mul(transform, _globalTransform) :
+			transform.get(_globalTransform)
 	}
 
 	/**
@@ -115,6 +125,14 @@ class Node<T extends Node> implements Named<T> {
 	Vector3fc getPosition() {
 
 		return _transform.getTranslation(_position)
+	}
+
+	/**
+	 * Return the rotation of this node.
+	 */
+	Vector3fc getRotation() {
+
+		return _transform.getEulerAnglesXYZ(_rotation)
 	}
 
 	/**

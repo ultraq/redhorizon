@@ -47,7 +47,7 @@ class CameraEntity extends Entity<CameraEntity> {
 	 */
 	Matrix4fc getViewProjection() {
 
-		return camera.getViewProjection(transform)
+		return camera.getViewProjection(globalTransform)
 	}
 
 	/**
@@ -55,7 +55,7 @@ class CameraEntity extends Entity<CameraEntity> {
 	 */
 	void render(SceneShaderContext sceneShaderContext) {
 
-		camera.render(sceneShaderContext, transform)
+		camera.render(sceneShaderContext, globalTransform)
 	}
 
 	/**
@@ -63,6 +63,6 @@ class CameraEntity extends Entity<CameraEntity> {
 	 */
 	Vector3f unproject(float winX, float winY, Vector3f result) {
 
-		return camera.unproject(winX, winY, transform, result)
+		return camera.unproject(winX, winY, globalTransform, result)
 	}
 }

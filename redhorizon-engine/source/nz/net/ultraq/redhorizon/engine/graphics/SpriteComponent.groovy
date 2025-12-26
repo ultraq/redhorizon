@@ -93,7 +93,7 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 	@Override
 	void render(SceneShaderContext shaderContext) {
 
-		sprite.render(shaderContext, globalTransform.set(entity.transform).mul(transform), framePosition)
+		sprite.render(shaderContext, entity.globalTransform.mul(transform, globalTransform), framePosition)
 	}
 
 	/**
