@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.engine.Entity
 
+import org.joml.primitives.Rectanglef
+
 /**
  * A custom class for any script used during the game update phase.
  *
@@ -32,6 +34,20 @@ abstract class EntityScript<T extends Entity> {
 	 * script.
 	 */
 	void init() {
+	}
+
+	/**
+	 * Called when a collision occurs between the entity this script is attached
+	 * to and another entity with a collision object.
+	 *
+	 * @param thisBounds
+	 *   Bounds of the collision object on this entity.
+	 * @param otherEntity
+	 *   The other entity that the collision object belongs to.
+	 * @param otherBounds
+	 *   Bounds of the collision object on the other entity.
+	 */
+	void onCollision(Rectanglef thisBounds, Entity otherEntity, Rectanglef otherBounds) {
 	}
 
 	/**

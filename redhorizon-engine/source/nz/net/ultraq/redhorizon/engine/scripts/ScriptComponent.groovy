@@ -47,6 +47,14 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 		this.scriptClass = scriptClass
 	}
 
+	/**
+	 * Return the script instance.
+	 */
+	EntityScript getScript() {
+
+		return script
+	}
+
 	@Override
 	void update(float delta) {
 
