@@ -29,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> {
+class Node<T extends Node> implements Named<T> {
 
 	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()

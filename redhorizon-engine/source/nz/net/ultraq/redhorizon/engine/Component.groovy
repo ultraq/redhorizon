@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.redhorizon.scenegraph.Named
+
 import groovy.transform.Memoized
 
 /**

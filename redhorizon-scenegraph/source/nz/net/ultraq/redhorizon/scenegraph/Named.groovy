@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.scenegraph
 
 /**
  * Any object in a scene that has a displayable name for debug purposes.

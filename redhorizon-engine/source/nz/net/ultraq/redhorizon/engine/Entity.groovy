@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
  *
  * @author Emanuel Rabina
  */
-class Entity<T extends Entity> extends Node<T> implements Named<T>, AutoCloseable {
+class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 
 	private List<Component> components = []
 
