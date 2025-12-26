@@ -34,7 +34,7 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	T addComponent(Component component) {
 
 		components << component
-		component.parent = this
+		component.entity = this
 		return (T)this
 	}
 

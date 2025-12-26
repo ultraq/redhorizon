@@ -51,6 +51,6 @@ class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
 	@Override
 	void render(SceneShaderContext shaderContext) {
 
-		mesh.render(shaderContext, null, parent.transform)
+		mesh.render(shaderContext, null, entity.transform)
 	}
 }

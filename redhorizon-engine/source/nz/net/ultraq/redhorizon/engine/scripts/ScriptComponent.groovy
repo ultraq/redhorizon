@@ -54,13 +54,13 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
 			if (isNew) {
 				script = scriptObject as EntityScript
-				script.entity = parent
+				script.entity = entity
 				script.init()
 			}
 		}
 		else if (!script && scriptClass) {
 			script = scriptClass.getDeclaredConstructor().newInstance()
-			script.entity = parent
+			script.entity = entity
 			script.init()
 		}
 		script.update(delta)

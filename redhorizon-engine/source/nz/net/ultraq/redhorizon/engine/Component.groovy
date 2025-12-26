@@ -28,7 +28,7 @@ import groovy.transform.Memoized
  */
 abstract class Component<T extends Component> implements Named<T>, Visitable {
 
-	Entity parent
+	protected Entity entity
 
 	@Override
 	@Memoized
