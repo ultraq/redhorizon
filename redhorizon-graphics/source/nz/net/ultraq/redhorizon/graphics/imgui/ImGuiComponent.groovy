@@ -42,6 +42,24 @@ interface ImGuiComponent {
 	}
 
 	/**
+	 * Return whether this component is a debug overlay.  Debug overlays will
+	 * remain present when the 'toggle ImGui windows' option is set to off.
+	 */
+	default boolean isDebugOverlay() {
+
+		return false
+	}
+
+	/**
+	 * Return whether this component is a debug window.  Debug windows will be
+	 * removed when the 'toggle ImGui windows' option is set to off.
+	 */
+	default boolean isDebugWindow() {
+
+		return false
+	}
+
+	/**
 	 * Draw the component.
 	 */
 	void render()

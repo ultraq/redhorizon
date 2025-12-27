@@ -35,6 +35,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  */
 class DebugOverlay implements ImGuiComponent {
 
+	final boolean debugOverlay = true
 	private final float updateRateSeconds
 	private Camera camera
 	private Matrix4fc cameraTransform

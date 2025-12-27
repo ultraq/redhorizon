@@ -121,9 +121,14 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	void toggleFullScreen()
 
 	/**
-	 * Switch between having ImGui windows rendered or not.
+	 * Switch between having ImGui debug overlays rendered or not.
 	 */
-	void toggleImGuiWindows()
+	void toggleImGuiDebugOverlays()
+
+	/**
+	 * Switch between having ImGui debug windows rendered or not.
+	 */
+	void toggleImGuiDebugWindows()
 
 	/**
 	 * Switch between vertical sync being anabled/disabled.

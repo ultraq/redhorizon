@@ -26,6 +26,10 @@ import java.util.concurrent.ConcurrentHashMap
  * query the state of input from those sources so that a game can act
  * accordingly.
  *
+ * <p>Bindings can also be added with {@link InputEventHandler#addInputBinding(InputBinding)},
+ * which will require the {@link InputEventHandler#processInputs()} method to be
+ * called during the render loop to run through them.
+ *
  * @author Emanuel Rabina
  */
 class InputEventHandler {
@@ -33,6 +37,16 @@ class InputEventHandler {
 	private final Map<Integer, Boolean> keyPressedStates = new ConcurrentHashMap<>()
 	private final Map<Integer, Boolean> mouseButtonPressedStates = new ConcurrentHashMap<>()
 	private final Vector2f cursorPosition = new Vector2f()
+	private final List<InputBinding> bindings = new ArrayList<>()
+
+	/**
+	 * Add an input binding that will be processed with calls to {@link #processInputs()}.
+	 */
+	InputEventHandler addInputBinding(InputBinding binding) {
+
+		bindings << binding
+		return this
+	}
 
 	/**
 	 * Add another input source to listen to.
@@ -56,6 +70,23 @@ class InputEventHandler {
 			}
 		}
 		return this
+	}
+
+	/**
+	 * An overload of {@code <<} as an alias to {@link #addInputBinding(InputBinding)}.
+	 */
+	void leftShift(InputBinding binding) {
+
+		addInputBinding(binding)
+	}
+
+	/**
+	 * Run through all of the registered input bindings to check if any have been
+	 * triggered with the current rendering loop.
+	 */
+	void processInputs() {
+
+		bindings*.process(this)
 	}
 
 	/**

@@ -78,6 +78,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private List<ImGuiComponent> imGuiComponents = []
 	private boolean createDockspace
 	private Rectanglei imguiViewport = new Rectanglei()
+	private boolean showImGuiOverlays = true
 	private boolean showImGuiWindows = true
 
 	/**
@@ -392,7 +393,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
-	void toggleImGuiWindows() {
+	void toggleImGuiDebugOverlays() {
+
+		showImGuiOverlays = !showImGuiOverlays
+	}
+
+	@Override
+	void toggleImGuiDebugWindows() {
 
 		showImGuiWindows = !showImGuiWindows
 	}
@@ -423,7 +430,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		clear()
 		glViewport(_viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
 
-		imGuiContext.withFrame(createDockspace && showImGuiWindows) { dockspaceId ->
+		imGuiContext.withFrame(createDockspace && (showImGuiOverlays || showImGuiWindows)) { dockspaceId ->
 			if (dockspaceId) {
 				gameWindow.render(dockspaceId, framebuffer)
 			}
@@ -433,7 +440,12 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 				}
 			}
 			imGuiComponents.each { imGuiComponent ->
-				imGuiComponent.render()
+				if (imGuiComponent.debugOverlay && showImGuiOverlays) {
+					imGuiComponent.render()
+				}
+				else if (imGuiComponent.debugWindow && showImGuiWindows) {
+					imGuiComponent.render()
+				}
 			}
 		}
 		swapBuffers()

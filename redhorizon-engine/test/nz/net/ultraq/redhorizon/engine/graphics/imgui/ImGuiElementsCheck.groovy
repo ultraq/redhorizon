@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -29,7 +28,6 @@ import org.joml.Matrix4f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.*
 
 /**
  * A simple test to see the ImGui elements in action.
@@ -55,11 +53,6 @@ class ImGuiElementsCheck extends Specification {
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
-			.on(KeyEvent) { event ->
-				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
-					window.shouldClose(true)
-				}
-			}
 	}
 
 	def cleanup() {
@@ -75,8 +68,11 @@ class ImGuiElementsCheck extends Specification {
 			node << new Node().withName('Child 1')
 			node << new Node().withName('Child 2')
 			var camera = new Camera(800, 500, window)
-			var eventHandler = new InputEventHandler()
+			var input = new InputEventHandler()
 				.addInputSource(window)
+				.addEscapeToCloseBinding(window)
+				.addImGuiDebugBindings(window)
+				.addVSyncBinding(window)
 		when:
 			window
 				.addImGuiComponent(new DebugOverlay()
@@ -85,14 +81,7 @@ class ImGuiElementsCheck extends Specification {
 				.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->
-					// Do something!
-
-					if (eventHandler.keyPressed(GLFW_KEY_V, true)) {
-						window.toggleVSync()
-					}
-					if (eventHandler.keyPressed(GLFW_KEY_I, true)) {
-						window.toggleImGuiWindows()
-					}
+					input.processInputs()
 				}
 				Thread.yield()
 			}
