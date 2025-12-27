@@ -99,7 +99,7 @@ class Palette implements AutoCloseable {
 	@Override
 	void close() {
 
-		texture?.close()
+		texture.close()
 	}
 
 	/**

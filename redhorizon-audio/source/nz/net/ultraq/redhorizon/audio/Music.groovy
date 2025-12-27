@@ -136,8 +136,8 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	@Override
 	void close() {
 
-		decodingTask?.cancel(true)
-		executor?.close()
+		decodingTask.cancel(true)
+		executor.close()
 		source.stop()
 		streamedBuffers*.close()
 		source.close()

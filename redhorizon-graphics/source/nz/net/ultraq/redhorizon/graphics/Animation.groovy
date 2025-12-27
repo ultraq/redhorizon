@@ -138,7 +138,7 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 	@Override
 	void close() {
 
-		executor?.close()
+		executor.close()
 		frames.eachWithIndex { frame, index ->
 			if (frame) {
 				frame.close()

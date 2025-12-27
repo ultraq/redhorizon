@@ -71,8 +71,8 @@ class Sound implements AutoCloseable {
 	@Override
 	void close() {
 
-		source?.close()
-		buffer?.close()
+		source.close()
+		buffer.close()
 	}
 
 	/**

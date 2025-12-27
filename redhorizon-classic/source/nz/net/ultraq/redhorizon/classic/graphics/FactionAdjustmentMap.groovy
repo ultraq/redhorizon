@@ -59,7 +59,7 @@ class FactionAdjustmentMap implements AutoCloseable {
 	@Override
 	void close() {
 
-		texture?.close()
+		texture.close()
 	}
 
 	/**

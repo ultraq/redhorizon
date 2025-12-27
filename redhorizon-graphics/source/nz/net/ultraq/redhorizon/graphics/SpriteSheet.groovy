@@ -87,7 +87,7 @@ class SpriteSheet implements AutoCloseable {
 	@Override
 	void close() {
 
-		texture?.close()
+		texture.close()
 	}
 
 	/**

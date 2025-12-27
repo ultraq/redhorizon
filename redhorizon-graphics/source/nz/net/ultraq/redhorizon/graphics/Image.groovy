@@ -72,6 +72,6 @@ class Image implements AutoCloseable {
 	@Override
 	void close() {
 
-		texture?.close()
+		texture.close()
 	}
 }

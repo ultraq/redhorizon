@@ -50,6 +50,6 @@ class AlphaMask implements AutoCloseable {
 	@Override
 	void close() {
 
-		texture?.close()
+		texture.close()
 	}
 }

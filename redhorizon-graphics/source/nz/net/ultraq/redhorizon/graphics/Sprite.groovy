@@ -76,7 +76,7 @@ class Sprite implements AutoCloseable {
 	@Override
 	void close() {
 
-		mesh?.close()
+		mesh.close()
 	}
 
 	/**
