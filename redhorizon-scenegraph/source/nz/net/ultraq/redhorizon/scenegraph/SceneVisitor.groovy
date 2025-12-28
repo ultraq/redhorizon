@@ -22,10 +22,10 @@ package nz.net.ultraq.redhorizon.scenegraph
  * @author Emanuel Rabina
  */
 @FunctionalInterface
-interface SceneVisitor {
+interface SceneVisitor<T extends Node> {
 
 	/**
 	 * Visit any node.
 	 */
-	void visit(Node node)
+	void visit(T node)
 }

@@ -229,9 +229,21 @@ class Node<T extends Node> implements Named<T> {
 	/**
 	 * Traverse this node and all of its children.
 	 */
-	void traverse(SceneVisitor visitor) {
+	void traverse(SceneVisitor<Node> visitor) {
 
 		visitor.visit(this)
 		children*.traverse(visitor)
+	}
+
+	/**
+	 * Traverse this node and all of its children, but only if they are the same
+	 * type as {@code type}.
+	 */
+	<T extends Node> void traverse(Class<T> type, SceneVisitor<T> visitor) {
+
+		if (type.isInstance(this)) {
+			visitor.visit((T)this)
+		}
+		children*.traverse(type, visitor)
 	}
 }
