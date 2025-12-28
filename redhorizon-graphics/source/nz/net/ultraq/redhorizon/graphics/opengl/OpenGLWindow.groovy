@@ -78,13 +78,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private List<ImGuiComponent> imGuiComponents = []
 	private boolean createDockspace
 	private Rectanglei imguiViewport = new Rectanglei()
-	private boolean showImGuiOverlays = true
-	private boolean showImGuiWindows = true
+	private boolean showImGuiOverlays = false
+	private boolean showImGuiWindows = false
 
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title) {
+	OpenGLWindow(int width, int height, String title, boolean startWithDebugMode = false) {
 
 		size = new Vector2f(width, height)
 
@@ -179,6 +179,11 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		// gonna be using it a lot
 		imGuiContext = new ImGuiContext(window, getContentScale() / renderScale as float)
 		gameWindow = new GameWindow()
+
+		if (startWithDebugMode) {
+			showImGuiOverlays = true
+			showImGuiWindows = true
+		}
 	}
 
 	@Override

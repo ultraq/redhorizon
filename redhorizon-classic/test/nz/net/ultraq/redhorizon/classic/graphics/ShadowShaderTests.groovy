@@ -49,7 +49,7 @@ class ShadowShaderTests extends Specification {
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(640, 400, "Testing")
+		window = new OpenGLWindow(640, 400, "Testing", true)
 			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)

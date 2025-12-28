@@ -55,7 +55,7 @@ class VideoDecoders extends Specification {
 	def setup() {
 		device = new OpenALAudioDevice()
 			.withMasterVolume(0.5f)
-		window = new OpenGLWindow(640, 400, "Testing")
+		window = new OpenGLWindow(640, 400, "Testing", true)
 			.addImGuiComponent(new DebugOverlay())
 			.centerToScreen()
 			.scaleToFit()

@@ -48,7 +48,7 @@ class ImGuiElementsCheck extends Specification {
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(800, 500, "Testing")
+		window = new OpenGLWindow(800, 500, "Testing", true)
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
