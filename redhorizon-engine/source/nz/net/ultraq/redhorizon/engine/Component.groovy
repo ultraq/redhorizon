@@ -28,7 +28,7 @@ import groovy.transform.Memoized
 abstract class Component<T extends Component> implements Named<T> {
 
 	protected Entity entity
-	boolean enabled = true
+	protected boolean enabled = true
 
 	/**
 	 * Disable this component.  The component will continue to exist attached to
@@ -59,5 +59,21 @@ abstract class Component<T extends Component> implements Named<T> {
 
 		var sentenceCaseName = this.class.simpleName.toSentenceCase()
 		return sentenceCaseName.substring(0, sentenceCaseName.lastIndexOf(' '))
+	}
+
+	/**
+	 * Return whether this component is disabled.
+	 */
+	boolean isDisabled() {
+
+		return !enabled
+	}
+
+	/**
+	 * Return whether this component is enabled.
+	 */
+	boolean isEnabled() {
+
+		return enabled
 	}
 }
