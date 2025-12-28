@@ -153,6 +153,19 @@ class Node<T extends Node> implements Named<T> {
 	}
 
 	/**
+	 * Insert a child node before another child node.
+	 */
+	T insertBefore(Node child, Node before) {
+
+		var index = children.indexOf(before)
+		if (index != -1) {
+			children.add(index, child)
+			child.parent = this
+		}
+		return (T)this
+	}
+
+	/**
 	 * An overload of {@code <<} as an alias for {@link #addChild(Node)}.
 	 */
 	void leftShift(Node child) {
