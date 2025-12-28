@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime.logback
+package nz.net.ultraq.redhorizon.engine.logback
 
 import nz.net.ultraq.eventhorizon.Event
 

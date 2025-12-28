@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime.imgui
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLogEvent
-import nz.net.ultraq.redhorizon.runtime.logback.ImGuiLoggingAppender
+import nz.net.ultraq.redhorizon.engine.logback.ImGuiLogEvent
+import nz.net.ultraq.redhorizon.engine.logback.ImGuiLoggingAppender
+import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 
+import imgui.ImFont
 import imgui.ImGui
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.*
+import static imgui.flag.ImGuiCond.FirstUseEver
 
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
@@ -32,17 +33,20 @@ import java.util.concurrent.BlockingQueue
 /**
  * The window into which the non-persistent logs will be emitted.
  *
+ * <p>When using the LogPanel, logback must also be configured with the
+ * {@link ImGuiLoggingAppender} otherwise it will error.
+ *
  * @author Emanuel Rabina
  */
-class LogPanel implements ImGuiChrome {
+class LogPanel implements ImGuiComponent {
 
 	private static final int MAX_DEBUG_LINES = 400
 
+	final boolean debugWindow = true
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 
 	private boolean scrollToBottom = true
-	private boolean focused
-	private boolean hovered
+	private ImFont robotoMonoFont
 
 	/**
 	 * Constructor, create a new ImGui window for capturing and showing the logs.
@@ -60,29 +64,21 @@ class LogPanel implements ImGuiChrome {
 	}
 
 	@Override
-	boolean isFocused() {
+	LogPanel configureFromWindow(ImGuiContext imGuiContext, Window window) {
 
-		return focused
+		robotoMonoFont = imGuiContext.robotoMonoFont
+		return this
 	}
 
 	@Override
-	boolean isHovered() {
-
-		return hovered
-	}
-
-	@Override
-	void render(int dockspaceId, Framebuffer sceneFramebufferResult) {
+	void render() {
 
 		ImGui.setNextWindowSize(800, 300, FirstUseEver)
 		ImGui.begin('Logs', new ImBoolean(true))
 
-		focused = ImGui.isWindowFocused()
-		hovered = ImGui.isWindowHovered()
-
 		if (logLines.size()) {
 			ImGui.separator()
-			ImGui.pushFont(ImGuiLayer.robotoMonoFont)
+			ImGui.pushFont(robotoMonoFont)
 			logLines.each { line ->
 				ImGui.selectable(line)
 			}

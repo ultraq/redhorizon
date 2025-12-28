@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime.logback
+package nz.net.ultraq.redhorizon.engine.logback
 
 import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
 

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
@@ -26,6 +27,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Matrix4f
 import org.lwjgl.system.Configuration
+import org.slf4j.LoggerFactory
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -60,8 +62,10 @@ class ImGuiElementsCheck extends Specification {
 		window?.close()
 	}
 
-	def 'Shows a debug overlay, node list'() {
+	def 'Shows all of our panels'() {
 		given:
+			var logger = LoggerFactory.getLogger(ImGuiElementsCheck)
+			var random = new Random()
 			var scene = new Scene()
 			var node = new Node().withName('Parent')
 			scene << node
@@ -73,15 +77,25 @@ class ImGuiElementsCheck extends Specification {
 				.addEscapeToCloseBinding(window)
 				.addImGuiDebugBindings(window)
 				.addVSyncBinding(window)
+			var randomLogTimer = 0f
 		when:
 			window
 				.addImGuiComponent(new DebugOverlay()
 					.withCursorTracking(camera, cameraTransform))
 				.addImGuiComponent(new NodeList(scene))
+				.addImGuiComponent(new LogPanel())
 				.show()
+			var deltaTimer = new DeltaTimer()
 			while (!window.shouldClose()) {
+				var delta = deltaTimer.deltaTime()
+				randomLogTimer += delta
+				if (randomLogTimer > 1f) {
+					randomLogTimer -= 1f
+					logger.info("Random log message ${random.nextInt(5)}")
+				}
+				input.processInputs()
 				window.useWindow { ->
-					input.processInputs()
+					// Do something!
 				}
 				Thread.yield()
 			}

@@ -44,12 +44,9 @@ configure {
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
 				implementation project(':redhorizon-scenegraph')
+				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
-			}
-		.configureVerification()
-			.withTestDependencies() {
-				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 			}
 }
 // @formatter:on
