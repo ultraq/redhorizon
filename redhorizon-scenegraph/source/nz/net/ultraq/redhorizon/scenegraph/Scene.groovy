@@ -27,8 +27,8 @@ import nz.net.ultraq.eventhorizon.EventTarget
 class Scene implements EventTarget<Scene> {
 
 	@Delegate(
-		includes = ['addChild', 'findAncestor', 'findDescendent', 'insertBefore', 'leftShift', 'removeChild', 'rotate',
-			'scale', 'translate', 'traverse'],
+		includes = ['addChild', 'clear', 'findAncestor', 'findDescendent', 'insertBefore', 'leftShift', 'removeChild',
+			'rotate', 'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()

@@ -54,6 +54,17 @@ class Node<T extends Node> implements Named<T> {
 	}
 
 	/**
+	 * Remove all children from this node.
+	 */
+	void clear() {
+
+		children.each { child ->
+			child.parent = null
+		}
+		children.clear()
+	}
+
+	/**
 	 * Locate the first ancestor node that satisfies the given predicate.
 	 *
 	 * @param predicate
