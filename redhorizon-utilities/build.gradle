@@ -14,21 +14,37 @@
  * limitations under the License.
  */
 
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
 	id 'redhorizon-build'
 }
+
+var os = OperatingSystem.current()
+var targetPlatform = findProperty('targetPlatform') ?:
+	os == OperatingSystem.MAC_OS && System.getProperty('os.arch').startsWith('aarch64') ? 'macos-arm64' : 'windows'
 
 // @formatter:off
 configure {
 	asGroovyApplicationProject() {
 		mainClass = 'nz.net.ultraq.redhorizon.cli.RedHorizon'
 		applicationName = 'redhorizon'
+		applicationDefaultJvmArgs = ['-Dorg.lwjgl.system.stackSize=10240'] +
+			(targetPlatform.startsWith('macos') ? ['-Dorg.lwjgl.glfw.libname=glfw_async'] : [])
+	}
+		.withJavaCompileOptions() {
+			options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 	}
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-classic')
 				implementation project(':redhorizon-filetypes')
+				implementation project(':redhorizon-explorer')
+				implementation project(':redhorizon-shooter')
+				implementation "ch.qos.logback:logback-core:${logbackVersion}"
 				implementation "info.picocli:picocli:${picocliVersion}"
+				implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+				runtimeOnly "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
@@ -37,6 +53,11 @@ configure {
 				testImplementation 'com.github.valfirst:slf4j-test:3.0.1'
 				testImplementation 'org.assertj:assertj-core:3.26.3'
 			}
+
+	createZipDistribution()
+		.withDependenciesIn('libraries')
+		.withSourcesIn('source')
+		.withGroovydocsIn('groovydoc')
 }
 // @formatter:on
 

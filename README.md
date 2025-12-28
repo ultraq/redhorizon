@@ -74,7 +74,7 @@ that the way graphics were rendered in the early 2000s are not at all the they
 are rendered now!  So 2020 was spent re-learning modern OpenGL with shaders and
 rewriting the graphics around that.
 
-[![Red Horizon - Play WSA file demo](redhorizon-cli/screenshot-of-wsa-demo.png)](https://www.youtube.com/watch?v=mp7A6EMWupY)
+[![Red Horizon - Play WSA file demo](redhorizon-utilities/screenshot-of-wsa-demo.png)](https://www.youtube.com/watch?v=mp7A6EMWupY)
 
 [Demo of VQA (video format) playback on YouTube](https://www.youtube.com/watch?v=3jpLoEJ22xc)
 
