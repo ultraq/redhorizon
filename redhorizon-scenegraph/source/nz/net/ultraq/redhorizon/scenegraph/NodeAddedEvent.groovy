@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph
+package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.eventhorizon.Event
 
-import groovy.transform.TupleConstructor
+import groovy.transform.ImmutableOptions
 
 /**
- * Event for when something has been added to the scene.
+ * Event for when a node has been added to the scene.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class NodeAddedEvent implements Event {
-
-	final Node node
+@ImmutableOptions(knownImmutables = ['node'])
+record NodeAddedEvent(Node node) implements Event {
 }

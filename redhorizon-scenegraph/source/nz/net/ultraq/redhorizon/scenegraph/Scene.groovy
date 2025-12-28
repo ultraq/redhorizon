@@ -16,13 +16,15 @@
 
 package nz.net.ultraq.redhorizon.scenegraph
 
+import nz.net.ultraq.eventhorizon.EventTarget
+
 /**
  * A scene is a collection of nodes, with parent/child relationships, that
  * represent the state of all or part of the game world.
  *
  * @author Emanuel Rabina
  */
-class Scene {
+class Scene implements EventTarget<Scene> {
 
 	@Delegate(
 		includes = ['addChild', 'findAncestor', 'findDescendent', 'insertBefore', 'leftShift', 'removeChild', 'rotate',

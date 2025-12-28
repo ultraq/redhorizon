@@ -49,6 +49,7 @@ class Node<T extends Node> implements Named<T> {
 
 		children.add(child)
 		child.parent = this
+		scene.trigger(new NodeAddedEvent(child))
 		return (T)this
 	}
 
@@ -180,6 +181,7 @@ class Node<T extends Node> implements Named<T> {
 
 		children.remove(child)
 		child.parent = null
+		scene.trigger(new NodeRemovedEvent(child))
 		return (T)this
 	}
 
