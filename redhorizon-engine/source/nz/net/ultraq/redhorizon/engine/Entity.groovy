@@ -60,6 +60,24 @@ class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
 	}
 
 	/**
+	 * Change the state of all components to be disabled.
+	 */
+	T disable() {
+
+		components*.disable()
+		return (T)this
+	}
+
+	/**
+	 * Change the state of all components to be enabled.
+	 */
+	T enable() {
+
+		components*.enable()
+		return (T)this
+	}
+
+	/**
 	 * Return the first component that matches the given predicate.
 	 */
 	<T extends Component> T findComponent(
