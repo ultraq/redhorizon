@@ -28,6 +28,26 @@ import groovy.transform.Memoized
 abstract class Component<T extends Component> implements Named<T> {
 
 	protected Entity entity
+	boolean enabled = true
+
+	/**
+	 * Disable this component.  The component will continue to exist attached to
+	 * its entity, but will no longer participate in any systems.
+	 */
+	T disable() {
+
+		enabled = false
+		return (T)this
+	}
+
+	/**
+	 * Enable this component.  The component will participate in any systems again.
+	 */
+	T enable() {
+
+		enabled = true
+		return (T)this
+	}
 
 	@Override
 	@Memoized
