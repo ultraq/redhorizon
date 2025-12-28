@@ -5,42 +5,89 @@ Red Horizon
 [![Build Status](https://github.com/ultraq/redhorizon/actions/workflows/build.yml/badge.svg)](https://github.com/ultraq/redhorizon/actions)
 [![GitHub Release](https://img.shields.io/github/release/ultraq/redhorizon.svg?maxAge=3600)](https://github.com/ultraq/redhorizon/releases/latest)
 
-This repository is an archive of work I started several years ago to attempt to
-recreate the original 2D Command & Conquer (C&C) games. The most useful outcome
-of this project has been a set of file conversion tools and working code
-examples of how to decode/encode various file formats from those games.
+A 2D game engine built to recreate many aspects of the Command & Conquer games
+of the 1990s, or at least have a lot of fun playing with the C&C assets while I
+learn about how one goes about building a game engine 😄
 
-While I don't think I have the time any more to fulfil the original goal of
-running the original Red Alert campaign missions with this (there's that [C&C
-Remaster project](https://www.ea.com/en-gb/games/command-and-conquer/command-and-conquer-remastered)
-now!), I update this project every so often when I feel the urge to work on
-smaller things like graphics rendering, playing sounds, creating CLI tools, and
-general software architecture for games as opposed to my day-to-day which is web
-development.
+This project has gone through a few incarnations with changes in goal and scope
+from its initial inception way back in 2007.  There's a [project history](#project-history)
+below for those interested, but as of writing the current goal is building a
+game engine as a way to learn about other areas of programming not related to my
+job (I'm a web developer by day) and learning about new and different technical
+aspects in the process.
 
 
 Installation
 ------------
 
-Currently, this project consists of several modules in an attempt to prove out
-various parts of the overall engine. These standalone modules are:
+This project consists of several modules in an attempt to prove out various
+parts of the overall engine.  These standalone modules are:
 
- - [`redhorizon-audio`](redhorizon-audio)
- - [`redhorizon-classic`](redhorizon-classic)
- - [`redhorizon-engine`](redhorizon-engine)
- - [`redhorizon-graphics`](redhorizon-graphics)
- - [`redhorizon-input`](redhorizon-input)
- - [`redhorizon-scenegraph`](redhorizon-scenegraph)
+ - [`redhorizon-audio`](redhorizon-audio) - play back sounds and music
+ - [`redhorizon-graphics`](redhorizon-graphics) - render meshes and sprites
+ - [`redhorizon-input`](redhorizon-input) - take and respond to player input
+ - [`redhorizon-scenegraph`](redhorizon-scenegraph) - organize objects in a game world
+ - [`redhorizon-classic`](redhorizon-classic) - bridge C&C files and assets with the above
+ - [`redhorizon-engine`](redhorizon-engine) - for taking everything to make it interactive
 
 Instructions for use in projects can be found in each of those subproject
 READMEs.
 
 ### Other releases
 
-To use the CLI tools (file conversion, playing back audio/video, viewing
-maps/units), check [the `redhorizon-cli` project](redhorizon-cli) for
-installation instructions.
+The very old file conversion tools from the first era of this project can be
+found in the [Pre-GitHub releases tag](https://github.com/ultraq/redhorizon/releases/tag/pre-github-releases)
 
-To work with classic C&C codecs and file formats in your own projects, check
-[the `redhorizon-classic` project](redhorizon-classic) for installation
-instructions.
+There are several other tags/releases but were really just for my own benefit
+until the 0.40.0 tag where I start to put things up on Maven central for use in
+other projects to aid with my game development learning.
+
+After that, [the `redhorizon-classic` project](redhorizon-classic) is likely the
+most interesting as it has code and working examples of reading the classic C&C
+codecs and file formats.
+
+
+Project history
+---------------
+
+This project started way back in 2007 as an attempt by me, a naive and fresh-out-of-uni
+programmer, to recreate the original 2D Command & Conquer (C&C) games which I
+was very familiar with having spent much of my teenage years modding and
+creating campaigns for them.
+
+In the first couple of years, I managed to display the map of the first Allied
+mission from C&C Red Alert (RA) using fixed-function OpenGL on Windows, from
+which came a set of file conversion tools with working code examples of how to
+decode various file formats from those games for display.  Not being able to do
+much beyond a static display though, I got discouraged and this project lay
+dormant for a very long time.
+
+![splash-screen](https://images.ultraq.net.nz/redhorizon/screenshots/GUI_SplashScreen.png)
+![drawing-map](https://images.ultraq.net.nz/redhorizon/screenshots/InGame_Structures.png)
+![view-dune2-files](https://images.ultraq.net.nz/redhorizon/screenshots/Utils_ReadDune2SHP.png)
+
+Things started back up in late 2019 where I got the itch to convert the old
+Windows batch files that were used for converting files, to cross-platform CLI
+tools (I was now running a Mac, which couldn't run the old stuff).  In the
+process I developed some basic 'media player' CLI tools which made me learn that
+that the way graphics were rendered in the early 2000s are not at all the they
+are rendered now!  So 2020 was spent re-learning modern OpenGL with shaders and
+rewriting the graphics around that.
+
+Even with new technology, I was still stuck with static objects and didn't have
+much in the way of making things move or have complicated responses to player
+input without creating absolute messes of code.  So from 2023 onwards my focus
+shifted to learning about the engine development part of game development as a
+way to learn about the systems and architectures used to make games interactive.
+
+This is where we are now, and the 0.40.0 and newer tags are a marker of this
+shift in focus where I've been using tutorials made for other game engines as a
+way to prove that what I'm doing can actually work.  The projects are simple,
+but built so far using Red Horizon as their basis are:
+
+ - [redhorizon-libgdx-simplegame](https://github.com/ultraq/redhorizon-libgdx-simplegame)
+ - [redhorizon-unity-asteroids](https://github.com/ultraq/redhorizon-unity-asteroids)
+
+And there is also [redhorizon-shooter](https://github.com/ultraq/redhorizon-unity-asteroids)
+where I'm really just having a play with C&C's assets to do whatever thing I can
+think of in a twin-stick shooter environment.

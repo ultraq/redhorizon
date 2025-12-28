@@ -12,7 +12,8 @@ here, and serve as working examples for other programmers.
 Installation
 ------------
 
-Requires Java 21 on macOS 12 Monterey and newer, or Windows 10 64-bit and newer.
+Requires Java 21 on either macOS 12 Monterey and newer or Windows 10 64-bit and
+newer.
 
 ### For Maven and Maven-compatible dependency managers
 
@@ -20,7 +21,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-classic`
- - Version: `0.41.0`
+ - Version: `0.41.1`
 
 
 Codecs
