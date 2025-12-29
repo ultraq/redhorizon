@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.logback
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.eventhorizon.Event
 
