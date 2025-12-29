@@ -17,28 +17,20 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.InputBinding
-import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V
-
-import groovy.transform.TupleConstructor
 
 /**
  * Input binding for toggling/cyling vsync options.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class VsyncBinding implements InputBinding {
+class VsyncBinding extends KeyBinding {
 
-	final Window window
-
-	@Override
-	void process(InputEventHandler input) {
-
-		if (input.keyPressed(GLFW_KEY_V, true)) {
+	VsyncBinding(Window window) {
+		super(GLFW_KEY_V, true, { ->
 			window.toggleVSync()
-		}
+		})
 	}
 }

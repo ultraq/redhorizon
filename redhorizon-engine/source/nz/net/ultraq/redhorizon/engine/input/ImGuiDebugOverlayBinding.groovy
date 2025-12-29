@@ -19,18 +19,18 @@ package nz.net.ultraq.redhorizon.engine.input
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
 
 /**
- * Bind the {@code ESC} key to closing the window.
+ * Key binding for toggling the ImGui debug overlay.
  *
  * @author Emanuel Rabina
  */
-class EscapeToCloseBinding extends KeyBinding {
+class ImGuiDebugOverlayBinding extends KeyBinding {
 
-	EscapeToCloseBinding(Window window) {
-		super(GLFW_KEY_ESCAPE, true, { ->
-			window.shouldClose(true)
+	ImGuiDebugOverlayBinding(Window window) {
+		super(GLFW_KEY_O, true, { ->
+			window.toggleImGuiDebugOverlays()
 		})
 	}
 }

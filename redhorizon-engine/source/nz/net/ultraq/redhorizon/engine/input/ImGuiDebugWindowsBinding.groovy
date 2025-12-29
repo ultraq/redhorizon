@@ -17,31 +17,20 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.InputBinding
-import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import static org.lwjgl.glfw.GLFW.*
-
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_I
 
 /**
- * Input bindings for toggling ImGui debug windows and overlays.
+ * Key binding for toggling the ImGui debug windows.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImGuiDebugBindings implements InputBinding {
+class ImGuiDebugWindowsBinding extends KeyBinding {
 
-	final Window window
-
-	@Override
-	void process(InputEventHandler input) {
-
-		if (input.keyPressed(GLFW_KEY_I, true)) {
+	ImGuiDebugWindowsBinding(Window window) {
+		super(GLFW_KEY_I, true, { ->
 			window.toggleImGuiDebugWindows()
-		}
-		if (input.keyPressed(GLFW_KEY_O, true)) {
-			window.toggleImGuiDebugOverlays()
-		}
+		})
 	}
 }

@@ -17,7 +17,8 @@
 package nz.net.ultraq.redhorizon.engine.extensions
 
 import nz.net.ultraq.redhorizon.engine.input.EscapeToCloseBinding
-import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugBindings
+import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugOverlayBinding
+import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugWindowsBinding
 import nz.net.ultraq.redhorizon.engine.input.VsyncBinding
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.InputEventHandler
@@ -44,7 +45,9 @@ class InputEventHandlerExtensions {
 	 */
 	static InputEventHandler addImGuiDebugBindings(InputEventHandler self, Window window) {
 
-		return self.addInputBinding(new ImGuiDebugBindings(window))
+		return self
+			.addInputBinding(new ImGuiDebugOverlayBinding(window))
+			.addInputBinding(new ImGuiDebugWindowsBinding(window))
 	}
 
 	/**

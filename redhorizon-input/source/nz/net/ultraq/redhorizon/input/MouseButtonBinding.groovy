@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.input
 
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.KeyBinding
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import groovy.transform.TupleConstructor
 
 /**
- * Bind the {@code ESC} key to closing the window.
+ * A mouse-specific input binding.
  *
  * @author Emanuel Rabina
  */
-class EscapeToCloseBinding extends KeyBinding {
+@TupleConstructor(defaults = false)
+class MouseButtonBinding implements InputBinding {
 
-	EscapeToCloseBinding(Window window) {
-		super(GLFW_KEY_ESCAPE, true, { ->
-			window.shouldClose(true)
-		})
-	}
+	final int button
+	final Closure action
 }
