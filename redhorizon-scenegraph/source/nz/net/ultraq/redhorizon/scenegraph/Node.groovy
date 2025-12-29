@@ -38,9 +38,11 @@ class Node<T extends Node> implements Named<T> {
 	protected final Matrix4f _transform = new Matrix4f()
 	protected final Vector3f _position = new Vector3f()
 	protected final Vector3f _rotation = new Vector3f()
+	protected final Vector3f _scale = new Vector3f()
 	protected final Matrix4f _globalTransform = new Matrix4f()
 	protected final Vector3f _globalPosition = new Vector3f()
 	protected final Vector3f _globalRotation = new Vector3f()
+	protected final Vector3f _globalScale = new Vector3f()
 
 	/**
 	 * Add a child node to this node.
@@ -124,6 +126,15 @@ class Node<T extends Node> implements Named<T> {
 	}
 
 	/**
+	 * Return the global scale of this node.  That is, the local scale multiplied
+	 * by every local scale of the node's ancestors.
+	 */
+	Vector3fc getGlobalScale() {
+
+		return globalTransform.getScale(_globalScale)
+	}
+
+	/**
 	 * Return this node's parent, or {@code null} if it has none.
 	 */
 	Node getParent() {
@@ -145,6 +156,14 @@ class Node<T extends Node> implements Named<T> {
 	Vector3fc getRotation() {
 
 		return _transform.getEulerAnglesXYZ(_rotation)
+	}
+
+	/**
+	 * Return the scale of this node.
+	 */
+	Vector3fc getScale() {
+
+		return _transform.getScale(_scale)
 	}
 
 	/**

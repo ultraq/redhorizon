@@ -47,10 +47,12 @@ class CircleCollisionComponent extends CollisionComponent<CircleCollisionCompone
 		}
 
 		var position = entity.globalPosition
-		var bounds = new Circlef(position.x(), position.y(), radius)
+		var scale = entity.globalScale
+		var bounds = new Circlef(position.x(), position.y(), radius * scale.x() as float)
 
 		var otherPosition = other.entity.globalPosition
-		var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius)
+		var otherScale = other.entity.globalScale
+		var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius * otherScale.x() as float)
 
 		if (bounds.intersects(otherBounds)) {
 			var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
