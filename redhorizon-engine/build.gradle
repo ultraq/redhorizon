@@ -30,6 +30,7 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
 			manifest {
@@ -46,7 +47,9 @@ configure {
 				implementation project(':redhorizon-scenegraph')
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
+				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }
 // @formatter:on
