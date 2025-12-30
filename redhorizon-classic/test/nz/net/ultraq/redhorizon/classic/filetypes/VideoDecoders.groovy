@@ -50,13 +50,13 @@ class VideoDecoders extends Specification {
 
 	AudioDevice device
 	OpenGLWindow window
+	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		device = new OpenALAudioDevice()
 			.withMasterVolume(0.5f)
-		window = new OpenGLWindow(640, 400, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
@@ -66,6 +66,7 @@ class VideoDecoders extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
@@ -90,14 +91,19 @@ class VideoDecoders extends Specification {
 				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 				lastUpdateTimeMs = currentTimeMs
 
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						video.update(delta)
-						video.render(shaderContext, videoTransform)
-						video.render(videoPosition)
+				window.useRenderPipeline()
+					.scene { ->
+						shader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							video.update(delta)
+							video.render(shaderContext, videoTransform)
+							video.render(videoPosition)
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 			video.stop()

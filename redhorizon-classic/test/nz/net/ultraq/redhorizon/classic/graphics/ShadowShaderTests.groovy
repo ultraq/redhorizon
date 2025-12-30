@@ -46,11 +46,11 @@ class ShadowShaderTests extends Specification {
 	}
 
 	OpenGLWindow window
+	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(640, 400, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
@@ -59,6 +59,7 @@ class ShadowShaderTests extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
@@ -90,12 +91,17 @@ class ShadowShaderTests extends Specification {
 					timer -= 0.25f
 				}
 
-				window.useWindow { ->
-					shadowShader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+				window.useRenderPipeline()
+					.scene { ->
+						shadowShader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:

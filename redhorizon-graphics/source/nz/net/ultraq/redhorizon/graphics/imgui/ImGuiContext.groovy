@@ -16,81 +16,15 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.GraphicsResource
-
 import imgui.ImFont
-import imgui.ImFontConfig
-import imgui.ImGui
-import imgui.gl3.ImGuiImplGl3
-import imgui.glfw.ImGuiImplGlfw
-import static imgui.flag.ImGuiConfigFlags.DockingEnable
 
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
+import groovy.transform.ImmutableOptions
 
 /**
- * Setup necessary to include ImGui in the rendering pipeline.
+ * ImGui-related data to pass along to ImGui components when rendering.
  *
  * @author Emanuel Rabina
  */
-class ImGuiContext implements GraphicsResource {
-
-	final ImFont robotoFont
-	final ImFont robotoMonoFont
-	private final ImGuiImplGl3 imGuiGl3
-	private final ImGuiImplGlfw imGuiGlfw
-
-	/**
-	 * Constructor, set up ImGui for the given window.
-	 */
-	ImGuiContext(long windowHandle, float contentScale) {
-
-		imGuiGlfw = new ImGuiImplGlfw()
-		imGuiGl3 = new ImGuiImplGl3()
-		ImGui.createContext()
-
-		var io = ImGui.getIO()
-		io.setConfigFlags(DockingEnable)
-
-		var fontConfig1 = new ImFontConfig()
-		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig1)
-		}
-		fontConfig1.destroy()
-		io.setFontDefault(robotoFont)
-
-		var fontConfig2 = new ImFontConfig()
-		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig2)
-		}
-		fontConfig2.destroy()
-
-		imGuiGlfw.init(windowHandle, true)
-		imGuiGl3.init('#version 410 core')
-	}
-
-	@Override
-	void close() {
-
-		imGuiGl3.shutdown()
-		imGuiGlfw.shutdown()
-		ImGui.destroyContext()
-	}
-
-	/**
-	 * Automatically mark the beginning and end of a frame as before and after the
-	 * execution of the given closure.
-	 */
-	void withFrame(boolean createDockspace, @ClosureParams(value = SimpleType, options = 'int') Closure closure) {
-
-		imGuiGl3.newFrame()
-		imGuiGlfw.newFrame()
-		ImGui.newFrame()
-
-		var dockspaceId = createDockspace ? ImGui.dockSpaceOverViewport() : 0
-		closure(dockspaceId)
-
-		ImGui.render()
-		imGuiGl3.renderDrawData(ImGui.getDrawData())
-	}
+@ImmutableOptions(knownImmutables = ['robotoFont', 'robotoMonoFont'])
+record ImGuiContext(ImFont robotoFont, ImFont robotoMonoFont, int dockspaceId) {
 }

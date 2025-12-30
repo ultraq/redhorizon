@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 
-import imgui.ImFont
 import imgui.ImGui
 import imgui.type.ImBoolean
 import org.joml.Matrix4fc
@@ -33,13 +32,10 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay implements ImGuiComponent {
+class DebugOverlay extends ImGuiWindow {
 
-	final boolean debugOverlay = true
 	private final float updateRateSeconds
-	private Camera camera
-	private Matrix4fc cameraTransform
-	private ImFont robotoMonoFont
+	private boolean cursorTracking = false
 	private final Vector2f cursorPosition = new Vector2f()
 	private final Vector3f worldPosition = new Vector3f()
 	private long lastUpdateTimeMs = System.currentTimeMillis()
@@ -57,20 +53,7 @@ class DebugOverlay implements ImGuiComponent {
 	}
 
 	@Override
-	ImGuiComponent configureFromWindow(ImGuiContext imGuiContext, Window window) {
-
-		robotoMonoFont = imGuiContext.robotoMonoFont
-		if (camera) {
-			window.on(CursorPositionEvent) { event ->
-				cursorPosition.set(event.xPos(), event.yPos())
-				camera.unproject(cursorPosition.x, cursorPosition.y, cameraTransform, worldPosition)
-			}
-		}
-		return this
-	}
-
-	@Override
-	void render() {
+	void render(ImGuiContext context) {
 
 		var currentTimeMs = System.currentTimeMillis()
 		var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
@@ -84,12 +67,12 @@ class DebugOverlay implements ImGuiComponent {
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.setNextWindowPos((float)(viewport.workPosX + viewport.sizeX - width), viewport.workPosY)
-		ImGui.pushFont(robotoMonoFont)
+		ImGui.pushFont(context.robotoMonoFont())
 
 		ImGui.begin('Debug overlay', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
 		width = (int)ImGui.getWindowSizeX()
 		ImGui.text("FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms")
-		if (camera) {
+		if (cursorTracking) {
 			ImGui.text("Cursor: ${sprintf('%.1f', cursorPosition.x)}, ${sprintf('%.1f', cursorPosition.y)}")
 			ImGui.text("World: ${sprintf('%.1f', worldPosition.x)}, ${sprintf('%.1f', worldPosition.y)}")
 		}
@@ -101,10 +84,13 @@ class DebugOverlay implements ImGuiComponent {
 	/**
 	 * Include cursor position debugging in the overlay.
 	 */
-	DebugOverlay withCursorTracking(Camera camera, Matrix4fc cameraTransform) {
+	DebugOverlay withCursorTracking(Camera camera, Matrix4fc cameraTransform, Window window) {
 
-		this.camera = camera
-		this.cameraTransform = cameraTransform
+		window.on(CursorPositionEvent) { event ->
+			cursorPosition.set(event.xPos(), event.yPos())
+			camera.unproject(cursorPosition.x, cursorPosition.y, cameraTransform, worldPosition)
+		}
+		cursorTracking = true
 		return this
 	}
 }

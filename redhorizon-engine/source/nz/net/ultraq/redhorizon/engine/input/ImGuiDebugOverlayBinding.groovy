@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
@@ -28,9 +28,16 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
  */
 class ImGuiDebugOverlayBinding extends KeyBinding {
 
-	ImGuiDebugOverlayBinding(Window window) {
+	ImGuiDebugOverlayBinding(List<ImGuiWindow> overlays) {
 		super(GLFW_KEY_O, true, { ->
-			window.toggleImGuiDebugOverlays()
+			overlays.each { overlay ->
+				if (overlay.enabled) {
+					overlay.disable()
+				}
+				else {
+					overlay.enable()
+				}
+			}
 		})
 	}
 }

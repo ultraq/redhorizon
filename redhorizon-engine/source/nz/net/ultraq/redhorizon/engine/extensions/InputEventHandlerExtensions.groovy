@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugOverlayBinding
 import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugWindowsBinding
 import nz.net.ultraq.redhorizon.engine.input.VsyncBinding
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 /**
@@ -43,11 +44,12 @@ class InputEventHandlerExtensions {
 	 * Add pressing {@code I} to toggle ImGui debug windows, and {@code O} to
 	 * toggle ImGui debug overlays.
 	 */
-	static InputEventHandler addImGuiDebugBindings(InputEventHandler self, Window window) {
+	static InputEventHandler addImGuiDebugBindings(InputEventHandler self, List<ImGuiWindow> overlays,
+		List<ImGuiWindow> windows) {
 
 		return self
-			.addInputBinding(new ImGuiDebugOverlayBinding(window))
-			.addInputBinding(new ImGuiDebugWindowsBinding(window))
+			.addInputBinding(new ImGuiDebugOverlayBinding(overlays))
+			.addInputBinding(new ImGuiDebugWindowsBinding(windows))
 	}
 
 	/**

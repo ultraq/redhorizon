@@ -21,13 +21,13 @@ import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiLayer
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
 
-import org.joml.Vector2f
+import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GLDebugMessageCallback
@@ -61,7 +61,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	private final long window
-	final Vector2f size
+	final Vector2i size
 	private float renderScale
 	private final Rectanglei _viewport
 	private boolean centered
@@ -70,23 +70,21 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private boolean doubleClickForFullscreenEnabled
 	private long lastClickTime
 	private final Rectanglei lastWindowPositionAndSize = new Rectanglei()
-	private final Framebuffer framebuffer
+	private boolean resizableFramebuffer = false
+	private Framebuffer framebuffer
 	private final ScreenShader screenShader
 
-	private final ImGuiContext imGuiContext
+	private final ImGuiLayer imGuiLayer
 	private final GameWindow gameWindow
-	private List<ImGuiComponent> imGuiComponents = []
-	private boolean createDockspace
 	private Rectanglei imguiViewport = new Rectanglei()
-	private boolean showImGuiOverlays = false
-	private boolean showImGuiWindows = false
+	private boolean dockspaceUsed = false
 
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
-	OpenGLWindow(int width, int height, String title, boolean startWithDebugMode = false) {
+	OpenGLWindow(int width, int height, String title) {
 
-		size = new Vector2f(width, height)
+		size = new Vector2i(width, height)
 
 		glfwSetErrorCallback() { int error, long description ->
 			logger.error(getDescription(description))
@@ -121,6 +119,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		def (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
+				size.set(newWidth, newHeight)
 				var scale = Math.min(newWidth / _viewport.lengthX(), newHeight / _viewport.lengthY())
 				var viewportWidth = (int)(_viewport.lengthX() * scale)
 				var viewportHeight = (int)(_viewport.lengthY() * scale)
@@ -175,23 +174,10 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		framebuffer = new OpenGLFramebuffer(width, height)
 		screenShader = new ScreenShader()
 
-		// Create an ImGui context - might as well bake it into the window as we're
+		// Create an ImGui layer - might as well bake it into the window as we're
 		// gonna be using it a lot
-		imGuiContext = new ImGuiContext(window, getContentScale() / renderScale as float)
+		imGuiLayer = new ImGuiLayer(window, getContentScale() / renderScale as float)
 		gameWindow = new GameWindow()
-
-		if (startWithDebugMode) {
-			showImGuiOverlays = true
-			showImGuiWindows = true
-		}
-	}
-
-	@Override
-	Window addImGuiComponent(ImGuiComponent imGuiComponent) {
-
-		imGuiComponents << imGuiComponent.configureFromWindow(imGuiContext, this)
-		createDockspace |= imGuiComponent.requiresDockspace
-		return this
 	}
 
 	@Override
@@ -215,7 +201,9 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	@Override
 	void close() {
 
-		imGuiContext.close()
+		imGuiLayer.close()
+		framebuffer.close()
+		screenShader.close()
 		glfwDestroyWindow(window)
 		glfwTerminate()
 	}
@@ -262,7 +250,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	 */
 	Rectanglei getViewport() {
 
-		return showImGuiWindows ?
+		return dockspaceUsed ?
 			imguiViewport
 				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
 				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int)
@@ -298,8 +286,11 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		glfwMakeContextCurrent(window)
 	}
 
-	@Override
-	void pollEvents() {
+	/**
+	 * Poll for and process all pending events.
+	 */
+	@SuppressWarnings('GrMethodMayBeStatic')
+	private void pollEvents() {
 
 		glfwPollEvents()
 	}
@@ -364,8 +355,10 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		return this
 	}
 
-	@Override
-	void swapBuffers() {
+	/**
+	 * Swap the front/back buffers to push the rendered result to the screen.
+	 */
+	private void swapBuffers() {
 
 		glfwSwapBuffers(window)
 	}
@@ -398,30 +391,67 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
-	void toggleImGuiDebugOverlays() {
-
-		showImGuiOverlays = !showImGuiOverlays
-	}
-
-	@Override
-	void toggleImGuiDebugWindows() {
-
-		showImGuiWindows = !showImGuiWindows
-	}
-
-	@Override
 	void toggleVSync() {
 
 		setVSync(Math.wrap(interval + 1, 0, System.isWindows() ? 5 : 2))
 	}
 
 	@Override
-	void useWindow(Closure closure) {
+	RenderPipeline useRenderPipeline() {
 
-		// Render everything out to the internal framebuffer
-		framebuffer.useFramebuffer(closure)
+		return new RenderPipeline() {
+			private Framebuffer postProcessingResult
 
-		// Then render everything to the screen, either via ImGui or the underlying window
+			@Override
+			void end() {
+				swapBuffers()
+				pollEvents()
+			}
+
+			@Override
+			RenderPipeline postProcessing(
+				@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure) {
+				postProcessingResult.useFramebuffer { ->
+					closure(framebuffer)
+				}
+				return this
+			}
+
+			@Override
+			RenderPipeline scene(
+				@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure) {
+				framebuffer.useFramebuffer(closure)
+				return this
+			}
+
+			@Override
+			RenderPipeline ui(
+				boolean createDockspace,
+				@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure) {
+				dockspaceUsed = createDockspace
+				useScreen { ->
+					imGuiLayer.useImGui(createDockspace) { dockspaceId ->
+						if (dockspaceId) {
+							gameWindow.render(dockspaceId, postProcessingResult ?: framebuffer)
+						}
+						else {
+							screenShader.useShader { shaderContext ->
+								(postProcessingResult ?: framebuffer).draw(shaderContext)
+							}
+						}
+						closure(new ImGuiContext(imGuiLayer.robotoFont, imGuiLayer.robotoMonoFont, dockspaceId))
+					}
+				}
+				return this
+			}
+		}
+	}
+
+	/**
+	 * Use the screen as the render target.
+	 */
+	private void useScreen(Closure closure) {
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0)
 		glDisable(GL_DEPTH_TEST)
 
@@ -434,30 +464,19 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 		clear()
 		glViewport(_viewport.minX, _viewport.minY, _viewport.lengthX(), _viewport.lengthY())
+		closure()
+	}
 
-		imGuiContext.withFrame(createDockspace && (showImGuiOverlays || showImGuiWindows)) { dockspaceId ->
-			if (dockspaceId) {
-				gameWindow.render(dockspaceId, framebuffer)
-			}
-			else {
-				screenShader.useShader { shaderContext ->
-					framebuffer.draw(shaderContext)
-				}
-			}
-			imGuiComponents.each { imGuiComponent ->
-				if (imGuiComponent.debugOverlay) {
-					if (showImGuiOverlays) {
-						imGuiComponent.render()
-					}
-				}
-				else if (imGuiComponent.debugWindow) {
-					if (showImGuiWindows) {
-						imGuiComponent.render()
-					}
-				}
-				else {
-					imGuiComponent.render()
-				}
+	@Override
+	void useWindow(Closure closure) {
+
+		if (resizableFramebuffer && size.x() != framebuffer.width) {
+			framebuffer = new OpenGLFramebuffer(size.x(), size.y())
+		}
+		framebuffer.useFramebuffer(closure)
+		useScreen { ->
+			screenShader.useShader { shaderContext ->
+				framebuffer.draw(shaderContext)
 			}
 		}
 		swapBuffers()
@@ -468,6 +487,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow withBackgroundColour(Colour colour) {
 
 		glClearColor(colour.r, colour.g, colour.b, colour.a)
+		gameWindow.setBackgroundColour(colour)
 		return this
 	}
 
@@ -498,6 +518,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow withMaximized() {
 
 		glfwMaximizeWindow(window)
+		return this
+	}
+
+	@Override
+	Window withResizableFramebuffer(boolean resizableFramebuffer) {
+
+		this.resizableFramebuffer = resizableFramebuffer
 		return this
 	}
 

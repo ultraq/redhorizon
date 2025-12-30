@@ -16,11 +16,13 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.input.InputSource
 
-import org.joml.Vector2f
+import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
+
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * The video interface through which the graphics are rendered.  One must first
@@ -42,11 +44,6 @@ import org.joml.primitives.Rectanglei
 interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoCloseable {
 
 	/**
-	 * Attach some ImGui component to this window.
-	 */
-	Window addImGuiComponent(ImGuiComponent imGuiComponent)
-
-	/**
 	 * Center the window to the screen.
 	 *
 	 * <p>This may be called after the window has been shown.
@@ -62,7 +59,7 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	/**
 	 * Get the size of the window.
 	 */
-	Vector2f getSize()
+	Vector2i getSize()
 
 	/**
 	 * Get the viewport used for rendering to the window.
@@ -73,11 +70,6 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	 * Makes the context current on the executing thread.
 	 */
 	void makeCurrent()
-
-	/**
-	 * Poll for and process all pending events.
-	 */
-	void pollEvents()
 
 	/**
 	 * Releases the context that is current on the executing thread.
@@ -111,24 +103,9 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window show()
 
 	/**
-	 * Swap the front/back buffers to push the rendered result to the screen.
-	 */
-	void swapBuffers()
-
-	/**
 	 * Switch between windowed and fullscreen modes.
 	 */
 	void toggleFullScreen()
-
-	/**
-	 * Switch between having ImGui debug overlays rendered or not.
-	 */
-	void toggleImGuiDebugOverlays()
-
-	/**
-	 * Switch between having ImGui debug windows rendered or not.
-	 */
-	void toggleImGuiDebugWindows()
 
 	/**
 	 * Switch between vertical sync being anabled/disabled.
@@ -136,9 +113,20 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	void toggleVSync()
 
 	/**
-	 * Convenience method for using the window as the render target.  The closure
-	 * will be surrounded with the necessary {@link #clear}, {@link #swapBuffers},
-	 * and {@link #pollEvents} calls.
+	 * Complex rendering method for providing each of the scene, post-processing,
+	 * UI, and post-render steps ({@link #swapBuffers}, {@link #pollEvents}).
+	 * Use this method if you need full control of the render pipeline.
+	 *
+	 * @see #useWindow
+	 */
+	RenderPipeline useRenderPipeline()
+
+	/**
+	 * Simple rendering method for using the window as the render target.  The
+	 * closure will be surrounded with the necessary {@link #clear}, {@link #swapBuffers},
+	 * and {@link #pollEvents} calls.  Use this method for simple scene rendering.
+	 *
+	 * @see #useRenderPipeline
 	 */
 	void useWindow(Closure closure)
 
@@ -148,9 +136,8 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window withBackgroundColour(Colour colour)
 
 	/**
-	 * Surround the given closure with calls to {@link #makeCurrent} and
-	 * {@link #releaseCurrent} so that audio commands can be executed in the
-	 * current thread.
+	 * Convenience method to perform the actions of the closure with the OpenGL
+	 * context, so that rendering commands can be executed in the current thread.
 	 */
 	default <T> T withCurrent(Closure<T> closure) {
 
@@ -175,7 +162,54 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window withMaximized()
 
 	/**
+	 * Set whether the internal framebuffer will be resized in response to window
+	 * size changes.
+	 */
+	Window withResizableFramebuffer(boolean resizableFramebuffer)
+
+	/**
 	 * Set whether vsync is enabled/disabled for this window.
 	 */
 	Window withVSync(boolean vsync)
+
+	/**
+	 * Object returned so that rendering can be done in steps.
+	 */
+	static interface RenderPipeline {
+
+		/**
+		 * Complete rendering of the frame, flipping buffers and polling for input
+		 * events.
+		 */
+		void end()
+
+		/**
+		 * Perform any post-processing of the scene result.
+		 */
+		RenderPipeline postProcessing(
+			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure)
+
+		/**
+		 * Perform rendering of the scene to the window's internal framebuffer.
+		 */
+		RenderPipeline scene(
+			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure)
+
+		/**
+		 * Perform rendering of ImGui components within the context of an ImGui
+		 * frame.
+		 */
+		default RenderPipeline ui(
+			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure) {
+
+			return ui(false, closure)
+		}
+
+		/**
+		 * Perform rendering of ImGui components within the context of an ImGui
+		 * frame.
+		 */
+		RenderPipeline ui(boolean createDockspace,
+			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure)
+	}
 }

@@ -27,7 +27,7 @@ class OpenGLWindowTests extends Specification {
 
 	def 'Cannot create a window larger than the monitor size'() {
 		when:
-			new OpenGLWindow(3840, 2160, 'Very large window', true)
+			new OpenGLWindow(3840, 2160, 'Very large window')
 				.show()
 		then:
 			thrown(IllegalArgumentException)

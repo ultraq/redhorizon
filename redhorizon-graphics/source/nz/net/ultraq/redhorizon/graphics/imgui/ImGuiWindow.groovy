@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
-
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
-import nz.net.ultraq.redhorizon.input.KeyBinding
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_I
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 /**
- * Key binding for toggling the ImGui debug windows.
+ * Any ImGui window to render during the ImGui phase.
  *
  * @author Emanuel Rabina
  */
-class ImGuiDebugWindowsBinding extends KeyBinding {
+abstract class ImGuiWindow {
 
-	ImGuiDebugWindowsBinding(List<ImGuiWindow> windows) {
-		super(GLFW_KEY_I, true, { ->
-			windows.each { window ->
-				if (window.enabled) {
-					window.disable()
-				}
-				else {
-					window.enable()
-				}
-			}
-		})
+	protected boolean disabled = false
+
+	void disable() {
+
+		disabled = true
 	}
+
+	void enable() {
+
+		disabled = false
+	}
+
+	boolean isEnabled() {
+
+		return !disabled
+	}
+
+	/**
+	 * Draw the window.
+	 */
+	abstract void render(ImGuiContext context)
 }

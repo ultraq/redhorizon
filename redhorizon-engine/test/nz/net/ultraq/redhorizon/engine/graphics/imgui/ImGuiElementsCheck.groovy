@@ -50,7 +50,7 @@ class ImGuiElementsCheck extends Specification {
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(800, 500, "Testing", true)
+		window = new OpenGLWindow(800, 500, "Testing")
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
@@ -71,20 +71,21 @@ class ImGuiElementsCheck extends Specification {
 			scene << node
 			node << new Node().withName('Child 1')
 			node << new Node().withName('Child 2')
+
 			var camera = new Camera(800, 500, window)
+			var debugOverlay = new DebugOverlay()
+				.withCursorTracking(camera, cameraTransform, window)
+			var nodeList = new NodeList(scene)
+			var logPanel = new LogPanel()
+			var imGuiWindows = [debugOverlay, nodeList, logPanel]
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
-				.addImGuiDebugBindings(window)
+				.addImGuiDebugBindings([debugOverlay], [nodeList, logPanel])
 				.addVSyncBinding(window)
 			var randomLogTimer = 0f
 		when:
-			window
-				.addImGuiComponent(new DebugOverlay()
-					.withCursorTracking(camera, cameraTransform))
-				.addImGuiComponent(new NodeList(scene))
-				.addImGuiComponent(new LogPanel())
-				.show()
+			window.show()
 			var deltaTimer = new DeltaTimer()
 			while (!window.shouldClose()) {
 				var delta = deltaTimer.deltaTime()
@@ -94,9 +95,16 @@ class ImGuiElementsCheck extends Specification {
 					logger.info("Random log message ${random.nextInt(5)}")
 				}
 				input.processInputs()
-				window.useWindow { ->
-					// Do something!
-				}
+
+				window.useRenderPipeline()
+					.ui(true) { imGuiContext ->
+						imGuiWindows.each { window ->
+							if (window.enabled) {
+								window.render(imGuiContext)
+							}
+						}
+					}
+					.end()
 				Thread.yield()
 			}
 		then:

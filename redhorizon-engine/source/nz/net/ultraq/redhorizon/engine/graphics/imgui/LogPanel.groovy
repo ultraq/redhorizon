@@ -16,11 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
 
-import imgui.ImFont
 import imgui.ImGui
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiCond.FirstUseEver
@@ -36,15 +34,13 @@ import java.util.concurrent.BlockingQueue
  *
  * @author Emanuel Rabina
  */
-class LogPanel implements ImGuiComponent {
+class LogPanel extends ImGuiWindow {
 
 	private static final int MAX_DEBUG_LINES = 400
 
-	final boolean debugWindow = true
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
 
 	private boolean scrollToBottom = true
-	private ImFont robotoMonoFont
 
 	/**
 	 * Constructor, create a new ImGui window for capturing and showing the logs.
@@ -62,21 +58,14 @@ class LogPanel implements ImGuiComponent {
 	}
 
 	@Override
-	LogPanel configureFromWindow(ImGuiContext imGuiContext, Window window) {
-
-		robotoMonoFont = imGuiContext.robotoMonoFont
-		return this
-	}
-
-	@Override
-	void render() {
+	void render(ImGuiContext context) {
 
 		ImGui.setNextWindowSize(800, 300, FirstUseEver)
 		ImGui.begin('Logs', new ImBoolean(true))
 
 		if (logLines.size()) {
 			ImGui.separator()
-			ImGui.pushFont(robotoMonoFont)
+			ImGui.pushFont(context.robotoMonoFont())
 			logLines.each { line ->
 				ImGui.selectable(line)
 			}

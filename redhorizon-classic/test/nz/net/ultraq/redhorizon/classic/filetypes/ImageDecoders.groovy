@@ -55,11 +55,11 @@ class ImageDecoders extends Specification {
 	}
 
 	OpenGLWindow window
+	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(640, 400, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
@@ -69,6 +69,7 @@ class ImageDecoders extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
@@ -87,12 +88,17 @@ class ImageDecoders extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						shader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							sprite.render(shaderContext, spriteTransform)
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -115,12 +121,17 @@ class ImageDecoders extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						shader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							sprite.render(shaderContext, spriteTransform)
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -169,16 +180,21 @@ class ImageDecoders extends Specification {
 					timer -= 0.1f
 				}
 
-				window.useWindow { ->
-					palettedSpriteShader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						shaderContext.setAdjustmentMap(adjustmentMap)
-						adjustmentMap.update()
-						shaderContext.setPalette(palette)
-						shaderContext.setAlphaMask(alphaMask)
-						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+				window.useRenderPipeline()
+					.scene { ->
+						palettedSpriteShader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							shaderContext.setAdjustmentMap(adjustmentMap)
+							adjustmentMap.update()
+							shaderContext.setPalette(palette)
+							shaderContext.setAlphaMask(alphaMask)
+							sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -208,13 +224,18 @@ class ImageDecoders extends Specification {
 				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 				lastUpdateTimeMs = currentTimeMs
 
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						animation.update(delta)
-						animation.render(shaderContext, animationTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						shader.useShader { shaderContext ->
+							camera.render(shaderContext, cameraTransform)
+							animation.update(delta)
+							animation.render(shaderContext, animationTransform)
+						}
 					}
-				}
+					.ui { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 			animation.stop()
