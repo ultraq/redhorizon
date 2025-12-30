@@ -445,10 +445,17 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 				}
 			}
 			imGuiComponents.each { imGuiComponent ->
-				if (imGuiComponent.debugOverlay && showImGuiOverlays) {
-					imGuiComponent.render()
+				if (imGuiComponent.debugOverlay) {
+					if (showImGuiOverlays) {
+						imGuiComponent.render()
+					}
 				}
-				else if (imGuiComponent.debugWindow && showImGuiWindows) {
+				else if (imGuiComponent.debugWindow) {
+					if (showImGuiWindows) {
+						imGuiComponent.render()
+					}
+				}
+				else {
 					imGuiComponent.render()
 				}
 			}
