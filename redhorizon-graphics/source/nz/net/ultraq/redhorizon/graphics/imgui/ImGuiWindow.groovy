@@ -23,21 +23,21 @@ package nz.net.ultraq.redhorizon.graphics.imgui
  */
 abstract class ImGuiWindow {
 
-	protected boolean disabled = false
+	protected boolean enabled = false
 
 	void disable() {
 
-		disabled = true
+		enabled = false
 	}
 
 	void enable() {
 
-		disabled = false
+		enabled = true
 	}
 
 	boolean isEnabled() {
 
-		return !disabled
+		return enabled
 	}
 
 	/**

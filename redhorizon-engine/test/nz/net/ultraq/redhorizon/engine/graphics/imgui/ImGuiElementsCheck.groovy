@@ -78,6 +78,7 @@ class ImGuiElementsCheck extends Specification {
 			var nodeList = new NodeList(scene)
 			var logPanel = new LogPanel()
 			var imGuiWindows = [debugOverlay, nodeList, logPanel]
+			imGuiWindows*.enable()
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
