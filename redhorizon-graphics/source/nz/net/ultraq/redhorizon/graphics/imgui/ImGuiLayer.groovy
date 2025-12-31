@@ -36,7 +36,7 @@ import groovy.transform.stc.SimpleType
  */
 class ImGuiLayer implements ImGuiContext, GraphicsResource {
 
-	final float contentAdjustmentScale
+	final float uiScale
 	final ImFont defaultFont
 	final ImFont monospaceFont
 	private int dockspaceId
@@ -46,9 +46,9 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 	/**
 	 * Constructor, set up ImGui for the given window.
 	 */
-	ImGuiLayer(long windowHandle, float contentAdjustmentScale) {
+	ImGuiLayer(long windowHandle, float uiScale) {
 
-		this.contentAdjustmentScale = contentAdjustmentScale
+		this.uiScale = uiScale
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
 		ImGui.createContext()
@@ -58,19 +58,21 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 
 		var fontConfig1 = new ImFontConfig()
 		defaultFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentAdjustmentScale), fontConfig1)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * uiScale), fontConfig1)
 		}
 		fontConfig1.destroy()
 		io.setFontDefault(defaultFont)
 
 		var fontConfig2 = new ImFontConfig()
 		monospaceFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentAdjustmentScale), fontConfig2)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * uiScale), fontConfig2)
 		}
 		fontConfig2.destroy()
 
 		imGuiGlfw.init(windowHandle, true)
 		imGuiGl3.init('#version 410 core')
+
+		ImGui.style.scaleAllSizes(uiScale)
 	}
 
 	@Override

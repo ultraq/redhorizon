@@ -26,12 +26,6 @@ import imgui.ImFont
 interface ImGuiContext {
 
 	/**
-	 * Get the factor by which UI content should be scale to account for the
-	 * user's display.
-	 */
-	float getContentAdjustmentScale()
-
-	/**
 	 * Get the current ImGui dockspace ID.
 	 */
 	int getDockspaceId()
@@ -45,4 +39,10 @@ interface ImGuiContext {
 	 * Get the default monospace font.
 	 */
 	ImFont getMonospaceFont()
+
+	/**
+	 * Get the factor by which UI content should be scale to account for the
+	 * user's display.
+	 */
+	float getUiScale()
 }
