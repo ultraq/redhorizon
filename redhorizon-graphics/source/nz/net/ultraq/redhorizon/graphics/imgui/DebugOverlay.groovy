@@ -67,7 +67,7 @@ class DebugOverlay implements ImGuiWindow {
 		var viewport = ImGui.getMainViewport()
 		ImGui.setNextWindowBgAlpha(0.4f)
 		ImGui.setNextWindowPos((float)(viewport.workPosX + viewport.sizeX - width), viewport.workPosY)
-		ImGui.pushFont(context.robotoMonoFont())
+		ImGui.pushFont(context.monospaceFont)
 
 		ImGui.begin('Debug overlay', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
 		width = (int)ImGui.getWindowSizeX()

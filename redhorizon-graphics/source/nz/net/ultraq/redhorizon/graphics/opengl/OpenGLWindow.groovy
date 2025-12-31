@@ -61,7 +61,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 	private final OpenGLRenderPipeline renderPipeline
 	private OpenGLFramebuffer framebuffer
-	private ScreenShader screenShader
 
 	/**
 	 * Create and configure a new window with OpenGL.
@@ -143,7 +142,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	@Override
 	void close() {
 
-		screenShader?.close()
 		framebuffer?.close()
 		renderPipeline.close()
 		glfwDestroyWindow(window)
@@ -334,9 +332,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 		if (!framebuffer || framebuffer.width != width) {
 			framebuffer = new OpenGLFramebuffer(width, height)
-		}
-		if (!screenShader) {
-			screenShader = new ScreenShader()
 		}
 
 		useRenderPipeline()

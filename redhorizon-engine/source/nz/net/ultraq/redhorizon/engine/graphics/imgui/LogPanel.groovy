@@ -65,7 +65,7 @@ class LogPanel implements ImGuiWindow {
 
 		if (logLines.size()) {
 			ImGui.separator()
-			ImGui.pushFont(context.robotoMonoFont())
+			ImGui.pushFont(context.monospaceFont)
 			logLines.each { line ->
 				ImGui.selectable(line)
 			}

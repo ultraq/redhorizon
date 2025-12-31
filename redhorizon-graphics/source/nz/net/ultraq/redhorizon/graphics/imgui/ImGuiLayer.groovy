@@ -34,18 +34,21 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
-class ImGuiLayer implements GraphicsResource {
+class ImGuiLayer implements ImGuiContext, GraphicsResource {
 
-	final ImFont robotoFont
-	final ImFont robotoMonoFont
+	final float contentAdjustmentScale
+	final ImFont defaultFont
+	final ImFont monospaceFont
+	private int dockspaceId
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
 
 	/**
 	 * Constructor, set up ImGui for the given window.
 	 */
-	ImGuiLayer(long windowHandle, float contentScale) {
+	ImGuiLayer(long windowHandle, float contentAdjustmentScale) {
 
+		this.contentAdjustmentScale = contentAdjustmentScale
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
 		ImGui.createContext()
@@ -54,15 +57,15 @@ class ImGuiLayer implements GraphicsResource {
 		io.setConfigFlags(DockingEnable)
 
 		var fontConfig1 = new ImFontConfig()
-		robotoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig1)
+		defaultFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentAdjustmentScale), fontConfig1)
 		}
 		fontConfig1.destroy()
-		io.setFontDefault(robotoFont)
+		io.setFontDefault(defaultFont)
 
 		var fontConfig2 = new ImFontConfig()
-		robotoMonoFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentScale), fontConfig2)
+		monospaceFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * contentAdjustmentScale), fontConfig2)
 		}
 		fontConfig2.destroy()
 
@@ -78,17 +81,25 @@ class ImGuiLayer implements GraphicsResource {
 		ImGui.destroyContext()
 	}
 
+	@Override
+	int getDockspaceId() {
+
+		return dockspaceId
+	}
+
 	/**
 	 * Render ImGui components within the context of an ImGui frame and optional
 	 * dockspace.
 	 */
-	void useImGui(boolean createDockspace = false, @ClosureParams(value = SimpleType, options = 'int') Closure closure) {
+	void useImGui(boolean createDockspace = false,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure) {
 
 		imGuiGl3.newFrame()
 		imGuiGlfw.newFrame()
 		ImGui.newFrame()
 
-		closure(createDockspace ? ImGui.dockSpaceOverViewport() : 0)
+		dockspaceId = createDockspace ? ImGui.dockSpaceOverViewport() : 0
+		closure(this)
 
 		ImGui.render()
 		imGuiGl3.renderDrawData(ImGui.getDrawData())

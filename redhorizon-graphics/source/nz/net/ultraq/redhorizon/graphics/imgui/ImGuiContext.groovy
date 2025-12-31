@@ -18,13 +18,31 @@ package nz.net.ultraq.redhorizon.graphics.imgui
 
 import imgui.ImFont
 
-import groovy.transform.ImmutableOptions
-
 /**
  * ImGui-related data to pass along to ImGui components when rendering.
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['robotoFont', 'robotoMonoFont'])
-record ImGuiContext(ImFont robotoFont, ImFont robotoMonoFont, int dockspaceId) {
+interface ImGuiContext {
+
+	/**
+	 * Get the factor by which UI content should be scale to account for the
+	 * user's display.
+	 */
+	float getContentAdjustmentScale()
+
+	/**
+	 * Get the current ImGui dockspace ID.
+	 */
+	int getDockspaceId()
+
+	/**
+	 * Get the default font.
+	 */
+	ImFont getDefaultFont()
+
+	/**
+	 * Get the default monospace font.
+	 */
+	ImFont getMonospaceFont()
 }

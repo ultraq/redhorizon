@@ -93,7 +93,7 @@ class GraphicsCheck extends Specification {
 					.scene { ->
 						return emptyFramebuffer
 					}
-					.ui(true) { imGuiContext ->
+					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)
 					}
 					.end()

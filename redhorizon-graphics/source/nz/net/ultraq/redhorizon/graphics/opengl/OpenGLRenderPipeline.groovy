@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.RenderPipeline
 import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiLayer
 
 import org.joml.primitives.Rectanglei
@@ -113,7 +112,6 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	void close() {
 
 		imGuiLayer.close()
-		sceneResult.close()
 		screenShader.close()
 	}
 
@@ -171,16 +169,16 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 
 		dockspaceUsed = createDockspace
 		useScreen { ->
-			imGuiLayer.useImGui(createDockspace) { dockspaceId ->
-				if (dockspaceId) {
-					gameWindow.render(dockspaceId, postProcessingResult ?: sceneResult)
+			imGuiLayer.useImGui(createDockspace) { imGuiContext ->
+				if (imGuiContext.dockspaceId) {
+					gameWindow.render(imGuiContext.dockspaceId, postProcessingResult ?: sceneResult)
 				}
 				else {
 					screenShader.useShader { shaderContext ->
 						(postProcessingResult ?: sceneResult).draw(shaderContext)
 					}
 				}
-				closure(new ImGuiContext(imGuiLayer.robotoFont, imGuiLayer.robotoMonoFont, dockspaceId))
+				closure(imGuiContext)
 			}
 		}
 		return this

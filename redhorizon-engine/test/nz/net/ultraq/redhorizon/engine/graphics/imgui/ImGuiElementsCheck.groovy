@@ -102,9 +102,6 @@ class ImGuiElementsCheck extends Specification {
 					.scene { ->
 						return framebuffer
 					}
-					.postProcessing { framebuffer ->
-						return framebuffer
-					}
 					.ui(true) { imGuiContext ->
 						imGuiWindows*.render(imGuiContext)
 					}
