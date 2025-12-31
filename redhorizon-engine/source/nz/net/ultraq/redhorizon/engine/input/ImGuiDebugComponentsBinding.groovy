@@ -16,26 +16,25 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_O
-
 /**
- * Key binding for toggling the ImGui debug overlay.
+ * Configure a key to toggle the enabled/disabled state of any
+ * {@link ImGuiComponent}s.
  *
  * @author Emanuel Rabina
  */
-class ImGuiDebugOverlayBinding extends KeyBinding {
+class ImGuiDebugComponentsBinding extends KeyBinding {
 
-	ImGuiDebugOverlayBinding(List<ImGuiWindow> overlays) {
-		super(GLFW_KEY_O, true, { ->
-			overlays.each { overlay ->
-				if (overlay.enabled) {
-					overlay.disable()
+	ImGuiDebugComponentsBinding(int key, List<ImGuiComponent> components) {
+		super(key, true, { ->
+			components.each { component ->
+				if (component.enabled) {
+					component.disable()
 				}
 				else {
-					overlay.enable()
+					component.enable()
 				}
 			}
 		})

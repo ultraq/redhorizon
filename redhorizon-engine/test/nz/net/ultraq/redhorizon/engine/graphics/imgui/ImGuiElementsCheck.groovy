@@ -70,10 +70,11 @@ class ImGuiElementsCheck extends Specification {
 			var logger = LoggerFactory.getLogger(ImGuiElementsCheck)
 			var random = new Random()
 			var scene = new Scene()
-			scene.addChild(
-				new Node().withName('Parent')
-					.addChild(new Node().withName('Child 1'))
-					.addChild(new Node().withName('Child 2')))
+			var parent = new Node().withName('Parent')
+			scene << parent
+			parent
+				.addChild(new Node().withName('Child 1'))
+				.addChild(new Node().withName('Child 2'))
 
 			var camera = new Camera(800, 500, window)
 			var debugOverlay = new DebugOverlay()
@@ -81,12 +82,9 @@ class ImGuiElementsCheck extends Specification {
 			var nodeList = new NodeList(scene)
 			var logPanel = new LogPanel()
 			var imGuiWindows = [debugOverlay, nodeList, logPanel]
-			imGuiWindows*.enable()
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
-				.addImGuiDebugBindings([debugOverlay], [nodeList, logPanel])
-				.addVSyncBinding(window)
 			var randomLogTimer = 0f
 		when:
 			window.show()
@@ -108,11 +106,7 @@ class ImGuiElementsCheck extends Specification {
 						return framebuffer
 					}
 					.ui(true) { imGuiContext ->
-						imGuiWindows.each { window ->
-							if (window.enabled) {
-								window.render(imGuiContext)
-							}
-						}
+						imGuiWindows*.render(imGuiContext)
 					}
 					.end()
 				Thread.yield()

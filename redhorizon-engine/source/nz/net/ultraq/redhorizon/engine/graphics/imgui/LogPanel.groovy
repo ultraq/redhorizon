@@ -34,7 +34,7 @@ import java.util.concurrent.BlockingQueue
  *
  * @author Emanuel Rabina
  */
-class LogPanel extends ImGuiWindow {
+class LogPanel implements ImGuiWindow {
 
 	private static final int MAX_DEBUG_LINES = 400
 
