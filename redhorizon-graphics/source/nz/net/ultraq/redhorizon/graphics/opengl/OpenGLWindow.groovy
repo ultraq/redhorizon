@@ -52,6 +52,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	int width
 	int height
 	final float renderScale
+	final float contentScale
 	private final long window
 	private boolean centered
 	private boolean fullScreen
@@ -110,7 +111,13 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 			}
 		}
 
+		var contentScalePointer = new float[1]
+		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
+		contentScale = contentScalePointer[0]
+		logger.debug('Content scale is {}', contentScale)
+
 		renderScale = framebufferWidth / width as float
+		logger.debug('Render scale is {}', renderScale)
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
@@ -169,16 +176,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 
 		return new Tuple2<>(width, height)
-	}
-
-	@Override
-	float getContentScale() {
-
-		var contentScalePointer = new float[1]
-		glfwGetWindowContentScale(window, contentScalePointer, new float[1])
-		var contentScale = contentScalePointer[0]
-		logger.debug('Content scale is {}', contentScale)
-		return contentScale
 	}
 
 	@Override

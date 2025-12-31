@@ -23,6 +23,8 @@ import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static imgui.flag.ImGuiConfigFlags.DockingEnable
 
 import groovy.transform.stc.ClosureParams
@@ -35,6 +37,8 @@ import groovy.transform.stc.SimpleType
  * @author Emanuel Rabina
  */
 class ImGuiLayer implements ImGuiContext, GraphicsResource {
+
+	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
 
 	final float uiScale
 	final ImFont defaultFont
@@ -49,6 +53,8 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 	ImGuiLayer(long windowHandle, float uiScale) {
 
 		this.uiScale = uiScale
+		logger.debug('UI scale is {}', uiScale)
+
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
 		ImGui.createContext()
