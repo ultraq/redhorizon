@@ -47,7 +47,6 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(OpenGLRenderPipeline)
 
 	private final OpenGLWindow window
-	private final float renderScale
 	private final ScreenShader screenShader
 	private final Rectanglei _viewport
 
@@ -62,10 +61,12 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	/**
 	 * Constructor, set up a new render pipeline object.
 	 */
-	OpenGLRenderPipeline(OpenGLWindow window, float renderScale, long windowHandle, float contentScale) {
+	OpenGLRenderPipeline(OpenGLWindow window, long windowHandle) {
 
 		this.window = window
-		this.renderScale = renderScale
+
+		var contentScale = window.contentScale
+		var renderScale = window.renderScale
 
 		// Enable debug mode if supported (Windows)
 		var capabilities = GL.createCapabilities()
@@ -134,7 +135,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 			imGuiViewport
 				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
 				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int)
-				.scale(renderScale as int) :
+				.scale(window.renderScale as int) :
 			_viewport
 	}
 

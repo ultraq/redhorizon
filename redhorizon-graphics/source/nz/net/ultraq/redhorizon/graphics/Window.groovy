@@ -47,9 +47,25 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window centerToScreen()
 
 	/**
+	 * Return the window's content scaling.  This is the amount a user scales
+	 * their desktop by.
+	 */
+	float getContentScale()
+
+	/**
 	 * Return the height of the window.
 	 */
 	int getHeight()
+
+	/**
+	 * Return the window's "render scaling".  This is the factor between the
+	 * requested window size and the size of the framebuffer that was created from
+	 * it (eg: if requesting a window of 800 pixels across, but we get a
+	 * framebuffer of 1600 pixels across, then the render scale is 2) and is
+	 * usually set by the OS to account for high DPI displays (eg: macOS on their
+	 * retina displays).
+	 */
+	float getRenderScale()
 
 	/**
 	 * Get the viewport used for rendering to the window.
