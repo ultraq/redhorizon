@@ -18,11 +18,7 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.input.InputSource
 
-import org.joml.Vector2i
 import org.joml.primitives.Rectanglei
-
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.SimpleType
 
 /**
  * The video interface through which the graphics are rendered.  One must first
@@ -51,15 +47,9 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window centerToScreen()
 
 	/**
-	 * Clear the framebuffer with the current clear colour.  Usually called to
-	 * start rendering a new frame.
+	 * Return the height of the window.
 	 */
-	void clear()
-
-	/**
-	 * Get the size of the window.
-	 */
-	Vector2i getSize()
+	int getHeight()
 
 	/**
 	 * Get the viewport used for rendering to the window.
@@ -67,9 +57,19 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Rectanglei getViewport()
 
 	/**
+	 * Return the width of the window.
+	 */
+	int getWidth()
+
+	/**
 	 * Makes the context current on the executing thread.
 	 */
 	void makeCurrent()
+
+	/**
+	 * Poll for and process all pending events.
+	 */
+	void pollEvents()
 
 	/**
 	 * Releases the context that is current on the executing thread.
@@ -103,6 +103,11 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window show()
 
 	/**
+	 * Swap the front/back buffers to push the rendered result to the screen.
+	 */
+	void swapBuffers()
+
+	/**
 	 * Switch between windowed and fullscreen modes.
 	 */
 	void toggleFullScreen()
@@ -114,19 +119,18 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 
 	/**
 	 * Complex rendering method for providing each of the scene, post-processing,
-	 * UI, and post-render steps ({@link #swapBuffers}, {@link #pollEvents}).
-	 * Use this method if you need full control of the render pipeline.
-	 *
-	 * @see #useWindow
+	 * UI, and completion steps ({@code swapBuffers}, {@code pollEvents}).  Use
+	 * this method if you need full control of the render pipeline.
 	 */
 	RenderPipeline useRenderPipeline()
 
 	/**
 	 * Simple rendering method for using the window as the render target.  The
-	 * closure will be surrounded with the necessary {@link #clear}, {@link #swapBuffers},
-	 * and {@link #pollEvents} calls.  Use this method for simple scene rendering.
+	 * closure will be surrounded with the necessary {@code clear}, {@code swapBuffers},
+	 * and {@code pollEvents} calls.
 	 *
-	 * @see #useRenderPipeline
+	 * <p>For more complicated rendering requirements, look to {@link #useRenderPipeline}
+	 * instead.
 	 */
 	void useWindow(Closure closure)
 
@@ -162,54 +166,7 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window withMaximized()
 
 	/**
-	 * Set whether the internal framebuffer will be resized in response to window
-	 * size changes.
-	 */
-	Window withResizableFramebuffer(boolean resizableFramebuffer)
-
-	/**
 	 * Set whether vsync is enabled/disabled for this window.
 	 */
 	Window withVSync(boolean vsync)
-
-	/**
-	 * Object returned so that rendering can be done in steps.
-	 */
-	static interface RenderPipeline {
-
-		/**
-		 * Complete rendering of the frame, flipping buffers and polling for input
-		 * events.
-		 */
-		void end()
-
-		/**
-		 * Perform any post-processing of the scene result.
-		 */
-		RenderPipeline postProcessing(
-			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure)
-
-		/**
-		 * Perform rendering of the scene to the window's internal framebuffer.
-		 */
-		RenderPipeline scene(
-			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure closure)
-
-		/**
-		 * Perform rendering of ImGui components within the context of an ImGui
-		 * frame.
-		 */
-		default RenderPipeline ui(
-			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure) {
-
-			return ui(false, closure)
-		}
-
-		/**
-		 * Perform rendering of ImGui components within the context of an ImGui
-		 * frame.
-		 */
-		RenderPipeline ui(boolean createDockspace,
-			@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext') Closure closure)
-	}
 }

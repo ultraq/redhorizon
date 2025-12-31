@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Node
@@ -47,6 +48,7 @@ class ImGuiElementsCheck extends Specification {
 	}
 
 	OpenGLWindow window
+	OpenGLFramebuffer framebuffer
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
@@ -55,10 +57,11 @@ class ImGuiElementsCheck extends Specification {
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
+		framebuffer = new OpenGLFramebuffer(800, 500)
 	}
 
 	def cleanup() {
-
+		framebuffer?.close()
 		window?.close()
 	}
 
@@ -67,10 +70,10 @@ class ImGuiElementsCheck extends Specification {
 			var logger = LoggerFactory.getLogger(ImGuiElementsCheck)
 			var random = new Random()
 			var scene = new Scene()
-			var node = new Node().withName('Parent')
-			scene << node
-			node << new Node().withName('Child 1')
-			node << new Node().withName('Child 2')
+			scene.addChild(
+				new Node().withName('Parent')
+					.addChild(new Node().withName('Child 1'))
+					.addChild(new Node().withName('Child 2')))
 
 			var camera = new Camera(800, 500, window)
 			var debugOverlay = new DebugOverlay()
@@ -98,6 +101,12 @@ class ImGuiElementsCheck extends Specification {
 				input.processInputs()
 
 				window.useRenderPipeline()
+					.scene { ->
+						return framebuffer
+					}
+					.postProcessing { framebuffer ->
+						return framebuffer
+					}
 					.ui(true) { imGuiContext ->
 						imGuiWindows.each { window ->
 							if (window.enabled) {

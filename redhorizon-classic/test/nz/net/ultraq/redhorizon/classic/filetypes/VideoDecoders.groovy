@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
@@ -50,6 +51,7 @@ class VideoDecoders extends Specification {
 
 	AudioDevice device
 	OpenGLWindow window
+	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
@@ -66,10 +68,12 @@ class VideoDecoders extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		framebuffer = new OpenGLFramebuffer(640, 400)
 		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
+		framebuffer?.close()
 		device?.close()
 		window?.close()
 	}
@@ -93,14 +97,17 @@ class VideoDecoders extends Specification {
 
 				window.useRenderPipeline()
 					.scene { ->
-						shader.useShader { shaderContext ->
-							camera.render(shaderContext, cameraTransform)
-							video.update(delta)
-							video.render(shaderContext, videoTransform)
-							video.render(videoPosition)
+						framebuffer.useFramebuffer { ->
+							shader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								video.update(delta)
+								video.render(shaderContext, videoTransform)
+								video.render(videoPosition)
+							}
 						}
+						return framebuffer
 					}
-					.ui { imGuiContext ->
+					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)
 					}
 					.end()
