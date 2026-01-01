@@ -18,6 +18,10 @@ package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.eventhorizon.EventTarget
 
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+
 /**
  * A scene is a collection of nodes, with parent/child relationships, that
  * represent the state of all or part of the game world.
@@ -33,6 +37,9 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	)
 	final Node root = new RootNode()
 
+	private final Queue<Closure> changeQueue = new ArrayDeque<>()
+	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()
+
 	@Override
 	void close() {
 
@@ -41,6 +48,42 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 				node.close()
 			}
 		}
+	}
+
+	/**
+	 * Apply modifications to the scene that were queued with calls to
+	 * {@link #queueChange(Closure)}.
+	 */
+	void processQueuedChanges() {
+
+		while (changeQueue) {
+			changeQueue.poll().call()
+		}
+	}
+
+	/**
+	 * Queue some scene modification to be performed with the next call to
+	 * {@link #processQueuedChanges()}.
+	 *
+	 * TODO: Need to figure out some way of limiting the closure to just queue
+	 *       changes - you could put basically anything into here.  One idea might
+	 *       be explicit methods for each type of change, eg: a create method for
+	 *       adding an entity, that must be given the parent node it's being made
+	 *       for.
+	 */
+	void queueChange(Closure change) {
+
+		changeQueue.add(change)
+	}
+
+	/**
+	 * Schedule a change to occur after the given amount of time has elapsed.
+	 */
+	void scheduleChange(long delay, TimeUnit timeUnit, Closure change) {
+
+		executor.schedule({ ->
+			queueChange(change)
+		}, delay, timeUnit)
 	}
 
 	/**
