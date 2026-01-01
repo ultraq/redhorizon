@@ -16,32 +16,27 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.InputBinding
-import nz.net.ultraq.redhorizon.input.InputEventHandler
-
-import static org.lwjgl.glfw.GLFW.*
-
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
 /**
- * Input bindings for toggling ImGui debug windows and overlays.
+ * Configure a key to toggle the enabled/disabled state of any
+ * {@link ImGuiComponent}s.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImGuiDebugBindings implements InputBinding {
+class ImGuiDebugComponentsBinding extends KeyBinding {
 
-	final Window window
-
-	@Override
-	void process(InputEventHandler input) {
-
-		if (input.keyPressed(GLFW_KEY_I, true)) {
-			window.toggleImGuiDebugWindows()
-		}
-		if (input.keyPressed(GLFW_KEY_O, true)) {
-			window.toggleImGuiDebugOverlays()
-		}
+	ImGuiDebugComponentsBinding(int key, List<ImGuiComponent> components) {
+		super(key, true, { ->
+			components.each { component ->
+				if (component.enabled) {
+					component.disable()
+				}
+				else {
+					component.enable()
+				}
+			}
+		})
 	}
 }

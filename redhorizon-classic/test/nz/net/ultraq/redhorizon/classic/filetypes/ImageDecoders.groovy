@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
@@ -55,11 +56,12 @@ class ImageDecoders extends Specification {
 	}
 
 	OpenGLWindow window
+	OpenGLFramebuffer framebuffer
+	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(640, 400, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
@@ -69,9 +71,12 @@ class ImageDecoders extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		framebuffer = new OpenGLFramebuffer(640, 400)
+		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
+		framebuffer?.close()
 		window?.close()
 	}
 
@@ -87,12 +92,20 @@ class ImageDecoders extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						framebuffer.useFramebuffer { ->
+							shader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								sprite.render(shaderContext, spriteTransform)
+							}
+						}
+						return framebuffer
 					}
-				}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -115,12 +128,20 @@ class ImageDecoders extends Specification {
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						framebuffer.useFramebuffer { ->
+							shader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								sprite.render(shaderContext, spriteTransform)
+							}
+						}
+						return framebuffer
 					}
-				}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -169,16 +190,24 @@ class ImageDecoders extends Specification {
 					timer -= 0.1f
 				}
 
-				window.useWindow { ->
-					palettedSpriteShader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						shaderContext.setAdjustmentMap(adjustmentMap)
-						adjustmentMap.update()
-						shaderContext.setPalette(palette)
-						shaderContext.setAlphaMask(alphaMask)
-						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+				window.useRenderPipeline()
+					.scene { ->
+						framebuffer.useFramebuffer { ->
+							palettedSpriteShader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								shaderContext.setAdjustmentMap(adjustmentMap)
+								adjustmentMap.update()
+								shaderContext.setPalette(palette)
+								shaderContext.setAlphaMask(alphaMask)
+								sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+							}
+						}
+						return framebuffer
 					}
-				}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:
@@ -208,13 +237,21 @@ class ImageDecoders extends Specification {
 				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 				lastUpdateTimeMs = currentTimeMs
 
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						animation.update(delta)
-						animation.render(shaderContext, animationTransform)
+				window.useRenderPipeline()
+					.scene { ->
+						framebuffer.useFramebuffer { ->
+							shader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								animation.update(delta)
+								animation.render(shaderContext, animationTransform)
+							}
+						}
+						return framebuffer
 					}
-				}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 			animation.stop()

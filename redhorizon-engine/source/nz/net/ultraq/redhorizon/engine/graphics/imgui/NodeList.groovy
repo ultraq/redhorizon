@@ -16,7 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -34,15 +35,13 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = ['scene'])
-class NodeList implements ImGuiComponent {
+class NodeList implements ImGuiWindow {
 
-	final boolean debugWindow = true
-	final boolean requiresDockspace = true
 	final Scene scene
 	private Node selectedNode
 
 	@Override
-	void render() {
+	void render(ImGuiContext context) {
 
 		ImGui.setNextWindowSize(250, 400, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)

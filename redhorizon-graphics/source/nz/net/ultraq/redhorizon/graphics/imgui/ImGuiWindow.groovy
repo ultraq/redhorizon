@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.opengl
-
-import spock.lang.Specification
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 /**
- * Tests for the OpenGL implementation of a window.
+ * Any ImGui window to render during the ImGui phase.
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindowTests extends Specification {
+interface ImGuiWindow {
 
-	def 'Cannot create a window larger than the monitor size'() {
-		when:
-			new OpenGLWindow(3840, 2160, 'Very large window')
-				.show()
-		then:
-			thrown(IllegalArgumentException)
-	}
+	/**
+	 * Draw the window.
+	 */
+	void render(ImGuiContext context)
 }

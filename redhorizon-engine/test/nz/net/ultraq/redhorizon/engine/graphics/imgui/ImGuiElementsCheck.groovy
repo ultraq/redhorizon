@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Node
@@ -47,18 +48,20 @@ class ImGuiElementsCheck extends Specification {
 	}
 
 	OpenGLWindow window
+	OpenGLFramebuffer framebuffer
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(800, 500, "Testing", true)
+		window = new OpenGLWindow(800, 500, "Testing")
 			.centerToScreen()
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
+		framebuffer = new OpenGLFramebuffer(800, 500)
 	}
 
 	def cleanup() {
-
+		framebuffer?.close()
 		window?.close()
 	}
 
@@ -67,24 +70,24 @@ class ImGuiElementsCheck extends Specification {
 			var logger = LoggerFactory.getLogger(ImGuiElementsCheck)
 			var random = new Random()
 			var scene = new Scene()
-			var node = new Node().withName('Parent')
-			scene << node
-			node << new Node().withName('Child 1')
-			node << new Node().withName('Child 2')
+			var parent = new Node().withName('Parent')
+			scene << parent
+			parent
+				.addChild(new Node().withName('Child 1'))
+				.addChild(new Node().withName('Child 2'))
+
 			var camera = new Camera(800, 500, window)
+			var debugOverlay = new DebugOverlay()
+				.withCursorTracking(camera, cameraTransform, window)
+			var nodeList = new NodeList(scene)
+			var logPanel = new LogPanel()
+			var imGuiWindows = [debugOverlay, nodeList, logPanel]
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
-				.addImGuiDebugBindings(window)
-				.addVSyncBinding(window)
 			var randomLogTimer = 0f
 		when:
-			window
-				.addImGuiComponent(new DebugOverlay()
-					.withCursorTracking(camera, cameraTransform))
-				.addImGuiComponent(new NodeList(scene))
-				.addImGuiComponent(new LogPanel())
-				.show()
+			window.show()
 			var deltaTimer = new DeltaTimer()
 			while (!window.shouldClose()) {
 				var delta = deltaTimer.deltaTime()
@@ -94,9 +97,15 @@ class ImGuiElementsCheck extends Specification {
 					logger.info("Random log message ${random.nextInt(5)}")
 				}
 				input.processInputs()
-				window.useWindow { ->
-					// Do something!
-				}
+
+				window.useRenderPipeline()
+					.scene { ->
+						return framebuffer
+					}
+					.ui(true) { imGuiContext ->
+						imGuiWindows*.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:

@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
@@ -46,11 +47,12 @@ class ShadowShaderTests extends Specification {
 	}
 
 	OpenGLWindow window
+	OpenGLFramebuffer framebuffer
+	DebugOverlay debugOverlay
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(640, 400, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
@@ -59,9 +61,12 @@ class ShadowShaderTests extends Specification {
 					window.shouldClose(true)
 				}
 			}
+		framebuffer = new OpenGLFramebuffer(640, 400)
+		debugOverlay = new DebugOverlay()
 	}
 
 	def cleanup() {
+		framebuffer?.close()
 		window?.close()
 	}
 
@@ -90,12 +95,20 @@ class ShadowShaderTests extends Specification {
 					timer -= 0.25f
 				}
 
-				window.useWindow { ->
-					shadowShader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+				window.useRenderPipeline()
+					.scene { ->
+						framebuffer.useFramebuffer { ->
+							shadowShader.useShader { shaderContext ->
+								camera.render(shaderContext, cameraTransform)
+								sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+							}
+						}
+						return framebuffer
 					}
-				}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
 				Thread.yield()
 			}
 		then:

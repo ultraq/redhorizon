@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import spock.lang.Specification
+import nz.net.ultraq.eventhorizon.Event
 
 /**
- * Tests for the OpenGL implementation of a window.
+ * Event for log lines that should be captured in the debug overlay.
  *
  * @author Emanuel Rabina
+ * @param persistentKey
+ *   If present, then {@link #message} will be shown with the other persistent
+ *   debug lines in the overlay.
  */
-class OpenGLWindowTests extends Specification {
+record ImGuiLogEvent(String message, String persistentKey) implements Event {
 
-	def 'Cannot create a window larger than the monitor size'() {
-		when:
-			new OpenGLWindow(3840, 2160, 'Very large window')
-				.show()
-		then:
-			thrown(IllegalArgumentException)
+	ImGuiLogEvent(String message) {
+		this(message, null)
 	}
 }

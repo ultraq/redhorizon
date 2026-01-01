@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.physics
 
-import spock.lang.Specification
+import nz.net.ultraq.redhorizon.engine.Component
 
 /**
- * Tests for the OpenGL implementation of a window.
+ * Base class for all collision component types.
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindowTests extends Specification {
+abstract class CollisionComponent<T extends CollisionComponent> extends Component<T> {
 
-	def 'Cannot create a window larger than the monitor size'() {
-		when:
-			new OpenGLWindow(3840, 2160, 'Very large window')
-				.show()
-		then:
-			thrown(IllegalArgumentException)
-	}
+	/**
+	 * Check whether this component is colliding with another.
+	 */
+	abstract void checkCollision(CollisionComponent other)
 }

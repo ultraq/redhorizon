@@ -86,7 +86,14 @@ class InputEventHandler {
 	 */
 	void processInputs() {
 
-		bindings*.process(this)
+		bindings.each { binding ->
+			if (binding instanceof KeyBinding && keyPressed(binding.key, binding.once)) {
+				binding.action()
+			}
+			else if (binding instanceof MouseButtonBinding && mouseButtonPressed(binding.button)) {
+				binding.action()
+			}
+		}
 	}
 
 	/**

@@ -16,10 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.input.InputSource
 
-import org.joml.Vector2f
 import org.joml.primitives.Rectanglei
 
 /**
@@ -42,11 +40,6 @@ import org.joml.primitives.Rectanglei
 interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoCloseable {
 
 	/**
-	 * Attach some ImGui component to this window.
-	 */
-	Window addImGuiComponent(ImGuiComponent imGuiComponent)
-
-	/**
 	 * Center the window to the screen.
 	 *
 	 * <p>This may be called after the window has been shown.
@@ -54,20 +47,35 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window centerToScreen()
 
 	/**
-	 * Clear the framebuffer with the current clear colour.  Usually called to
-	 * start rendering a new frame.
+	 * Return the window's content scaling.  This is the amount a user scales
+	 * their desktop by.
 	 */
-	void clear()
+	float getContentScale()
 
 	/**
-	 * Get the size of the window.
+	 * Return the height of the window.
 	 */
-	Vector2f getSize()
+	int getHeight()
+
+	/**
+	 * Return the window's "render scaling".  This is the factor between the
+	 * requested window size and the size of the framebuffer that was created from
+	 * it (eg: if requesting a window of 800 pixels across, but we get a
+	 * framebuffer of 1600 pixels across, then the render scale is 2) and is
+	 * usually set by the OS to account for high DPI displays (eg: macOS on their
+	 * retina displays).
+	 */
+	float getRenderScale()
 
 	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()
+
+	/**
+	 * Return the width of the window.
+	 */
+	int getWidth()
 
 	/**
 	 * Makes the context current on the executing thread.
@@ -121,24 +129,24 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	void toggleFullScreen()
 
 	/**
-	 * Switch between having ImGui debug overlays rendered or not.
-	 */
-	void toggleImGuiDebugOverlays()
-
-	/**
-	 * Switch between having ImGui debug windows rendered or not.
-	 */
-	void toggleImGuiDebugWindows()
-
-	/**
 	 * Switch between vertical sync being anabled/disabled.
 	 */
 	void toggleVSync()
 
 	/**
-	 * Convenience method for using the window as the render target.  The closure
-	 * will be surrounded with the necessary {@link #clear}, {@link #swapBuffers},
-	 * and {@link #pollEvents} calls.
+	 * Complex rendering method for providing each of the scene, post-processing,
+	 * UI, and completion steps ({@code swapBuffers}, {@code pollEvents}).  Use
+	 * this method if you need full control of the render pipeline.
+	 */
+	RenderPipeline useRenderPipeline()
+
+	/**
+	 * Simple rendering method for using the window as the render target.  The
+	 * closure will be surrounded with the necessary {@code clear}, {@code swapBuffers},
+	 * and {@code pollEvents} calls.
+	 *
+	 * <p>For more complicated rendering requirements, look to {@link #useRenderPipeline}
+	 * instead.
 	 */
 	void useWindow(Closure closure)
 
@@ -148,9 +156,8 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window withBackgroundColour(Colour colour)
 
 	/**
-	 * Surround the given closure with calls to {@link #makeCurrent} and
-	 * {@link #releaseCurrent} so that audio commands can be executed in the
-	 * current thread.
+	 * Convenience method to perform the actions of the closure with the OpenGL
+	 * context, so that rendering commands can be executed in the current thread.
 	 */
 	default <T> T withCurrent(Closure<T> closure) {
 

@@ -22,9 +22,4 @@ package nz.net.ultraq.redhorizon.input
  * @author Emanuel Rabina
  */
 interface InputBinding {
-
-	/**
-	 * Process the input binding.
-	 */
-	void process(InputEventHandler input)
 }

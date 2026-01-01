@@ -35,7 +35,22 @@ abstract class EntityScript<T extends Entity> {
 	}
 
 	/**
+	 * Called when a collision occurs between the entity this script is attached
+	 * to and another entity with a collision object.
+	 *
+	 * @param thisBounds
+	 *   Bounds of the collision object on this entity.
+	 * @param otherEntity
+	 *   The other entity that the collision object belongs to.
+	 * @param otherBounds
+	 *   Bounds of the collision object on the other entity.
+	 */
+	void onCollision(Object thisBounds, Entity otherEntity, Object otherBounds) {
+	}
+
+	/**
 	 * Actions to perform when the entity is being updated.
 	 */
-	abstract void update(float delta)
+	void update(float delta) {
+	}
 }

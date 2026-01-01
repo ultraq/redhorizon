@@ -16,11 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine.extensions
 
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.input.EscapeToCloseBinding
-import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugBindings
+import nz.net.ultraq.redhorizon.engine.input.ImGuiDebugComponentsBinding
 import nz.net.ultraq.redhorizon.engine.input.VsyncBinding
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Extensions for adding some common key bindings to the
@@ -42,9 +45,12 @@ class InputEventHandlerExtensions {
 	 * Add pressing {@code I} to toggle ImGui debug windows, and {@code O} to
 	 * toggle ImGui debug overlays.
 	 */
-	static InputEventHandler addImGuiDebugBindings(InputEventHandler self, Window window) {
+	static InputEventHandler addImGuiDebugBindings(InputEventHandler self, List<ImGuiComponent> overlays,
+		List<ImGuiComponent> windows) {
 
-		return self.addInputBinding(new ImGuiDebugBindings(window))
+		return self
+			.addInputBinding(new ImGuiDebugComponentsBinding(GLFW_KEY_O, overlays))
+			.addInputBinding(new ImGuiDebugComponentsBinding(GLFW_KEY_I, windows))
 	}
 
 	/**

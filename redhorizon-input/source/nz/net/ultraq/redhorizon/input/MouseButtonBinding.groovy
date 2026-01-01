@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.opengl
+package nz.net.ultraq.redhorizon.input
 
-import spock.lang.Specification
+import groovy.transform.TupleConstructor
 
 /**
- * Tests for the OpenGL implementation of a window.
+ * A mouse-specific input binding.
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindowTests extends Specification {
+@TupleConstructor(defaults = false)
+class MouseButtonBinding implements InputBinding {
 
-	def 'Cannot create a window larger than the monitor size'() {
-		when:
-			new OpenGLWindow(3840, 2160, 'Very large window')
-				.show()
-		then:
-			thrown(IllegalArgumentException)
-	}
+	final int button
+	final Closure action
 }

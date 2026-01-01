@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.opengl
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import spock.lang.Specification
+import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
+
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.filter.Filter
+import ch.qos.logback.core.spi.FilterReply
 
 /**
- * Tests for the OpenGL implementation of a window.
+ * A logging filter that drops any performance/profiling-related messages.
  *
  * @author Emanuel Rabina
  */
-class OpenGLWindowTests extends Specification {
+class ExcludePerformanceStatsFilter extends Filter<ILoggingEvent> {
 
-	def 'Cannot create a window larger than the monitor size'() {
-		when:
-			new OpenGLWindow(3840, 2160, 'Very large window')
-				.show()
-		then:
-			thrown(IllegalArgumentException)
+	@Override
+	FilterReply decide(ILoggingEvent event) {
+
+		return event.markerList?.contains(ProfilingExtensions.profilingMarker) ?
+			FilterReply.DENY :
+			FilterReply.NEUTRAL
 	}
 }

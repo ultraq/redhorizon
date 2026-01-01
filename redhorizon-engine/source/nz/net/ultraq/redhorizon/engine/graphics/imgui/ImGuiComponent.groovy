@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.logback
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 
 /**
- * Event for log lines that should be captured in the debug overlay.
+ * A component for adding UI via ImGui to the scene.
  *
  * @author Emanuel Rabina
- * @param persistentKey
- *   If present, then {@link #message} will be shown with the other persistent
- *   debug lines in the overlay.
  */
-record ImGuiLogEvent(String message, String persistentKey) implements Event {
+abstract class ImGuiComponent<T extends ImGuiComponent> extends Component<T> {
 
-	ImGuiLogEvent(String message) {
-		this(message, null)
-	}
+	/**
+	 * Render the UI component.
+	 */
+	abstract void render(ImGuiContext context)
 }

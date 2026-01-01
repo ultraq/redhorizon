@@ -17,28 +17,20 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.InputBinding
-import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-
-import groovy.transform.TupleConstructor
 
 /**
  * Bind the {@code ESC} key to closing the window.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class EscapeToCloseBinding implements InputBinding {
+class EscapeToCloseBinding extends KeyBinding {
 
-	final Window window
-
-	@Override
-	void process(InputEventHandler input) {
-
-		if (input.keyPressed(GLFW_KEY_ESCAPE, true)) {
+	EscapeToCloseBinding(Window window) {
+		super(GLFW_KEY_ESCAPE, true, { ->
 			window.shouldClose(true)
-		}
+		})
 	}
 }

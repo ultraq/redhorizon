@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.graphics
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
@@ -53,8 +54,7 @@ class GraphicsCheck extends Specification {
 	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
-		window = new OpenGLWindow(800, 600, "Testing", true)
-			.addImGuiComponent(new DebugOverlay())
+		window = new OpenGLWindow(800, 600, "Testing")
 			.centerToScreen()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
@@ -80,6 +80,29 @@ class GraphicsCheck extends Specification {
 			}
 		then:
 			notThrown(Exception)
+	}
+
+	def "Opens a window with the debug overlay"() {
+		given:
+			var emptyFramebuffer = new OpenGLFramebuffer(800, 600)
+			var debugOverlay = new DebugOverlay()
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.useRenderPipeline()
+					.scene { ->
+						return emptyFramebuffer
+					}
+					.ui(false) { imGuiContext ->
+						debugOverlay.render(imGuiContext)
+					}
+					.end()
+				Thread.yield()
+			}
+		then:
+			notThrown(Exception)
+		cleanup:
+			emptyFramebuffer?.close()
 	}
 
 	def "Draws a triangle"() {

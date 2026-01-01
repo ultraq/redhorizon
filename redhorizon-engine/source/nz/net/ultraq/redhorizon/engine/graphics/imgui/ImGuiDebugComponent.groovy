@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.logback
+package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
 
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.filter.Filter
-import ch.qos.logback.core.spi.FilterReply
+import groovy.transform.TupleConstructor
 
 /**
- * A logging filter that drops any performance/profiling-related messages.
+ * A component for adding an existing ImGui debug window to the scene.
  *
  * @author Emanuel Rabina
  */
-class ExcludePerformanceStatsFilter extends Filter<ILoggingEvent> {
+@TupleConstructor(defaults = false)
+class ImGuiDebugComponent extends ImGuiComponent<ImGuiDebugComponent> {
+
+	final ImGuiWindow debugComponent
 
 	@Override
-	FilterReply decide(ILoggingEvent event) {
+	void render(ImGuiContext context) {
 
-		return event.markerList?.contains(ProfilingExtensions.profilingMarker) ?
-			FilterReply.DENY :
-			FilterReply.NEUTRAL
+		debugComponent.render(context)
 	}
 }
