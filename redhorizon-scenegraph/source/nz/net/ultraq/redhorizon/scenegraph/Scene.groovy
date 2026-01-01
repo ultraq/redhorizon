@@ -24,7 +24,7 @@ import nz.net.ultraq.eventhorizon.EventTarget
  *
  * @author Emanuel Rabina
  */
-class Scene implements EventTarget<Scene> {
+class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
 		includes = ['addChild', 'clear', 'findAncestor', 'findDescendent', 'insertBefore', 'leftShift', 'removeChild',
@@ -32,6 +32,16 @@ class Scene implements EventTarget<Scene> {
 		interfaces = false
 	)
 	final Node root = new RootNode()
+
+	@Override
+	void close() {
+
+		traverse { node ->
+			if (node instanceof AutoCloseable) {
+				node.close()
+			}
+		}
+	}
 
 	/**
 	 * A special instance of {@link Node} that is always present in the scene.
