@@ -179,6 +179,12 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
+	Rectanglei getUiArea() {
+
+		return renderPipeline.uiArea
+	}
+
+	@Override
 	Rectanglei getViewport() {
 
 		return renderPipeline.viewport

@@ -68,6 +68,13 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	float getRenderScale()
 
 	/**
+	 * Return coordinates for the area in which usable UI can be rendered.  This
+	 * differs from {@link #getViewport()} in that it returns values that can be
+	 * used as layout coordinates for UI components.
+	 */
+	Rectanglei getUiArea()
+
+	/**
 	 * Get the viewport used for rendering to the window.
 	 */
 	Rectanglei getViewport()

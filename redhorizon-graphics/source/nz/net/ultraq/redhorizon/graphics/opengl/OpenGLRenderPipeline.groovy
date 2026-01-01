@@ -53,6 +53,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	private final ImGuiLayer imGuiLayer
 	private final GameWindow gameWindow
 	private boolean dockspaceUsed = false
+	private final Rectanglei imGuiArea = new Rectanglei()
 	private final Rectanglei imGuiViewport = new Rectanglei()
 
 	private Framebuffer sceneResult
@@ -121,6 +122,21 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 
 		window.swapBuffers()
 		window.pollEvents()
+	}
+
+	/**
+	 * Return coordinates for the area in which usable UI can be rendered.  If
+	 * ImGui docking is being used, then this will be the area that the primary
+	 * framebuffer is occupying in the overall window.  Otherwise, it's just the
+	 * window.
+	 */
+	Rectanglei getUiArea() {
+
+		return dockspaceUsed ?
+			imGuiArea
+				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
+				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int) :
+			_viewport
 	}
 
 	/**
