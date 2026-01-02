@@ -57,21 +57,20 @@ creating campaigns for them.
 
 In the first couple of years I managed to display the map of the first Allied
 mission from C&C Red Alert (RA) using fixed-function OpenGL on Windows, from
-which came a set of file conversion tools with working code examples of how to
-decode various file formats from those games for display.  Not being able to do
-much beyond a static display though, I got discouraged and this project lay
-dormant for a very long time.
+which came a set of file conversion tools to decode various file formats from
+those games.  Not being able to do much beyond a static display though, I got
+discouraged and this project lay dormant for a very long time.
 
 ![splash-screen](https://images.ultraq.net.nz/redhorizon/screenshots/GUI_SplashScreen.png)
 ![drawing-map](https://images.ultraq.net.nz/redhorizon/screenshots/InGame_Structures.png)
 ![view-dune2-files](https://images.ultraq.net.nz/redhorizon/screenshots/Utils_ReadDune2SHP.png)
 
-Things started back up in late 2019 where I got the itch to convert the old
+Things started back up in late 2019 where I got the itch to update the old
 Windows batch files that were used for converting files, to cross-platform CLI
 tools (I was now running a Mac, which couldn't run the old stuff).  In the
-process I developed some basic 'media player' CLI tools which made me learn that
-that the way graphics were rendered in the early 2000s are not at all the they
-are rendered now!  So 2020 was spent re-learning modern OpenGL with shaders and
+process I developed some basic 'media player' tools which made me learn that
+the way graphics were rendered in the early 2000s are not at all the they are
+rendered now!  So 2020 was spent re-learning modern OpenGL with shaders and
 rewriting the graphics around that.
 
 [![Red Horizon - Play WSA file demo](redhorizon-utilities/screenshot-of-wsa-demo.png)](https://www.youtube.com/watch?v=mp7A6EMWupY)
@@ -81,7 +80,7 @@ rewriting the graphics around that.
 Even with new technology I was still stuck with static objects and didn't have
 much in the way of making things move or have complicated responses to player
 input without creating absolute messes of code.  So from 2023 onwards my focus
-shifted to learning about the engine development part of game development as a
+shifted to learning about the engine development side of game development as a
 way to learn about the systems and architectures used to make games interactive.
 
 This is where we are now, and the 0.40.0 and newer tags are a marker of this
