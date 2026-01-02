@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 /**
  * A custom class for any script used during the game update phase.
@@ -26,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.Entity
 abstract class EntityScript<T extends Entity> {
 
 	protected T entity
+	protected InputEventHandler input
 
 	/**
 	 * Called when a script is first started, can be overridden to set up the

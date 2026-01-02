@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import groovy.transform.TupleConstructor
@@ -31,6 +32,7 @@ import groovy.transform.TupleConstructor
 class ScriptSystem extends System {
 
 	final ScriptEngine scriptEngine
+	final InputEventHandler input
 	private final List<ScriptComponent> scriptComponents = new ArrayList<>()
 
 	@Override
@@ -42,7 +44,7 @@ class ScriptSystem extends System {
 		}
 		scriptComponents.each { ScriptComponent component ->
 			if (component.enabled) {
-				component.update(scriptEngine, delta)
+				component.update(scriptEngine, input, delta)
 			}
 		}
 	}

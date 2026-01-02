@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 /**
  * Perform the logic written in the provided entity script.
@@ -59,19 +60,21 @@ class ScriptComponent extends Component<ScriptComponent> {
 	/**
 	 * Perform any logic as part of the scene update.
 	 */
-	void update(ScriptEngine scriptEngine, float delta) {
+	void update(ScriptEngine scriptEngine, InputEventHandler input, float delta) {
 
 		if (scriptName) {
 			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
 			if (isNew) {
 				script = scriptObject as EntityScript
 				script.entity = entity
+				script.input = input
 				script.init()
 			}
 		}
 		else if (!script && scriptClass) {
 			script = scriptClass.getDeclaredConstructor().newInstance()
 			script.entity = entity
+			script.input = input
 			script.init()
 		}
 		script.update(delta)
