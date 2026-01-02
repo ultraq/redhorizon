@@ -20,8 +20,9 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import groovy.transform.TupleConstructor
@@ -36,7 +37,7 @@ class GraphicsSystem extends System {
 
 	final Window window
 	final Framebuffer framebuffer
-	final BasicShader shader
+	final Shader<? extends SceneShaderContext>[] shaders
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
 
@@ -50,15 +51,20 @@ class GraphicsSystem extends System {
 			entity.findComponentsByType(ImGuiComponent, imguiComponents)
 		}
 
+		// TODO: Create an allocation-free method of grouping objects
+		var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
+
 		window.useRenderPipeline()
 			.scene { ->
 				framebuffer.useFramebuffer { ->
-					shader.useShader { shaderContext ->
-						var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-						camera.render(shaderContext)
-						graphicsComponents.each { component ->
-							if (component.enabled) {
-								component.render(shaderContext)
+					shaders.each { shader ->
+						shader.useShader { shaderContext ->
+							var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+							camera.render(shaderContext)
+							groupedComponents[shader.class]?.each { component ->
+								if (component.enabled) {
+									component.render(shaderContext)
+								}
 							}
 						}
 					}
