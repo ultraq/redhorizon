@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.RenderPipeline
-import nz.net.ultraq.redhorizon.graphics.imgui.GameWindow
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiLayer
 
 import org.joml.primitives.Rectanglei
@@ -51,9 +50,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	private final Rectanglei _viewport
 
 	private final ImGuiLayer imGuiLayer
-	private final GameWindow gameWindow
 	private boolean dockspaceUsed = false
-	private final Rectanglei imGuiArea = new Rectanglei()
 	private final Rectanglei imGuiViewport = new Rectanglei()
 
 	private Framebuffer sceneResult
@@ -65,9 +62,6 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	OpenGLRenderPipeline(OpenGLWindow window, long windowHandle) {
 
 		this.window = window
-
-		var contentScale = window.contentScale
-		var renderScale = window.renderScale
 
 		// Enable debug mode if supported (Windows)
 		var capabilities = GL.createCapabilities()
@@ -85,7 +79,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 		}
 		logger.info('OpenGL device: {}, version {}', glGetString(GL_RENDERER), glGetString(GL_VERSION))
 
-		_viewport = new Rectanglei(0, 0, window.width * renderScale as int, window.height * renderScale as int)
+		_viewport = new Rectanglei(0, 0, window.width * window.renderScale as int, window.height * window.renderScale as int)
 
 		window.on(FramebufferSizeEvent) { event ->
 			var newWidth = event.width()
@@ -106,8 +100,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 
 		// Create an ImGui layer - might as well bake it into the window as we're
 		// gonna be using it a lot
-		imGuiLayer = new ImGuiLayer(windowHandle, contentScale / renderScale as float)
-		gameWindow = new GameWindow()
+		imGuiLayer = new ImGuiLayer(window, windowHandle)
 	}
 
 	@Override
@@ -125,21 +118,6 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	}
 
 	/**
-	 * Return coordinates for the area in which usable UI can be rendered.  If
-	 * ImGui docking is being used, then this will be the area that the primary
-	 * framebuffer is occupying in the overall window.  Otherwise, it's just the
-	 * window.
-	 */
-	Rectanglei getUiArea() {
-
-		return dockspaceUsed ?
-			imGuiArea
-				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
-				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int) :
-			_viewport
-	}
-
-	/**
 	 * Return the viewport into which the scene is being rendered.  If ImGui
 	 * docking is being used, then this will be the area that the primary
 	 * framebuffer is occupying in the overall window.  Otherwise, it's just the
@@ -149,8 +127,8 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 
 		return dockspaceUsed ?
 			imGuiViewport
-				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
-				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int)
+				.setMin(imGuiLayer.gameWindow.lastImageX as int, imGuiLayer.gameWindow.lastImageY as int)
+				.setLengths(imGuiLayer.gameWindow.lastImageWidth as int, imGuiLayer.gameWindow.lastImageHeight as int)
 				.scale(window.renderScale as int) :
 			_viewport
 	}
@@ -176,7 +154,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	void setClearColour(Colour clearColour) {
 
 		glClearColor(clearColour.r, clearColour.g, clearColour.b, clearColour.a)
-		gameWindow.setBackgroundColour(clearColour)
+		imGuiLayer.gameWindow.setBackgroundColour(clearColour)
 	}
 
 	@Override
@@ -188,7 +166,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 		useScreen { ->
 			imGuiLayer.useImGui(createDockspace) { imGuiContext ->
 				if (imGuiContext.dockspaceId) {
-					gameWindow.render(imGuiContext.dockspaceId, postProcessingResult ?: sceneResult)
+					imGuiLayer.gameWindow.render(imGuiContext.dockspaceId, postProcessingResult ?: sceneResult)
 				}
 				else {
 					screenShader.useShader { shaderContext ->

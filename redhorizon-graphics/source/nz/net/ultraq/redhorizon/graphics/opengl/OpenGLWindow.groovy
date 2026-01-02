@@ -53,6 +53,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	int height
 	final float renderScale
 	final float contentScale
+	final float uiScale
 	private final long window
 	private boolean centered
 	private boolean fullScreen
@@ -118,6 +119,8 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 		renderScale = framebufferWidth / width as float
 		logger.debug('Render scale is {}', renderScale)
+		uiScale = contentScale / renderScale as float
+		logger.debug('UI scale is {}', uiScale)
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
@@ -176,12 +179,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 
 		return new Tuple2<>(width, height)
-	}
-
-	@Override
-	Rectanglei getUiArea() {
-
-		return renderPipeline.uiArea
 	}
 
 	@Override

@@ -17,14 +17,14 @@
 package nz.net.ultraq.redhorizon.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.GraphicsResource
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 
 import imgui.ImFont
 import imgui.ImFontConfig
 import imgui.ImGui
 import imgui.gl3.ImGuiImplGl3
 import imgui.glfw.ImGuiImplGlfw
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.joml.primitives.Rectanglei
 import static imgui.flag.ImGuiConfigFlags.DockingEnable
 
 import groovy.transform.stc.ClosureParams
@@ -38,22 +38,21 @@ import groovy.transform.stc.SimpleType
  */
 class ImGuiLayer implements ImGuiContext, GraphicsResource {
 
-	private static final Logger logger = LoggerFactory.getLogger(ImGuiLayer)
-
-	final float uiScale
 	final ImFont defaultFont
 	final ImFont monospaceFont
+	final GameWindow gameWindow
+	private final OpenGLWindow window
 	private int dockspaceId
 	private final ImGuiImplGl3 imGuiGl3
 	private final ImGuiImplGlfw imGuiGlfw
+	private final Rectanglei uiArea = new Rectanglei()
 
 	/**
 	 * Constructor, set up ImGui for the given window.
 	 */
-	ImGuiLayer(long windowHandle, float uiScale) {
+	ImGuiLayer(OpenGLWindow window, long windowHandle) {
 
-		this.uiScale = uiScale
-		logger.debug('UI scale is {}', uiScale)
+		this.window = window
 
 		imGuiGlfw = new ImGuiImplGlfw()
 		imGuiGl3 = new ImGuiImplGl3()
@@ -79,6 +78,7 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 		imGuiGl3.init('#version 410 core')
 
 		ImGui.style.scaleAllSizes(uiScale)
+		gameWindow = new GameWindow()
 	}
 
 	@Override
@@ -93,6 +93,22 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 	int getDockspaceId() {
 
 		return dockspaceId
+	}
+
+	@Override
+	Rectanglei getUiArea() {
+
+		return dockspaceId ?
+			uiArea
+				.setMin(gameWindow.lastImageX as int, gameWindow.lastImageY as int)
+				.setLengths(gameWindow.lastImageWidth as int, gameWindow.lastImageHeight as int) :
+			uiArea.setMin(0, 0).setLengths(window.width, window.height)
+	}
+
+	@Override
+	float getUiScale() {
+
+		return window.uiScale
 	}
 
 	/**

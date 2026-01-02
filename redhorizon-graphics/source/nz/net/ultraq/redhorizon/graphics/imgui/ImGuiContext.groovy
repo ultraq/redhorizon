@@ -16,7 +16,10 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
+import nz.net.ultraq.redhorizon.graphics.Window
+
 import imgui.ImFont
+import org.joml.primitives.Rectanglei
 
 /**
  * ImGui-related data to pass along to ImGui components when rendering.
@@ -39,6 +42,13 @@ interface ImGuiContext {
 	 * Get the default monospace font.
 	 */
 	ImFont getMonospaceFont()
+
+	/**
+	 * Return coordinates for the area in which usable UI can be rendered.  This
+	 * differs slightly from {@link Window#getViewport()} in that it returns
+	 * values that can be used as layout coordinates for UI components.
+	 */
+	Rectanglei getUiArea()
 
 	/**
 	 * Get the factor by which UI content should be scale to account for the
