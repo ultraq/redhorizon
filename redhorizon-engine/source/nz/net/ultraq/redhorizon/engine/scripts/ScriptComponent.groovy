@@ -16,14 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.scripts
 
+import nz.net.ultraq.redhorizon.engine.Component
+
 /**
  * Perform the logic written in the provided entity script.
  *
  * @author Emanuel Rabina
  */
-class ScriptComponent extends GameLogicComponent<ScriptComponent> {
+class ScriptComponent extends Component<ScriptComponent> {
 
-	final ScriptEngine scriptEngine
 	final String scriptName
 	final Class<? extends EntityScript> scriptClass
 	private EntityScript script
@@ -32,19 +33,19 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 	 * Constructor, set the script used to a Groovy file on the engine's script
 	 * path.
 	 */
-	ScriptComponent(ScriptEngine scriptEngine, String scriptName) {
+	ScriptComponent(String scriptName) {
 
-		this.scriptEngine = scriptEngine
 		this.scriptName = scriptName
+		this.scriptClass = null
 	}
 
 	/**
 	 * Constructor, set the script used to a Groovy class.
 	 */
-	ScriptComponent(ScriptEngine scriptEngine, Class<? extends EntityScript> scriptClass) {
+	ScriptComponent(Class<? extends EntityScript> scriptClass) {
 
-		this.scriptEngine = scriptEngine
 		this.scriptClass = scriptClass
+		this.scriptName = null
 	}
 
 	/**
@@ -55,8 +56,10 @@ class ScriptComponent extends GameLogicComponent<ScriptComponent> {
 		return script
 	}
 
-	@Override
-	void update(float delta) {
+	/**
+	 * Perform any logic as part of the scene update.
+	 */
+	void update(ScriptEngine scriptEngine, float delta) {
 
 		if (scriptName) {
 			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)

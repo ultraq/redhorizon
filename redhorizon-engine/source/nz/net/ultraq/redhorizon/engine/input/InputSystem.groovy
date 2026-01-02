@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scripts
+package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.scenegraph.Scene
+
+import groovy.transform.TupleConstructor
 
 /**
- * A component that requires updating during the game logic loop.
+ * A system for processing user input.
  *
  * @author Emanuel Rabina
  */
-abstract class GameLogicComponent<T extends GameLogicComponent> extends Component<T> {
+@TupleConstructor(defaults = false)
+class InputSystem extends System {
 
-	/**
-	 * Perform any logic as part of the scene update.
-	 */
-	abstract void update(float delta)
+	final InputEventHandler input
+
+	@Override
+	void update(Scene scene, float delta) {
+
+		input.processInputs()
+	}
 }

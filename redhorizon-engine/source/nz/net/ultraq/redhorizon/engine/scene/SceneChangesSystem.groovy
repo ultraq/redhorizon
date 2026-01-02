@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.scene
 
-import nz.net.ultraq.redhorizon.scenegraph.Named
-
-import groovy.transform.Memoized
+import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 /**
- * Any reusable behaviour that can be attached to an entity.
+ * System for processing queued scene changes.
  *
  * @author Emanuel Rabina
  */
-abstract class Component<T extends Component> implements Named<T>, Disableable<T> {
-
-	protected Entity entity
+class SceneChangesSystem extends System {
 
 	@Override
-	@Memoized
-	String getName() {
+	void update(Scene scene, float delta) {
 
-		if (hasCustomName()) {
-			return Named.super.getName()
-		}
-
-		var sentenceCaseName = this.class.simpleName.toSentenceCase()
-		return sentenceCaseName.substring(0, sentenceCaseName.lastIndexOf(' '))
+		scene.processQueuedChanges()
 	}
 }

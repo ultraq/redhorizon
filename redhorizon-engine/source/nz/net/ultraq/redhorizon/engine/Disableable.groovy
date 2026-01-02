@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,47 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.scenegraph.Named
-
-import groovy.transform.Memoized
-
 /**
- * Any reusable behaviour that can be attached to an entity.
+ * Any object that can have a disabled state which should prevent it from
+ * participating in any systems.
  *
  * @author Emanuel Rabina
  */
-abstract class Component<T extends Component> implements Named<T>, Disableable<T> {
+trait Disableable<T extends Disableable> {
 
-	protected Entity entity
+	private boolean enabled = true
 
-	@Override
-	@Memoized
-	String getName() {
+	/**
+	 * Disable this object.
+	 */
+	T disable() {
 
-		if (hasCustomName()) {
-			return Named.super.getName()
-		}
+		enabled = false
+		return (T)this
+	}
 
-		var sentenceCaseName = this.class.simpleName.toSentenceCase()
-		return sentenceCaseName.substring(0, sentenceCaseName.lastIndexOf(' '))
+	/**
+	 * Enable this object.
+	 */
+	T enable() {
+
+		enabled = true
+		return (T)this
+	}
+
+	/**
+	 * Return whether this object is disabled.
+	 */
+	boolean isDisabled() {
+
+		return !enabled
+	}
+
+	/**
+	 * Return whether this object is enabled.
+	 */
+	boolean isEnabled() {
+
+		return enabled
 	}
 }
