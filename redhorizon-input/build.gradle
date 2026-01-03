@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'redhorizon-build'
+	id 'redhorizon-library'
 }
 
 description = 'Input module for the Red Horizon project'

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.redhorizon.scenegraph.Scene
+
 /**
- * Options to pass to, and retrieve from, the Explorer application.
+ * Explorer UI and preview area.
  *
  * @author Emanuel Rabina
  */
-class ExplorerOptions {
+class ExplorerScene extends Scene {
 
-	boolean maximized
-	boolean touchpadInput
+	/**
+	 * Constructor, create the initial scene (blank, unless asked to load a file
+	 * at startup).
+	 */
+	ExplorerScene() {
+	}
 }

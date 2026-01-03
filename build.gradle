@@ -15,7 +15,8 @@
  */
 
 plugins {
-	id 'redhorizon-build' apply false
+	id 'redhorizon-application' apply false
+	id 'redhorizon-library' apply false
 }
 
 description = 'Recreating the original 2D Command & Conquer games'

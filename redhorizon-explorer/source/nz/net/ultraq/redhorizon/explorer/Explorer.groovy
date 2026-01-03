@@ -20,50 +20,14 @@ import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.PalFile
 import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
-import nz.net.ultraq.redhorizon.classic.maps.Map
-import nz.net.ultraq.redhorizon.classic.nodes.GlobalPalette
-import nz.net.ultraq.redhorizon.classic.nodes.PalettedSprite
-import nz.net.ultraq.redhorizon.classic.units.Unit
-import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.geometry.Dimension
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsConfiguration
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsRequests.SpriteSheetRequest
-import nz.net.ultraq.redhorizon.engine.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.engine.input.KeyControl
-import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
-import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Animation
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.FullScreenContainer
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.GridLines
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Listener
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sound
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Sprite
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Video
 import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.scripts.PlaybackScript
 import nz.net.ultraq.redhorizon.explorer.scripts.SpriteShowcaseScript
 import nz.net.ultraq.redhorizon.explorer.scripts.UnitShowcaseScript
-import nz.net.ultraq.redhorizon.filetypes.AnimationFile
-import nz.net.ultraq.redhorizon.filetypes.ImageFile
-import nz.net.ultraq.redhorizon.filetypes.ImagesFile
-import nz.net.ultraq.redhorizon.filetypes.SoundFile
-import nz.net.ultraq.redhorizon.filetypes.VideoFile
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.runtime.Application
-import nz.net.ultraq.redhorizon.runtime.Runtime
-import nz.net.ultraq.redhorizon.runtime.imgui.LogPanel
-import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar
-import nz.net.ultraq.redhorizon.runtime.imgui.MainMenuBar.MenuItem
-import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
+import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 
 import imgui.ImGui
 import org.slf4j.Logger
@@ -79,7 +43,6 @@ import static org.lwjgl.glfw.GLFW.*
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import java.util.concurrent.Callable
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -88,11 +51,10 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Explorer implements Application {
+@Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
+class Explorer implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
-	private static final Dimension renderResolution = new Dimension(1280, 800)
-	private static final float volume = 0.5f
 	private static final Preferences userPreferences = new Preferences()
 
 	/**
@@ -100,75 +62,65 @@ class Explorer implements Application {
 	 */
 	static void main(String[] args) {
 
-		System.exit(new CommandLine(new CliWrapper()).execute(args))
+		System.exit(new CommandLine(new Explorer()).execute(args))
 	}
 
 	/**
-	 * Not-so-tiny CLI wrapper around the Explorer application so it's launchable
-	 * w/ Picocli.
+	 * Provide default options for the user-remembered options.
 	 */
-	@Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
-	static class CliWrapper implements Callable<Integer> {
-
-		@Parameters(index = '0', defaultValue = Option.NULL_VALUE, description = 'Path to a file to open on launch')
-		File file
-
-		@Option(names = '--maximized', description = 'Start the application maximized. Remembers your last usage.')
-		boolean maximized
-
-		@Option(names = '--touchpad-input', description = 'Start the application using touchpad controls.  Remembers your last usage.')
-		boolean touchpadInput
+	static class DefaultOptionsProvider implements IDefaultValueProvider {
 
 		@Override
-		Integer call() {
+		String defaultValue(ArgSpec argSpec) {
 
-			var options = new ExplorerOptions(
-				maximized: maximized,
-				touchpadInput: touchpadInput
-			)
-
-			var exitCode = new Runtime(new Explorer(options, file))
-				.withGraphicsConfiguration(new GraphicsConfiguration(
-					clearColour: Colour.GREY,
-					maximized: options.maximized,
-					renderResolution: renderResolution,
-					startWithChrome: true
-				))
-				.execute()
-
-			// Save preferences for next time
-			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, options.maximized)
-			userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, options.touchpadInput)
-
-			return exitCode
-		}
-
-		/**
-		 * Provide default options for the user-remembered options.
-		 */
-		static class DefaultOptionsProvider implements IDefaultValueProvider {
-
-			@Override
-			String defaultValue(ArgSpec argSpec) {
-
-				if (argSpec.option) {
-					var option = (OptionSpec)argSpec
-					if (option.longestName() == '--maximized') {
-						return userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED)
-					}
-					if (option.longestName() == '--touchpad-input') {
-						return userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT).toString()
-					}
+			if (argSpec.option) {
+				var option = (OptionSpec)argSpec
+				if (option.longestName() == '--maximized') {
+					return userPreferences.get(ExplorerPreferences.WINDOW_MAXIMIZED)
 				}
-				return null
+				if (option.longestName() == '--touchpad-input') {
+					return userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT).toString()
+				}
 			}
+			return null
 		}
 	}
 
-	final String name = 'Explorer'
-	final String version = new VersionReader('runtime.properties').read()
+	@Parameters(index = '0', defaultValue = Option.NULL_VALUE, description = 'Path to a file to open on launch')
+	File file
 
-	private final ExplorerOptions options
+	@Option(names = '--maximized', description = 'Start the application maximized. Remembers your last usage.')
+	boolean maximized
+
+	@Option(names = '--touchpad-input', description = 'Start the application using touchpad controls.  Remembers your last usage.')
+	boolean touchpadInput
+
+	private Window window
+	private ExplorerScene scene
+
+	@Override
+	void run() {
+
+		try {
+			var properties = new Properties()
+			properties.load(getResourceAsStream('runtime.properties'))
+			var version = properties.getProperty('version')
+
+			window = new OpenGLWindow(1280, 800, "Explorer ${version}")
+				.centerToScreen()
+				.withVSync(true)
+
+			scene = new ExplorerScene()
+		}
+		finally {
+			window?.close()
+		}
+
+		// Save preferences for next time
+		userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
+		userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
+	}
+
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private final EntryList entryList = new EntryList(entries)
 	private final NodeList nodeList = new NodeList()

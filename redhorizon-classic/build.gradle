@@ -15,7 +15,7 @@
  */
 
 plugins {
-	id 'redhorizon-build'
+	id 'redhorizon-library'
 }
 
 description = 'Code that bridges the classic C&C file formats for use with the Red Horizon engine'
