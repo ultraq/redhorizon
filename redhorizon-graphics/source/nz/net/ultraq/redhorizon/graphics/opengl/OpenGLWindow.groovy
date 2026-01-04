@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
@@ -131,6 +132,11 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
+		}
+
+		// Window callbacks
+		glfwSetWindowMaximizeCallback(window) { long window, boolean maximized ->
+			trigger(new WindowMaximizedEvent(maximized))
 		}
 
 		// OpenGL rendering pipeline

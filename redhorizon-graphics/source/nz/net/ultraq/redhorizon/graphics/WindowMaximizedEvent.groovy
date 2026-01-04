@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.Event
-
-import groovy.transform.TupleConstructor
 
 /**
  * Event for window maximize/unmaximize.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class WindowMaximizedEvent implements Event {
-
-	final boolean maximized
+record WindowMaximizedEvent(boolean maximized) implements Event {
 }
