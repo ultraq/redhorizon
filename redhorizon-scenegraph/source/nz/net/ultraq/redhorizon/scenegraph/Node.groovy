@@ -30,19 +30,15 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> implements Named<T> {
+class Node<T extends Node> implements LocalTransform<T>, Named<T> {
 
 	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()
 
-	protected final Matrix4f _transform = new Matrix4f()
-	protected final Vector3f _position = new Vector3f()
-	protected final Vector3f _rotation = new Vector3f()
-	protected final Vector3f _scale = new Vector3f()
-	protected final Matrix4f _globalTransform = new Matrix4f()
-	protected final Vector3f _globalPosition = new Vector3f()
-	protected final Vector3f _globalRotation = new Vector3f()
-	protected final Vector3f _globalScale = new Vector3f()
+	private final Matrix4f globalTransformResult = new Matrix4f()
+	private final Vector3f globalPositionResult = new Vector3f()
+	private final Vector3f globalRotationResult = new Vector3f()
+	private final Vector3f globalScaleResult = new Vector3f()
 
 	/**
 	 * Add a child node to this node.
@@ -102,7 +98,7 @@ class Node<T extends Node> implements Named<T> {
 	 */
 	Vector3fc getGlobalPosition() {
 
-		return globalTransform.getTranslation(_globalPosition)
+		return globalTransform.getTranslation(globalPositionResult)
 	}
 
 	/**
@@ -111,7 +107,16 @@ class Node<T extends Node> implements Named<T> {
 	 */
 	Vector3fc getGlobalRotation() {
 
-		return globalTransform.getEulerAnglesXYZ(_globalRotation)
+		return globalTransform.getEulerAnglesXYZ(globalRotationResult)
+	}
+
+	/**
+	 * Return the global scale of this node.  That is, the local scale multiplied
+	 * by every local scale of the node's ancestors.
+	 */
+	Vector3fc getGlobalScale() {
+
+		return globalTransform.getScale(globalScaleResult)
 	}
 
 	/**
@@ -121,17 +126,8 @@ class Node<T extends Node> implements Named<T> {
 	Matrix4fc getGlobalTransform() {
 
 		return parent ?
-			parent.globalTransform.mul(transform, _globalTransform) :
-			transform.get(_globalTransform)
-	}
-
-	/**
-	 * Return the global scale of this node.  That is, the local scale multiplied
-	 * by every local scale of the node's ancestors.
-	 */
-	Vector3fc getGlobalScale() {
-
-		return globalTransform.getScale(_globalScale)
+			parent.globalTransform.mul(transform, globalTransformResult) :
+			transform.get(globalTransformResult)
 	}
 
 	/**
@@ -143,44 +139,12 @@ class Node<T extends Node> implements Named<T> {
 	}
 
 	/**
-	 * Return the position of this node.
-	 */
-	Vector3fc getPosition() {
-
-		return _transform.getTranslation(_position)
-	}
-
-	/**
-	 * Return the rotation of this node.
-	 */
-	Vector3fc getRotation() {
-
-		return _transform.getEulerAnglesXYZ(_rotation)
-	}
-
-	/**
-	 * Return the scale of this node.
-	 */
-	Vector3fc getScale() {
-
-		return _transform.getScale(_scale)
-	}
-
-	/**
 	 * Walk up the scene graph to locate and return the scene to which this node
 	 * belongs.
 	 */
 	Scene getScene() {
 
 		return parent?.getScene()
-	}
-
-	/**
-	 * Get the local transform of this node.
-	 */
-	Matrix4f getTransform() {
-
-		return _transform
 	}
 
 	/**
@@ -212,49 +176,6 @@ class Node<T extends Node> implements Named<T> {
 		children.remove(child)
 		child.parent = null
 		scene.trigger(new NodeRemovedEvent(child))
-		return (T)this
-	}
-
-	/**
-	 * Adjust the rotation of this node.
-	 */
-	T rotate(float angleX, float angleY, float angleZ) {
-
-		_transform.rotateXYZ(angleX, angleY, angleZ)
-		return (T)this
-	}
-
-	/**
-	 * Adjust the size of this node.
-	 */
-	T scale(float scaleX, float scaleY, float scaleZ) {
-
-		_transform.scale(scaleX, scaleY, scaleZ)
-		return (T)this
-	}
-
-	/**
-	 * Set the position of this node.
-	 */
-	void setPosition(float x, float y, float z) {
-
-		_transform.setTranslation(x, y, z)
-	}
-
-	/**
-	 * Set the position of this node.
-	 */
-	void setPosition(Vector3fc position) {
-
-		setPosition(position.x(), position.y(), position.z())
-	}
-
-	/**
-	 * Alter the position of this node through translation.
-	 */
-	T translate(float x, float y, float z) {
-
-		_transform.translate(x, y, z)
 		return (T)this
 	}
 

@@ -21,29 +21,27 @@ import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.scenegraph.LocalTransform
 
 import org.joml.Matrix4f
 import org.joml.Vector2f
-import org.joml.Vector3f
-import org.joml.Vector3fc
 
 /**
  * A component for adding a {@link Sprite} to an entity.
  *
  * @author Emanuel Rabina
  */
-class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderContext> implements AutoCloseable {
+class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderContext>
+	implements LocalTransform<SpriteComponent>, AutoCloseable {
 
 	final Sprite sprite
 	final Vector2f framePosition = new Vector2f()
-	final Matrix4f transform = new Matrix4f()
 	final Image image
 	final SpriteSheet spriteSheet
 	final Class<? extends Shader> shaderClass
 	final int width
 	final int height
-	private final Matrix4f globalTransform = new Matrix4f()
-	private final Vector3f _position = new Vector3f()
+	private final Matrix4f globalTransformResult = new Matrix4f()
 
 	/**
 	 * Constructor, use the given image for the sprite.
@@ -80,45 +78,11 @@ class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderCont
 	}
 
 	/**
-	 * Return the local position of the sprite component.
-	 */
-	Vector3fc getPosition() {
-
-		return transform.getTranslation(_position)
-	}
-
-	/**
 	 * Render the sprite.
 	 */
 	@Override
 	void render(SceneShaderContext shaderContext) {
 
-		sprite.render(shaderContext, entity.globalTransform.mul(transform, globalTransform), framePosition)
-	}
-
-	/**
-	 * Adjust the rotation of this sprite.
-	 */
-	SpriteComponent rotate(float angleX, float angleY, float angleZ) {
-
-		transform.rotateXYZ(angleX, angleY, angleZ)
-		return this
-	}
-
-	/**
-	 * Update the local position of the sprite component.
-	 */
-	void setPosition(float x, float y, float z) {
-
-		transform.setTranslation(x, y, z)
-	}
-
-	/**
-	 * Modify the transform of this component.
-	 */
-	SpriteComponent translate(float x, float y, float z) {
-
-		transform.translate(x, y, z)
-		return this
+		sprite.render(shaderContext, entity.globalTransform.mul(transform, globalTransformResult), framePosition)
 	}
 }
