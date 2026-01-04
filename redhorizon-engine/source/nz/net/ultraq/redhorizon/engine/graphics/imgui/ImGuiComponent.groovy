@@ -18,16 +18,25 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.Component
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+
+import groovy.transform.TupleConstructor
 
 /**
- * A component for adding UI via ImGui to the scene.
+ * A component for adding UI using ImGui to the scene.
  *
  * @author Emanuel Rabina
  */
-abstract class ImGuiComponent<T extends ImGuiComponent> extends Component<T> {
+@TupleConstructor(defaults = false)
+class ImGuiComponent extends Component<ImGuiComponent> {
+
+	final ImGuiElement imGuiElement
 
 	/**
 	 * Render the UI component.
 	 */
-	abstract void render(ImGuiContext context)
+	void render(ImGuiContext context) {
+
+		imGuiElement.render(context)
+	}
 }

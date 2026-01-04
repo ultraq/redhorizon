@@ -25,9 +25,9 @@ import nz.net.ultraq.redhorizon.input.KeyBinding
  *
  * @author Emanuel Rabina
  */
-class ImGuiDebugComponentsBinding extends KeyBinding {
+class ImGuiComponentsBinding extends KeyBinding {
 
-	ImGuiDebugComponentsBinding(int key, List<ImGuiComponent> components) {
+	ImGuiComponentsBinding(int key, List<ImGuiComponent> components) {
 		super(key, true, { ->
 			components.each { component ->
 				if (component.enabled) {

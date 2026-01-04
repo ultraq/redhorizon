@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
-
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
-
-import groovy.transform.TupleConstructor
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 /**
- * A component for adding an existing ImGui debug window to the scene.
+ * Any ImGui element to render during the ImGui phase.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImGuiDebugComponent extends ImGuiComponent<ImGuiDebugComponent> {
+interface ImGuiElement {
 
-	final ImGuiWindow debugComponent
-
-	@Override
-	void render(ImGuiContext context) {
-
-		debugComponent.render(context)
-	}
+	/**
+	 * Draw the element.
+	 */
+	void render(ImGuiContext context)
 }

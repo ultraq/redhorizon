@@ -32,7 +32,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay implements ImGuiWindow {
+class DebugOverlay implements ImGuiElement {
 
 	private final float updateRateSeconds
 	private boolean cursorTracking = false

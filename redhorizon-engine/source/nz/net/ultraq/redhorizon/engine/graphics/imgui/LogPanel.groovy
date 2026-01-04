@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiWindow
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -34,7 +34,7 @@ import java.util.concurrent.BlockingQueue
  *
  * @author Emanuel Rabina
  */
-class LogPanel implements ImGuiWindow {
+class LogPanel implements ImGuiElement {
 
 	private static final int MAX_DEBUG_LINES = 400
 
