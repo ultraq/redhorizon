@@ -23,16 +23,21 @@ import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
+import nz.net.ultraq.redhorizon.scenegraph.LocalTransform
+
+import org.joml.Matrix4f
 
 /**
  * A component for adding a plain mesh to an entity.
  *
  * @author Emanuel Rabina
  */
-class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext> implements AutoCloseable {
+class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
+	implements LocalTransform<MeshComponent>, AutoCloseable {
 
+	final Mesh mesh
 	final Class<? extends Shader> shaderClass = BasicShader
-	private final Mesh mesh
+	private final Matrix4f globalTransformResult = new Matrix4f()
 
 	/**
 	 * Constructor, configure this mesh component.
@@ -51,6 +56,6 @@ class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
 	@Override
 	void render(SceneShaderContext shaderContext) {
 
-		mesh.render(shaderContext, null, entity.globalTransform)
+		mesh.render(shaderContext, null, entity.globalTransform.mul(transform, globalTransformResult))
 	}
 }
