@@ -41,9 +41,6 @@ class ShadowShaderTests extends Specification {
 
 	def setupSpec() {
 		Configuration.STACK_SIZE.set(10240)
-		if (System.isMacOs()) {
-			Configuration.GLFW_LIBRARY_NAME.set('glfw_async')
-		}
 	}
 
 	OpenGLWindow window
