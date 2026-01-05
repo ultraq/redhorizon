@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.mixdata
 
 /**
  * A list of known classic C&C mix file entries so that names can be displayed
@@ -34,17 +34,14 @@ class MixDatabase {
 	MixDatabase() {
 
 		sources
-			.collect { source -> "${MixDatabase.packageName.replace('.', '/')}/mixdata/${source}" }
+			.collect { source -> "${MixDatabase.packageName.replace('.', '/')}/${source}" }
 			.each { source ->
 				// Very basic CSV parsing, might want to use a library if it gets any more complicated
 				getResourceAsStream(source).withBufferedReader { reader ->
 					reader.readLine() // First line assumed to be CSV headers
 					reader.eachLine { line ->
 						def (id, name) = line.split(',')
-						data << new MixData(
-							id: Long.decode(id) as int,
-							name: name
-						)
+						data << new MixData(Long.decode(id) as int, name)
 					}
 				}
 			}
@@ -58,6 +55,6 @@ class MixDatabase {
 	 */
 	MixData find(int id) {
 
-		return data.find { entry -> entry.id == id }
+		return data.find { entry -> entry.id() == id }
 	}
 }

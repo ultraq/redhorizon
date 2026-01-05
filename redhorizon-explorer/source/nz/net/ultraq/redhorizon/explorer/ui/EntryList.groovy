@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiChrome
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLayer
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.explorer.Entry
+import nz.net.ultraq.redhorizon.explorer.EntrySelectedEvent
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
 
 import imgui.ImGui
 import imgui.flag.ImGuiSortDirection
 import imgui.type.ImBoolean
-import static imgui.flag.ImGuiCond.*
-import static imgui.flag.ImGuiFocusedFlags.*
-import static imgui.flag.ImGuiSelectableFlags.*
-import static imgui.flag.ImGuiStyleVar.*
+import static imgui.flag.ImGuiCond.FirstUseEver
+import static imgui.flag.ImGuiFocusedFlags.ChildWindows
+import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
+import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTableFlags.*
 
 import groovy.transform.TupleConstructor
@@ -39,12 +41,11 @@ import java.text.DecimalFormat
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = 'entries')
-class EntryList implements EventTarget<EntryList>, ImGuiChrome {
+class EntryList implements EventTarget<EntryList>, ImGuiElement {
 
 	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 
 	final List<Entry> entries
-
 	private boolean focused
 	private boolean hovered
 	private Entry selectedEntry
@@ -52,19 +53,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiChrome {
 	private boolean entryVisibleOnce
 
 	@Override
-	boolean isFocused() {
-
-		return focused
-	}
-
-	@Override
-	boolean isHovered() {
-
-		return hovered
-	}
-
-	@Override
-	void render(int dockspaceId, Framebuffer sceneResult) {
+	void render(ImGuiContext context) {
 
 		ImGui.setNextWindowSize(300, 500, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
@@ -136,7 +125,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiChrome {
 				ImGui.text(entry.type ?: '')
 
 				ImGui.tableSetColumnIndex(2)
-				ImGui.pushFont(ImGuiLayer.robotoMonoFont)
+				ImGui.pushFont(context.monospaceFont)
 				ImGui.text(String.format('%12s', numberFormat.format(entry.size)))
 				ImGui.popFont()
 

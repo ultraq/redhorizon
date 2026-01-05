@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-
-import groovy.transform.TupleConstructor
 
 /**
- * Triggered when a node has been picked from the node list.
+ * Triggered when the cycle palette option is selected.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class NodeSelectedEvent implements Event {
-
-	final Node node
+record CyclePaletteEvent() implements Event {
 }

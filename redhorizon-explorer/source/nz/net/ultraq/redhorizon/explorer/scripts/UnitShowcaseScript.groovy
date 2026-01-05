@@ -16,17 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
-import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.units.Unit
-import nz.net.ultraq.redhorizon.engine.input.KeyControl
-import nz.net.ultraq.redhorizon.engine.input.RemoveControlFunction
-import nz.net.ultraq.redhorizon.engine.scenegraph.Scene
-import nz.net.ultraq.redhorizon.engine.scenegraph.nodes.Camera
-import nz.net.ultraq.redhorizon.engine.scenegraph.scripting.Script
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
 
 import groovy.transform.TupleConstructor
 
@@ -36,62 +29,51 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class UnitShowcaseScript extends Script<Unit> {
+class UnitShowcaseScript extends EntityScript {
 
 	private static final Logger logger = LoggerFactory.getLogger(UnitShowcaseScript)
 
-	final Camera camera
-
-	private final List<RemoveControlFunction> removeControlFunctions = []
-
-	@Delegate
-	private Unit applyDelegate() {
-		return scriptable as Unit
-	}
+//	final Camera camera
+//
+//	private final List<RemoveControlFunction> removeControlFunctions = []
 
 	@Override
-	void onSceneAdded(Scene scene) {
+	void init() {
 
-		camera.setScaleXY(4)
-		logger.info("Showing ${state} state")
-
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
-			rotateLeft()
-		}, true))
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
-			rotateRight()
-		}, true))
-
-		var states = unitData.shpFile.states
-
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_W, 'Previous animation', { ->
-			var currentStateIndex = states.findIndexOf { it.name == state }
-			setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
-			logger.info("Showing ${state} state")
-			startAnimation()
-		}))
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_S, 'Next animation', { ->
-			var currentStateIndex = states.findIndexOf { it.name == state }
-			setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
-			logger.info("Showing ${state} state")
-			startAnimation()
-		}))
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
-//			scene.gameClock.togglePause()
-		}))
-
-		var Faction[] factions = Faction.values()
-		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
-			->
-			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
-			logger.info('Viewing with {} faction colours', selectedFaction.name())
-			faction = selectedFaction
-		}))
-	}
-
-	@Override
-	void onSceneRemoved(Scene scene) {
-
-		removeControlFunctions*.remove()
+//		camera.setScaleXY(4)
+//		logger.info("Showing ${state} state")
+//
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_A, 'Rotate left', { ->
+//			rotateLeft()
+//		}, true))
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_D, 'Rotate right', { ->
+//			rotateRight()
+//		}, true))
+//
+//		var states = unitData.shpFile.states
+//
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_W, 'Previous animation', { ->
+//			var currentStateIndex = states.findIndexOf { it.name == state }
+//			setState(states[Math.wrap(currentStateIndex - 1, 0, states.length)].name)
+//			logger.info("Showing ${state} state")
+//			startAnimation()
+//		}))
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_S, 'Next animation', { ->
+//			var currentStateIndex = states.findIndexOf { it.name == state }
+//			setState(states[Math.wrap(currentStateIndex + 1, 0, states.length)].name)
+//			logger.info("Showing ${state} state")
+//			startAnimation()
+//		}))
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_SPACE, 'Pause animation', { ->
+////			scene.gameClock.togglePause()
+//		}))
+//
+//		var Faction[] factions = Faction.values()
+//		removeControlFunctions << scene.addControl(new KeyControl(GLFW_KEY_F, 'Cycle faction colours', {
+//			->
+//			var selectedFaction = factions[(faction.ordinal() + 1) % factions.length]
+//			logger.info('Viewing with {} faction colours', selectedFaction.name())
+//			faction = selectedFaction
+//		}))
 	}
 }

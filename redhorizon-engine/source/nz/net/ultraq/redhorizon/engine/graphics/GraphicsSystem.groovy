@@ -60,7 +60,9 @@ class GraphicsSystem extends System {
 					shaders.each { shader ->
 						shader.useShader { shaderContext ->
 							var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-							camera.render(shaderContext)
+							if (camera) {
+								camera.render(shaderContext)
+							}
 							groupedComponents[shader.class]?.each { component ->
 								if (component.enabled) {
 									component.render(shaderContext)

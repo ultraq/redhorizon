@@ -14,44 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.mixdata
 
-import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-
-import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor
 
 /**
- * Metadata for entries in a mix file.
+ * Data about the result of a {@link MixEntryTester} test.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-@EqualsAndHashCode
-class MixEntry implements Entry<MixEntry> {
+@TupleConstructor(defaults = false)
+class MixEntryTesterResult {
 
-	final MixFile mixFile
-	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
 	final String name
 	final Class<?> fileClass
-	final long size
-	final boolean unknown
-	final String description
-
-	@Override
-	int compareTo(MixEntry other) {
-
-		return name == '..' ? -1 :
-			other.name == '..' ? 1 :
-				!unknown && other.unknown ? -1 :
-					unknown && !other.unknown ? 1 :
-						unknown && other.unknown ? 0 :
-							name <=> other.name
-	}
-
-	@Override
-	String getType() {
-
-		return fileClass?.simpleName
-	}
 }

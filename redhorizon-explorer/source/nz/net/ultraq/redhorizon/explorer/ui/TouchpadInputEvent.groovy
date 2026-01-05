@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.ui
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.eventhorizon.Event
 
 /**
- * Data about the result of a {@link MixEntryTester} test.
+ * Triggered when the touchpad input option changes.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class MixEntryTesterResult {
-
-	final String name
-	final Class<?> fileClass
+record TouchpadInputEvent(boolean touchpadInput) implements Event {
 }

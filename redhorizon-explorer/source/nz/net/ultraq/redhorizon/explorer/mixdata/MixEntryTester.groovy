@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.mixdata
 
-import nz.net.ultraq.redhorizon.classic.filetypes.AudFile
-import nz.net.ultraq.redhorizon.classic.filetypes.CpsFile
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.ShpFile
-import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRA
-import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileTD
-import nz.net.ultraq.redhorizon.classic.filetypes.VqaFile
-import nz.net.ultraq.redhorizon.classic.filetypes.WsaFile
-import nz.net.ultraq.redhorizon.filetypes.PcxFile
-import nz.net.ultraq.redhorizon.filetypes.ResourceFile
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,8 +36,8 @@ class MixEntryTester {
 
 	// Any file in this list should only load the header data and lazily load their
 	// main data so that testing can be fast
-	private static final List<Class<? extends ResourceFile>> fileClasses = [
-		AudFile, CpsFile, PcxFile, ShpFile, TmpFileRA, TmpFileTD, VqaFile, WsaFile
+	private static final List<Class<?>> fileClasses = [
+//		AudFile, CpsFile, PcxFile, ShpFile, TmpFileRA, TmpFileTD, VqaFile, WsaFile
 	]
 
 	final MixFile mixFile
@@ -85,7 +76,7 @@ class MixEntryTester {
 	 *
 	 * @return A result if the type matches the next entry, {@code null} otherwise.
 	 */
-	private static MixEntryTesterResult testFileType(BufferedInputStream stream, Class<? extends ResourceFile> fileClass, String hexId) {
+	private static MixEntryTesterResult testFileType(BufferedInputStream stream, Class<?> fileClass, String hexId) {
 
 		try {
 			fileClass.newInstance(stream)
