@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.explorer.Entry
-import nz.net.ultraq.redhorizon.explorer.EntrySelectedEvent
+import nz.net.ultraq.redhorizon.explorer.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
@@ -125,9 +125,11 @@ class EntryList implements EventTarget<EntryList>, ImGuiElement {
 				ImGui.text(entry.type ?: '')
 
 				ImGui.tableSetColumnIndex(2)
-				ImGui.pushFont(context.monospaceFont)
-				ImGui.text(String.format('%12s', numberFormat.format(entry.size)))
-				ImGui.popFont()
+				if (!(entry instanceof FileEntry && entry.file.directory)) {
+					ImGui.pushFont(context.monospaceFont)
+					ImGui.text(String.format('%,12d', entry.size))
+					ImGui.popFont()
+				}
 
 				if (entry instanceof MixEntry && entry.description) {
 					ImGui.tableSetColumnIndex(3)

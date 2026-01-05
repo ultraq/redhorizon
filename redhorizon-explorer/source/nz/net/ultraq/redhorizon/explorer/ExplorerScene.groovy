@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.classic.filetypes.PalFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
@@ -35,6 +36,7 @@ import nz.net.ultraq.redhorizon.explorer.objects.Palette
 import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
 import nz.net.ultraq.redhorizon.explorer.ui.CyclePaletteEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntryList
+import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
 import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
@@ -56,7 +58,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class ExplorerScene extends Scene {
+class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExplorerScene)
 
@@ -80,7 +82,7 @@ class ExplorerScene extends Scene {
 	 * at startup).
 	 */
 	ExplorerScene(int width, int height, Window window, ResourceManager resourceManager, InputEventHandler input,
-		boolean touchpadInput) {
+		boolean touchpadInput, File startingDirectory) {
 
 		this.resourceManager = resourceManager
 
@@ -114,31 +116,33 @@ class ExplorerScene extends Scene {
 			}
 
 		// Entry list events
-		entryList.on(EntrySelectedEvent) { event ->
-			var entry = event.entry
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
+		entryList
+			.on(EntrySelectedEvent) { event ->
+				var entry = event.entry()
+				if (entry instanceof MixEntry) {
+					if (entry.name == '..') {
+						buildList(currentDirectory)
+					}
+					else {
+						clearPreview()
+						preview(entry)
+					}
 				}
-				else {
-					clearPreview()
-					preview(entry)
+				else if (entry instanceof FileEntry) {
+					var file = entry.file
+					if (file.directory) {
+						buildList(file)
+					}
+					else if (file.name.endsWith('.mix')) {
+						buildList(new MixFile(file))
+					}
+					else {
+						clearPreview()
+						preview(file)
+					}
 				}
 			}
-			else if (entry instanceof FileEntry) {
-				var file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				else {
-					clearPreview()
-					preview(file)
-				}
-			}
-		}
+			.relay(EntrySelectedEvent, this)
 
 		addChild(new GridLinesEntity(Map.MAX_BOUNDS, 24, Colour.RED, Colour.YELLOW))
 
@@ -151,7 +155,7 @@ class ExplorerScene extends Scene {
 			cyclePalette()
 		}))
 
-		buildList(new File(System.getProperty("user.dir")))
+		buildList(startingDirectory)
 	}
 
 	/**

@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Window
@@ -71,7 +72,7 @@ class Explorer implements Runnable {
 	}
 
 	/**
-	 * Provide default options for the user-remembered options.
+	 * Provide default values for the user-remembered options.
 	 */
 	static class DefaultOptionsProvider implements IDefaultValueProvider {
 
@@ -86,6 +87,9 @@ class Explorer implements Runnable {
 				if (option.longestName() == '--touchpad-input') {
 					return userPreferences.get(ExplorerPreferences.TOUCHPAD_INPUT).toString()
 				}
+				if (option.longestName() == '--starting-directory') {
+					return userPreferences.get(ExplorerPreferences.STARTING_DIRECTORY).toString()
+				}
 			}
 			return null
 		}
@@ -99,6 +103,9 @@ class Explorer implements Runnable {
 
 	@Option(names = '--touchpad-input', description = 'Start the application using touchpad controls.  Remembers your last usage.')
 	boolean touchpadInput
+
+	@Option(names = '--starting-directory', description = 'View this directory on launch.  Remembers your last usage.')
+	File startingDirectory
 
 	private Window window
 	private Framebuffer framebuffer
@@ -128,7 +135,14 @@ class Explorer implements Runnable {
 				.addVSyncBinding(window)
 			resourceManager = new ResourceManager('.')
 
-			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, resourceManager, input, touchpadInput)
+			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, resourceManager, input, touchpadInput,
+				startingDirectory)
+				.on(EntrySelectedEvent) { event ->
+					var entry = event.entry()
+					if (entry instanceof FileEntry && entry.file.directory) {
+						startingDirectory = entry.file
+					}
+				}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
 				.addSystem(new GraphicsSystem(window, framebuffer, new BasicShader(), new PalettedSpriteShader()))
@@ -155,5 +169,8 @@ class Explorer implements Runnable {
 		// Save preferences for next time
 		userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
 		userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
+		if (startingDirectory) {
+			userPreferences.set(ExplorerPreferences.STARTING_DIRECTORY, startingDirectory.toString())
+		}
 	}
 }

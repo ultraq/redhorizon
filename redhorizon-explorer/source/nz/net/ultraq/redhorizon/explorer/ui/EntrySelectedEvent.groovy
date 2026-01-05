@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.explorer.Entry
 
-import groovy.transform.TupleConstructor
+import groovy.transform.ImmutableOptions
 
 /**
  * Event for explorer file selections.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class EntrySelectedEvent implements Event {
-
-	final Entry entry
+@ImmutableOptions(knownImmutables = ['entry'])
+record EntrySelectedEvent(Entry entry) implements Event {
 }
