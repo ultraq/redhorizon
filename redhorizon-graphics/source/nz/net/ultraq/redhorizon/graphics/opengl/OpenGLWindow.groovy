@@ -383,9 +383,11 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	}
 
 	@Override
-	OpenGLWindow withMaximized() {
+	OpenGLWindow withMaximized(boolean maximized) {
 
-		glfwMaximizeWindow(window)
+		if (maximized) {
+			glfwMaximizeWindow(window)
+		}
 		return this
 	}
 

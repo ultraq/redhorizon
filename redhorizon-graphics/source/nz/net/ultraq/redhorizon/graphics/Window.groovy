@@ -183,9 +183,9 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	Window withDoubleClickForFullscreen()
 
 	/**
-	 * Maximize the window
+	 * Set if the window is maximized or not.
 	 */
-	Window withMaximized()
+	Window withMaximized(boolean maximized)
 
 	/**
 	 * Set whether vsync is enabled/disabled for this window.
