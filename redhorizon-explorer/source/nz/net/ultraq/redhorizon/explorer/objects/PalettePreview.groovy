@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Palette
@@ -37,11 +40,15 @@ class PalettePreview extends Entity<PalettePreview> {
 	private static final int SWATCH_HEIGHT = 24
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 
+	private final ExplorerScene explorerScene
+
 	/**
 	 * Constructor, create a preview by laying out all of the colours of the
 	 * palette.
 	 */
-	PalettePreview(Palette palette) {
+	PalettePreview(ExplorerScene explorerScene, Palette palette) {
+
+		this.explorerScene = explorerScene
 
 		palette.colourData.eachWithIndex { byte[] colour, int i ->
 			var r = colour[0] & 0xff
@@ -63,5 +70,22 @@ class PalettePreview extends Entity<PalettePreview> {
 		}
 
 		translate(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT)
+
+		addComponent(new ScriptComponent(PalettePreviewScript))
+	}
+
+	static class PalettePreviewScript extends EntityScript<PalettePreview> implements AutoCloseable {
+
+		@Override
+		void close() {
+
+			entity.explorerScene.gridLines.enable()
+		}
+
+		@Override
+		void init() {
+
+			entity.explorerScene.gridLines.disable()
+		}
 	}
 }

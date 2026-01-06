@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.extensions
 
+import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 
 /**
@@ -25,12 +26,14 @@ import nz.net.ultraq.redhorizon.graphics.Palette
  */
 class FileMappingExtensions {
 
-	static final Map<String, Class> EXTENSION_TO_CLASS = [
-		'pal': Palette
+	static final Map<String, Class> FILE_EXTENSION_TO_CLASS = [
+		'pal': Palette,
+		'pcx': Image
 	]
 
-	static final Map<String, String> EXTENSION_TO_NAME = [
-		'pal': 'PAL file'
+	static final Map<String, String> FILE_EXTENSION_TO_NAME = [
+		'pal': 'PAL file',
+		'pcx': 'PCX image file'
 	]
 
 	/**
@@ -39,7 +42,7 @@ class FileMappingExtensions {
 	 */
 	static Class getSupportedFileClass(File self) {
 
-		return self ? EXTENSION_TO_CLASS[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+		return self ? FILE_EXTENSION_TO_CLASS[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
 	}
 
 	/**
@@ -48,6 +51,6 @@ class FileMappingExtensions {
 	 */
 	static String getSupportedFileName(File self) {
 
-		return self ? EXTENSION_TO_NAME[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+		return self ? FILE_EXTENSION_TO_NAME[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
 	}
 }

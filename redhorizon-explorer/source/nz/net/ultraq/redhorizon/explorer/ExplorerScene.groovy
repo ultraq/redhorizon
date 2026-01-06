@@ -23,11 +23,13 @@ import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
+import nz.net.ultraq.redhorizon.explorer.objects.ImagePreview
 import nz.net.ultraq.redhorizon.explorer.objects.PalettePreview
 import nz.net.ultraq.redhorizon.explorer.objects.UiController
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -53,6 +55,8 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 	private final MixDatabase mixDatabase = new MixDatabase()
 
 	final CameraEntity camera
+	final GridLinesEntity gridLines
+	private final Window window
 	private Entity preview
 	private InputStream selectedFileInputStream
 
@@ -61,6 +65,8 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 	 * at startup).
 	 */
 	ExplorerScene(int width, int height, Window window, boolean touchpadInput, File startingDirectory) {
+
+		this.window = window
 
 		camera = new CameraEntity(width, height, window)
 		addChild(camera)
@@ -88,14 +94,21 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 					}
 				}
 				else if (entry instanceof FileEntry) {
-					queueChange { ->
-						clearPreview()
-						preview(entry.file)
+					if (entry.file.file) {
+						queueChange { ->
+							clearPreview()
+							preview(entry.file)
+						}
+					}
+					else {
+						trigger(event)
 					}
 				}
 			}
 
-		addChild(new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY))
+		gridLines = new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY)
+		addChild(gridLines)
+
 		addChild(new GlobalPalette()
 			.withName('Global palette'))
 	}
@@ -169,8 +182,6 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 	 */
 	void preview(Object file, String objectId) {
 
-		logger.info('File details: {}', file)
-
 		var mediaNode = switch (file) {
 
 		// Objects
@@ -181,9 +192,10 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 //			case IniFile ->
 //				preview(file as MapFile, objectId)
 //
-//				// Media
-//			case ImageFile ->
-//				new FullScreenContainer().addChild(new Sprite(file))
+		// Media
+			case Image ->
+				new ImagePreview(window, this, file)
+					.withName('Image - ${objectId}')
 //			case VideoFile ->
 //				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
 //			case AnimationFile ->
@@ -191,9 +203,9 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 //			case SoundFile ->
 //				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
 
-		// 🤷
+				// 🤷
 			case Palette ->
-				new PalettePreview(file)
+				new PalettePreview(this, file)
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}

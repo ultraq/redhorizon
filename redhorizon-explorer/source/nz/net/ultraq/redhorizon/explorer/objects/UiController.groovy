@@ -81,9 +81,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				else if (file.name.endsWith('.mix')) {
 					buildList(new MixFile(file))
 				}
-				else {
-					trigger(event)
-				}
+				trigger(event)
 			}
 		}
 
