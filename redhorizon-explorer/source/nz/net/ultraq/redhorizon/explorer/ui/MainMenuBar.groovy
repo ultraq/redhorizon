@@ -25,6 +25,8 @@ import imgui.ImGui
 import groovy.transform.TupleConstructor
 
 /**
+ * Menu bar for the Explorer.
+ *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)

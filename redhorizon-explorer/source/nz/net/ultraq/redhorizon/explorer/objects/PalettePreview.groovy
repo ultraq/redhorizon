@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Vertex
 
 import org.joml.Vector2f
@@ -30,32 +31,37 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Palette extends Entity<Palette> {
+class PalettePreview extends Entity<PalettePreview> {
 
 	private static final int SWATCH_WIDTH = 24
 	private static final int SWATCH_HEIGHT = 24
+	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 
-	Palette(nz.net.ultraq.redhorizon.graphics.Palette palette) {
+	/**
+	 * Constructor, create a preview by laying out all of the colours of the
+	 * palette.
+	 */
+	PalettePreview(Palette palette) {
 
-		for (var i = 0; i < palette.colours; i++) {
-			var colour = palette[i]
+		palette.colourData.eachWithIndex { byte[] colour, int i ->
 			var r = colour[0] & 0xff
 			var g = colour[1] & 0xff
 			var b = colour[2] & 0xff
-			var swatch = new MeshComponent(
+			var offsetX = (i % 16) * SWATCH_WIDTH as float
+			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT as float
+			addComponent(new MeshComponent(
 				Type.TRIANGLES,
 				new Vertex[]{
 					new Vertex(new Vector3f(0, 0, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(0, 0)),
 					new Vertex(new Vector3f(SWATCH_WIDTH, 0, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(1, 0)),
 					new Vertex(new Vector3f(SWATCH_WIDTH, SWATCH_HEIGHT, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(1, 1)),
 					new Vertex(new Vector3f(0, SWATCH_HEIGHT, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(0, 1))
-				}
+				},
+				index
 			)
-			var offsetX = (i % 16) * SWATCH_WIDTH
-			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT
-			addComponent(swatch)
+				.translate(offsetX, offsetY))
 		}
 
-		setPosition(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT, 0f)
+		translate(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT)
 	}
 }

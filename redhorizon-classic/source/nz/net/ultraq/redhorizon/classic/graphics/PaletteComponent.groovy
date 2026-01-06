@@ -29,14 +29,20 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = ['palette'])
-class PaletteComponent extends GraphicsComponent<PaletteComponent, PalettedSpriteShaderContext> {
+class PaletteComponent extends GraphicsComponent<PaletteComponent, PalettedSpriteShaderContext> implements AutoCloseable {
 
+	Palette palette
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
-	final Palette palette
 
 	@Override
 	void render(PalettedSpriteShaderContext shaderContext) {
 
 		shaderContext.setPalette(palette)
+	}
+
+	@Override
+	void close() {
+
+		palette.close()
 	}
 }

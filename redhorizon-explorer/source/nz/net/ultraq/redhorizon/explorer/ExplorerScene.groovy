@@ -17,41 +17,23 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.PalFileDecoder
-import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
-import nz.net.ultraq.redhorizon.classic.graphics.PaletteComponent
-import nz.net.ultraq.redhorizon.classic.maps.Map
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
-import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
-import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntryTester
-import nz.net.ultraq.redhorizon.explorer.objects.Palette
-import nz.net.ultraq.redhorizon.explorer.scripts.MapViewerScript
-import nz.net.ultraq.redhorizon.explorer.ui.CyclePaletteEvent
-import nz.net.ultraq.redhorizon.explorer.ui.EntryList
+import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
+import nz.net.ultraq.redhorizon.explorer.objects.PalettePreview
+import nz.net.ultraq.redhorizon.explorer.objects.UiController
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
-import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
-import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
-import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.input.KeyBinding
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
-
-import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Explorer UI and preview area.
@@ -61,182 +43,61 @@ import java.util.concurrent.CopyOnWriteArrayList
 class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExplorerScene)
+	private static final Colour GRID_LINES_GREY = new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f)
+	private static final Colour GRID_LINES_DARK_GREY = new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f)
 
-	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 //	private final ResourceManager resourceManager = new ResourceManager(
 //		new File(System.getProperty('user.dir'), 'mix'),
 //		'nz.net.ultraq.redhorizon.filetypes',
 //		'nz.net.ultraq.redhorizon.classic.filetypes')
-	private final ResourceManager resourceManager
 	private final MixDatabase mixDatabase = new MixDatabase()
 
-	private CameraEntity camera
-	private Entity globalPalette
+	final CameraEntity camera
 	private Entity preview
-	private File currentDirectory
 	private InputStream selectedFileInputStream
-	private PaletteType currentPalette
 
 	/**
 	 * Constructor, create the initial scene (blank, unless asked to load a file
 	 * at startup).
 	 */
-	ExplorerScene(int width, int height, Window window, ResourceManager resourceManager, InputEventHandler input,
-		boolean touchpadInput, File startingDirectory) {
-
-		this.resourceManager = resourceManager
+	ExplorerScene(int width, int height, Window window, boolean touchpadInput, File startingDirectory) {
 
 		camera = new CameraEntity(width, height, window)
 		addChild(camera)
 
-		var mainMenuBar = new MainMenuBar(touchpadInput)
-		var entryList = new EntryList(entries)
-		addChild(new Entity()
-			.addComponent(new ImGuiComponent(new DebugOverlay()
-				.withCursorTracking(camera, window)))
-			.addComponent(new ImGuiComponent(mainMenuBar))
-			.addComponent(new ImGuiComponent(new NodeList(this)))
-			.addComponent(new ImGuiComponent(entryList))
-			.addComponent(new ImGuiComponent(new LogPanel()))
-			.withName('UI'))
+		var uiController = new UiController(this, window, touchpadInput, startingDirectory)
+		addChild(uiController.withName('UI'))
 
 		// Main menu events
-		mainMenuBar
-			.on(ExitEvent) { event ->
-				window.shouldClose(true)
-			}
+		uiController
 			.on(TouchpadInputEvent) { event ->
-				var mapNode = this.findDescendent { it instanceof Map } as Map
-				if (mapNode) {
-					((MapViewerScript)mapNode.script).touchpadInput = event.touchpadInput()
-				}
-			}
-			.on(CyclePaletteEvent) { event ->
-				cyclePalette()
+//				var mapNode = this.findDescendent { it instanceof nz.net.ultraq.redhorizon.classic.maps.Map } as nz.net.ultraq.redhorizon.classic.maps.Map
+//				if (mapNode) {
+//					((MapViewerScript)mapNode.script).touchpadInput = event.touchpadInput()
+//				}
 			}
 
 		// Entry list events
-		entryList
+		uiController
 			.on(EntrySelectedEvent) { event ->
 				var entry = event.entry()
 				if (entry instanceof MixEntry) {
-					if (entry.name == '..') {
-						buildList(currentDirectory)
-					}
-					else {
+					queueChange { ->
 						clearPreview()
 						preview(entry)
 					}
 				}
 				else if (entry instanceof FileEntry) {
-					var file = entry.file
-					if (file.directory) {
-						buildList(file)
-					}
-					else if (file.name.endsWith('.mix')) {
-						buildList(new MixFile(file))
-					}
-					else {
+					queueChange { ->
 						clearPreview()
-						preview(file)
+						preview(entry.file)
 					}
 				}
 			}
-			.relay(EntrySelectedEvent, this)
 
-		addChild(new GridLinesEntity(Map.MAX_BOUNDS, 24, Colour.RED, Colour.YELLOW))
-
-		globalPalette = new Entity()
-			.addComponent(new PaletteComponent(loadPalette()))
-			.withName('Palette')
-		addChild(globalPalette)
-
-		input.addInputBinding(new KeyBinding(GLFW_KEY_P, true, { ->
-			cyclePalette()
-		}))
-
-		buildList(startingDirectory)
-	}
-
-	/**
-	 * Update the contents of the list from the current directory.
-	 */
-	private void buildList(File directory) {
-
-		entries.clear()
-
-		if (directory.parent) {
-			entries << new FileEntry(
-				file: directory.parentFile,
-				name: '/..'
-			)
-		}
-		directory
-			.listFiles()
-			.sort { file1, file2 ->
-				file1.directory && !file2.directory ? -1 :
-					!file1.directory && file2.directory ? 1 :
-						file1.name <=> file2.name
-			}
-			.each { fileOrDirectory ->
-				entries << new FileEntry(
-					file: fileOrDirectory,
-//					type: fileOrDirectory.file ? fileOrDirectory.name.fileClass?.simpleName : null
-					type: null
-				)
-			}
-
-		currentDirectory = directory
-	}
-
-	/**
-	 * Update the contents of the list from the current mix file.
-	 */
-	private void buildList(MixFile mixFile) {
-
-		entries.clear()
-		entries << new MixEntry(mixFile, null, '..')
-
-		// RA-MIXer built-in database, if available
-		var raMixDbEntry = mixFile.getEntry(0x7fffffff)
-		var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
-
-		// TODO: Also support XCC local database
-
-		var mixEntryTester = new MixEntryTester(mixFile)
-		mixFile.entries.each { entry ->
-
-			if (raMixDb) {
-				if (entry.id == 0x7fffffff) {
-					entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size, false, 'Local database created by the RA-MIXer tool')
-					return
-				}
-
-				var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
-				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.name().fileClass, entry.size, false, dbEntry.description())
-					return
-				}
-			}
-
-			// Perform a lookup to see if we know about this file already, getting both a name and class
-			var dbEntry = mixDatabase.find(entry.id)
-			if (dbEntry) {
-				entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.name().fileClass, entry.size)
-				return
-			}
-
-			// Otherwise try determine what kind of file this is, getting only a class
-			var testerResult = mixEntryTester.test(entry)
-			if (testerResult) {
-				entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
-			}
-			else {
-				entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
-			}
-		}
-
-		entries.sort()
+		addChild(new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY))
+		addChild(new GlobalPalette()
+			.withName('Global palette'))
 	}
 
 	/**
@@ -245,30 +106,38 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 	private void clearPreview() {
 
 		selectedFileInputStream?.close()
-		removeChild(preview)
-		preview = null
-		camera.transform.identity()
+		if (preview) {
+			removeChild(preview)
+			preview.close()
+			preview = null
+		}
+		camera.resetTransform()
+	}
+
+	@Override
+	void close() {
+
+		clearPreview()
+		super.close()
 	}
 
 	/**
-	 * Cycle through the available palettes and apply to any paletted objects in
-	 * the scene.
+	 * Update the preview area with the media for the selected file.
 	 */
-	private void cyclePalette() {
+	void preview(File file) {
 
-		var paletteComponent = globalPalette.findComponentByType(PaletteComponent)
-		paletteComponent.palette = loadPalette(PaletteType.values()[Math.wrap(currentPalette.ordinal() + 1, 0, PaletteType.values().length)])
-	}
+		logger.info('Loading {}...', file.name)
 
-	/**
-	 * Load the given palette as the global palette for objects.
-	 */
-	private nz.net.ultraq.redhorizon.graphics.Palette loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
-
-		logger.info("Using ${paletteType} palette")
-		currentPalette = paletteType
-		return getResourceAsStream(paletteType.file).withBufferedStream { stream ->
-			return new nz.net.ultraq.redhorizon.graphics.Palette(paletteType.file, stream)
+		var fileClass = file.supportedFileClass
+		if (fileClass) {
+			selectedFileInputStream = file.newInputStream()
+			var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
+				return fileClass.newInstance(file.name, selectedFileInputStream)
+			}
+			preview(fileInstance, file.name.substring(0, file.name.lastIndexOf('.')))
+		}
+		else {
+			logger.info('No filetype implementation for {}', file.name)
 		}
 	}
 
@@ -292,26 +161,6 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 		}
 		else {
 			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
-		}
-	}
-
-	/**
-	 * Update the preview area with the media for the selected file.
-	 */
-	void preview(File file) {
-
-		logger.info('Loading {}...', file.name)
-
-		var fileClass = file.name.fileClass
-		if (fileClass) {
-			selectedFileInputStream = file.newInputStream()
-			var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
-				return fileClass.newInstance(selectedFileInputStream)
-			}
-			preview(fileInstance, file.nameWithoutExtension)
-		}
-		else {
-			logger.info('No filetype implementation for {}', file.name)
 		}
 	}
 
@@ -343,8 +192,8 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 //				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
 
 		// 🤷
-			case PalFileDecoder ->
-				new Palette(file)
+			case Palette ->
+				new PalettePreview(file)
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}

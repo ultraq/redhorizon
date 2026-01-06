@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
  */
 @TupleConstructor
 @EqualsAndHashCode
-// TODO: If we're keeping this immutable, it should be a record
 class Colour {
 
 	/**

@@ -23,11 +23,14 @@ import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
+import nz.net.ultraq.redhorizon.engine.scene.SceneChangesSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
+import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
+import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Window
@@ -117,6 +120,7 @@ class Explorer implements Runnable {
 	void run() {
 
 		try {
+			// Setup
 			window = new OpenGLWindow(1280, 800, 'Explorer')
 				.centerToScreen()
 				.scaleToFit()
@@ -135,8 +139,14 @@ class Explorer implements Runnable {
 				.addVSyncBinding(window)
 			resourceManager = new ResourceManager('.')
 
-			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, resourceManager, input, touchpadInput,
-				startingDirectory)
+			// Init scene and engine
+			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, touchpadInput, startingDirectory)
+				.on(ExitEvent) { event ->
+					window.shouldClose(true)
+				}
+				.on(TouchpadInputEvent) { event ->
+					touchpadInput = event.touchpadInput()
+				}
 				.on(EntrySelectedEvent) { event ->
 					var entry = event.entry()
 					if (entry instanceof FileEntry && entry.file.directory) {
@@ -145,8 +155,9 @@ class Explorer implements Runnable {
 				}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
-				.addSystem(new GraphicsSystem(window, framebuffer, new BasicShader(), new PalettedSpriteShader()))
 				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
+				.addSystem(new GraphicsSystem(window, framebuffer, new BasicShader(), new PalettedSpriteShader()))
+				.addSystem(new SceneChangesSystem())
 				.withScene(scene)
 
 			// Game loop
@@ -161,6 +172,7 @@ class Explorer implements Runnable {
 			}
 		}
 		finally {
+			// Shutdown
 			resourceManager?.close()
 			device?.close()
 			window?.close()

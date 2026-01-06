@@ -42,9 +42,9 @@ class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
 	/**
 	 * Constructor, configure this mesh component.
 	 */
-	MeshComponent(Type type, Vertex[] vertices) {
+	MeshComponent(Type type, Vertex[] vertices, int[] index = null) {
 
-		mesh = new OpenGLMesh(type, vertices)
+		mesh = new OpenGLMesh(type, vertices, index)
 	}
 
 	@Override

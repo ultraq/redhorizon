@@ -33,7 +33,6 @@ import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTableFlags.*
 
 import groovy.transform.TupleConstructor
-import java.text.DecimalFormat
 
 /**
  * Renders the file/entry list window for the explorer application.
@@ -42,8 +41,6 @@ import java.text.DecimalFormat
  */
 @TupleConstructor(defaults = false, includes = 'entries')
 class EntryList implements EventTarget<EntryList>, ImGuiElement {
-
-	private static final DecimalFormat numberFormat = new DecimalFormat('#,###,##0')
 
 	final List<Entry> entries
 	private boolean focused
