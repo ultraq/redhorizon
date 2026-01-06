@@ -124,7 +124,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiElement {
 				ImGui.tableSetColumnIndex(2)
 				if (!(entry instanceof FileEntry && entry.file.directory)) {
 					ImGui.pushFont(context.monospaceFont)
-					ImGui.text(String.format('%,12d', entry.size))
+					ImGui.text(sprintf('%,12d', entry.size))
 					ImGui.popFont()
 				}
 

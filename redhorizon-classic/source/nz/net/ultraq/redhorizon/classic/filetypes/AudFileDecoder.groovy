@@ -99,7 +99,7 @@ class AudFileDecoder implements AudioDecoder {
 		return new DecodeSummary(bits, channels, frequency, framesDecoded, [
 			"AUD file, ${frequency}hz ${bits}-bit ${channels == 2 ? 'Stereo' : 'Mono'}",
 			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : 'IMA ADPCM'} algorithm",
-			"Compressed: ${String.format('%,d', compressedSize)} bytes => Uncompressed: ${String.format('%,d', uncompressedSize)} bytes"
+			"Compressed: ${sprintf('%,d', compressedSize)} bytes => Uncompressed: ${sprintf('%,d', uncompressedSize)} bytes"
 		].join(', '))
 	}
 
