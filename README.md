@@ -73,9 +73,9 @@ the way graphics were rendered in the early 2000s are not at all the they are
 rendered now!  So 2020 was spent re-learning modern OpenGL with shaders and
 rewriting the graphics around that.
 
-[![Red Horizon - Play WSA file demo](redhorizon-utilities/screenshot-of-wsa-demo.png)](https://www.youtube.com/watch?v=mp7A6EMWupY)
+[![Red Horizon - Play WSA file demo](https://i.ytimg.com/vi_webp/mp7A6EMWupY/maxresdefault.webp)](https://www.youtube.com/watch?v=mp7A6EMWupY)
 
-[Demo of VQA (video format) playback on YouTube](https://www.youtube.com/watch?v=3jpLoEJ22xc)
+[![Red Horizon - Play VQA file demo](https://i.ytimg.com/vi_webp/3jpLoEJ22xc/maxresdefault.webp)](https://www.youtube.com/watch?v=3jpLoEJ22xc)
 
 Even with new technology I was still stuck with static objects and didn't have
 much in the way of making things move or have complicated responses to player
@@ -88,8 +88,11 @@ shift in focus where I've been using tutorials made for other game engines as a
 way to prove that what I'm doing can actually work.  The projects are simple,
 but built so far using Red Horizon as their basis are:
 
- - [redhorizon-libgdx-simplegame](https://github.com/ultraq/redhorizon-libgdx-simplegame)
- - [redhorizon-unity-asteroids](https://github.com/ultraq/redhorizon-unity-asteroids)
+[redhorizon-libgdx-simplegame](https://github.com/ultraq/redhorizon-libgdx-simplegame)
+[![redhorizon-libgdx-simplegame](https://raw.githubusercontent.com/ultraq/redhorizon-libgdx-simplegame/refs/heads/main/screenshot.png)](https://github.com/ultraq/redhorizon-libgdx-simplegame)
+
+[redhorizon-unity-asteroids](https://github.com/ultraq/redhorizon-unity-asteroids)
+[![redhorizon-unity-asteroids](https://raw.githubusercontent.com/ultraq/redhorizon-unity-asteroids/refs/heads/main/screenshot-main.png)](https://github.com/ultraq/redhorizon-unity-asteroids)
 
 And there is also [redhorizon-shooter](https://github.com/ultraq/redhorizon-shooter)
 where I'm really just having a play with C&C's assets to do whatever thing I can
