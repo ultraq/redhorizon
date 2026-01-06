@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -35,7 +35,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = ['scene'])
-class NodeList implements ImGuiElement {
+class NodeList implements ImGuiModule {
 
 	final Scene scene
 	private Node selectedNode

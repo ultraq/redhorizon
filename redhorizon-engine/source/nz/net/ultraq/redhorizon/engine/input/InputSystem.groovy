@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.TupleConstructor
 
 /**
@@ -30,11 +33,15 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class InputSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
+
 	final InputEventHandler input
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		input.processInputs()
+		average('Input processing', 1f, logger) { ->
+			input.processInputs()
+		}
 	}
 }

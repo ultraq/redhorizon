@@ -21,6 +21,9 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.TupleConstructor
 
 /**
@@ -31,6 +34,8 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class ScriptSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(ScriptSystem)
+
 	final ScriptEngine scriptEngine
 	final InputEventHandler input
 	private final List<ScriptComponent> scriptComponents = new ArrayList<>()
@@ -38,13 +43,15 @@ class ScriptSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		scriptComponents.clear()
-		scene.traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(ScriptComponent, scriptComponents)
-		}
-		scriptComponents.each { ScriptComponent component ->
-			if (component.enabled) {
-				component.update(scriptEngine, input, delta)
+		average('Script processing', 1f, logger) { ->
+			scriptComponents.clear()
+			scene.traverse(Entity) { Entity entity ->
+				entity.findComponentsByType(ScriptComponent, scriptComponents)
+			}
+			scriptComponents.each { ScriptComponent component ->
+				if (component.enabled) {
+					component.update(scriptEngine, input, delta)
+				}
 			}
 		}
 	}

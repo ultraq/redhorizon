@@ -25,6 +25,9 @@ import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.TupleConstructor
 
 /**
@@ -35,6 +38,8 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class GraphicsSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
+
 	final Window window
 	final Framebuffer framebuffer
 	final Shader<? extends SceneShaderContext>[] shaders
@@ -44,42 +49,44 @@ class GraphicsSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		graphicsComponents.clear()
-		imguiComponents.clear()
-		scene.traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(GraphicsComponent, graphicsComponents)
-			entity.findComponentsByType(ImGuiComponent, imguiComponents)
-		}
+		average('Graphics rendering', 1f, logger) { ->
+			graphicsComponents.clear()
+			imguiComponents.clear()
+			scene.traverse(Entity) { Entity entity ->
+				entity.findComponentsByType(GraphicsComponent, graphicsComponents)
+				entity.findComponentsByType(ImGuiComponent, imguiComponents)
+			}
 
-		// TODO: Create an allocation-free method of grouping objects
-		var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
+			// TODO: Create an allocation-free method of grouping objects
+			var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
 
-		window.useRenderPipeline()
-			.scene { ->
-				framebuffer.useFramebuffer { ->
-					shaders.each { shader ->
-						shader.useShader { shaderContext ->
-							var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-							if (camera) {
-								camera.render(shaderContext)
-							}
-							groupedComponents[shader.class]?.each { component ->
-								if (component.enabled) {
-									component.render(shaderContext)
+			window.useRenderPipeline()
+				.scene { ->
+					framebuffer.useFramebuffer { ->
+						shaders.each { shader ->
+							shader.useShader { shaderContext ->
+								var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+								if (camera) {
+									camera.render(shaderContext)
+								}
+								groupedComponents[shader.class]?.each { component ->
+									if (component.enabled) {
+										component.render(shaderContext)
+									}
 								}
 							}
 						}
 					}
+					return framebuffer
 				}
-				return framebuffer
-			}
-			.ui(true) { context ->
-				imguiComponents.each { component ->
-					if (component.enabled) {
-						component.render(context)
+				.ui(true) { context ->
+					imguiComponents.each { component ->
+						if (component.enabled) {
+							component.render(context)
+						}
 					}
 				}
-			}
-			.end()
+				.end()
+		}
 	}
 }

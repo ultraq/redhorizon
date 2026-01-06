@@ -20,6 +20,9 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 /**
  * Perform collision checks between all entities in the scene.
  *
@@ -27,26 +30,30 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
  */
 class CollisionSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
+
 	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		collisionComponents.clear()
-		scene.traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(CollisionComponent, collisionComponents)
-		}
-		for (var i = 0; i < collisionComponents.size(); i++) {
-			var collision = collisionComponents.get(i)
-			if (!collision.enabled) {
-				continue
+		average('Collision detection', 1f, logger) { ->
+			collisionComponents.clear()
+			scene.traverse(Entity) { Entity entity ->
+				entity.findComponentsByType(CollisionComponent, collisionComponents)
 			}
-			for (var j = i + 1; j < collisionComponents.size(); j++) {
-				var otherCollision = collisionComponents.get(j)
-				if (!otherCollision.enabled) {
+			for (var i = 0; i < collisionComponents.size(); i++) {
+				var collision = collisionComponents.get(i)
+				if (!collision.enabled) {
 					continue
 				}
-				collision.checkCollision(otherCollision)
+				for (var j = i + 1; j < collisionComponents.size(); j++) {
+					var otherCollision = collisionComponents.get(j)
+					if (!otherCollision.enabled) {
+						continue
+					}
+					collision.checkCollision(otherCollision)
+				}
 			}
 		}
 	}

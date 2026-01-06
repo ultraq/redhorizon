@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
 import imgui.ImGui
 
@@ -30,7 +30,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MainMenuBar implements ImGuiElement, EventTarget<MainMenuBar> {
+class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
 	boolean touchpadInput
 

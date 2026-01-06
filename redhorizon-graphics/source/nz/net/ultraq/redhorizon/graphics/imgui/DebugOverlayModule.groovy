@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,15 @@
 package nz.net.ultraq.redhorizon.graphics.imgui
 
 /**
- * Any ImGui element to render during the ImGui phase.
+ * A customization/addition to the debug overlay so it can be shown persistently
+ * alongside it.
  *
  * @author Emanuel Rabina
  */
-interface ImGuiElement {
+interface DebugOverlayModule {
 
 	/**
-	 * Draw the element.
+	 * Render the module within the context of the debug overlay.
 	 */
-	void render(ImGuiContext context)
+	void render()
 }

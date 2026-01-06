@@ -18,7 +18,7 @@
 	<statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
 	<timestamp key="timestamp" datePattern="yyyy-MM-dd-HH-mm-ss"/>
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-		<filter class="nz.net.ultraq.redhorizon.runtime.logback.ExcludePerformanceStatsFilter"/>
+		<filter class="nz.net.ultraq.redhorizon.engine.graphics.imgui.ExcludePerformanceStatsFilter"/>
 		<encoder>
 			<pattern>[%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>
@@ -31,7 +31,7 @@
 	</appender>
 	<appender name="gui" class="nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiLoggingAppender">
 		<encoder>
-			<pattern>%logger{0} - %msg%n</pattern>
+			<pattern>%msg%n</pattern>
 		</encoder>
 	</appender>
 	<logger name="nz.net.ultraq.redhorizon" level="DEBUG"/>

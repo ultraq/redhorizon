@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scene
-
-import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.scenegraph.Scene
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 /**
- * System for processing queued scene changes.
+ * Any ImGui object to render during the ImGui phase.
  *
  * @author Emanuel Rabina
  */
-class SceneChangesSystem extends System {
+interface ImGuiModule {
 
-	private static final Logger logger = LoggerFactory.getLogger(SceneChangesSystem)
-
-	@Override
-	void update(Scene scene, float delta) {
-
-		average('Scene changes', 1f, logger) { ->
-			scene.processQueuedChanges()
-		}
-	}
+	/**
+	 * Draw the module.
+	 */
+	void render(ImGuiContext context)
 }

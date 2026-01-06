@@ -18,6 +18,9 @@ package nz.net.ultraq.redhorizon.engine
 
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 /**
  * The object responsible for running each of the registered systems on a scene.
  * Systems are currently not prioritized, so are run in the order in which they
@@ -26,6 +29,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
  * @author Emanuel Rabina
  */
 class Engine {
+
+	private static final Logger logger = LoggerFactory.getLogger(Engine)
 
 	private final List<System> systems = new ArrayList<>()
 	private Scene scene
@@ -38,6 +43,14 @@ class Engine {
 
 		systems.add(system)
 		return this
+	}
+
+	/**
+	 * An overload of the {@code <<} operator as an alias to {@link #addSystem(System)}.
+	 */
+	Engine leftShift(System system) {
+
+		return addSystem(system)
 	}
 
 	/**
@@ -57,9 +70,11 @@ class Engine {
 		// TODO: There are a lot of scene traversal methods in each of the system
 		//       updates, so introduce a more eficient way of picking out necessary
 		//       components.
-		systems.each { system ->
-			if (system.enabled) {
-				system.update(scene, delta)
+		average('Overall engine update', 1f, logger) { ->
+			systems.each { system ->
+				if (system.enabled) {
+					system.update(scene, delta)
+				}
 			}
 		}
 	}

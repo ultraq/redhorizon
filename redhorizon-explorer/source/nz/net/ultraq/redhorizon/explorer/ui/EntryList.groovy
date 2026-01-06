@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.explorer.Entry
 import nz.net.ultraq.redhorizon.explorer.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
 import imgui.ImGui
 import imgui.flag.ImGuiSortDirection
@@ -40,7 +40,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = 'entries')
-class EntryList implements EventTarget<EntryList>, ImGuiElement {
+class EntryList implements EventTarget<EntryList>, ImGuiModule {
 
 	final List<Entry> entries
 	private boolean focused
