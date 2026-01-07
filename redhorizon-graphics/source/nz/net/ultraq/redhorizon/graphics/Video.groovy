@@ -53,11 +53,11 @@ class Video implements AutoCloseable {
 	 * Constructor, set up a new video from its name and a stream of data.
 	 */
 	@SuppressWarnings('UnnecessaryQualifiedReference')
-	Video(String fileName, InputStream inputStream, int playbackWidth = 0, int playbackHeight = 0) {
+	Video(String fileName, InputStream inputStream) {
 
 		var decoder = VideoDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 
-		animation = new Animation(decoder, 31, playbackWidth, playbackHeight)
+		animation = new Animation(decoder, 31)
 			.on(Animation.PlaybackReadyEvent) { event ->
 				animationReady = true
 			}

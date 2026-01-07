@@ -73,12 +73,12 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 	/**
 	 * Constructor, set up a new animation from its name and a stream of data.
 	 */
-	Animation(String fileName, InputStream inputStream, int playbackWidth = 0, int playbackHeight = 0) {
+	Animation(String fileName, InputStream inputStream) {
 
 		var decoder = ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
 			.on(HeaderDecodedEvent) { event ->
-				width = playbackWidth ?: event.width()
-				height = playbackHeight ?: event.height()
+				width = event.width()
+				height = event.height()
 				numFrames = event.frames()
 				frameRate = event.frameRate()
 				streamingEvents = new ArrayBlockingQueue<>(frameRate as int)
@@ -114,15 +114,15 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 	/**
 	 * Constructor, set up streaming from an image event source.
 	 */
-	Animation(EventTarget<? extends EventTarget> imageSource, int eventCapacity, int playbackWidth = 0, int playbackHeight = 0) {
+	Animation(EventTarget<? extends EventTarget> imageSource, int eventCapacity) {
 
 		streamingEvents = new ArrayBlockingQueue<>(eventCapacity)
 
 		var playbackReadyTriggered = false
 		imageSource
 			.on(ImageInfoEvent) { event ->
-				width = playbackWidth ?: event.width()
-				height = playbackHeight ?: event.height()
+				width = event.width()
+				height = event.height()
 				numFrames = event.frames()
 				frameRate = event.frameRate()
 			}

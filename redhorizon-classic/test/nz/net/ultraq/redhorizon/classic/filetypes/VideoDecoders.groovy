@@ -78,8 +78,8 @@ class VideoDecoders extends Specification {
 	def 'Play a VQA file using the VideoDecoder SPI'() {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
-			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream, 320, 188)
-			var videoTransform = new Matrix4f()
+			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream)
+			var videoTransform = new Matrix4f().scale(1f, 1.2f, 1f)
 			var videoPosition = new Vector3f() // Should move the "ears" to the video position too, but we haven't
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)

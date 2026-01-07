@@ -221,7 +221,7 @@ class ImageDecoders extends Specification {
 	def "Play a WSA file using the Image SPI"() {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
-			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream, 266, 200)
+			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream)
 			var animationTransform = new Matrix4f()
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)

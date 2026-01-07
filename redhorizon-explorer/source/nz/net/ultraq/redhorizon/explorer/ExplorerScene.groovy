@@ -64,14 +64,15 @@ class ExplorerScene extends Scene {
 	 * Constructor, create the initial scene (blank, unless asked to load a file
 	 * at startup).
 	 */
-	ExplorerScene(int width, int height, Window window, boolean touchpadInput, File startingDirectory) {
+	ExplorerScene(int width, int height, Window window, boolean touchpadInput, File startingDirectory,
+		MixDatabase mixDatabase) {
 
 		this.window = window
 
 		camera = new CameraEntity(width, height, window)
 		addChild(camera)
 
-		var uiController = new UiController(this, window, touchpadInput, startingDirectory)
+		var uiController = new UiController(this, window, touchpadInput, startingDirectory, mixDatabase)
 		addChild(uiController.withName('UI'))
 
 		// Main menu events
