@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.input.InputEventHandler
  *
  * @author Emanuel Rabina
  */
-class ScriptComponent extends Component<ScriptComponent> implements AutoCloseable {
+class ScriptComponent implements Component<ScriptComponent>, AutoCloseable {
 
 	final String scriptName
 	final Class<? extends EntityScript> scriptClass

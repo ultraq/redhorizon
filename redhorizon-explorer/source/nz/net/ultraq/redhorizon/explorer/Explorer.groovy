@@ -141,6 +141,7 @@ class Explorer implements Runnable {
 
 			// Init scene and engine
 			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, touchpadInput, startingDirectory)
+			scene
 				.on(ExitEvent) { event ->
 					window.shouldClose(true)
 				}

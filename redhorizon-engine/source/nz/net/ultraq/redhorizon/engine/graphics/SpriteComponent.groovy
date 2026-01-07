@@ -31,8 +31,8 @@ import org.joml.Vector2f
  *
  * @author Emanuel Rabina
  */
-class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderContext>
-	implements LocalTransform<SpriteComponent>, AutoCloseable {
+class SpriteComponent implements GraphicsComponent<SpriteComponent, SceneShaderContext>, LocalTransform<SpriteComponent>,
+	AutoCloseable {
 
 	final Sprite sprite
 	final Vector2f framePosition = new Vector2f()

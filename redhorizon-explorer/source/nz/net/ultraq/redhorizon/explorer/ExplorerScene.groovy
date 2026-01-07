@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
@@ -42,7 +41,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
+class ExplorerScene extends Scene {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExplorerScene)
 	private static final Colour GRID_LINES_GREY = new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f)

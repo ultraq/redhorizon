@@ -23,10 +23,10 @@ import nz.net.ultraq.redhorizon.engine.Component
  *
  * @author Emanuel Rabina
  */
-abstract class CollisionComponent<T extends CollisionComponent> extends Component<T> {
+interface CollisionComponent<T extends CollisionComponent> extends Component<T> {
 
 	/**
 	 * Check whether this component is colliding with another.
 	 */
-	abstract void checkCollision(CollisionComponent other)
+	void checkCollision(CollisionComponent other)
 }

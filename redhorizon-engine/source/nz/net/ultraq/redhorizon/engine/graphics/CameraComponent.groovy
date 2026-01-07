@@ -25,7 +25,7 @@ import nz.net.ultraq.redhorizon.graphics.Window
  *
  * @author Emanuel Rabina
  */
-class CameraComponent extends Component<CameraComponent> {
+class CameraComponent implements Component<CameraComponent> {
 
 	final Camera camera
 

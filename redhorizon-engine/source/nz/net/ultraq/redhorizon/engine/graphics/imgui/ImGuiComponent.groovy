@@ -28,7 +28,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImGuiComponent extends Component<ImGuiComponent> {
+class ImGuiComponent implements Component<ImGuiComponent> {
 
 	final ImGuiModule imGuiElement
 

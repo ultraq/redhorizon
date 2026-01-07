@@ -32,8 +32,8 @@ import org.joml.Matrix4f
  *
  * @author Emanuel Rabina
  */
-class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
-	implements LocalTransform<MeshComponent>, AutoCloseable {
+class MeshComponent implements GraphicsComponent<MeshComponent, SceneShaderContext>, LocalTransform<MeshComponent>,
+	AutoCloseable {
 
 	final Mesh mesh
 	final Class<? extends Shader> shaderClass = BasicShader

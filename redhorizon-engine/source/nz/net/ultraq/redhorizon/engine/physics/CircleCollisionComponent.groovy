@@ -26,7 +26,7 @@ import org.joml.primitives.Circlef
  *
  * @author Emanuel Rabina
  */
-class CircleCollisionComponent extends CollisionComponent<CircleCollisionComponent> {
+class CircleCollisionComponent implements CollisionComponent<CircleCollisionComponent> {
 
 	final float radius
 

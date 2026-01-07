@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.graphics.Shader
  *
  * @author Emanuel Rabina
  */
-class AlphaMaskComponent extends GraphicsComponent<AlphaMaskComponent, PalettedSpriteShaderContext> implements AutoCloseable {
+class AlphaMaskComponent implements GraphicsComponent<AlphaMaskComponent, PalettedSpriteShaderContext>, AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
 	final AlphaMask alphaMask = new AlphaMask()
