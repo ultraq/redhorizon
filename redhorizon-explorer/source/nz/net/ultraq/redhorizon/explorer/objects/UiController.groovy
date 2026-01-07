@@ -58,7 +58,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 		addComponent(new ImGuiComponent(new DebugOverlay()
 			.withCursorTracking(window, scene.camera)
-			.withPersistentLogging()))
+			.withProfilingLogging()))
 		addComponent(new ImGuiComponent(mainMenuBar))
 		addComponent(new ImGuiComponent(new NodeList(scene)))
 		addComponent(new ImGuiComponent(entryList))

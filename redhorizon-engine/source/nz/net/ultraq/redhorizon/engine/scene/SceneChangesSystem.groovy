@@ -34,7 +34,7 @@ class SceneChangesSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Scene changes', 1f, logger) { ->
+		average('Update', 1f, logger) { ->
 			scene.processQueuedChanges()
 		}
 	}

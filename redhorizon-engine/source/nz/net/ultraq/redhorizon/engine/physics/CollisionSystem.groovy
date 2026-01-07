@@ -37,7 +37,7 @@ class CollisionSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Collision detection', 1f, logger) { ->
+		average('Update', 1f, logger) { ->
 			collisionComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(CollisionComponent, collisionComponents)

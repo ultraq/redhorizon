@@ -40,7 +40,7 @@ class InputSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Input processing', 1f, logger) { ->
+		average('Update', 1f, logger) { ->
 			input.processInputs()
 		}
 	}

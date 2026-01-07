@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.extensions
 
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.PersistentLoggingOverlayModule
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ProfilingLoggingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
@@ -39,10 +39,10 @@ class DebugOverlayExtensions {
 	}
 
 	/**
-	 * Simplifies the addition of the {@link PersistentLoggingOverlayModule}.
+	 * Simplifies the addition of the {@link ProfilingLoggingOverlayModule}.
 	 */
-	static DebugOverlay withPersistentLogging(DebugOverlay self) {
+	static DebugOverlay withProfilingLogging(DebugOverlay self) {
 
-		return self << new PersistentLoggingOverlayModule()
+		return self << new ProfilingLoggingOverlayModule()
 	}
 }

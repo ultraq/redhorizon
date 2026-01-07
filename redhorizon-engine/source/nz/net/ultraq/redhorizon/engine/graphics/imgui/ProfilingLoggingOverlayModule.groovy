@@ -21,11 +21,11 @@ import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlayModule
 import imgui.ImGui
 
 /**
- * Additional logging for any persistent log events, eg: performance stats.
+ * Additional logging for profiling log events, ie: performance stats.
  *
  * @author Emanuel Rabina
  */
-class PersistentLoggingOverlayModule implements DebugOverlayModule {
+class ProfilingLoggingOverlayModule implements DebugOverlayModule {
 
 	private final Map<String, String> persistentLines = [:]
 
@@ -33,7 +33,7 @@ class PersistentLoggingOverlayModule implements DebugOverlayModule {
 	 * Constructor, listen for persistent log events.  This requires that the
 	 * {@link ImGuiLoggingAppender} has been configured in the logback config.
 	 */
-	PersistentLoggingOverlayModule() {
+	ProfilingLoggingOverlayModule() {
 
 		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey()) {

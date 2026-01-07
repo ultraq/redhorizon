@@ -43,7 +43,7 @@ class ScriptSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Script processing', 1f, logger) { ->
+		average('Update', 1f, logger) { ->
 			scriptComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(ScriptComponent, scriptComponents)

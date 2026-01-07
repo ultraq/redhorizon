@@ -70,7 +70,7 @@ class Engine {
 		// TODO: There are a lot of scene traversal methods in each of the system
 		//       updates, so introduce a more eficient way of picking out necessary
 		//       components.
-		average('Overall engine update', 1f, logger) { ->
+		average('Combined update', 1f, logger) { ->
 			systems.each { system ->
 				if (system.enabled) {
 					system.update(scene, delta)

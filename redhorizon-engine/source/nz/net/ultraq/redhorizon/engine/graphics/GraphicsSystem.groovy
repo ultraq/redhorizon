@@ -49,7 +49,7 @@ class GraphicsSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Graphics rendering', 1f, logger) { ->
+		average('Update', 1f, logger) { ->
 			graphicsComponents.clear()
 			imguiComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
@@ -62,27 +62,31 @@ class GraphicsSystem extends System {
 
 			window.useRenderPipeline()
 				.scene { ->
-					framebuffer.useFramebuffer { ->
-						shaders.each { shader ->
-							shader.useShader { shaderContext ->
-								var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-								if (camera) {
-									camera.render(shaderContext)
-								}
-								groupedComponents[shader.class]?.each { component ->
-									if (component.enabled) {
-										component.render(shaderContext)
+					return average('Render scene', 1f, logger) { ->
+						framebuffer.useFramebuffer { ->
+							shaders.each { shader ->
+								shader.useShader { shaderContext ->
+									var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+									if (camera) {
+										camera.render(shaderContext)
+									}
+									groupedComponents[shader.class]?.each { component ->
+										if (component.enabled) {
+											component.render(shaderContext)
+										}
 									}
 								}
 							}
 						}
+						return framebuffer
 					}
-					return framebuffer
 				}
 				.ui(true) { context ->
-					imguiComponents.each { component ->
-						if (component.enabled) {
-							component.render(context)
+					average('Render UI', 1f, logger) { ->
+						imguiComponents.each { component ->
+							if (component.enabled) {
+								component.render(context)
+							}
 						}
 					}
 				}

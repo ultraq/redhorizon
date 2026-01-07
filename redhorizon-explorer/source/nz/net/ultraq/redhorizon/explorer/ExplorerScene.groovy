@@ -195,7 +195,7 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 		// Media
 			case Image ->
 				new ImagePreview(window, this, file)
-					.withName('Image - ${objectId}')
+					.withName("Image - ${objectId}")
 //			case VideoFile ->
 //				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
 //			case AnimationFile ->
@@ -206,6 +206,7 @@ class ExplorerScene extends Scene implements EventTarget<ExplorerScene> {
 				// 🤷
 			case Palette ->
 				new PalettePreview(this, file)
+					.withName("Palette - ${objectId}")
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
 		}
