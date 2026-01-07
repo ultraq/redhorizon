@@ -40,15 +40,11 @@ class PalettePreview extends Entity<PalettePreview> {
 	private static final int SWATCH_HEIGHT = 24
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 
-	private final ExplorerScene explorerScene
-
 	/**
 	 * Constructor, create a preview by laying out all of the colours of the
 	 * palette.
 	 */
-	PalettePreview(ExplorerScene explorerScene, Palette palette) {
-
-		this.explorerScene = explorerScene
+	PalettePreview(Palette palette) {
 
 		palette.colourData.eachWithIndex { byte[] colour, int i ->
 			var r = colour[0] & 0xff
@@ -76,16 +72,19 @@ class PalettePreview extends Entity<PalettePreview> {
 
 	static class PalettePreviewScript extends EntityScript<PalettePreview> implements AutoCloseable {
 
+		private ExplorerScene scene
+
 		@Override
 		void close() {
 
-			entity.explorerScene.gridLines.enable()
+			scene.gridLines.enable()
 		}
 
 		@Override
 		void init() {
 
-			entity.explorerScene.gridLines.disable()
+			scene = entity.scene as ExplorerScene
+			scene.gridLines.disable()
 		}
 	}
 }

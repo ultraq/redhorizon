@@ -29,6 +29,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * Render graphical scene components, followed by the UI.
@@ -45,6 +47,7 @@ class GraphicsSystem extends System {
 	final Shader<? extends SceneShaderContext>[] shaders
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
+	private Closure<Framebuffer> postProcessingStage
 
 	@Override
 	void update(Scene scene, float delta) {
@@ -62,7 +65,7 @@ class GraphicsSystem extends System {
 
 			window.useRenderPipeline()
 				.scene { ->
-					return average('Render scene', 1f, logger) { ->
+					return average('Scene', 1f, logger) { ->
 						framebuffer.useFramebuffer { ->
 							shaders.each { shader ->
 								shader.useShader { shaderContext ->
@@ -81,8 +84,13 @@ class GraphicsSystem extends System {
 						return framebuffer
 					}
 				}
+				.postProcessing { sceneBuffer ->
+					return average('Post-processing', 1f, logger) { ->
+						return postProcessingStage ? postProcessingStage(sceneBuffer) : null as Framebuffer
+					}
+				}
 				.ui(true) { context ->
-					average('Render UI', 1f, logger) { ->
+					average('UI', 1f, logger) { ->
 						imguiComponents.each { component ->
 							if (component.enabled) {
 								component.render(context)
@@ -92,5 +100,15 @@ class GraphicsSystem extends System {
 				}
 				.end()
 		}
+	}
+
+	/**
+	 * Configure the post-processing stage of the render pipeline.
+	 */
+	GraphicsSystem withPostProcessing(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure<Framebuffer> closure) {
+
+		postProcessingStage = closure
+		return this
 	}
 }

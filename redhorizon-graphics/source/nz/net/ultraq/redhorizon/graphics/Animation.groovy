@@ -42,7 +42,7 @@ import java.util.concurrent.Future
  * methods to play them back as an animation.
  *
  * <p>Input streams will be decoded in a separate thread and loaded over time.
- * Whichever thread is used for updating audio will need to call {@link #update}
+ * Another thread for keeping time will need to call {@link Animation#update(float)}
  * periodically to keep the animation fed.
  *
  * @author Emanuel Rabina

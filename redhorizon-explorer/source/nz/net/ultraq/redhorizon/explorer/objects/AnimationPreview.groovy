@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 
 /**
- * For viewing n animation file.
+ * For viewing an animation file.
  *
  * @author Emanuel Rabina
  */

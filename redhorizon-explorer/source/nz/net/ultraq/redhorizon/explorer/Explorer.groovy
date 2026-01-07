@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
@@ -39,6 +40,7 @@ import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 import org.lwjgl.system.Configuration
@@ -62,6 +64,8 @@ class Explorer implements Runnable {
 	private static final Preferences userPreferences = new Preferences()
 	private static final int RENDER_WIDTH = 640
 	private static final int RENDER_HEIGHT = 480
+	private static final int OUTPUT_WIDTH = RENDER_WIDTH * 2
+	private static final int OUTPUT_HEIGHT = RENDER_HEIGHT * 2
 
 	static {
 		Configuration.STACK_SIZE.set(10240)
@@ -112,7 +116,9 @@ class Explorer implements Runnable {
 	File startingDirectory
 
 	private Window window
-	private Framebuffer framebuffer
+	private Framebuffer sceneFramebuffer
+	private SharpUpscalingShader sharpUpscalingShader
+	private Framebuffer postProcessingFramebuffer
 	private AudioDevice device
 	private ResourceManager resourceManager
 	private ExplorerScene scene
@@ -122,7 +128,7 @@ class Explorer implements Runnable {
 
 		try {
 			// Setup
-			window = new OpenGLWindow(1280, 800, 'Explorer')
+			window = new OpenGLWindow(OUTPUT_WIDTH, OUTPUT_HEIGHT, 'Explorer')
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(Colour.GREY)
@@ -131,7 +137,9 @@ class Explorer implements Runnable {
 				.on(WindowMaximizedEvent) { event ->
 					maximized = event.maximized()
 				}
-			framebuffer = new OpenGLFramebuffer(RENDER_WIDTH, RENDER_HEIGHT)
+			sceneFramebuffer = new OpenGLFramebuffer(RENDER_WIDTH, RENDER_HEIGHT)
+			sharpUpscalingShader = new SharpUpscalingShader()
+			postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
 			device = new OpenALAudioDevice()
 				.withMasterVolume(0.5f)
 			var input = new InputEventHandler()
@@ -141,7 +149,8 @@ class Explorer implements Runnable {
 			resourceManager = new ResourceManager('.')
 
 			// Init scene and engine
-			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, touchpadInput, startingDirectory)
+			var mixDatabase = new MixDatabase()
+			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, touchpadInput, startingDirectory, mixDatabase)
 			scene
 				.on(ExitEvent) { event ->
 					window.shouldClose(true)
@@ -155,11 +164,30 @@ class Explorer implements Runnable {
 						startingDirectory = entry.file
 					}
 				}
+			var graphicsSystem = new GraphicsSystem(window, sceneFramebuffer, new BasicShader(), new PalettedSpriteShader())
+			scene.on(PreviewFileEvent) { event ->
+				// Use sharp upscaling shader when adjusting for low-res files with an old aspect ratio
+				if (event.fileName().endsWith('.wsa')) {
+					graphicsSystem.withPostProcessing { sceneBuffer ->
+						postProcessingFramebuffer.useFramebuffer { ->
+							sharpUpscalingShader.useShader { shaderContext ->
+								shaderContext.setTextureSourceSize(320, 200)
+								shaderContext.setTextureTargetSize(OUTPUT_WIDTH, OUTPUT_HEIGHT)
+								sceneBuffer.draw(shaderContext)
+							}
+						}
+						return postProcessingFramebuffer
+					}
+				}
+				else {
+					graphicsSystem.withPostProcessing(null)
+				}
+			}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
 				.addSystem(new TimeSystem())
 				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
-				.addSystem(new GraphicsSystem(window, framebuffer, new BasicShader(), new PalettedSpriteShader()))
+				.addSystem(graphicsSystem)
 				.addSystem(new SceneChangesSystem())
 				.withScene(scene)
 
@@ -178,6 +206,8 @@ class Explorer implements Runnable {
 			// Shutdown
 			resourceManager?.close()
 			device?.close()
+			postProcessingFramebuffer?.close()
+			sharpUpscalingShader?.close()
 			window?.close()
 		}
 

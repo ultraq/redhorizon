@@ -207,7 +207,7 @@ class ExplorerScene extends Scene {
 
 				// 🤷
 			case Palette ->
-				new PalettePreview(this, file)
+				new PalettePreview(file)
 					.withName("Palette - ${objectId}")
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)
@@ -216,6 +216,7 @@ class ExplorerScene extends Scene {
 		if (mediaNode) {
 			addChild(mediaNode)
 			preview = mediaNode
+			trigger(new PreviewFileEvent(objectId))
 		}
 	}
 

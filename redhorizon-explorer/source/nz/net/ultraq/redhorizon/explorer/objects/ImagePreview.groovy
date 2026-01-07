@@ -49,18 +49,21 @@ class ImagePreview extends Entity<ImagePreview> {
 
 	static class ImagePreviewScript extends EntityScript<ImagePreview> implements AutoCloseable {
 
+		private ExplorerScene scene
+
 		@Override
 		void close() {
 
 			entity.window.withBackgroundColour(Colour.GREY)
-			(entity.scene as ExplorerScene).gridLines.enable()
+			scene.gridLines.enable()
 		}
 
 		@Override
 		void init() {
 
+			scene = entity.scene as ExplorerScene
 			entity.window.withBackgroundColour(Colour.BLACK)
-			(entity.scene as ExplorerScene).gridLines.disable()
+			scene.gridLines.disable()
 		}
 	}
 }

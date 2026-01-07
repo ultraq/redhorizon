@@ -27,6 +27,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.explorer.Entry
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.FileEntry
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntryTester
 import nz.net.ultraq.redhorizon.explorer.ui.EntryList
@@ -44,13 +45,17 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class UiController extends Entity<UiController> implements EventTarget<UiController> {
 
+	private final MixDatabase mixDatabase
 	private File currentDirectory
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 
 	/**
 	 * Constructor, build and register the many UI pieces.
 	 */
-	UiController(ExplorerScene scene, Window window, boolean touchpadInput, File startingDirectory) {
+	UiController(ExplorerScene scene, Window window, boolean touchpadInput, File startingDirectory,
+		MixDatabase mixDatabase) {
+
+		this.mixDatabase = mixDatabase
 
 		var mainMenuBar = new MainMenuBar(touchpadInput)
 			.relay(Event, this)
@@ -144,7 +149,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 				var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
 				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.name().fileClass, entry.size, false, dbEntry.description())
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
 					return
 				}
 			}
@@ -152,7 +157,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 			// Perform a lookup to see if we know about this file already, getting both a name and class
 			var dbEntry = mixDatabase.find(entry.id)
 			if (dbEntry) {
-				entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.name().fileClass, entry.size)
+				entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size)
 				return
 			}
 
