@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.explorer.extensions
 
+import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixData
+import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 
@@ -27,13 +30,17 @@ import nz.net.ultraq.redhorizon.graphics.Palette
 class FileMappingExtensions {
 
 	static final Map<String, Class> FILE_EXTENSION_TO_CLASS = [
+		'cps': Image,
 		'pal': Palette,
-		'pcx': Image
+		'pcx': Image,
+		'wsa': Animation
 	]
 
 	static final Map<String, String> FILE_EXTENSION_TO_NAME = [
+		'cps': 'CPS image file',
 		'pal': 'PAL file',
-		'pcx': 'PCX image file'
+		'pcx': 'PCX image file',
+		'wsa': 'WSA animation file'
 	]
 
 	/**
@@ -43,6 +50,24 @@ class FileMappingExtensions {
 	static Class getSupportedFileClass(File self) {
 
 		return self ? FILE_EXTENSION_TO_CLASS[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a class that can handle the current RA-MIXer database entry, or
+	 * {@code null} if there is no implementation for it.
+	 */
+	static Class getSupportedFileClass(RaMixDatabase.Entry self) {
+
+		return self ? FILE_EXTENSION_TO_CLASS[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a class that can handle the current mix file entry, or {@code null}
+	 * if there is no implementation for it.
+	 */
+	static Class getSupportedFileClass(MixData self) {
+
+		return self ? FILE_EXTENSION_TO_CLASS[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
 	}
 
 	/**

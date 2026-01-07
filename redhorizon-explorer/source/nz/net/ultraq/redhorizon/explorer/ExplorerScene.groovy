@@ -21,12 +21,14 @@ import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
+import nz.net.ultraq.redhorizon.explorer.objects.AnimationPreview
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.explorer.objects.ImagePreview
 import nz.net.ultraq.redhorizon.explorer.objects.PalettePreview
 import nz.net.ultraq.redhorizon.explorer.objects.UiController
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
+import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
@@ -51,7 +53,6 @@ class ExplorerScene extends Scene {
 //		new File(System.getProperty('user.dir'), 'mix'),
 //		'nz.net.ultraq.redhorizon.filetypes',
 //		'nz.net.ultraq.redhorizon.classic.filetypes')
-	private final MixDatabase mixDatabase = new MixDatabase()
 
 	final CameraEntity camera
 	final GridLinesEntity gridLines
@@ -146,7 +147,7 @@ class ExplorerScene extends Scene {
 			var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
 				return fileClass.newInstance(file.name, selectedFileInputStream)
 			}
-			preview(fileInstance, file.name.substring(0, file.name.lastIndexOf('.')))
+			preview(fileInstance, file.name)
 		}
 		else {
 			logger.info('No filetype implementation for {}', file.name)
@@ -193,12 +194,13 @@ class ExplorerScene extends Scene {
 //
 		// Media
 			case Image ->
-				new ImagePreview(window, this, file)
+				new ImagePreview(window, file)
 					.withName("Image - ${objectId}")
+			case Animation ->
+				new AnimationPreview(window, file, objectId)
+					.withName("Animation - ${objectId}")
 //			case VideoFile ->
 //				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
-//			case AnimationFile ->
-//				new FullScreenContainer().addChild(new Animation(file).attachScript(new PlaybackScript(true)))
 //			case SoundFile ->
 //				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
 

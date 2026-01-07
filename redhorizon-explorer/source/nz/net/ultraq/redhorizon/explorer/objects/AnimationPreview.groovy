@@ -17,21 +17,20 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 
 /**
- * For viewing an image file.
+ * For viewing n animation file.
  *
  * @author Emanuel Rabina
  */
-class ImagePreview extends Entity<ImagePreview> {
+class AnimationPreview extends Entity<AnimationPreview> {
 
 	private final Window window
 
@@ -39,28 +38,56 @@ class ImagePreview extends Entity<ImagePreview> {
 	 * Constructor, create a preview with a sprite component and to change the
 	 * background to black.
 	 */
-	ImagePreview(Window window, Image image) {
+	AnimationPreview(Window window, Animation animation, String objectId) {
 
 		this.window = window.withBackgroundColour(Colour.BLACK)
 
-		addComponent(new SpriteComponent(image, BasicShader))
-		addComponent(new ScriptComponent(ImagePreviewScript))
+		// TODO: Is there some better way to convey animations that needs special scaling?
+		var animationComponent = new AnimationComponent(animation)
+		if (objectId.endsWith('.wsa')) {
+			animationComponent.scale(2f, 2.4f)
+		}
+		addComponent(animationComponent)
+		addComponent(new ScriptComponent(AnimationPreviewScript))
 	}
 
-	static class ImagePreviewScript extends EntityScript<ImagePreview> implements AutoCloseable {
+	static class AnimationPreviewScript extends EntityScript<AnimationPreview> implements AutoCloseable {
+
+		private ExplorerScene scene
+		private AnimationComponent animationComponent
+		private boolean playbackStarted = false
 
 		@Override
 		void close() {
 
 			entity.window.withBackgroundColour(Colour.GREY)
-			(entity.scene as ExplorerScene).gridLines.enable()
+			scene.gridLines.enable()
 		}
 
 		@Override
 		void init() {
 
+			scene = entity.scene as ExplorerScene
+			animationComponent = entity.findComponentByType(AnimationComponent)
+
 			entity.window.withBackgroundColour(Colour.BLACK)
-			(entity.scene as ExplorerScene).gridLines.disable()
+			scene.gridLines.disable()
+		}
+
+		@Override
+		void update(float delta) {
+
+			if (!playbackStarted && !animationComponent.animation.playing) {
+				animationComponent.animation.play()
+				playbackStarted = true
+			}
+
+			if (playbackStarted && animationComponent.animation.stopped) {
+				scene.queueChange { ->
+					scene.removeChild(entity)
+					entity.close()
+				}
+			}
 		}
 	}
 }

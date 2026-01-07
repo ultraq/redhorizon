@@ -244,7 +244,7 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 		if (framesProcessed) {
 			framesProcessed.times { i ->
 				var index = lastFrame + i
-				frames[index].close()
+				frames[index]?.close()
 				frames[index] = null
 			}
 			lastFrame = currentFrame
