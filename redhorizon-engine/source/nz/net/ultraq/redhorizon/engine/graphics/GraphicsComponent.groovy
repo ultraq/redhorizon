@@ -25,8 +25,8 @@ import nz.net.ultraq.redhorizon.graphics.Shader
  *
  * @author Emanuel Rabina
  */
-interface GraphicsComponent<C extends GraphicsComponent, SC extends SceneShaderContext>
-	extends Component<C> {
+interface GraphicsComponent<T extends GraphicsComponent, SC extends SceneShaderContext>
+	extends Component<T> {
 
 	/**
 	 * Return the shader used for rendering this component.

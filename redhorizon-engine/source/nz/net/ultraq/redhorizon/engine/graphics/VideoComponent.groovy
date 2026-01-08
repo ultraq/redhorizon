@@ -16,10 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.redhorizon.engine.audio.AudioComponent
 import nz.net.ultraq.redhorizon.engine.time.TimeComponent
-import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.LocalTransform
 
@@ -28,16 +29,16 @@ import org.joml.Matrix4f
 import groovy.transform.TupleConstructor
 
 /**
- * A component for adding a full-screen animation to an entity.
+ * A component for adding a video to an entity.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class AnimationComponent implements GraphicsComponent<AnimationComponent, SceneShaderContext>,
-	TimeComponent<AnimationComponent>, LocalTransform<AnimationComponent> {
+class VideoComponent implements GraphicsComponent<VideoComponent, SceneShaderContext>, AudioComponent<VideoComponent>,
+	TimeComponent<VideoComponent>, LocalTransform<VideoComponent> {
 
 	@Delegate(interfaces = false, includes = ['isPlaying', 'isStopped', 'play', 'stop'])
-	final Animation animation
+	final Video video
 	private final Matrix4f globalTransformResult = new Matrix4f()
 
 	@Override
@@ -47,14 +48,20 @@ class AnimationComponent implements GraphicsComponent<AnimationComponent, SceneS
 	}
 
 	@Override
+	void render() {
+
+		video.render(entity.globalPosition)
+	}
+
+	@Override
 	void render(SceneShaderContext shaderContext) {
 
-		animation.render(shaderContext, entity.globalTransform.mul(transform, globalTransformResult))
+		video.render(shaderContext, entity.globalTransform.mul(transform, globalTransformResult))
 	}
 
 	@Override
 	void update(float delta) {
 
-		animation.update(delta)
+		video.update(delta)
 	}
 }

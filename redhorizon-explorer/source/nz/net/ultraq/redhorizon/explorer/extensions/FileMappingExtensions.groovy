@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixEntry
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.Video
 
 /**
  * Add convenience methods/properties to objects that represent files.
@@ -43,6 +44,7 @@ class FileMappingExtensions {
 		'cps': { file -> Image },
 		'pal': { file -> Palette },
 		'pcx': { file -> Image },
+		'vqa': { file -> Video },
 		'wsa': { file -> Animation }
 	]
 
@@ -51,6 +53,7 @@ class FileMappingExtensions {
 		'cps': 'CPS image file',
 		'pal': 'PAL file',
 		'pcx': 'PCX image file',
+		'vqa': 'VQA video file',
 		'wsa': 'WSA animation file'
 	]
 

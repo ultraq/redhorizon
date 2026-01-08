@@ -107,6 +107,14 @@ class Video implements AutoCloseable {
 	}
 
 	/**
+	 * Return whether the video is currently stopped.
+	 */
+	boolean isStopped() {
+
+		return animation.stopped
+	}
+
+	/**
 	 * Play the video.
 	 */
 	Video play() {

@@ -20,8 +20,8 @@ import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
-import nz.net.ultraq.redhorizon.explorer.objects.UiController
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
+import nz.net.ultraq.redhorizon.explorer.ui.UiController
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene

@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.audio.MusicComponent
 import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
@@ -29,10 +30,12 @@ import nz.net.ultraq.redhorizon.explorer.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.previews.AnimationPlaybackScript.AnimationStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.previews.MusicPlaybackScript.MusicStoppedEvent
+import nz.net.ultraq.redhorizon.explorer.previews.VideoPlaybackScript.VideoStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 
 import org.slf4j.Logger
@@ -185,8 +188,22 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 							}
 						}
 				}
-//			case VideoFile ->
-//				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
+				case Video -> {
+					var videoComponent = new VideoComponent(file)
+					if (objectId.endsWith('.vqa')) {
+						videoComponent.scale(2f, 2.4f)
+					}
+					yield new Entity()
+						.addComponent(videoComponent)
+						.addComponent(new ScriptComponent(DarkPreviewScript))
+						.addComponent(new ScriptComponent(VideoPlaybackScript))
+						.withName("Video - ${objectId}")
+						.on(VideoStoppedEvent) { event ->
+							scene.queueChange { ->
+								clearPreview()
+							}
+						}
+				}
 				case Music ->
 					new Entity()
 						.addComponent(new MusicComponent(file))

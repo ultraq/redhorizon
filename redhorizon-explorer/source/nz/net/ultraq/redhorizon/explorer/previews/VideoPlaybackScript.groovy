@@ -17,46 +17,46 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
+import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 
 /**
- * Control the behaviour of an animation in preview.
+ * Control the behaviour of a video in preview.
  *
  * @author Emanuel Rabina
  */
-class AnimationPlaybackScript extends EntityScript implements AutoCloseable {
+class VideoPlaybackScript extends EntityScript implements AutoCloseable {
 
-	private AnimationComponent animation
+	private VideoComponent video
 	private boolean playbackStarted = false
 
 	@Override
 	void close() {
 
-		animation.stop()
+		video.stop()
 	}
 
 	@Override
 	void init() {
 
-		animation = entity.findComponentByType(AnimationComponent)
+		video = entity.findComponentByType(VideoComponent)
 	}
 
 	@Override
 	void update(float delta) {
 
 		if (!playbackStarted) {
-			animation.play()
+			video.play()
 			playbackStarted = true
 		}
 
-		if (playbackStarted && animation.stopped) {
-			entity.trigger(new AnimationStoppedEvent())
+		if (playbackStarted && video.stopped) {
+			entity.trigger(new VideoStoppedEvent())
 		}
 	}
 
 	/**
-	 * Triggered when an animation has stopped playing by itself.
+	 * Triggered when a video has stopped playing by itself.
 	 */
-	static record AnimationStoppedEvent() implements Event {}
+	static record VideoStoppedEvent() implements Event {}
 }

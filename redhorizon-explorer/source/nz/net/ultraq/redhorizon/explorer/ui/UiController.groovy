@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.objects
+package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.eventhorizon.EventTarget
@@ -32,9 +32,6 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntryTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
-import nz.net.ultraq.redhorizon.explorer.ui.EntryList
-import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
-import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 
