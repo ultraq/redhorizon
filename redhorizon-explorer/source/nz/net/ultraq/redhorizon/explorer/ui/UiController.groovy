@@ -46,6 +46,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 	private final File startingDirectory
 	private final MixDatabase mixDatabase
+	private final MainMenuBar mainMenuBar
 	private final EntryList entryList
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 
@@ -58,16 +59,16 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 		this.startingDirectory = startingDirectory
 		this.mixDatabase = mixDatabase
 
+		mainMenuBar = new MainMenuBar(touchpadInput)
+			.relay(Event, scene)
 		entryList = new EntryList(entries)
 
 		addComponent(new ImGuiComponent(new DebugOverlay()
 			.withCursorTracking(window, scene.camera)
 			.withProfilingLogging()))
-		addComponent(new ImGuiComponent(new MainMenuBar(touchpadInput)
-			.relay(Event, this)))
+		addComponent(new ImGuiComponent(mainMenuBar))
 		addComponent(new ImGuiComponent(new NodeList(scene)))
-		addComponent(new ImGuiComponent(entryList)
-			.withName('File list'))
+		addComponent(new ImGuiComponent(entryList))
 		addComponent(new ImGuiComponent(new LogPanel()))
 		addComponent(new ScriptComponent(UiControllerScript))
 	}
@@ -140,7 +141,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				}
 
 				// Perform a lookup to see if we know about this file already, getting both a name and class
-				var dbEntry = mixDatabase.find(entry.id)
+				var dbEntry = entity.mixDatabase.find(entry.id)
 				if (dbEntry) {
 					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size)
 					return

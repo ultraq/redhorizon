@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class SoundEffectComponent implements AudioComponent<SoundEffectComponent> {
+class SoundComponent implements AudioComponent<SoundComponent> {
 
 	@Delegate(interfaces = false, includes = ['isPaused', 'isPlaying', 'isStopped', 'pause', 'play', 'stop'])
 	final Sound sound

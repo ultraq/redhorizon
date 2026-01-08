@@ -44,6 +44,10 @@ class FileMappingExtensions {
 		'cps': { file -> Image },
 		'pal': { file -> Palette },
 		'pcx': { file -> Image },
+		'v00': { file -> Sound },
+		'v01': { file -> Sound },
+		'v02': { file -> Sound },
+		'v03': { file -> Sound },
 		'vqa': { file -> Video },
 		'wsa': { file -> Animation }
 	]
@@ -53,6 +57,10 @@ class FileMappingExtensions {
 		'cps': 'CPS image file',
 		'pal': 'PAL file',
 		'pcx': 'PCX image file',
+		'v00': 'AUD sound file',
+		'v01': 'AUD sound file',
+		'v02': 'AUD sound file',
+		'v03': 'AUD sound file',
 		'vqa': 'VQA video file',
 		'wsa': 'WSA animation file'
 	]

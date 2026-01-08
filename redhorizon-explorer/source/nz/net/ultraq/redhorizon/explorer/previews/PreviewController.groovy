@@ -18,8 +18,10 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.audio.MusicComponent
+import nz.net.ultraq.redhorizon.engine.audio.SoundComponent
 import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
@@ -135,15 +137,12 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 			logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
 			var fileClass = entry.fileClass
-			var fileName = entry.name
-			var entryId = !fileName.contains('unknown') ? fileName.substring(0, fileName.indexOf('.')) : '(unknown)'
-
 			if (fileClass) {
 				selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
-				var fileInstance = time("Reading file ${fileName} from Mix file", logger) { ->
-					return fileClass.newInstance(selectedFileInputStream)
+				var fileInstance = time("Reading file ${entry.name} from Mix file", logger) { ->
+					return fileClass.newInstance(entry.name, selectedFileInputStream)
 				}
-				preview(fileInstance, entryId)
+				preview(fileInstance, entry.name)
 			}
 			else {
 				logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
@@ -204,6 +203,11 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 							}
 						}
 				}
+				case Sound ->
+					new Entity()
+						.addComponent(new SoundComponent(file))
+						.addComponent(new ScriptComponent(SoundPlaybackScript))
+						.withName("Sound - ${objectId}")
 				case Music ->
 					new Entity()
 						.addComponent(new MusicComponent(file))
