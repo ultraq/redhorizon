@@ -16,27 +16,15 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
-import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
-import nz.net.ultraq.redhorizon.explorer.objects.AnimationPreview
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
-import nz.net.ultraq.redhorizon.explorer.objects.ImagePreview
-import nz.net.ultraq.redhorizon.explorer.objects.PalettePreview
 import nz.net.ultraq.redhorizon.explorer.objects.UiController
-import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
-import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
-import nz.net.ultraq.redhorizon.graphics.Animation
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Image
-import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
  * Explorer UI and preview area.
@@ -45,273 +33,32 @@ import org.slf4j.LoggerFactory
  */
 class ExplorerScene extends Scene {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExplorerScene)
 	private static final Colour GRID_LINES_GREY = new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f)
 	private static final Colour GRID_LINES_DARK_GREY = new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f)
 
-//	private final ResourceManager resourceManager = new ResourceManager(
-//		new File(System.getProperty('user.dir'), 'mix'),
-//		'nz.net.ultraq.redhorizon.filetypes',
-//		'nz.net.ultraq.redhorizon.classic.filetypes')
-
+	final Window window
 	final CameraEntity camera
 	final GridLinesEntity gridLines
-	private final Window window
-	private Entity preview
-	private InputStream selectedFileInputStream
 
 	/**
 	 * Constructor, create the initial scene (blank, unless asked to load a file
 	 * at startup).
 	 */
-	ExplorerScene(int width, int height, Window window, boolean touchpadInput, File startingDirectory,
+	ExplorerScene(Window window, int width, int height, boolean touchpadInput, File startingDirectory,
 		MixDatabase mixDatabase) {
 
 		this.window = window
 
 		camera = new CameraEntity(width, height, window)
 		addChild(camera)
-
-		var uiController = new UiController(this, window, touchpadInput, startingDirectory, mixDatabase)
-		addChild(uiController.withName('UI'))
-
-		// Main menu events
-		uiController
-			.on(TouchpadInputEvent) { event ->
-//				var mapNode = this.findDescendent { it instanceof nz.net.ultraq.redhorizon.classic.maps.Map } as nz.net.ultraq.redhorizon.classic.maps.Map
-//				if (mapNode) {
-//					((MapViewerScript)mapNode.script).touchpadInput = event.touchpadInput()
-//				}
-			}
-
-		// Entry list events
-		uiController
-			.on(EntrySelectedEvent) { event ->
-				var entry = event.entry()
-				if (entry instanceof MixEntry) {
-					queueChange { ->
-						clearPreview()
-						preview(entry)
-					}
-				}
-				else if (entry instanceof FileEntry) {
-					if (entry.file.file) {
-						queueChange { ->
-							clearPreview()
-							preview(entry.file)
-						}
-					}
-					else {
-						trigger(event)
-					}
-				}
-			}
-
+		addChild(new UiController(this, window, touchpadInput, startingDirectory, mixDatabase)
+			.withName('UI'))
+		addChild(new PreviewController()
+			.withName('Preview controller'))
 		gridLines = new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY)
+			.withName('Grid lines')
 		addChild(gridLines)
-
 		addChild(new GlobalPalette()
 			.withName('Global palette'))
 	}
-
-	/**
-	 * Clear the current entry in preview and reset the preview scene.
-	 */
-	private void clearPreview() {
-
-		selectedFileInputStream?.close()
-		if (preview) {
-			removeChild(preview)
-			preview.close()
-			preview = null
-		}
-		camera.resetTransform()
-	}
-
-	@Override
-	void close() {
-
-		clearPreview()
-		super.close()
-	}
-
-	/**
-	 * Update the preview area with the media for the selected file.
-	 */
-	void preview(File file) {
-
-		logger.info('Loading {}...', file.name)
-
-		var fileClass = file.supportedFileClass
-		if (fileClass) {
-			selectedFileInputStream = file.newInputStream()
-			var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
-				return fileClass.newInstance(file.name, selectedFileInputStream)
-			}
-			preview(fileInstance, file.name)
-		}
-		else {
-			logger.info('No filetype implementation for {}', file.name)
-		}
-	}
-
-	/**
-	 * Update the preview area with the media for the selected mix file entry.
-	 */
-	void preview(MixEntry entry) {
-
-		logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
-
-		var fileClass = entry.fileClass
-		var fileName = entry.name
-		var entryId = !fileName.contains('unknown') ? fileName.substring(0, fileName.indexOf('.')) : '(unknown)'
-
-		if (fileClass) {
-			selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
-			var fileInstance = time("Reading file ${fileName} from Mix file", logger) { ->
-				return fileClass.newInstance(selectedFileInputStream)
-			}
-			preview(fileInstance, entryId)
-		}
-		else {
-			logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
-		}
-	}
-
-	/**
-	 * Update the preview area for the given file data and type.
-	 */
-	void preview(Object file, String objectId) {
-
-		var mediaNode = switch (file) {
-
-		// Objects
-//			case ShpFile ->
-//				preview(file, objectId)
-//			case TmpFileRA ->
-//				preview(file, objectId)
-//			case IniFile ->
-//				preview(file as MapFile, objectId)
-//
-		// Media
-			case Image ->
-				new ImagePreview(window, file)
-					.withName("Image - ${objectId}")
-			case Animation ->
-				new AnimationPreview(window, file, objectId)
-					.withName("Animation - ${objectId}")
-//			case VideoFile ->
-//				new FullScreenContainer().addChild(new Video(file).attachScript(new PlaybackScript(true)))
-//			case SoundFile ->
-//				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
-
-				// 🤷
-			case Palette ->
-				new PalettePreview(file)
-					.withName("Palette - ${objectId}")
-			default ->
-				logger.info('Filetype of {} not yet configured', file.class.simpleName)
-		}
-
-		if (mediaNode) {
-			addChild(mediaNode)
-			preview = mediaNode
-			trigger(new PreviewFileEvent(objectId))
-		}
-	}
-
-	/**
-	 * Load up any unspecified multi-image file as a sprite to flip through its
-	 * frames.
-	 */
-//	private void preview(ImagesFile imagesFile, String objectId) {
-//
-//		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera))
-//		sprite.bounds { ->
-//			center()
-//		}
-//		sprite.name = "PalettedSprite - ${objectId}"
-//		scene << sprite
-//		preview = sprite
-//	}
-
-	/**
-	 * Attempt to load up an object from its corresponding SHP file.
-	 */
-//	private void preview(ShpFile shpFile, String objectId) {
-//
-//		String unitConfig
-//		try {
-//			unitConfig = getUnitDataJson(objectId)
-//			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
-//		}
-//		catch (IllegalArgumentException ignored) {
-//			logger.info('No configuration available for {}', objectId)
-//		}
-//
-//		// Found a unit config, use it to view the file
-//		if (unitConfig) {
-//			var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
-//			var targetClass = switch (unitData.type) {
-//				case 'infantry', 'structure', 'vehicle', 'aircraft' -> Unit
-//				default -> logger.info('Unit type {} not supported', unitData.type)
-//			}
-//			if (targetClass) {
-//				var unit = targetClass
-//					.getDeclaredConstructor(ImagesFile, UnitData)
-//					.newInstance(shpFile, unitData)
-//					.attachScript(new UnitShowcaseScript(camera))
-//				unit.body.bounds { ->
-//					center()
-//				}
-//				if (unit.turret) {
-//					unit.turret.bounds { ->
-//						center()
-//					}
-//				}
-//				scene << unit
-//				preview = unit
-//			}
-//		}
-//
-//		// No config found, fall back to viewing a SHP file as media
-//		else {
-//			preview(shpFile as ImagesFile, objectId)
-//		}
-//	}
-
-	/**
-	 * Load up a tile file and arrange it so that it looks complete.
-	 */
-//	private void preview(TmpFileRA tileFile, String objectId) {
-//
-//		var singleImageData = tileFile.imagesData.combine(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
-//		var singleImageWidth = tileFile.tilesX * tileFile.width
-//		var singleImageHeight = tileFile.tilesY * tileFile.height
-//
-//		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, 1f, 1f, { scene ->
-//			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
-//		})
-//			.attachScript(new SpriteShowcaseScript(camera))
-//		tile.bounds.center()
-//		tile.name = "PalettedSprite - ${objectId}"
-//		scene << tile
-//		preview = tile
-//	}
-
-	/**
-	 * Attempt to load up a map from its map file.
-	 */
-//	private void preview(MapFile mapFile, String objectId) {
-//
-//		var mapViewerScript = new MapViewerScript(camera, nodeList, options.touchpadInput)
-//		time("Loading map ${objectId}", logger) { ->
-//			resourceManager.withDirectory(currentDirectory) { ->
-//				var map = new Map(mapFile, resourceManager).attachScript(mapViewerScript)
-//				scene << map
-//				preview = map
-//			}
-//		}
-//		mapViewerScript.viewInitialPosition()
-//	}
 }

@@ -19,17 +19,19 @@ package nz.net.ultraq.redhorizon.explorer.objects
 import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.Entry
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntryTester
+import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
 import nz.net.ultraq.redhorizon.explorer.ui.EntryList
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
@@ -45,8 +47,9 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class UiController extends Entity<UiController> implements EventTarget<UiController> {
 
+	private final File startingDirectory
 	private final MixDatabase mixDatabase
-	private File currentDirectory
+	private final EntryList entryList
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
 
 	/**
@@ -55,122 +58,137 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 	UiController(ExplorerScene scene, Window window, boolean touchpadInput, File startingDirectory,
 		MixDatabase mixDatabase) {
 
+		this.startingDirectory = startingDirectory
 		this.mixDatabase = mixDatabase
 
-		var mainMenuBar = new MainMenuBar(touchpadInput)
-			.relay(Event, this)
-		var entryList = new EntryList(entries)
+		entryList = new EntryList(entries)
 
 		addComponent(new ImGuiComponent(new DebugOverlay()
 			.withCursorTracking(window, scene.camera)
 			.withProfilingLogging()))
-		addComponent(new ImGuiComponent(mainMenuBar))
+		addComponent(new ImGuiComponent(new MainMenuBar(touchpadInput)
+			.relay(Event, this)))
 		addComponent(new ImGuiComponent(new NodeList(scene)))
-		addComponent(new ImGuiComponent(entryList))
+		addComponent(new ImGuiComponent(entryList)
+			.withName('File list'))
 		addComponent(new ImGuiComponent(new LogPanel()))
-
-		entryList.on(EntrySelectedEvent) { event ->
-			var entry = event.entry()
-			if (entry instanceof MixEntry) {
-				if (entry.name == '..') {
-					buildList(currentDirectory)
-				}
-				else {
-					trigger(event)
-				}
-			}
-			else if (entry instanceof FileEntry) {
-				var file = entry.file
-				if (file.directory) {
-					buildList(file)
-				}
-				else if (file.name.endsWith('.mix')) {
-					buildList(new MixFile(file))
-				}
-				trigger(event)
-			}
-		}
-
-		buildList(startingDirectory)
+		addComponent(new ScriptComponent(UiControllerScript))
 	}
 
-	/**
-	 * Update the contents of the list from the current directory.
-	 */
-	private void buildList(File directory) {
+	static class UiControllerScript extends EntityScript<UiController> {
 
-		entries.clear()
+		private ExplorerScene scene
+		private File currentDirectory
 
-		if (directory.parent) {
-			entries << new FileEntry(
-				file: directory.parentFile,
-				name: '/..'
-			)
-		}
-		directory
-			.listFiles()
-			.sort { file1, file2 ->
-				file1.directory && !file2.directory ? -1 :
-					!file1.directory && file2.directory ? 1 :
-						file1.name <=> file2.name
-			}
-			.each { fileOrDirectory ->
+		/**
+		 * Update the contents of the list from the current directory.
+		 */
+		private void buildList(File directory) {
+
+			var entries = entity.entries
+			entries.clear()
+
+			if (directory.parent) {
 				entries << new FileEntry(
-					file: fileOrDirectory,
-					type: fileOrDirectory.supportedFileName
+					file: directory.parentFile,
+					name: '/..'
 				)
 			}
-
-		currentDirectory = directory
-	}
-
-	/**
-	 * Update the contents of the list from the current mix file.
-	 */
-	private void buildList(MixFile mixFile) {
-
-		entries.clear()
-		entries << new MixEntry(mixFile, null, '..')
-
-		// RA-MIXer built-in database, if available
-		var raMixDbEntry = mixFile.getEntry(0x7fffffff)
-		var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
-
-		// TODO: Also support XCC local database
-
-		var mixEntryTester = new MixEntryTester(mixFile)
-		mixFile.entries.each { entry ->
-
-			if (raMixDb) {
-				if (entry.id == 0x7fffffff) {
-					entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size, false, 'Local database created by the RA-MIXer tool')
-					return
+			directory
+				.listFiles()
+				.sort { file1, file2 ->
+					file1.directory && !file2.directory ? -1 :
+						!file1.directory && file2.directory ? 1 :
+							file1.name <=> file2.name
+				}
+				.each { fileOrDirectory ->
+					entries << new FileEntry(
+						file: fileOrDirectory,
+						type: fileOrDirectory.supportedFileName
+					)
 				}
 
-				var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
-				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
-					return
-				}
-			}
-
-			// Perform a lookup to see if we know about this file already, getting both a name and class
-			var dbEntry = mixDatabase.find(entry.id)
-			if (dbEntry) {
-				entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size)
-				return
-			}
-
-			// Otherwise try determine what kind of file this is, getting only a class
-			var testerResult = mixEntryTester.test(entry)
-			if (testerResult) {
-				entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
-			}
-			else {
-				entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
-			}
+			currentDirectory = directory
 		}
 
-		entries.sort()
+		/**
+		 * Update the contents of the list from the current mix file.
+		 */
+		private void buildList(MixFile mixFile) {
+
+			var entries = entity.entries
+			entries.clear()
+			entries << new MixEntry(mixFile, null, '..')
+
+			// RA-MIXer built-in database, if available
+			var raMixDbEntry = mixFile.getEntry(0x7fffffff)
+			var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
+
+			// TODO: Also support XCC local database
+
+			var mixEntryTester = new MixEntryTester(mixFile)
+			mixFile.entries.each { entry ->
+
+				if (raMixDb) {
+					if (entry.id == 0x7fffffff) {
+						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size, false, 'Local database created by the RA-MIXer tool')
+						return
+					}
+
+					var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
+					if (dbEntry) {
+						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
+						return
+					}
+				}
+
+				// Perform a lookup to see if we know about this file already, getting both a name and class
+				var dbEntry = mixDatabase.find(entry.id)
+				if (dbEntry) {
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size)
+					return
+				}
+
+				// Otherwise try determine what kind of file this is, getting only a class
+				var testerResult = mixEntryTester.test(entry)
+				if (testerResult) {
+					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
+				}
+				else {
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
+				}
+			}
+
+			entries.sort()
+		}
+
+		@Override
+		void init() {
+
+			scene = entity.scene as ExplorerScene
+			entity.entryList.on(EntrySelectedEvent) { event ->
+				var entry = event.entry()
+				if (entry instanceof MixEntry) {
+					if (entry.name == '..') {
+						buildList(currentDirectory)
+					}
+					else {
+						scene.trigger(event)
+					}
+				}
+				else if (entry instanceof FileEntry) {
+					var file = entry.file
+					if (file.directory) {
+						buildList(file)
+					}
+					else if (file.name.endsWith('.mix')) {
+						buildList(new MixFile(file))
+					}
+					scene.trigger(event)
+				}
+			}
+
+			buildList(entity.startingDirectory)
+		}
 	}
 }

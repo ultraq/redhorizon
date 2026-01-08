@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.audio.AudioDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneChangesSystem
@@ -30,6 +31,8 @@ import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewBeginEvent
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewEndEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
@@ -44,6 +47,8 @@ import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 import org.lwjgl.system.Configuration
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.IDefaultValueProvider
@@ -61,6 +66,7 @@ import picocli.CommandLine.Parameters
 @Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
 class Explorer implements Runnable {
 
+	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
 	private static final int RENDER_WIDTH = 640
 	private static final int RENDER_HEIGHT = 480
@@ -150,7 +156,7 @@ class Explorer implements Runnable {
 
 			// Init scene and engine
 			var mixDatabase = new MixDatabase()
-			scene = new ExplorerScene(RENDER_WIDTH, RENDER_HEIGHT, window, touchpadInput, startingDirectory, mixDatabase)
+			scene = new ExplorerScene(window, RENDER_WIDTH, RENDER_HEIGHT, touchpadInput, startingDirectory, mixDatabase)
 			scene
 				.on(ExitEvent) { event ->
 					window.shouldClose(true)
@@ -165,37 +171,40 @@ class Explorer implements Runnable {
 					}
 				}
 			var graphicsSystem = new GraphicsSystem(window, sceneFramebuffer, new BasicShader(), new PalettedSpriteShader())
-			scene.on(PreviewFileEvent) { event ->
-				// Use sharp upscaling shader when adjusting for low-res files with an old aspect ratio
-				if (event.fileName().endsWith('.wsa')) {
-					graphicsSystem.withPostProcessing { sceneBuffer ->
-						postProcessingFramebuffer.useFramebuffer { ->
-							sharpUpscalingShader.useShader { shaderContext ->
-								shaderContext.setTextureSourceSize(320, 200)
-								shaderContext.setTextureTargetSize(OUTPUT_WIDTH, OUTPUT_HEIGHT)
-								sceneBuffer.draw(shaderContext)
+			scene
+				.on(PreviewBeginEvent) { event ->
+					// Use sharp upscaling shader when adjusting for low-res files with an old aspect ratio
+					if (event.fileName().endsWith('.wsa')) {
+						logger.debug('WSA file detected, using sharp upscaling shader to fix aspect ratio issues')
+						graphicsSystem.withPostProcessing { sceneBuffer ->
+							postProcessingFramebuffer.useFramebuffer { ->
+								sharpUpscalingShader.useShader { shaderContext ->
+									shaderContext.setTextureSourceSize(320, 200)
+									shaderContext.setTextureTargetSize(OUTPUT_WIDTH, OUTPUT_HEIGHT)
+									sceneBuffer.draw(shaderContext)
+								}
 							}
+							return postProcessingFramebuffer
 						}
-						return postProcessingFramebuffer
 					}
 				}
-				else {
+				.on(PreviewEndEvent) { event ->
 					graphicsSystem.withPostProcessing(null)
 				}
-			}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
 				.addSystem(new TimeSystem())
 				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
+				.addSystem(new AudioSystem())
 				.addSystem(graphicsSystem)
 				.addSystem(new SceneChangesSystem())
 				.withScene(scene)
 
 			// Game loop
 			window.show()
-			if (file) {
-				scene.preview(file)
-			}
+//			if (file) {
+//				scene.preview(file)
+//			}
 			var deltaTimer = new DeltaTimer()
 			while (!window.shouldClose()) {
 				engine.update(deltaTimer.deltaTime())

@@ -36,6 +36,7 @@ import groovy.transform.TupleConstructor
 class AnimationComponent implements GraphicsComponent<AnimationComponent, SceneShaderContext>,
 	TimeComponent<AnimationComponent>, LocalTransform<AnimationComponent> {
 
+	@Delegate(interfaces = false, includes = ['isPlaying', 'isStopped', 'play', 'stop'])
 	final Animation animation
 	private final Matrix4f globalTransformResult = new Matrix4f()
 

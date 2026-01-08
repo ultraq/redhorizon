@@ -16,8 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.extensions
 
-import nz.net.ultraq.redhorizon.classic.filetypes.RaMixDatabase
+import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixData
+import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixEntry
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
@@ -29,14 +31,23 @@ import nz.net.ultraq.redhorizon.graphics.Palette
  */
 class FileMappingExtensions {
 
-	static final Map<String, Class> FILE_EXTENSION_TO_CLASS = [
-		'cps': Image,
-		'pal': Palette,
-		'pcx': Image,
-		'wsa': Animation
+	static final Map<String, Closure<Class>> FILE_EXTENSION_TO_CLASS = [
+		'aud': { file ->
+			// Let's say 1MB cutoff
+			if ((file instanceof File && file.size() > 1024 * 1024) ||
+				(file instanceof RaMixEntry && file.space() > 1024 * 1024)) {
+				return Music
+			}
+			return Sound
+		},
+		'cps': { file -> Image },
+		'pal': { file -> Palette },
+		'pcx': { file -> Image },
+		'wsa': { file -> Animation }
 	]
 
 	static final Map<String, String> FILE_EXTENSION_TO_NAME = [
+		'aud': 'AUD sound file',
 		'cps': 'CPS image file',
 		'pal': 'PAL file',
 		'pcx': 'PCX image file',
@@ -49,16 +60,30 @@ class FileMappingExtensions {
 	 */
 	static Class getSupportedFileClass(File self) {
 
-		return self ? FILE_EXTENSION_TO_CLASS[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+		if (self) {
+			var fileExtension = self.name.substring(self.name.lastIndexOf('.') + 1)
+			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			if (closure) {
+				return closure(self)
+			}
+		}
+		return null
 	}
 
 	/**
 	 * Return a class that can handle the current RA-MIXer database entry, or
 	 * {@code null} if there is no implementation for it.
 	 */
-	static Class getSupportedFileClass(RaMixDatabase.Entry self) {
+	static Class getSupportedFileClass(RaMixEntry self) {
 
-		return self ? FILE_EXTENSION_TO_CLASS[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+		if (self) {
+			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
+			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			if (closure) {
+				return closure(self)
+			}
+		}
+		return null
 	}
 
 	/**
@@ -67,7 +92,14 @@ class FileMappingExtensions {
 	 */
 	static Class getSupportedFileClass(MixData self) {
 
-		return self ? FILE_EXTENSION_TO_CLASS[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+		if (self) {
+			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
+			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			if (closure) {
+				return closure(self)
+			}
+		}
+		return null
 	}
 
 	/**

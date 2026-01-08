@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.objects
+package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
 
 /**
- * Event triggered when a file is being previewed.
+ * Triggered when a preview has been unloaded.
  *
  * @author Emanuel Rabina
  */
-record PreviewFileEvent(String fileName) implements Event {
+record PreviewEndEvent() implements Event {
 }

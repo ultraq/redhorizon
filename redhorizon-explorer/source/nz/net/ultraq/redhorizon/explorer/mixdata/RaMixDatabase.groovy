@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.filetypes
+package nz.net.ultraq.redhorizon.explorer.mixdata
 
 import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 
@@ -36,7 +36,7 @@ class RaMixDatabase {
 	final String textHeader
 	final int unknown2
 	final byte[] unknown3
-	final Entry[] entries
+	final RaMixEntry[] entries
 
 	RaMixDatabase(InputStream stream) {
 
@@ -55,9 +55,9 @@ class RaMixDatabase {
 		input.readBytes(127)
 		unknown3 = input.readBytes(5)
 
-		entries = new Entry[numEntries]
+		entries = new RaMixEntry[numEntries]
 		numEntries.times { index ->
-			entries[index] = new Entry(
+			entries[index] = new RaMixEntry(
 				input.readInt(),
 				input.readByte(),
 				new String(input.readBytes(51)).trim(),
@@ -65,10 +65,4 @@ class RaMixDatabase {
 			)
 		}
 	}
-
-	/**
-	 * An entry in the RA MIX database, contains metadata about the entry in a mix
-	 * file with the matching ID.
-	 */
-	static record Entry(int id, byte space, String description, String name) {}
 }
