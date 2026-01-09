@@ -168,8 +168,7 @@ class ImageDecoders extends Specification {
 			var frame = 0
 			window.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_P)) {
-					var factions = Faction.values()
-					faction = factions[Math.wrap(faction.ordinal() + 1, 0, factions.length)]
+					faction = faction.next()
 					adjustmentMap.setFaction(faction)
 				}
 			}

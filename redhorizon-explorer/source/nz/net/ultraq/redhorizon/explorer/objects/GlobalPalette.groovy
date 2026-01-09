@@ -56,8 +56,7 @@ class GlobalPalette extends Entity<GlobalPalette> {
 
 		var paletteComponent = findComponentByType(PaletteComponent)
 		paletteComponent.palette.close()
-		paletteComponent.palette = loadPalette(
-			PaletteType.values()[Math.wrap(currentPalette.ordinal() + 1, 0, PaletteType.values().length)])
+		paletteComponent.palette = loadPalette(currentPalette.next())
 	}
 
 	/**
