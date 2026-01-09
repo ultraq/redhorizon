@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.objects
 
+import nz.net.ultraq.redhorizon.classic.graphics.AlphaMaskComponent
 import nz.net.ultraq.redhorizon.classic.graphics.PaletteComponent
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
@@ -44,6 +45,7 @@ class GlobalPalette extends Entity<GlobalPalette> {
 	GlobalPalette() {
 
 		addComponent(new PaletteComponent(loadPalette()))
+		addComponent(new AlphaMaskComponent())
 		addComponent(new ScriptComponent(GlobalPaletteScript))
 	}
 

@@ -17,3 +17,4 @@
 moduleName = redhorizon-explorer
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.explorer.extensions.FileMappingExtensions
+staticExtensionClasses = nz.net.ultraq.redhorizon.explorer.extensions.MathExtensions

@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixEntry
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 
 /**
@@ -44,6 +45,7 @@ class FileMappingExtensions {
 		'cps': { file -> Image },
 		'pal': { file -> Palette },
 		'pcx': { file -> Image },
+		'shp': { file -> SpriteSheet },
 		'v00': { file -> Sound },
 		'v01': { file -> Sound },
 		'v02': { file -> Sound },
@@ -57,6 +59,7 @@ class FileMappingExtensions {
 		'cps': 'CPS image file',
 		'pal': 'PAL file',
 		'pcx': 'PCX image file',
+		'shp': 'SHP sprite sheet file',
 		'v00': 'AUD sound file',
 		'v01': 'AUD sound file',
 		'v02': 'AUD sound file',

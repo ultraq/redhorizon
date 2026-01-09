@@ -59,6 +59,6 @@ class ExplorerScene extends Scene {
 			.withName('Grid lines')
 		addChild(gridLines)
 		addChild(new GlobalPalette()
-			.withName('Global palette'))
+			.withName('Global palette & alpha mask'))
 	}
 }

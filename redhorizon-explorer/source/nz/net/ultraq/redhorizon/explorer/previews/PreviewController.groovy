@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.explorer.previews
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.audio.MusicComponent
 import nz.net.ultraq.redhorizon.engine.audio.SoundComponent
@@ -37,11 +38,15 @@ import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 /**
  * Controls the previewing of file assets in the main scene.
@@ -78,7 +83,25 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 				preview.close()
 				preview = null
 			}
+
+			// Animate back to the origin
+//			var translateStart = new Vector3f(scene.camera.position)
+//			var translateEnd = new Vector3f()
+//			var translateResult = new Vector3f()
+//			var scaleStart = scene.camera.scale
+//			var scaleEnd = new Vector3f(1f, 1f, 1f)
+//			var scaleResult = new Vector3f()
+//			var resetResult = new Matrix4f()
+//			new Transition(EasingFunctions::easeOutSine, 400, { float value ->
+//				// start + ((end - start) * value)
+//				translateEnd.sub(translateStart, translateEnd).mul(value).add(translateStart)
+//				scaleEnd.sub(scaleStart, scaleResult).mul(value).add(scaleStart)
+//				this.scene.camera.setTransform(resetResult.identity()
+//					.translate(translateResult)
+//					.scale(scaleResult))
+//			}).start()
 			scene.camera.resetTransform()
+
 			scene.trigger(new PreviewEndEvent())
 		}
 
@@ -112,7 +135,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		/**
 		 * Update the preview area with the media for the selected file.
 		 */
-		void preview(File file) {
+		private void preview(File file) {
 
 			logger.info('Loading {}...', file.name)
 
@@ -132,7 +155,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		/**
 		 * Update the preview area with the media for the selected mix file entry.
 		 */
-		void preview(MixEntry entry) {
+		private void preview(MixEntry entry) {
 
 			logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
 
@@ -152,35 +175,35 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		/**
 		 * Update the preview area for the given file data and type.
 		 */
-		void preview(Object file, String objectId) {
+		private void preview(Object file, String fileName) {
 
-			var mediaNode = switch (file) {
+			var entity = switch (file) {
 
 			// Objects
-//			case ShpFile ->
-//				preview(file, objectId)
+				case SpriteSheet ->
+					previewObject(file, fileName)
 //			case TmpFileRA ->
 //				preview(file, objectId)
 //			case IniFile ->
 //				preview(file as MapFile, objectId)
 //
-			// Media
+					// Media
 				case Image ->
 					new Entity()
 						.addComponent(new SpriteComponent(file, BasicShader))
 						.addComponent(new ScriptComponent(DarkPreviewScript))
-						.withName("Image - ${objectId}")
+						.withName("Image - ${fileName}")
 				case Animation -> {
 					var animationComponent = new AnimationComponent(file)
 					// TODO: Is there some better way to convey animations that needs special scaling?
-					if (objectId.endsWith('.wsa')) {
+					if (fileName.endsWith('.wsa')) {
 						animationComponent.scale(2f, 2.4f)
 					}
 					yield new Entity()
 						.addComponent(animationComponent)
 						.addComponent(new ScriptComponent(DarkPreviewScript))
 						.addComponent(new ScriptComponent(AnimationPlaybackScript))
-						.withName("Animation - ${objectId}")
+						.withName("Animation - ${fileName}")
 						.on(AnimationStoppedEvent) { event ->
 							scene.queueChange { ->
 								clearPreview()
@@ -189,14 +212,14 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 				}
 				case Video -> {
 					var videoComponent = new VideoComponent(file)
-					if (objectId.endsWith('.vqa')) {
+					if (fileName.endsWith('.vqa')) {
 						videoComponent.scale(2f, 2.4f)
 					}
 					yield new Entity()
 						.addComponent(videoComponent)
 						.addComponent(new ScriptComponent(DarkPreviewScript))
 						.addComponent(new ScriptComponent(VideoPlaybackScript))
-						.withName("Video - ${objectId}")
+						.withName("Video - ${fileName}")
 						.on(VideoStoppedEvent) { event ->
 							scene.queueChange { ->
 								clearPreview()
@@ -207,12 +230,12 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 					new Entity()
 						.addComponent(new SoundComponent(file))
 						.addComponent(new ScriptComponent(SoundPlaybackScript))
-						.withName("Sound - ${objectId}")
+						.withName("Sound - ${fileName}")
 				case Music ->
 					new Entity()
 						.addComponent(new MusicComponent(file))
 						.addComponent(new ScriptComponent(MusicPlaybackScript))
-						.withName("Music - ${objectId}")
+						.withName("Music - ${fileName}")
 						.on(MusicStoppedEvent) { event ->
 							scene.queueChange { ->
 								clearPreview()
@@ -224,15 +247,15 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 					// 🤷
 				case Palette ->
 					new PalettePreview(file)
-						.withName("Palette - ${objectId}")
+						.withName("Palette - ${fileName}")
 				default ->
 					logger.info('Filetype of {} not yet configured', file.class.simpleName)
 			}
 
-			if (mediaNode) {
-				scene.addChild(mediaNode)
-				preview = mediaNode
-				scene.trigger(new PreviewBeginEvent(objectId))
+			if (entity) {
+				scene.addChild(entity)
+				preview = entity
+				scene.trigger(new PreviewBeginEvent(fileName))
 			}
 		}
 
@@ -254,47 +277,37 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		/**
 		 * Attempt to load up an object from its corresponding SHP file.
 		 */
-//	private void preview(ShpFile shpFile, String objectId) {
-//
-//		String unitConfig
-//		try {
-//			unitConfig = getUnitDataJson(objectId)
-//			logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig))
-//		}
-//		catch (IllegalArgumentException ignored) {
-//			logger.info('No configuration available for {}', objectId)
-//		}
-//
-//		// Found a unit config, use it to view the file
-//		if (unitConfig) {
-//			var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
-//			var targetClass = switch (unitData.type) {
-//				case 'infantry', 'structure', 'vehicle', 'aircraft' -> Unit
-//				default -> logger.info('Unit type {} not supported', unitData.type)
-//			}
-//			if (targetClass) {
-//				var unit = targetClass
-//					.getDeclaredConstructor(ImagesFile, UnitData)
-//					.newInstance(shpFile, unitData)
-//					.attachScript(new UnitShowcaseScript(camera))
-//				unit.body.bounds { ->
-//					center()
-//				}
-//				if (unit.turret) {
-//					unit.turret.bounds { ->
-//						center()
-//					}
-//				}
-//				scene << unit
-//				preview = unit
-//			}
-//		}
-//
-//		// No config found, fall back to viewing a SHP file as media
-//		else {
-//			preview(shpFile as ImagesFile, objectId)
-//		}
-//	}
+		private Entity previewObject(SpriteSheet spriteSheet, String fileName) {
+
+			var objectId = fileName.substring(0, fileName.lastIndexOf('.'))
+			String unitConfig
+			try {
+				unitConfig = getUnitDataJson(objectId)
+				logger.info('Configuration data:\n{}', JsonOutput.prettyPrint(unitConfig).replaceAll(' {4}', '  '))
+			}
+			catch (IllegalArgumentException ignored) {
+				logger.info('No configuration available for {}', objectId)
+			}
+
+			// Found a unit config, use it to view the file
+			if (unitConfig) {
+				var unitData = new JsonSlurper().parseText(unitConfig) as UnitData
+				return switch (unitData.type) {
+					case 'infantry', 'structure', 'vehicle', 'aircraft' ->
+						new UnitPreview(spriteSheet, unitData)
+					default -> {
+						logger.info('Unit type {} not supported', unitData.type)
+						yield null
+					}
+				}
+			}
+
+			// No config found, fall back to viewing a SHP file as media
+			else {
+//				preview(spriteSheet, objectId)
+				return null
+			}
+		}
 
 		/**
 		 * Load up a tile file and arrange it so that it looks complete.

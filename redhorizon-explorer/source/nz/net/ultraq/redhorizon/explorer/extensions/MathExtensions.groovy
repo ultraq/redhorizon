@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.animation
+package nz.net.ultraq.redhorizon.explorer.extensions
 
 /**
- * An easing function is one that takes a value between 0 and 1 that represents
- * progress over time, and transforms it into another value between 0 and 1 that
- * represents a point in the function.
+ * Extension methods for the {@link Math} class.
  *
  * @author Emanuel Rabina
  */
-@FunctionalInterface
-interface EasingFunction {
+class MathExtensions {
 
-	float transform(float progress)
+	/**
+	 * Wrap a value between 0 and 360.
+	 */
+	static float wrapCircleDegrees(Math self, float degrees) {
+
+		return degrees % 360f
+	}
 }
