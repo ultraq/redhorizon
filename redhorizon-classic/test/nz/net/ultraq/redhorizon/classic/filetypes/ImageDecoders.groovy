@@ -182,7 +182,7 @@ class ImageDecoders extends Specification {
 
 				timer += delta
 				if (timer > 0.1f) {
-					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
+					frame = (frame + 1) % spriteSheet.numFrames
 					timer -= 0.1f
 				}
 
