@@ -34,6 +34,7 @@ class MixEntry implements Entry<MixEntry> {
 	final MixFile mixFile
 	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
 	final String name
+	final String type
 	final Class<?> fileClass
 	final long size
 	final boolean unknown
@@ -48,11 +49,5 @@ class MixEntry implements Entry<MixEntry> {
 					unknown && !other.unknown ? 1 :
 						unknown && other.unknown ? 0 :
 							name <=> other.name
-	}
-
-	@Override
-	String getType() {
-
-		return fileClass?.simpleName
 	}
 }

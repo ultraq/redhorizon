@@ -50,7 +50,12 @@ class UnitPreview extends Entity<UnitPreview> {
 		this.unitData = unitData
 
 		addComponent(new FactionComponent(Faction.GOLD))
-		addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))
+		addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader)
+			.withName('Body'))
+		if (unitData.shpFile.parts.turret) {
+			addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader)
+				.withName('Turret'))
+		}
 		addComponent(new ScriptComponent(UnitPreviewScript))
 	}
 
@@ -167,6 +172,12 @@ class UnitPreview extends Entity<UnitPreview> {
 			var animationFrame = frames > 1 ? Math.floor((float)(animationTimer * FRAMERATE)) % frames as int : 0
 			var frame = entity.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			sprite.framePosition.set(sprite.spriteSheet.getFramePosition(frame))
+
+			var turret = entity.findComponent { it.name == 'Turret' } as SpriteComponent
+			if (turret) {
+				var turretData = entity.unitData.shpFile.parts.turret
+				turret.framePosition.set(turret.spriteSheet.getFramePosition(frame + turretData.headings))
+			}
 		}
 	}
 }

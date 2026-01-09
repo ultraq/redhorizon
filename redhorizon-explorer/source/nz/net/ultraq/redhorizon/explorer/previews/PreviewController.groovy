@@ -19,6 +19,9 @@ package nz.net.ultraq.redhorizon.explorer.previews
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.audio.MusicComponent
@@ -92,16 +95,20 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 //			var scaleEnd = new Vector3f(1f, 1f, 1f)
 //			var scaleResult = new Vector3f()
 //			var resetResult = new Matrix4f()
-//			new Transition(EasingFunctions::easeOutSine, 400, { float value ->
+//			return new Transition(EasingFunctions::easeOutSine, 400, { float value ->
 //				// start + ((end - start) * value)
 //				translateEnd.sub(translateStart, translateEnd).mul(value).add(translateStart)
 //				scaleEnd.sub(scaleStart, scaleResult).mul(value).add(scaleStart)
 //				this.scene.camera.setTransform(resetResult.identity()
 //					.translate(translateResult)
 //					.scale(scaleResult))
-//			}).start()
-			scene.camera.resetTransform()
+//			})
+//				.start()
+//				.thenRunAsync { ->
+//					scene.trigger(new PreviewEndEvent())
+//				}
 
+			scene.camera.resetTransform()
 			scene.trigger(new PreviewEndEvent())
 		}
 
@@ -295,6 +302,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 				return switch (unitData.type) {
 					case 'infantry', 'structure', 'vehicle', 'aircraft' ->
 						new UnitPreview(spriteSheet, unitData)
+							.withName("Unit - ${objectId}")
 					default -> {
 						logger.info('Unit type {} not supported', unitData.type)
 						yield null
@@ -304,8 +312,11 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 
 			// No config found, fall back to viewing a SHP file as media
 			else {
-//				preview(spriteSheet, objectId)
-				return null
+				return new Entity()
+					.addComponent(new FactionComponent(Faction.GOLD))
+					.addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))
+					.addComponent(new ScriptComponent(SpritePreviewScript))
+					.withName("Sprite - ${fileName}")
 			}
 		}
 

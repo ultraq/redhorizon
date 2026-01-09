@@ -16,9 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
-import nz.net.ultraq.redhorizon.classic.units.Unit
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
@@ -27,8 +25,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import groovy.transform.ImmutableOptions
-import groovy.transform.stc.ClosureParams
-import groovy.transform.stc.FromString
 
 /**
  * A map on which a mission or skirmish can take place.
@@ -491,36 +487,36 @@ class Map extends Node<Map> {
 
 //		final PartitionHint partitionHint = PartitionHint.DO_NOT_PARTICIPATE
 
-		Unit createObject(L objectLine,
-			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
-				Closure configure) {
-
-			var unitConfig = rules.getUnitConfig(objectLine.type)
-			var unitData = getUnitData(objectLine.type)
-			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}${unitData.spriteSource == 'theater' ? theater.ext : '.shp'}", ShpFile)
-
-			return new Unit(unitImages, unitData).tap {
-				configure(it, unitData)
-
-				// TODO: Country to faction map
-				faction = switch (objectLine.faction) {
-					case 'Greece', 'GoodGuy' -> Faction.BLUE
-					case 'Spain' -> Faction.GOLD
-					case 'England' -> Faction.GREEN
-					case 'Germany' -> Faction.BROWN
-					case 'France' -> Faction.TEAL
-					case 'Turkey' -> Faction.MAROON
-					case 'USSR', 'BadGuy' -> Faction.RED
-					case 'Ukraine' -> Faction.ORANGE
-					case 'Neutral' -> Faction.GOLD
-					default -> {
-						logger.warn("Unmapped country ${objectLine.faction}")
-						yield Faction.GOLD
-					}
-				}
-				heading = objectLine.heading
-			}
-		}
+//		Unit createObject(L objectLine,
+//			@ClosureParams(value = FromString, options = 'nz.net.ultraq.redhorizon.classic.units.Unit, nz.net.ultraq.redhorizon.classic.units.UnitData')
+//				Closure configure) {
+//
+//			var unitConfig = rules.getUnitConfig(objectLine.type)
+//			var unitData = getUnitData(objectLine.type)
+//			var unitImages = resourceManager.loadFile("${unitConfig.image ?: objectLine.type}${unitData.spriteSource == 'theater' ? theater.ext : '.shp'}", ShpFile)
+//
+//			return new Unit(unitImages, unitData).tap {
+//				configure(it, unitData)
+//
+//				// TODO: Country to faction map
+//				faction = switch (objectLine.faction) {
+//					case 'Greece', 'GoodGuy' -> Faction.BLUE
+//					case 'Spain' -> Faction.GOLD
+//					case 'England' -> Faction.GREEN
+//					case 'Germany' -> Faction.BROWN
+//					case 'France' -> Faction.TEAL
+//					case 'Turkey' -> Faction.MAROON
+//					case 'USSR', 'BadGuy' -> Faction.RED
+//					case 'Ukraine' -> Faction.ORANGE
+//					case 'Neutral' -> Faction.GOLD
+//					default -> {
+//						logger.warn("Unmapped country ${objectLine.faction}")
+//						yield Faction.GOLD
+//					}
+//				}
+//				heading = objectLine.heading
+//			}
+//		}
 
 //		@Override
 //		String getName() {

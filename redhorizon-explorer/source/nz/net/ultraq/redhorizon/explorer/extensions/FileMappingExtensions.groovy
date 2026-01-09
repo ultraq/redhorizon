@@ -57,7 +57,8 @@ class FileMappingExtensions {
 	static final Map<String, String> FILE_EXTENSION_TO_NAME = [
 		'aud': 'AUD sound file',
 		'cps': 'CPS image file',
-		'pal': 'PAL file',
+		'mix': 'MIX archive file',
+		'pal': 'PAL palette file',
 		'pcx': 'PCX image file',
 		'shp': 'SHP sprite sheet file',
 		'v00': 'AUD sound file',
@@ -85,10 +86,10 @@ class FileMappingExtensions {
 	}
 
 	/**
-	 * Return a class that can handle the current RA-MIXer database entry, or
-	 * {@code null} if there is no implementation for it.
+	 * Return a class that can handle the current mix file entry, or {@code null}
+	 * if there is no implementation for it.
 	 */
-	static Class getSupportedFileClass(RaMixEntry self) {
+	static Class getSupportedFileClass(MixData self) {
 
 		if (self) {
 			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
@@ -101,10 +102,10 @@ class FileMappingExtensions {
 	}
 
 	/**
-	 * Return a class that can handle the current mix file entry, or {@code null}
-	 * if there is no implementation for it.
+	 * Return a class that can handle the current RA-MIXer database entry, or
+	 * {@code null} if there is no implementation for it.
 	 */
-	static Class getSupportedFileClass(MixData self) {
+	static Class getSupportedFileClass(RaMixEntry self) {
 
 		if (self) {
 			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
@@ -122,6 +123,24 @@ class FileMappingExtensions {
 	 */
 	static String getSupportedFileName(File self) {
 
-		return self ? FILE_EXTENSION_TO_NAME[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+		return self?.file ? FILE_EXTENSION_TO_NAME[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a name identifying the type of supported file, or {@code null} if
+	 * there is no implementation for it.
+	 */
+	static String getSupportedFileName(MixData self) {
+
+		return self ? FILE_EXTENSION_TO_NAME[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a name identifying the type of supported file, or {@code null} if
+	 * there is no implementation for it.
+	 */
+	static String getSupportedFileName(RaMixEntry self) {
+
+		return self ? FILE_EXTENSION_TO_NAME[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
 	}
 }

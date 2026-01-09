@@ -129,13 +129,13 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 				if (raMixDb) {
 					if (entry.id == 0x7fffffff) {
-						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size, false, 'Local database created by the RA-MIXer tool')
+						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, null, entry.size, false, 'Local database created by the RA-MIXer tool')
 						return
 					}
 
 					var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
 					if (dbEntry) {
-						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
+						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileName, dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
 						return
 					}
 				}
@@ -143,17 +143,17 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				// Perform a lookup to see if we know about this file already, getting both a name and class
 				var dbEntry = entity.mixDatabase.find(entry.id)
 				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileClass, entry.size)
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileName, dbEntry.supportedFileClass, entry.size)
 					return
 				}
 
 				// Otherwise try determine what kind of file this is, getting only a class
 				var testerResult = mixEntryTester.test(entry)
 				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, testerResult.fileClass, entry.size, true)
+					entries << new MixEntry(mixFile, entry, testerResult.name, null, testerResult.fileClass, entry.size, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, entry.size, true)
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, entry.size, true)
 				}
 			}
 
