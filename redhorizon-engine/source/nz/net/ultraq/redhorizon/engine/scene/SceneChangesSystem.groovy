@@ -35,7 +35,7 @@ class SceneChangesSystem extends System {
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			scene.processQueuedChanges()
+			scene.update()
 		}
 	}
 }

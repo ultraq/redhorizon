@@ -80,7 +80,7 @@ class GlobalPalette extends Entity<GlobalPalette> {
 		void init() {
 
 			entity.scene.on(CyclePaletteEvent) { event ->
-				entity.scene.queueChange { ->
+				entity.scene.queueUpdate { ->
 					entity.cyclePalette()
 				}
 			}

@@ -125,13 +125,13 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 			scene.on(EntrySelectedEvent) { event ->
 				var entry = event.entry()
 				if (entry instanceof FileEntry && entry.file.file) {
-					scene.queueChange { ->
+					scene.queueUpdate { ->
 						clearPreview()
 						preview(entry.file)
 					}
 				}
 				else if (entry instanceof MixEntry) {
-					scene.queueChange { ->
+					scene.queueUpdate { ->
 						clearPreview()
 						preview(entry)
 					}
@@ -212,7 +212,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 						.addComponent(new ScriptComponent(AnimationPlaybackScript))
 						.withName("Animation - ${fileName}")
 						.on(AnimationStoppedEvent) { event ->
-							scene.queueChange { ->
+							scene.queueUpdate { ->
 								clearPreview()
 							}
 						}
@@ -228,7 +228,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 						.addComponent(new ScriptComponent(VideoPlaybackScript))
 						.withName("Video - ${fileName}")
 						.on(VideoStoppedEvent) { event ->
-							scene.queueChange { ->
+							scene.queueUpdate { ->
 								clearPreview()
 							}
 						}
@@ -244,7 +244,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 						.addComponent(new ScriptComponent(MusicPlaybackScript))
 						.withName("Music - ${fileName}")
 						.on(MusicStoppedEvent) { event ->
-							scene.queueChange { ->
+							scene.queueUpdate { ->
 								clearPreview()
 							}
 						}
