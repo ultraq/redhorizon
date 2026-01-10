@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.input
 
 import org.joml.Vector2f
-import static org.lwjgl.glfw.GLFW.*
+import org.joml.Vector2fc
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -55,15 +55,10 @@ class InputEventHandler {
 
 		inputSource.on(InputEvent) { event ->
 			if (event instanceof KeyEvent) {
-				if (event.action() == GLFW_PRESS) {
-					keyPressedStates[event.key()] = true
-				}
-				else if (event.action() == GLFW_RELEASE) {
-					keyPressedStates[event.key()] = false
-				}
+				keyPressedStates[event.key()] = event.pressed()
 			}
 			else if (event instanceof MouseButtonEvent) {
-				mouseButtonPressedStates[event.button()] = event.action() == GLFW_PRESS
+				mouseButtonPressedStates[event.button()] = event.pressed()
 			}
 			else if (event instanceof CursorPositionEvent) {
 				cursorPosition.set(event.xPos(), event.yPos())
@@ -99,7 +94,7 @@ class InputEventHandler {
 	/**
 	 * Return the current cursor position.
 	 */
-	Vector2f cursorPosition() {
+	Vector2fc cursorPosition() {
 
 		return cursorPosition
 	}

@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.input
 
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
-import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Tests for the {@link InputEventHandler}.
@@ -29,16 +28,19 @@ class InputEventHandlerTests extends Specification {
 
 	static class TestInputSource implements InputSource {}
 
+	static final int KEY_A = 65
+	static final int MOUSE_BUTTON_1 = 0
+
 	def "Key is considered 'pressed' after the key press event"() {
 		given:
 			var inputSource = new TestInputSource()
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(GLFW_KEY_A, 0, GLFW_PRESS, 0))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
 		then:
 			new PollingConditions().eventually { ->
-				assert eventHandler.keyPressed(GLFW_KEY_A)
+				assert eventHandler.keyPressed(KEY_A)
 			}
 	}
 
@@ -48,11 +50,11 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(GLFW_KEY_A, 0, GLFW_PRESS, 0))
-			inputSource.trigger(new KeyEvent(GLFW_KEY_A, 0, GLFW_RELEASE, 0))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, false, false))
 		then:
 			new PollingConditions().eventually { ->
-				assert !eventHandler.keyPressed(GLFW_KEY_A)
+				assert !eventHandler.keyPressed(KEY_A)
 			}
 	}
 
@@ -62,12 +64,12 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(GLFW_KEY_A, 0, GLFW_PRESS, 0))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
 		then:
 			new PollingConditions().eventually { ->
-				assert eventHandler.keyPressed(GLFW_KEY_A, true)
+				assert eventHandler.keyPressed(KEY_A, true)
 			}
-			!eventHandler.keyPressed(GLFW_KEY_A)
+			!eventHandler.keyPressed(KEY_A)
 	}
 
 	def "Mouse button is considered 'pressed' after the mouse button press event"() {
@@ -76,10 +78,10 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new MouseButtonEvent(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0))
+			inputSource.trigger(new MouseButtonEvent(MOUSE_BUTTON_1, 0, true))
 		then:
 			new PollingConditions().eventually { ->
-				assert eventHandler.mouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)
+				assert eventHandler.mouseButtonPressed(MOUSE_BUTTON_1)
 			}
 	}
 
@@ -89,11 +91,11 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new MouseButtonEvent(GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS, 0))
-			inputSource.trigger(new MouseButtonEvent(GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0))
+			inputSource.trigger(new MouseButtonEvent(MOUSE_BUTTON_1, 0, true))
+			inputSource.trigger(new MouseButtonEvent(MOUSE_BUTTON_1, 0, false))
 		then:
 			new PollingConditions().eventually { ->
-				assert !eventHandler.mouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)
+				assert !eventHandler.mouseButtonPressed(MOUSE_BUTTON_1)
 			}
 	}
 
@@ -107,7 +109,7 @@ class InputEventHandlerTests extends Specification {
 		then:
 			new PollingConditions().eventually { ->
 				var cursorPosition = eventHandler.cursorPosition()
-				assert cursorPosition.x == 100 && cursorPosition.y == 50
+				assert cursorPosition.x() == 100 && cursorPosition.y() == 50
 			}
 	}
 }

@@ -16,21 +16,19 @@
 
 package nz.net.ultraq.redhorizon.input
 
-import static org.lwjgl.glfw.GLFW.*
-
 /**
  * Event for mouse input
  *
  * @author Emanuel Rabina
  */
-record MouseButtonEvent(int button, int action, int mods) implements InputEvent {
+record MouseButtonEvent(int button, int mods, boolean pressed) implements InputEvent {
 
 	/**
 	 * Return whether this event is for a button press for the given button.
 	 */
 	boolean buttonPressed(int button) {
 
-		return this.button == button && action == GLFW_PRESS
+		return this.button == button && pressed
 	}
 
 	/**
@@ -38,6 +36,6 @@ record MouseButtonEvent(int button, int action, int mods) implements InputEvent 
 	 */
 	boolean buttonReleased(int button) {
 
-		return this.button == button && action == GLFW_RELEASE
+		return this.button == button && !pressed
 	}
 }

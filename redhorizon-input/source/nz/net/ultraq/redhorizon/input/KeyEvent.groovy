@@ -16,21 +16,19 @@
 
 package nz.net.ultraq.redhorizon.input
 
-import static org.lwjgl.glfw.GLFW.*
-
 /**
  * Event for keyboard input.
  *
  * @author Emanuel Rabina
  */
-record KeyEvent(int key, int scancode, int action, int mods) implements InputEvent {
+record KeyEvent(int key, int mods, boolean pressed, boolean repeat) implements InputEvent {
 
 	/**
 	 * Return whether this event is a key press for the given key.
 	 */
 	boolean keyPressed(int key, boolean includeRepeat = false) {
 
-		return this.key == key && (action == GLFW_PRESS || (action == GLFW_REPEAT && includeRepeat))
+		return this.key == key && (pressed || (repeat && includeRepeat))
 	}
 
 	/**
@@ -38,6 +36,6 @@ record KeyEvent(int key, int scancode, int action, int mods) implements InputEve
 	 */
 	boolean keyReleased(int key) {
 
-		return this.key == key && action == GLFW_RELEASE
+		return this.key == key && !pressed
 	}
 }

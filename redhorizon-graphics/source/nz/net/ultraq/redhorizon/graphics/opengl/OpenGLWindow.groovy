@@ -125,10 +125,10 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 
 		// Input callbacks
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
-			trigger(new KeyEvent(key, scancode, action, mods))
+			trigger(new KeyEvent(key, mods, action == GLFW_PRESS, action == GLFW_REPEAT))
 		}
 		glfwSetMouseButtonCallback(window) { long window, int button, int action, int mods ->
-			trigger(new MouseButtonEvent(button, action, mods))
+			trigger(new MouseButtonEvent(button, mods, action == GLFW_PRESS))
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
