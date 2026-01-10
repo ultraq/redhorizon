@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.mixdata
+package nz.net.ultraq.redhorizon.classic.filetypes
 
 /**
- * Data about the result of a {@link MixEntryTester} test.
+ * For unknown assets in MIX files, be able to run a quick test against a MIX
+ * entry stream to determine the file type.
  *
  * @author Emanuel Rabina
  */
-record MixEntryTesterResult(String name, String type, Class<?> fileClass) {
+interface FileTypeTest {
+
+	/**
+	 * Attempt a light decode of only the file header with assertions to fail if
+	 * the input stream is invalid.
+	 */
+	void test(InputStream inputStream)
 }

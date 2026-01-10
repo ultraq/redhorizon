@@ -18,6 +18,14 @@ package nz.net.ultraq.redhorizon.explorer.extensions
 
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.classic.filetypes.AudFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.PcxFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileTDDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.VqaFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.WsaFileDecoder
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixData
 import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixEntry
 import nz.net.ultraq.redhorizon.graphics.Animation
@@ -33,7 +41,31 @@ import nz.net.ultraq.redhorizon.graphics.Video
  */
 class FileMappingExtensions {
 
-	static final Map<String, Closure<Class>> FILE_EXTENSION_TO_CLASS = [
+	// TODO: A lot of this mapping could be properties on the decoder classes?
+
+	static final Map<Class, String> DECODER_TO_EXTENSION = [
+		(AudFileDecoder): 'aud',
+		(CpsFileDecoder): 'cps',
+		(PcxFileDecoder): 'pcx',
+		(ShpFileDecoder): 'shp',
+		(TmpFileRADecoder): 'sno',
+		(TmpFileTDDecoder): 'tem',
+		(VqaFileDecoder): 'vqa',
+		(WsaFileDecoder): 'wsa'
+	]
+
+	static final Map<Class, Class> DECODER_TO_MEDIA_CLASS = [
+		(AudFileDecoder): Sound,
+		(CpsFileDecoder): Image,
+		(PcxFileDecoder): Image,
+		(ShpFileDecoder): SpriteSheet,
+		(TmpFileRADecoder): SpriteSheet,
+		(TmpFileTDDecoder): SpriteSheet,
+		(VqaFileDecoder): Video,
+		(WsaFileDecoder): Animation
+	]
+
+	static final Map<String, Closure<Class>> FILE_EXTENSION_TO_MEDIA_CLASS = [
 		'aud': { file ->
 			// Let's say 1MB cutoff
 			if ((file instanceof File && file.size() > 1024 * 1024) ||
@@ -46,6 +78,8 @@ class FileMappingExtensions {
 		'pal': { file -> Palette },
 		'pcx': { file -> Image },
 		'shp': { file -> SpriteSheet },
+		'sno': { file -> SpriteSheet },
+		'tem': { file -> SpriteSheet },
 		'v00': { file -> Sound },
 		'v01': { file -> Sound },
 		'v02': { file -> Sound },
@@ -54,13 +88,26 @@ class FileMappingExtensions {
 		'wsa': { file -> Animation }
 	]
 
-	static final Map<String, String> FILE_EXTENSION_TO_NAME = [
+	static final Map<Class, String> DECODER_TO_TYPE = [
+		(AudFileDecoder): 'AUD sound file',
+		(CpsFileDecoder): 'CPS image file',
+		(PcxFileDecoder): 'PCX image file',
+		(ShpFileDecoder): 'SHP sprite sheet file',
+		(TmpFileRADecoder): 'Tilemap file (RA)',
+		(TmpFileTDDecoder): 'Tilemap file (TD)',
+		(VqaFileDecoder): 'VQA video file',
+		(WsaFileDecoder): 'WSA animation file'
+	]
+
+	static final Map<String, String> FILE_EXTENSION_TO_TYPE = [
 		'aud': 'AUD sound file',
 		'cps': 'CPS image file',
 		'mix': 'MIX archive file',
 		'pal': 'PAL palette file',
 		'pcx': 'PCX image file',
 		'shp': 'SHP sprite sheet file',
+		'sno': 'SNO tilemap file',
+		'tem': 'TEM tilemap file',
 		'v00': 'AUD sound file',
 		'v01': 'AUD sound file',
 		'v02': 'AUD sound file',
@@ -77,7 +124,7 @@ class FileMappingExtensions {
 
 		if (self) {
 			var fileExtension = self.name.substring(self.name.lastIndexOf('.') + 1)
-			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			var closure = FILE_EXTENSION_TO_MEDIA_CLASS[fileExtension]
 			if (closure) {
 				return closure(self)
 			}
@@ -93,7 +140,7 @@ class FileMappingExtensions {
 
 		if (self) {
 			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
-			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			var closure = FILE_EXTENSION_TO_MEDIA_CLASS[fileExtension]
 			if (closure) {
 				return closure(self)
 			}
@@ -109,7 +156,7 @@ class FileMappingExtensions {
 
 		if (self) {
 			var fileExtension = self.name().substring(self.name().lastIndexOf('.') + 1)
-			var closure = FILE_EXTENSION_TO_CLASS[fileExtension]
+			var closure = FILE_EXTENSION_TO_MEDIA_CLASS[fileExtension]
 			if (closure) {
 				return closure(self)
 			}
@@ -118,29 +165,54 @@ class FileMappingExtensions {
 	}
 
 	/**
-	 * Return a name identifying the type of supported file, or {@code null} if
-	 * there is no implementation for it.
+	 * Return the media class that can be created from the current decoder class.
 	 */
-	static String getSupportedFileName(File self) {
+	static Class getSupportedFileClass(Class self) {
 
-		return self?.file ? FILE_EXTENSION_TO_NAME[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
+		return self ? DECODER_TO_MEDIA_CLASS[self] : null
+	}
+
+	/**
+	 * Return a supported file extension for the current decoder class.
+	 */
+	static String getSupportedFileExtension(Class self) {
+
+		return self ? DECODER_TO_EXTENSION[self] : null
 	}
 
 	/**
 	 * Return a name identifying the type of supported file, or {@code null} if
 	 * there is no implementation for it.
 	 */
-	static String getSupportedFileName(MixData self) {
+	static String getSupportedFileType(File self) {
 
-		return self ? FILE_EXTENSION_TO_NAME[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+		return self?.file ? FILE_EXTENSION_TO_TYPE[self.name.substring(self.name.lastIndexOf('.') + 1)] : null
 	}
 
 	/**
 	 * Return a name identifying the type of supported file, or {@code null} if
 	 * there is no implementation for it.
 	 */
-	static String getSupportedFileName(RaMixEntry self) {
+	static String getSupportedFileType(MixData self) {
 
-		return self ? FILE_EXTENSION_TO_NAME[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+		return self ? FILE_EXTENSION_TO_TYPE[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a name identifying the type of supported file, or {@code null} if
+	 * there is no implementation for it.
+	 */
+	static String getSupportedFileType(RaMixEntry self) {
+
+		return self ? FILE_EXTENSION_TO_TYPE[self.name().substring(self.name().lastIndexOf('.') + 1)] : null
+	}
+
+	/**
+	 * Return a name identifying the type of supported file, or {@code null} if
+	 * there is no implementation for it.
+	 */
+	static String getSupportedFileType(Class self) {
+
+		return self ? DECODER_TO_TYPE[self] : null
 	}
 }

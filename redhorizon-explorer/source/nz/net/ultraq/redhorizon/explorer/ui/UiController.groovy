@@ -35,6 +35,8 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 
+import static org.lwjgl.glfw.GLFW.*
+
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -102,7 +104,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				.each { fileOrDirectory ->
 					entries << new FileEntry(
 						file: fileOrDirectory,
-						type: fileOrDirectory.supportedFileName
+						type: fileOrDirectory.supportedFileType
 					)
 				}
 
@@ -124,7 +126,6 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 			// TODO: Also support XCC local database
 
-			var mixEntryTester = new MixEntryTester(mixFile)
 			mixFile.entries.each { entry ->
 
 				if (raMixDb) {
@@ -135,7 +136,8 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 					var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
 					if (dbEntry) {
-						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileName, dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
+						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileType,
+							dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
 						return
 					}
 				}
@@ -143,17 +145,20 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				// Perform a lookup to see if we know about this file already, getting both a name and class
 				var dbEntry = entity.mixDatabase.find(entry.id)
 				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileName, dbEntry.supportedFileClass, entry.size)
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileType, dbEntry.supportedFileClass,
+						entry.size)
 					return
 				}
 
 				// Otherwise try determine what kind of file this is, getting only a class
-				var testerResult = mixEntryTester.test(entry)
-				if (testerResult) {
-					entries << new MixEntry(mixFile, entry, testerResult.name, null, testerResult.fileClass, entry.size, true)
+				var testResult = new MixEntryTester(mixFile).test(entry)
+				if (testResult) {
+					entries << new MixEntry(mixFile, entry, testResult.name(), testResult.type(), testResult.fileClass(),
+						entry.size, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null, entry.size, true)
+					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null,
+						entry.size, true)
 				}
 			}
 
@@ -187,6 +192,17 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 			}
 
 			buildList(entity.startingDirectory)
+		}
+
+		@Override
+		void update(float delta) {
+
+			if (input.keyPressed(GLFW_KEY_UP, true) && entity.entryList.focused) {
+				entity.entryList.selectPrevious()
+			}
+			else if (input.keyPressed(GLFW_KEY_DOWN, true) && entity.entryList.focused) {
+				entity.entryList.selectNext()
+			}
 		}
 	}
 }

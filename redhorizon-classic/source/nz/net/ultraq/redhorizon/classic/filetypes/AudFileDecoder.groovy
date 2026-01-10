@@ -38,7 +38,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class AudFileDecoder implements AudioDecoder {
+class AudFileDecoder implements AudioDecoder, FileTypeTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudFileDecoder)
 
@@ -47,7 +47,7 @@ class AudFileDecoder implements AudioDecoder {
 	static final byte FLAG_16BIT = 0x02
 	static final byte FLAG_STEREO = 0x01
 
-	final String[] supportedFileExtensions = ['aud', 'v00']
+	final String[] supportedFileExtensions = ['aud', 'v00', 'v01', 'v02', 'v03']
 
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
@@ -101,6 +101,27 @@ class AudFileDecoder implements AudioDecoder {
 			"Encoded using ${type == TYPE_WS_ADPCM ? 'WS ADPCM' : 'IMA ADPCM'} algorithm",
 			"Compressed: ${sprintf('%,d', compressedSize)} bytes => Uncompressed: ${sprintf('%,d', uncompressedSize)} bytes"
 		].join(', '))
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new AudNativeDataInputStream(new NativeDataInputStream(inputStream))
+
+		var frequency = input.readUnsignedShort()
+		assert frequency in [22050, 44100]
+
+		var compressedSize = input.readInt()
+		assert compressedSize > 0
+
+		var uncompressedSize = input.readInt()
+		assert 0 < compressedSize && compressedSize < uncompressedSize
+
+		var flags = input.readUnsignedByte()
+		assert (flags & 0x03) == flags
+
+		var type = input.readByte()
+		assert type in [TYPE_IMA_ADPCM, TYPE_WS_ADPCM]
 	}
 
 	/**

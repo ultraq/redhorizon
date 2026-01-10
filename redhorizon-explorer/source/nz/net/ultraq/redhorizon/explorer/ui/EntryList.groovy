@@ -141,15 +141,29 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 	}
 
 	/**
+	 * Return whether this window is focused.
+	 */
+	boolean isFocused() {
+
+		return focused
+	}
+
+	/**
+	 * Return whether this window is hovered.
+	 */
+	boolean isHovered() {
+
+		return hovered
+	}
+
+	/**
 	 * Select the next entry in the current list.
 	 */
 	void selectNext() {
 
-		if (focused) {
-			var currentIndex = entries.indexOf(selectedEntry)
-			if (currentIndex < entries.size() - 1) {
-				updateSelection(entries[currentIndex + 1])
-			}
+		var currentIndex = entries.indexOf(selectedEntry)
+		if (currentIndex < entries.size() - 1) {
+			updateSelection(entries[currentIndex + 1])
 		}
 	}
 
@@ -158,11 +172,9 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 	 */
 	void selectPrevious() {
 
-		if (focused) {
-			var currentIndex = entries.indexOf(selectedEntry)
-			if (currentIndex > 1) {
-				updateSelection(entries[currentIndex - 1])
-			}
+		var currentIndex = entries.indexOf(selectedEntry)
+		if (currentIndex > 1) {
+			updateSelection(entries[currentIndex - 1])
 		}
 	}
 

@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class PcxFileDecoder implements ImageDecoder {
+class PcxFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header constants
 	// @formatter:off
@@ -121,5 +121,23 @@ class PcxFileDecoder implements ImageDecoder {
 		trigger(new FrameDecodedEvent(width, height, 1, indexData, palette))
 
 		return new DecodeSummary(width, height, 1, 1, "PCX file, ${width}x${height}, 24-bit w/ 256 colour palette")
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new NativeDataInputStream(inputStream)
+
+		var manufacturer = input.readByte()
+		assert manufacturer == MANUFACTURER_ZSOFT
+
+		var version = input.readByte()
+		assert version in [VERSION_PCP25, VERSION_PCP28_PAL, VERSION_PCP28_NO_PAL, VERSION_PCP4WIN, VERSION_PCPPLUS]
+
+		var encoding = input.readByte()
+		assert encoding == ENCODING_RLE
+
+		var bitsPerPixel = input.readByte()
+		assert bitsPerPixel == BPP_8 : 'Only 8-bit (256 colour) PCX files are currently supported'
 	}
 }

@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class ShpFileDecoder implements ImageDecoder {
+class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header flags
 	// @formatter:off
@@ -110,6 +110,26 @@ class ShpFileDecoder implements ImageDecoder {
 
 		return new DecodeSummary(width, height, 1, numImages,
 			"SHP file (C&C), contains ${numImages} ${width}x${height} images (no palette)")
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new NativeDataInputStream(inputStream)
+
+		var numImages = input.readUnsignedShort()
+		assert numImages > 0
+
+		input.skipBytes(4)
+
+		var width = input.readUnsignedShort()
+		assert width > 0
+
+		var height = input.readUnsignedShort()
+		assert height > 0
+
+		var delta = input.readShort()
+		assert delta >= 0
 	}
 
 	/**

@@ -16,7 +16,16 @@
 
 package nz.net.ultraq.redhorizon.explorer.mixdata
 
+import nz.net.ultraq.redhorizon.classic.filetypes.AudFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.FileTypeTest
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.classic.filetypes.PcxFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileTDDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.VqaFileDecoder
+import nz.net.ultraq.redhorizon.classic.filetypes.WsaFileDecoder
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -33,11 +42,9 @@ import groovy.transform.TupleConstructor
 class MixEntryTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(MixEntryTester)
-
-	// Any file in this list should only load the header data and lazily load their
-	// main data so that testing can be fast
-	private static final List<Class<?>> fileClasses = [
-//		AudFile, CpsFile, PcxFile, ShpFile, TmpFileRA, TmpFileTD, VqaFile, WsaFile
+	private static final List<Class<? extends FileTypeTest>> fileClasses = [
+		AudFileDecoder, CpsFileDecoder, PcxFileDecoder, ShpFileDecoder, TmpFileRADecoder, TmpFileTDDecoder,
+		VqaFileDecoder, WsaFileDecoder
 	]
 
 	final MixFile mixFile
@@ -57,7 +64,7 @@ class MixEntryTester {
 
 		return mixFile.getEntryData(mixEntry).withBufferedStream { stream ->
 			stream.mark(mixEntry.size)
-			var result = fileClasses.inject(null) { acc, fileClass ->
+			var result = fileClasses.inject(null as MixEntryTesterResult) { acc, fileClass ->
 				if (acc) {
 					return acc
 				}
@@ -76,12 +83,15 @@ class MixEntryTester {
 	 *
 	 * @return A result if the type matches the next entry, {@code null} otherwise.
 	 */
-	private static MixEntryTesterResult testFileType(BufferedInputStream stream, Class<?> fileClass, String hexId) {
+	private static MixEntryTesterResult testFileType(BufferedInputStream stream, Class<? extends FileTypeTest> fileClass,
+		String hexId) {
 
 		try {
-			fileClass.newInstance(stream)
+			var decoder = fileClass.getConstructor().newInstance()
+			decoder.test(stream)
 			logger.debug("Guessing ${fileClass.simpleName}")
-			return new MixEntryTesterResult("(unknown, 0x${hexId})", fileClass)
+			return new MixEntryTesterResult("0x${hexId}, unknown .${fileClass.supportedFileExtension}",
+				fileClass.supportedFileType, fileClass.supportedFileClass)
 		}
 		catch (AssertionError ignored) {
 			// Do nothing

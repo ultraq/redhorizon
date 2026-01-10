@@ -40,7 +40,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class WsaFileDecoder implements ImageDecoder {
+class WsaFileDecoder implements ImageDecoder, FileTypeTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsaFileDecoder)
 
@@ -114,5 +114,28 @@ class WsaFileDecoder implements ImageDecoder {
 
 		return new DecodeSummary(width, height, 3, framesDecoded,
 			"WSA file (C&C), ${width}x${height}, ${palette ? '18-bit w/ 256 colour palette' : '(no palette)'}, ${numFrames} frames")
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new NativeDataInputStream(inputStream)
+
+		// File header
+		var numFrames = input.readUnsignedShort()
+		assert numFrames > 0
+
+		input.skipBytes(4)
+
+		var width = input.readUnsignedShort()
+		assert width > 0
+
+		var height = input.readUnsignedShort()
+		assert height > 0
+
+		input.skipBytes(2)
+
+		var flags = input.readUnsignedShort()
+		assert (flags & 0x0001) == flags
 	}
 }

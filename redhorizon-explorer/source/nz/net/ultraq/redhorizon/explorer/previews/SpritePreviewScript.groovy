@@ -46,11 +46,11 @@ class SpritePreviewScript extends EntityScript {
 	void update(float delta) {
 
 		repeatTimer += delta
-		if (input.keyPressed(GLFW_KEY_A) && repeatTimer >= repeatInterval) {
+		if ((input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT)) && repeatTimer >= repeatInterval) {
 			frame = Math.max(frame - 1, 0)
 			repeatTimer = 0f
 		}
-		else if (input.keyPressed(GLFW_KEY_D) && repeatTimer >= repeatInterval) {
+		else if ((input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT)) && repeatTimer >= repeatInterval) {
 			frame = Math.min(frame + 1, sprite.spriteSheet.numFrames - 1)
 			repeatTimer = 0f
 		}

@@ -124,10 +124,13 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 			scene = entity.scene as ExplorerScene
 			scene.on(EntrySelectedEvent) { event ->
 				var entry = event.entry()
-				if (entry instanceof FileEntry && entry.file.file) {
-					scene.queueUpdate { ->
-						clearPreview()
-						preview(entry.file)
+				if (entry instanceof FileEntry) {
+					var file = entry.file
+					if (file.file && !file.name.endsWith('.mix')) {
+						scene.queueUpdate { ->
+							clearPreview()
+							preview(file)
+						}
 					}
 				}
 				else if (entry instanceof MixEntry) {
@@ -248,8 +251,6 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 								clearPreview()
 							}
 						}
-//			case SoundFile ->
-//				new Sound(file).attachScript(new PlaybackScript(file.forStreaming))
 
 					// 🤷
 				case Palette ->
