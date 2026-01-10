@@ -16,23 +16,27 @@
 
 package nz.net.ultraq.redhorizon.engine.utilities
 
+import groovy.transform.CompileStatic
+
 /**
  * Calculate delta times for use in game loops.
  *
  * @author Emanuel Rabina
  */
+@CompileStatic
 class DeltaTimer {
 
-	private long lastUpdateTimeMs = System.currentTimeMillis()
+	private long lastUpdateTimeNanos = System.nanoTime()
 
 	/**
-	 * The amount of time that has elapsed since the last call to this method.
+	 * The amount of time, in seconds, that has elapsed since the last call to
+	 * this method.
 	 */
 	float deltaTime() {
 
-		var currentTimeMs = System.currentTimeMillis()
-		var delta = (currentTimeMs - lastUpdateTimeMs) / 1000f
-		lastUpdateTimeMs = currentTimeMs
-		return delta
+		var currentTimeNanos = System.nanoTime()
+		var delta = (currentTimeNanos - lastUpdateTimeNanos) / 1_000_000_000L
+		lastUpdateTimeNanos = currentTimeNanos
+		return delta as float
 	}
 }
