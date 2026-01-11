@@ -49,8 +49,16 @@ class Sound implements AutoCloseable {
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
-		var result = AudioDecoders
-			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		this(fileName, AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+	}
+
+	/**
+	 * Constructor, sets up a new sound using its name, a selected decoder, and a
+	 * stream of data.
+	 */
+	Sound(String fileName, AudioDecoder decoder, InputStream inputStream) {
+
+		var result = decoder
 			.on(SampleDecodedEvent) { event ->
 				buffers << event.buffer()
 			}

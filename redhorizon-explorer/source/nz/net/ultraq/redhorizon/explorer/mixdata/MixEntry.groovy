@@ -19,26 +19,18 @@ package nz.net.ultraq.redhorizon.explorer.mixdata
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.explorer.ui.Entry
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.TupleConstructor
+import groovy.transform.ImmutableOptions
+import groovy.transform.RecordOptions
 
 /**
  * Metadata for entries in a mix file.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-@EqualsAndHashCode
-class MixEntry implements Entry<MixEntry> {
-
-	final MixFile mixFile
-	final nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry
-	final String name
-	final String type
-	final Class<?> fileClass
-	final long size
-	final boolean unknown
-	final String description
+@ImmutableOptions(knownImmutables = ['mixFile', 'mixEntry'])
+@RecordOptions(size = false)
+record MixEntry(MixFile mixFile, nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry, String name, String type,
+	long size, String description, boolean unknown) implements Entry<MixEntry> {
 
 	@Override
 	int compareTo(MixEntry other) {

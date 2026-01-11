@@ -27,9 +27,9 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
+import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
-import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntryTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
@@ -88,10 +88,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 			entries.clear()
 
 			if (directory.parent) {
-				entries << new FileEntry(
-					file: directory.parentFile,
-					name: '/..'
-				)
+				entries << new FileEntry(directory.parentFile, '/..', null)
 			}
 			directory
 				.listFiles()
@@ -101,10 +98,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 							file1.name <=> file2.name
 				}
 				.each { fileOrDirectory ->
-					entries << new FileEntry(
-						file: fileOrDirectory,
-						type: fileOrDirectory.supportedFileType
-					)
+					entries << new FileEntry(fileOrDirectory, null, fileOrDirectory.guessedFileType())
 				}
 
 			currentDirectory = directory
@@ -117,7 +111,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 			var entries = entity.entries
 			entries.clear()
-			entries << new MixEntry(mixFile, null, '..')
+			entries << new MixEntry(mixFile, null, '..', null, 0, null, false)
 
 			// RA-MIXer built-in database, if available
 			var raMixDbEntry = mixFile.getEntry(0x7fffffff)
@@ -129,14 +123,15 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 
 				if (raMixDb) {
 					if (entry.id == 0x7fffffff) {
-						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, null, entry.size, false, 'Local database created by the RA-MIXer tool')
+						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size,
+							'Local database created by the RA-MIXer tool', false)
 						return
 					}
 
 					var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
 					if (dbEntry) {
-						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileType,
-							dbEntry.supportedFileClass, entry.size, false, dbEntry.description())
+						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(), entry.size,
+							dbEntry.description(), false)
 						return
 					}
 				}
@@ -144,20 +139,18 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 				// Perform a lookup to see if we know about this file already, getting both a name and class
 				var dbEntry = entity.mixDatabase.find(entry.id)
 				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.supportedFileType, dbEntry.supportedFileClass,
-						entry.size)
+					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(), entry.size, null, false)
 					return
 				}
 
-				// Otherwise try determine what kind of file this is, getting only a class
-				var testResult = new MixEntryTester(mixFile).test(entry)
+				// Otherwise run some tests to see if we can determine what kind of file this is
+				var testResult = new FileTester().test(null, entry.size, mixFile.getEntryData(entry))
 				if (testResult) {
-					entries << new MixEntry(mixFile, entry, testResult.name(), testResult.type(), testResult.fileClass(),
-						entry.size, true)
+					entries << new MixEntry(mixFile, entry, "0x${Integer.toHexString(entry.id)}", testResult.type(), entry.size,
+						null, true)
 				}
 				else {
-					entries << new MixEntry(mixFile, entry, "(unknown entry, ID: 0x${Integer.toHexString(entry.id)})", null, null,
-						entry.size, true)
+					entries << new MixEntry(mixFile, entry, "0x${Integer.toHexString(entry.id)}", null, entry.size, null, true)
 				}
 			}
 
@@ -171,7 +164,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 			entity.entryList.on(EntrySelectedEvent) { event ->
 				var entry = event.entry()
 				if (entry instanceof MixEntry) {
-					if (entry.name == '..') {
+					if (entry.name() == '..') {
 						buildList(currentDirectory)
 					}
 					else {
@@ -179,7 +172,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 					}
 				}
 				else if (entry instanceof FileEntry) {
-					var file = entry.file
+					var file = entry.file()
 					if (file.directory) {
 						buildList(file)
 					}

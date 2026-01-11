@@ -26,15 +26,15 @@ interface Entry<T extends Entry> extends Comparable<T> {
 	/**
 	 * Return the name this entry will use for display in the file list.
 	 */
-	String getName()
+	String name()
 
 	/**
 	 * Return the size in bytes of the entry.
 	 */
-	long getSize()
+	long size()
 
 	/**
 	 * Returns the resource/file type of the entry.
 	 */
-	String getType()
+	String type()
 }

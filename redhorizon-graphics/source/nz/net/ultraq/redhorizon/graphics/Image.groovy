@@ -44,9 +44,17 @@ class Image implements AutoCloseable {
 	 */
 	Image(String fileName, InputStream inputStream) {
 
+		this(fileName, ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+	}
+
+	/**
+	 * Constructor, create a new image using its name, the selected decoder, and a
+	 * stream of data.
+	 */
+	Image(String fileName, ImageDecoder decoder, InputStream inputStream) {
+
 		Palette palette = null
-		var result = ImageDecoders
-			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		var result = decoder
 			.on(FrameDecodedEvent) { event ->
 				imageData = event.data().flipVertical(event.width(), event.height(), event.format())
 				palette = event.palette()

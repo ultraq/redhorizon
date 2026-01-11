@@ -20,7 +20,6 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
 import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -34,6 +33,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
+import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.previews.AnimationPlaybackScript.AnimationStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.previews.MusicPlaybackScript.MusicStoppedEvent
@@ -126,7 +126,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 			scene.on(EntrySelectedEvent) { event ->
 				var entry = event.entry()
 				if (entry instanceof FileEntry) {
-					var file = entry.file
+					var file = entry.file()
 					if (file.file && !file.name.endsWith('.mix')) {
 						scene.queueUpdate { ->
 							clearPreview()
@@ -150,13 +150,14 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 
 			logger.info('Loading {}...', file.name)
 
-			var fileClass = file.supportedFileClass
-			if (fileClass) {
-				selectedFileInputStream = file.newInputStream()
-				var fileInstance = time("Reading file ${file.name} from filesystem", logger) { ->
-					return fileClass.newInstance(file.name, selectedFileInputStream)
+			selectedFileInputStream = file.newInputStream()
+			var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
+			if (result) {
+				time("Reading file ${file.name} from filesystem", logger) { ->
+					var decoder = result.decoder().getConstructor().newInstance()
+					var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
+					preview(media, file.name)
 				}
-				preview(fileInstance, file.name)
 			}
 			else {
 				logger.info('No filetype implementation for {}', file.name)
@@ -168,25 +169,26 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		 */
 		private void preview(MixEntry entry) {
 
-			logger.info('Loading {} from mix file', entry.name ?: '(unknown)')
+			logger.info('Loading {} from mix file', entry.name())
 
-			var fileClass = entry.fileClass
-			if (fileClass) {
-				selectedFileInputStream = new BufferedInputStream(entry.mixFile.getEntryData(entry.mixEntry))
-				var fileInstance = time("Reading file ${entry.name} from Mix file", logger) { ->
-					return fileClass.newInstance(entry.name, selectedFileInputStream)
+			selectedFileInputStream = new BufferedInputStream(entry.mixFile().getEntryData(entry.mixEntry()))
+			var result = new FileTester().test(null, entry.size(), selectedFileInputStream)
+			if (result) {
+				time("Reading file ${entry.name()} from mix file", logger) { ->
+					var decoder = result.decoder().getConstructor().newInstance()
+					var media = result.mediaClass().newInstance(entry.name(), decoder, selectedFileInputStream)
+					preview(media, entry.name())
 				}
-				preview(fileInstance, entry.name, fileClass)
 			}
 			else {
-				logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
+				logger.info('No filetype implementation for {}', entry.name())
 			}
 		}
 
 		/**
 		 * Update the preview area for the given file data and type.
 		 */
-		private void preview(Object file, String fileName, Class<?> fileClass = null) {
+		private void preview(Object file, String fileName) {
 
 			var entity = switch (file) {
 
@@ -198,11 +200,11 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 //
 					// Static media
 				case Image -> {
-					if (fileClass == TmpFileRADecoder) {
-						yield new Entity()
-							.addComponent(new SpriteComponent(file, PalettedSpriteShader))
-							.withName("Tilemap - ${fileName}")
-					}
+//					if (fileClass == TmpFileRADecoder) {
+//						yield new Entity()
+//							.addComponent(new SpriteComponent(file, PalettedSpriteShader))
+//							.withName("Tilemap - ${fileName}")
+//					}
 					yield new Entity()
 						.addComponent(new SpriteComponent(file, BasicShader))
 						.addComponent(new ScriptComponent(DarkPreviewScript))
@@ -277,7 +279,8 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		 */
 		private Entity previewObject(SpriteSheet spriteSheet, String fileName) {
 
-			var objectId = fileName.substring(0, fileName.lastIndexOf('.'))
+			var indexOfDot = fileName.lastIndexOf('.')
+			var objectId = indexOfDot != -1 ? fileName.substring(0, indexOfDot) : fileName
 			String unitConfig
 			try {
 				unitConfig = getUnitDataJson(objectId)
@@ -301,7 +304,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 				}
 			}
 
-			// No config found, fall back to viewing a SHP file as media
+			// No config found, fall back to viewing a SHP file as frame-by-frame media
 			return new Entity()
 				.addComponent(new FactionComponent(Faction.GOLD))
 				.addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))

@@ -18,19 +18,17 @@ package nz.net.ultraq.redhorizon.explorer.filedata
 
 import nz.net.ultraq.redhorizon.explorer.ui.Entry
 
-import groovy.transform.MapConstructor
+import groovy.transform.ImmutableOptions
+import groovy.transform.RecordOptions
 
 /**
  * Metadata about a file or directory item.
  *
  * @author Emanuel Rabina
  */
-@MapConstructor
-class FileEntry implements Entry<FileEntry> {
-
-	final File file
-	final String name
-	final String type
+@ImmutableOptions(knownImmutables = ['file'])
+@RecordOptions(size = false)
+record FileEntry(File file, String name, String type) implements Entry<FileEntry> {
 
 	@Override
 	int compareTo(FileEntry other) {
@@ -41,14 +39,14 @@ class FileEntry implements Entry<FileEntry> {
 	}
 
 	@Override
-	String getName() {
+	String name() {
 
 		return name ?: file.directory ? "/${file.name}" : file.name
 	}
 
 	@Override
-	long getSize() {
+	long size() {
 
-		return file.size()
+		return file.file ? file.size() : 0
 	}
 }

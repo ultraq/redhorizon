@@ -25,6 +25,11 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 interface FileTypeTest {
 
 	/**
+	 * Returns the file extension commonly used by files that this class supports.
+	 */
+	String[] getSupportedFileExtensions()
+
+	/**
 	 * Attempt a light decode of only the file header with assertions to fail if
 	 * the input stream is invalid.
 	 */

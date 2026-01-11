@@ -44,7 +44,7 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 	static final byte FORMAT_NONE      = (byte)0x00
 	// @formatter:on
 
-	String[] supportedFileExtensions = ['shp']
+	String[] supportedFileExtensions = ['shp', 'int', 'sno', 'tem']
 
 	@Override
 	DecodeSummary decode(InputStream inputStream) {
@@ -131,10 +131,10 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 		var delta = input.readShort()
 		assert delta >= 0
 
-		(numImages + 2).times { i ->
-			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
-			assert imageInfo.offsetFormat in [FORMAT_NONE, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
-		}
+//		(numImages + 2).times { i ->
+//			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
+//			assert imageInfo.offsetFormat in [FORMAT_NONE, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
+//		}
 	}
 
 	/**

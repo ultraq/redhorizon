@@ -73,17 +73,17 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 
 				// Take the special .. entry out to put back at the top after
 				var specialEntry = null
-				var specialEntryIndex = entries.findIndexOf { e -> e.name == '/..' || e.name == '..' }
+				var specialEntryIndex = entries.findIndexOf { e -> e.name() == '/..' || e.name() == '..' }
 				if (specialEntryIndex != -1) {
 					specialEntry = entries.remove(specialEntryIndex)
 				}
 
 				var sortingColumnSpecs = tableSortSpecs.specs[0]
 				switch (sortingColumnSpecs.columnIndex) {
-					case 1 -> entries.sort { it.type }
-					case 2 -> entries.sort { it.size }
-					case 3 && entries[0] instanceof MixEntry -> entries.sort { it.description }
-					default -> entries.sort { it.name }
+					case 1 -> entries.sort { it.type() }
+					case 2 -> entries.sort { it.size() }
+					case 3 && entries[0] instanceof MixEntry -> entries.sort { it.description() }
+					default -> entries.sort { it.name() }
 				}
 				if (sortingColumnSpecs.sortDirection == ImGuiSortDirection.Descending) {
 					entries.reverse(true)
@@ -102,7 +102,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 				ImGui.tableSetColumnIndex(0)
 				// noinspection ChangeToOperator
 				var isSelected = selectedEntry.equals(entry)
-				if (ImGui.selectable(entry.name, isSelected, SpanAllColumns)) {
+				if (ImGui.selectable(entry.name(), isSelected, SpanAllColumns)) {
 					updateSelection(entry)
 				}
 				if (isSelected) {
@@ -118,18 +118,18 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 				}
 
 				ImGui.tableSetColumnIndex(1)
-				ImGui.text(entry.type ?: '')
+				ImGui.text(entry.type() ?: '')
 
 				ImGui.tableSetColumnIndex(2)
-				if (!(entry instanceof FileEntry && entry.file.directory)) {
+				if (!(entry instanceof FileEntry && entry.file().directory)) {
 					ImGui.pushFont(context.monospaceFont)
-					ImGui.text(sprintf('%,12d', entry.size))
+					ImGui.text(sprintf('%,12d', entry.size()))
 					ImGui.popFont()
 				}
 
-				if (entry instanceof MixEntry && entry.description) {
+				if (entry instanceof MixEntry && entry.description()) {
 					ImGui.tableSetColumnIndex(3)
-					ImGui.text(entry.description)
+					ImGui.text(entry.description())
 				}
 			}
 
