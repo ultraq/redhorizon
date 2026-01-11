@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer
+package nz.net.ultraq.redhorizon.explorer.filedata
+
+import nz.net.ultraq.redhorizon.explorer.ui.Entry
 
 import groovy.transform.MapConstructor
 

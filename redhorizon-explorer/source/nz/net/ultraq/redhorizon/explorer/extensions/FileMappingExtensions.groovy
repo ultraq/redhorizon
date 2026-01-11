@@ -59,8 +59,8 @@ class FileMappingExtensions {
 		(CpsFileDecoder): Image,
 		(PcxFileDecoder): Image,
 		(ShpFileDecoder): SpriteSheet,
-		(TmpFileRADecoder): SpriteSheet,
-		(TmpFileTDDecoder): SpriteSheet,
+		(TmpFileRADecoder): Image,
+		(TmpFileTDDecoder): Image,
 		(VqaFileDecoder): Video,
 		(WsaFileDecoder): Animation
 	]

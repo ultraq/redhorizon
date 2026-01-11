@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.mixdata
 
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.explorer.Entry
+import nz.net.ultraq.redhorizon.explorer.ui.Entry
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor

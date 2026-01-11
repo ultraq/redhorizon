@@ -30,6 +30,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewBeginEvent
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewEndEvent

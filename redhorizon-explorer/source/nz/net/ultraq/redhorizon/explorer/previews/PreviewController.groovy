@@ -20,6 +20,7 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
 import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -32,7 +33,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
-import nz.net.ultraq.redhorizon.explorer.FileEntry
+import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.previews.AnimationPlaybackScript.AnimationStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.previews.MusicPlaybackScript.MusicStoppedEvent
@@ -175,7 +176,7 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 				var fileInstance = time("Reading file ${entry.name} from Mix file", logger) { ->
 					return fileClass.newInstance(entry.name, selectedFileInputStream)
 				}
-				preview(fileInstance, entry.name)
+				preview(fileInstance, entry.name, fileClass)
 			}
 			else {
 				logger.info('No filetype implementation for {}', entry.name ?: '(unknown)')
@@ -185,24 +186,28 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		/**
 		 * Update the preview area for the given file data and type.
 		 */
-		private void preview(Object file, String fileName) {
+		private void preview(Object file, String fileName, Class<?> fileClass = null) {
 
 			var entity = switch (file) {
 
-			// Objects
+			// Dynamic objects
 				case SpriteSheet ->
 					previewObject(file, fileName)
-//			case TmpFileRA ->
-//				preview(file, objectId)
 //			case IniFile ->
 //				preview(file as MapFile, objectId)
 //
-					// Media
-				case Image ->
-					new Entity()
+					// Static media
+				case Image -> {
+					if (fileClass == TmpFileRADecoder) {
+						yield new Entity()
+							.addComponent(new SpriteComponent(file, PalettedSpriteShader))
+							.withName("Tilemap - ${fileName}")
+					}
+					yield new Entity()
 						.addComponent(new SpriteComponent(file, BasicShader))
 						.addComponent(new ScriptComponent(DarkPreviewScript))
 						.withName("Image - ${fileName}")
+				}
 				case Animation -> {
 					var animationComponent = new AnimationComponent(file)
 					// TODO: Is there some better way to convey animations that needs special scaling?
@@ -268,21 +273,6 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 		}
 
 		/**
-		 * Load up any unspecified multi-image file as a sprite to flip through its
-		 * frames.
-		 */
-//	private void preview(ImagesFile imagesFile, String objectId) {
-//
-//		var sprite = new PalettedSprite(imagesFile).attachScript(new SpriteShowcaseScript(camera))
-//		sprite.bounds { ->
-//			center()
-//		}
-//		sprite.name = "PalettedSprite - ${objectId}"
-//		scene << sprite
-//		preview = sprite
-//	}
-
-		/**
 		 * Attempt to load up an object from its corresponding SHP file.
 		 */
 		private Entity previewObject(SpriteSheet spriteSheet, String fileName) {
@@ -312,33 +302,12 @@ class PreviewController extends Entity<PreviewController> implements EventTarget
 			}
 
 			// No config found, fall back to viewing a SHP file as media
-			else {
-				return new Entity()
-					.addComponent(new FactionComponent(Faction.GOLD))
-					.addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))
-					.addComponent(new ScriptComponent(SpritePreviewScript))
-					.withName("Sprite - ${fileName}")
-			}
+			return new Entity()
+				.addComponent(new FactionComponent(Faction.GOLD))
+				.addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))
+				.addComponent(new ScriptComponent(SpritePreviewScript))
+				.withName("Sprite - ${fileName}")
 		}
-
-		/**
-		 * Load up a tile file and arrange it so that it looks complete.
-		 */
-//	private void preview(TmpFileRA tileFile, String objectId) {
-//
-//		var singleImageData = tileFile.imagesData.combine(tileFile.width, tileFile.height, tileFile.format, tileFile.tilesX)
-//		var singleImageWidth = tileFile.tilesX * tileFile.width
-//		var singleImageHeight = tileFile.tilesY * tileFile.height
-//
-//		var tile = new PalettedSprite(singleImageWidth, singleImageHeight, 1, 1f, 1f, { scene ->
-//			return scene.requestCreateOrGet(new SpriteSheetRequest(singleImageWidth, singleImageHeight, tileFile.format, singleImageData))
-//		})
-//			.attachScript(new SpriteShowcaseScript(camera))
-//		tile.bounds.center()
-//		tile.name = "PalettedSprite - ${objectId}"
-//		scene << tile
-//		preview = tile
-//	}
 
 		/**
 		 * Attempt to load up a map from its map file.

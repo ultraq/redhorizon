@@ -130,6 +130,11 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 
 		var delta = input.readShort()
 		assert delta >= 0
+
+		(numImages + 2).times { i ->
+			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
+			assert imageInfo.offsetFormat in [FORMAT_NONE, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
+		}
 	}
 
 	/**

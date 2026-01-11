@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.explorer.Entry
 
 import groovy.transform.ImmutableOptions
 
