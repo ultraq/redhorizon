@@ -37,7 +37,7 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true))
 		then:
 			new PollingConditions().eventually { ->
 				assert eventHandler.keyPressed(KEY_A)
@@ -50,8 +50,8 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
-			inputSource.trigger(new KeyEvent(KEY_A, 0, false, false))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, false))
 		then:
 			new PollingConditions().eventually { ->
 				assert !eventHandler.keyPressed(KEY_A)
@@ -64,7 +64,7 @@ class InputEventHandlerTests extends Specification {
 			var eventHandler = new InputEventHandler()
 				.addInputSource(inputSource)
 		when:
-			inputSource.trigger(new KeyEvent(KEY_A, 0, true, false))
+			inputSource.trigger(new KeyEvent(KEY_A, 0, true))
 		then:
 			new PollingConditions().eventually { ->
 				assert eventHandler.keyPressed(KEY_A, true)

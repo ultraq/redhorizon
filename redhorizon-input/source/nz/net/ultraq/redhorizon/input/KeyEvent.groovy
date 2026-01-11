@@ -21,14 +21,14 @@ package nz.net.ultraq.redhorizon.input
  *
  * @author Emanuel Rabina
  */
-record KeyEvent(int key, int mods, boolean pressed, boolean repeat) implements InputEvent {
+record KeyEvent(int key, int mods, boolean pressed) implements InputEvent {
 
 	/**
 	 * Return whether this event is a key press for the given key.
 	 */
-	boolean keyPressed(int key, boolean includeRepeat = false) {
+	boolean keyPressed(int key) {
 
-		return this.key == key && (pressed || (repeat && includeRepeat))
+		return this.key == key && pressed
 	}
 
 	/**
