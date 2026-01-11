@@ -128,10 +128,10 @@ class WsaFileDecoder implements ImageDecoder, FileTypeTest {
 		input.skipBytes(4)
 
 		var width = input.readUnsignedShort()
-		assert width > 0
+		assert width == 320 // To distinguish from SHP files which have a similar header
 
 		var height = input.readUnsignedShort()
-		assert height > 0
+		assert height == 200 // To distinguish from SHP files which have a similar header
 
 		input.skipBytes(2)
 

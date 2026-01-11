@@ -75,7 +75,15 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 	 */
 	Animation(String fileName, InputStream inputStream) {
 
-		var decoder = ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		this(fileName, ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+	}
+
+	/**
+	 * Constructor, set up a new animation from its name and a stream of data.
+	 */
+	Animation(String fileName, ImageDecoder decoder, InputStream inputStream) {
+
+		decoder
 			.on(HeaderDecodedEvent) { event ->
 				width = event.width()
 				height = event.height()

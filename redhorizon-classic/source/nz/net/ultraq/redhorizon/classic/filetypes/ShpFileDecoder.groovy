@@ -123,18 +123,13 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 		input.skipBytes(4)
 
 		var width = input.readUnsignedShort()
-		assert width > 0
+		assert 0 < width && width < 320 // To distinguish from WSA files which have a similar header
 
 		var height = input.readUnsignedShort()
-		assert height > 0
+		assert 0 < height && height < 200 // To distinguish from WSA files which have a similar header
 
 		var delta = input.readShort()
 		assert delta >= 0
-
-//		(numImages + 2).times { i ->
-//			var imageInfo = new ShpImageInfo(input.readInt(), input.readInt())
-//			assert imageInfo.offsetFormat in [FORMAT_NONE, FORMAT_LCW, FORMAT_XOR_BASE, FORMAT_XOR_CHAIN]
-//		}
 	}
 
 	/**
