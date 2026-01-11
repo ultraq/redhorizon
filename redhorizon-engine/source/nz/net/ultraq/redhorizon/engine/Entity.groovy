@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import groovy.transform.stc.ClosureParams
@@ -26,7 +27,7 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
-class Entity<T extends Entity> extends Node<T> implements AutoCloseable {
+class Entity<T extends Entity> extends Node<T> implements EventTarget<T>, AutoCloseable {
 
 	private List<Component> components = []
 

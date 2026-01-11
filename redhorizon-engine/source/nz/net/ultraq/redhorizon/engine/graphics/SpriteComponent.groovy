@@ -31,16 +31,16 @@ import org.joml.Vector2f
  *
  * @author Emanuel Rabina
  */
-class SpriteComponent extends GraphicsComponent<SpriteComponent, SceneShaderContext>
-	implements LocalTransform<SpriteComponent>, AutoCloseable {
+class SpriteComponent implements GraphicsComponent<SpriteComponent, SceneShaderContext>, LocalTransform<SpriteComponent>,
+	AutoCloseable {
 
-	final Sprite sprite
-	final Vector2f framePosition = new Vector2f()
 	final Image image
 	final SpriteSheet spriteSheet
 	final Class<? extends Shader> shaderClass
 	final int width
 	final int height
+	final Sprite sprite
+	final Vector2f framePosition = new Vector2f()
 	private final Matrix4f globalTransformResult = new Matrix4f()
 
 	/**

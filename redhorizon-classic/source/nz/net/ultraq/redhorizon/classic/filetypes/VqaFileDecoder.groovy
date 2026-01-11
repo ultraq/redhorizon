@@ -50,7 +50,7 @@ import java.text.DecimalFormat
  *
  * @author Emanuel Rabina
  */
-class VqaFileDecoder implements VideoDecoder {
+class VqaFileDecoder implements VideoDecoder, FileTypeTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(VqaFileDecoder)
 
@@ -267,6 +267,25 @@ class VqaFileDecoder implements VideoDecoder {
 		return header.compressed ?
 			audioDecoder.decode(data, ByteBuffer.allocateNative(header.length() << 2)) : // IMA ADPCM is always 4x the compression
 			data
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new VqaNativeDataInputStream(new NativeDataInputStream(inputStream))
+
+		var formHeader = input.readChunkHeader()
+		assert formHeader.name() == 'FORM'
+
+		var wvqa = new String(input.readNBytes(4))
+		assert wvqa == 'WVQA'
+
+		var vqhdHeader = input.readChunkHeader()
+		assert vqhdHeader.name() == 'VQHD'
+		var vqhdData = input.readChunkData(vqhdHeader)
+
+		var version = vqhdData.getUnsignedShort(0)
+		assert version == 2 : 'Only C&C/RA VQAs currently supported'
 	}
 
 	/**

@@ -1,0 +1,47 @@
+/*
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nz.net.ultraq.redhorizon.engine.audio
+
+import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.engine.time.TimeComponent
+
+import groovy.transform.TupleConstructor
+
+/**
+ * A component for adding a music track to an entity.
+ *
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class MusicComponent implements AudioComponent<MusicComponent>, TimeComponent<MusicComponent> {
+
+	@Delegate(interfaces = false, includes = ['isPaused', 'isPlaying', 'isStopped', 'pause', 'play', 'stop', 'withVolume'])
+	final Music music
+
+	@Override
+	void render() {
+
+		music.render(entity.globalPosition)
+	}
+
+	@Override
+	void update(float delta) {
+
+		// TODO: If delta isn't used, then is this really a time component?
+		music.update()
+	}
+}

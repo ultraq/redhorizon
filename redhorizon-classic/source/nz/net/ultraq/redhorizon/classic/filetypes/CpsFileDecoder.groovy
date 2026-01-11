@@ -29,7 +29,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class CpsFileDecoder implements ImageDecoder {
+class CpsFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header constants
 	// @formatter:off
@@ -83,5 +83,22 @@ class CpsFileDecoder implements ImageDecoder {
 
 		return new DecodeSummary(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_FORMAT, 1,
 			"CPS file, ${IMAGE_WIDTH}x${IMAGE_HEIGHT}, 8-bit ${palette ? 'w/ internal palette' : '(no palette)'}")
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new NativeDataInputStream(inputStream)
+
+		input.skipBytes(2)
+
+		var compression = input.readShort()
+		assert compression == COMPRESSION_LCW : 'Only LCW compression supported'
+
+		var imageSize = input.readInt()
+		assert imageSize == IMAGE_SIZE : "CPS image size isn\'t ${IMAGE_SIZE} (320x200)"
+
+		var paletteSize = input.readShort()
+		assert paletteSize in [0, PALETTE_SIZE] : "CPS palette size isn't 0 or 768"
 	}
 }

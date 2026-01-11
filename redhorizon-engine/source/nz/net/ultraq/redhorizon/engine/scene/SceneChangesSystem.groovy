@@ -19,6 +19,9 @@ package nz.net.ultraq.redhorizon.engine.scene
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 /**
  * System for processing queued scene changes.
  *
@@ -26,9 +29,13 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
  */
 class SceneChangesSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(SceneChangesSystem)
+
 	@Override
 	void update(Scene scene, float delta) {
 
-		scene.processQueuedChanges()
+		average('Update', 1f, logger) { ->
+			scene.update()
+		}
 	}
 }

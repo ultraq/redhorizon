@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
@@ -75,7 +76,7 @@ class ImGuiElementsCheck extends Specification {
 
 			var camera = new Camera(800, 500, window)
 			var debugOverlay = new DebugOverlay()
-				.withCursorTracking(camera, cameraTransform, window)
+				.addModule(new CursorTrackingOverlayModule(window, camera, cameraTransform))
 			var nodeList = new NodeList(scene)
 			var logPanel = new LogPanel()
 			var imGuiWindows = [debugOverlay, nodeList, logPanel]

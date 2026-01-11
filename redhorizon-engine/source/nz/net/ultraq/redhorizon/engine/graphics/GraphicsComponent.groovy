@@ -25,16 +25,16 @@ import nz.net.ultraq.redhorizon.graphics.Shader
  *
  * @author Emanuel Rabina
  */
-abstract class GraphicsComponent<C extends GraphicsComponent, SC extends SceneShaderContext>
-	extends Component<C> {
+interface GraphicsComponent<T extends GraphicsComponent, SC extends SceneShaderContext>
+	extends Component<T> {
 
 	/**
 	 * Return the shader used for rendering this component.
 	 */
-	abstract Class<? extends Shader> getShaderClass()
+	Class<? extends Shader> getShaderClass()
 
 	/**
 	 * Render this component for the current shader context.
 	 */
-	abstract void render(SC shaderContext)
+	void render(SC shaderContext)
 }

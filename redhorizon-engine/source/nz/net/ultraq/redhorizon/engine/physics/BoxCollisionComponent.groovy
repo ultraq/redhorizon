@@ -26,7 +26,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class BoxCollisionComponent extends CollisionComponent<BoxCollisionComponent> {
+class BoxCollisionComponent implements CollisionComponent<BoxCollisionComponent> {
 
 	final float width
 	final float height

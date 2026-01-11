@@ -68,10 +68,10 @@ class WsaFileDune2 {
 
 		// File header
 		numFrames = input.readShort()
-		width     = input.readShort()
-		height    = input.readShort()
-		delta     = input.readShort() + 33 // https://github.com/ultraq/redhorizon/issues/4
-		flags     = input.readShort()
+		width = input.readShort()
+		height = input.readShort()
+		delta = input.readShort() + 33 // https://github.com/ultraq/redhorizon/issues/4
+		flags = input.readShort()
 
 		// Frame offsets
 		frameOffsets = new int[numFrames + 1]
@@ -105,8 +105,8 @@ class WsaFileDune2 {
 	String toString() {
 
 		return [
-		  "WSA file (Dune 2), ${width}x${height} (requires external palette)",
-			"Contains ${numFrames} frames to run at ${String.format('%.2f', delta / 1024)}fps"
+			"WSA file (Dune 2), ${width}x${height} (requires external palette)",
+			"Contains ${numFrames} frames to run at ${sprintf('%.2f', delta / 1024)}fps"
 		].join(', ')
 	}
 }

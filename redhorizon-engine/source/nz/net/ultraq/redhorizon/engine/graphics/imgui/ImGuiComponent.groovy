@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.Component
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
 import groovy.transform.TupleConstructor
 
@@ -28,9 +28,9 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ImGuiComponent extends Component<ImGuiComponent> {
+class ImGuiComponent implements Component<ImGuiComponent> {
 
-	final ImGuiElement imGuiElement
+	final ImGuiModule imGuiElement
 
 	/**
 	 * Render the UI component.

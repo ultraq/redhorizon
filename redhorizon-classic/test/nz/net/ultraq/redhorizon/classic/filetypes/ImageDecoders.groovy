@@ -168,8 +168,7 @@ class ImageDecoders extends Specification {
 			var frame = 0
 			window.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_P)) {
-					var factions = Faction.values()
-					faction = factions[Math.wrap(faction.ordinal() + 1, 0, factions.length)]
+					faction = faction.next()
 					adjustmentMap.setFaction(faction)
 				}
 			}
@@ -183,7 +182,7 @@ class ImageDecoders extends Specification {
 
 				timer += delta
 				if (timer > 0.1f) {
-					frame = Math.wrap(frame + 1, 0, spriteSheet.numFrames)
+					frame = (frame + 1) % spriteSheet.numFrames
 					timer -= 0.1f
 				}
 
@@ -221,7 +220,7 @@ class ImageDecoders extends Specification {
 	def "Play a WSA file using the Image SPI"() {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
-			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream, 266, 200)
+			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream)
 			var animationTransform = new Matrix4f()
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)

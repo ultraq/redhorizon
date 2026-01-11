@@ -145,7 +145,7 @@ class QuadTree {
 					return true
 				}
 				else {
-					randomQuadrantIndex = Math.wrap(randomQuadrantIndex + 1, 0, 4)
+					randomQuadrantIndex = (randomQuadrantIndex + 1) % 4
 					attempts++
 				}
 				if (attempts == 4) {

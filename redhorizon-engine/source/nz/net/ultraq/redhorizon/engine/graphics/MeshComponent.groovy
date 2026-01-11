@@ -32,8 +32,8 @@ import org.joml.Matrix4f
  *
  * @author Emanuel Rabina
  */
-class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
-	implements LocalTransform<MeshComponent>, AutoCloseable {
+class MeshComponent implements GraphicsComponent<MeshComponent, SceneShaderContext>, LocalTransform<MeshComponent>,
+	AutoCloseable {
 
 	final Mesh mesh
 	final Class<? extends Shader> shaderClass = BasicShader
@@ -42,9 +42,9 @@ class MeshComponent extends GraphicsComponent<MeshComponent, SceneShaderContext>
 	/**
 	 * Constructor, configure this mesh component.
 	 */
-	MeshComponent(Type type, Vertex[] vertices) {
+	MeshComponent(Type type, Vertex[] vertices, int[] index = null) {
 
-		mesh = new OpenGLMesh(type, vertices)
+		mesh = new OpenGLMesh(type, vertices, index)
 	}
 
 	@Override

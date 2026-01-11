@@ -25,7 +25,12 @@ import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import groovy.transform.TupleConstructor
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 
 /**
  * Render graphical scene components, followed by the UI.
@@ -35,49 +40,75 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class GraphicsSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(GraphicsSystem)
+
 	final Window window
 	final Framebuffer framebuffer
 	final Shader<? extends SceneShaderContext>[] shaders
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
+	private Closure<Framebuffer> postProcessingStage
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		graphicsComponents.clear()
-		imguiComponents.clear()
-		scene.traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(GraphicsComponent, graphicsComponents)
-			entity.findComponentsByType(ImGuiComponent, imguiComponents)
-		}
+		average('Update', 1f, logger) { ->
+			graphicsComponents.clear()
+			imguiComponents.clear()
+			scene.traverse(Entity) { Entity entity ->
+				entity.findComponentsByType(GraphicsComponent, graphicsComponents)
+				entity.findComponentsByType(ImGuiComponent, imguiComponents)
+			}
 
-		// TODO: Create an allocation-free method of grouping objects
-		var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
+			// TODO: Create an allocation-free method of grouping objects
+			var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
 
-		window.useRenderPipeline()
-			.scene { ->
-				framebuffer.useFramebuffer { ->
-					shaders.each { shader ->
-						shader.useShader { shaderContext ->
-							var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-							camera.render(shaderContext)
-							groupedComponents[shader.class]?.each { component ->
-								if (component.enabled) {
-									component.render(shaderContext)
+			window.useRenderPipeline()
+				.scene { ->
+					return average('Scene', 1f, logger) { ->
+						framebuffer.useFramebuffer { ->
+							shaders.each { shader ->
+								shader.useShader { shaderContext ->
+									var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+									if (camera) {
+										camera.render(shaderContext)
+									}
+									groupedComponents[shader.class]?.each { component ->
+										if (component.enabled) {
+											component.render(shaderContext)
+										}
+									}
 								}
+							}
+						}
+						return framebuffer
+					}
+				}
+				.postProcessing { sceneBuffer ->
+					return average('Post-processing', 1f, logger) { ->
+						return postProcessingStage ? postProcessingStage(sceneBuffer) : null as Framebuffer
+					}
+				}
+				.ui(true) { context ->
+					average('UI', 1f, logger) { ->
+						imguiComponents.each { component ->
+							if (component.enabled) {
+								component.render(context)
 							}
 						}
 					}
 				}
-				return framebuffer
-			}
-			.ui(true) { context ->
-				imguiComponents.each { component ->
-					if (component.enabled) {
-						component.render(context)
-					}
-				}
-			}
-			.end()
+				.end()
+		}
+	}
+
+	/**
+	 * Configure the post-processing stage of the render pipeline.
+	 */
+	GraphicsSystem withPostProcessing(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure<Framebuffer> closure) {
+
+		postProcessingStage = closure
+		return this
 	}
 }

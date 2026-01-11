@@ -32,7 +32,7 @@ import java.nio.ByteBuffer
  */
 class FactionAdjustmentMap implements AutoCloseable {
 
-	private Faction faction
+	Faction faction
 	private boolean factionChanged
 	private final ByteBuffer buffer
 	final Texture texture

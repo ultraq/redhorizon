@@ -37,7 +37,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	)
 	final Node root = new RootNode()
 
-	private final Queue<Closure> changeQueue = new ArrayDeque<>()
+	private final Queue<Closure> updateQueue = new ArrayDeque<>()
 	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()
 
 	@Override
@@ -48,22 +48,12 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 				node.close()
 			}
 		}
-	}
-
-	/**
-	 * Apply modifications to the scene that were queued with calls to
-	 * {@link #queueChange(Closure)}.
-	 */
-	void processQueuedChanges() {
-
-		while (changeQueue) {
-			changeQueue.poll().call()
-		}
+		executor.close()
 	}
 
 	/**
 	 * Queue some scene modification to be performed with the next call to
-	 * {@link #processQueuedChanges()}.
+	 * {@link #update()}.
 	 *
 	 * TODO: Need to figure out some way of limiting the closure to just queue
 	 *       changes - you could put basically anything into here.  One idea might
@@ -71,19 +61,31 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 *       adding an entity, that must be given the parent node it's being made
 	 *       for.
 	 */
-	void queueChange(Closure change) {
+	void queueUpdate(Closure change) {
 
-		changeQueue.add(change)
+		updateQueue.add(change)
 	}
 
 	/**
-	 * Schedule a change to occur after the given amount of time has elapsed.
+	 * Queue some scene modification to be performed after the given amount of
+	 * time has elapsed.
 	 */
-	void scheduleChange(long delay, TimeUnit timeUnit, Closure change) {
+	void queueUpdate(long delay, TimeUnit timeUnit, Closure change) {
 
 		executor.schedule({ ->
-			queueChange(change)
+			queueUpdate(change)
 		}, delay, timeUnit)
+	}
+
+	/**
+	 * Apply modifications to the scene that were queued with calls to
+	 * {@link #queueUpdate(Closure)}.
+	 */
+	void update() {
+
+		while (updateQueue) {
+			updateQueue.poll().call()
+		}
 	}
 
 	/**

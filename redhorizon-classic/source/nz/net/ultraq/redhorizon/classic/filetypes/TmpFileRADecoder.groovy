@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class TmpFileRADecoder implements ImageDecoder {
+class TmpFileRADecoder implements ImageDecoder, FileTypeTest {
 
 	final String[] supportedFileExtensions = ['int', 'sno', 'tem']
 
@@ -92,5 +92,27 @@ class TmpFileRADecoder implements ImageDecoder {
 
 		return new DecodeSummary(width, height, 1, numImages,
 			"TMP file (RA), contains ${numImages} ${width}x${height} images (no palette)")
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		var input = new NativeDataInputStream(inputStream)
+
+		var width = input.readUnsignedShort()
+		assert width == 24 : 'Tile width should be 24 pixels'
+
+		var height = input.readUnsignedShort()
+		assert height == 24 : 'Tile height should be 24 pixels'
+
+		input.skipBytes(2)
+
+		var zero1 = input.readUnsignedShort()
+		assert zero1 == 0
+
+		input.skipBytes(12)
+
+		var zero2 = input.readInt()
+		assert zero2 == 0
 	}
 }

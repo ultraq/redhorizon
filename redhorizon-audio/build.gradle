@@ -25,7 +25,6 @@ configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 		}
 		.withJarOptions() {
 			manifest {

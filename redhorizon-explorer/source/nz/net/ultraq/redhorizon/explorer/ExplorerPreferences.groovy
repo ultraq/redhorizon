@@ -29,7 +29,8 @@ import groovy.transform.TupleConstructor
 enum ExplorerPreferences implements UserPreference {
 
 	WINDOW_MAXIMIZED(false),
-	TOUCHPAD_INPUT(false)
+	TOUCHPAD_INPUT(false),
+	STARTING_DIRECTORY(new File(System.getProperty('user.dir')).toString())
 
 	final Object defaultValue
 }

@@ -54,8 +54,16 @@ class SpriteSheet implements AutoCloseable {
 	 */
 	SpriteSheet(String fileName, InputStream inputStream) {
 
-		var result = ImageDecoders
-			.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		this(fileName, ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+	}
+
+	/**
+	 * Constructor, create a new sprite sheet using its name, the selected decoder,
+	 * and a stream of data.
+	 */
+	SpriteSheet(String fileName, ImageDecoder decoder, InputStream inputStream) {
+
+		var result = decoder
 			.on(FrameDecodedEvent) { event ->
 				imageData << event.data().flipVertical(event.width(), event.height(), event.format())
 			}

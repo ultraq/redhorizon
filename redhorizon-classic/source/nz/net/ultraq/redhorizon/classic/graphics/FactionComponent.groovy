@@ -26,9 +26,11 @@ import nz.net.ultraq.redhorizon.graphics.Shader
  *
  * @author Emanuel Rabina
  */
-class FactionComponent extends GraphicsComponent<FactionComponent, PalettedSpriteShaderContext> implements AutoCloseable {
+class FactionComponent implements GraphicsComponent<FactionComponent, PalettedSpriteShaderContext>, AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
+
+	@Delegate(interfaces = false, includes = ['getFaction', 'setFaction'])
 	final FactionAdjustmentMap adjustmentMap
 
 	/**
@@ -49,5 +51,6 @@ class FactionComponent extends GraphicsComponent<FactionComponent, PalettedSprit
 	void render(PalettedSpriteShaderContext shaderContext) {
 
 		shaderContext.setAdjustmentMap(adjustmentMap)
+		adjustmentMap.update()
 	}
 }

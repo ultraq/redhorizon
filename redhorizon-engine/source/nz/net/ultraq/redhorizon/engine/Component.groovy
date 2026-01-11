@@ -25,9 +25,9 @@ import groovy.transform.Memoized
  *
  * @author Emanuel Rabina
  */
-abstract class Component<T extends Component> implements Named<T>, Disableable<T> {
+trait Component<T extends Component> implements Named<T>, Disableable<T> {
 
-	protected Entity entity
+	Entity entity
 
 	@Override
 	@Memoized
