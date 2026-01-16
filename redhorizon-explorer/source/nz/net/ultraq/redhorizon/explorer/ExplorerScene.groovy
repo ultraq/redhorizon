@@ -18,13 +18,18 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
+import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.explorer.ui.UiController
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.input.KeyBinding
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
 /**
  * Explorer UI and preview area.
@@ -44,8 +49,8 @@ class ExplorerScene extends Scene {
 	 * Constructor, create the initial scene (blank, unless asked to load a file
 	 * at startup).
 	 */
-	ExplorerScene(Window window, int width, int height, boolean touchpadInput, File startingDirectory,
-		MixDatabase mixDatabase) {
+	ExplorerScene(Window window, InputEventHandler input, int width, int height, boolean touchpadInput,
+		File startingDirectory, MixDatabase mixDatabase) {
 
 		this.window = window
 
@@ -60,5 +65,9 @@ class ExplorerScene extends Scene {
 		addChild(gridLines)
 		addChild(new GlobalPalette()
 			.withName('Global palette & alpha mask'))
+
+		input.addInputBinding(new KeyBinding(GLFW_KEY_P, true, { ->
+			new CyclePaletteAction(this).cyclePalette()
+		}))
 	}
 }

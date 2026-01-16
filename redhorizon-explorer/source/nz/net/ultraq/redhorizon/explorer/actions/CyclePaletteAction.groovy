@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui
+package nz.net.ultraq.redhorizon.explorer.actions
 
-import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
+
+import groovy.transform.TupleConstructor
 
 /**
- * Triggered when the cycle palette option is selected.
+ * Command object for cycling the global palette.
  *
  * @author Emanuel Rabina
  */
-record CyclePaletteEvent() implements Event {
+@TupleConstructor(defaults = false)
+class CyclePaletteAction {
+
+	final ExplorerScene scene
+
+	/**
+	 * Cycle the global palette.
+	 */
+	void cyclePalette() {
+
+		scene.queueUpdate { ->
+			scene.findByType(GlobalPalette).cyclePalette()
+		}
+	}
 }

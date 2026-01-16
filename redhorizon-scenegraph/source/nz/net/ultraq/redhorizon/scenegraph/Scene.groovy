@@ -18,6 +18,8 @@ package nz.net.ultraq.redhorizon.scenegraph
 
 import nz.net.ultraq.eventhorizon.EventTarget
 
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.SimpleType
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -31,8 +33,8 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['addChild', 'clear', 'findAncestor', 'findDescendent', 'insertBefore', 'leftShift', 'removeChild',
-			'rotate', 'scale', 'translate', 'traverse'],
+		includes = ['addChild', 'clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate',
+			'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()
@@ -49,6 +51,24 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 			}
 		}
 		executor.close()
+	}
+
+	/**
+	 * Return the first node in the scene to match the given predicate.
+	 */
+	Node find(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
+			Closure<Boolean> predicate) {
+
+		return root.findDescendent(predicate)
+	}
+
+	/**
+	 * Return the first node in the scene of the given type.
+	 */
+	<T extends Node> T findByType(Class<T> type) {
+
+		return (T)find { node -> type.isInstance(node) }
 	}
 
 	/**

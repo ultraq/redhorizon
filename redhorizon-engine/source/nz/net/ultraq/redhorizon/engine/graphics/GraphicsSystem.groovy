@@ -69,7 +69,7 @@ class GraphicsSystem extends System {
 						framebuffer.useFramebuffer { ->
 							shaders.each { shader ->
 								shader.useShader { shaderContext ->
-									var camera = scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+									var camera = scene.findByType(CameraEntity)
 									if (camera) {
 										camera.render(shaderContext)
 									}

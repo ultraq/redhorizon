@@ -151,8 +151,8 @@ class Explorer implements Runnable {
 			resourceManager = new ResourceManager('.')
 
 			// Init scene and engine
-			var mixDatabase = new MixDatabase()
-			scene = new ExplorerScene(window, RENDER_WIDTH, RENDER_HEIGHT, touchpadInput, startingDirectory, mixDatabase)
+			scene = new ExplorerScene(window, input, RENDER_WIDTH, RENDER_HEIGHT, touchpadInput, startingDirectory,
+				new MixDatabase())
 			scene
 				.on(TouchpadInputEvent) { event ->
 					touchpadInput = event.touchpadInput()

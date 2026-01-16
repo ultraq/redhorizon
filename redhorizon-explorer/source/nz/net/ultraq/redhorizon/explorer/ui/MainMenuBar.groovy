@@ -17,7 +17,9 @@
 package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.explorer.ui.actions.ExitApplication
+import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
+import nz.net.ultraq.redhorizon.explorer.ui.actions.ExitApplicationAction
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
@@ -35,6 +37,7 @@ import groovy.transform.TupleConstructor
 class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
 	final Window window
+	final ExplorerScene scene
 	boolean touchpadInput
 
 	@Override
@@ -44,7 +47,7 @@ class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
 			if (ImGui.beginMenu('File')) {
 				if (ImGui.menuItem('Exit', 'Esc')) {
-					new ExitApplication(window).exit()
+					new ExitApplicationAction(window).exit()
 				}
 				ImGui.endMenu()
 			}
@@ -55,7 +58,7 @@ class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 					trigger(new TouchpadInputEvent(touchpadInput))
 				}
 				if (ImGui.menuItem('Cycle palette', 'P')) {
-					trigger(new CyclePaletteEvent())
+					new CyclePaletteAction(scene).cyclePalette()
 				}
 				ImGui.endMenu()
 			}

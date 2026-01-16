@@ -19,15 +19,11 @@ package nz.net.ultraq.redhorizon.explorer.objects
 import nz.net.ultraq.redhorizon.classic.graphics.AlphaMaskComponent
 import nz.net.ultraq.redhorizon.classic.graphics.PaletteComponent
 import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.explorer.PaletteType
-import nz.net.ultraq.redhorizon.explorer.ui.CyclePaletteEvent
 import nz.net.ultraq.redhorizon.graphics.Palette
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
 /**
  * The palette used for any paletted graphics in the scene.
@@ -46,13 +42,12 @@ class GlobalPalette extends Entity<GlobalPalette> {
 
 		addComponent(new PaletteComponent(loadPalette()))
 		addComponent(new AlphaMaskComponent())
-		addComponent(new ScriptComponent(GlobalPaletteScript))
 	}
 
 	/**
 	 * Cycle through the available palettes, replacing the current global one.
 	 */
-	private void cyclePalette() {
+	void cyclePalette() {
 
 		var paletteComponent = findComponentByType(PaletteComponent)
 		paletteComponent.palette.close()
@@ -68,30 +63,6 @@ class GlobalPalette extends Entity<GlobalPalette> {
 		currentPalette = paletteType
 		return getResourceAsStream(paletteType.file).withBufferedStream { stream ->
 			return new Palette(paletteType.file, stream)
-		}
-	}
-
-	/**
-	 * Update the global palette in response to inputs/events.
-	 */
-	static class GlobalPaletteScript extends EntityScript<GlobalPalette> {
-
-		@Override
-		void init() {
-
-			entity.scene.on(CyclePaletteEvent) { event ->
-				entity.scene.queueUpdate { ->
-					entity.cyclePalette()
-				}
-			}
-		}
-
-		@Override
-		void update(float delta) {
-
-			if (input.keyPressed(GLFW_KEY_P, true)) {
-				entity.cyclePalette()
-			}
 		}
 	}
 }

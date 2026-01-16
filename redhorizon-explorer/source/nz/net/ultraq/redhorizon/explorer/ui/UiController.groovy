@@ -60,7 +60,7 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 		this.startingDirectory = startingDirectory
 		this.mixDatabase = mixDatabase
 
-		mainMenuBar = new MainMenuBar(window, touchpadInput)
+		mainMenuBar = new MainMenuBar(window, scene, touchpadInput)
 			.relay(Event, scene)
 		entryList = new EntryList(entries)
 

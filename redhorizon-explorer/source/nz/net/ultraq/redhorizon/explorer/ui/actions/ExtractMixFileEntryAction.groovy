@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,36 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui.actions
 
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import groovy.transform.TupleConstructor
 
 /**
- * Closes the application.
+ * Command object for extracting a mix file entry to disk.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ExitApplication {
+class ExtractMixFileEntryAction {
 
-	final Window window
+	private static final Logger logger = LoggerFactory.getLogger(ExtractMixFileEntryAction)
+
+	final MixEntry entry
 
 	/**
-	 * Close the application.
+	 * Save the data for a mix entry to disk.
 	 */
-	void exit() {
+	void extract(String name) {
 
-		window.shouldClose(true)
+		logger.info('Extracting {}...', name)
+		new FileOutputStream(name).withCloseable { outputStream ->
+			entry.mixFile().getEntryData(entry.mixEntry()).withBufferedStream { inputStream ->
+				inputStream.transferTo(outputStream)
+				logger.info('Done!')
+			}
+		}
 	}
 }

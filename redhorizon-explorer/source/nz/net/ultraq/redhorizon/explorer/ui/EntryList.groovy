@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
-import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntry
+import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntryAction
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
@@ -120,7 +120,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 				if (entry instanceof MixEntry) {
 					if (ImGui.beginPopupContextItem()) {
 						if (ImGui.selectable('Extract')) {
-							new ExtractMixFileEntry().extract(entry, entry.name()) // TODO: Save to specified location
+							new ExtractMixFileEntryAction(entry).extract(entry.name()) // TODO: Save to specified location
 							ImGui.closeCurrentPopup()
 						}
 						ImGui.endPopup()
