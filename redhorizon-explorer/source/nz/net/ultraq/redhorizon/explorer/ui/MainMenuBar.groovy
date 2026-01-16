@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.explorer.ui.actions.ExitApplication
+import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
@@ -32,6 +34,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
+	final Window window
 	boolean touchpadInput
 
 	@Override
@@ -41,7 +44,7 @@ class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
 			if (ImGui.beginMenu('File')) {
 				if (ImGui.menuItem('Exit', 'Esc')) {
-					trigger(new ExitEvent())
+					new ExitApplication(window).exit()
 				}
 				ImGui.endMenu()
 			}

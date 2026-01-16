@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.extract
+package nz.net.ultraq.redhorizon.explorer.ui.actions
 
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 

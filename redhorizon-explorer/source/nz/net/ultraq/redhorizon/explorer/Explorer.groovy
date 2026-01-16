@@ -35,7 +35,6 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewBeginEvent
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewEndEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
-import nz.net.ultraq.redhorizon.explorer.ui.ExitEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
@@ -56,7 +55,6 @@ import picocli.CommandLine.IDefaultValueProvider
 import picocli.CommandLine.Model.ArgSpec
 import picocli.CommandLine.Model.OptionSpec
 import picocli.CommandLine.Option
-import picocli.CommandLine.Parameters
 
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
@@ -110,9 +108,6 @@ class Explorer implements Runnable {
 		}
 	}
 
-	@Parameters(index = '0', defaultValue = Option.NULL_VALUE, description = 'Path to a file to open on launch')
-	File file
-
 	@Option(names = '--maximized', description = 'Start the application maximized. Remembers your last usage.')
 	boolean maximized
 
@@ -159,16 +154,13 @@ class Explorer implements Runnable {
 			var mixDatabase = new MixDatabase()
 			scene = new ExplorerScene(window, RENDER_WIDTH, RENDER_HEIGHT, touchpadInput, startingDirectory, mixDatabase)
 			scene
-				.on(ExitEvent) { event ->
-					window.shouldClose(true)
-				}
 				.on(TouchpadInputEvent) { event ->
 					touchpadInput = event.touchpadInput()
 				}
 				.on(EntrySelectedEvent) { event ->
 					var entry = event.entry()
-					if (entry instanceof FileEntry && entry.file.directory) {
-						startingDirectory = entry.file
+					if (entry instanceof FileEntry && entry.file().directory) {
+						startingDirectory = entry.file()
 					}
 				}
 			var graphicsSystem = new GraphicsSystem(window, sceneFramebuffer, new BasicShader(), new PalettedSpriteShader())
@@ -203,9 +195,6 @@ class Explorer implements Runnable {
 
 			// Game loop
 			window.show()
-//			if (file) {
-//				scene.preview(file)
-//			}
 			var deltaTimer = new DeltaTimer()
 			while (!window.shouldClose()) {
 				engine.update(deltaTimer.deltaTime())

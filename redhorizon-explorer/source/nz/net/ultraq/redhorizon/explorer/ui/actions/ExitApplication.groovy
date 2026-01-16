@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui
+package nz.net.ultraq.redhorizon.explorer.ui.actions
 
-import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.graphics.Window
+
+import groovy.transform.TupleConstructor
 
 /**
- * Triggered when Exit is selected from the main menu.
+ * Closes the application.
  *
  * @author Emanuel Rabina
  */
-record ExitEvent() implements Event {
+@TupleConstructor(defaults = false)
+class ExitApplication {
+
+	final Window window
+
+	/**
+	 * Close the application.
+	 */
+	void exit() {
+
+		window.shouldClose(true)
+	}
 }
