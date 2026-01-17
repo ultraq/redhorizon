@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.engine.Entity
@@ -45,6 +44,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class UiController extends Entity<UiController> implements EventTarget<UiController> {
 
+	boolean touchpadInput
+
 	private final File startingDirectory
 	private final MixDatabase mixDatabase
 	private final MainMenuBar mainMenuBar
@@ -57,11 +58,11 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 	UiController(ExplorerScene scene, Window window, boolean touchpadInput, File startingDirectory,
 		MixDatabase mixDatabase) {
 
+		this.touchpadInput = touchpadInput
 		this.startingDirectory = startingDirectory
 		this.mixDatabase = mixDatabase
 
-		mainMenuBar = new MainMenuBar(window, scene, touchpadInput)
-			.relay(Event, scene)
+		mainMenuBar = new MainMenuBar(window, scene, this)
 		entryList = new EntryList(entries)
 
 		addComponent(new ImGuiComponent(new DebugOverlay()
