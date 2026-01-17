@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui.actions
+package nz.net.ultraq.redhorizon.engine.graphics.actions
 
 import nz.net.ultraq.redhorizon.graphics.Window
 
 import groovy.transform.TupleConstructor
 
 /**
- * Command object for closing the application.
+ * Command object for closing the window.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ExitApplicationAction {
+class CloseWindowAction {
 
 	final Window window
 
 	/**
-	 * Close the application.
+	 * Close the window.
 	 */
-	void exit() {
+	void close() {
 
 		window.shouldClose(true)
 	}

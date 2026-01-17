@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
+import nz.net.ultraq.redhorizon.engine.graphics.actions.CloseWindowAction
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
-import nz.net.ultraq.redhorizon.explorer.ui.actions.ExitApplicationAction
 import nz.net.ultraq.redhorizon.explorer.ui.actions.ToggleTouchpadInputAction
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
@@ -47,7 +47,7 @@ class MainMenuBar implements ImGuiModule {
 
 			if (ImGui.beginMenu('File')) {
 				if (ImGui.menuItem('Exit', 'Esc')) {
-					new ExitApplicationAction(window).exit()
+					new CloseWindowAction(window).close()
 				}
 				ImGui.endMenu()
 			}

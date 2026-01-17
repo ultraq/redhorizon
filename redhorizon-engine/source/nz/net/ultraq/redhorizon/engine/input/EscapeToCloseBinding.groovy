@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
+import nz.net.ultraq.redhorizon.engine.graphics.actions.CloseWindowAction
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
@@ -30,7 +31,7 @@ class EscapeToCloseBinding extends KeyBinding {
 
 	EscapeToCloseBinding(Window window) {
 		super(GLFW_KEY_ESCAPE, true, { ->
-			window.shouldClose(true)
+			new CloseWindowAction(window).close()
 		})
 	}
 }
