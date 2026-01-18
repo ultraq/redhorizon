@@ -120,7 +120,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 				if (entry instanceof MixEntry) {
 					if (ImGui.beginPopupContextItem()) {
 						if (ImGui.selectable('Extract')) {
-							new ExtractMixFileEntryAction(entry).extract(entry.name()) // TODO: Save to specified location
+							new ExtractMixFileEntryAction(entry, entry.name()).extract() // TODO: Save to specified location
 							ImGui.closeCurrentPopup()
 						}
 						ImGui.endPopup()

@@ -34,11 +34,12 @@ class ExtractMixFileEntryAction {
 	private static final Logger logger = LoggerFactory.getLogger(ExtractMixFileEntryAction)
 
 	final MixEntry entry
+	final String name
 
 	/**
 	 * Save the data for a mix entry to disk.
 	 */
-	void extract(String name) {
+	void extract() {
 
 		logger.info('Extracting {}...', name)
 		new FileOutputStream(name).withCloseable { outputStream ->
