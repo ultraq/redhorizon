@@ -30,6 +30,7 @@ import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 
@@ -51,19 +52,20 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 	private final MainMenuBar mainMenuBar
 	private final EntryList entryList
 	private final List<Entry> entries = new CopyOnWriteArrayList<>()
+	private File currentDirectory
 
 	/**
 	 * Constructor, build and register the many UI pieces.
 	 */
-	UiController(ExplorerScene scene, Window window, boolean touchpadInput, File startingDirectory,
-		MixDatabase mixDatabase) {
+	UiController(Window window, ExplorerScene scene, PreviewController previewController, boolean touchpadInput,
+		File startingDirectory, MixDatabase mixDatabase) {
 
 		this.touchpadInput = touchpadInput
 		this.startingDirectory = startingDirectory
 		this.mixDatabase = mixDatabase
 
 		mainMenuBar = new MainMenuBar(window, scene, this)
-		entryList = new EntryList(entries)
+		entryList = new EntryList(scene, this, previewController, entries)
 
 		addComponent(new ImGuiComponent(new DebugOverlay()
 			.withCursorTracking(window, scene.camera)
@@ -75,116 +77,91 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 		addComponent(new ScriptComponent(UiControllerScript))
 	}
 
-	static class UiControllerScript extends EntityScript<UiController> {
+	/**
+	 * Update the contents of the list from the current directory.
+	 */
+	void buildList(File directory) {
 
-		private ExplorerScene scene
-		private File currentDirectory
+		entries.clear()
 
-		/**
-		 * Update the contents of the list from the current directory.
-		 */
-		private void buildList(File directory) {
-
-			var entries = entity.entries
-			entries.clear()
-
-			if (directory.parent) {
-				entries << new FileEntry(directory.parentFile, '/..', null)
-			}
-			directory
-				.listFiles()
-				.sort { file1, file2 ->
-					file1.directory && !file2.directory ? -1 :
-						!file1.directory && file2.directory ? 1 :
-							file1.name <=> file2.name
-				}
-				.each { fileOrDirectory ->
-					entries << new FileEntry(fileOrDirectory, null, fileOrDirectory.guessedFileType())
-				}
-
-			currentDirectory = directory
+		if (directory.parent) {
+			entries << new FileEntry(directory.parentFile, '/..', null)
 		}
+		directory
+			.listFiles()
+			.sort { file1, file2 ->
+				file1.directory && !file2.directory ? -1 :
+					!file1.directory && file2.directory ? 1 :
+						file1.name <=> file2.name
+			}
+			.each { fileOrDirectory ->
+				entries << new FileEntry(fileOrDirectory, null, fileOrDirectory.guessedFileType())
+			}
 
-		/**
-		 * Update the contents of the list from the current mix file.
-		 */
-		private void buildList(MixFile mixFile) {
+		currentDirectory = directory
+	}
 
-			var entries = entity.entries
-			entries.clear()
-			entries << new MixEntry(mixFile, null, '..', null, 0, null, false)
+	/**
+	 * Update the contents of the list from the current mix file.
+	 */
+	void buildList(MixFile mixFile) {
 
-			// RA-MIXer built-in database, if available
-			var raMixDbEntry = mixFile.getEntry(0x7fffffff)
-			var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
+		entries.clear()
+		entries << new MixEntry(currentDirectory, mixFile, null, '..', null, 0, null, false)
 
-			// TODO: Also support XCC local database
+		// RA-MIXer built-in database, if available
+		var raMixDbEntry = mixFile.getEntry(0x7fffffff)
+		var raMixDb = raMixDbEntry ? new RaMixDatabase(mixFile.getEntryData(raMixDbEntry)) : null
 
-			mixFile.entries.each { entry ->
+		// TODO: Also support XCC local database
 
-				if (raMixDb) {
-					if (entry.id == 0x7fffffff) {
-						entries << new MixEntry(mixFile, entry, 'RA-MIXer localDB', null, entry.size,
-							'Local database created by the RA-MIXer tool', false)
-						return
-					}
+		mixFile.entries.each { entry ->
 
-					var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
-					if (dbEntry) {
-						entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(), entry.size,
-							dbEntry.description(), false)
-						return
-					}
-				}
-
-				// Perform a lookup to see if we know about this file already, getting both a name and class
-				var dbEntry = entity.mixDatabase.find(entry.id)
-				if (dbEntry) {
-					entries << new MixEntry(mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(), entry.size, null, false)
+			if (raMixDb) {
+				if (entry.id == 0x7fffffff) {
+					entries << new MixEntry(currentDirectory, mixFile, entry, 'RA-MIXer localDB', null, entry.size,
+						'Local database created by the RA-MIXer tool', false)
 					return
 				}
 
-				// Otherwise run some tests to see if we can determine what kind of file this is
-				var testResult = new FileTester().test(null, entry.size, mixFile.getEntryData(entry))
-				if (testResult) {
-					entries << new MixEntry(mixFile, entry, "0x${Integer.toHexString(entry.id)}", testResult.type(), entry.size,
-						null, true)
-				}
-				else {
-					entries << new MixEntry(mixFile, entry, "0x${Integer.toHexString(entry.id)}", null, entry.size, null, true)
+				var dbEntry = raMixDb.entries.find { dbEntry -> dbEntry.id() == entry.id }
+				if (dbEntry) {
+					entries << new MixEntry(currentDirectory, mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(),
+						entry.size, dbEntry.description(), false)
+					return
 				}
 			}
 
-			entries.sort()
+			// Perform a lookup to see if we know about this file already, getting both a name and class
+			var dbEntry = mixDatabase.find(entry.id)
+			if (dbEntry) {
+				entries << new MixEntry(currentDirectory, mixFile, entry, dbEntry.name(), dbEntry.guessedFileType(), entry.size,
+					null, false)
+				return
+			}
+
+			// Otherwise run some tests to see if we can determine what kind of file this is
+			var testResult = new FileTester().test(null, entry.size, mixFile.getEntryData(entry))
+			if (testResult) {
+				entries << new MixEntry(currentDirectory, mixFile, entry, "0x${Integer.toHexString(entry.id)}",
+					testResult.type(), entry.size,
+					null, true)
+			}
+			else {
+				entries << new MixEntry(currentDirectory, mixFile, entry, "0x${Integer.toHexString(entry.id)}", null,
+					entry.size, null, true)
+			}
 		}
+
+		entries.sort()
+	}
+
+	static class UiControllerScript extends EntityScript<UiController> {
 
 		@Override
 		void init() {
 
-			scene = entity.scene as ExplorerScene
-			entity.entryList.on(EntrySelectedEvent) { event ->
-				var entry = event.entry()
-				if (entry instanceof MixEntry) {
-					if (entry.name() == '..') {
-						buildList(currentDirectory)
-					}
-					else {
-						scene.trigger(event)
-					}
-				}
-				else if (entry instanceof FileEntry) {
-					var file = entry.file()
-					if (file.directory) {
-						buildList(file)
-					}
-					else if (file.name.endsWith('.mix')) {
-						buildList(new MixFile(file))
-					}
-					scene.trigger(event)
-				}
-			}
-
-			buildList(entity.startingDirectory)
+			entity.buildList(entity.startingDirectory)
 		}
 
 		@Override

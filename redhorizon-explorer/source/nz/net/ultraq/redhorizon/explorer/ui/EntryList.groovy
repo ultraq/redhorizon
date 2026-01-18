@@ -16,10 +16,12 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntryAction
+import nz.net.ultraq.redhorizon.explorer.ui.actions.SelectEntryAction
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
@@ -39,9 +41,12 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = 'entries')
-class EntryList implements EventTarget<EntryList>, ImGuiModule {
+@TupleConstructor(defaults = false)
+class EntryList implements ImGuiModule {
 
+	final ExplorerScene scene
+	final UiController uiController
+	final PreviewController previewController
 	final List<Entry> entries
 	private boolean focused
 	private boolean hovered
@@ -109,7 +114,7 @@ class EntryList implements EventTarget<EntryList>, ImGuiModule {
 				if (isSelected) {
 					ImGui.setItemDefaultFocus()
 					if (!selectedEntryTriggered) {
-						trigger(new EntrySelectedEvent(entry))
+						new SelectEntryAction(scene, uiController, previewController, entry).select()
 						selectedEntryTriggered = true
 					}
 					if (!ImGui.isItemVisible() && !entryVisibleOnce) {

@@ -56,10 +56,12 @@ class ExplorerScene extends Scene {
 
 		camera = new CameraEntity(width, height, window)
 		addChild(camera)
-		addChild(new UiController(this, window, touchpadInput, startingDirectory, mixDatabase)
+
+		var previewController = new PreviewController(this).withName('Preview controller')
+
+		addChild(new UiController(window, this, previewController, touchpadInput, startingDirectory, mixDatabase)
 			.withName('UI'))
-		addChild(new PreviewController()
-			.withName('Preview controller'))
+		addChild(previewController)
 		gridLines = new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY)
 			.withName('Grid lines')
 		addChild(gridLines)

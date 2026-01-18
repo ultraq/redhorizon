@@ -27,10 +27,10 @@ import groovy.transform.RecordOptions
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['mixFile', 'mixEntry'])
+@ImmutableOptions(knownImmutables = ['parentDirectory', 'mixFile', 'mixEntry'])
 @RecordOptions(size = false)
-record MixEntry(MixFile mixFile, nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry, String name, String type,
-	long size, String description, boolean unknown) implements Entry<MixEntry> {
+record MixEntry(File parentDirectory, MixFile mixFile, nz.net.ultraq.redhorizon.classic.filetypes.MixEntry mixEntry,
+	String name, String type, long size, String description, boolean unknown) implements Entry<MixEntry> {
 
 	@Override
 	int compareTo(MixEntry other) {
