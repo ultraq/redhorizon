@@ -28,6 +28,6 @@ class MathExtensions {
 	 */
 	static float wrapCircleDegrees(Math self, float degrees) {
 
-		return degrees % 360f
+		return Math.wrap(degrees, 0f, 360f)
 	}
 }
