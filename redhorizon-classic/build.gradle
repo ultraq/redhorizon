@@ -36,8 +36,6 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
-		.withSourcesJar()
-		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-audio')

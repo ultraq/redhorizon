@@ -32,8 +32,6 @@ configure {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.input'
 			}
 		}
-		.withSourcesJar()
-		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation "org.joml:joml:${jomlVersion}"

@@ -32,8 +32,6 @@ configure {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.scenegraph'
 			}
 		}
-		.withSourcesJar()
-		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"

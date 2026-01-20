@@ -15,8 +15,18 @@
  */
 
 plugins {
-	id 'redhorizon-application' apply false
-	id 'redhorizon-library' apply false
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.0'
 }
 
 description = 'Recreating the original 2D Command & Conquer games'
+
+gradle.projectsEvaluated {
+	configure {
+		createMavenCentralPublisherBundle()
+			.forProjects(subprojects.findAll { it.plugins.hasPlugin('java-library') } as Project[])
+			.withCredentials(
+				findProperty('mavenCentral.publisher.username'),
+				findProperty('mavenCentral.publisher.password')
+			)
+	}
+}

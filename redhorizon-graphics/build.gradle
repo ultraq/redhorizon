@@ -35,8 +35,6 @@ configure {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.graphics'
 			}
 		}
-		.withSourcesJar()
-		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation project(':redhorizon-audio')

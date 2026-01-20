@@ -31,8 +31,6 @@ configure {
 				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.audio'
 			}
 		}
-		.withSourcesJar()
-		.withGroovydocJar()
 		.configureSource()
 			.withDependencies() {
 				implementation 'com.tagtraum:ffsampledsp-complete:0.9.53'
