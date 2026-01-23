@@ -24,8 +24,9 @@ import nz.net.ultraq.redhorizon.input.InputEventHandler
  *
  * @author Emanuel Rabina
  */
-abstract class EntityScript<T extends Entity> {
+abstract class EntityScript<T extends Entity<T>> {
 
+	@Delegate(interfaces = false)
 	protected T entity
 	protected InputEventHandler input
 

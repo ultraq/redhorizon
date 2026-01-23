@@ -41,6 +41,16 @@ class Node<T extends Node> implements LocalTransform<T>, Named<T> {
 	private final Vector3f globalScaleResult = new Vector3f()
 
 	/**
+	 * Add and return the child node to this node.
+	 */
+	@SuppressWarnings('GrUnnecessaryPublicModifier')
+	public <T extends Node<T>> T addAndReturnChild(T child) {
+
+		addChild(child)
+		return child
+	}
+
+	/**
 	 * Add a child node to this node.
 	 */
 	T addChild(Node child) {

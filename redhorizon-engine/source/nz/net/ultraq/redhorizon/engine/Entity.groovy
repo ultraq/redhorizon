@@ -27,7 +27,7 @@ import groovy.transform.stc.SimpleType
  *
  * @author Emanuel Rabina
  */
-class Entity<T extends Entity> extends Node<T> implements EventTarget<T>, AutoCloseable {
+class Entity<T extends Entity<T>> extends Node<T> implements EventTarget<T>, AutoCloseable {
 
 	private List<Component> components = []
 
