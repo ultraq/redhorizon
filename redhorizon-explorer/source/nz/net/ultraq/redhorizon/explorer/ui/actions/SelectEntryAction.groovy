@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.explorer.ui.actions
 
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
@@ -34,7 +33,6 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class SelectEntryAction {
 
-	final ExplorerScene scene
 	final UiController uiController
 	final PreviewController previewController
 	final Entry entry
@@ -51,10 +49,7 @@ class SelectEntryAction {
 				uiController.buildList(entry.parentDirectory())
 			}
 			else {
-				scene.queueUpdate { ->
-					previewController.clearPreview()
-					previewController.preview(entry as MixEntry)
-				}
+				previewController.preview(entry as MixEntry)
 			}
 		}
 		else if (entry instanceof FileEntry) {
@@ -66,10 +61,7 @@ class SelectEntryAction {
 				uiController.buildList(new MixFile(file))
 			}
 			else {
-				scene.queueUpdate { ->
-					previewController.clearPreview()
-					previewController.preview(entry as FileEntry)
-				}
+				previewController.preview(entry as FileEntry)
 			}
 		}
 	}

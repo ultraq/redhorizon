@@ -70,7 +70,7 @@ class PalettePreview extends Entity<PalettePreview> {
 		addComponent(new ScriptComponent(PalettePreviewScript))
 	}
 
-	static class PalettePreviewScript extends EntityScript<PalettePreview> implements AutoCloseable {
+	static class PalettePreviewScript extends EntityScript implements AutoCloseable {
 
 		private ExplorerScene scene
 

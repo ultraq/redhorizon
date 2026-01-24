@@ -18,64 +18,32 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixDatabase
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntryAction
+import nz.net.ultraq.redhorizon.explorer.ui.actions.SelectEntryAction
+import nz.net.ultraq.redhorizon.explorer.ui.actions.ToggleTouchpadInputAction
 
 import static org.lwjgl.glfw.GLFW.*
-
-import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Manage UI elements in the explorer.
  *
  * @author Emanuel Rabina
  */
-class UiController extends Entity<UiController> implements EventTarget<UiController> {
+class UiController extends EntityScript implements EventTarget<UiController> {
 
-	boolean touchpadInput
-
-	private final File startingDirectory
-	private final MixDatabase mixDatabase
-	private final MainMenuBar mainMenuBar
-	private final EntryList entryList
-	private final List<Entry> entries = new CopyOnWriteArrayList<>()
+	private UiSettingsComponent uiSettings
+	private MixDatabase mixDatabase
+	private EntryList entryList
+	private List<Entry> entries
 	private File currentDirectory
-
-	/**
-	 * Constructor, build and register the many UI pieces.
-	 */
-	UiController(Window window, ExplorerScene scene, PreviewController previewController, boolean touchpadInput,
-		File startingDirectory, MixDatabase mixDatabase) {
-
-		this.touchpadInput = touchpadInput
-		this.startingDirectory = startingDirectory
-		this.mixDatabase = mixDatabase
-
-		mainMenuBar = new MainMenuBar(window, scene, this)
-		entryList = new EntryList(scene, this, previewController, entries)
-
-		addComponent(new ImGuiComponent(new DebugOverlay()
-			.withCursorTracking(window, scene.camera)
-			.withProfilingLogging()))
-		addComponent(new ImGuiComponent(mainMenuBar))
-		addComponent(new ImGuiComponent(new NodeList(scene)))
-		addComponent(new ImGuiComponent(entryList))
-		addComponent(new ImGuiComponent(new LogPanel()))
-		addComponent(new ScriptComponent(UiControllerScript))
-	}
 
 	/**
 	 * Update the contents of the list from the current directory.
@@ -156,23 +124,39 @@ class UiController extends Entity<UiController> implements EventTarget<UiControl
 		entries.sort()
 	}
 
-	static class UiControllerScript extends EntityScript<UiController> {
+	@Override
+	void init() {
 
-		@Override
-		void init() {
+		uiSettings = entity.findComponentByType(UiSettingsComponent)
+		mixDatabase = uiSettings.mixDatabase
 
-			entity.buildList(entity.startingDirectory)
+		var previewController = scene.findByType(PreviewController)
+		entryList = (entity.findComponent { it.name == 'Entry list' } as ImGuiComponent)?.imGuiModule as EntryList
+		entryList
+			.on(EntrySelectedEvent) { event ->
+				new SelectEntryAction(this, previewController, event.entry()).select()
+			}
+			.on(ExtractMixEntryEvent) { event ->
+				new ExtractMixFileEntryAction(event.entry(), event.entry().name()).extract() // TODO: Save to specified location
+			}
+		entries = entryList.entries
+
+		var mainMenuBar = (entity.findComponent { it.name == 'Main menu' } as ImGuiComponent)
+		mainMenuBar.on(TouchpadInputEvent) { event ->
+			new ToggleTouchpadInputAction(scene, uiSettings).toggle()
 		}
 
-		@Override
-		void update(float delta) {
+		buildList(uiSettings.startingDirectory)
+	}
 
-			if (input.keyPressed(GLFW_KEY_UP, true) && entity.entryList.focused) {
-				entity.entryList.selectPrevious()
-			}
-			else if (input.keyPressed(GLFW_KEY_DOWN, true) && entity.entryList.focused) {
-				entity.entryList.selectNext()
-			}
+	@Override
+	void update(float delta) {
+
+		if (input.keyPressed(GLFW_KEY_UP, true) && entryList.focused) {
+			entryList.selectPrevious()
+		}
+		else if (input.keyPressed(GLFW_KEY_DOWN, true) && entryList.focused) {
+			entryList.selectNext()
 		}
 	}
 }

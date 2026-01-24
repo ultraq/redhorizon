@@ -18,17 +18,25 @@ package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 /**
  * A custom class for any script used during the game update phase.
  *
  * @author Emanuel Rabina
  */
-abstract class EntityScript<T extends Entity<T>> {
+abstract class EntityScript {
 
-	@Delegate(interfaces = false)
-	protected T entity
+	protected Entity entity
 	protected InputEventHandler input
+
+	/**
+	 * A shortcut for {@code entity.scene}.
+	 */
+	protected Scene getScene() {
+
+		return entity.scene
+	}
 
 	/**
 	 * Called when a script is first started, can be overridden to set up the

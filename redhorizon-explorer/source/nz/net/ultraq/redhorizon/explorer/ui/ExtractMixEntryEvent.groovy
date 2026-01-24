@@ -14,31 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui.actions
+package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
-import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 
-import groovy.transform.TupleConstructor
+import groovy.transform.ImmutableOptions
 
 /**
- * Command object for changing the touchpad input option.
+ * Event for extracting a file within a mix file.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ToggleTouchpadInputAction {
-
-	final Scene scene
-	final UiSettingsComponent uiSettings
-
-	/**
-	 * Switch the value of the option to the given value.
-	 */
-	void toggle() {
-
-		uiSettings.touchpadInput = !uiSettings.touchpadInput
-		scene.trigger(new TouchpadInputEvent(uiSettings.touchpadInput))
-	}
+@ImmutableOptions(knownImmutables = ['entry'])
+record ExtractMixEntryEvent(MixEntry entry) implements Event {
 }

@@ -107,7 +107,7 @@ class UnitPreview extends Entity<UnitPreview> {
 	/**
 	 * Showcase behaviours for a unit.
 	 */
-	static class UnitPreviewScript extends EntityScript<UnitPreview> {
+	static class UnitPreviewScript extends EntityScript {
 
 		private static final Logger logger = LoggerFactory.getLogger(UnitPreview)
 		private static final int FRAMERATE = 10 // C&C ran animations at 10fps?

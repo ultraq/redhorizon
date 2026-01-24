@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.ui.actions
+package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
-import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 
 import groovy.transform.TupleConstructor
 
 /**
- * Command object for changing the touchpad input option.
+ * Component for holding UI state.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class ToggleTouchpadInputAction {
+class UiSettingsComponent implements Component<UiSettingsComponent> {
 
-	final Scene scene
-	final UiSettingsComponent uiSettings
-
-	/**
-	 * Switch the value of the option to the given value.
-	 */
-	void toggle() {
-
-		uiSettings.touchpadInput = !uiSettings.touchpadInput
-		scene.trigger(new TouchpadInputEvent(uiSettings.touchpadInput))
-	}
+	final File startingDirectory
+	final MixDatabase mixDatabase
+	boolean touchpadInput
 }

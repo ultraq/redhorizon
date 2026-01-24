@@ -16,27 +16,38 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Component
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
-
-import groovy.transform.TupleConstructor
 
 /**
  * A component for adding UI using ImGui to the scene.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class ImGuiComponent implements Component<ImGuiComponent> {
+class ImGuiComponent implements Component<ImGuiComponent>, EventTarget<ImGuiComponent> {
 
-	final ImGuiModule imGuiElement
+	final ImGuiModule imGuiModule
+
+	/**
+	 * Constructor, save the ImGui module and relay any events it fires so they
+	 * can be captured by scripts.
+	 */
+	ImGuiComponent(ImGuiModule imGuiModule) {
+
+		this.imGuiModule = imGuiModule
+		if (imGuiModule instanceof EventTarget) {
+			imGuiModule.relay(Event, this)
+		}
+	}
 
 	/**
 	 * Render the UI component.
 	 */
 	void render(ImGuiContext context) {
 
-		imGuiElement.render(context)
+		imGuiModule.render(context)
 	}
 }

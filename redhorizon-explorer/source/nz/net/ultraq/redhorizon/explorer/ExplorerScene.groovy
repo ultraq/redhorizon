@@ -16,15 +16,23 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
+import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
+import nz.net.ultraq.redhorizon.explorer.ui.EntryList
+import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.explorer.ui.UiController
+import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyBinding
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -44,6 +52,7 @@ class ExplorerScene extends Scene {
 	final Window window
 	final CameraEntity camera
 	final GridLinesEntity gridLines
+	final MixDatabase mixDatabase
 
 	/**
 	 * Constructor, create the initial scene (blank, unless asked to load a file
@@ -53,15 +62,26 @@ class ExplorerScene extends Scene {
 		File startingDirectory, MixDatabase mixDatabase) {
 
 		this.window = window
+		this.mixDatabase = mixDatabase
 
-		camera = new CameraEntity(width, height, window)
-		addChild(camera)
+		camera = addAndReturnChild(new CameraEntity(width, height, window)) as CameraEntity
 
-		var previewController = new PreviewController(this).withName('Preview controller')
+		addChild(new Entity()
+			.addComponent(new ImGuiComponent(new DebugOverlay()
+				.withCursorTracking(window, camera)
+				.withProfilingLogging()))
+			.addComponent(new ImGuiComponent(new MainMenuBar(window, this, touchpadInput))
+				.withName('Main menu'))
+			.addComponent(new ImGuiComponent(new EntryList())
+				.withName('Entry list'))
+			.addComponent(new ImGuiComponent(new NodeList(this))
+				.withName('Node list'))
+			.addComponent(new ImGuiComponent(new LogPanel()))
+			.addComponent(new UiSettingsComponent(startingDirectory, mixDatabase, touchpadInput))
+			.addScript(UiController)
+		)
 
-		addChild(new UiController(window, this, previewController, touchpadInput, startingDirectory, mixDatabase)
-			.withName('UI'))
-		addChild(previewController)
+		addChild(new PreviewController(this).withName('Preview controller'))
 		gridLines = new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY)
 			.withName('Grid lines')
 		addChild(gridLines)

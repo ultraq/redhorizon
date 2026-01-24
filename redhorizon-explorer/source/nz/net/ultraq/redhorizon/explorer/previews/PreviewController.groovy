@@ -74,7 +74,7 @@ class PreviewController extends Entity<PreviewController> implements AutoCloseab
 	/**
 	 * Clear the current entry in preview and reset the preview scene.
 	 */
-	void clearPreview() {
+	private void clearPreview() {
 
 		selectedFileInputStream?.close()
 		if (previewedEntity) {
@@ -113,23 +113,27 @@ class PreviewController extends Entity<PreviewController> implements AutoCloseab
 	 */
 	void preview(FileEntry entry) {
 
-		var file = entry.file()
-		logger.info('Loading {}...', file.name)
+		scene.queueUpdate { ->
+			clearPreview()
 
-		selectedFileInputStream = file.newInputStream()
-		var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
-		if (result) {
-			time("Reading file ${file.name} from filesystem", logger) { ->
-				var decoder = result.decoder().getConstructor().newInstance()
-				var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
-				previewObject(media, file.name)
+			var file = entry.file()
+			logger.info('Loading {}...', file.name)
+
+			selectedFileInputStream = file.newInputStream()
+			var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
+			if (result) {
+				time("Reading file ${file.name} from filesystem", logger) { ->
+					var decoder = result.decoder().getConstructor().newInstance()
+					var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
+					previewObject(media, file.name)
+				}
 			}
-		}
-		else {
-			logger.info('No filetype implementation for {}', file.name)
-		}
+			else {
+				logger.info('No filetype implementation for {}', file.name)
+			}
 
-		scene.trigger(new EntrySelectedEvent(entry))
+			scene.trigger(new EntrySelectedEvent(entry))
+		}
 	}
 
 	/**
@@ -137,22 +141,26 @@ class PreviewController extends Entity<PreviewController> implements AutoCloseab
 	 */
 	void preview(MixEntry entry) {
 
-		logger.info('Loading {} from mix file', entry.name())
+		scene.queueUpdate { ->
+			clearPreview()
 
-		selectedFileInputStream = new BufferedInputStream(entry.mixFile().getEntryData(entry.mixEntry()))
-		var result = new FileTester().test(null, entry.size(), selectedFileInputStream)
-		if (result) {
-			time("Reading file ${entry.name()} from mix file", logger) { ->
-				var decoder = result.decoder().getConstructor().newInstance()
-				var media = result.mediaClass().newInstance(entry.name(), decoder, selectedFileInputStream)
-				previewObject(media, entry.name())
+			logger.info('Loading {} from mix file', entry.name())
+
+			selectedFileInputStream = new BufferedInputStream(entry.mixFile().getEntryData(entry.mixEntry()))
+			var result = new FileTester().test(null, entry.size(), selectedFileInputStream)
+			if (result) {
+				time("Reading file ${entry.name()} from mix file", logger) { ->
+					var decoder = result.decoder().getConstructor().newInstance()
+					var media = result.mediaClass().newInstance(entry.name(), decoder, selectedFileInputStream)
+					previewObject(media, entry.name())
+				}
 			}
-		}
-		else {
-			logger.info('No filetype implementation for {}', entry.name())
-		}
+			else {
+				logger.info('No filetype implementation for {}', entry.name())
+			}
 
-		scene.trigger(new EntrySelectedEvent(entry))
+			scene.trigger(new EntrySelectedEvent(entry))
+		}
 	}
 
 	/**

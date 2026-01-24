@@ -16,12 +16,9 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
-import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
-import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntryAction
-import nz.net.ultraq.redhorizon.explorer.ui.actions.SelectEntryAction
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
@@ -34,20 +31,16 @@ import static imgui.flag.ImGuiSelectableFlags.SpanAllColumns
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTableFlags.*
 
-import groovy.transform.TupleConstructor
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Renders the file/entry list window for the explorer application.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class EntryList implements ImGuiModule {
+class EntryList implements ImGuiModule, EventTarget<EntryList> {
 
-	final ExplorerScene scene
-	final UiController uiController
-	final PreviewController previewController
-	final List<Entry> entries
+	final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private boolean focused
 	private boolean hovered
 	private Entry selectedEntry
@@ -114,7 +107,7 @@ class EntryList implements ImGuiModule {
 				if (isSelected) {
 					ImGui.setItemDefaultFocus()
 					if (!selectedEntryTriggered) {
-						new SelectEntryAction(scene, uiController, previewController, entry).select()
+						trigger(new EntrySelectedEvent(entry))
 						selectedEntryTriggered = true
 					}
 					if (!ImGui.isItemVisible() && !entryVisibleOnce) {
@@ -125,7 +118,7 @@ class EntryList implements ImGuiModule {
 				if (entry instanceof MixEntry) {
 					if (ImGui.beginPopupContextItem()) {
 						if (ImGui.selectable('Extract')) {
-							new ExtractMixFileEntryAction(entry, entry.name()).extract() // TODO: Save to specified location
+							trigger(new ExtractMixEntryEvent(entry))
 							ImGui.closeCurrentPopup()
 						}
 						ImGui.endPopup()

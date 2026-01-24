@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.graphics.actions.CloseWindowAction
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
-import nz.net.ultraq.redhorizon.explorer.ui.actions.ToggleTouchpadInputAction
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
@@ -34,11 +34,11 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MainMenuBar implements ImGuiModule {
+class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
 
 	final Window window
 	final ExplorerScene scene
-	final UiController uiController // TODO: Some state/options object instead of the controller
+	boolean touchpadInput
 
 	@Override
 	void render(ImGuiContext context) {
@@ -53,8 +53,9 @@ class MainMenuBar implements ImGuiModule {
 			}
 
 			if (ImGui.beginMenu('Options')) {
-				if (ImGui.menuItem('Touchpad input', null, uiController.touchpadInput)) {
-					new ToggleTouchpadInputAction(scene, uiController).toggle()
+				if (ImGui.menuItem('Touchpad input', null, touchpadInput)) {
+					touchpadInput = !touchpadInput
+					trigger(new TouchpadInputEvent(!touchpadInput))
 				}
 				if (ImGui.menuItem('Cycle palette', 'P')) {
 					new CyclePaletteAction(scene).cyclePalette()
