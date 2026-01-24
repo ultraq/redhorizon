@@ -130,11 +130,10 @@ class UiController extends EntityScript implements EventTarget<UiController> {
 		uiSettings = entity.findComponentByType(UiSettingsComponent)
 		mixDatabase = uiSettings.mixDatabase
 
-		var previewController = scene.findByType(PreviewController)
 		entryList = (entity.findComponent { it.name == 'Entry list' } as ImGuiComponent)?.imGuiModule as EntryList
 		entryList
 			.on(EntrySelectedEvent) { event ->
-				new SelectEntryAction(this, previewController, event.entry()).select()
+				new SelectEntryAction(this, scene.findScriptByType(PreviewController), event.entry()).select()
 			}
 			.on(ExtractMixEntryEvent) { event ->
 				new ExtractMixFileEntryAction(event.entry(), event.entry().name()).extract() // TODO: Save to specified location

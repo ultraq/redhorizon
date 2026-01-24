@@ -28,8 +28,8 @@ import nz.net.ultraq.redhorizon.engine.audio.SoundComponent
 import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
@@ -57,11 +57,10 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class PreviewController extends Entity<PreviewController> implements AutoCloseable {
+class PreviewController extends EntityScript implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreviewController)
 
-	ExplorerScene scene
 	private InputStream selectedFileInputStream
 	private Entity previewedEntity
 

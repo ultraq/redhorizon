@@ -52,7 +52,6 @@ class ExplorerScene extends Scene {
 	final Window window
 	final CameraEntity camera
 	final GridLinesEntity gridLines
-	final MixDatabase mixDatabase
 
 	/**
 	 * Constructor, create the initial scene (blank, unless asked to load a file
@@ -62,9 +61,8 @@ class ExplorerScene extends Scene {
 		File startingDirectory, MixDatabase mixDatabase) {
 
 		this.window = window
-		this.mixDatabase = mixDatabase
 
-		camera = addAndReturnChild(new CameraEntity(width, height, window)) as CameraEntity
+		camera = addAndReturnChild(new CameraEntity(width, height, window))
 
 		addChild(new Entity()
 			.addComponent(new ImGuiComponent(new DebugOverlay()
@@ -81,10 +79,15 @@ class ExplorerScene extends Scene {
 			.addScript(UiController)
 		)
 
-		addChild(new PreviewController(this).withName('Preview controller'))
-		gridLines = new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24, GRID_LINES_DARK_GREY, GRID_LINES_GREY)
-			.withName('Grid lines')
-		addChild(gridLines)
+		addChild(new Entity()
+			.addScript(PreviewController)
+			.withName('Preview controller')
+		)
+
+		gridLines = addAndReturnChild(new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24,
+			GRID_LINES_DARK_GREY, GRID_LINES_GREY)
+			.withName('Grid lines'))
+
 		addChild(new GlobalPalette()
 			.withName('Global palette & alpha mask'))
 
