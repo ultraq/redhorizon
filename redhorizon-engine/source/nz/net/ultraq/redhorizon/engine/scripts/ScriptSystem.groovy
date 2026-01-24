@@ -47,6 +47,7 @@ class ScriptSystem extends System {
 			scriptComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(ScriptComponent, scriptComponents)
+				return true
 			}
 			scriptComponents.each { ScriptComponent component ->
 				if (component.enabled) {

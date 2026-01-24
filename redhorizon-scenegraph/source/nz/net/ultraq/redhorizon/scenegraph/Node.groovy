@@ -194,8 +194,9 @@ class Node<T extends Node> implements LocalTransform<T>, Named<T> {
 	 */
 	void traverse(SceneVisitor<Node> visitor) {
 
-		visitor.visit(this)
-		children*.traverse(visitor)
+		if (visitor.visit(this)) {
+			children*.traverse(visitor)
+		}
 	}
 
 	/**
@@ -205,8 +206,12 @@ class Node<T extends Node> implements LocalTransform<T>, Named<T> {
 	<T extends Node> void traverse(Class<T> type, SceneVisitor<T> visitor) {
 
 		if (type.isInstance(this)) {
-			visitor.visit((T)this)
+			if (visitor.visit((T)this)) {
+				children*.traverse(type, visitor)
+			}
 		}
-		children*.traverse(type, visitor)
+		else {
+			children*.traverse(type, visitor)
+		}
 	}
 }

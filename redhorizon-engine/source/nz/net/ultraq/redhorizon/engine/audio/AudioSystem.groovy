@@ -41,6 +41,7 @@ class AudioSystem extends System {
 			audioComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(AudioComponent, audioComponents)
+				return true
 			}
 			audioComponents.each { AudioComponent component ->
 				if (component.enabled) {

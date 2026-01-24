@@ -58,6 +58,7 @@ class GraphicsSystem extends System {
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(GraphicsComponent, graphicsComponents)
 				entity.findComponentsByType(ImGuiComponent, imguiComponents)
+				return true
 			}
 
 			// TODO: Create an allocation-free method of grouping objects

@@ -41,6 +41,7 @@ class CollisionSystem extends System {
 			collisionComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(CollisionComponent, collisionComponents)
+				return true
 			}
 			for (var i = 0; i < collisionComponents.size(); i++) {
 				var collision = collisionComponents.get(i)

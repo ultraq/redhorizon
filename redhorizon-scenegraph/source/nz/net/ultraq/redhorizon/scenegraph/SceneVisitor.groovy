@@ -26,6 +26,10 @@ interface SceneVisitor<T extends Node> {
 
 	/**
 	 * Visit any node.
+	 *
+	 * @return
+	 *   {@code true} if traversal should continue, {@code false} if it should
+	 *   stop.
 	 */
-	void visit(T node)
+	boolean visit(T node)
 }

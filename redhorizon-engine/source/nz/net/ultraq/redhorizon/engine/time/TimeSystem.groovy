@@ -41,6 +41,7 @@ class TimeSystem extends System {
 			timeComponents.clear()
 			scene.traverse(Entity) { Entity entity ->
 				entity.findComponentsByType(TimeComponent, timeComponents)
+				return true
 			}
 			timeComponents.each { component ->
 				if (component.enabled) {

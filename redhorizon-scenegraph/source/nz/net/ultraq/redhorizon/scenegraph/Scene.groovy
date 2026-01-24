@@ -49,6 +49,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 			if (node instanceof AutoCloseable) {
 				node.close()
 			}
+			return true
 		}
 		executor.close()
 	}
@@ -56,11 +57,19 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	/**
 	 * Return the first node in the scene to match the given predicate.
 	 */
-	Node find(
+	<T extends Node> T find(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
 			Closure<Boolean> predicate) {
 
-		return root.findDescendent(predicate)
+		return (T)root.findDescendent(predicate)
+	}
+
+	/**
+	 * Return the first node in the scene with the given name.
+	 */
+	<T extends Node> T findByName(String name) {
+
+		return find { node -> node.name == name }
 	}
 
 	/**
@@ -68,7 +77,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 */
 	<T extends Node> T findByType(Class<T> type) {
 
-		return (T)find { node -> type.isInstance(node) }
+		return find { node -> type.isInstance(node) }
 	}
 
 	/**
