@@ -33,14 +33,30 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['addAndReturnChild', 'addChild', 'clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale',
-			'translate', 'traverse'],
+		includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()
 
 	private final Queue<Closure> updateQueue = new ArrayDeque<>()
 	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()
+
+	/**
+	 * Add a node as a child of the root of the scene.
+	 */
+	Scene addChild(Node node) {
+
+		root.addChild(node)
+		return this
+	}
+
+	/**
+	 * Add and return a node as a child of the root of the scene.
+	 */
+	<T extends Node> T addAndReturnChild(T node) {
+
+		return root.addAndReturnChild(node)
+	}
 
 	@Override
 	void close() {

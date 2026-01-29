@@ -23,7 +23,7 @@ import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
 /**
- * Any object in the scene that should be updated periodically.
+ * Any object in the scene.
  *
  * @author Emanuel Rabina
  */

@@ -23,13 +23,10 @@ import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
 import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.audio.MusicComponent
-import nz.net.ultraq.redhorizon.engine.audio.SoundComponent
 import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
@@ -103,7 +100,7 @@ class PreviewController extends EntityScript implements AutoCloseable {
 //				scene.trigger(new PreviewEndEvent())
 //			}
 
-		scene.camera.resetTransform()
+		(scene as ExplorerScene).camera.resetTransform()
 		scene.trigger(new PreviewEndEvent())
 	}
 
@@ -183,8 +180,8 @@ class PreviewController extends EntityScript implements AutoCloseable {
 //						.withName("Tilemap - ${fileName}")
 //				}
 				yield new Entity()
-					.addComponent(new SpriteComponent(file, BasicShader))
-					.addComponent(new ScriptComponent(DarkPreviewScript))
+					.addSprite(file, BasicShader)
+					.addScript(DarkPreviewScript)
 					.withName("Image - ${fileName}")
 			}
 			case Animation -> {
@@ -195,8 +192,8 @@ class PreviewController extends EntityScript implements AutoCloseable {
 				}
 				yield new Entity()
 					.addComponent(animationComponent)
-					.addComponent(new ScriptComponent(DarkPreviewScript))
-					.addComponent(new ScriptComponent(AnimationPlaybackScript))
+					.addScript(DarkPreviewScript)
+					.addScript(AnimationPlaybackScript)
 					.withName("Animation - ${fileName}")
 					.on(AnimationStoppedEvent) { event ->
 						scene.queueUpdate { ->
@@ -211,8 +208,8 @@ class PreviewController extends EntityScript implements AutoCloseable {
 				}
 				yield new Entity()
 					.addComponent(videoComponent)
-					.addComponent(new ScriptComponent(DarkPreviewScript))
-					.addComponent(new ScriptComponent(VideoPlaybackScript))
+					.addScript(DarkPreviewScript)
+					.addScript(VideoPlaybackScript)
 					.withName("Video - ${fileName}")
 					.on(VideoStoppedEvent) { event ->
 						scene.queueUpdate { ->
@@ -222,13 +219,13 @@ class PreviewController extends EntityScript implements AutoCloseable {
 			}
 			case Sound ->
 				new Entity()
-					.addComponent(new SoundComponent(file))
-					.addComponent(new ScriptComponent(SoundPlaybackScript))
+					.addSound(file)
+					.addScript(SoundPlaybackScript)
 					.withName("Sound - ${fileName}")
 			case Music ->
 				new Entity()
-					.addComponent(new MusicComponent(file))
-					.addComponent(new ScriptComponent(MusicPlaybackScript))
+					.addMusic(file)
+					.addScript(MusicPlaybackScript)
 					.withName("Music - ${fileName}")
 					.on(MusicStoppedEvent) { event ->
 						scene.queueUpdate { ->
@@ -284,8 +281,8 @@ class PreviewController extends EntityScript implements AutoCloseable {
 		// No config found, fall back to viewing a SHP file as frame-by-frame media
 		return new Entity()
 			.addComponent(new FactionComponent(Faction.GOLD))
-			.addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader))
-			.addComponent(new ScriptComponent(SpritePreviewScript))
+			.addSprite(spriteSheet, PalettedSpriteShader)
+			.addScript(SpritePreviewScript)
 			.withName("Sprite - ${fileName}")
 	}
 
