@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.eventhorizon.EventTarget
 
 import org.joml.primitives.Circlef
 
@@ -26,7 +26,7 @@ import org.joml.primitives.Circlef
  *
  * @author Emanuel Rabina
  */
-class CircleCollider extends Collider<CircleCollider> {
+class CircleCollider extends Collider<CircleCollider> implements EventTarget<CircleCollider> {
 
 	final float radius
 
@@ -55,11 +55,8 @@ class CircleCollider extends Collider<CircleCollider> {
 		var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius * otherScale.x() as float)
 
 		if (bounds.intersects(otherBounds)) {
-			var scriptComponent = parent.findDescendentByType(ScriptNode)
-			scriptComponent?.script?.onCollision(bounds, other.parent, otherBounds)
-
-			var otherScriptComponent = other.parent.findDescendentByType(ScriptNode)
-			otherScriptComponent?.script?.onCollision(otherBounds, parent, bounds)
+			trigger(new CollisionEvent(bounds, other.parent, otherBounds))
+			other.trigger(new CollisionEvent(otherBounds, parent, bounds))
 		}
 	}
 }

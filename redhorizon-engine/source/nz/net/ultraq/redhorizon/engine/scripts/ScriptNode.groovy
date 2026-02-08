@@ -75,14 +75,14 @@ class ScriptNode extends Node<ScriptNode> implements AutoCloseable {
 			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
 			if (isNew) {
 				script = scriptObject as Script
-				script.entity = parent
+				script.node = parent
 				script.input = input
 				script.init()
 			}
 		}
 		else if (!script && scriptClass) {
 			script = scriptClass.getDeclaredConstructor().newInstance()
-			script.entity = parent
+			script.node = parent
 			script.input = input
 			script.init()
 		}

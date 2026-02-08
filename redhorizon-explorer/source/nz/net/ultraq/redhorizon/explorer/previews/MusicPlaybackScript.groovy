@@ -41,7 +41,7 @@ class MusicPlaybackScript extends Script implements AutoCloseable {
 	@Override
 	void init() {
 
-		music = entity.findComponentByType(MusicComponent)
+		music = node.findComponentByType(MusicComponent)
 		music.withVolume(0.5f)
 	}
 
@@ -63,7 +63,7 @@ class MusicPlaybackScript extends Script implements AutoCloseable {
 		}
 
 		if (playbackStarted && music.stopped) {
-			entity.trigger(new MusicStoppedEvent())
+			node.trigger(new MusicStoppedEvent())
 		}
 	}
 

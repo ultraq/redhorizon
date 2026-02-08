@@ -14,33 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.previews
+package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.scenegraph.Node
+
+import groovy.transform.ImmutableOptions
 
 /**
- * A script to make the background colour black and disable the grid lines.
+ * Triggered when two collider objects intersect/collide.
  *
  * @author Emanuel Rabina
  */
-class DarkPreviewScript extends Script implements AutoCloseable {
-
-	private ExplorerScene scene
-
-	@Override
-	void close() {
-
-		scene.window.withBackgroundColour(Colour.GREY)
-		scene.gridLines.enable()
-	}
-
-	@Override
-	void init() {
-
-		scene = node.scene as ExplorerScene
-		scene.window.withBackgroundColour(Colour.BLACK)
-		scene.gridLines.disable()
-	}
+@ImmutableOptions(knownImmutables = ['thisBounds', 'otherObject', 'otherBounds'])
+record CollisionEvent(Object thisBounds, Node otherObject, Object otherBounds) implements Event {
 }

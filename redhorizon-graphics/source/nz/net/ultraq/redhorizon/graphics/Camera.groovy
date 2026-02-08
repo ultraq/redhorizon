@@ -54,7 +54,7 @@ class Camera extends Node<Camera> {
 	/**
 	 * Return a view-projection matrix for the given transform.
 	 */
-	private Matrix4fc getViewProjection() {
+	Matrix4fc getViewProjection() {
 
 		return projection.mulAffine(view.mulAffine(transform, viewTransform), viewProjection)
 	}

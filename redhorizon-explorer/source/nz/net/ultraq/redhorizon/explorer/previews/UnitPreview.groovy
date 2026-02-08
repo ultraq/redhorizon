@@ -128,8 +128,8 @@ class UnitPreview extends Entity<UnitPreview> {
 //					.scale(1f + value as float))
 //			})
 //				.start()
-			(entity.scene as ExplorerScene).camera.scale(2f)
-			sprite = entity.findComponentByType(SpriteComponent)
+			(node.scene as ExplorerScene).camera.scale(2f)
+			sprite = node.findComponentByType(SpriteComponent)
 		}
 
 		@Override
@@ -139,43 +139,43 @@ class UnitPreview extends Entity<UnitPreview> {
 			animationTimer += delta
 
 			if (input.keyPressed(GLFW_KEY_A) && repeatTimer >= repeatInterval) {
-				entity.rotateLeft()
+				node.rotateLeft()
 				repeatTimer = 0f
 			}
 			else if (input.keyPressed(GLFW_KEY_D) && repeatTimer >= repeatInterval) {
-				entity.rotateRight()
+				node.rotateRight()
 				repeatTimer = 0f
 			}
 			else if (input.keyPressed(GLFW_KEY_W, true)) {
-				entity.previousAnimation()
-				logger.info('Showing {} state', entity.unitData.shpFile.states[entity.stateIndex].name)
+				node.previousAnimation()
+				logger.info('Showing {} state', node.unitData.shpFile.states[node.stateIndex].name)
 				animationTimer = 0f
 			}
 			else if (input.keyPressed(GLFW_KEY_S, true)) {
-				entity.nextAnimation()
-				logger.info('Showing {} state', entity.unitData.shpFile.states[entity.stateIndex].name)
+				node.nextAnimation()
+				logger.info('Showing {} state', node.unitData.shpFile.states[node.stateIndex].name)
 				animationTimer = 0f
 			}
 
 			if (input.keyPressed(GLFW_KEY_F, true)) {
 				var factions = Faction.values()
-				var currentFaction = entity.findComponentByType(FactionComponent)
+				var currentFaction = node.findComponentByType(FactionComponent)
 				var nextFaction = factions[(currentFaction.faction.ordinal() + 1) % factions.length]
 				currentFaction.faction = nextFaction
 				logger.info('Viewing with {} faction colours', nextFaction.name())
 			}
 
-			var currentState = entity.unitData.shpFile.states[entity.stateIndex]
+			var currentState = node.unitData.shpFile.states[node.stateIndex]
 			var frames = currentState.frames
-			var closestHeading = Math.round(entity.heading / entity.degreesPerHeading)
+			var closestHeading = Math.round(node.heading / node.degreesPerHeading)
 			var rotationFrame = closestHeading ? (currentState.headings - closestHeading) * frames as int : 0
 			var animationFrame = frames > 1 ? Math.floor((float)(animationTimer * FRAMERATE)) % frames as int : 0
-			var frame = entity.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
+			var frame = node.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			sprite.framePosition.set(sprite.spriteSheet.getFramePosition(frame))
 
-			var turret = entity.findComponent { it.name == 'Turret' } as SpriteComponent
+			var turret = node.findComponent { it.name == 'Turret' } as SpriteComponent
 			if (turret) {
-				var turretData = entity.unitData.shpFile.parts.turret
+				var turretData = node.unitData.shpFile.parts.turret
 				turret.framePosition.set(turret.spriteSheet.getFramePosition(frame + turretData.headings))
 			}
 		}

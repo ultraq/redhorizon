@@ -39,7 +39,7 @@ class AnimationPlaybackScript extends Script implements AutoCloseable {
 	@Override
 	void init() {
 
-		animation = entity.findComponentByType(AnimationComponent)
+		animation = node.findComponentByType(AnimationComponent)
 	}
 
 	@Override
@@ -51,7 +51,7 @@ class AnimationPlaybackScript extends Script implements AutoCloseable {
 		}
 
 		if (playbackStarted && animation.stopped) {
-			entity.trigger(new AnimationStoppedEvent())
+			node.trigger(new AnimationStoppedEvent())
 		}
 	}
 

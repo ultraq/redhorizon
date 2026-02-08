@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class Node<T extends Node> {
+class Node<T extends Node> implements AutoCloseable {
 
 	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()
@@ -76,6 +76,16 @@ class Node<T extends Node> {
 			child.parent = null
 		}
 		children.clear()
+	}
+
+	@Override
+	void close() {
+
+		children.each { child ->
+			if (child instanceof AutoCloseable) {
+				child.close()
+			}
+		}
 	}
 
 	/**

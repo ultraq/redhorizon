@@ -38,8 +38,8 @@ class SpritePreviewScript extends Script {
 	@Override
 	void init() {
 
-		(entity.scene as ExplorerScene).camera.scale(2f)
-		sprite = entity.findComponentByType(SpriteComponent)
+		(node.scene as ExplorerScene).camera.scale(2f)
+		sprite = node.findComponentByType(SpriteComponent)
 	}
 
 	@Override

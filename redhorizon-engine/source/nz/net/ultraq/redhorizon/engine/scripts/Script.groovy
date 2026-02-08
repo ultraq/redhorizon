@@ -24,9 +24,9 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
  *
  * @author Emanuel Rabina
  */
-abstract class Script {
+abstract class Script<T extends Node> {
 
-	protected Node entity
+	protected T node
 	protected InputEventHandler input
 
 	/**
@@ -34,20 +34,6 @@ abstract class Script {
 	 * script.
 	 */
 	void init() {
-	}
-
-	/**
-	 * Called when a collision occurs between the entity this script is attached
-	 * to and another entity with a collision object.
-	 *
-	 * @param thisBounds
-	 *   Bounds of the collision object on this entity.
-	 * @param otherEntity
-	 *   The other entity that the collision object belongs to.
-	 * @param otherBounds
-	 *   Bounds of the collision object on the other entity.
-	 */
-	void onCollision(Object thisBounds, Node otherEntity, Object otherBounds) {
 	}
 
 	/**

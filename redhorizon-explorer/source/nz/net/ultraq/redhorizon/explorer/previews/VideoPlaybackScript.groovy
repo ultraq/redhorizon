@@ -39,7 +39,7 @@ class VideoPlaybackScript extends Script implements AutoCloseable {
 	@Override
 	void init() {
 
-		video = entity.findComponentByType(VideoComponent)
+		video = node.findComponentByType(VideoComponent)
 	}
 
 	@Override
@@ -51,7 +51,7 @@ class VideoPlaybackScript extends Script implements AutoCloseable {
 		}
 
 		if (playbackStarted && video.stopped) {
-			entity.trigger(new VideoStoppedEvent())
+			node.trigger(new VideoStoppedEvent())
 		}
 	}
 

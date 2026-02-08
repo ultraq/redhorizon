@@ -40,7 +40,7 @@ class SoundPlaybackScript extends Script implements AutoCloseable {
 	@Override
 	void init() {
 
-		sound = entity.findComponentByType(SoundComponent)
+		sound = node.findComponentByType(SoundComponent)
 	}
 
 	@Override

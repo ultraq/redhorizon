@@ -127,10 +127,10 @@ class UiController extends Script implements EventTarget<UiController> {
 	@Override
 	void init() {
 
-		uiSettings = entity.findComponentByType(UiSettingsComponent)
+		uiSettings = node.findComponentByType(UiSettingsComponent)
 		mixDatabase = uiSettings.mixDatabase
 
-		entryList = (entity.findComponent { it.name == 'Entry list' } as ImGuiComponent)?.imGuiModule as EntryList
+		entryList = (node.findComponent { it.name == 'Entry list' } as ImGuiComponent)?.imGuiModule as EntryList
 		entryList
 			.on(EntrySelectedEvent) { event ->
 				new SelectEntryAction(this, scene.findScriptByType(PreviewController), event.entry()).select()
@@ -140,7 +140,7 @@ class UiController extends Script implements EventTarget<UiController> {
 			}
 		entries = entryList.entries
 
-		var mainMenuBar = (entity.findComponent { it.name == 'Main menu' } as ImGuiComponent)
+		var mainMenuBar = (node.findComponent { it.name == 'Main menu' } as ImGuiComponent)
 		mainMenuBar.on(TouchpadInputEvent) { event ->
 			new ToggleTouchpadInputAction(scene, uiSettings).toggle()
 		}

@@ -83,7 +83,7 @@ class PalettePreview extends Entity<PalettePreview> {
 		@Override
 		void init() {
 
-			scene = entity.scene as ExplorerScene
+			scene = node.scene as ExplorerScene
 			scene.gridLines.disable()
 		}
 	}

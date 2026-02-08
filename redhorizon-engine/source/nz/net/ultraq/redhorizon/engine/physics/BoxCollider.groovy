@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.eventhorizon.EventTarget
 
 import org.joml.primitives.Rectanglef
 
@@ -26,7 +26,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class BoxCollider extends Collider<BoxCollider> {
+class BoxCollider extends Collider<BoxCollider> implements EventTarget<BoxCollider> {
 
 	final float width
 	final float height
@@ -59,11 +59,8 @@ class BoxCollider extends Collider<BoxCollider> {
 			.translate(otherPosition.x(), otherPosition.y())
 
 		if (bounds.intersectsRectangle(otherBounds)) {
-			var scriptComponent = parent.findDescendentByType(ScriptNode)
-			scriptComponent?.script?.onCollision(bounds, other.parent, otherBounds)
-
-			var otherScriptComponent = other.findDescendentByType(ScriptNode)
-			otherScriptComponent?.script?.onCollision(otherBounds, parent, bounds)
+			trigger(new CollisionEvent(bounds, other.parent, otherBounds))
+			other.trigger(new CollisionEvent(otherBounds, parent, bounds))
 		}
 	}
 }
