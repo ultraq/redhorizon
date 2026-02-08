@@ -16,15 +16,17 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
+import nz.net.ultraq.redhorizon.scenegraph.Node
+
 /**
  * Any ImGui object to render during the ImGui phase.
  *
  * @author Emanuel Rabina
  */
-interface ImGuiModule {
+abstract class ImGuiModule<T extends ImGuiModule> extends Node<T> {
 
 	/**
 	 * Draw the module.
 	 */
-	void render(ImGuiContext context)
+	abstract void render(ImGuiContext context)
 }

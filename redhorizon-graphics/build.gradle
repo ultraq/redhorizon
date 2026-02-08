@@ -26,6 +26,7 @@ configure {
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
@@ -44,6 +45,7 @@ configure {
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				api project(':redhorizon-scenegraph')
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				api platform("org.lwjgl:lwjgl-bom:${lwjglVersion}")
 				api 'org.lwjgl:lwjgl'

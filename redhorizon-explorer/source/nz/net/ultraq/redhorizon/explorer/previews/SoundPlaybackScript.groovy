@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.engine.audio.SoundComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
@@ -26,7 +26,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
-class SoundPlaybackScript extends EntityScript implements AutoCloseable {
+class SoundPlaybackScript extends Script implements AutoCloseable {
 
 	private SoundComponent sound
 	private boolean playbackStarted = false

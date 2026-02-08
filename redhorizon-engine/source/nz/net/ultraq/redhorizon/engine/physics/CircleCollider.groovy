@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 
 import org.joml.primitives.Circlef
 
@@ -26,40 +26,40 @@ import org.joml.primitives.Circlef
  *
  * @author Emanuel Rabina
  */
-class CircleCollisionComponent implements CollisionComponent<CircleCollisionComponent> {
+class CircleCollider extends Collider<CircleCollider> {
 
 	final float radius
 
 	/**
 	 * Constructor, set the collision area with a radius.
 	 */
-	CircleCollisionComponent(float radius) {
+	CircleCollider(float radius) {
 
 		this.radius = radius
 	}
 
 	@Override
-	void checkCollision(CollisionComponent other) {
+	void checkCollision(Collider other) {
 
 		// TODO: Allow collision checks across different shapes
-		if (other !instanceof CircleCollisionComponent) {
+		if (other !instanceof CircleCollider) {
 			return
 		}
 
-		var position = entity.globalPosition
-		var scale = entity.globalScale
+		var position = globalPosition
+		var scale = globalScale
 		var bounds = new Circlef(position.x(), position.y(), radius * scale.x() as float)
 
-		var otherPosition = other.entity.globalPosition
-		var otherScale = other.entity.globalScale
+		var otherPosition = other.globalPosition
+		var otherScale = other.globalScale
 		var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius * otherScale.x() as float)
 
 		if (bounds.intersects(otherBounds)) {
-			var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
-			scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
+			var scriptComponent = parent.findDescendentByType(ScriptNode)
+			scriptComponent?.script?.onCollision(bounds, other.parent, otherBounds)
 
-			var otherScriptComponent = other.entity.findComponentByType(ScriptComponent) as ScriptComponent
-			otherScriptComponent?.script?.onCollision(otherBounds, entity, bounds)
+			var otherScriptComponent = other.parent.findDescendentByType(ScriptNode)
+			otherScriptComponent?.script?.onCollision(otherBounds, parent, bounds)
 		}
 	}
 }

@@ -18,14 +18,14 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 
 /**
  * Control the behaviour of a video in preview.
  *
  * @author Emanuel Rabina
  */
-class VideoPlaybackScript extends EntityScript implements AutoCloseable {
+class VideoPlaybackScript extends Script implements AutoCloseable {
 
 	private VideoComponent video
 	private boolean playbackStarted = false

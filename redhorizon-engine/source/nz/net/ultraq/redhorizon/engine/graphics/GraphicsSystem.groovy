@@ -16,13 +16,14 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.GraphicsNode
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
@@ -45,24 +46,28 @@ class GraphicsSystem extends System {
 	final Window window
 	final Framebuffer framebuffer
 	final Shader<? extends SceneShaderContext>[] shaders
-	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
-	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
+	private final List<GraphicsNode> graphicsNodes = new ArrayList<>()
+	private final List<ImGuiModule> imguiModules = new ArrayList<>()
 	private Closure<Framebuffer> postProcessingStage
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			graphicsComponents.clear()
-			imguiComponents.clear()
-			scene.traverse(Entity) { Entity entity ->
-				entity.findComponentsByType(GraphicsComponent, graphicsComponents)
-				entity.findComponentsByType(ImGuiComponent, imguiComponents)
+			graphicsNodes.clear()
+			imguiModules.clear()
+			scene.traverse { Node node ->
+				if (node instanceof GraphicsNode) {
+					graphicsNodes << node
+				}
+				else if (node instanceof ImGuiModule) {
+					imguiModules << node
+				}
 				return true
 			}
 
 			// TODO: Create an allocation-free method of grouping objects
-			var groupedComponents = graphicsComponents.groupBy { it.shaderClass }
+			var groupedNodes = graphicsNodes.groupBy { it.shaderClass }
 
 			window.useRenderPipeline()
 				.scene { ->
@@ -70,13 +75,13 @@ class GraphicsSystem extends System {
 						framebuffer.useFramebuffer { ->
 							shaders.each { shader ->
 								shader.useShader { shaderContext ->
-									var camera = scene.findByType(CameraEntity)
+									var camera = scene.findByType(Camera)
 									if (camera) {
 										camera.render(shaderContext)
 									}
-									groupedComponents[shader.class]?.each { component ->
-										if (component.enabled) {
-											component.render(shaderContext)
+									groupedNodes[shader.class]?.each { graphics ->
+										if (graphics.enabled) {
+											graphics.render(shaderContext)
 										}
 									}
 								}
@@ -92,7 +97,7 @@ class GraphicsSystem extends System {
 				}
 				.ui(true) { context ->
 					average('UI', 1f, logger) { ->
-						imguiComponents.each { component ->
+						imguiModules.each { component ->
 							if (component.enabled) {
 								component.render(context)
 							}

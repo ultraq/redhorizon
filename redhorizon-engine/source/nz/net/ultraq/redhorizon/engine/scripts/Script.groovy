@@ -16,27 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.scripts
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
  * A custom class for any script used during the game update phase.
  *
  * @author Emanuel Rabina
  */
-abstract class EntityScript {
+abstract class Script {
 
-	protected Entity entity
+	protected Node entity
 	protected InputEventHandler input
-
-	/**
-	 * A shortcut for {@code entity.scene}.
-	 */
-	protected Scene getScene() {
-
-		return entity.scene
-	}
 
 	/**
 	 * Called when a script is first started, can be overridden to set up the
@@ -56,7 +47,7 @@ abstract class EntityScript {
 	 * @param otherBounds
 	 *   Bounds of the collision object on the other entity.
 	 */
-	void onCollision(Object thisBounds, Entity otherEntity, Object otherBounds) {
+	void onCollision(Object thisBounds, Node otherEntity, Object otherBounds) {
 	}
 
 	/**

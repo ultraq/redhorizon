@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Matrix4f
 import org.lwjgl.system.Configuration
 import org.slf4j.LoggerFactory
 import spock.lang.IgnoreIf
@@ -47,7 +46,6 @@ class ImGuiElementsCheck extends Specification {
 
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
-	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(800, 500, "Testing")
@@ -75,8 +73,9 @@ class ImGuiElementsCheck extends Specification {
 				.addChild(new Node().withName('Child 2'))
 
 			var camera = new Camera(800, 500, window)
+				.translate(450f, 200f)
 			var debugOverlay = new DebugOverlay()
-				.addModule(new CursorTrackingOverlayModule(window, camera, cameraTransform))
+				.addModule(new CursorTrackingOverlayModule(window, camera))
 			var nodeList = new NodeList(scene)
 			var logPanel = new LogPanel()
 			var imGuiWindows = [debugOverlay, nodeList, logPanel]

@@ -17,6 +17,9 @@
 package nz.net.ultraq.redhorizon.classic.graphics
 
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
+import nz.net.ultraq.redhorizon.graphics.GraphicsNode
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
@@ -30,8 +33,10 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class FactionAdjustmentMap implements AutoCloseable {
+class FactionAdjustmentMap extends GraphicsNode<FactionAdjustmentMap, PalettedSpriteShaderContext>
+	implements AutoCloseable {
 
+	final Class<? extends Shader> shaderClass = PalettedSpriteShader
 	Faction faction
 	private boolean factionChanged
 	private final ByteBuffer buffer
@@ -60,6 +65,13 @@ class FactionAdjustmentMap implements AutoCloseable {
 	void close() {
 
 		texture.close()
+	}
+
+	@Override
+	void render(PalettedSpriteShaderContext shaderContext) {
+
+		shaderContext.setAdjustmentMap(this)
+		update()
 	}
 
 	/**

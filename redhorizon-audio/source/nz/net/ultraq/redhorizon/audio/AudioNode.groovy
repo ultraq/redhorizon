@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.audio
 
-import nz.net.ultraq.redhorizon.scenegraph.Named
-
-import groovy.transform.Memoized
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Any reusable behaviour that can be attached to an entity.
+ * Parent class for all audio nodes.
  *
  * @author Emanuel Rabina
  */
-trait Component<T extends Component> implements Named<T>, Disableable<T> {
+abstract class AudioNode<T extends AudioNode> extends Node<T> {
 
-	Entity entity
+	/**
+	 * Return the source for this audio node.
+	 */
+	protected abstract Source getSource()
 
-	@Override
-	@Memoized
-	String getName() {
+	/**
+	 * Render this audio node, mostly by updating the state of the node with the
+	 * audio device.
+	 */
+	void render() {
 
-		if (hasCustomName()) {
-			return Named.super.getName()
-		}
-
-		var sentenceCaseName = this.class.simpleName.toSentenceCase()
-		return sentenceCaseName.substring(0, sentenceCaseName.lastIndexOf(' '))
+		source.setPosition(globalPosition)
 	}
 }

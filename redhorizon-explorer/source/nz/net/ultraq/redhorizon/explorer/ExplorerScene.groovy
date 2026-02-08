@@ -16,12 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
@@ -30,11 +28,13 @@ import nz.net.ultraq.redhorizon.explorer.ui.EntryList
 import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.explorer.ui.UiController
 import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.input.KeyBinding
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
@@ -50,8 +50,8 @@ class ExplorerScene extends Scene {
 	private static final Colour GRID_LINES_DARK_GREY = new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f)
 
 	final Window window
-	final CameraEntity camera
-	final GridLinesEntity gridLines
+	final Camera camera
+	final GridLines gridLines
 
 	/**
 	 * Constructor, create the initial scene (blank, unless asked to load a file
@@ -62,29 +62,32 @@ class ExplorerScene extends Scene {
 
 		this.window = window
 
-		camera = addAndReturnChild(new CameraEntity(width, height, window))
+		camera = addAndReturnChild(new Camera(width, height, window))
 
-		addChild(new Entity()
-			.addComponent(new ImGuiComponent(new DebugOverlay()
+		addChild(new Node()
+			.withName('UI')
+			.addChild(new DebugOverlay()
 				.withCursorTracking(window, camera)
-				.withProfilingLogging()))
-			.addComponent(new ImGuiComponent(new MainMenuBar(window, this, touchpadInput))
+				.withProfilingLogging())
+			.addChild(new MainMenuBar(window, this, touchpadInput)
 				.withName('Main menu'))
-			.addComponent(new ImGuiComponent(new EntryList())
+			.addChild(new EntryList()
 				.withName('Entry list'))
-			.addComponent(new ImGuiComponent(new NodeList(this))
+			.addChild(new NodeList(this)
 				.withName('Node list'))
-			.addComponent(new ImGuiComponent(new LogPanel()))
-			.addComponent(new UiSettingsComponent(startingDirectory, mixDatabase, touchpadInput))
-			.addScript(UiController)
+			.addChild(new LogPanel()
+				.withName('Log panel'))
+			.addChild(new UiSettingsComponent(startingDirectory, mixDatabase, touchpadInput)
+				.withName('UI settings'))
+			.addChild(new ScriptNode(UiController))
 		)
 
-		addChild(new Entity()
-			.addScript(PreviewController)
+		addChild(new Node()
 			.withName('Preview controller')
+			.addChild(new ScriptNode(PreviewController))
 		)
 
-		gridLines = addAndReturnChild(new GridLinesEntity(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24,
+		gridLines = addAndReturnChild(new GridLines(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24,
 			GRID_LINES_DARK_GREY, GRID_LINES_GREY)
 			.withName('Grid lines'))
 

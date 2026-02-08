@@ -22,7 +22,7 @@ package nz.net.ultraq.redhorizon.scenegraph
  * @author Emanuel Rabina
  */
 @FunctionalInterface
-interface SceneVisitor<T extends Node> {
+interface SceneVisitor {
 
 	/**
 	 * Visit any node.
@@ -31,5 +31,5 @@ interface SceneVisitor<T extends Node> {
 	 *   {@code true} if traversal should continue, {@code false} if it should
 	 *   stop.
 	 */
-	boolean visit(T node)
+	boolean visit(Node node)
 }

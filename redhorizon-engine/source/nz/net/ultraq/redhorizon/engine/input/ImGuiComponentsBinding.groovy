@@ -16,18 +16,18 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
 /**
  * Configure a key to toggle the enabled/disabled state of any
- * {@link ImGuiComponent}s.
+ * {@link ImGuiModule}s.
  *
  * @author Emanuel Rabina
  */
 class ImGuiComponentsBinding extends KeyBinding {
 
-	ImGuiComponentsBinding(int key, List<ImGuiComponent> components) {
+	ImGuiComponentsBinding(int key, List<ImGuiModule> components) {
 		super(key, true, { ->
 			components.each { component ->
 				if (component.enabled) {

@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -32,15 +31,15 @@ class CollisionSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
-	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
+	private final List<Collider> collisionComponents = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
 			collisionComponents.clear()
-			scene.traverse(Entity) { Entity entity ->
-				entity.findComponentsByType(CollisionComponent, collisionComponents)
+			scene.traverse(Collider) { Collider collision ->
+				collisionComponents << collision
 				return true
 			}
 			for (var i = 0; i < collisionComponents.size(); i++) {

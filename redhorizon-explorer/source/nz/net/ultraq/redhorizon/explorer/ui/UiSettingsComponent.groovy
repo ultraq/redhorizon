@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.explorer.ui
 
-import nz.net.ultraq.redhorizon.engine.Component
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import groovy.transform.TupleConstructor
 
@@ -27,7 +27,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class UiSettingsComponent implements Component<UiSettingsComponent> {
+class UiSettingsComponent extends Node<UiSettingsComponent> {
 
 	final File startingDirectory
 	final MixDatabase mixDatabase

@@ -17,9 +17,9 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 
-import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 
@@ -29,48 +29,51 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Sprite implements AutoCloseable {
+class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoCloseable {
 
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 	private static final Vector2f defaultFramePosition = new Vector2f(0, 0)
 
 	final int width
 	final int height
+	final Class<? extends Shader> shaderClass
 	private final Mesh mesh
 	private final Material material
 
 	/**
 	 * Constructor, create a new sprite.
 	 */
-	private Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture) {
+	private Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture,
+		Class<? extends Shader> shaderClass) {
 
 		this.width = width
 		this.height = height
+		this.shaderClass = shaderClass
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(0, 0)),
 			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
 			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
 			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.WHITE, new Vector2f(0, frameHeight))
 		}, index)
-		material = new Material(texture: texture)
+		material = new Material(texture: texture, frameXY: defaultFramePosition)
 	}
 
 	/**
 	 * Constructor, create a new sprite out of an existing image.
 	 */
-	Sprite(Image image) {
+	Sprite(Image image, Class<? extends Shader> shaderClass = BasicShader) {
 
-		this(image.width, image.height, 1f, 1f, image.texture)
+		this(image.width, image.height, 1f, 1f, image.texture, shaderClass)
 	}
 
 	/**
 	 * Constructor, create a new sprite from a sprite sheet.
 	 */
-	Sprite(SpriteSheet spriteSheet) {
+	Sprite(SpriteSheet spriteSheet, Class<? extends Shader> shaderClass = BasicShader) {
 
 		this(spriteSheet.width, spriteSheet.height,
 			spriteSheet.width / spriteSheet.texture.width, spriteSheet.height / spriteSheet.texture.height,
-			spriteSheet.texture)
+			spriteSheet.texture, shaderClass)
 	}
 
 	@Override
@@ -83,9 +86,17 @@ class Sprite implements AutoCloseable {
 	 * Draw this sprite, using the currently-bound shader and optionally selecting
 	 * a frame in the sprite sheet.
 	 */
-	void render(SceneShaderContext shaderContext, Matrix4fc transform, Vector2f framePosition = defaultFramePosition) {
+	void render(SceneShaderContext shaderContext) {
+
+		mesh.render(shaderContext, material, globalTransform)
+	}
+
+	/**
+	 * Adjust which frame of the sprite sheet is displayed.
+	 */
+	Sprite withFramePosition(Vector2f framePosition) {
 
 		material.frameXY = framePosition
-		mesh.render(shaderContext, material, transform)
+		return this
 	}
 }

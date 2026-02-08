@@ -14,41 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph
+package nz.net.ultraq.redhorizon.engine.physics
+
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Any object in a scene that has a displayable name for debug purposes.
+ * Base class for all collision nodes.
  *
  * @author Emanuel Rabina
  */
-trait Named<T extends Named> {
-
-	private String name
+abstract class Collider<T extends Collider> extends Node<T> {
 
 	/**
-	 * Returns this object's name, defaulting to the class name if not set using
-	 * {@link #withName(String)}.
+	 * Check whether this object is colliding with another.
 	 */
-	String getName() {
-
-		return name ?: this.class.simpleName
-	}
-
-	/**
-	 * Return whether or not a custom name has been set for this object.
-	 * @return
-	 */
-	boolean hasCustomName() {
-
-		return name != null
-	}
-
-	/**
-	 * Set the name of this object.
-	 */
-	T withName(String name) {
-
-		this.name = name
-		return (T)this
-	}
+	abstract void checkCollision(Collider other)
 }

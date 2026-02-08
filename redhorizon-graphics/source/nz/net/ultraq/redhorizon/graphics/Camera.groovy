@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.scenegraph.Node
+
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
@@ -25,7 +27,7 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class Camera {
+class Camera extends Node<Camera> {
 
 	private final Window window
 	private final Matrix4f projection
@@ -52,7 +54,7 @@ class Camera {
 	/**
 	 * Return a view-projection matrix for the given transform.
 	 */
-	Matrix4fc getViewProjection(Matrix4fc transform) {
+	private Matrix4fc getViewProjection() {
 
 		return projection.mulAffine(view.mul(transform, viewTransform), viewProjection)
 	}
@@ -60,7 +62,7 @@ class Camera {
 	/**
 	 * Update rendering with the camera state.
 	 */
-	void render(SceneShaderContext renderContext, Matrix4fc transform) {
+	void render(SceneShaderContext renderContext) {
 
 		renderContext.setProjectionMatrix(projection)
 		renderContext.setViewMatrix(view.mul(transform, viewTransform))
@@ -74,13 +76,13 @@ class Camera {
 	 * @param result A vector to store the result in.
 	 * @return The {@code result} vector.
 	 */
-	Vector3f unproject(float winX, float winY, Matrix4fc transform, Vector3f result) {
+	Vector3f unproject(float winX, float winY, Vector3f result) {
 
 		var viewport = window.viewport
-		return getViewProjection(transform)
+		return getViewProjection()
 			.unproject(
 				winX,
-				winY,
+				-winY,
 				0,
 				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
 				result)

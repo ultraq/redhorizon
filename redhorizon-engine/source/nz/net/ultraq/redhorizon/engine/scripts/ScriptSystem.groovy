@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.scripts
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -38,20 +37,20 @@ class ScriptSystem extends System {
 
 	final ScriptEngine scriptEngine
 	final InputEventHandler input
-	private final List<ScriptComponent> scriptComponents = new ArrayList<>()
+	private final List<ScriptNode> scripts = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			scriptComponents.clear()
-			scene.traverse(Entity) { Entity entity ->
-				entity.findComponentsByType(ScriptComponent, scriptComponents)
+			scripts.clear()
+			scene.traverse(ScriptNode) { ScriptNode script ->
+				scripts << script
 				return true
 			}
-			scriptComponents.each { ScriptComponent component ->
-				if (component.enabled) {
-					component.update(scriptEngine, input, delta)
+			scripts.each { ScriptNode script ->
+				if (script.enabled) {
+					script.update(scriptEngine, input, delta)
 				}
 			}
 		}

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Palette implements AutoCloseable {
+class Palette extends Node<Palette> implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Palette)
 

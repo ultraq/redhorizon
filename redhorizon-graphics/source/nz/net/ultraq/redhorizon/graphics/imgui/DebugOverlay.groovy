@@ -25,7 +25,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class DebugOverlay implements ImGuiModule {
+class DebugOverlay extends ImGuiModule<DebugOverlay> {
 
 	private final float updateRateSeconds
 	private long lastUpdateTimeMs = System.currentTimeMillis()

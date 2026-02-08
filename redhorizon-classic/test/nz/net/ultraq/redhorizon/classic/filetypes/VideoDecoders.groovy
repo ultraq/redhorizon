@@ -27,8 +27,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
-import org.joml.Matrix4f
-import org.joml.Vector3f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -50,7 +48,6 @@ class VideoDecoders extends Specification {
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
-	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		device = new OpenALAudioDevice()
@@ -79,8 +76,7 @@ class VideoDecoders extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream)
-			var videoTransform = new Matrix4f().scale(1f, 1.2f, 1f)
-			var videoPosition = new Vector3f() // Should move the "ears" to the video position too, but we haven't
+				.scale(1f, 1.2f)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 		when:
@@ -96,10 +92,10 @@ class VideoDecoders extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							shader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
+								camera.render(shaderContext)
 								video.update(delta)
-								video.render(shaderContext, videoTransform)
-								video.render(videoPosition)
+								video.render(shaderContext)
+								video.render()
 							}
 						}
 						return framebuffer

@@ -34,7 +34,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MainMenuBar implements ImGuiModule, EventTarget<MainMenuBar> {
+class MainMenuBar extends ImGuiModule<MainMenuBar> implements EventTarget<MainMenuBar> {
 
 	final Window window
 	final ExplorerScene scene

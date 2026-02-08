@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Base class for all collision component types.
+ * Parent class for all graphics nodes.
  *
  * @author Emanuel Rabina
  */
-interface CollisionComponent<T extends CollisionComponent> extends Component<T> {
+abstract class GraphicsNode<T extends GraphicsNode, SC extends SceneShaderContext> extends Node<T> {
 
 	/**
-	 * Check whether this component is colliding with another.
+	 * Return the shader used for rendering this component.
 	 */
-	void checkCollision(CollisionComponent other)
+	abstract Class<? extends Shader> getShaderClass()
+
+	/**
+	 * Render this node out to the scene.
+	 */
+	abstract void render(SC shaderContext)
 }

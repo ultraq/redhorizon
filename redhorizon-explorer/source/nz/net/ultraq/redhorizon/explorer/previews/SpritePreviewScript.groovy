@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 
 import static org.lwjgl.glfw.GLFW.*
@@ -28,7 +28,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class SpritePreviewScript extends EntityScript {
+class SpritePreviewScript extends Script {
 
 	private SpriteComponent sprite
 	private int frame = 0

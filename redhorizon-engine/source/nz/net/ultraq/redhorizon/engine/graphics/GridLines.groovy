@@ -16,10 +16,15 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.GraphicsNode
+import nz.net.ultraq.redhorizon.graphics.Mesh
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
@@ -29,13 +34,17 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class GridLinesEntity extends Entity<GridLinesEntity> {
+class GridLines extends GraphicsNode<GridLines, SceneShaderContext> {
+
+	final Class<? extends Shader> shaderClass = BasicShader
+	private final Mesh originLines
+	private final Mesh dividerLines
 
 	/**
 	 * Constructor, build a set of grid lines for the X and Y axes within the
 	 * bounds specified by {@code range}, for every {@code step} rendered pixels.
 	 */
-	GridLinesEntity(Rectanglef range, float step, Colour originColour, Colour dividersColour) {
+	GridLines(Rectanglef range, float step, Colour originColour, Colour dividersColour) {
 
 		// Alter values so that they line up with the origin
 		var minX = Math.floor(range.minX / step) * step as int
@@ -53,16 +62,21 @@ class GridLinesEntity extends Entity<GridLinesEntity> {
 			}
 		}
 
-		addComponent(new MeshComponent(Type.LINES, lines.collect { line ->
+		dividerLines = new OpenGLMesh(Type.LINES, lines.collect { line ->
 			return new Vertex(line, dividersColour)
 		} as Vertex[])
-			.withName('Dividers'))
-		addComponent(new MeshComponent(Type.LINES, new Vertex[]{
+		originLines = new OpenGLMesh(Type.LINES, new Vertex[]{
 			new Vertex(new Vector3f(range.minX, 0, 0), originColour),
 			new Vertex(new Vector3f(range.maxX, 0, 0), originColour),
 			new Vertex(new Vector3f(0, range.minX, 0), originColour),
 			new Vertex(new Vector3f(0, range.maxX, 0), originColour)
 		})
-			.withName('Origin'))
+	}
+
+	@Override
+	void render(SceneShaderContext shaderContext) {
+
+		dividerLines.render(shaderContext)
+		originLines.render(shaderContext)
 	}
 }

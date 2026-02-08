@@ -16,25 +16,26 @@
 
 package nz.net.ultraq.redhorizon.engine.scripts
 
-import nz.net.ultraq.redhorizon.engine.Component
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Perform the logic written in the provided entity script.
+ * A wrapper for scripts that allows them to be a part of the scene and operate
+ * on their parent node.
  *
  * @author Emanuel Rabina
  */
-class ScriptComponent implements Component<ScriptComponent>, AutoCloseable {
+class ScriptNode extends Node<ScriptNode> implements AutoCloseable {
 
 	final String scriptName
-	final Class<? extends EntityScript> scriptClass
-	private EntityScript script
+	final Class<? extends Script> scriptClass
+	private Script script
 
 	/**
 	 * Constructor, set the script used to a Groovy file on the engine's script
 	 * path.
 	 */
-	ScriptComponent(String scriptName) {
+	ScriptNode(String scriptName) {
 
 		this.scriptName = scriptName
 		this.scriptClass = null
@@ -43,7 +44,7 @@ class ScriptComponent implements Component<ScriptComponent>, AutoCloseable {
 	/**
 	 * Constructor, set the script used to a Groovy class.
 	 */
-	ScriptComponent(Class<? extends EntityScript> scriptClass) {
+	ScriptNode(Class<? extends Script> scriptClass) {
 
 		this.scriptClass = scriptClass
 		this.scriptName = null
@@ -60,7 +61,7 @@ class ScriptComponent implements Component<ScriptComponent>, AutoCloseable {
 	/**
 	 * Return the script instance.
 	 */
-	EntityScript getScript() {
+	Script getScript() {
 
 		return script
 	}
@@ -73,15 +74,15 @@ class ScriptComponent implements Component<ScriptComponent>, AutoCloseable {
 		if (scriptName) {
 			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
 			if (isNew) {
-				script = scriptObject as EntityScript
-				script.entity = entity
+				script = scriptObject as Script
+				script.entity = parent
 				script.input = input
 				script.init()
 			}
 		}
 		else if (!script && scriptClass) {
 			script = scriptClass.getDeclaredConstructor().newInstance()
-			script.entity = entity
+			script.entity = parent
 			script.input = input
 			script.init()
 		}

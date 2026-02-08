@@ -22,10 +22,10 @@ import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.ImageInfoEvent
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
-import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.slf4j.Logger
@@ -47,11 +47,12 @@ import java.util.concurrent.Future
  *
  * @author Emanuel Rabina
  */
-class Animation implements AutoCloseable, EventTarget<Animation> {
+class Animation extends GraphicsNode<Animation, SceneShaderContext> implements AutoCloseable, EventTarget<Animation> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 
+	final Class<? extends Shader> shaderClass = BasicShader
 	private int width
 	private int height
 	private int numFrames
@@ -183,10 +184,8 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 		return this
 	}
 
-	/**
-	 * Draw the current frame of the animation.
-	 */
-	void render(SceneShaderContext shaderContext, Matrix4fc transform) {
+	@Override
+	void render(SceneShaderContext shaderContext) {
 
 		if (!mesh && width && height) {
 			mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
@@ -199,7 +198,7 @@ class Animation implements AutoCloseable, EventTarget<Animation> {
 		var frame = frames[currentFrame]
 		if (frame) {
 			material.texture = frames[currentFrame]
-			mesh.render(shaderContext, material, transform)
+			mesh.render(shaderContext, material, globalTransform)
 		}
 	}
 

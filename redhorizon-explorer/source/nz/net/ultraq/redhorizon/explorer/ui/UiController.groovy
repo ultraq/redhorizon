@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
@@ -37,7 +37,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class UiController extends EntityScript implements EventTarget<UiController> {
+class UiController extends Script implements EventTarget<UiController> {
 
 	private UiSettingsComponent uiSettings
 	private MixDatabase mixDatabase

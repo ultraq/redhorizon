@@ -48,7 +48,6 @@ class GraphicsCheck extends Specification {
 	}
 
 	OpenGLWindow window
-	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
@@ -117,7 +116,7 @@ class GraphicsCheck extends Specification {
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
+						camera.render(shaderContext)
 						triangle.render(shaderContext, null, triangleTransform)
 					}
 				}
@@ -136,16 +135,15 @@ class GraphicsCheck extends Specification {
 			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck_Texture_ship0000.png').withBufferedStream { stream ->
 				return new Image('GraphicsCheck_Texture_ship0000.png', stream)
 			}
-			var sprite = new Sprite(image)
-			var spriteTransform = new Matrix4f()
+			var sprite = new Sprite(image, BasicShader)
 			var camera = new Camera(80, 60, window)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
 				window.useWindow { ->
 					shader.useShader { shaderContext ->
-						camera.render(shaderContext, cameraTransform)
-						sprite.render(shaderContext, spriteTransform)
+						camera.render(shaderContext)
+						sprite.render(shaderContext)
 					}
 				}
 				Thread.yield()

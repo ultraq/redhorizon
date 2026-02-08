@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class MapViewerScript extends EntityScript {
+class MapViewerScript extends Script {
 
 	private static final Logger logger = LoggerFactory.getLogger(MapViewerScript)
 	private static final int TICK = 48

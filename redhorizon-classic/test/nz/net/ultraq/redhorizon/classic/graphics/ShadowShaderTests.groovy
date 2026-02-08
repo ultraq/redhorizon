@@ -25,7 +25,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
-import org.joml.Matrix4f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -46,11 +45,11 @@ class ShadowShaderTests extends Specification {
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
-	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
+			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
@@ -69,12 +68,11 @@ class ShadowShaderTests extends Specification {
 
 	def 'Draws a silhouette of a sprite'() {
 		given:
+			var shadowShader = new ShadowShader()
 			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/graphics/ShadowShaderTests_Shadow_mig.shp').withBufferedStream { stream ->
 				return new SpriteSheet('ShadowShaderTests_Shadow_mig.shp', stream)
 			}
-			var sprite = new Sprite(spriteSheet)
-			var spriteTransform = new Matrix4f()
-			var shadowShader = new ShadowShader()
+			var sprite = new Sprite(spriteSheet, ShadowShader)
 			var camera = new Camera(320, 200, window)
 			var timer = 0
 			var frame = 0
@@ -96,8 +94,10 @@ class ShadowShaderTests extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							shadowShader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
-								sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+								camera.render(shaderContext)
+								sprite
+									.withFramePosition(spriteSheet.getFramePosition(frame))
+									.render(shaderContext)
 							}
 						}
 						return framebuffer

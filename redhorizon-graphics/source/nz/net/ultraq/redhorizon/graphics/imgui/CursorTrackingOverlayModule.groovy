@@ -21,7 +21,6 @@ import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 
 import imgui.ImGui
-import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
 
@@ -38,11 +37,11 @@ class CursorTrackingOverlayModule implements DebugOverlayModule {
 	/**
 	 * Constructor, read cursor position updates from the window to log out later.
 	 */
-	CursorTrackingOverlayModule(Window window, Camera camera, Matrix4fc cameraTransform) {
+	CursorTrackingOverlayModule(Window window, Camera camera) {
 
 		window.on(CursorPositionEvent) { event ->
 			cursorPosition.set(event.xPos(), event.yPos())
-			camera.unproject(cursorPosition.x, cursorPosition.y, cameraTransform, worldPosition)
+			camera.unproject(cursorPosition.x, cursorPosition.y, worldPosition)
 		}
 	}
 

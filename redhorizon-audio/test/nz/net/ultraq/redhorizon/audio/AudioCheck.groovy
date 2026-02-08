@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 
-import org.joml.Vector3f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -38,7 +37,6 @@ class AudioCheck extends Specification {
 	}
 
 	AudioDevice device
-	Vector3f position = new Vector3f()
 
 	def setup() {
 		device = new OpenALAudioDevice()
@@ -56,7 +54,7 @@ class AudioCheck extends Specification {
 		when:
 			sound.play()
 			while (!sound.stopped) {
-				sound.render(position)
+				sound.render()
 				Thread.sleep(500)
 			}
 		then:

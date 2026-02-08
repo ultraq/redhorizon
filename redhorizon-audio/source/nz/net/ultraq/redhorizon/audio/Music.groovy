@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
-import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -44,11 +43,11 @@ import java.util.concurrent.LinkedBlockingQueue
  *
  * @author Emanuel Rabina
  */
-class Music implements AutoCloseable, EventTarget<Music> {
+class Music extends AudioNode<Music> implements AutoCloseable, EventTarget<Music> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Music)
 
-	private final Source source
+	final Source source
 	private ExecutorService executor
 	private Future<?> decodingTask
 	private volatile BlockingQueue<SampleDecodedEvent> streamingEvents
@@ -189,12 +188,10 @@ class Music implements AutoCloseable, EventTarget<Music> {
 		return this
 	}
 
-	/**
-	 * Continue playback of the music track.
-	 */
-	void render(Vector3fc position) {
+	@Override
+	void render() {
 
-		source.setPosition(position)
+		source.setPosition(globalPosition)
 	}
 
 	/**

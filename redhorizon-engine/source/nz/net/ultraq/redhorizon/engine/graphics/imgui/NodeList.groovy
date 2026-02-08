@@ -35,7 +35,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false, includes = ['scene'])
-class NodeList implements ImGuiModule {
+class NodeList extends ImGuiModule<NodeList> {
 
 	final Scene scene
 	private Node selectedNode

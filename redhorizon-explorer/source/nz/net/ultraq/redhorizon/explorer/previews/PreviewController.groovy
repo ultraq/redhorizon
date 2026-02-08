@@ -20,12 +20,11 @@ import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
@@ -40,6 +39,7 @@ import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -54,7 +54,7 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class PreviewController extends EntityScript implements AutoCloseable {
+class PreviewController extends Script implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreviewController)
 

@@ -14,34 +14,39 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.engine.time.TimeComponent
-
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 
 /**
- * A component for adding a music track to an entity.
+ * A shape is a wireframe mesh.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class MusicComponent implements AudioComponent<MusicComponent>, TimeComponent<MusicComponent> {
+class Shape extends GraphicsNode<Shape, SceneShaderContext> implements AutoCloseable {
 
-	@Delegate(interfaces = false, includes = ['isPaused', 'isPlaying', 'isStopped', 'pause', 'play', 'stop', 'withVolume'])
-	final Music music
+	final Mesh mesh
+	final Class<? extends Shader> shaderClass = BasicShader
 
-	@Override
-	void render() {
+	/**
+	 * Constructor, configure this shape.
+	 */
+	Shape(Type type, Vertex[] vertices, int[] index = null) {
 
-		music.render(entity.globalPosition)
+		mesh = new OpenGLMesh(type, vertices, index)
 	}
 
 	@Override
-	void update(float delta) {
+	void close() {
 
-		// TODO: If delta isn't used, then is this really a time component?
-		music.update()
+		mesh.close()
+	}
+
+	@Override
+	void render(SceneShaderContext shaderContext) {
+
+		mesh.render(shaderContext, null, globalTransform)
 	}
 }

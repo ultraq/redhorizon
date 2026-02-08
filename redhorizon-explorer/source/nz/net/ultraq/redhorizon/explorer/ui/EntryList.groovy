@@ -38,7 +38,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *
  * @author Emanuel Rabina
  */
-class EntryList implements ImGuiModule, EventTarget<EntryList> {
+class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList> {
 
 	final List<Entry> entries = new CopyOnWriteArrayList<>()
 	private boolean focused

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 
 import org.joml.primitives.Rectanglef
 
@@ -26,7 +26,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class BoxCollisionComponent implements CollisionComponent<BoxCollisionComponent> {
+class BoxCollider extends Collider<BoxCollider> {
 
 	final float width
 	final float height
@@ -35,7 +35,7 @@ class BoxCollisionComponent implements CollisionComponent<BoxCollisionComponent>
 	/**
 	 * Constructor, set the collision area from width/height values.
 	 */
-	BoxCollisionComponent(float width, float height) {
+	BoxCollider(float width, float height) {
 
 		this.width = width
 		this.height = height
@@ -43,27 +43,27 @@ class BoxCollisionComponent implements CollisionComponent<BoxCollisionComponent>
 	}
 
 	@Override
-	void checkCollision(CollisionComponent other) {
+	void checkCollision(Collider other) {
 
 		// TODO: Allow collision checks across different shapes
-		if (other !instanceof BoxCollisionComponent) {
+		if (other !instanceof BoxCollider) {
 			return
 		}
 
-		var position = entity.globalPosition
+		var position = globalPosition
 		bounds.center().translate(position.x(), position.y())
 
-		var otherPosition = other.entity.globalPosition
+		var otherPosition = other.globalPosition
 		var otherBounds = new Rectanglef(0, 0, other.width, other.height)
 			.center()
 			.translate(otherPosition.x(), otherPosition.y())
 
 		if (bounds.intersectsRectangle(otherBounds)) {
-			var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
-			scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
+			var scriptComponent = parent.findDescendentByType(ScriptNode)
+			scriptComponent?.script?.onCollision(bounds, other.parent, otherBounds)
 
-			var otherScriptComponent = other.entity.findComponentByType(ScriptComponent) as ScriptComponent
-			otherScriptComponent?.script?.onCollision(otherBounds, entity, bounds)
+			var otherScriptComponent = other.findDescendentByType(ScriptNode)
+			otherScriptComponent?.script?.onCollision(otherBounds, parent, bounds)
 		}
 	}
 }

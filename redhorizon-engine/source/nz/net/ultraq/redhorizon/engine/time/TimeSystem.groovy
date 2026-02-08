@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.time
 
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -32,20 +31,20 @@ class TimeSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(TimeSystem)
 
-	private final List<TimeComponent> timeComponents = new ArrayList<>()
+	private final List<Temporal> temporals = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			timeComponents.clear()
-			scene.traverse(Entity) { Entity entity ->
-				entity.findComponentsByType(TimeComponent, timeComponents)
+			temporals.clear()
+			scene.traverse(Temporal) { Temporal temporal ->
+				temporals << temporal
 				return true
 			}
-			timeComponents.each { component ->
-				if (component.enabled) {
-					component.update(delta)
+			temporals.each { temporal ->
+				if (temporal.enabled) {
+					temporal.update(delta)
 				}
 			}
 		}

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.engine.time
 
-import nz.net.ultraq.redhorizon.engine.Component
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * A component for adding audio to an entity.
+ * A component for anything that can be affected by the flow of time.
  *
  * @author Emanuel Rabina
  */
-interface AudioComponent<T extends AudioComponent> extends Component<T> {
+abstract class Temporal<T extends Temporal> extends Node<T> {
 
 	/**
-	 * Update the playback state of the audio component.
+	 * Perform any logic as part of the scene update.
+	 *
+	 * @param delta
+	 *   The time elapsed here can differ from actual time if time for the scene
+	 *   is changed in some way, eg: paused, or slowed down.
 	 */
-	void render()
+	abstract void update(float delta)
 }

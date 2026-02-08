@@ -17,9 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
-import org.joml.Matrix4fc
-import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -35,9 +34,14 @@ import java.util.concurrent.Future
  * Whichever thread is used for updating audio or video will need to call their
  * respective {@code update*} methods periodically to keep the video fed.
  *
+ * <p>A video is composed of an {@link Animation} node and a {@link Music} node.
+ * When participating in a scene with systems, those child nodes will be the
+ * render targets, but for conveniencec their respective render methods are also
+ * available on this class.
+ *
  * @author Emanuel Rabina
  */
-class Video implements AutoCloseable {
+class Video extends Node<Video> implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Video)
 
@@ -68,10 +72,13 @@ class Video implements AutoCloseable {
 			.on(Animation.PlaybackReadyEvent) { event ->
 				animationReady = true
 			}
+		addChild(animation)
+
 		music = new Music(decoder, 32)
 			.on(Music.PlaybackReadyEvent) { event ->
 				musicReady = true
 			}
+		addChild(music)
 
 		decodingTask = executor.submit { ->
 			Thread.currentThread().name = "Video ${fileName} :: Decoding"
@@ -134,17 +141,17 @@ class Video implements AutoCloseable {
 	/**
 	 * Draw the current frame of the video.
 	 */
-	void render(SceneShaderContext shaderContext, Matrix4fc transform) {
+	void render(SceneShaderContext shaderContext) {
 
-		animation.render(shaderContext, transform)
+		animation.render(shaderContext)
 	}
 
 	/**
 	 * Continue playback of the audio stream for this video.
 	 */
-	void render(Vector3fc position) {
+	void render() {
 
-		music.render(position)
+		music.render()
 	}
 
 	/**

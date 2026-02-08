@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
-import org.joml.Vector3fc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -32,12 +31,12 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Sound implements AutoCloseable {
+class Sound extends AudioNode<Sound> implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
+	final Source source
 	private volatile List<ByteBuffer> buffers = []
-	private final Source source
 	private final Buffer buffer
 
 	/**
@@ -118,12 +117,10 @@ class Sound implements AutoCloseable {
 		return this
 	}
 
-	/**
-	 * Update the state of the sound with the audio device.
-	 */
-	void render(Vector3fc position) {
+	@Override
+	void render() {
 
-		source.setPosition(position)
+		source.setPosition(globalPosition)
 	}
 
 	/**

@@ -24,7 +24,43 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
  *
  * @author Emanuel Rabina
  */
-abstract class System implements Disableable<System> {
+abstract class System {
+
+	private boolean enabled = true
+
+	/**
+	 * Disable this object.
+	 */
+	System disable() {
+
+		enabled = false
+		return this
+	}
+
+	/**
+	 * Enable this object.
+	 */
+	System enable() {
+
+		enabled = true
+		return this
+	}
+
+	/**
+	 * Return whether this object is disabled.
+	 */
+	boolean isDisabled() {
+
+		return !enabled
+	}
+
+	/**
+	 * Return whether this object is enabled.
+	 */
+	boolean isEnabled() {
+
+		return enabled
+	}
 
 	/**
 	 * Perform the role of the system over the given scene.

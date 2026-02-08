@@ -16,11 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.objects
 
-import nz.net.ultraq.redhorizon.classic.graphics.AlphaMaskComponent
-import nz.net.ultraq.redhorizon.classic.graphics.PaletteComponent
-import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class GlobalPalette extends Entity<GlobalPalette> {
+class GlobalPalette extends Node<GlobalPalette> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalPalette)
 	private PaletteType currentPalette
@@ -40,8 +39,8 @@ class GlobalPalette extends Entity<GlobalPalette> {
 	 */
 	GlobalPalette() {
 
-		addComponent(new PaletteComponent(loadPalette()))
-		addComponent(new AlphaMaskComponent())
+		addChild(loadPalette())
+		addChild(new AlphaMask())
 	}
 
 	/**
@@ -49,9 +48,10 @@ class GlobalPalette extends Entity<GlobalPalette> {
 	 */
 	void cyclePalette() {
 
-		var paletteComponent = findComponentByType(PaletteComponent)
-		paletteComponent.palette.close()
-		paletteComponent.palette = loadPalette(currentPalette.next())
+		var palette = findDescendentByType(Palette)
+		removeChild(palette)
+		palette.close()
+		addChild(loadPalette(currentPalette.next()))
 	}
 
 	/**

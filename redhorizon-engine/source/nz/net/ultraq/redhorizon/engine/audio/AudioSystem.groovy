@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.audio.AudioNode
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -24,7 +24,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * Render audio scene components.
+ * Render audio nodes.
  *
  * @author Emanuel Rabina
  */
@@ -32,20 +32,20 @@ class AudioSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
-	private final List<AudioComponent> audioComponents = new ArrayList<>()
+	private final List<AudioNode> audioNodes = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			audioComponents.clear()
-			scene.traverse(Entity) { Entity entity ->
-				entity.findComponentsByType(AudioComponent, audioComponents)
+			audioNodes.clear()
+			scene.traverse(AudioNode) { AudioNode audio ->
+				audioNodes << audio
 				return true
 			}
-			audioComponents.each { AudioComponent component ->
-				if (component.enabled) {
-					component.render()
+			audioNodes.each { audio ->
+				if (audio.enabled) {
+					audio.render()
 				}
 			}
 		}

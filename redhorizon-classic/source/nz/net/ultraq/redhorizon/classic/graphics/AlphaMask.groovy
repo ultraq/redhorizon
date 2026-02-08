@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.graphics
 
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
+import nz.net.ultraq.redhorizon.graphics.GraphicsNode
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
@@ -26,8 +29,9 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class AlphaMask implements AutoCloseable {
+class AlphaMask extends GraphicsNode<AlphaMask, PalettedSpriteShaderContext> implements AutoCloseable {
 
+	final Class<? extends Shader> shaderClass = PalettedSpriteShader
 	final Texture texture
 
 	/**
@@ -51,5 +55,11 @@ class AlphaMask implements AutoCloseable {
 	void close() {
 
 		texture.close()
+	}
+
+	@Override
+	void render(PalettedSpriteShaderContext shaderContext) {
+
+		shaderContext.setAlphaMask(this)
 	}
 }

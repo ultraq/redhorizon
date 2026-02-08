@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.extensions
 
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ProfilingLoggingOverlayModule
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
@@ -33,9 +33,9 @@ class DebugOverlayExtensions {
 	 * Simplifies the addition of the {@link CursorTrackingOverlayModule} to work
 	 * with the camera entity.
 	 */
-	static DebugOverlay withCursorTracking(DebugOverlay self, Window window, CameraEntity cameraEntity) {
+	static DebugOverlay withCursorTracking(DebugOverlay self, Window window, Camera camera) {
 
-		return self << new CursorTrackingOverlayModule(window, cameraEntity.camera, cameraEntity.transform)
+		return self << new CursorTrackingOverlayModule(window, camera)
 	}
 
 	/**

@@ -18,14 +18,14 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -56,7 +56,7 @@ class UnitPreview extends Entity<UnitPreview> {
 			addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader)
 				.withName('Turret'))
 		}
-		addComponent(new ScriptComponent(UnitPreviewScript))
+		addComponent(new ScriptNode(UnitPreviewScript))
 	}
 
 	/**
@@ -107,7 +107,7 @@ class UnitPreview extends Entity<UnitPreview> {
 	/**
 	 * Showcase behaviours for a unit.
 	 */
-	static class UnitPreviewScript extends EntityScript {
+	static class UnitPreviewScript extends Script {
 
 		private static final Logger logger = LoggerFactory.getLogger(UnitPreview)
 		private static final int FRAMERATE = 10 // C&C ran animations at 10fps?

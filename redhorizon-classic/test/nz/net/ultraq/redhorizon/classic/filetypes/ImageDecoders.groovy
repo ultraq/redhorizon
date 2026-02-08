@@ -33,7 +33,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
-import org.joml.Matrix4f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -55,7 +54,6 @@ class ImageDecoders extends Specification {
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
-	Matrix4f cameraTransform = new Matrix4f()
 
 	def setup() {
 		window = new OpenGLWindow(640, 400, "Testing")
@@ -79,12 +77,11 @@ class ImageDecoders extends Specification {
 
 	def "Draw a PCX file using the Image SPI"() {
 		given:
+			var shader = new BasicShader()
 			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Image_alipaper.pcx').withBufferedStream { stream ->
 				return new Image('ImageDecoders_Image_alipaper.pcx', stream)
 			}
-			var sprite = new Sprite(image)
-			var spriteTransform = new Matrix4f()
-			var shader = new BasicShader()
+			var sprite = new Sprite(image, BasicShader)
 			var camera = new Camera(640, 400, window)
 		when:
 			window.show()
@@ -93,8 +90,8 @@ class ImageDecoders extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							shader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
-								sprite.render(shaderContext, spriteTransform)
+								camera.render(shaderContext)
+								sprite.render(shaderContext)
 							}
 						}
 						return framebuffer
@@ -115,12 +112,11 @@ class ImageDecoders extends Specification {
 
 	def "Draw a CPS file using the Image SPI"() {
 		given:
+			var shader = new BasicShader()
 			var image = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Image_alipaper.cps').withBufferedStream { stream ->
 				return new Image('ImageDecoders_Image_alipaper.cps', stream)
 			}
-			var sprite = new Sprite(image)
-			var spriteTransform = new Matrix4f()
-			var shader = new BasicShader()
+			var sprite = new Sprite(image, BasicShader)
 			var camera = new Camera(320, 200, window)
 		when:
 			window.show()
@@ -129,8 +125,8 @@ class ImageDecoders extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							shader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
-								sprite.render(shaderContext, spriteTransform)
+								camera.render(shaderContext)
+								sprite.render(shaderContext)
 							}
 						}
 						return framebuffer
@@ -151,25 +147,23 @@ class ImageDecoders extends Specification {
 
 	def "Draw an SHP file using the Image SPI"() {
 		given:
+			var palettedSpriteShader = new PalettedSpriteShader()
 			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_SpriteSheet_4tnk.shp').withBufferedStream { stream ->
 				return new SpriteSheet('ImageDecoders_SpriteSheet_4tnk.shp', stream)
 			}
-			var sprite = new Sprite(spriteSheet)
-			var spriteTransform = new Matrix4f()
+			var sprite = new Sprite(spriteSheet, PalettedSpriteShader)
 			var faction = Faction.RED
 			var adjustmentMap = new FactionAdjustmentMap(faction)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
 				return new Palette('Palette_temperat.pal', stream)
 			}
 			var alphaMask = new AlphaMask()
-			var palettedSpriteShader = new PalettedSpriteShader()
 			var camera = new Camera(320, 200, window)
 			var timer = 0
 			var frame = 0
 			window.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_P)) {
-					faction = faction.next()
-					adjustmentMap.setFaction(faction)
+					adjustmentMap.setFaction(faction++)
 				}
 			}
 		when:
@@ -190,12 +184,14 @@ class ImageDecoders extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							palettedSpriteShader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
+								camera.render(shaderContext)
 								shaderContext.setAdjustmentMap(adjustmentMap)
 								adjustmentMap.update()
 								shaderContext.setPalette(palette)
 								shaderContext.setAlphaMask(alphaMask)
-								sprite.render(shaderContext, spriteTransform, spriteSheet.getFramePosition(frame))
+								sprite
+									.withFramePosition(spriteSheet.getFramePosition(frame))
+									.render(shaderContext)
 							}
 						}
 						return framebuffer
@@ -221,7 +217,7 @@ class ImageDecoders extends Specification {
 		given:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/ImageDecoders_Animation_africa.wsa'))
 			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream)
-			var animationTransform = new Matrix4f()
+				.scale(0.83125f, 1f)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window)
 		when:
@@ -237,9 +233,9 @@ class ImageDecoders extends Specification {
 					.scene { ->
 						framebuffer.useFramebuffer { ->
 							shader.useShader { shaderContext ->
-								camera.render(shaderContext, cameraTransform)
+								camera.render(shaderContext)
 								animation.update(delta)
-								animation.render(shaderContext, animationTransform)
+								animation.render(shaderContext)
 							}
 						}
 						return framebuffer
