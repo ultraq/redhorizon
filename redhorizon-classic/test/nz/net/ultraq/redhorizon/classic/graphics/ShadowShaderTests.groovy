@@ -100,7 +100,6 @@ class ShadowShaderTests extends Specification {
 									.render(shaderContext)
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)

@@ -30,8 +30,8 @@ import org.joml.Vector3f
 class Camera extends Node<Camera> {
 
 	private final Window window
-	private final Matrix4f projection
-	private final Matrix4f view
+	private final Matrix4fc projection
+	private final Matrix4fc view
 	private final Matrix4f viewProjection = new Matrix4f()
 	private final Matrix4f viewTransform = new Matrix4f()
 
@@ -56,7 +56,7 @@ class Camera extends Node<Camera> {
 	 */
 	private Matrix4fc getViewProjection() {
 
-		return projection.mulAffine(view.mul(transform, viewTransform), viewProjection)
+		return projection.mulAffine(view.mulAffine(transform, viewTransform), viewProjection)
 	}
 
 	/**
@@ -65,7 +65,14 @@ class Camera extends Node<Camera> {
 	void render(SceneShaderContext renderContext) {
 
 		renderContext.setProjectionMatrix(projection)
-		renderContext.setViewMatrix(view.mul(transform, viewTransform))
+		renderContext.setViewMatrix(view.mulAffine(transform, viewTransform))
+	}
+
+	@Override
+	Camera translate(float x, float y, float z) {
+
+		super.translate(-x, -y, -z)
+		return this
 	}
 
 	/**
@@ -79,13 +86,13 @@ class Camera extends Node<Camera> {
 	Vector3f unproject(float winX, float winY, Vector3f result) {
 
 		var viewport = window.viewport
+		var viewportHeight = viewport.lengthY()
 		return getViewProjection()
 			.unproject(
 				winX,
-				-winY,
+				viewportHeight - winY as float, // Because the window Y axis is inverted
 				0,
-				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewport.lengthY() },
+				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewportHeight },
 				result)
-			.mul(1f, -1f, 1f)
 	}
 }

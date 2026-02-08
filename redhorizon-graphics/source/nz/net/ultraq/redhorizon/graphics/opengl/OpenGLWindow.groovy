@@ -344,7 +344,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 				framebuffer.useFramebuffer { ->
 					closure()
 				}
-				return framebuffer
 			}
 			.ui(false) { imGuiContext ->
 				// Called to emit the scene - not actually doing any UI work here

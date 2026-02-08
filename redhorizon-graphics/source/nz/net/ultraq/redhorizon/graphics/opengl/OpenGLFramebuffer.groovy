@@ -94,7 +94,7 @@ class OpenGLFramebuffer implements Framebuffer {
 	}
 
 	@Override
-	void useFramebuffer(Closure closure) {
+	OpenGLFramebuffer useFramebuffer(Closure closure) {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebufferId)
 		glEnable(GL_DEPTH_TEST)
@@ -110,5 +110,7 @@ class OpenGLFramebuffer implements Framebuffer {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 		glViewport(0, 0, width, height)
 		closure()
+
+		return this
 	}
 }

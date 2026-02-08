@@ -49,5 +49,5 @@ interface Framebuffer extends GraphicsResource {
 	 * operations.  This will last until either another render target is selected
 	 * for rendering.
 	 */
-	void useFramebuffer(Closure closure)
+	Framebuffer useFramebuffer(Closure closure)
 }

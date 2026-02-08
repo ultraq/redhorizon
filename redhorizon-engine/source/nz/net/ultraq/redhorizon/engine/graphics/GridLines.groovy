@@ -34,11 +34,11 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class GridLines extends GraphicsNode<GridLines, SceneShaderContext> {
+class GridLines extends GraphicsNode<GridLines, SceneShaderContext> implements AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = BasicShader
-	private final Mesh originLines
 	private final Mesh dividerLines
+	private final Mesh originLines
 
 	/**
 	 * Constructor, build a set of grid lines for the X and Y axes within the
@@ -71,6 +71,13 @@ class GridLines extends GraphicsNode<GridLines, SceneShaderContext> {
 			new Vertex(new Vector3f(0, range.minX, 0), originColour),
 			new Vertex(new Vector3f(0, range.maxX, 0), originColour)
 		})
+	}
+
+	@Override
+	void close() {
+
+		dividerLines.close()
+		originLines.close()
 	}
 
 	@Override

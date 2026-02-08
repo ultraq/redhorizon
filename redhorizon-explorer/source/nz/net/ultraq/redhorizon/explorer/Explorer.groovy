@@ -177,7 +177,6 @@ class Explorer implements Runnable {
 									sceneBuffer.draw(shaderContext)
 								}
 							}
-							return postProcessingFramebuffer
 						}
 					}
 				}

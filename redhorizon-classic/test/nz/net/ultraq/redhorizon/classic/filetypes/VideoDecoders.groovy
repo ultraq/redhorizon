@@ -98,7 +98,6 @@ class VideoDecoders extends Specification {
 								video.render()
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)

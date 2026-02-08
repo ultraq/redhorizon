@@ -94,7 +94,6 @@ class ImageDecoders extends Specification {
 								sprite.render(shaderContext)
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)
@@ -129,7 +128,6 @@ class ImageDecoders extends Specification {
 								sprite.render(shaderContext)
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)
@@ -194,7 +192,6 @@ class ImageDecoders extends Specification {
 									.render(shaderContext)
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)
@@ -238,7 +235,6 @@ class ImageDecoders extends Specification {
 								animation.render(shaderContext)
 							}
 						}
-						return framebuffer
 					}
 					.ui(false) { imGuiContext ->
 						debugOverlay.render(imGuiContext)

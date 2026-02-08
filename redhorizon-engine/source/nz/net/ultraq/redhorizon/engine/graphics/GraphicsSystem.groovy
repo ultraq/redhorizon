@@ -72,7 +72,7 @@ class GraphicsSystem extends System {
 			window.useRenderPipeline()
 				.scene { ->
 					return average('Scene', 1f, logger) { ->
-						framebuffer.useFramebuffer { ->
+						return framebuffer.useFramebuffer { ->
 							shaders.each { shader ->
 								shader.useShader { shaderContext ->
 									var camera = scene.findByType(Camera)
@@ -87,7 +87,6 @@ class GraphicsSystem extends System {
 								}
 							}
 						}
-						return framebuffer
 					}
 				}
 				.postProcessing { sceneBuffer ->
