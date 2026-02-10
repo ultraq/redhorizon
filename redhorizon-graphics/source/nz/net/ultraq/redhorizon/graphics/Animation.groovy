@@ -47,6 +47,7 @@ import java.util.concurrent.Future
  *
  * @author Emanuel Rabina
  */
+// TODO: Will need to rename when we have sprite animations.  Cutscene?
 class Animation extends GraphicsNode<Animation, SceneShaderContext> implements AutoCloseable, EventTarget<Animation> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Animation)

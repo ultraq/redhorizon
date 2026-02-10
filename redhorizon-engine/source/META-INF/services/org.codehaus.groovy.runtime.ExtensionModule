@@ -17,4 +17,5 @@
 moduleName = redhorizon-engine
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.engine.extensions.DebugOverlayExtensions,\
-                   nz.net.ultraq.redhorizon.engine.extensions.InputEventHandlerExtensions
+                   nz.net.ultraq.redhorizon.engine.extensions.InputEventHandlerExtensions,\
+                   nz.net.ultraq.redhorizon.engine.scripts.SceneExtensions

@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
@@ -41,7 +42,7 @@ import java.util.concurrent.Future
  *
  * @author Emanuel Rabina
  */
-class Video extends Node<Video> implements AutoCloseable {
+class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Video)
 

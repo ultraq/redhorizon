@@ -125,30 +125,38 @@ class Node<T extends Node> implements AutoCloseable {
 	 * Locate the first descendent from this node that satisfies the given
 	 * predicate.
 	 *
-	 * @param predicate
-	 * @return
-	 *   The matching node, or {@code null} if no match is found.
+	 * @return The matching node, or {@code null} if no match is found.
 	 */
-	Node findDescendent(
+	<T extends Node> T find(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
 			Closure<Boolean> predicate) {
 
-		return children.find { node ->
-			return predicate(node) ? node : node.findDescendent(predicate)
+		return (T)children.find { node ->
+			return predicate(node) ? node : node.find(predicate)
+		}
+	}
+
+	/**
+	 * Locate the first descendent from this node that satisfies the given name.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
+	 */
+	<T extends Node> T findByName(String name) {
+
+		return (T)children.find { node ->
+			return node.name == name
 		}
 	}
 
 	/**
 	 * Locate the first descendent from this node that satisfies the given type.
 	 *
-	 * @param type
-	 * @return
-	 *   The matching node, or {@code null} if no match is found.
+	 * @return The matching node, or {@code null} if no match is found.
 	 */
-	<T extends Node> T findDescendentByType(Class<T> type) {
+	<T extends Node> T findByType(Class<T> type) {
 
 		return (T)children.find { node ->
-			return type.isInstance(node) ? node : node.findDescendentByType(type)
+			return type.isInstance(node) ? node : node.findByType(type)
 		}
 	}
 

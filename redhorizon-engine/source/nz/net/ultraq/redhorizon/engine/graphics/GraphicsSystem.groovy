@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger

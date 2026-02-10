@@ -48,7 +48,7 @@ class GlobalPalette extends Node<GlobalPalette> {
 	 */
 	void cyclePalette() {
 
-		var palette = findDescendentByType(Palette)
+		var palette = findByType(Palette)
 		removeChild(palette)
 		palette.close()
 		addChild(loadPalette(currentPalette.next()))

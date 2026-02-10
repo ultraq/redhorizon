@@ -17,40 +17,33 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.graphics.Video
 
 /**
  * Control the behaviour of a video in preview.
  *
  * @author Emanuel Rabina
  */
-class VideoPlaybackScript extends Script implements AutoCloseable {
+class VideoPlaybackScript extends Script<Video> implements AutoCloseable {
 
-	private VideoComponent video
 	private boolean playbackStarted = false
 
 	@Override
 	void close() {
 
-		video.stop()
-	}
-
-	@Override
-	void init() {
-
-		video = node.findComponentByType(VideoComponent)
+		node.stop()
 	}
 
 	@Override
 	void update(float delta) {
 
 		if (!playbackStarted) {
-			video.play()
+			node.play()
 			playbackStarted = true
 		}
 
-		if (playbackStarted && video.stopped) {
+		if (playbackStarted && node.stopped) {
 			node.trigger(new VideoStoppedEvent())
 		}
 	}

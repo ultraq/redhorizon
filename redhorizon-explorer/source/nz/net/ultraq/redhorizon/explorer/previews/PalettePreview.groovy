@@ -16,15 +16,15 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.Shape
 import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -34,7 +34,7 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class PalettePreview extends Entity<PalettePreview> {
+class PalettePreview extends Node<PalettePreview> {
 
 	private static final int SWATCH_WIDTH = 24
 	private static final int SWATCH_HEIGHT = 24
@@ -52,7 +52,7 @@ class PalettePreview extends Entity<PalettePreview> {
 			var b = colour[2] & 0xff
 			var offsetX = (i % 16) * SWATCH_WIDTH as float
 			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT as float
-			addComponent(new MeshComponent(
+			addChild(new Shape(
 				Type.TRIANGLES,
 				new Vertex[]{
 					new Vertex(new Vector3f(0, 0, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(0, 0)),
@@ -67,7 +67,7 @@ class PalettePreview extends Entity<PalettePreview> {
 
 		translate(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT)
 
-		addComponent(new ScriptNode(PalettePreviewScript))
+		addChild(new ScriptNode(PalettePreviewScript))
 	}
 
 	static class PalettePreviewScript extends Script implements AutoCloseable {

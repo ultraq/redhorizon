@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.Sprite
 
 import static org.lwjgl.glfw.GLFW.*
 
@@ -30,7 +30,7 @@ import static org.lwjgl.glfw.GLFW.*
  */
 class SpritePreviewScript extends Script {
 
-	private SpriteComponent sprite
+	private Sprite sprite
 	private int frame = 0
 	private float repeatTimer
 	private float repeatInterval = 0.1f
@@ -39,7 +39,7 @@ class SpritePreviewScript extends Script {
 	void init() {
 
 		(node.scene as ExplorerScene).camera.scale(2f)
-		sprite = node.findComponentByType(SpriteComponent)
+		sprite = node.findByType(Sprite)
 	}
 
 	@Override
@@ -55,6 +55,6 @@ class SpritePreviewScript extends Script {
 			repeatTimer = 0f
 		}
 
-		sprite.framePosition.set(sprite.spriteSheet.getFramePosition(frame))
+		sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))
 	}
 }

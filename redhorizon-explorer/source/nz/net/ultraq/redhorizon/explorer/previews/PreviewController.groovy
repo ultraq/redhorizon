@@ -19,12 +19,11 @@ package nz.net.ultraq.redhorizon.explorer.previews
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
+import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
-import nz.net.ultraq.redhorizon.engine.graphics.VideoComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
@@ -36,10 +35,11 @@ import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -59,7 +59,7 @@ class PreviewController extends Script implements AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(PreviewController)
 
 	private InputStream selectedFileInputStream
-	private Entity previewedEntity
+	private Node previewedEntity
 
 	@Override
 	void close() {
@@ -74,7 +74,7 @@ class PreviewController extends Script implements AutoCloseable {
 
 		selectedFileInputStream?.close()
 		if (previewedEntity) {
-			scene.removeChild(previewedEntity)
+			node.scene.removeChild(previewedEntity)
 			previewedEntity.close()
 			previewedEntity = null
 		}
@@ -179,59 +179,61 @@ class PreviewController extends Script implements AutoCloseable {
 //						.addComponent(new SpriteComponent(file, PalettedSpriteShader))
 //						.withName("Tilemap - ${fileName}")
 //				}
-				yield new Entity()
-					.addSprite(file, BasicShader)
-					.addScript(DarkPreviewScript)
+				yield new Node()
+					.addChild(new Sprite(file, BasicShader))
+					.addChild(new ScriptNode(DarkPreviewScript))
 					.withName("Image - ${fileName}")
 			}
 			case Animation -> {
-				var animationComponent = new AnimationComponent(file)
 				// TODO: Is there some better way to convey animations that needs special scaling?
 				if (fileName.endsWith('.wsa')) {
-					animationComponent.scale(2f, 2.4f)
+					file.scale(2f, 2.4f)
 				}
-				yield new Entity()
-					.addComponent(animationComponent)
-					.addScript(DarkPreviewScript)
-					.addScript(AnimationPlaybackScript)
-					.withName("Animation - ${fileName}")
-					.on(AnimationStoppedEvent) { event ->
-						scene.queueUpdate { ->
-							clearPreview()
+				yield new Node()
+					.addChild(file
+						.addChild(new ScriptNode(AnimationPlaybackScript))
+						.on(AnimationStoppedEvent) { event ->
+							node.scene.queueUpdate { ->
+								clearPreview()
+							}
 						}
-					}
+					)
+					.addChild(new ScriptNode(DarkPreviewScript))
+					.withName("Animation - ${fileName}")
 			}
 			case Video -> {
-				var videoComponent = new VideoComponent(file)
 				if (fileName.endsWith('.vqa')) {
-					videoComponent.scale(2f, 2.4f)
+					file.scale(2f, 2.4f)
 				}
-				yield new Entity()
-					.addComponent(videoComponent)
-					.addScript(DarkPreviewScript)
-					.addScript(VideoPlaybackScript)
-					.withName("Video - ${fileName}")
-					.on(VideoStoppedEvent) { event ->
-						scene.queueUpdate { ->
-							clearPreview()
+				yield new Node()
+					.addChild(file
+						.addChild(new ScriptNode(VideoPlaybackScript))
+						.on(VideoStoppedEvent) { event ->
+							node.scene.queueUpdate { ->
+								clearPreview()
+							}
 						}
-					}
+					)
+					.addChild(new ScriptNode(DarkPreviewScript))
+					.withName("Video - ${fileName}")
 			}
 			case Sound ->
-				new Entity()
-					.addSound(file)
-					.addScript(SoundPlaybackScript)
+				new Node()
+					.addChild(file
+						.addChild(new ScriptNode(SoundPlaybackScript))
+					)
 					.withName("Sound - ${fileName}")
 			case Music ->
-				new Entity()
-					.addMusic(file)
-					.addScript(MusicPlaybackScript)
-					.withName("Music - ${fileName}")
-					.on(MusicStoppedEvent) { event ->
-						scene.queueUpdate { ->
-							clearPreview()
+				new Node()
+					.addChild(file
+						.addChild(new ScriptNode(MusicPlaybackScript))
+						.on(MusicStoppedEvent) { event ->
+							node.scene.queueUpdate { ->
+								clearPreview()
+							}
 						}
-					}
+					)
+					.withName("Music - ${fileName}")
 
 				// 🤷
 			case Palette ->
@@ -242,16 +244,16 @@ class PreviewController extends Script implements AutoCloseable {
 		}
 
 		if (entity) {
-			scene.addChild(entity)
+			node.scene.addChild(entity)
 			previewedEntity = entity
-			scene.trigger(new PreviewBeginEvent(fileName))
+			node.scene.trigger(new PreviewBeginEvent(fileName))
 		}
 	}
 
 	/**
 	 * Attempt to load up an object from its corresponding SHP file.
 	 */
-	private Entity previewSprite(SpriteSheet spriteSheet, String fileName) {
+	private Node previewSprite(SpriteSheet spriteSheet, String fileName) {
 
 		var indexOfDot = fileName.lastIndexOf('.')
 		var objectId = indexOfDot != -1 ? fileName.substring(0, indexOfDot) : fileName
@@ -279,10 +281,10 @@ class PreviewController extends Script implements AutoCloseable {
 		}
 
 		// No config found, fall back to viewing a SHP file as frame-by-frame media
-		return new Entity()
-			.addComponent(new FactionComponent(Faction.GOLD))
-			.addSprite(spriteSheet, PalettedSpriteShader)
-			.addScript(SpritePreviewScript)
+		return new Node()
+			.addChild(new FactionAdjustmentMap(Faction.GOLD))
+			.addChild(new Sprite(spriteSheet, PalettedSpriteShader))
+			.addChild(new ScriptNode(SpritePreviewScript))
 			.withName("Sprite - ${fileName}")
 	}
 

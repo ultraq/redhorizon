@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['clear', 'findDescendent', 'findDescendentByType', 'insertBefore', 'leftShift', 'removeChild', 'rotate',
+		includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate',
 			'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
@@ -72,29 +72,36 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	}
 
 	/**
-	 * Return the first node in the scene to match the given predicate.
+	 * Locate the first descendent from this node that satisfies the given
+	 * predicate.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
 	 */
 	<T extends Node> T find(
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
 			Closure<Boolean> predicate) {
 
-		return (T)root.findDescendent(predicate)
+		return root.find(predicate)
 	}
 
 	/**
-	 * Return the first node in the scene with the given name.
+	 * Locate the first descendent from this node that satisfies the given name.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
 	 */
 	<T extends Node> T findByName(String name) {
 
-		return find { node -> node.name == name }
+		return root.findByName(name)
 	}
 
 	/**
-	 * Return the first node in the scene of the given type.
+	 * Locate the first descendent from this node that satisfies the given type.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
 	 */
 	<T extends Node> T findByType(Class<T> type) {
 
-		return find { node -> type.isInstance(node) }
+		return root.findByType(type)
 	}
 
 	/**
@@ -137,7 +144,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	/**
 	 * A special instance of {@link Node} that is always present in the scene.
 	 */
-	private class RootNode extends Node<RootNode> {
+	private class RootNode extends Node {
 
 		@Override
 		Scene getScene() {

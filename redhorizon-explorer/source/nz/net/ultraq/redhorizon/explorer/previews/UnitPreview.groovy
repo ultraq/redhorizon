@@ -17,15 +17,15 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.FactionComponent
+import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,7 +36,7 @@ import static org.lwjgl.glfw.GLFW.*
  *
  * @author Emanuel Rabina
  */
-class UnitPreview extends Entity<UnitPreview> {
+class UnitPreview extends Node<UnitPreview> {
 
 	private final UnitData unitData
 	private float heading = 0f
@@ -49,14 +49,14 @@ class UnitPreview extends Entity<UnitPreview> {
 
 		this.unitData = unitData
 
-		addComponent(new FactionComponent(Faction.GOLD))
-		addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader)
-			.withName('Body'))
+		addChild(new FactionAdjustmentMap(Faction.GOLD))
+		addChild(new Sprite(spriteSheet, PalettedSpriteShader))
+			.withName('Body')
 		if (unitData.shpFile.parts.turret) {
-			addComponent(new SpriteComponent(spriteSheet, PalettedSpriteShader)
+			addChild(new Sprite(spriteSheet, PalettedSpriteShader)
 				.withName('Turret'))
 		}
-		addComponent(new ScriptNode(UnitPreviewScript))
+		addChild(new ScriptNode(UnitPreviewScript))
 	}
 
 	/**
@@ -107,13 +107,13 @@ class UnitPreview extends Entity<UnitPreview> {
 	/**
 	 * Showcase behaviours for a unit.
 	 */
-	static class UnitPreviewScript extends Script {
+	static class UnitPreviewScript extends Script<UnitPreview> {
 
 		private static final Logger logger = LoggerFactory.getLogger(UnitPreview)
 		private static final int FRAMERATE = 10 // C&C ran animations at 10fps?
 		private static final float repeatInterval = 0.1f
 
-		private SpriteComponent sprite
+		private Sprite sprite
 		private float repeatTimer
 		private float animationTimer
 
@@ -129,7 +129,7 @@ class UnitPreview extends Entity<UnitPreview> {
 //			})
 //				.start()
 			(node.scene as ExplorerScene).camera.scale(2f)
-			sprite = node.findComponentByType(SpriteComponent)
+			sprite = node.findByType(Sprite)
 		}
 
 		@Override
@@ -159,7 +159,7 @@ class UnitPreview extends Entity<UnitPreview> {
 
 			if (input.keyPressed(GLFW_KEY_F, true)) {
 				var factions = Faction.values()
-				var currentFaction = node.findComponentByType(FactionComponent)
+				var currentFaction = node.findByType(FactionAdjustmentMap)
 				var nextFaction = factions[(currentFaction.faction.ordinal() + 1) % factions.length]
 				currentFaction.faction = nextFaction
 				logger.info('Viewing with {} faction colours', nextFaction.name())
@@ -171,12 +171,12 @@ class UnitPreview extends Entity<UnitPreview> {
 			var rotationFrame = closestHeading ? (currentState.headings - closestHeading) * frames as int : 0
 			var animationFrame = frames > 1 ? Math.floor((float)(animationTimer * FRAMERATE)) % frames as int : 0
 			var frame = node.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
-			sprite.framePosition.set(sprite.spriteSheet.getFramePosition(frame))
+			sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))
 
-			var turret = node.findComponent { it.name == 'Turret' } as SpriteComponent
+			var turret = node.findByName('Turret') as Sprite
 			if (turret) {
 				var turretData = node.unitData.shpFile.parts.turret
-				turret.framePosition.set(turret.spriteSheet.getFramePosition(frame + turretData.headings))
+				turret.withFramePosition(turret.spriteSheet.getFramePosition(frame + turretData.headings))
 			}
 		}
 	}

@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
@@ -127,22 +126,22 @@ class UiController extends Script implements EventTarget<UiController> {
 	@Override
 	void init() {
 
-		uiSettings = node.findComponentByType(UiSettingsComponent)
+		uiSettings = node.findByType(UiSettingsComponent)
 		mixDatabase = uiSettings.mixDatabase
 
-		entryList = (node.findComponent { it.name == 'Entry list' } as ImGuiComponent)?.imGuiModule as EntryList
+		entryList = node.findByType(EntryList)
 		entryList
 			.on(EntrySelectedEvent) { event ->
-				new SelectEntryAction(this, scene.findScriptByType(PreviewController), event.entry()).select()
+				new SelectEntryAction(this, node.scene.findScriptByType(PreviewController), event.entry()).select()
 			}
 			.on(ExtractMixEntryEvent) { event ->
 				new ExtractMixFileEntryAction(event.entry(), event.entry().name()).extract() // TODO: Save to specified location
 			}
 		entries = entryList.entries
 
-		var mainMenuBar = (node.findComponent { it.name == 'Main menu' } as ImGuiComponent)
+		var mainMenuBar = node.findByType(MainMenuBar)
 		mainMenuBar.on(TouchpadInputEvent) { event ->
-			new ToggleTouchpadInputAction(scene, uiSettings).toggle()
+			new ToggleTouchpadInputAction(node.scene, uiSettings).toggle()
 		}
 
 		buildList(uiSettings.startingDirectory)

@@ -14,40 +14,30 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.previews
+package nz.net.ultraq.redhorizon.engine.scripts
 
-import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 /**
- * Script for listening to a sound effect.
+ * Script-related extensions for the {@link Scene} class.
  *
  * @author Emanuel Rabina
  */
-class SoundPlaybackScript extends Script<Sound> implements AutoCloseable {
+class SceneExtensions {
 
-	private boolean playbackStarted = false
+	/**
+	 * Locate a script component by its type.
+	 */
+	static <T extends Script> T findScriptByType(Scene self, Class<T> scriptClass) {
 
-	@Override
-	void close() {
-
-		node.stop()
-	}
-
-	@Override
-	void update(float delta) {
-
-		if (!playbackStarted) {
-			node.play()
-			playbackStarted = true
-		}
-
-		if (input.keyPressed(GLFW_KEY_SPACE, true)) {
-			if (node.stopped) {
-				node.play()
+		T result = null
+		self.traverse(ScriptNode) { ScriptNode node ->
+			if (scriptClass.isInstance(node.script)) {
+				result = (T)node.script
+				return false
 			}
+			return true
 		}
+		return result
 	}
 }

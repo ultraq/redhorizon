@@ -37,6 +37,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	final int width
 	final int height
 	final Class<? extends Shader> shaderClass
+	final SpriteSheet spriteSheet
 	private final Mesh mesh
 	private final Material material
 
@@ -64,6 +65,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	Sprite(Image image, Class<? extends Shader> shaderClass = BasicShader) {
 
 		this(image.width, image.height, 1f, 1f, image.texture, shaderClass)
+		spriteSheet = null
 	}
 
 	/**
@@ -74,6 +76,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 		this(spriteSheet.width, spriteSheet.height,
 			spriteSheet.width / spriteSheet.texture.width, spriteSheet.height / spriteSheet.texture.height,
 			spriteSheet.texture, shaderClass)
+		this.spriteSheet = spriteSheet
 	}
 
 	@Override

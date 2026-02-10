@@ -17,40 +17,34 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.graphics.AnimationComponent
 import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.graphics.Animation
 
 /**
  * Control the behaviour of an animation in preview.
  *
  * @author Emanuel Rabina
  */
-class AnimationPlaybackScript extends Script implements AutoCloseable {
+class AnimationPlaybackScript extends Script<Animation> implements AutoCloseable {
 
-	private AnimationComponent animation
 	private boolean playbackStarted = false
 
 	@Override
 	void close() {
 
-		animation.stop()
-	}
-
-	@Override
-	void init() {
-
-		animation = node.findComponentByType(AnimationComponent)
+		node.stop()
 	}
 
 	@Override
 	void update(float delta) {
 
 		if (!playbackStarted) {
-			animation.play()
+			node.play()
 			playbackStarted = true
 		}
 
-		if (playbackStarted && animation.stopped) {
+		if (playbackStarted && node.stopped) {
+			// TODO: Move AnimationStoppedEvent to Animation class?
 			node.trigger(new AnimationStoppedEvent())
 		}
 	}
