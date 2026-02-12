@@ -58,6 +58,7 @@ class PreviewController extends Script implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreviewController)
 
+	private ExplorerScene scene
 	private InputStream selectedFileInputStream
 	private Node previewedEntity
 
@@ -72,11 +73,14 @@ class PreviewController extends Script implements AutoCloseable {
 	 */
 	private void clearPreview() {
 
-		selectedFileInputStream?.close()
 		if (previewedEntity) {
 			node.scene.removeChild(previewedEntity)
 			previewedEntity.close()
 			previewedEntity = null
+		}
+		if (selectedFileInputStream) {
+			selectedFileInputStream.close()
+			selectedFileInputStream = null
 		}
 
 		// Animate back to the origin
@@ -100,8 +104,14 @@ class PreviewController extends Script implements AutoCloseable {
 //				scene.trigger(new PreviewEndEvent())
 //			}
 
-		(scene as ExplorerScene).camera.resetTransform()
+		scene.camera.resetTransform()
 		scene.trigger(new PreviewEndEvent())
+	}
+
+	@Override
+	void init() {
+
+		scene = node.scene as ExplorerScene
 	}
 
 	/**

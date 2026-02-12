@@ -27,43 +27,43 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
-class MusicPlaybackScript extends Script implements AutoCloseable {
+class MusicPlaybackScript extends Script<Music> implements AutoCloseable {
 
-	private Music music
 	private boolean playbackStarted = false
 
 	@Override
 	void close() {
 
-		music.stop()
+		node.stop()
 	}
 
 	@Override
 	void init() {
 
-		music = node.findByType(Music)
-		music.withVolume(0.5f)
+		node.withVolume(0.5f)
 	}
 
 	@Override
 	void update(float delta) {
 
+		node.update()
+
 		if (!playbackStarted) {
-			music.play()
+			node.play()
 			playbackStarted = true
 		}
 
 		if (input.keyPressed(GLFW_KEY_SPACE, true)) {
-			if (music.paused) {
-				music.play()
+			if (node.paused) {
+				node.play()
 			}
 			else {
-				music.pause()
+				node.pause()
 			}
 		}
 
-		if (playbackStarted && music.stopped) {
-			music.trigger(new MusicStoppedEvent())
+		if (playbackStarted && node.stopped) {
+			node.trigger(new MusicStoppedEvent())
 		}
 	}
 

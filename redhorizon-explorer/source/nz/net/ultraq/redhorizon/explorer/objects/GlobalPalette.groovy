@@ -17,9 +17,12 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
 import nz.net.ultraq.redhorizon.explorer.PaletteType
+import nz.net.ultraq.redhorizon.graphics.GraphicsNode
 import nz.net.ultraq.redhorizon.graphics.Palette
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.graphics.Shader
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,17 +32,20 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class GlobalPalette extends Node<GlobalPalette> {
+class GlobalPalette extends GraphicsNode<GlobalPalette, PalettedSpriteShaderContext> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalPalette)
-	private PaletteType currentPalette
+
+	final Class<? extends Shader> shaderClass = PalettedSpriteShader
+	private PaletteType paletteType
+	private Palette palette
 
 	/**
 	 * Constructor, create the global palette and load an initial palette.
 	 */
 	GlobalPalette() {
 
-		addChild(loadPalette())
+		palette = addAndReturnChild(loadPalette())
 		addChild(new AlphaMask())
 	}
 
@@ -48,10 +54,9 @@ class GlobalPalette extends Node<GlobalPalette> {
 	 */
 	void cyclePalette() {
 
-		var palette = findByType(Palette)
 		removeChild(palette)
 		palette.close()
-		addChild(loadPalette(currentPalette.next()))
+		palette = addAndReturnChild(loadPalette(paletteType.next()))
 	}
 
 	/**
@@ -60,9 +65,15 @@ class GlobalPalette extends Node<GlobalPalette> {
 	private Palette loadPalette(PaletteType paletteType = PaletteType.RA_TEMPERATE) {
 
 		logger.info("Using ${paletteType} palette")
-		currentPalette = paletteType
+		this.paletteType = paletteType
 		return getResourceAsStream(paletteType.file).withBufferedStream { stream ->
 			return new Palette(paletteType.file, stream)
 		}
+	}
+
+	@Override
+	void render(PalettedSpriteShaderContext shaderContext) {
+
+		shaderContext.setPalette(palette)
 	}
 }

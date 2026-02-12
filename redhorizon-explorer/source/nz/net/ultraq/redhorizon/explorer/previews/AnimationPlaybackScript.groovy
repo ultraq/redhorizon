@@ -38,6 +38,8 @@ class AnimationPlaybackScript extends Script<Animation> implements AutoCloseable
 	@Override
 	void update(float delta) {
 
+		node.update(delta)
+
 		if (!playbackStarted) {
 			node.play()
 			playbackStarted = true

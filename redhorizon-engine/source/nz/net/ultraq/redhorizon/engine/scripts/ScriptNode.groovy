@@ -39,6 +39,7 @@ class ScriptNode extends Node<ScriptNode> implements AutoCloseable {
 
 		this.scriptName = scriptName
 		this.scriptClass = null
+		this.name = "ScriptNode (${scriptName})"
 	}
 
 	/**
@@ -48,6 +49,7 @@ class ScriptNode extends Node<ScriptNode> implements AutoCloseable {
 
 		this.scriptClass = scriptClass
 		this.scriptName = null
+		this.name = "${ScriptNode.simpleName} (${scriptClass.simpleName})"
 	}
 
 	@Override

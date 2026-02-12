@@ -131,6 +131,7 @@ class UiController extends Script implements EventTarget<UiController> {
 
 		entryList = node.findByType(EntryList)
 		entryList
+			.relay(EntrySelectedEvent, node.scene)
 			.on(EntrySelectedEvent) { event ->
 				new SelectEntryAction(this, node.scene.findScriptByType(PreviewController), event.entry()).select()
 			}

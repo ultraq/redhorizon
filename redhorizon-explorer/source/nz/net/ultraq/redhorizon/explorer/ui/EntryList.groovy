@@ -81,7 +81,7 @@ class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList>
 				switch (sortingColumnSpecs.columnIndex) {
 					case 1 -> entries.sort { it.type() }
 					case 2 -> entries.sort { it.size() }
-					case 3 && entries[0] instanceof MixEntry -> entries.sort { it.description() }
+					case 3 && entries[0] instanceof MixEntry -> entries.sort { ((MixEntry)it).description() }
 					default -> entries.sort { it.name() }
 				}
 				if (sortingColumnSpecs.sortDirection == ImGuiSortDirection.Descending) {

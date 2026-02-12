@@ -148,6 +148,7 @@ class Animation extends GraphicsNode<Animation, SceneShaderContext> implements A
 	@Override
 	void close() {
 
+		stop()
 		executor?.close()
 		frames.eachWithIndex { frame, index ->
 			if (frame) {

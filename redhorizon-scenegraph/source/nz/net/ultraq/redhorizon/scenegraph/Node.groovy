@@ -32,10 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 class Node<T extends Node> implements AutoCloseable {
 
-	protected Node parent
 	final List<Node> children = new CopyOnWriteArrayList<>()
-
-	private String name
+	protected Node parent
+	protected String name
 	private boolean enabled = true
 	private final Matrix4f transform = new Matrix4f()
 	private final Vector3f positionResult = new Vector3f()

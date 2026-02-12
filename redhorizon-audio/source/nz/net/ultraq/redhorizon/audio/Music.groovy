@@ -61,13 +61,26 @@ class Music extends AudioNode<Music> implements AutoCloseable, EventTarget<Music
 
 	/**
 	 * Constructor, set up streaming of the given music track.
+	 *
+	 * <p>The file extension is the hint used to determine which available
+	 * {@link AudioDecoder} (registered using Java SPI) is capable of decoding the
+	 * stream.
 	 */
 	Music(String fileName, InputStream inputStream) {
+
+		this(fileName, AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+	}
+
+	/**
+	 * Constructor, set up streaming of the given music track using its name, a
+	 * selected decoder, and a stream of data.
+	 */
+	Music(String fileName, AudioDecoder decoder, InputStream inputStream) {
 
 		source = new OpenALSource()
 		var fileSize = 0
 		var duration = 0
-		var decoder = AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		decoder
 			.on(HeaderDecodedEvent) { event ->
 				var bits = event.bits()
 				var channels = event.channels()
