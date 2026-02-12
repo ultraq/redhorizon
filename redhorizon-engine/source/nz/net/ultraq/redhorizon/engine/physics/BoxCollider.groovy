@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.eventhorizon.EventTarget
-
 import org.joml.primitives.Rectanglef
+
+import groovy.transform.TupleConstructor
 
 /**
  * Give an entity a 2D area which is used for detecting collisions with other
@@ -26,41 +26,28 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class BoxCollider extends Collider<BoxCollider> implements EventTarget<BoxCollider> {
+@TupleConstructor(defaults = false)
+class BoxCollider extends Collider<BoxCollider, Rectanglef> {
 
 	final float width
 	final float height
-	final Rectanglef bounds
-
-	/**
-	 * Constructor, set the collision area from width/height values.
-	 */
-	BoxCollider(float width, float height) {
-
-		this.width = width
-		this.height = height
-		bounds = new Rectanglef(0, 0, width, height).center()
-	}
+	private final Rectanglef _bounds = new Rectanglef(0, 0, width, height)
 
 	@Override
-	void checkCollision(Collider other) {
+	boolean checkCollision(Collider other) {
 
 		// TODO: Allow collision checks across different shapes
 		if (other !instanceof BoxCollider) {
-			return
+			return false
 		}
+
+		return bounds.intersectsRectangle(other.bounds)
+	}
+
+	@Override
+	Rectanglef getBounds() {
 
 		var position = globalPosition
-		bounds.center().translate(position.x(), position.y())
-
-		var otherPosition = other.globalPosition
-		var otherBounds = new Rectanglef(0, 0, other.width, other.height)
-			.center()
-			.translate(otherPosition.x(), otherPosition.y())
-
-		if (bounds.intersectsRectangle(otherBounds)) {
-			trigger(new CollisionEvent(bounds, other.parent, otherBounds))
-			other.trigger(new CollisionEvent(otherBounds, parent, bounds))
-		}
+		return _bounds.center().translate(position.x(), position.y())
 	}
 }

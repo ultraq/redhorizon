@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.eventhorizon.EventTarget
-
 import org.joml.primitives.Circlef
+
+import groovy.transform.TupleConstructor
 
 /**
  * Give an entity a circular area which is used for detecting collisions with
@@ -26,37 +26,31 @@ import org.joml.primitives.Circlef
  *
  * @author Emanuel Rabina
  */
-class CircleCollider extends Collider<CircleCollider> implements EventTarget<CircleCollider> {
+@TupleConstructor(defaults = false)
+class CircleCollider extends Collider<CircleCollider, Circlef> {
 
 	final float radius
-
-	/**
-	 * Constructor, set the collision area with a radius.
-	 */
-	CircleCollider(float radius) {
-
-		this.radius = radius
-	}
+	private final Circlef _bounds = new Circlef(0, 0, radius)
 
 	@Override
-	void checkCollision(Collider other) {
+	boolean checkCollision(Collider other) {
 
 		// TODO: Allow collision checks across different shapes
 		if (other !instanceof CircleCollider) {
-			return
+			return false
 		}
+
+		return bounds.intersects(other.bounds)
+	}
+
+	@Override
+	Circlef getBounds() {
 
 		var position = globalPosition
 		var scale = globalScale
-		var bounds = new Circlef(position.x(), position.y(), radius * scale.x() as float)
-
-		var otherPosition = other.globalPosition
-		var otherScale = other.globalScale
-		var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius * otherScale.x() as float)
-
-		if (bounds.intersects(otherBounds)) {
-			trigger(new CollisionEvent(bounds, other.parent, otherBounds))
-			other.trigger(new CollisionEvent(otherBounds, parent, bounds))
-		}
+		_bounds.x = position.x()
+		_bounds.y = position.y()
+		_bounds.r = radius * scale.x() as float
+		return _bounds
 	}
 }

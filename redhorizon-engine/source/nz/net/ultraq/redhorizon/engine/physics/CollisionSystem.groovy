@@ -31,28 +31,31 @@ class CollisionSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
-	private final List<Collider> collisionComponents = new ArrayList<>()
+	private final List<Collider> colliders = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			collisionComponents.clear()
-			scene.traverse(Collider) { Collider collision ->
-				collisionComponents << collision
+			colliders.clear()
+			scene.traverse(Collider) { Collider collider ->
+				colliders << collider
 				return true
 			}
-			for (var i = 0; i < collisionComponents.size(); i++) {
-				var collision = collisionComponents.get(i)
-				if (!collision.enabled) {
+			for (var i = 0; i < colliders.size(); i++) {
+				var collider = colliders.get(i)
+				if (!collider.enabled) {
 					continue
 				}
-				for (var j = i + 1; j < collisionComponents.size(); j++) {
-					var otherCollision = collisionComponents.get(j)
-					if (!otherCollision.enabled) {
+				for (var j = i + 1; j < colliders.size(); j++) {
+					var otherCollider = colliders.get(j)
+					if (!otherCollider.enabled) {
 						continue
 					}
-					collision.checkCollision(otherCollision)
+					if (collider.checkCollision(otherCollider)) {
+						collider.trigger(new CollisionEvent(otherCollider))
+						otherCollider.trigger(new CollisionEvent(collider))
+					}
 				}
 			}
 		}

@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import groovy.transform.ImmutableOptions
 
@@ -26,6 +25,6 @@ import groovy.transform.ImmutableOptions
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['thisBounds', 'otherObject', 'otherBounds'])
-record CollisionEvent(Object thisBounds, Node otherObject, Object otherBounds) implements Event {
+@ImmutableOptions(knownImmutables = ['otherObject'])
+record CollisionEvent(Collider otherObject) implements Event {
 }

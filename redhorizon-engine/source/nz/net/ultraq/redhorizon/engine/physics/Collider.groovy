@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
@@ -23,10 +24,15 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
  *
  * @author Emanuel Rabina
  */
-abstract class Collider<T extends Collider> extends Node<T> {
+abstract class Collider<T extends Collider, S> extends Node<T> implements EventTarget<T> {
 
 	/**
 	 * Check whether this object is colliding with another.
 	 */
-	abstract void checkCollision(Collider other)
+	abstract boolean checkCollision(Collider other)
+
+	/**
+	 * Return a shape describing the collision space.
+	 */
+	abstract S getBounds()
 }
