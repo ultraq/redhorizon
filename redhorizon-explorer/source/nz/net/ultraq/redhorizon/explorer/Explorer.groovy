@@ -27,7 +27,6 @@ import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneChangesSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
-import nz.net.ultraq.redhorizon.engine.time.TimeSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
@@ -185,7 +184,6 @@ class Explorer implements Runnable {
 				}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
-				.addSystem(new TimeSystem())
 				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
 				.addSystem(new AudioSystem())
 				.addSystem(graphicsSystem)
