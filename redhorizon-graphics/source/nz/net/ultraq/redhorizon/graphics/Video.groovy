@@ -108,6 +108,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	@Override
 	void close() {
 
+		stop()
 		executor.close()
 		music.close()
 		animation.close()
