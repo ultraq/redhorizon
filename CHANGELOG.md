@@ -2,6 +2,13 @@
 Changelog
 =========
 
+### 0.42.0
+
+After a foray into ECS, I've returned to a node-based structure for organizing
+objects as I never fully stuck to what ECS was wanting.  It did however show me
+some new ideas for splitting up code and behaviours that I can still use in a
+node-based structure.
+
 ### 0.41.0
 
 While the 0.40.x versions focused on smaller standalone modules for use in any
