@@ -16,16 +16,18 @@
 
 plugins {
 	id 'maven-publish'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.2'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.3'
 }
 
 description = 'Recreating the original 2D Command & Conquer games'
 
-configure {
-	createMavenCentralPublisherBundle()
-		.forProjects(subprojects.findAll { it.plugins.hasPlugin('java-library') } as Project[])
-		.withCredentials(
-			findProperty('mavenCentral.publisher.username'),
-			findProperty('mavenCentral.publisher.password')
-		)
+gradle.projectsEvaluated {
+	configure {
+		createMavenCentralPublisherBundle()
+			.forProjects(subprojects.findAll { it.plugins.hasPlugin('java-library') } as Project[])
+			.withCredentials(
+				findProperty('mavenCentral.publisher.username'),
+				findProperty('mavenCentral.publisher.password')
+			)
+	}
 }
