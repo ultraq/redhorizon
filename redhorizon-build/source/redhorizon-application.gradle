@@ -22,7 +22,7 @@ plugins {
 // @formatter:off
 configure {
 	createGroovyProject()
-		.useJavaVersion(21)
+		.useJavaVersion(25)
 		.useMavenCentralRepositories()
 		.configureSource()
 			.withSourceDirectory('source')

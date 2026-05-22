@@ -22,7 +22,7 @@ plugins {
 // @formatter:off
 configure {
 	createGroovyLibraryProject()
-		.useJavaVersion(21)
+		.useJavaVersion(25)
 		.useMavenCentralRepositories()
 		.withSourcesJar()
 		.withGroovydocJar()

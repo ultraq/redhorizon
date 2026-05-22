@@ -24,7 +24,7 @@ description = 'Build configuration for Red Horizon projects'
 // @formatter:off
 configure {
 	createGroovyGradlePluginProject()
-		.useJavaVersion(21)
+		.useJavaVersion(25)
 		.useGradlePluginPortal()
 		.configureSource()
 			.withSourceDirectory('source')
