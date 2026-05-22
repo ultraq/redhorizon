@@ -68,7 +68,7 @@ class Music extends AudioNode<Music> implements AutoCloseable, EventTarget<Music
 	 */
 	Music(String fileName, InputStream inputStream) {
 
-		this(fileName, AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+		this(fileName, AudioDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**

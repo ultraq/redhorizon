@@ -77,7 +77,7 @@ class Animation extends GraphicsNode<Animation, SceneShaderContext> implements A
 	 */
 	Animation(String fileName, InputStream inputStream) {
 
-		this(fileName, ImageDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+		this(fileName, ImageDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**

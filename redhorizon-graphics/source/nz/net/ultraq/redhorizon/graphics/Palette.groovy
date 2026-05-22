@@ -77,7 +77,7 @@ class Palette extends Node<Palette> implements AutoCloseable {
 	 */
 	Palette(String fileName, InputStream inputStream) {
 
-		this(fileName, PaletteDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+		this(fileName, PaletteDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**

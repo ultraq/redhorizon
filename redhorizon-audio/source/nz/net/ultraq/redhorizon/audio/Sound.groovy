@@ -48,7 +48,7 @@ class Sound extends AudioNode<Sound> implements AutoCloseable {
 	 */
 	Sound(String fileName, InputStream inputStream) {
 
-		this(fileName, AudioDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+		this(fileName, AudioDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**

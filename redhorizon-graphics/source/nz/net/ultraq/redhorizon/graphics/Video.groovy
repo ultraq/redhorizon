@@ -59,7 +59,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	 */
 	Video(String fileName, InputStream inputStream) {
 
-		this(fileName, VideoDecoders.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
+		this(fileName, VideoDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**
