@@ -67,6 +67,7 @@ class Palette extends Node<Palette> implements AutoCloseable {
 			paletteData.get(colour)
 			colourData[i] = colour
 		}
+		paletteData.flip()
 		texture = new OpenGLTexture(colours, 1, format, paletteData)
 	}
 

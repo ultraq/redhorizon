@@ -115,7 +115,9 @@ class PcxFileDecoder implements ImageDecoder, FileTypeTest {
 		}
 		indexData.flip()
 
-		var paletteData = ByteBuffer.wrapNative(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
+		var paletteData = ByteBuffer.allocateNative(PALETTE_SIZE)
+			.put(imageAndPalette, imageAndPalette.length - PALETTE_SIZE, PALETTE_SIZE)
+			.flip()
 		var palette = new Palette(PALETTE_COLOURS, PALETTE_FORMAT, paletteData)
 
 		trigger(new FrameDecodedEvent(width, height, 1, indexData, palette))
