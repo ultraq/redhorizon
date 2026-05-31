@@ -8,7 +8,7 @@ Runtime package for building applications with the Red Horizon engine.
 Installation
 ------------
 
-Requires Java 21 on macOS 12 Monterey and newer, or Windows 10 64-bit and newer.
+Requires Java 25 on macOS Monterey (12) and newer, or Windows 10 64-bit and newer.
 
 ### For Maven and Maven-compatible dependency managers
 
@@ -16,29 +16,27 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-runtime`
+ - Version: `0.43.0`
 
 Check the [project releases](https://github.com/ultraq/redhorizon/releases)
-for a list of available versions.  Each release page also includes a
-downloadable JAR if you want to manually add it to your project classpath.
+for a list of available versions.
 
 
 Usage
 -----
 
-In a nutshell, a game/application can be built and run by creating an instance
-of `nz.net.ultraq.redhorizon.runtime.Runtime`, passing an instance of
-`nz.net.ultraq.redhorizon.runtime.Application` to the constructor, configuring
-the runtime with the methods available on the runtime instance, and then calling
-`execute()`.
+A game can be scaffolded by extending the `nz.net.ultraq.redhorizon.runtime.Game`
+class (which contains many optional methods for configuring all of the systems).
+Then pass an instance of that class to the `nz.net.ultraq.redhorizon.runtime.Runtime`
+constructor, and call `execute()`.
 
-For an extremely basic game example, this can all be contained within a single
-class:
+For an extremely basic example, this can all be contained within a single class:
 
 ```groovy
-import nz.net.ultraq.redhorizon.runtime.Application
+import nz.net.ultraq.redhorizon.runtime.Game
 import nz.net.ultraq.redhorizon.runtime.Runtime
 
-class MyGame implements Application {
+class MyGame extends Game {
 
   static void main(String[] args) {
     System.exit(new Runtime(new MyGame()).execute(args))
@@ -58,3 +56,10 @@ class MyGame implements Application {
   }
 }
 ```
+
+
+API
+---
+
+Browse the online groovydocs for the full API:
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-runtime
