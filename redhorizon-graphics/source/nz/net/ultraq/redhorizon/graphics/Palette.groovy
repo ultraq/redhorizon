@@ -17,7 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,7 +30,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class Palette extends Node<Palette> implements AutoCloseable {
+class Palette extends GraphicsNode<Palette, PalettedSpriteShaderContext> implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Palette)
 
@@ -118,5 +119,17 @@ class Palette extends Node<Palette> implements AutoCloseable {
 	byte[] getAt(int index) {
 
 		return colourData[index]
+	}
+
+	@Override
+	Class<? extends Shader> getShaderClass() {
+
+		return PalettedSpriteShader
+	}
+
+	@Override
+	void render(PalettedSpriteShaderContext shaderContext) {
+
+		shaderContext.setPalette(this)
 	}
 }

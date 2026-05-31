@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.graphics
+package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
-import nz.net.ultraq.redhorizon.graphics.GraphicsNode
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
 
 import java.nio.ByteBuffer
 
@@ -29,15 +27,18 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class AlphaMask extends GraphicsNode<AlphaMask, PalettedSpriteShaderContext> implements AutoCloseable {
+class PaletteAlphaMask extends GraphicsNode<PaletteAlphaMask, PalettedSpriteShaderContext> implements AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
 	final Texture texture
 
 	/**
 	 * Constructor, creates the standard alpha mask used in C&C.
+	 *
+	 * TODO: Don't tie this to C&C and instead have the classic package provide an
+	 *       implementation.
 	 */
-	AlphaMask() {
+	PaletteAlphaMask() {
 
 		var alphaMaskBuffer = ByteBuffer.allocateNative(256 * 4)
 		256.times { i ->

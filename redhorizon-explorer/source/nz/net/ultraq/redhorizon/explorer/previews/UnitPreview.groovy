@@ -17,14 +17,14 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
@@ -49,7 +49,7 @@ class UnitPreview extends Node<UnitPreview> {
 
 		this.unitData = unitData
 
-		addChild(new FactionAdjustmentMap(Faction.GOLD))
+		addChild(new PaletteSwapMap(Faction.GOLD.colours))
 		addChild(new Sprite(spriteSheet, PalettedSpriteShader))
 			.withName('Body')
 		if (unitData.shpFile.parts.turret) {
@@ -116,6 +116,7 @@ class UnitPreview extends Node<UnitPreview> {
 		private Sprite sprite
 		private float repeatTimer
 		private float animationTimer
+		private Faction faction
 
 		@Override
 		void init() {
@@ -158,11 +159,10 @@ class UnitPreview extends Node<UnitPreview> {
 			}
 
 			if (input.keyPressed(GLFW_KEY_F, true)) {
-				var factions = Faction.values()
-				var currentFaction = node.findByType(FactionAdjustmentMap)
-				var nextFaction = factions[(currentFaction.faction.ordinal() + 1) % factions.length]
-				currentFaction.faction = nextFaction
-				logger.info('Viewing with {} faction colours', nextFaction.name())
+				faction++
+				var swapMap = node.findByType(PaletteSwapMap)
+				swapMap.setColours(faction.colours)
+				logger.info('Viewing with {} faction colours', faction.name())
 			}
 
 			var currentState = node.unitData.shpFile.states[node.stateIndex]

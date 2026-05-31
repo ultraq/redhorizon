@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.graphics
+package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
-import nz.net.ultraq.redhorizon.graphics.GraphicsNode
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
 
 import java.nio.ByteBuffer
 
 /**
  * A texture used to swap index values to adjust the output colour from a
- * palette.  Used for things like remapping the 'gold' value in sprites to a
- * faction-specific colour, or for palette-swapping animations like water and
- * glowing lights.
+ * palette.  Used for performing palette-swapping animations, or to remap a set
+ * of colours to another (eg: faction colours).
  *
  * @author Emanuel Rabina
  */
-class FactionAdjustmentMap extends GraphicsNode<FactionAdjustmentMap, PalettedSpriteShaderContext>
+class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderContext>
 	implements AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
-	Faction faction
-	private boolean factionChanged
+	int[] colours
+	private boolean coloursChanged
 	private final ByteBuffer buffer
 	final Texture texture
 
 	/**
-	 * Constructor, builds an adjustment map for the given faction.
+	 * Constructor, builds an adjustment map for the given colours.
+	 *
+	 * TODO: Don't tie this to C&C and instead have the classic package provide an
+	 *       implementation.  Also need a data structure that represents these
+	 *       swaps a lot better.
 	 */
-	FactionAdjustmentMap(Faction faction) {
+	PaletteSwapMap(int[] colours) {
 
-		this.faction = faction
+		this.colours = colours
 		buffer = ByteBuffer.allocateNative(256)
 		256.times { i ->
 			if (i in 80..95) {
-				buffer.put(faction.colours[i - 80] as byte)
+				buffer.put(colours[i - 80] as byte)
 			}
 			else {
 				buffer.put(i as byte)
@@ -70,7 +70,7 @@ class FactionAdjustmentMap extends GraphicsNode<FactionAdjustmentMap, PalettedSp
 	@Override
 	void render(PalettedSpriteShaderContext shaderContext) {
 
-		shaderContext.setAdjustmentMap(this)
+		shaderContext.setSwapMap(this)
 		update()
 	}
 
@@ -78,10 +78,10 @@ class FactionAdjustmentMap extends GraphicsNode<FactionAdjustmentMap, PalettedSp
 	 * Set the faction to use.  This will cause the adjustment map to be updated
 	 * with the next call to {@link #update()}.
 	 */
-	void setFaction(Faction faction) {
+	void setColours(int[] colours) {
 
-		this.faction = faction
-		factionChanged = true
+		this.colours = colours
+		coloursChanged = true
 	}
 
 	/**
@@ -89,12 +89,12 @@ class FactionAdjustmentMap extends GraphicsNode<FactionAdjustmentMap, PalettedSp
 	 */
 	void update() {
 
-		if (factionChanged) {
+		if (coloursChanged) {
 			(80..95).each { i ->
-				buffer.put(i, faction.colours[i - 80] as byte)
+				buffer.put(i, colours[i - 80] as byte)
 			}
 			texture.update(buffer)
-			factionChanged = false
+			coloursChanged = false
 		}
 	}
 }

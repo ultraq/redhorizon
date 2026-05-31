@@ -17,20 +17,20 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
-import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
+import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.input.KeyEvent
 
 import org.lwjgl.system.Configuration
@@ -151,17 +151,18 @@ class ImageDecoders extends Specification {
 			}
 			var sprite = new Sprite(spriteSheet, PalettedSpriteShader)
 			var faction = Faction.RED
-			var adjustmentMap = new FactionAdjustmentMap(faction)
+			var swapMap = new PaletteSwapMap(faction.colours)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
 				return new Palette('Palette_temperat.pal', stream)
 			}
-			var alphaMask = new AlphaMask()
+			var alphaMask = new PaletteAlphaMask()
 			var camera = new Camera(320, 200, window)
 			var timer = 0
 			var frame = 0
 			window.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_P)) {
-					adjustmentMap.setFaction(faction++)
+					swapMap.setColours(faction.colours)
+					faction++
 				}
 			}
 		when:
@@ -183,8 +184,8 @@ class ImageDecoders extends Specification {
 						framebuffer.useFramebuffer { ->
 							palettedSpriteShader.useShader { shaderContext ->
 								camera.render(shaderContext)
-								shaderContext.setAdjustmentMap(adjustmentMap)
-								adjustmentMap.update()
+								shaderContext.setSwapMap(swapMap)
+								swapMap.update()
 								shaderContext.setPalette(palette)
 								shaderContext.setAlphaMask(alphaMask)
 								sprite
@@ -203,7 +204,7 @@ class ImageDecoders extends Specification {
 			notThrown(Exception)
 		cleanup:
 			alphaMask?.close()
-			adjustmentMap?.close()
+			swapMap?.close()
 			palettedSpriteShader?.close()
 			palette?.close()
 			sprite?.close()

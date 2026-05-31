@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.audio.AudioDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
@@ -42,6 +41,7 @@ import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 

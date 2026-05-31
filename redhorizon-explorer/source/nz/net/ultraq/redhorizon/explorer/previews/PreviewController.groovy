@@ -19,8 +19,6 @@ package nz.net.ultraq.redhorizon.explorer.previews
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.classic.graphics.FactionAdjustmentMap
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
@@ -35,10 +33,12 @@ import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
@@ -292,7 +292,7 @@ class PreviewController extends Script implements AutoCloseable {
 
 		// No config found, fall back to viewing a SHP file as frame-by-frame media
 		return new Node()
-			.addChild(new FactionAdjustmentMap(Faction.GOLD))
+			.addChild(new PaletteSwapMap(Faction.GOLD.colours))
 			.addChild(new Sprite(spriteSheet, PalettedSpriteShader))
 			.addChild(new ScriptNode(SpritePreviewScript))
 			.withName("Sprite - ${fileName}")

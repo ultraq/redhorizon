@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.graphics
+package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
+import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 
 import org.joml.Matrix4fc
 
@@ -35,7 +36,7 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 	 */
 	PalettedSpriteShader() {
 
-		super('PalettedSprite', 'nz/net/ultraq/redhorizon/classic/graphics/PalettedSprite.glsl')
+		super('PalettedSprite', 'nz/net/ultraq/redhorizon/graphics/opengl/PalettedSprite.glsl')
 	}
 
 	@Override
@@ -44,12 +45,7 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 		return new PalettedSpriteShaderContext() {
 
 			@Override
-			void setAdjustmentMap(FactionAdjustmentMap adjustmentMap) {
-				setUniform('adjustmentMap', 1, adjustmentMap.texture)
-			}
-
-			@Override
-			void setAlphaMask(AlphaMask alphaMask) {
+			void setAlphaMask(PaletteAlphaMask alphaMask) {
 				setUniform('alphaMask', 3, alphaMask.texture)
 			}
 
@@ -75,6 +71,11 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 			}
 
 			@Override
+			void setSwapMap(PaletteSwapMap swapMap) {
+				setUniform('swapMap', 1, swapMap.texture)
+			}
+
+			@Override
 			void setViewMatrix(Matrix4fc view) {
 				setUniform('view', view)
 			}
@@ -87,18 +88,18 @@ class PalettedSpriteShader extends OpenGLShader<PalettedSpriteShaderContext> {
 	interface PalettedSpriteShaderContext extends SceneShaderContext {
 
 		/**
-		 * Set an adjustment map to apply atop the palette.
-		 */
-		void setAdjustmentMap(FactionAdjustmentMap adjustmentMap)
-
-		/**
 		 * Set the alpha mask to apply atop the palette.
 		 */
-		void setAlphaMask(AlphaMask alphaMask)
+		void setAlphaMask(PaletteAlphaMask alphaMask)
 
 		/**
 		 * Set the palette to use.
 		 */
 		void setPalette(Palette palette)
+
+		/**
+		 * Set a swap map to apply atop the palette.
+		 */
+		void setSwapMap(PaletteSwapMap swapMap)
 	}
 }

@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.explorer.objects
 
-import nz.net.ultraq.redhorizon.classic.graphics.AlphaMask
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader
-import nz.net.ultraq.redhorizon.classic.graphics.PalettedSpriteShader.PalettedSpriteShaderContext
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.GraphicsNode
 import nz.net.ultraq.redhorizon.graphics.Palette
+import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
 import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,7 +46,7 @@ class GlobalPalette extends GraphicsNode<GlobalPalette, PalettedSpriteShaderCont
 	GlobalPalette() {
 
 		palette = addAndReturnChild(loadPalette())
-		addChild(new AlphaMask())
+		addChild(new PaletteAlphaMask())
 	}
 
 	/**
