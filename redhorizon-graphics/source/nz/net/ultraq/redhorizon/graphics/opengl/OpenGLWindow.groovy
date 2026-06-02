@@ -368,7 +368,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		// own space which GLFW will not do.
 		if (System.isWindows() && !doubleClickForFullscreenEnabled) {
 			on(MouseButtonEvent) { event ->
-				if (event.button() == GLFW_MOUSE_BUTTON_1 && event.action() == GLFW_RELEASE) {
+				if (event.buttonReleased(GLFW_MOUSE_BUTTON_1)) {
 					var clickTime = System.currentTimeMillis()
 					if (clickTime - lastClickTime < 300) {
 						toggleFullScreen()

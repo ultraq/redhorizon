@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.input
 
 /**
- * Event for mouse input
+ * Event for mouse input.
  *
  * @author Emanuel Rabina
  */
