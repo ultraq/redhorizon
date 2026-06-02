@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.scene.SceneChangesSystem
+import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
@@ -187,7 +187,7 @@ class Explorer implements Runnable {
 				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
 				.addSystem(new AudioSystem())
 				.addSystem(graphicsSystem)
-				.addSystem(new SceneChangesSystem())
+				.addSystem(new SceneUpdateSystem())
 				.withScene(scene)
 
 			// Game loop

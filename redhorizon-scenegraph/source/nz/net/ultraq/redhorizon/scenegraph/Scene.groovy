@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate',
-			'scale', 'translate', 'traverse'],
+		includes = ['clear', 'find', 'findAll', 'findAllByType', 'insertBefore',
+			'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()

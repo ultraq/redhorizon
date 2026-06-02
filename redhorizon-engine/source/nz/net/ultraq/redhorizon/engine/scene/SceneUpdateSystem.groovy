@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class SceneChangesSystem extends System {
+class SceneUpdateSystem extends System {
 
-	private static final Logger logger = LoggerFactory.getLogger(SceneChangesSystem)
+	private static final Logger logger = LoggerFactory.getLogger(SceneUpdateSystem)
 
 	@Override
 	void update(Scene scene, float delta) {

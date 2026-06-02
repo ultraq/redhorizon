@@ -26,6 +26,14 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 abstract class ImGuiModule<T extends ImGuiModule> extends Node<T> {
 
 	/**
+	 * Whether this module is for debugging purposes.  Defaults to {@code false}.
+	 */
+	boolean isDebug() {
+
+		return false
+	}
+
+	/**
 	 * Draw the module.
 	 */
 	abstract void render(ImGuiContext context)

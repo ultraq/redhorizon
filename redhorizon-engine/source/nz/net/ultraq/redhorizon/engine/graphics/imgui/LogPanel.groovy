@@ -38,8 +38,8 @@ class LogPanel extends ImGuiModule<LogPanel> {
 
 	private static final int MAX_DEBUG_LINES = 400
 
+	final boolean debug = true
 	private final BlockingQueue<String> logLines = new ArrayBlockingQueue<>(MAX_DEBUG_LINES)
-
 	private boolean scrollToBottom = true
 
 	/**
