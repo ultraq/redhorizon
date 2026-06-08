@@ -281,15 +281,13 @@ class Node<T extends Node> implements AutoCloseable {
 	}
 
 	/**
-	 * Insert a child node before another child node.
+	 * Insert a child node before another child node.  If {@code before} is {@code
+	 * null}, then the child node is added anyway.
 	 */
 	T insertBefore(Node child, Node before) {
 
-		var index = children.indexOf(before)
-		if (index != -1) {
-			children.add(index, child)
-			child.parent = this
-		}
+		children.add(Math.min(children.indexOf(before), 0), child)
+		child.parent = this
 		return (T)this
 	}
 

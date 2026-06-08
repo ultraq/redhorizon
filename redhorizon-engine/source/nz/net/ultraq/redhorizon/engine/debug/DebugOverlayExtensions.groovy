@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.extensions
+package nz.net.ultraq.redhorizon.engine.debug
 
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ProfilingLoggingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.Camera

@@ -5,9 +5,8 @@ Changelog
 ### 0.43.0
 
 An upgrade to Java 25 and Groovy 5, and an attempt to make spinning up a new
-game project easier (re-introducing the [redhorizon-runtime](redhorizon-runtime)
-package) in the lead-up to my very first Game Jam, [The Very Serious Juniper Dev
-Game Jam](https://itch.io/jam/theveryseriousjuniperdevgamejam) 😄
+game project easier (in the lead-up to my very first Game Jam, [The Very Serious
+Juniper Dev Game Jam](https://itch.io/jam/theveryseriousjuniperdevgamejam) 😄
 
 Very unlikely that I'll have something finished at the end (there's a work trip
 while its running!), but it'll give me a chance to try use the engine in anger
