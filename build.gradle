@@ -16,7 +16,7 @@
 
 plugins {
 	id 'maven-publish'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.3'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.4'
 }
 
 description = 'Recreating the original 2D Command & Conquer games'
