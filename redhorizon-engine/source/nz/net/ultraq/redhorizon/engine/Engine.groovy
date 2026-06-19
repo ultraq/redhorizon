@@ -67,9 +67,10 @@ class Engine {
 	 */
 	void update(float delta) {
 
-		// TODO: There are a lot of scene traversal methods in each of the system
-		//       updates, so introduce a more eficient way of picking out necessary
-		//       components.
+		if (!scene) {
+			throw new IllegalStateException('Called Engine.update() without a scene')
+		}
+
 		average('Combined update', 1f, logger) { ->
 			systems.each { system ->
 				if (system.enabled) {
