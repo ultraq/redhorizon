@@ -125,12 +125,19 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 	 */
 	Rectanglei getViewport() {
 
-		return dockspaceUsed ?
-			imGuiViewport
-				.setMin(imGuiLayer.gameWindow.lastImageX as int, imGuiLayer.gameWindow.lastImageY as int)
-				.setLengths(imGuiLayer.gameWindow.lastImageWidth as int, imGuiLayer.gameWindow.lastImageHeight as int)
-				.scale(window.renderScale as int) :
-			_viewport
+		if (dockspaceUsed) {
+			var lastImageX = imGuiLayer.gameWindow.lastImageX
+			var lastImageY = imGuiLayer.gameWindow.lastImageY
+			var lastImageWidth = imGuiLayer.gameWindow.lastImageWidth
+			var lastImageHeight = imGuiLayer.gameWindow.lastImageHeight
+			var renderScale = window.renderScale
+			return imGuiViewport.set(
+				lastImageX * renderScale as int,
+				lastImageY * renderScale as int,
+				(lastImageX + lastImageWidth) * renderScale as int,
+				(lastImageY + lastImageHeight) * renderScale as int)
+		}
+		return _viewport
 	}
 
 	@Override

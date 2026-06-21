@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * The player's view into the world.
@@ -28,6 +30,8 @@ import org.joml.Vector3f
  * @author Emanuel Rabina
  */
 class Camera extends Node<Camera> {
+
+	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
 	private final Window window
 	private final Matrix4fc projection
