@@ -66,6 +66,8 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	private final OpenGLRenderPipeline renderPipeline
 	private OpenGLFramebuffer framebuffer
 
+	private final GamepadStateProcessor gamepadStateProcessor
+
 	/**
 	 * Create and configure a new window with OpenGL.
 	 */
@@ -123,7 +125,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		uiScale = contentScale / renderScale as float
 		logger.debug('UI scale is {}', uiScale)
 
-		// Input callbacks
+		// Input callbacks and managed input handling
 		glfwSetKeyCallback(window) { long window, int key, int scancode, int action, int mods ->
 			trigger(new KeyEvent(key, mods, action == GLFW_PRESS || action == GLFW_REPEAT))
 		}
@@ -133,6 +135,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
 		}
+		gamepadStateProcessor = new GamepadStateProcessor(this)
 
 		// Window callbacks
 		glfwSetWindowMaximizeCallback(window) { long window, boolean maximized ->
@@ -225,6 +228,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	void pollEvents() {
 
 		glfwPollEvents()
+		gamepadStateProcessor.process()
 	}
 
 	@Override
