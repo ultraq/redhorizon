@@ -35,6 +35,8 @@ class GamepadStateOverlayModule implements DebugOverlayModule {
 
 	private final Vector2f leftStick = new Vector2f()
 	private final Vector2f rightStick = new Vector2f()
+	private float leftTrigger = 0f
+	private float rightTrigger = 0f
 	private final Map<Integer, Boolean> buttonStates = new ConcurrentHashMap<>()
 	private final Map<Integer, String> buttonNames = [
 		(GLFW_GAMEPAD_BUTTON_A): "A",
@@ -65,6 +67,8 @@ class GamepadStateOverlayModule implements DebugOverlayModule {
 				case GLFW_GAMEPAD_AXIS_LEFT_Y -> leftStick.y = event.value()
 				case GLFW_GAMEPAD_AXIS_RIGHT_X -> rightStick.x = event.value()
 				case GLFW_GAMEPAD_AXIS_RIGHT_Y -> rightStick.y = event.value()
+				case GLFW_GAMEPAD_AXIS_LEFT_TRIGGER -> leftTrigger = event.value()
+				case GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER -> rightTrigger = event.value()
 			}
 		}
 		window.on(GamepadButtonEvent) { event ->
@@ -77,6 +81,8 @@ class GamepadStateOverlayModule implements DebugOverlayModule {
 
 		ImGui.text("Left stick: ${sprintf('%.1f', leftStick.x)}, ${sprintf('%.1f', leftStick.y)}")
 		ImGui.text("Right stick: ${sprintf('%.1f', rightStick.x)}, ${sprintf('%.1f', rightStick.y)}")
+		ImGui.text("Left trigger: ${sprintf('%.1f', leftTrigger)}")
+		ImGui.text("Right trigger: ${sprintf('%.1f', rightTrigger)}")
 		var buttonsPressed = buttonNames.inject([]) { acc, key, name ->
 			if (buttonStates[key]) {
 				acc << name

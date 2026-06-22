@@ -48,28 +48,6 @@ class GamepadStateProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(GamepadStateProcessor)
 
-	// Testing has shown that not all of the buttons in GLFW match exactly to the
-	// buttons on a gamepad, so this class is to remap the values experienced to
-	// the GLFW values so that GLFW can continue to be used as expected.
-	// Note that this might only be a macOS thing: gotta test in Windows too.
-	private static final Map<Integer, Integer> MAPPING = [
-		(GLFW_GAMEPAD_BUTTON_A): 0,
-		(GLFW_GAMEPAD_BUTTON_B): 1,
-		(GLFW_GAMEPAD_BUTTON_X): 3,
-		(GLFW_GAMEPAD_BUTTON_Y): 4,
-		(GLFW_GAMEPAD_BUTTON_LEFT_BUMPER): 6,
-		(GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER): 7,
-		(GLFW_GAMEPAD_BUTTON_BACK): 10,
-		(GLFW_GAMEPAD_BUTTON_START): 11,
-		(GLFW_GAMEPAD_BUTTON_GUIDE): 12,
-		(GLFW_GAMEPAD_BUTTON_LEFT_THUMB): 13,
-		(GLFW_GAMEPAD_BUTTON_RIGHT_THUMB): 14,
-		(GLFW_GAMEPAD_BUTTON_DPAD_UP): 23,
-		(GLFW_GAMEPAD_BUTTON_DPAD_RIGHT): 24,
-		(GLFW_GAMEPAD_BUTTON_DPAD_DOWN): 25,
-		(GLFW_GAMEPAD_BUTTON_DPAD_LEFT): 26
-	]
-
 	final OpenGLWindow window
 	@Lazy
 	private GLFWGamepadState gamepadState = { GLFWGamepadState.create() }()
@@ -102,6 +80,7 @@ class GamepadStateProcessor {
 		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_Y)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_X)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_Y)
+		processAxis(axes, GLFW_GAMEPAD_AXIS_LEFT_TRIGGER)
 		processAxis(axes, GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER)
 	}
 
@@ -124,21 +103,43 @@ class GamepadStateProcessor {
 			buttonValues << buttons.get(i)
 		}
 
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_A, MAPPING[GLFW_GAMEPAD_BUTTON_A])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_B, MAPPING[GLFW_GAMEPAD_BUTTON_B])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_X, MAPPING[GLFW_GAMEPAD_BUTTON_X])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_Y, MAPPING[GLFW_GAMEPAD_BUTTON_Y])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_BUMPER, MAPPING[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER, MAPPING[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_BACK, MAPPING[GLFW_GAMEPAD_BUTTON_BACK])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_START, MAPPING[GLFW_GAMEPAD_BUTTON_START])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_GUIDE, MAPPING[GLFW_GAMEPAD_BUTTON_GUIDE])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_THUMB, MAPPING[GLFW_GAMEPAD_BUTTON_LEFT_THUMB])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_THUMB, MAPPING[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_UP, MAPPING[GLFW_GAMEPAD_BUTTON_DPAD_UP])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT, MAPPING[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_DOWN, MAPPING[GLFW_GAMEPAD_BUTTON_DPAD_DOWN])
-		processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_LEFT, MAPPING[GLFW_GAMEPAD_BUTTON_DPAD_LEFT])
+		// Testing has shown that not all of the buttons in GLFW match exactly to
+		// the buttons on a gamepad on macOS, so this remaps the GLFW names to the
+		// values experienced so that we can continue to use GLFW constants.
+		if (System.isMacOs()) {
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_A, 0)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_B, 1)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_X, 3)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_Y, 4)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_BUMPER, 6)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER, 7)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_BACK, 10)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_START, 11)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_GUIDE, 12)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_THUMB, 13)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_THUMB, 14)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_UP, 23)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT, 24)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_DOWN, 25)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_LEFT, 26)
+		}
+		else {
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_A, GLFW_GAMEPAD_BUTTON_A)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_B, GLFW_GAMEPAD_BUTTON_B)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_X, GLFW_GAMEPAD_BUTTON_X)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_Y, GLFW_GAMEPAD_BUTTON_Y)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_BUMPER, GLFW_GAMEPAD_BUTTON_LEFT_BUMPER)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER, GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_BACK, GLFW_GAMEPAD_BUTTON_BACK)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_START, GLFW_GAMEPAD_BUTTON_START)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_GUIDE, GLFW_GAMEPAD_BUTTON_GUIDE)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_LEFT_THUMB, GLFW_GAMEPAD_BUTTON_LEFT_THUMB)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_RIGHT_THUMB, GLFW_GAMEPAD_BUTTON_RIGHT_THUMB)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_UP, GLFW_GAMEPAD_BUTTON_DPAD_UP)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT, GLFW_GAMEPAD_BUTTON_DPAD_RIGHT)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_DOWN, GLFW_GAMEPAD_BUTTON_DPAD_DOWN)
+			processButton(buttons, GLFW_GAMEPAD_BUTTON_DPAD_LEFT, GLFW_GAMEPAD_BUTTON_DPAD_LEFT)
+		}
 	}
 
 	/**
