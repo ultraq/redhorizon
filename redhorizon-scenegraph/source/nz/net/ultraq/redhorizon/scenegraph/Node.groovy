@@ -316,6 +316,15 @@ class Node<T extends Node> implements AutoCloseable {
 	}
 
 	/**
+	 * Remove a node from its parent.
+	 */
+	T remove() {
+
+		parent?.removeChild(this)
+		return (T)this
+	}
+
+	/**
 	 * Remove a child node from this node.
 	 */
 	T removeChild(Node child) {
