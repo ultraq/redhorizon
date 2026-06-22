@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
-import nz.net.ultraq.redhorizon.graphics.imgui.GamepadAxesOverlayModule
+import nz.net.ultraq.redhorizon.graphics.imgui.GamepadStateOverlayModule
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
@@ -60,7 +60,7 @@ class GamepadProcessingCheck extends Specification {
 	def 'Gamepad axes are being read'() {
 		given:
 			var debugOverlay = new DebugOverlay()
-				.addModule(new GamepadAxesOverlayModule(window))
+				.addModule(new GamepadStateOverlayModule(window))
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)

@@ -18,25 +18,46 @@ package nz.net.ultraq.redhorizon.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.GamepadAxisEvent
+import nz.net.ultraq.redhorizon.input.GamepadButtonEvent
 
 import imgui.ImGui
 import org.joml.Vector2f
 import static org.lwjgl.glfw.GLFW.*
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
- * Display the gamepad X/Y stick positions in the debug overlay.
+ * Display the gamepad axes and button states in the debug overlay.
  *
  * @author Emanuel Rabina
  */
-class GamepadAxesOverlayModule implements DebugOverlayModule {
+class GamepadStateOverlayModule implements DebugOverlayModule {
 
 	private final Vector2f leftStick = new Vector2f()
 	private final Vector2f rightStick = new Vector2f()
+	private final Map<Integer, Boolean> buttonStates = new ConcurrentHashMap<>()
+	private final Map<Integer, String> buttonNames = [
+		(GLFW_GAMEPAD_BUTTON_A): "A",
+		(GLFW_GAMEPAD_BUTTON_B): "B",
+		(GLFW_GAMEPAD_BUTTON_X): "X",
+		(GLFW_GAMEPAD_BUTTON_Y): "Y",
+		(GLFW_GAMEPAD_BUTTON_LEFT_BUMPER): "LB",
+		(GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER): "RB",
+		(GLFW_GAMEPAD_BUTTON_BACK): "Back",
+		(GLFW_GAMEPAD_BUTTON_START): "Start",
+		(GLFW_GAMEPAD_BUTTON_GUIDE): "Guide",
+		(GLFW_GAMEPAD_BUTTON_LEFT_THUMB): "LT",
+		(GLFW_GAMEPAD_BUTTON_RIGHT_THUMB): "RT",
+		(GLFW_GAMEPAD_BUTTON_DPAD_UP): "Up",
+		(GLFW_GAMEPAD_BUTTON_DPAD_RIGHT): "Right",
+		(GLFW_GAMEPAD_BUTTON_DPAD_DOWN): "Down",
+		(GLFW_GAMEPAD_BUTTON_DPAD_LEFT): "Left"
+	]
 
 	/**
 	 * Constructor, read gamepad input from the window.
 	 */
-	GamepadAxesOverlayModule(Window window) {
+	GamepadStateOverlayModule(Window window) {
 
 		window.on(GamepadAxisEvent) { event ->
 			switch (event.type()) {
@@ -46,6 +67,9 @@ class GamepadAxesOverlayModule implements DebugOverlayModule {
 				case GLFW_GAMEPAD_AXIS_RIGHT_Y -> rightStick.y = event.value()
 			}
 		}
+		window.on(GamepadButtonEvent) { event ->
+			buttonStates[event.button()] = event.pressed()
+		}
 	}
 
 	@Override
@@ -53,5 +77,12 @@ class GamepadAxesOverlayModule implements DebugOverlayModule {
 
 		ImGui.text("Left stick: ${sprintf('%.1f', leftStick.x)}, ${sprintf('%.1f', leftStick.y)}")
 		ImGui.text("Right stick: ${sprintf('%.1f', rightStick.x)}, ${sprintf('%.1f', rightStick.y)}")
+		var buttonsPressed = buttonNames.inject([]) { acc, key, name ->
+			if (buttonStates[key]) {
+				acc << name
+			}
+			return acc
+		}
+		ImGui.text("Buttons pressed: ${buttonsPressed.join(',')}")
 	}
 }

@@ -37,6 +37,7 @@ class InputEventHandler {
 	private final Map<Integer, Boolean> keyPressedStates = new ConcurrentHashMap<>()
 	private final Map<Integer, Boolean> mouseButtonPressedStates = new ConcurrentHashMap<>()
 	private final Vector2f cursorPosition = new Vector2f()
+	private final Map<Integer, Boolean> gamepadButtonPressedStates = new ConcurrentHashMap<>()
 	private final List<InputBinding> bindings = new ArrayList<>()
 
 	/**
@@ -62,6 +63,9 @@ class InputEventHandler {
 			}
 			else if (event instanceof CursorPositionEvent) {
 				cursorPosition.set(event.xPos(), event.yPos())
+			}
+			else if (event instanceof GamepadButtonEvent) {
+				gamepadButtonPressedStates[event.button()] = event.pressed()
 			}
 		}
 		return this
