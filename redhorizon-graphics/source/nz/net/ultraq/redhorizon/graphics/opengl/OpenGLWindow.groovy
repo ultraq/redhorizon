@@ -31,7 +31,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.glfw.GLFWErrorCallback.getDescription
-import static org.lwjgl.system.MemoryStack.stackASCII
 import static org.lwjgl.system.MemoryUtil.NULL
 
 import groovy.transform.stc.ClosureParams
@@ -85,15 +84,6 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		if (!glfwInit()) {
 			throw new Exception('Unable to initialize GLFW')
 		}
-
-		// Update the controller DB - the one in GLFW hasn't been updated since 2021 😮
-		// https://github.com/glfw/glfw/pull/2745
-		var gameControllerDb = getResourceAsText('nz/net/ultraq/redhorizon/graphics/input/gamecontrollerdb.txt')
-//		var xboxElite2 = '030000005e040000220b000023050000,Xbox Elite Controller Series 2,a:b0,b:b1,back:b31,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b53,leftshoulder:b6,leftstick:b13,lefttrigger:a6,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:a5,rightx:a2,righty:a3,start:b11,x:b3,y:b4,platform:Mac OS X'
-		var buffer = stackASCII(gameControllerDb)
-		glfwUpdateGamepadMappings(buffer)
-		logger.debug('Gamepad ID: {}', glfwGetJoystickGUID(GLFW_JOYSTICK_1))
-		logger.debug('Gamepad name: {} / {}', glfwGetJoystickName(GLFW_JOYSTICK_1), glfwGetGamepadName(GLFW_JOYSTICK_1))
 
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE)
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
