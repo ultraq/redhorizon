@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
 import org.lwjgl.system.Configuration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
@@ -32,6 +33,7 @@ import spock.lang.Specification
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class GamepadProcessingCheck extends Specification {
 
 	def setupSpec() {
