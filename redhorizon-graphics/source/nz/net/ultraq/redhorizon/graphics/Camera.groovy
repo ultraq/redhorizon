@@ -47,9 +47,9 @@ class Camera extends Node<Camera> {
 	Camera(int width, int height, Window window) {
 
 		this.window = window
-		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, 10)
+		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, 100)
 		view = new Matrix4f().setLookAt(
-			0, 0, 10,
+			0, 0, 50,
 			0, 0, 0,
 			0, 1, 0
 		)
