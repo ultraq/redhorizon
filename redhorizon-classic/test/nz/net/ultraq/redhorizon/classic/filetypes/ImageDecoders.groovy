@@ -82,7 +82,7 @@ class ImageDecoders extends Specification {
 				return new Image('ImageDecoders_Image_alipaper.pcx', stream)
 			}
 			var sprite = new Sprite(image, BasicShader)
-			var camera = new Camera(640, 400, window)
+			var camera = new Camera(640, 400, window::getViewport)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
@@ -116,7 +116,7 @@ class ImageDecoders extends Specification {
 				return new Image('ImageDecoders_Image_alipaper.cps', stream)
 			}
 			var sprite = new Sprite(image, BasicShader)
-			var camera = new Camera(320, 200, window)
+			var camera = new Camera(320, 200, window::getViewport)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
@@ -156,7 +156,7 @@ class ImageDecoders extends Specification {
 				return new Palette('Palette_temperat.pal', stream)
 			}
 			var alphaMask = new PaletteAlphaMask()
-			var camera = new Camera(320, 200, window)
+			var camera = new Camera(320, 200, window::getViewport)
 			var timer = 0
 			var frame = 0
 			window.on(KeyEvent) { event ->
@@ -217,7 +217,7 @@ class ImageDecoders extends Specification {
 			var animation = new Animation('ImageDecoders_Animation_africa.wsa', inputStream)
 				.scale(0.83125f, 1f)
 			var shader = new BasicShader()
-			var camera = new Camera(320, 200, window)
+			var camera = new Camera(320, 200, window::getViewport)
 		when:
 			window.show()
 			animation.play()

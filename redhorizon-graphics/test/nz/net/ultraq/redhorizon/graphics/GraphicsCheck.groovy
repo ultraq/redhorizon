@@ -110,7 +110,7 @@ class GraphicsCheck extends Specification {
 				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
 			})
 			var triangleTransform = new Matrix4f()
-			var camera = new Camera(10, 10, window)
+			var camera = new Camera(10, 10, window::getViewport)
 		when:
 			window.show()
 			while (!window.shouldClose()) {
@@ -136,7 +136,7 @@ class GraphicsCheck extends Specification {
 				return new Image('GraphicsCheck_Texture_ship0000.png', stream)
 			}
 			var sprite = new Sprite(image, BasicShader)
-			var camera = new Camera(80, 60, window)
+			var camera = new Camera(80, 60, window::getViewport)
 		when:
 			window.show()
 			while (!window.shouldClose()) {

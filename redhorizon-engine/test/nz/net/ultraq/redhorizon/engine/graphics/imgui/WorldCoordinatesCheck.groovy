@@ -67,7 +67,7 @@ class WorldCoordinatesCheck extends Specification {
 
 	def 'Convert window coordinates to world coordinates'() {
 		given:
-			var camera = new Camera(800, 600, window)
+			var camera = new Camera(800, 600, window::getViewport)
 			var gridLines = new GridLines(new Rectanglef(-800, -600, 1600, 1200), 25, Colour.RED, Colour.YELLOW)
 			var debugOverlay = new DebugOverlay()
 				.addModule(new CursorTrackingOverlayModule(window, camera))

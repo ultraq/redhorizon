@@ -73,7 +73,7 @@ class ShadowShaderTests extends Specification {
 				return new SpriteSheet('ShadowShaderTests_Shadow_mig.shp', stream)
 			}
 			var sprite = new Sprite(spriteSheet, ShadowShader)
-			var camera = new Camera(320, 200, window)
+			var camera = new Camera(320, 200, window::getViewport)
 			var timer = 0
 			var frame = 0
 		when:

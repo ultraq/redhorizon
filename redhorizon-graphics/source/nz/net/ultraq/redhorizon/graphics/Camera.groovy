@@ -21,8 +21,11 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
+import org.joml.primitives.Rectanglei
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import java.util.function.Supplier
 
 /**
  * The player's view into the world.
@@ -33,27 +36,24 @@ class Camera extends Node<Camera> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera)
 
-	private final Window window
+	private final Supplier<Rectanglei> viewportSupplier
 	private final Matrix4fc projection
 	private final Matrix4fc view
 	private final Matrix4f viewProjection = new Matrix4f()
 	private final Matrix4f viewTransform = new Matrix4f()
 
 	/**
-	 * Constructor, create a new 2D camera with the given view dimensions.
+	 * Constructor, create a new camera with the given width/height dimensions and
+	 * optional visible z-range.
+	 *
+	 * @param width
+	 * @param height
+	 * @param depth
+	 * @param viewportSupplier Usually {@code Window::getViewport}
 	 */
-	Camera(int width, int height, Window window) {
+	Camera(float width, float height, float depth = 10f, Supplier<Rectanglei> viewportSupplier) {
 
-		this(width, height, 10, window)
-	}
-
-	/**
-	 * Constructor, create a new 2D camera with the given width/height dimensions
-	 * and visible z-range.
-	 */
-	Camera(int width, int height, float depth, Window window) {
-
-		this.window = window
+		this.viewportSupplier = viewportSupplier
 		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, depth)
 		view = new Matrix4f().setLookAt(
 			0, 0, depth / 2 as float,
@@ -96,7 +96,7 @@ class Camera extends Node<Camera> {
 	 */
 	Vector3f unproject(float winX, float winY, Vector3f result) {
 
-		var viewport = window.viewport
+		var viewport = viewportSupplier.get()
 		var viewportHeight = viewport.lengthY()
 		return getViewProjection()
 			.unproject(

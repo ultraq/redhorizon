@@ -78,7 +78,7 @@ class VideoDecoders extends Specification {
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream)
 				.scale(1f, 1.2f)
 			var shader = new BasicShader()
-			var camera = new Camera(320, 200, window)
+			var camera = new Camera(320, 200, window::getViewport)
 		when:
 			window.show()
 			video.play()
