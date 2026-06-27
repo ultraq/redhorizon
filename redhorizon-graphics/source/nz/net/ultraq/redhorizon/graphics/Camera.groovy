@@ -41,15 +41,22 @@ class Camera extends Node<Camera> {
 
 	/**
 	 * Constructor, create a new 2D camera with the given view dimensions.
-	 * The dimensions will serve as the expected aspect ratio of the viewport and
-	 * retain it if tracking a window for resize events.
 	 */
 	Camera(int width, int height, Window window) {
 
+		this(width, height, 10, window)
+	}
+
+	/**
+	 * Constructor, create a new 2D camera with the given width/height dimensions
+	 * and visible z-range.
+	 */
+	Camera(int width, int height, float depth, Window window) {
+
 		this.window = window
-		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, 100)
+		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, depth)
 		view = new Matrix4f().setLookAt(
-			0, 0, 50,
+			0, 0, depth / 2 as float,
 			0, 0, 0,
 			0, 1, 0
 		)
