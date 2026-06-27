@@ -17,7 +17,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-input`
- - Version: `0.42.0`
+ - Version: `0.43.0`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
 of available versions.

@@ -21,7 +21,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-classic`
- - Version: `0.42.0`
+ - Version: `0.43.0`
 
 
 Codecs
