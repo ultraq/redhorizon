@@ -113,6 +113,12 @@ class GamepadStateProcessor {
 	private void processAxis(FloatBuffer axes, int type) {
 
 		var value = axes.get(type)
+
+		// Invert Y values for thumbsticks so that negative is down
+		if (type == GLFW_GAMEPAD_AXIS_LEFT_Y || type == GLFW_GAMEPAD_AXIS_RIGHT_Y) {
+			value = -value
+		}
+
 		window.trigger(new GamepadAxisEvent(type, value))
 	}
 
