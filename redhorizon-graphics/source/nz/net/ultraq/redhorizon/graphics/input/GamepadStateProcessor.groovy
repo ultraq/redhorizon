@@ -86,8 +86,8 @@ class GamepadStateProcessor {
 		this.window = window
 
 		// Adding an entry for Xbox Elite Series 2 recognized as Xbox Wireless Controller in macOS 26
-		var xboxWirelessController = '030000005e040000220b000023050000,Xbox Wireless Controller,a:b0,b:b1,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b6,leftstick:b13,lefttrigger:a5,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:a4,rightx:a2,righty:a3,start:b11,x:b3,y:b4,platform:Mac OS X'
-		var buffer = stackASCII(xboxWirelessController)
+		var additionalGamepadDB = getResourceAsText('nz/net/ultraq/redhorizon/graphics/input/AdditionalGamepadDB.txt')
+		var buffer = stackASCII(additionalGamepadDB)
 		glfwUpdateGamepadMappings(buffer)
 		logger.debug('Gamepad ID / Name: {}', glfwGetJoystickGUID(GLFW_JOYSTICK_1), glfwGetJoystickName(GLFW_JOYSTICK_1))
 	}
