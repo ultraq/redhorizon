@@ -87,8 +87,8 @@ import java.nio.ByteBuffer
 @SuppressWarnings('GrFinalVariableAccess')
 class ShpFileDune2 {
 
-	static final int MAX_WIDTH = 65535
-	static final int MAX_HEIGHT = 255
+	public static final int MAX_WIDTH = 65535
+	public static final int MAX_HEIGHT = 255
 
 	// File header
 	final int numImages

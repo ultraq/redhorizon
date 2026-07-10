@@ -27,8 +27,7 @@ import nz.net.ultraq.redhorizon.explorer.mixdata.RaMixEntry
 class FileMappingExtensions {
 
 	// TODO: A lot of this mapping could be properties on the decoder classes?
-
-	static final Map<String, String> FILE_EXTENSION_TO_TYPE = [
+	public static final Map<String, String> FILE_EXTENSION_TO_TYPE = [
 		'aud': 'AUD sound file',
 		'cps': 'CPS image file',
 		'int': 'INT tilemap file',

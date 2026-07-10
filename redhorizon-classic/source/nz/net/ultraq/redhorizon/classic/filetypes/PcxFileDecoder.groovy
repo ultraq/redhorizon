@@ -38,20 +38,20 @@ class PcxFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header constants
 	// @formatter:off
-	static final int  HEADER_PALETTE_SIZE  = 48
-	static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
-	static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
-	static final byte VERSION_PCP28_PAL    = 2 // PC Paintbrush 2.8 w/ palette
-	static final byte VERSION_PCP28_NO_PAL = 3 // PC Paintbrush 2.8 w/o palette
-	static final byte VERSION_PCP4WIN      = 4 // PC Paintbrush for Windows
-	static final byte VERSION_PCPPLUS      = 5 // PC Paintbrush+
-	static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
-	static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
+	public static final int  HEADER_PALETTE_SIZE  = 48
+	public static final byte MANUFACTURER_ZSOFT   = 0x0a // 10 = ZSoft .pcx
+	public static final byte VERSION_PCP25        = 0 // PC Paintbrush 2.5
+	public static final byte VERSION_PCP28_PAL    = 2 // PC Paintbrush 2.8 w/ palette
+	public static final byte VERSION_PCP28_NO_PAL = 3 // PC Paintbrush 2.8 w/o palette
+	public static final byte VERSION_PCP4WIN      = 4 // PC Paintbrush for Windows
+	public static final byte VERSION_PCPPLUS      = 5 // PC Paintbrush+
+	public static final byte ENCODING_RLE         = 1 // 1 = run-length encoding
+	public static final byte BPP_8                = 8 // 8-bits-per-pixel, 256 colours
 
-	static final int PALETTE_COLOURS      = 256
-	static final int PALETTE_FORMAT       = 3
-	static final int PALETTE_SIZE         = PALETTE_COLOURS * PALETTE_FORMAT
-	static final int PALETTE_PADDING_SIZE = 1
+	public static final int PALETTE_COLOURS      = 256
+	public static final int PALETTE_FORMAT       = 3
+	public static final int PALETTE_SIZE         = PALETTE_COLOURS * PALETTE_FORMAT
+	public static final int PALETTE_PADDING_SIZE = 1
 	// @formatter:on
 
 	final String[] supportedFileExtensions = ['pcx']

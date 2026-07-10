@@ -33,21 +33,21 @@ class CpsFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header constants
 	// @formatter:off
-	static final short COMPRESSION_NONE  = 0x0000
-	static final short COMPRESSION_LZW12 = 0x0001
-	static final short COMPRESSION_LZW14 = 0x0002
-	static final short COMPRESSION_RLE   = 0x0003
-	static final short COMPRESSION_LCW   = 0x0004
+	public static final short COMPRESSION_NONE  = 0x0000
+	public static final short COMPRESSION_LZW12 = 0x0001
+	public static final short COMPRESSION_LZW14 = 0x0002
+	public static final short COMPRESSION_RLE   = 0x0003
+	public static final short COMPRESSION_LCW   = 0x0004
 
-	static final int IMAGE_SIZE = 64000  // 320x200
-	static final short PALETTE_SIZE = 768
+	public static final int IMAGE_SIZE = 64000  // 320x200
+	public static final short PALETTE_SIZE = 768
 	// @formatter:on
 
-	static final int IMAGE_WIDTH = 320
-	static final int IMAGE_HEIGHT = 200
-	static final int IMAGE_FORMAT = 1
-	static final int PALETTE_COLOURS = 256
-	static final int PALETTE_FORMAT = 3
+	public static final int IMAGE_WIDTH = 320
+	public static final int IMAGE_HEIGHT = 200
+	public static final int IMAGE_FORMAT = 1
+	public static final int PALETTE_COLOURS = 256
+	public static final int PALETTE_FORMAT = 3
 
 	final String[] supportedFileExtensions = ['cps']
 

@@ -42,10 +42,10 @@ class AudFileDecoder implements AudioDecoder, FileTypeTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudFileDecoder)
 
-	static final byte TYPE_IMA_ADPCM = 99
-	static final byte TYPE_WS_ADPCM = 1
-	static final byte FLAG_16BIT = 0x02
-	static final byte FLAG_STEREO = 0x01
+	public static final byte TYPE_IMA_ADPCM = 99
+	public static final byte TYPE_WS_ADPCM = 1
+	public static final byte FLAG_16BIT = 0x02
+	public static final byte FLAG_STEREO = 0x01
 
 	final String[] supportedFileExtensions = ['aud', 'v00', 'v01', 'v02', 'v03']
 

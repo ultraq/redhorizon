@@ -38,10 +38,10 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 
 	// Header flags
 	// @formatter:off
-	static final byte FORMAT_LCW       = (byte)0x80
-	static final byte FORMAT_XOR_BASE  = (byte)0x40
-	static final byte FORMAT_XOR_CHAIN = (byte)0x20
-	static final byte FORMAT_NONE      = (byte)0x00
+	public static final byte FORMAT_LCW       = (byte)0x80
+	public static final byte FORMAT_XOR_BASE  = (byte)0x40
+	public static final byte FORMAT_XOR_CHAIN = (byte)0x20
+	public static final byte FORMAT_NONE      = (byte)0x00
 	// @formatter:on
 
 	String[] supportedFileExtensions = ['shp', 'int', 'sno', 'tem']

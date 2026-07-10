@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
+package nz.net.ultraq.redhorizon.runtime.utilities
 
-import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.Colour
+
+import picocli.CommandLine.ITypeConverter
 
 /**
- * Keys for objects being shared using Java's Scoped Values.  The values here
- * are available for the lifecycle of the application.
+ * Let Picocli understand the {@link Colour} class.
  *
  * @author Emanuel Rabina
  */
-class ScopedValues {
+class ColourTypeConverter implements ITypeConverter<Colour> {
 
-	public static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
-	public static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
+	@Override
+	Colour convert(String value) throws Exception {
+
+		return (Colour)Colour.getDeclaredField(value.toUpperCase()).get(null)
+	}
 }

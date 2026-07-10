@@ -44,7 +44,7 @@ class WsaFileDecoder implements ImageDecoder, FileTypeTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(WsaFileDecoder)
 
-	static final short FLAG_HAS_PALETTE = 0x01
+	public static final short FLAG_HAS_PALETTE = 0x01
 
 	final String[] supportedFileExtensions = ['wsa']
 

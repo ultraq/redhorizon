@@ -32,9 +32,9 @@ import groovy.transform.PackageScope
 class ShpImageInfoDune2 {
 
 	// The various known flags
-	static final short FLAG_LOOKUP_TABLE                 = 0x01
-	static final short FLAG_NO_COMPRESSION               = 0x02
-	static final short FLAG_VARIABLE_LENGTH_LOOKUP_TABLE = 0x04
+	public static final short FLAG_LOOKUP_TABLE = 0x01
+	public static final short FLAG_NO_COMPRESSION = 0x02
+	public static final short FLAG_VARIABLE_LENGTH_LOOKUP_TABLE = 0x04
 
 	// File header
 	final short flags
@@ -56,10 +56,10 @@ class ShpImageInfoDune2 {
 	 */
 	ShpImageInfoDune2(NativeDataInputStream input) {
 
-		flags    = input.readShort()
-		slices   = input.readByte()
-		width    = input.readShort()
-		height   = input.readByte()
+		flags = input.readShort()
+		slices = input.readByte()
+		width = input.readShort()
+		height = input.readByte()
 		compressedSize = input.readShort()
 		uncompressedSize = input.readShort()
 

@@ -28,8 +28,8 @@ class InputEventHandlerTests extends Specification {
 
 	static class TestInputSource implements InputSource {}
 
-	static final int KEY_A = 65
-	static final int MOUSE_BUTTON_1 = 0
+	private static final int KEY_A = 65
+	private static final int MOUSE_BUTTON_1 = 0
 
 	def "Key is considered 'pressed' after the key press event"() {
 		given:

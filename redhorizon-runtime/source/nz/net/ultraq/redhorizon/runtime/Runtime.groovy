@@ -33,6 +33,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.runtime.utilities.ColourTypeConverter
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
@@ -80,6 +81,8 @@ final class Runtime implements Callable<Integer> {
 	int lwjglStackSize
 
 	// Window options
+	@Option(names = ['--window-background-colour'], defaultValue = 'BLACK', converter = ColourTypeConverter)
+	Colour windowBackgroundColour
 	@Option(names = ['--window-width'], defaultValue = '800')
 	int windowWidth
 	@Option(names = ['--window-height'], defaultValue = '600')
@@ -117,7 +120,7 @@ final class Runtime implements Callable<Integer> {
 			window = new OpenGLWindow(windowWidth, windowHeight, "${application.name} ${application.version}")
 				.centerToScreen()
 				.scaleToFit()
-				.withBackgroundColour(Colour.BLACK)
+				.withBackgroundColour(windowBackgroundColour)
 				.withVSync(true)
 			framebuffer = new OpenGLFramebuffer(framebufferWidth, framebufferHeight)
 			shader = new BasicShader()
@@ -183,7 +186,7 @@ final class Runtime implements Callable<Integer> {
 	 */
 	int execute(String[] args) {
 
-		logger.debug('Initializing application w/ args {}', args)
+		logger.debug('Initializing application w/ args: {}', args)
 		return new CommandLine(this).execute(args)
 	}
 }

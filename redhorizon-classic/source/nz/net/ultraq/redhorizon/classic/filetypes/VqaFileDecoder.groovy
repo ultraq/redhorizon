@@ -353,8 +353,8 @@ class VqaFileDecoder implements VideoDecoder, FileTypeTest {
 	 * order.  Rounding out the chunk will be the data afterwards.
 	 */
 	private static record VqaChunkHeader(String name, int length) {
-		static final BYTES = 8
-		static final String SUFFIX_UNCOMPRESSED = "0"
+		public static final int BYTES = 8
+		public static final String SUFFIX_UNCOMPRESSED = "0"
 
 		/**
 		 * Returns whether or not the chunk data that follows is compressed.

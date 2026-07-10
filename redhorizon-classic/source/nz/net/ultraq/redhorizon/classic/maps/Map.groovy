@@ -33,11 +33,11 @@ import groovy.transform.ImmutableOptions
  */
 class Map extends Node<Map> {
 
-	static final int TILE_WIDTH = 24
-	static final int TILE_HEIGHT = 24
-	static final int TILES_X = 128
-	static final int TILES_Y = 128
-	static final Rectanglef MAX_BOUNDS = new Rectanglef(0, 0, TILES_X * TILE_WIDTH, TILES_Y * TILE_HEIGHT).center()
+	public static final int TILE_WIDTH = 24
+	public static final int TILE_HEIGHT = 24
+	public static final int TILES_X = 128
+	public static final int TILES_Y = 128
+	public static final Rectanglef MAX_BOUNDS = new Rectanglef(0, 0, TILES_X * TILE_WIDTH, TILES_Y * TILE_HEIGHT).center()
 
 	private static final Logger logger = LoggerFactory.getLogger(Map)
 

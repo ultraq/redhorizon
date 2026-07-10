@@ -37,7 +37,7 @@ class Vertex {
 	/**
 	 * An attribute list that describes the layout of the data in a vertex.
 	 */
-	static Attribute[] LAYOUT = [
+	public static final Attribute[] LAYOUT = [
 		new Attribute('position', 0, Vector3f.FLOATS),
 		new Attribute('colour', 1, Colour.FLOATS),
 		new Attribute('textureUVs', 2, Vector2f.FLOATS)
@@ -46,12 +46,12 @@ class Vertex {
 	/**
 	 * The number of {@code float}s used to represent a vertex.
 	 */
-	static final int FLOATS = LAYOUT.sum { it.sizeInFloats() } as int
+	public static final int FLOATS = LAYOUT.sum { it.sizeInFloats() } as int
 
 	/**
 	 * The number of {@code byte}s used to represent a vertex.
 	 */
-	static final int BYTES = FLOATS * Float.BYTES
+	public static final int BYTES = FLOATS * Float.BYTES
 
 	Vector3f position
 	Colour colour

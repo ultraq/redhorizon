@@ -31,21 +31,21 @@ class Colour {
 	/**
 	 * The number of {@code byte}s used to represent a colour value.
 	 */
-	static final int BYTES = FLOATS * Float.BYTES
+	public static final int BYTES = FLOATS * Float.BYTES
 
 	/**
 	 * The number of {@code float}s used to represent a colour value.
 	 */
-	static final int FLOATS = 4
+	public static final int FLOATS = 4
 
 	// @formatter:off
-	static final Colour BLACK  = new Colour('Black',  0.0, 0.0, 0.0)
-	static final Colour BLUE   = new Colour('Blue',   0.0, 0.0, 1.0)
-	static final Colour GREEN  = new Colour('Green',  0.0, 1.0, 0.0)
-	static final Colour GREY   = new Colour('Grey',   0.5, 0.5, 0.5)
-	static final Colour RED    = new Colour('Red',    1.0, 0.0, 0.0)
-	static final Colour WHITE  = new Colour('White',  1.0, 1.0, 1.0)
-	static final Colour YELLOW = new Colour('Yellow', 1.0, 1.0, 0.0)
+	public static final Colour BLACK  = new Colour('Black',  0.0, 0.0, 0.0)
+	public static final Colour BLUE   = new Colour('Blue',   0.0, 0.0, 1.0)
+	public static final Colour GREEN  = new Colour('Green',  0.0, 1.0, 0.0)
+	public static final Colour GREY   = new Colour('Grey',   0.5, 0.5, 0.5)
+	public static final Colour RED    = new Colour('Red',    1.0, 0.0, 0.0)
+	public static final Colour WHITE  = new Colour('White',  1.0, 1.0, 1.0)
+	public static final Colour YELLOW = new Colour('Yellow', 1.0, 1.0, 0.0)
 	// @formatter:on
 
 	final String name

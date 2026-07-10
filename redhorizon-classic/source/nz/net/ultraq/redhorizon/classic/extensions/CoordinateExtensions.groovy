@@ -32,7 +32,7 @@ class CoordinateExtensions {
 	private static final int TILE_WIDTH = 24
 	private static final int TILE_HEIGHT = 24
 
-	static final Vector2f WORLD_OFFSET = new Vector2f(
+	public static final Vector2f WORLD_OFFSET = new Vector2f(
 		-TILES_X * TILE_WIDTH / 2,
 		-TILES_Y * TILE_HEIGHT / 2
 	)

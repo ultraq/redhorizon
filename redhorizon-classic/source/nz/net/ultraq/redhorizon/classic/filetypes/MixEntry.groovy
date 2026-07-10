@@ -26,7 +26,7 @@ import java.nio.ByteBuffer
  */
 class MixEntry implements Comparable<MixEntry> {
 
-	static final int SIZE = 12
+	public static final int SIZE = 12
 
 	String name // Name cannot be determined initially
 	final int id

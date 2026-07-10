@@ -39,13 +39,13 @@ import java.nio.ShortBuffer
  */
 class MixFileKey {
 
-	static final int SIZE_KEY_SOURCE = 80
-	static final int SIZE_KEY = 56
+	public static final int SIZE_KEY_SOURCE = 80
+	public static final int SIZE_KEY = 56
 
 	// TODO: The key values are constant, so maybe just save those instead
 	//       of running the calculations every time?
 	// A base64 encoded string of the public key used for the transformation function
-	static final String PUBLIC_KEY_STRING = 'AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V'
+	public static final String PUBLIC_KEY_STRING = 'AihRvNoIbTn85FZRYNZRcT+i6KpU+maCsEqr3Q5q+LDB5tH7Tz2qQ38V'
 
 	private static BigInteger publicKey
 	private static int pkHiBitLength
