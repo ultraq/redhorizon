@@ -64,6 +64,7 @@ class OpenGLMesh implements Mesh {
 			case Type.LINES -> GL_LINES
 			case Type.LINE_LOOP -> GL_LINE_LOOP
 			case Type.TRIANGLES -> GL_TRIANGLES
+			case Type.TRIANGLE_FAN -> GL_TRIANGLE_FAN
 			default -> throw new UnsupportedOperationException("Unhandled mesh type ${type.name()}")
 		}
 

@@ -20,14 +20,9 @@ import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Palette
-import nz.net.ultraq.redhorizon.graphics.Shape
-import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.scenegraph.Node
-
-import org.joml.Vector2f
-import org.joml.Vector3f
 
 /**
  * For viewing a palette file.
@@ -38,7 +33,6 @@ class PalettePreview extends Node<PalettePreview> {
 
 	private static final int SWATCH_WIDTH = 24
 	private static final int SWATCH_HEIGHT = 24
-	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
 
 	/**
 	 * Constructor, create a preview by laying out all of the colours of the
@@ -52,17 +46,10 @@ class PalettePreview extends Node<PalettePreview> {
 			var b = colour[2] & 0xff
 			var offsetX = (i % 16) * SWATCH_WIDTH as float
 			var offsetY = Math.floor(i / 16) * -SWATCH_HEIGHT as float
-			addChild(new Shape(
-				Type.TRIANGLES,
-				new Vertex[]{
-					new Vertex(new Vector3f(0, 0, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(0, 0)),
-					new Vertex(new Vector3f(SWATCH_WIDTH, 0, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(1, 0)),
-					new Vertex(new Vector3f(SWATCH_WIDTH, SWATCH_HEIGHT, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(1, 1)),
-					new Vertex(new Vector3f(0, SWATCH_HEIGHT, 0), new Colour("Palette-${i}", r / 256, g / 256, b / 256), new Vector2f(0, 1))
-				},
-				index
+			addChild(
+				new Rectangle(SWATCH_WIDTH, SWATCH_HEIGHT, new Colour("Palette-${i}", r / 256, g / 256, b / 256), true)
+					.translate(offsetX, offsetY)
 			)
-				.translate(offsetX, offsetY))
 		}
 
 		translate(8 * -SWATCH_WIDTH, 7 * SWATCH_HEIGHT)

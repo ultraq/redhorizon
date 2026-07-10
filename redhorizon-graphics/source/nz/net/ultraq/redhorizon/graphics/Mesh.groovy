@@ -59,6 +59,7 @@ interface Mesh extends GraphicsResource {
 
 		LINE_LOOP,
 		LINES,
-		TRIANGLES
+		TRIANGLES,
+		TRIANGLE_FAN
 	}
 }

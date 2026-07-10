@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.classic.filetypes.AudFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.FileTypeTest
+import nz.net.ultraq.redhorizon.classic.filetypes.PalFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.PcxFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.ShpFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
@@ -29,6 +30,7 @@ import nz.net.ultraq.redhorizon.classic.filetypes.VqaFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.WsaFileDecoder
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
+import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 
@@ -47,12 +49,13 @@ class FileTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileTester)
 	private static final List<Class<? extends FileTypeTest>> decoderClasses = [
-		AudFileDecoder, CpsFileDecoder, PcxFileDecoder, ShpFileDecoder, TmpFileRADecoder, TmpFileTDDecoder,
+		AudFileDecoder, CpsFileDecoder, PalFileDecoder, PcxFileDecoder, ShpFileDecoder, TmpFileRADecoder, TmpFileTDDecoder,
 		VqaFileDecoder, WsaFileDecoder
 	]
 	private static final Map<Class, String> decoderToType = [
 		(AudFileDecoder): 'AUD sound file',
 		(CpsFileDecoder): 'CPS image file',
+		(PalFileDecoder): 'PAL palette file',
 		(PcxFileDecoder): 'PCX image file',
 		(ShpFileDecoder): 'SHP sprite sheet file',
 		(TmpFileRADecoder): 'Tilemap file (RA)',
@@ -80,6 +83,7 @@ class FileTester {
 							switch (decoderClass) {
 								case AudFileDecoder -> fileSize > (1024 * 1024) ? Music : Sound
 								case CpsFileDecoder, PcxFileDecoder -> Image
+								case PalFileDecoder -> Palette
 								case ShpFileDecoder, TmpFileRADecoder, TmpFileTDDecoder -> SpriteSheet
 								case VqaFileDecoder -> Video
 								case WsaFileDecoder -> Animation

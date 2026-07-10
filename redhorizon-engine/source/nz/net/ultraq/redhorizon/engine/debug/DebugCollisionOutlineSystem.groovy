@@ -17,14 +17,14 @@
 package nz.net.ultraq.redhorizon.engine.debug
 
 import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.engine.physics.BoxCollider
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollider
+import nz.net.ultraq.redhorizon.engine.physics.Collider
+import nz.net.ultraq.redhorizon.graphics.Circle
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.Shape
-import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.joml.Vector3f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -47,34 +47,28 @@ class DebugCollisionOutlineSystem extends System {
 				throw new IllegalStateException('Scene does not have a DebugStore')
 			}
 
-			scene.traverse(CircleCollider) { CircleCollider collider ->
+			scene.traverse(Collider) { Collider collider ->
 				var collisionOutline = collider.parent.findByName(COLLISION_OUTLINE_NAME)
 				if (debugStore.showCollisionOutlines) {
-					if (collider) {
-						if (!collisionOutline) {
-							var radius = collider.radius
-							collisionOutline = collider.parent.addAndReturnChild(
-								new Shape(Type.LINE_LOOP, new Vertex[]{
-									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
-								})
-									.withName(COLLISION_OUTLINE_NAME)
-							)
+					if (!collisionOutline) {
+						var collisionShape = switch (collider) {
+							case BoxCollider -> new Rectangle(collider.width, collider.height, Colour.YELLOW)
+							case CircleCollider -> new Circle(collider.radius, Colour.YELLOW)
+							default -> null
 						}
-						if (collider.enabled) {
-							collisionOutline.enable()
-						}
-						else {
-							collisionOutline.disable()
+						if (collisionShape) {
+							collisionOutline = collider.parent.addAndReturnChild(collisionShape.withName(COLLISION_OUTLINE_NAME))
 						}
 					}
-				}
-				else {
-					if (collisionOutline) {
+					if (collider.enabled) {
+						collisionOutline.enable()
+					}
+					else {
 						collisionOutline.disable()
 					}
+				}
+				else if (collisionOutline) {
+					collisionOutline.disable()
 				}
 				return true
 			}

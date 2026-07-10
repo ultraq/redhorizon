@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.graphics.PaletteDecoder
  *
  * @author Emanuel Rabina
  */
-class PalFileDecoder implements PaletteDecoder {
+class PalFileDecoder implements PaletteDecoder, FileTypeTest {
 
 	private static final int COLOURS = 256
 	private static final int FORMAT = 3
@@ -41,5 +41,11 @@ class PalFileDecoder implements PaletteDecoder {
 			colourData[i] = inputStream.readNBytes(FORMAT).collect { it << 2 }
 		}
 		return new DecodeResult(COLOURS, FORMAT, colourData, 'PAL file, 256 colour VGA palette (6 bits per pixel)')
+	}
+
+	@Override
+	void test(InputStream inputStream) {
+
+		// Pal files don't have marker information on them, so they just pass
 	}
 }
