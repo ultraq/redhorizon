@@ -25,6 +25,6 @@ import groovy.transform.ImmutableOptions
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['otherObject'])
-record CollisionEvent(Collider otherObject) implements Event {
+@ImmutableOptions(knownImmutables = ['otherCollider'])
+record CollisionEvent(Collider otherCollider) implements Event {
 }
