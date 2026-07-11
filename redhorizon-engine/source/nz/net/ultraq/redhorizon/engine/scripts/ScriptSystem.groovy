@@ -50,7 +50,7 @@ class ScriptSystem extends System {
 	 *   updates are performed at a fixed rate, decoupled from frame rate, to
 	 *   prevent jank.
 	 */
-	ScriptSystem(ScriptEngine scriptEngine, InputEventHandler input, int updateFrequency = 100) {
+	ScriptSystem(ScriptEngine scriptEngine, InputEventHandler input, int updateFrequency) {
 
 		this.scriptEngine = scriptEngine
 		this.input = input

@@ -33,6 +33,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
@@ -41,32 +42,21 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class ScriptSystemTests extends Specification {
 
 	private static final SCREEN_BOUNDS = new Rectanglef(-400, -300, 400, 300)
 
-	OpenGLWindow window
-	OpenGLFramebuffer framebuffer
-	BasicShader shader
-
-	def setup() {
-		window = new OpenGLWindow(800, 600, "Testing")
-			.centerToScreen()
-			.scaleToFit()
-			.withBackgroundColour(Colour.GREY)
-			.withVSync(true)
-		framebuffer = new OpenGLFramebuffer(1600, 1200)
-		shader = new BasicShader()
-	}
-
-	def cleanup() {
-		shader?.close()
-		framebuffer?.close()
-		window?.close()
-	}
-
-	def 'Simulation timestep'() {
+	def 'Simulation timestep - #frequency Hz'(int frequency) {
 		given:
+			var window = new OpenGLWindow(800, 600, "Simulation timestep - ${frequency}Hz")
+				.centerToScreen()
+				.scaleToFit()
+				.withBackgroundColour(Colour.GREY)
+				.withVSync(true)
+			var framebuffer = new OpenGLFramebuffer(1600, 1200)
+			var shader = new BasicShader()
+
 			var inputEventHandler = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
@@ -79,7 +69,7 @@ class ScriptSystemTests extends Specification {
 			}
 			var engine = new Engine()
 				.addSystem(new InputSystem(inputEventHandler))
-				.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+				.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler, frequency))
 				.addSystem(new GraphicsSystem(window, framebuffer, shader))
 				.withScene(scene)
 		when:
@@ -93,6 +83,11 @@ class ScriptSystemTests extends Specification {
 			notThrown(Exception)
 		cleanup:
 			scene?.close()
+			shader?.close()
+			framebuffer?.close()
+			window?.close()
+		where:
+			frequency << [15, 30, 60, 120]
 	}
 
 	/**
@@ -100,43 +95,35 @@ class ScriptSystemTests extends Specification {
 	 * framerate and varying timestep solutions.
 	 */
 	static class Ball extends Node<Ball> {
-
 		private static final float radius = 20f
 		private static final float speed = 300f
 
-		final Vector2f vector = new Vector2f()
+		final Vector2f vector = randomVector(new Vector2f())
 
 		Ball() {
-
 			addChild(new Circle(radius, Colour.GREEN, 32, true))
 			addChild(new ScriptNode(BallScript))
 		}
 
+		static randomVector(Vector2f dest) {
+			return dest.set(Math.random() * 2 - 1 as float, Math.random() * 2 - 1 as float).normalize()
+		}
+
 		static class BallScript extends Script<Ball> {
-
 			private Scene scene
-
-			// Flag to prevent executing the wall-bounce code multiple times because the
-			// ball ends up over the edges for multiple frames
 			private boolean bounced = false
 
 			@Override
 			void init() {
-
 				scene = node.scene
 			}
 
 			@Override
 			void update(float delta) {
-
-				// Send the ball flying in some random direction
 				if (input.keyPressed(GLFW_KEY_SPACE, true)) {
-					node.vector.set(Math.random() * 2 - 1 as float, Math.random() * 2 - 1 as float).normalize()
+					randomVector(node.vector)
 				}
-
 				var ballPosition = node.position
-
-				// Reset the bounce flag once the ball is within the screen again
 				if (bounced) {
 					if ((ballPosition.x() - radius > SCREEN_BOUNDS.minX) &&
 						(ballPosition.x() + radius < SCREEN_BOUNDS.maxX) &&
@@ -145,8 +132,6 @@ class ScriptSystemTests extends Specification {
 						bounced = false
 					}
 				}
-
-				// Check if the ball is going out the top/left/right of the screen
 				if (!bounced) {
 					if ((ballPosition.x() - radius < SCREEN_BOUNDS.minX) ||
 						(ballPosition.x() + radius > SCREEN_BOUNDS.maxX)) {
@@ -159,8 +144,6 @@ class ScriptSystemTests extends Specification {
 						bounced = true
 					}
 				}
-
-				// Move the ball along its current trajectory
 				if (node.vector) {
 					node.translate(node.vector.x() * speed * delta as float, node.vector.y() * speed * delta as float)
 				}

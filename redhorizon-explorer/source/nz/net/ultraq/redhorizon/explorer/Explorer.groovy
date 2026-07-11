@@ -184,7 +184,7 @@ class Explorer implements Runnable {
 				}
 			var engine = new Engine()
 				.addSystem(new InputSystem(input))
-				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
+				.addSystem(new ScriptSystem(new ScriptEngine('.'), input, 60))
 				.addSystem(new AudioSystem())
 				.addSystem(graphicsSystem)
 				.addSystem(new SceneUpdateSystem())

@@ -95,7 +95,7 @@ final class Runtime implements Callable<Integer> {
 	int framebufferHeight
 
 	// Script system options
-	@Option(names = ['--script-update-frequency'], defaultValue = '100')
+	@Option(names = ['--script-update-frequency'], defaultValue = '60')
 	int scriptUpdateFrequency
 
 	// Resource manager options
