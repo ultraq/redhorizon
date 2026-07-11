@@ -286,7 +286,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	T insertBefore(Node child, Node before) {
 
-		children.add(Math.min(children.indexOf(before), 0), child)
+		children.add(Math.max(children.indexOf(before), 0), child)
 		child.parent = this
 		return (T)this
 	}

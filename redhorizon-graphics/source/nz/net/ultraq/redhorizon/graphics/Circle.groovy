@@ -53,6 +53,9 @@ class Circle extends Shape {
 				0f
 			), colour)
 		}
+		if (filled) {
+			vertices << vertices[1] // To close out the fan
+		}
 		return vertices as Vertex[]
 	}
 }

@@ -48,7 +48,7 @@ class SceneExtensions {
 		GridLines gridLines = DEFAULT_GRID_LINES) {
 
 		// Find the first node and add all of the following debug information before it
-		var firstNode = self.root.children.first()
+		var firstNode = self.root.children ? self.root.children.first() : null
 
 		self.insertBefore(new DebugStore(), firstNode)
 		self.insertBefore(

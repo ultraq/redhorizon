@@ -94,6 +94,10 @@ final class Runtime implements Callable<Integer> {
 	@Option(names = ['--framebuffer-height'], defaultValue = '600')
 	int framebufferHeight
 
+	// Script system options
+	@Option(names = ['--script-update-frequency'], defaultValue = '100')
+	int scriptUpdateFrequency
+
 	// Resource manager options
 	@Option(names = ['--resource-manager-path-prefix'],
 		description = 'Path prefix for the resource manager, defaults to the application\'s package name as a path')
@@ -144,7 +148,7 @@ final class Runtime implements Callable<Integer> {
 					var engine = new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new DebugCollisionOutlineSystem())
-						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler, scriptUpdateFrequency))
 						.addSystem(new CollisionSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shader))
 						.addSystem(new SceneUpdateSystem())
