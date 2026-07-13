@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.SimulationSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
+import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
@@ -39,6 +40,7 @@ import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
+import org.joml.primitives.Rectanglef
 import org.lwjgl.system.Configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -147,7 +149,9 @@ final class Runtime implements Callable<Integer> {
 					// Init scene and systems
 					scene = application.configureScene(
 						new SimpleScene(framebufferWidth, framebufferHeight, window).tap {
-							addDebugComponents(window, camera, inputEventHandler)
+							addDebugComponents(window, camera, inputEventHandler,
+								new GridLines(new Rectanglef(0f, 0f, framebufferWidth, framebufferHeight).center(), 50f,
+									new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY))
 						}
 					)
 					var engine = new Engine()
