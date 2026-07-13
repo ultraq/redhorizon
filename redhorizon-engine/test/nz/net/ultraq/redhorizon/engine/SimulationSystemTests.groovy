@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scripts
+package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Circle
@@ -38,12 +41,12 @@ import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 
 /**
- * Tests for the scripting system.
+ * Tests for the simulation system.
  *
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class ScriptSystemTests extends Specification {
+class SimulationSystemTests extends Specification {
 
 	private static final SCREEN_BOUNDS = new Rectanglef(-400, -300, 400, 300)
 
@@ -69,7 +72,9 @@ class ScriptSystemTests extends Specification {
 			}
 			var engine = new Engine()
 				.addSystem(new InputSystem(inputEventHandler))
-				.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler, frequency))
+				.addSystem(new SimulationSystem(frequency)
+					.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+				)
 				.addSystem(new GraphicsSystem(window, framebuffer, shader))
 				.withScene(scene)
 		when:

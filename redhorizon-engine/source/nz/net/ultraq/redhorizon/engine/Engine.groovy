@@ -54,15 +54,6 @@ class Engine {
 	}
 
 	/**
-	 * Remove a system from the engine.
-	 */
-	Engine removeSystem(System system) {
-
-		systems.remove(system)
-		return this
-	}
-
-	/**
 	 * Update all of the systems in the engine.
 	 */
 	void update(float delta) {

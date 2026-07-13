@@ -23,39 +23,21 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
+
 /**
  * A system for updating any entity scripts.
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class ScriptSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(ScriptSystem)
 
-	private final ScriptEngine scriptEngine
-	private final InputEventHandler input
-	private final float updateStep
-
+	final ScriptEngine scriptEngine
+	final InputEventHandler input
 	private final List<ScriptNode> scripts = new ArrayList<>()
-	private float accumulatedTime = 0f
-
-	/**
-	 * Constructor, configure the script system.
-	 *
-	 * @param scriptEngine
-	 * @param input
-	 * @param updateFrequency
-	 *   The rate at which script updates should occur.  As the script system is
-	 *   currently used for simulating movement and physics, then all script
-	 *   updates are performed at a fixed rate, decoupled from frame rate, to
-	 *   prevent jank.
-	 */
-	ScriptSystem(ScriptEngine scriptEngine, InputEventHandler input, int updateFrequency) {
-
-		this.scriptEngine = scriptEngine
-		this.input = input
-		this.updateStep = 1 / updateFrequency
-	}
 
 	@Override
 	void update(Scene scene, float delta) {
@@ -66,17 +48,10 @@ class ScriptSystem extends System {
 				scripts << script
 				return true
 			}
-
-			// Perform as many fixed-step updates within the accumulated frame time
-			// From: http://gafferongames.com/game-physics/fix-your-timestep/
-			accumulatedTime += delta
-			while (accumulatedTime > updateStep) {
-				scripts.each { ScriptNode script ->
-					if (script.enabled) {
-						script.update(scriptEngine, input, updateStep)
-					}
+			scripts.each { script ->
+				if (script.enabled) {
+					script.update(scriptEngine, input, delta)
 				}
-				accumulatedTime -= updateStep
 			}
 		}
 	}

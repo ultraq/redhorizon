@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.SimulationSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
@@ -94,9 +95,9 @@ final class Runtime implements Callable<Integer> {
 	@Option(names = ['--framebuffer-height'], defaultValue = '600')
 	int framebufferHeight
 
-	// Script system options
-	@Option(names = ['--script-update-frequency'], defaultValue = '60')
-	int scriptUpdateFrequency
+	// Simulation options
+	@Option(names = ['--simulation-update-frequency'], defaultValue = '60')
+	int simulationUpdateFrequency
 
 	// Resource manager options
 	@Option(names = ['--resource-manager-path-prefix'],
@@ -148,10 +149,12 @@ final class Runtime implements Callable<Integer> {
 					var engine = new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new DebugCollisionOutlineSystem())
-						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler, scriptUpdateFrequency))
-						.addSystem(new CollisionSystem())
+						.addSystem(new SimulationSystem(simulationUpdateFrequency)
+							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+							.addSystem(new CollisionSystem())
+							.addSystem(new SceneUpdateSystem())
+						)
 						.addSystem(new GraphicsSystem(window, framebuffer, shader))
-						.addSystem(new SceneUpdateSystem())
 						.withScene(scene)
 
 					// Application loop
