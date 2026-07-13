@@ -27,9 +27,35 @@ import picocli.CommandLine.ITypeConverter
  */
 class ColourTypeConverter implements ITypeConverter<Colour> {
 
+	private static final String COLOUR_NAME = 'Background colour'
+
 	@Override
 	Colour convert(String value) throws Exception {
 
+		// Value is a hex code
+		if (value.startsWith('#')) {
+			return new Colour(COLOUR_NAME,
+				Integer.parseInt(value.substring(1, 3), 16) / 256f as float,
+				Integer.parseInt(value.substring(3, 5), 16) / 256f as float,
+				Integer.parseInt(value.substring(5, 7), 16) / 256f as float
+			)
+		}
+
+		// Value is 3 colour values
+		if (value.contains(',')) {
+			if (value.contains('f')) {
+				var components = value.split(',').collect { Float.parseFloat(it.trim()) }
+				return new Colour(COLOUR_NAME, components[0], components[1], components[2])
+			}
+			var components = value.split(',').collect { Integer.parseInt(it.trim()) }
+			return new Colour(COLOUR_NAME,
+				components[0] / 256f as float,
+				components[1] / 256f as float,
+				components[2] / 256f as float
+			)
+		}
+
+		// Value is an enum identifier
 		return (Colour)Colour.getDeclaredField(value.toUpperCase()).get(null)
 	}
 }

@@ -39,13 +39,13 @@ class Colour {
 	public static final int FLOATS = 4
 
 	// @formatter:off
-	public static final Colour BLACK  = new Colour('Black',  0.0, 0.0, 0.0)
-	public static final Colour BLUE   = new Colour('Blue',   0.0, 0.0, 1.0)
-	public static final Colour GREEN  = new Colour('Green',  0.0, 1.0, 0.0)
-	public static final Colour GREY   = new Colour('Grey',   0.5, 0.5, 0.5)
-	public static final Colour RED    = new Colour('Red',    1.0, 0.0, 0.0)
-	public static final Colour WHITE  = new Colour('White',  1.0, 1.0, 1.0)
-	public static final Colour YELLOW = new Colour('Yellow', 1.0, 1.0, 0.0)
+	public static final Colour BLACK  = new Colour('Black',  0.0f, 0.0f, 0.0f)
+	public static final Colour BLUE   = new Colour('Blue',   0.0f, 0.0f, 1.0f)
+	public static final Colour GREEN  = new Colour('Green',  0.0f, 1.0f, 0.0f)
+	public static final Colour GREY   = new Colour('Grey',   0.5f, 0.5f, 0.5f)
+	public static final Colour RED    = new Colour('Red',    1.0f, 0.0f, 0.0f)
+	public static final Colour WHITE  = new Colour('White',  1.0f, 1.0f, 1.0f)
+	public static final Colour YELLOW = new Colour('Yellow', 1.0f, 1.0f, 0.0f)
 	// @formatter:on
 
 	final String name

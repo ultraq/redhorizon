@@ -27,8 +27,23 @@ import spock.lang.Specification
  */
 class ColourTypeConverterTests extends Specification {
 
-	def 'Can convert from a string into a Colour constant'() {
+	def 'Can convert from a colour name into a Colour constant'() {
 		expect:
 			new ColourTypeConverter().convert('Black') == Colour.BLACK
+	}
+
+	def 'Can convert from a hex colour code into a custom Colour class'() {
+		expect:
+			new ColourTypeConverter().convert('#000000') == new Colour('Background colour', 0f, 0f, 0f)
+	}
+
+	def 'Can convert from float colour values into a custom Colour class'() {
+		expect:
+			new ColourTypeConverter().convert('0.5f,0.5f,0.5f') == new Colour('Background colour', 0.5f, 0.5f, 0.5f)
+	}
+
+	def 'Can convert from integer colour values into a custom Colour class'() {
+		expect:
+			new ColourTypeConverter().convert('128,128,128') == new Colour('Background colour', 0.5f, 0.5f, 0.5f)
 	}
 }

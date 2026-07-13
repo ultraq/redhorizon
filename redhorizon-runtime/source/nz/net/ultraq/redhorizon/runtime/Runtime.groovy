@@ -82,7 +82,11 @@ final class Runtime implements Callable<Integer> {
 	int lwjglStackSize
 
 	// Window options
-	@Option(names = ['--window-background-colour'], defaultValue = 'BLACK', converter = ColourTypeConverter)
+	@Option(names = ['--window-background-colour'], defaultValue = 'BLACK', converter = ColourTypeConverter,
+		description = '''
+			The name of a built-in colour, a hex code starting with #, or a comma-separated list of 3 floating-point values in
+			the range of 0f..1f or integers in the range of 0..255
+		''')
 	Colour windowBackgroundColour
 	@Option(names = ['--window-width'], defaultValue = '800')
 	int windowWidth
