@@ -55,7 +55,7 @@ class WorldCoordinatesCheck extends Specification {
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
-		framebuffer = new OpenGLFramebuffer(1600, 1200)
+		framebuffer = new OpenGLFramebuffer(800, 600)
 		shader = new BasicShader()
 	}
 
@@ -68,7 +68,7 @@ class WorldCoordinatesCheck extends Specification {
 	def 'Convert window coordinates to world coordinates'() {
 		given:
 			var camera = new Camera(800, 600, window::getViewport)
-			var gridLines = new GridLines(new Rectanglef(-800, -600, 1600, 1200), 25, Colour.RED, Colour.YELLOW)
+			var gridLines = new GridLines(new Rectanglef(0f, 0f, 800f, 600f).center(), 50, Colour.RED, Colour.YELLOW)
 			var debugOverlay = new DebugOverlay()
 				.addModule(new CursorTrackingOverlayModule(window, camera))
 			var input = new InputEventHandler()

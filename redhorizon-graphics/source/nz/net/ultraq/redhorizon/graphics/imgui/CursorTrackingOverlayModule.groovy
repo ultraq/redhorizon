@@ -48,7 +48,7 @@ class CursorTrackingOverlayModule implements DebugOverlayModule {
 	@Override
 	void render() {
 
-		ImGui.text("Cursor: ${sprintf('%.1f', cursorPosition.x)}, ${sprintf('%.1f', cursorPosition.y)}")
-		ImGui.text("World: ${sprintf('%.1f', worldPosition.x)}, ${sprintf('%.1f', worldPosition.y)}")
+		ImGui.text(sprintf('Window: %.1f, %.1f, World: %.1f, %.1f',
+			cursorPosition.x, cursorPosition.y, worldPosition.x, worldPosition.y))
 	}
 }
