@@ -115,13 +115,7 @@ class SimulationSystemTests extends Specification {
 		}
 
 		static class BallScript extends Script<Ball> {
-			private Scene scene
 			private boolean bounced = false
-
-			@Override
-			void init() {
-				scene = node.scene
-			}
 
 			@Override
 			void update(float delta) {
