@@ -130,8 +130,8 @@ class Node<T extends Node> implements AutoCloseable {
 		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
 			Closure<Boolean> predicate) {
 
-		return (T)children.find { node ->
-			return predicate(node) ? node : node.find(predicate)
+		return (T)children.inject(null) { result, node ->
+			return result ?: predicate(node) ? node : node.find(predicate)
 		}
 	}
 

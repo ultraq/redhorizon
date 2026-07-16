@@ -16,12 +16,13 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.eventhorizon.Event
+import groovy.transform.ImmutableOptions
 
 /**
- * Common parent for all collision events.
+ * Triggered when two collider objects stop intersecting/colliding.
  *
  * @author Emanuel Rabina
  */
-interface CollisionEvent extends Event {
+@ImmutableOptions(knownImmutables = ['otherCollider'])
+record CollisionEndEvent(Collider otherCollider) implements CollisionEvent {
 }

@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.scenegraph
 
-import nz.net.ultraq.eventhorizon.Event
+import spock.lang.Specification
 
 /**
- * Common parent for all collision events.
+ * Tests for the {@link Node} class.
  *
  * @author Emanuel Rabina
  */
-interface CollisionEvent extends Event {
+class NodeTests extends Specification {
+
+	def 'find locates the matching descendant node'() {
+		given:
+			var root = new Node()
+				.addChild(new Node().withName('Child')
+					.addChild(new Node().withName('Grandchild')))
+		when:
+			var result = root.find { node -> node.name == 'Grandchild' }
+		then:
+			result.name == 'Grandchild'
+	}
 }

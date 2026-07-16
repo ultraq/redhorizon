@@ -32,6 +32,7 @@ class CollisionSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
 	private final List<Collider> colliders = new ArrayList<>()
+	private final Map<Collider, Collider> collisions = new HashMap<>()
 
 	@Override
 	void update(Scene scene, float delta) {
@@ -52,9 +53,23 @@ class CollisionSystem extends System {
 					if (!otherCollider.enabled) {
 						continue
 					}
+					var existingCollision = collisions[collider] == otherCollider
 					if (collider.checkCollision(otherCollider)) {
-						collider.trigger(new CollisionEvent(otherCollider))
-						otherCollider.trigger(new CollisionEvent(collider))
+						if (existingCollision) {
+							// Do nothing - we don't have a 'collision continue' event
+						}
+						else {
+							collisions[collider] = otherCollider
+							collisions[otherCollider] = collider
+							collider.trigger(new CollisionStartEvent(otherCollider))
+							otherCollider.trigger(new CollisionStartEvent(collider))
+						}
+					}
+					else if (existingCollision) {
+						collisions.remove(collider)
+						collisions.remove(otherCollider)
+						collider.trigger(new CollisionEndEvent(otherCollider))
+						otherCollider.trigger(new CollisionEndEvent(collider))
 					}
 				}
 			}
