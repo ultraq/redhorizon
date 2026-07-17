@@ -72,6 +72,26 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	}
 
 	/**
+	 * Gather all nodes in the scene of the given type.
+	 *
+	 * @param type
+	 * @param results
+	 *   Optional, provide a collection to store the results in to avoid
+	 *   allocations.
+	 * @return The {@code results} list.
+	 */
+	<T extends Node> List<T> collect(Class<T> type, List<T> results = []) {
+
+		root.traverse { Node node ->
+			if (type.isInstance(node)) {
+				results << (T)node
+			}
+			return true
+		}
+		return results
+	}
+
+	/**
 	 * Locate the first descendent from this node that satisfies the given
 	 * predicate.
 	 *

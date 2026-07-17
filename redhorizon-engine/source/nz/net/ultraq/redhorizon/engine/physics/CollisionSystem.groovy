@@ -43,10 +43,7 @@ class CollisionSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			colliders.clear()
-			scene.traverse(Collider) { Collider collider ->
-				colliders << collider
-				return true
-			}
+			scene.collect(Collider, colliders)
 			if (colliders.size() != lastCollidersCount) {
 				logger.debug('Colliders: {}', colliders.size())
 				lastCollidersCount = colliders.size()

@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
+import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
@@ -158,8 +159,9 @@ final class Runtime implements Callable<Integer> {
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new DebugCollisionOutlineSystem())
 						.addSystem(new SimulationSystem(simulationUpdateFrequency)
-							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+							.addSystem(new MovementSystem())
 							.addSystem(new CollisionSystem())
+							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 							.addSystem(new SceneUpdateSystem())
 						)
 						.addSystem(new GraphicsSystem(window, framebuffer, shader))
