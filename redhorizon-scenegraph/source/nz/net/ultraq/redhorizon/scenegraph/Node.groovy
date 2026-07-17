@@ -71,10 +71,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	void clear() {
 
-		children.each { child ->
-			child.parent = null
-		}
-		children.clear()
+		children*.remove()
 	}
 
 	@Override
