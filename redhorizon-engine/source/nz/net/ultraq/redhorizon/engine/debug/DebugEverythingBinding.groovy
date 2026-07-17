@@ -39,7 +39,7 @@ class DebugEverythingBinding extends KeyBinding {
 	DebugEverythingBinding(Scene scene) {
 
 		super(GLFW_KEY_P, true, { ->
-			var debugStore = scene.findByType(DebugStore)
+			var debugStore = scene.find(DebugStore)
 			var debugModules = scene.findAll { it instanceof ImGuiModule && it.debug } as List<ImGuiModule>
 
 			// Use this flag to determine if all on/off
@@ -52,7 +52,7 @@ class DebugEverythingBinding extends KeyBinding {
 				debugModules*.disable()
 			}
 
-			var gridLines = scene.findByType(GridLines)
+			var gridLines = scene.find(GridLines)
 			if (debugStore.showGridLines) {
 				gridLines.enable()
 			}

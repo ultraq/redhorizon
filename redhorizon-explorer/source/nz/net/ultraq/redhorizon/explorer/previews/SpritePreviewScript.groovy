@@ -39,7 +39,7 @@ class SpritePreviewScript extends Script {
 	void init() {
 
 		(node.scene as ExplorerScene).camera.scale(2f)
-		sprite = node.findByType(Sprite)
+		sprite = node.find(Sprite)
 	}
 
 	@Override

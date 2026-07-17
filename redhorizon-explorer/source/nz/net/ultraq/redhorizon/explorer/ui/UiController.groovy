@@ -126,10 +126,10 @@ class UiController extends Script implements EventTarget<UiController> {
 	@Override
 	void init() {
 
-		uiSettings = node.findByType(UiSettingsComponent)
+		uiSettings = node.find(UiSettingsComponent)
 		mixDatabase = uiSettings.mixDatabase
 
-		entryList = node.findByType(EntryList)
+		entryList = node.find(EntryList)
 		entryList
 			.relay(EntrySelectedEvent, node.scene)
 			.on(EntrySelectedEvent) { event ->
@@ -140,7 +140,7 @@ class UiController extends Script implements EventTarget<UiController> {
 			}
 		entries = entryList.entries
 
-		var mainMenuBar = node.findByType(MainMenuBar)
+		var mainMenuBar = node.find(MainMenuBar)
 		mainMenuBar.on(TouchpadInputEvent) { event ->
 			new ToggleTouchpadInputAction(node.scene, uiSettings).toggle()
 		}

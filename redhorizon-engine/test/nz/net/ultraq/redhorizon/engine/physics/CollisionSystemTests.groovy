@@ -36,7 +36,7 @@ class CollisionSystemTests extends Specification {
 				.addChild(new Node().addChild(new BoxCollider(10f, 10f)))
 			var collisionSystem = new CollisionSystem()
 			var hasCollisionStartEvent = false
-			scene.findByType(BoxCollider).on(CollisionStartEvent) { event ->
+			scene.find(BoxCollider).on(CollisionStartEvent) { event ->
 				hasCollisionStartEvent = true
 			}
 		when:

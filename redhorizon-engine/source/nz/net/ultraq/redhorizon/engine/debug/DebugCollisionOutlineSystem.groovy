@@ -42,13 +42,13 @@ class DebugCollisionOutlineSystem extends System {
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			var debugStore = scene.findByType(DebugStore)
+			var debugStore = scene.find(DebugStore)
 			if (!debugStore) {
 				throw new IllegalStateException('Scene does not have a DebugStore')
 			}
 
 			scene.traverse(Collider) { Collider collider ->
-				var collisionOutline = collider.parent.findByName(COLLISION_OUTLINE_NAME)
+				var collisionOutline = collider.parent.find(COLLISION_OUTLINE_NAME)
 				if (debugStore.showCollisionOutlines) {
 					if (!collisionOutline) {
 						var collisionShape = switch (collider) {

@@ -130,7 +130,7 @@ class UnitPreview extends Node<UnitPreview> {
 //			})
 //				.start()
 			(node.scene as ExplorerScene).camera.scale(2f)
-			sprite = node.findByType(Sprite)
+			sprite = node.find(Sprite)
 		}
 
 		@Override
@@ -160,7 +160,7 @@ class UnitPreview extends Node<UnitPreview> {
 
 			if (input.keyPressed(GLFW_KEY_F, true)) {
 				faction++
-				var swapMap = node.findByType(PaletteSwapMap)
+				var swapMap = node.find(PaletteSwapMap)
 				swapMap.setColours(faction.colours)
 				logger.info('Viewing with {} faction colours', faction.name())
 			}
@@ -173,7 +173,7 @@ class UnitPreview extends Node<UnitPreview> {
 			var frame = node.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
 			sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))
 
-			var turret = node.findByName('Turret') as Sprite
+			var turret = node.find('Turret') as Sprite
 			if (turret) {
 				var turretData = node.unitData.shpFile.parts.turret
 				turret.withFramePosition(turret.spriteSheet.getFramePosition(frame + turretData.headings))

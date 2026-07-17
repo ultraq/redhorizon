@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['clear', 'find', 'findAll', 'findAllByType', 'insertBefore',
-			'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
+		includes = ['clear', 'find', 'findAll', 'insertBefore', 'leftShift',
+			'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()
@@ -109,9 +109,9 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 *
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
-	<T extends Node> T findByName(String name) {
+	<T extends Node> T find(String name) {
 
-		return root.findByName(name)
+		return root.find(name)
 	}
 
 	/**
@@ -119,9 +119,9 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 *
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
-	<T extends Node> T findByType(Class<T> type) {
+	<T extends Node> T find(Class<T> type) {
 
-		return root.findByType(type)
+		return root.find(type)
 	}
 
 	/**

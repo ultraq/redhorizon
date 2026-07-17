@@ -133,8 +133,30 @@ class Node<T extends Node> implements AutoCloseable {
 	}
 
 	/**
+	 * Locate the first descendent from this node that satisfies the given name.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
+	 */
+	<T extends Node> T find(String name) {
+
+		return find { node -> node.name == name }
+	}
+
+	/**
+	 * Locate the first descendent from this node that satisfies the given type.
+	 *
+	 * @return The matching node, or {@code null} if no match is found.
+	 */
+	<T extends Node> T find(Class<T> type) {
+
+		return find { node -> type.isInstance(node) }
+	}
+
+	/**
 	 * Locate every descendant of this node that satisfies the given predicate.
 	 *
+	 * @param results
+	 *   Optional, a list to hold the results so that a new list isn't allocated.
 	 * @return The matching nodes, or an empty list if no matches are found.
 	 */
 	<T extends Node> List<T> findAll(
@@ -154,31 +176,13 @@ class Node<T extends Node> implements AutoCloseable {
 	/**
 	 * Locate every descendant of this node that satisfies the given type.
 	 *
+	 * @param results
+	 *   Optional, a list to hold the results so that a new list isn't allocated.
 	 * @return The matching nodes, or an empty list if no matches are found.
 	 */
-	<T extends Node> List<T> findAllByType(Class<T> type) {
+	<T extends Node> List<T> findAll(Class<T> type, List<T> results = []) {
 
 		return findAll { node -> type.isInstance(node) }
-	}
-
-	/**
-	 * Locate the first descendent from this node that satisfies the given name.
-	 *
-	 * @return The matching node, or {@code null} if no match is found.
-	 */
-	<T extends Node> T findByName(String name) {
-
-		return find { node -> node.name == name }
-	}
-
-	/**
-	 * Locate the first descendent from this node that satisfies the given type.
-	 *
-	 * @return The matching node, or {@code null} if no match is found.
-	 */
-	<T extends Node> T findByType(Class<T> type) {
-
-		return find { node -> type.isInstance(node) }
 	}
 
 	/**

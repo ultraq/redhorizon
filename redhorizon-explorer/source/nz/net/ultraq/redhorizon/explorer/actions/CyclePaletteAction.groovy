@@ -37,7 +37,7 @@ class CyclePaletteAction {
 	void cyclePalette() {
 
 		scene.queueUpdate { ->
-			scene.findByType(GlobalPalette).cyclePalette()
+			scene.find(GlobalPalette).cyclePalette()
 		}
 	}
 }
