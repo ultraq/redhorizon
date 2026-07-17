@@ -133,7 +133,7 @@ class UiController extends Script implements EventTarget<UiController> {
 		entryList
 			.relay(EntrySelectedEvent, node.scene)
 			.on(EntrySelectedEvent) { event ->
-				new SelectEntryAction(this, node.scene.findScriptByType(PreviewController), event.entry()).select()
+				new SelectEntryAction(this, node.scene.findScript(PreviewController), event.entry()).select()
 			}
 			.on(ExtractMixEntryEvent) { event ->
 				new ExtractMixFileEntryAction(event.entry(), event.entry().name()).extract() // TODO: Save to specified location

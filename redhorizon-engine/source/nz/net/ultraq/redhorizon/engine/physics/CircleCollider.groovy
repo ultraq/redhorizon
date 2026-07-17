@@ -41,7 +41,7 @@ class CircleCollider extends Collider<CircleCollider, Circlef> {
 			return bounds.intersects(other.bounds)
 		}
 		// TODO: We need a better way to check if different shapes collide
-		else if (other instanceof BoxCollider) {
+		if (other instanceof BoxCollider) {
 			return bounds.asRectanglef(asBoxBounds).intersectsRectangle(other.bounds)
 		}
 		return false

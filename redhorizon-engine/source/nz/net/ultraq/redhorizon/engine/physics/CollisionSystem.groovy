@@ -22,6 +22,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * Perform collision checks between all entities in the scene.
  *
@@ -32,7 +34,9 @@ class CollisionSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
 	private final List<Collider> colliders = new ArrayList<>()
+	private final List<CompletableFuture<Void>> collisionChecks = new ArrayList<>()
 	private final Map<Collider, Collider> collisions = new HashMap<>()
+	private int lastCollidersCount = 0
 
 	@Override
 	void update(Scene scene, float delta) {
@@ -43,6 +47,12 @@ class CollisionSystem extends System {
 				colliders << collider
 				return true
 			}
+			if (colliders.size() != lastCollidersCount) {
+				logger.debug('Colliders: {}', colliders.size())
+				lastCollidersCount = colliders.size()
+			}
+
+			collisionChecks.clear()
 			for (var i = 0; i < colliders.size(); i++) {
 				var collider = colliders.get(i)
 				if (!collider.enabled) {
@@ -61,18 +71,19 @@ class CollisionSystem extends System {
 						else {
 							collisions[collider] = otherCollider
 							collisions[otherCollider] = collider
-							collider.trigger(new CollisionStartEvent(otherCollider))
-							otherCollider.trigger(new CollisionStartEvent(collider))
+							collisionChecks << collider.trigger(new CollisionStartEvent(otherCollider))
+							collisionChecks << otherCollider.trigger(new CollisionStartEvent(collider))
 						}
 					}
 					else if (existingCollision) {
 						collisions.remove(collider)
 						collisions.remove(otherCollider)
-						collider.trigger(new CollisionEndEvent(otherCollider))
-						otherCollider.trigger(new CollisionEndEvent(collider))
+						collisionChecks << collider.trigger(new CollisionEndEvent(otherCollider))
+						collisionChecks << otherCollider.trigger(new CollisionEndEvent(collider))
 					}
 				}
 			}
+			collisionChecks*.join()
 		}
 	}
 }

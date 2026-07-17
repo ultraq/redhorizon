@@ -26,9 +26,9 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 class SceneExtensions {
 
 	/**
-	 * Locate a script component by its type.
+	 * Locate a script by its type.
 	 */
-	static <T extends Script> T findScriptByType(Scene self, Class<T> scriptClass) {
+	static <T extends Script> T findScript(Scene self, Class<T> scriptClass) {
 
 		T result = null
 		self.traverse(ScriptNode) { ScriptNode node ->
