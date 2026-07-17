@@ -148,7 +148,7 @@ final class Runtime implements Callable<Integer> {
 
 					// Init scene and systems
 					scene = application.configureScene(
-						new SimpleScene(framebufferWidth, framebufferHeight, window).tap {
+						new SimpleScene(windowWidth, windowHeight, window).tap {
 							addDebugComponents(window, camera, inputEventHandler,
 								new GridLines(new Rectanglef(0f, 0f, framebufferWidth, framebufferHeight).center(), 50f,
 									new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY))
