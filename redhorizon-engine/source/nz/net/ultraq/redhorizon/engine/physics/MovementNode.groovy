@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.physics
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
-import org.joml.Vector2fc
 
 import groovy.transform.TupleConstructor
 
@@ -28,9 +27,9 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = 'speed')
+@TupleConstructor
 class MovementNode extends Node<MovementNode> {
 
-	final Vector2fc vector = new Vector2f()
 	float speed
+	final Vector2f vector = new Vector2f()
 }

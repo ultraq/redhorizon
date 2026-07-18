@@ -32,8 +32,8 @@ class CollisionSystemTests extends Specification {
 	def 'Triggers a collision start event when 2 colliders intersect'() {
 		given:
 			var scene = new Scene()
-				.addChild(new Node().addChild(new BoxCollider(10f, 10f)))
-				.addChild(new Node().addChild(new BoxCollider(10f, 10f)))
+				.addChild(new Node().addChild(new BoxCollider(10f, 10f)).addChild(new MovementNode()))
+				.addChild(new Node().addChild(new BoxCollider(10f, 10f)).addChild(new MovementNode()))
 			var collisionSystem = new CollisionSystem()
 			var hasCollisionStartEvent = false
 			scene.find(BoxCollider).on(CollisionStartEvent) { event ->

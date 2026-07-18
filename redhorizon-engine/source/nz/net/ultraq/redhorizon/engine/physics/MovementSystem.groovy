@@ -40,7 +40,7 @@ class MovementSystem extends System {
 			movementNodes.clear()
 			scene.collect(MovementNode, movementNodes).each { node ->
 				if (node.vector) {
-					node.translate(node.vector.x() * node.speed * delta as float, node.vector.y() * node.speed * delta as float)
+					node.parent.translate(node.vector.x() * node.speed * delta as float, node.vector.y() * node.speed * delta as float)
 				}
 			}
 		}

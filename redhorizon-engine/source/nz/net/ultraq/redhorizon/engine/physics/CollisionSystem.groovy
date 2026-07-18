@@ -34,32 +34,38 @@ class CollisionSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
 	private final List<Collider> colliders = new ArrayList<>()
-	private final List<CompletableFuture<Void>> collisionChecks = new ArrayList<>()
-	private final Map<Collider, Collider> collisions = new HashMap<>()
 	private int lastCollidersCount = 0
+	private final List<CompletableFuture<Void>> collisionEvents = new ArrayList<>()
+	private int lastCollisionEventsCount = 0
+	private final Map<Collider, Collider> collisions = new HashMap<>()
+	private int lastCollisionChecksCount = 0
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
 			colliders.clear()
+			collisionEvents.clear()
+			int collisionChecks = 0
+
 			scene.collect(Collider, colliders)
 			if (colliders.size() != lastCollidersCount) {
 				logger.debug('Colliders: {}', colliders.size())
 				lastCollidersCount = colliders.size()
 			}
 
-			collisionChecks.clear()
-			for (var i = 0; i < colliders.size(); i++) {
-				var collider = colliders.get(i)
-				if (!collider.enabled) {
-					continue
+			colliders.each { collider ->
+				// Skip collision checks on disabled and stationary objects
+				if (!collider.enabled || !collider.parent.find(MovementNode)) {
+					return
 				}
-				for (var j = i + 1; j < colliders.size(); j++) {
-					var otherCollider = colliders.get(j)
-					if (!otherCollider.enabled) {
-						continue
+				colliders.each { otherCollider ->
+					// Skip collision checks on disabled objects and itself
+					if (!otherCollider.enabled || otherCollider == collider) {
+						return
 					}
+					collisionChecks++
+
 					var existingCollision = collisions[collider] == otherCollider
 					if (collider.checkCollision(otherCollider)) {
 						if (existingCollision) {
@@ -68,19 +74,31 @@ class CollisionSystem extends System {
 						else {
 							collisions[collider] = otherCollider
 							collisions[otherCollider] = collider
-							collisionChecks << collider.trigger(new CollisionStartEvent(otherCollider))
-							collisionChecks << otherCollider.trigger(new CollisionStartEvent(collider))
+							collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
+							collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
 						}
 					}
 					else if (existingCollision) {
 						collisions.remove(collider)
 						collisions.remove(otherCollider)
-						collisionChecks << collider.trigger(new CollisionEndEvent(otherCollider))
-						collisionChecks << otherCollider.trigger(new CollisionEndEvent(collider))
+						collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
+						collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
 					}
 				}
 			}
-			collisionChecks*.join()
+			collisionEvents*.join()
+
+			if (collisionEvents.size() != lastCollisionEventsCount) {
+				if (collisionEvents) {
+					logger.debug('Collision events: {}', collisionEvents.size())
+				}
+				lastCollisionEventsCount = collisionEvents.size()
+			}
+
+			if (collisionChecks != lastCollisionChecksCount) {
+				logger.debug('Collision checks: {}', collisionChecks)
+				lastCollisionChecksCount = collisionChecks
+			}
 		}
 	}
 }
