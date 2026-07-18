@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.physics
 
+import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.physics.BoxCollider
-import nz.net.ultraq.redhorizon.engine.physics.CollisionStartEvent
-import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
-import nz.net.ultraq.redhorizon.engine.physics.MovementNode
-import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
@@ -51,7 +47,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class SimulationSystemTests extends Specification {
+class PhysicsSystemTests extends Specification {
 
 	private static final Rectanglei screen = new Rectanglei(-400, -300, 400, 300)
 
@@ -76,10 +72,10 @@ class SimulationSystemTests extends Specification {
 				.addChild(new Ball())
 			var engine = new Engine()
 				.addSystem(new InputSystem(inputEventHandler))
-				.addSystem(new SimulationSystem(frequency)
+				.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+				.addSystem(new PhysicsSystem(frequency)
 					.addSystem(new MovementSystem())
 					.addSystem(new CollisionSystem())
-					.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 				)
 				.addSystem(new GraphicsSystem(window, framebuffer, shader))
 				.withScene(scene)

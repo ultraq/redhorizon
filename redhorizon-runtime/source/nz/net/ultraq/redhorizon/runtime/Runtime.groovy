@@ -17,13 +17,13 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.SimulationSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
+import nz.net.ultraq.redhorizon.engine.physics.PhysicsSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
@@ -102,9 +102,9 @@ final class Runtime implements Callable<Integer> {
 	@Option(names = ['--framebuffer-height'], defaultValue = '600')
 	int framebufferHeight
 
-	// Simulation options
-	@Option(names = ['--simulation-update-frequency'], defaultValue = '60')
-	int simulationUpdateFrequency
+	// Physics options
+	@Option(names = ['--physics-update-frequency'], defaultValue = '60')
+	int physicsUpdateFrequency
 
 	// Resource manager options
 	@Option(names = ['--resource-manager-path-prefix'],
@@ -157,13 +157,13 @@ final class Runtime implements Callable<Integer> {
 					)
 					var engine = new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
-						.addSystem(new DebugCollisionOutlineSystem())
-						.addSystem(new SimulationSystem(simulationUpdateFrequency)
+						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+						.addSystem(new PhysicsSystem(physicsUpdateFrequency)
 							.addSystem(new MovementSystem())
 							.addSystem(new CollisionSystem())
-							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-							.addSystem(new SceneUpdateSystem())
 						)
+						.addSystem(new SceneUpdateSystem())
+						.addSystem(new DebugCollisionOutlineSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shader))
 						.withScene(scene)
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.engine.physics
 
+import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
@@ -27,29 +28,29 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class SimulationSystem extends System {
+class PhysicsSystem extends System {
 
-	private static final Logger logger = LoggerFactory.getLogger(SimulationSystem)
+	private static final Logger logger = LoggerFactory.getLogger(PhysicsSystem)
 
 	private final List<System> systems = []
 	private final float updateStep
 	private float accumulatedTime = 0f
 
 	/**
-	 * Constructor, configure the simulation system.
+	 * Constructor, configure the physics system.
 	 *
 	 * @param updateFrequency
-	 *   The rate at which simulation updates should occur
+	 *   The rate at which physics updates should occur
 	 */
-	SimulationSystem(int updateFrequency) {
+	PhysicsSystem(int updateFrequency) {
 
 		updateStep = 1 / updateFrequency
 	}
 
 	/**
-	 * Add an update system to be managed by this simulation system.
+	 * Add a system to be managed by the physics system.
 	 */
-	SimulationSystem addSystem(System system) {
+	PhysicsSystem addSystem(System system) {
 
 		systems << system
 		return this
@@ -58,7 +59,7 @@ class SimulationSystem extends System {
 	/**
 	 * Shorthand for {@link #addSystem}.
 	 */
-	SimulationSystem leftShift(System system) {
+	PhysicsSystem leftShift(System system) {
 
 		return addSystem(system)
 	}
