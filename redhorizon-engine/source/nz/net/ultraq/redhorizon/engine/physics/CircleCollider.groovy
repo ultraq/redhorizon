@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.engine.physics
 
 import org.joml.primitives.Circlef
-import org.joml.primitives.Rectanglef
 
 import groovy.transform.TupleConstructor
 
@@ -32,7 +31,6 @@ class CircleCollider extends Collider<CircleCollider, Circlef> {
 
 	final float radius
 	private final Circlef _bounds = new Circlef(0, 0, radius)
-	private final Rectanglef asBoxBounds = new Rectanglef(0f, 0f, 0f, 0f)
 
 	@Override
 	boolean checkCollision(Collider other) {
@@ -40,9 +38,8 @@ class CircleCollider extends Collider<CircleCollider, Circlef> {
 		if (other instanceof CircleCollider) {
 			return bounds.intersects(other.bounds)
 		}
-		// TODO: We need a better way to check if different shapes collide
 		if (other instanceof BoxCollider) {
-			return bounds.asRectanglef(asBoxBounds).intersectsRectangle(other.bounds)
+			return bounds.intersects(other.bounds)
 		}
 		return false
 	}

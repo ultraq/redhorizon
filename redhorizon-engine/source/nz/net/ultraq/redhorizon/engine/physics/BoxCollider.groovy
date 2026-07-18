@@ -32,7 +32,6 @@ class BoxCollider extends Collider<BoxCollider, Rectanglef> {
 	final float width
 	final float height
 	private final Rectanglef _bounds = new Rectanglef(0, 0, width, height)
-	private final Rectanglef otherAsBoxBounds = new Rectanglef(0f, 0f, 0f, 0f)
 
 	@Override
 	boolean checkCollision(Collider other) {
@@ -40,9 +39,8 @@ class BoxCollider extends Collider<BoxCollider, Rectanglef> {
 		if (other instanceof BoxCollider) {
 			return bounds.intersectsRectangle(other.bounds)
 		}
-		// TODO: We need a better way to check if different shapes collide
 		if (other instanceof CircleCollider) {
-			return bounds.intersectsRectangle(other.bounds.asRectanglef(otherAsBoxBounds))
+			return bounds.intersectsCircle(other.bounds)
 		}
 		return false
 	}
