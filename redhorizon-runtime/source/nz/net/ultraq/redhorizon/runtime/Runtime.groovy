@@ -36,7 +36,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.runtime.utilities.ColourTypeConverter
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
@@ -45,11 +44,9 @@ import org.joml.primitives.Rectanglef
 import org.lwjgl.system.Configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import picocli.CommandLine
-import picocli.CommandLine.Command
-import picocli.CommandLine.Option
 
-import java.util.concurrent.Callable
+import groovy.transform.builder.Builder
+import groovy.transform.builder.SimpleStrategy
 
 /**
  * Main class for starting a Red Horizon engine, configuring and running it for
@@ -60,14 +57,13 @@ import java.util.concurrent.Callable
  *   System.exit(new Runtime(new MyApplication()).execute(args))
  * }
  * </code></pre>
- * Available {@code args} can be found by passing {@code --help} as an arg, or
- * inspecting the {@code @Option}-annotated members of this class (it's all
- * <a href="https://picocli.info/">Picocli</a> under the hood).
+ * The runtime can be configured using any of the fluent API methods available,
+ * before calling the {@link #execute} method.
  *
  * @author Emanuel Rabina
  */
-@Command(name = 'runtime')
-final class Runtime implements Callable<Integer> {
+@Builder(builderStrategy = SimpleStrategy, prefix = 'with')
+final class Runtime {
 
 	private static final Logger logger = LoggerFactory.getLogger(Runtime)
 
@@ -81,33 +77,21 @@ final class Runtime implements Callable<Integer> {
 	private Scene scene
 
 	// LWJGL options
-	@Option(names = ['--lwjgl-stack-size'], defaultValue = '10240')
-	int lwjglStackSize
+	int lwjglStackSize = 10240
 
 	// Window options
-	@Option(names = ['--window-background-colour'], defaultValue = 'BLACK', converter = ColourTypeConverter,
-		description = '''
-			The name of a built-in colour, a hex code starting with #, or a comma-separated list of 3 floating-point values in
-			the range of 0f..1f or integers in the range of 0..255
-		''')
-	Colour windowBackgroundColour
-	@Option(names = ['--window-width'], defaultValue = '800')
-	int windowWidth
-	@Option(names = ['--window-height'], defaultValue = '600')
-	int windowHeight
+	Colour windowBackgroundColour = Colour.BLACK
+	int windowWidth = 800
+	int windowHeight = 600
 
 	// Framebuffer options
-	@Option(names = ['--framebuffer-width'], defaultValue = '800')
-	int framebufferWidth
-	@Option(names = ['--framebuffer-height'], defaultValue = '600')
-	int framebufferHeight
+	int framebufferWidth = 800
+	int framebufferHeight = 600
 
 	// Physics options
 	int physicsFixedUpdateFrequency
 
 	// Resource manager options
-	@Option(names = ['--resource-manager-path-prefix'],
-		description = 'Path prefix for the resource manager, defaults to the application\'s package name as a path')
 	String resourceManagerPathPrefix
 
 	/**
@@ -120,8 +104,19 @@ final class Runtime implements Callable<Integer> {
 		this.application = application
 	}
 
-	@Override
-	Integer call() {
+	/**
+	 * Start the Red Horizon runtime with the given command-line parameters
+	 * straight from a standard Java {@code main} method.
+	 *
+	 * @param args
+	 *   Command line arguments for configuring the runtime.
+	 * @return
+	 *   A value that can be passed to `System.exit` to indicate whether the
+	 *   runtime and application completed successfully, or with an error.
+	 */
+	int execute(String[] args) {
+
+		logger.debug('Initializing application w/ args: {}', args)
 
 		try {
 			// Init libraries
@@ -188,21 +183,5 @@ final class Runtime implements Callable<Integer> {
 		}
 
 		return 0
-	}
-
-	/**
-	 * Start the Red Horizon runtime with the given command-line parameters
-	 * straight from a standard Java {@code main} method.
-	 *
-	 * @param args
-	 *   Command line arguments for configuring the runtime.
-	 * @return
-	 *   A value that can be passed to `System.exit` to indicate whether the
-	 *   runtime and application completed successfully, or with an error.
-	 */
-	int execute(String[] args) {
-
-		logger.debug('Initializing application w/ args: {}', args)
-		return new CommandLine(this).execute(args)
 	}
 }

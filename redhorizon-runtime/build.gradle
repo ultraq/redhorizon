@@ -43,7 +43,6 @@ configure {
 				api project(':redhorizon-graphics')
 				api project(':redhorizon-input')
 				api project(':redhorizon-scenegraph')
-				implementation "info.picocli:picocli:${picocliVersion}"
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
