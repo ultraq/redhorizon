@@ -44,7 +44,7 @@ class PhysicsSystem extends System {
 	 */
 	PhysicsSystem(int updateFrequency) {
 
-		updateStep = 1 / updateFrequency
+		updateStep = updateFrequency ? 1 / updateFrequency : 0f
 	}
 
 	/**
@@ -70,12 +70,16 @@ class PhysicsSystem extends System {
 		average('Update', 1f, logger) { ->
 			// Perform as many fixed-step updates within the accumulated frame time
 			// From: http://gafferongames.com/game-physics/fix-your-timestep/
-			accumulatedTime += delta
-			while (accumulatedTime > updateStep) {
-				systems.each { system ->
-					system.update(scene, updateStep)
+			if (updateStep) {
+				accumulatedTime += delta
+				while (accumulatedTime > updateStep) {
+					systems*.update(scene, updateStep)
+					accumulatedTime -= updateStep
 				}
-				accumulatedTime -= updateStep
+			}
+			// Run updates at the speed of the framerate
+			else {
+				systems*.update(scene, delta)
 			}
 		}
 	}

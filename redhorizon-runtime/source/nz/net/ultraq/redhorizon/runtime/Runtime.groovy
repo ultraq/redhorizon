@@ -103,8 +103,7 @@ final class Runtime implements Callable<Integer> {
 	int framebufferHeight
 
 	// Physics options
-	@Option(names = ['--physics-update-frequency'], defaultValue = '60')
-	int physicsUpdateFrequency
+	int physicsFixedUpdateFrequency
 
 	// Resource manager options
 	@Option(names = ['--resource-manager-path-prefix'],
@@ -158,7 +157,7 @@ final class Runtime implements Callable<Integer> {
 					var engine = new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-						.addSystem(new PhysicsSystem(physicsUpdateFrequency)
+						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency)
 							.addSystem(new MovementSystem())
 							.addSystem(new CollisionSystem())
 						)
