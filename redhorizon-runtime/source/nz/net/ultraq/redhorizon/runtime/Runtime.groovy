@@ -16,7 +16,10 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
+import nz.net.ultraq.redhorizon.audio.AudioDevice
+import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
 import nz.net.ultraq.redhorizon.engine.Engine
+import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
@@ -73,11 +76,15 @@ final class Runtime {
 	private Window window
 	private Framebuffer framebuffer
 	private BasicShader shader
+	private AudioDevice audioDevice
 	private ResourceManager resourceManager
 	private Scene scene
 
 	// LWJGL options
 	int lwjglStackSize = 10240
+
+	// Audio options
+	float audioMasterVolume = 1f
 
 	// Window options
 	Colour windowBackgroundColour = Colour.BLACK
@@ -85,8 +92,8 @@ final class Runtime {
 	int windowHeight = 600
 
 	// Framebuffer options
-	int framebufferWidth = 800
-	int framebufferHeight = 600
+	int framebufferWidth
+	int framebufferHeight
 
 	// Physics options
 	int physicsFixedUpdateFrequency
@@ -123,12 +130,14 @@ final class Runtime {
 			Configuration.STACK_SIZE.set(lwjglStackSize)
 
 			// Init devices
+			audioDevice = new OpenALAudioDevice()
+				.withMasterVolume(audioMasterVolume)
 			window = new OpenGLWindow(windowWidth, windowHeight, "${application.name} ${application.version}")
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(windowBackgroundColour)
 				.withVSync(true)
-			framebuffer = new OpenGLFramebuffer(framebufferWidth, framebufferHeight)
+			framebuffer = new OpenGLFramebuffer(framebufferWidth ?: windowWidth, framebufferHeight ?: windowHeight)
 			shader = new BasicShader()
 			var inputEventHandler = new InputEventHandler()
 				.addInputSource(window)
@@ -158,6 +167,7 @@ final class Runtime {
 						)
 						.addSystem(new SceneUpdateSystem())
 						.addSystem(new DebugCollisionOutlineSystem())
+						.addSystem(new AudioSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shader))
 						.withScene(scene)
 
@@ -180,6 +190,7 @@ final class Runtime {
 			shader?.close()
 			framebuffer?.close()
 			window?.close()
+			audioDevice?.close()
 		}
 
 		return 0
