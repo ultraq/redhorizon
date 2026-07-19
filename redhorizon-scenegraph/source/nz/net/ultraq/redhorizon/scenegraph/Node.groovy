@@ -297,7 +297,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	boolean isDisabled() {
 
-		return !enabled
+		return parent ? !enabled && parent.disabled : !enabled
 	}
 
 	/**
@@ -305,7 +305,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	boolean isEnabled() {
 
-		return enabled
+		return parent ? enabled && parent.enabled : enabled
 	}
 
 	/**
