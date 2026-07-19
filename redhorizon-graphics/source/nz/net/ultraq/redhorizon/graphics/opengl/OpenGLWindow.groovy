@@ -107,7 +107,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 			throw new Exception('Failed to create a window')
 		}
 
-		def (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
+		var (framebufferWidth, framebufferHeight) = getAndTrackFramebufferSize { newWidth, newHeight ->
 			// Width/height will be 0 if the window is minimized
 			if (newWidth && newHeight) {
 				this.width = newWidth
@@ -152,7 +152,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow centerToScreen() {
 
 		centered = true
-		def (width, height) = getWindowSize()
+		var (width, height) = getWindowSize()
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
 		glfwSetWindowPos(window,
 			(videoMode.width() / 2) - (width / 2) as int,
@@ -242,7 +242,7 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 	OpenGLWindow scaleToFit() {
 
 		var videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
-		def (width, height) = getWindowSize()
+		var (width, height) = getWindowSize()
 
 		// Subtract some value from the monitor size to account for any window and OS chrome
 		var scale = Math.floor(Math.min((videoMode.width() * 0.90) / width, (videoMode.height() * 0.90) / height)) as int
@@ -313,8 +313,8 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		// Switch to full screen mode
 		else {
 			logger.debug('Switching to full screen mode')
-			def (x, y) = getWindowPosition()
-			def (width, height) = getWindowSize()
+			var (x, y) = getWindowPosition()
+			var (width, height) = getWindowSize()
 			logger.debug('Window position and size before maximizing is {}x{}, {}x{}', x, y, width, height)
 			lastWindowPositionAndSize.setMin(x, y).setLengths(width, height)
 			var primaryMonitor = glfwGetPrimaryMonitor()

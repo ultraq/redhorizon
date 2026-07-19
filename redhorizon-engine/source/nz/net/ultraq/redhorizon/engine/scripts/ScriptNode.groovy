@@ -74,7 +74,7 @@ class ScriptNode extends Node<ScriptNode> implements AutoCloseable {
 	void update(ScriptEngine scriptEngine, InputEventHandler input, float delta) {
 
 		if (scriptName) {
-			def (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
+			var (scriptObject, isNew) = scriptEngine.loadScriptClass(scriptName, this)
 			if (isNew) {
 				script = scriptObject as Script
 				script.node = parent

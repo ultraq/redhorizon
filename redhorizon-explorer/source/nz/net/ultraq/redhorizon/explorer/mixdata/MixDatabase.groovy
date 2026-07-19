@@ -40,7 +40,7 @@ class MixDatabase {
 				getResourceAsStream(source).withBufferedReader { reader ->
 					reader.readLine() // First line assumed to be CSV headers
 					reader.eachLine { line ->
-						def (id, name) = line.split(',')
+						var (id, name) = line.split(',')
 						data << new MixData(Long.decode(id) as int, name)
 					}
 				}

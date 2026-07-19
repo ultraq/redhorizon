@@ -62,7 +62,7 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 
 		this.name = name
 
-		def (vertexShaderSource, fragmentShaderSource) = new LibRetroShaderReader().read(shaderSourcePath)
+		var (vertexShaderSource, fragmentShaderSource) = new LibRetroShaderReader().read(shaderSourcePath)
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation

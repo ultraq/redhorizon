@@ -42,7 +42,7 @@ class FFSampledSPAudioDecoder implements AudioDecoder {
 
 		logger.debug('Decoding started')
 
-		def (encoding, bits, channels, frequency, buffers) = AudioSystem.getAudioInputStream(inputStream).withCloseable { encodedStream ->
+		var (encoding, bits, channels, frequency, buffers) = AudioSystem.getAudioInputStream(inputStream).withCloseable { encodedStream ->
 			return AudioSystem.getAudioInputStream(Encoding.PCM_SIGNED, encodedStream).withCloseable { pcmStream ->
 				var format = pcmStream.format
 				var bits = format.sampleSizeInBits
