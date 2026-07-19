@@ -67,6 +67,21 @@ class Colour {
 	}
 
 	/**
+	 * Create a custom colour from a hex code.
+	 */
+	static Colour fromHexCode(String hexCode, String name = hexCode) {
+
+		if (!hexCode.startsWith('#')) {
+			throw new IllegalArgumentException("Hex code must start with # symbol")
+		}
+		return new Colour(name,
+			Integer.parseInt(hexCode.substring(1, 3), 16) / 255f as float,
+			Integer.parseInt(hexCode.substring(3, 5), 16) / 255f as float,
+			Integer.parseInt(hexCode.substring(5, 7), 16) / 255f as float
+		)
+	}
+
+	/**
 	 * Return this colour in the form: "Name (r, g, b, a)"
 	 */
 	@Override
