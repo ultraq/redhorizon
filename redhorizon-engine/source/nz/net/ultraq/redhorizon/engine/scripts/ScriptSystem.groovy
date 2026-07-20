@@ -44,11 +44,7 @@ class ScriptSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			scripts.clear()
-			scene.traverse(ScriptNode) { ScriptNode script ->
-				scripts << script
-				return true
-			}
-			scripts.each { script ->
+			scene.collect(ScriptNode, scripts).each { script ->
 				if (script.enabled) {
 					script.update(scriptEngine, input, delta)
 				}

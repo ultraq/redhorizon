@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
-import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
@@ -56,16 +55,9 @@ class GraphicsSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			graphicsNodes.clear()
+			scene.collect(GraphicsNode, graphicsNodes)
 			imguiModules.clear()
-			scene.traverse { Node node ->
-				if (node instanceof GraphicsNode) {
-					graphicsNodes << node
-				}
-				else if (node instanceof ImGuiModule) {
-					imguiModules << node
-				}
-				return true
-			}
+			scene.collect(ImGuiModule, imguiModules)
 
 			// TODO: Create an allocation-free method of grouping objects
 			var groupedNodes = graphicsNodes.groupBy { it.shaderClass }

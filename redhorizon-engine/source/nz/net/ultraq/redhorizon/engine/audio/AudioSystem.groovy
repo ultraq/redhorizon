@@ -39,7 +39,7 @@ class AudioSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			audioNodes.clear()
-			scene.collect(AudioNode, audioNodes).each { AudioNode audio ->
+			scene.collect(AudioNode, audioNodes).each { audio ->
 				if (audio.enabled) {
 					audio.render()
 				}

@@ -38,6 +38,8 @@ class DebugCollisionOutlineSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(DebugCollisionOutlineSystem)
 	private static final String COLLISION_OUTLINE_NAME = 'Collision outline'
 
+	private final List<Collider> colliders = new ArrayList<>()
+
 	@Override
 	void update(Scene scene, float delta) {
 
@@ -47,7 +49,8 @@ class DebugCollisionOutlineSystem extends System {
 				throw new IllegalStateException('Scene does not have a DebugStore')
 			}
 
-			scene.traverse(Collider) { Collider collider ->
+			colliders.clear()
+			scene.collect(Collider, colliders).each { collider ->
 				var collisionOutline = collider.parent.find(COLLISION_OUTLINE_NAME)
 				if (debugStore.showCollisionOutlines) {
 					if (!collisionOutline) {
