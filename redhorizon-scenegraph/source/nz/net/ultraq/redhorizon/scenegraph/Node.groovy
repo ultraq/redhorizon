@@ -45,6 +45,9 @@ class Node<T extends Node> implements AutoCloseable {
 	private final Vector3f globalRotationResult = new Vector3f()
 	private final Vector3f globalScaleResult = new Vector3f()
 
+	private final Map<String, ? extends Node> nameMap = new HashMap<>()
+	private final Map<Class<? extends Node>, List<? extends Node>> typeMap = new HashMap<>()
+
 	/**
 	 * Add and return the child node to this node.
 	 */
@@ -63,7 +66,21 @@ class Node<T extends Node> implements AutoCloseable {
 		children.add(child)
 		child.parent = this
 		scene?.trigger(new NodeAddedEvent(child))
+		addMappings(child)
 		return (T)this
+	}
+
+	/**
+	 * Fill out the mapping collections for the given node.
+	 */
+	private void addMappings(Node node) {
+
+		nameMap[node.name] = node
+		var nodeClass = node.class
+		while (nodeClass && nodeClass != Object) {
+			typeMap.getOrCreate(nodeClass) { [] } << node
+			nodeClass = nodeClass.superclass
+		}
 	}
 
 	/**
@@ -119,7 +136,8 @@ class Node<T extends Node> implements AutoCloseable {
 
 	/**
 	 * Locate the first descendent from this node that satisfies the given
-	 * predicate.
+	 * predicate.  Prefer to use the {@code find} methods for node name or class
+	 * for better performance.
 	 *
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
@@ -139,7 +157,9 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	<T extends Node> T find(String name) {
 
-		return find { node -> node.name == name }
+		return (T)nameMap[name] ?: (T)children.inject(null) { result, node ->
+			return result ?: node.find(name)
+		}
 	}
 
 	/**
@@ -149,11 +169,15 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	<T extends Node> T find(Class<T> type) {
 
-		return find { node -> type.isInstance(node) }
+		return (T)typeMap[type]?.first() ?: (T)children.inject(null) { result, node ->
+			return result ?: node.find(type)
+		}
 	}
 
 	/**
 	 * Locate every descendant of this node that satisfies the given predicate.
+	 * Prefer to use the {@code findAll} methods for node class for better
+	 * performance.
 	 *
 	 * @param results
 	 *   Optional, a list to hold the results so that a new list isn't allocated.
@@ -182,7 +206,12 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	<T extends Node> List<T> findAll(Class<T> type, List<T> results = []) {
 
-		return findAll { node -> type.isInstance(node) }
+		var nodesByType = typeMap[type]
+		if (nodesByType) {
+			results.addAll((List<T>)nodesByType)
+		}
+		children*.findAll(type, results)
+		return results
 	}
 
 	/**
@@ -289,6 +318,8 @@ class Node<T extends Node> implements AutoCloseable {
 
 		children.add(Math.max(children.indexOf(before), 0), child)
 		child.parent = this
+		scene?.trigger(new NodeAddedEvent(child))
+		addMappings(child)
 		return (T)this
 	}
 

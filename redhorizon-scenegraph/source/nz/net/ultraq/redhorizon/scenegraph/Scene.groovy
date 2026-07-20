@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	@Delegate(
-		includes = ['clear', 'find', 'findAll', 'insertBefore', 'leftShift',
-			'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
+		includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
 		interfaces = false
 	)
 	final Node root = new RootNode()
@@ -93,7 +92,8 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	/**
 	 * Locate the first descendent from this node that satisfies the given
-	 * predicate.
+	 * predicate.  Prefer to use the {@code find} methods for node name or class
+	 * for better performance.
 	 *
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
@@ -122,6 +122,35 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	<T extends Node> T find(Class<T> type) {
 
 		return root.find(type)
+	}
+
+	/**
+	 * Locate every descendant of this node that satisfies the given predicate.
+	 * Prefer to use the {@code findAll} methods for a node class for better
+	 * performance.
+	 *
+	 * @param results
+	 *   Optional, a list to hold the results so that a new list isn't allocated.
+	 * @return The matching nodes, or an empty list if no matches are found.
+	 */
+	<T extends Node> List<T> findAll(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
+			Closure<Boolean> predicate,
+		List<T> results = []) {
+
+		return root.findAll(predicate, results)
+	}
+
+	/**
+	 * Locate every descendant of this node that satisfies the given type.
+	 *
+	 * @param results
+	 *   Optional, a list to hold the results so that a new list isn't allocated.
+	 * @return The matching nodes, or an empty list if no matches are found.
+	 */
+	<T extends Node> List<T> findAll(Class<T> type, List<T> results = []) {
+
+		return root.findAll(type, results)
 	}
 
 	/**

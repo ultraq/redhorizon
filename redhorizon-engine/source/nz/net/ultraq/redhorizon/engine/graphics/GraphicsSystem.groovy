@@ -55,9 +55,9 @@ class GraphicsSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			graphicsNodes.clear()
-			scene.collect(GraphicsNode, graphicsNodes)
+			scene.findAll(GraphicsNode, graphicsNodes)
 			imguiModules.clear()
-			scene.collect(ImGuiModule, imguiModules)
+			scene.findAll(ImGuiModule, imguiModules)
 
 			// TODO: Create an allocation-free method of grouping objects
 			var groupedNodes = graphicsNodes.groupBy { it.shaderClass }

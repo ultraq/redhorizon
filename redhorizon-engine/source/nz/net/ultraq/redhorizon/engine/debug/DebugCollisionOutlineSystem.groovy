@@ -50,7 +50,7 @@ class DebugCollisionOutlineSystem extends System {
 			}
 
 			colliders.clear()
-			scene.collect(Collider, colliders).each { collider ->
+			scene.findAll(Collider, colliders).each { collider ->
 				var collisionOutline = collider.parent.find(COLLISION_OUTLINE_NAME)
 				if (debugStore.showCollisionOutlines) {
 					if (!collisionOutline) {

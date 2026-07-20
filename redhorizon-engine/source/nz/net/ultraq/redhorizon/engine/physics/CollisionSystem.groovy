@@ -48,7 +48,7 @@ class CollisionSystem extends System {
 			collisionEvents.clear()
 			int collisionChecks = 0
 
-			scene.collect(Collider, colliders)
+			scene.findAll(Collider, colliders)
 			if (colliders.size() != lastCollidersCount) {
 				logger.debug('Colliders: {}', colliders.size())
 				lastCollidersCount = colliders.size()

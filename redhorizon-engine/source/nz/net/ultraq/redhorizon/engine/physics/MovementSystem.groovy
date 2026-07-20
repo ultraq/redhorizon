@@ -38,7 +38,7 @@ class MovementSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			movementNodes.clear()
-			scene.collect(MovementNode, movementNodes).each { node ->
+			scene.findAll(MovementNode, movementNodes).each { node ->
 				if (node.vector) {
 					node.parent.translate(node.vector.x() * node.speed * delta as float, node.vector.y() * node.speed * delta as float)
 				}
