@@ -39,4 +39,8 @@ configure {
 				api "org.joml:joml:${jomlVersion}"
 				api "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
+			}
 }
