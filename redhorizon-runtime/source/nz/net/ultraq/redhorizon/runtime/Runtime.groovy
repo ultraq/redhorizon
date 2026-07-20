@@ -34,6 +34,7 @@ import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory
 
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
+import java.util.function.Supplier
 
 /**
  * Main class for starting a Red Horizon engine, configuring and running it for
@@ -75,7 +77,7 @@ final class Runtime {
 
 	private Window window
 	private Framebuffer framebuffer
-	private BasicShader shader
+	private List<Shader> shaders = []
 	private AudioDevice audioDevice
 	private ResourceManager resourceManager
 	private Scene scene
@@ -86,14 +88,13 @@ final class Runtime {
 	// Audio options
 	float audioMasterVolume = 1f
 
-	// Window options
+	// Graphics options
 	Colour windowBackgroundColour = Colour.BLACK
 	int windowWidth = 800
 	int windowHeight = 600
-
-	// Framebuffer options
 	int framebufferWidth
 	int framebufferHeight
+	Supplier<List<Shader>> additionalShaders
 
 	// Physics options
 	int physicsFixedUpdateFrequency
@@ -138,7 +139,10 @@ final class Runtime {
 				.withBackgroundColour(windowBackgroundColour)
 				.withVSync(true)
 			framebuffer = new OpenGLFramebuffer(framebufferWidth ?: windowWidth, framebufferHeight ?: windowHeight)
-			shader = new BasicShader()
+			shaders << new BasicShader()
+			if (additionalShaders) {
+				shaders.addAll(additionalShaders.get())
+			}
 			var inputEventHandler = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
@@ -168,7 +172,7 @@ final class Runtime {
 						.addSystem(new SceneUpdateSystem())
 						.addSystem(new DebugCollisionOutlineSystem())
 						.addSystem(new AudioSystem())
-						.addSystem(new GraphicsSystem(window, framebuffer, shader))
+						.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
 						.withScene(scene)
 
 					// Application loop
@@ -187,7 +191,7 @@ final class Runtime {
 		finally {
 			scene?.close()
 			resourceManager?.close()
-			shader?.close()
+			shaders*.close()
 			framebuffer?.close()
 			window?.close()
 			audioDevice?.close()

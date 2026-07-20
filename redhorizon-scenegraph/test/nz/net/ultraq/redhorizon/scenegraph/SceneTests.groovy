@@ -53,7 +53,7 @@ class SceneTests extends Specification {
 				Thread.yield()
 			}
 		then:
-			true
+			notThrown(Exception)
 	}
 
 	def 'findAll performance'() {
@@ -84,6 +84,6 @@ class SceneTests extends Specification {
 				Thread.yield()
 			}
 		then:
-			true
+			notThrown(Exception)
 	}
 }
