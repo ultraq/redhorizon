@@ -32,6 +32,9 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.physics.BoxCollider
+import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
+import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -57,7 +60,7 @@ class PhysicsSystemTests extends Specification {
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(Colour.GREY)
-				.withVSync(true)
+				.withVSync(frequency as Boolean)
 			var framebuffer = new OpenGLFramebuffer(screen.lengthX() * 2, screen.lengthY() * 2)
 			var shader = new BasicShader()
 
@@ -94,7 +97,7 @@ class PhysicsSystemTests extends Specification {
 			framebuffer?.close()
 			window?.close()
 		where:
-			frequency << [15, 30, 60, 120]
+			frequency << [30, 60, 120, 0]
 	}
 
 	/**

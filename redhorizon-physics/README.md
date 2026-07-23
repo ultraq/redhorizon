@@ -1,10 +1,10 @@
 
-Red Horizon - Engine module
-===========================
+Red Horizon - Physics module
+============================
 
-[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-engine)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-engine)
+[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-physics)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-physics)
 
-Engine module for the Red Horizon project.
+Physics module for the Red Horizon project.
 
 
 Installation
@@ -16,7 +16,7 @@ newer.
 Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
- - ArtifactId: `redhorizon-engine`
+ - ArtifactId: `redhorizon-physics`
  - Version: `0.43.1`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
@@ -27,4 +27,4 @@ API
 ---
 
 Browse the online groovydocs for the full API:
-https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-engine
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-physics

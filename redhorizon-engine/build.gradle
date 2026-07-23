@@ -27,6 +27,7 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
@@ -42,6 +43,7 @@ configure {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
+				implementation project(':redhorizon-physics')
 				implementation project(':redhorizon-scenegraph')
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"

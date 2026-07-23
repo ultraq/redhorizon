@@ -9,7 +9,7 @@ assets.
 Usage
 -----
 
-Requires Java 21 on either macOS 12 Monterey and newer or Windows 10 64-bit and
+Requires Java 25 on either macOS 12 Monterey and newer or Windows 10 64-bit and
 newer.
 
 1. Either open the project in an IDE and run the main method of the `Explorer`

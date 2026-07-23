@@ -12,7 +12,7 @@ here, and serve as working examples for other programmers.
 Installation
 ------------
 
-Requires Java 21 on either macOS 12 Monterey and newer or Windows 10 64-bit and
+Requires Java 25 on either macOS 12 Monterey and newer or Windows 10 64-bit and
 newer.
 
 ### For Maven and Maven-compatible dependency managers

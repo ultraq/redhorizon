@@ -10,7 +10,7 @@ Graphics module for the Red Horizon project.
 Installation
 ------------
 
-Requires Java 21 on either macOS 12 Monterey and newer or Windows 10 64-bit and
+Requires Java 25 on either macOS 12 Monterey and newer or Windows 10 64-bit and
 newer.
 
 Add a dependency to your project with the following co-ordinates:

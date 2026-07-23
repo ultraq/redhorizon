@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.physics
 
-import groovy.transform.ImmutableOptions
+import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Triggered when two collider objects intersect/collide.
+ * Base class for all collision nodes.
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['otherCollider'])
-record CollisionStartEvent(Collider otherCollider) implements CollisionEvent {
+abstract class Collider<T extends Collider, S> extends Node<T> implements EventTarget<T> {
+
+	/**
+	 * Check whether this object is colliding with another.
+	 */
+	abstract boolean checkCollision(Collider other)
+
+	/**
+	 * Return a shape describing the collision space.
+	 */
+	abstract S getBounds()
 }

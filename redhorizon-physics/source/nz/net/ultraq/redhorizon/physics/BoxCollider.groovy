@@ -14,44 +14,41 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.physics
 
-import org.joml.primitives.Circlef
+import org.joml.primitives.Rectanglef
 
 import groovy.transform.TupleConstructor
 
 /**
- * Give an entity a circular area which is used for detecting collisions with
- * other collision components.
+ * Give an entity a 2D area which is used for detecting collisions with other
+ * collision components.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class CircleCollider extends Collider<CircleCollider, Circlef> {
+class BoxCollider extends Collider<BoxCollider, Rectanglef> {
 
-	final float radius
-	private final Circlef _bounds = new Circlef(0, 0, radius)
+	final float width
+	final float height
+	private final Rectanglef _bounds = new Rectanglef(0, 0, width, height)
 
 	@Override
 	boolean checkCollision(Collider other) {
 
-		if (other instanceof CircleCollider) {
-			return bounds.intersects(other.bounds)
-		}
 		if (other instanceof BoxCollider) {
-			return bounds.intersects(other.bounds)
+			return bounds.intersectsRectangle(other.bounds)
+		}
+		if (other instanceof CircleCollider) {
+			return bounds.intersectsCircle(other.bounds)
 		}
 		return false
 	}
 
 	@Override
-	Circlef getBounds() {
+	Rectanglef getBounds() {
 
 		var position = globalPosition
-		var scale = globalScale
-		_bounds.x = position.x()
-		_bounds.y = position.y()
-		_bounds.r = radius * scale.x() as float
-		return _bounds
+		return _bounds.center().translate(position.x(), position.y())
 	}
 }

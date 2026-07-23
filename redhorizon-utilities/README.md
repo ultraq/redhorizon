@@ -10,7 +10,7 @@ which are in a somewhat frozen state ([#34](https://github.com/ultraq/redhorizon
 Installation
 ------------
 
-Requires Java 21 on macOS 12 Monterey and newer, or Windows 10 64-bit and newer.
+Requires Java 25 on macOS 12 Monterey and newer, or Windows 10 64-bit and newer.
 
 Download the distribution bundle from the [project releases](https://github.com/ultraq/redhorizon/releases)
 page, then unzip it to somewhere on your computer.

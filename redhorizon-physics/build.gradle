@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +18,27 @@ plugins {
 	id 'redhorizon-library'
 }
 
-description = 'Runtime package for building applications with the Red Horizon engine'
+description = 'Physics module for the Red Horizon project'
 
+// @formatter:off
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-classic/${version}/", 'nz.net.ultraq.redhorizon.classic.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
 			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.runtime'
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.physics'
 			}
 		}
 		.configureSource()
 			.withDependencies() {
-				api project(':redhorizon-audio')
-				api project(':redhorizon-classic')
-				api project(':redhorizon-engine')
-				api project(':redhorizon-graphics')
-				api project(':redhorizon-input')
-				api project(':redhorizon-physics')
 				api project(':redhorizon-scenegraph')
+				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }
+// @formatter:on
