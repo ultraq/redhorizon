@@ -102,6 +102,12 @@ final class Runtime {
 	// Resource manager options
 	String resourceManagerPathPrefix
 
+	// Debugging options
+	Supplier<GridLines> gridLines = { ->
+		return new GridLines(new Rectanglef(0f, 0f, framebufferWidth, framebufferHeight).center(), 50f,
+			new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY)
+	}
+
 	/**
 	 * Constructor, creates a new runtime to launch an application.
 	 */
@@ -157,9 +163,7 @@ final class Runtime {
 					// Init scene and systems
 					scene = application.configureScene(
 						new SimpleScene(windowWidth, windowHeight, window).tap {
-							addDebugComponents(window, camera, inputEventHandler,
-								new GridLines(new Rectanglef(0f, 0f, framebufferWidth, framebufferHeight).center(), 50f,
-									new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY))
+							addDebugComponents(window, camera, inputEventHandler, gridLines.get())
 						}
 					)
 					var engine = new Engine()
