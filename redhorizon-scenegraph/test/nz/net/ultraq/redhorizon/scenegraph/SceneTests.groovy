@@ -72,7 +72,7 @@ class SceneTests extends Specification {
 		when:
 			var startTime = System.currentTimeMillis()
 			while (true) {
-				average('findAll', 1f, logger) { ->
+				average('findAll avg {}ms', 1f, logger) { ->
 					scene.findAll(MovementNode)
 					scene.findAll(CollisionNode)
 					scene.findAll(GraphicsNode)

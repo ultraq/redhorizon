@@ -37,7 +37,7 @@ class AudioSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update', 1f, logger) { ->
+		average('Update: {}ms', 1f, logger) { ->
 			audioNodes.clear()
 			scene.findAll(AudioNode, audioNodes).each { audio ->
 				if (audio.enabled) {

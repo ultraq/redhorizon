@@ -62,7 +62,7 @@ class Engine {
 			throw new IllegalStateException('Called Engine.update() without a scene')
 		}
 
-		average('Combined update', 1f, logger) { ->
+		average('Total: {}ms', 1f, logger) { ->
 			systems.each { system ->
 				if (system.enabled) {
 					system.update(scene, delta)

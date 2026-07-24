@@ -43,7 +43,7 @@ class DebugCollisionOutlineSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update', 1f, logger) { ->
+		average('Update: {}ms', 1f, logger) { ->
 			var debugStore = scene.find(DebugStore)
 			if (!debugStore) {
 				throw new IllegalStateException('Scene does not have a DebugStore')

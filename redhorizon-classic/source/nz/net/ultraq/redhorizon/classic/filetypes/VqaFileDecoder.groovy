@@ -172,7 +172,7 @@ class VqaFileDecoder implements VideoDecoder, FileTypeTest {
 								}
 								case ~/VPT./ -> {
 									// Video data
-									var frame = average('Decoding frame', 1f, logger) { ->
+									var frame = average('Frame decode avg {}ms', 1f, logger) { ->
 										return decodeFrame(input.readChunkData(innerChunkHeader, numBlocks * 2), codebook, vqaPalette)
 									}
 									frames++

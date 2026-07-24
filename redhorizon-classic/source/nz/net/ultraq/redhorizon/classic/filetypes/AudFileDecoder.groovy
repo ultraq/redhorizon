@@ -83,7 +83,7 @@ class AudFileDecoder implements AudioDecoder, FileTypeTest {
 		var headerSize = input.bytesRead
 		try {
 			while (input.bytesRead < headerSize + compressedSize && !Thread.currentThread().interrupted) {
-				var sample = average('Decoding sample', 1f, logger) { ->
+				var sample = average('Sample decode avg {}ms', 1f, logger) { ->
 					var chunkHeader = input.readChunkHeader()
 					return decoder.decode(input.readChunkData(chunkHeader), ByteBuffer.allocateNative(chunkHeader.uncompressedSize()))
 				}

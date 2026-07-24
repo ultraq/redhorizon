@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
+import nz.net.ultraq.groovy.profilingextensions.LoggingStrategy
+import nz.net.ultraq.groovy.profilingextensions.Profiler
+import nz.net.ultraq.groovy.profilingextensions.TimedLoggingStrategy
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
@@ -49,54 +52,63 @@ class GraphicsSystem extends System {
 	private final List<GraphicsNode> graphicsNodes = new ArrayList<>()
 	private final List<ImGuiModule> imguiModules = new ArrayList<>()
 	private Closure<Framebuffer> postProcessingStage
+	private final LoggingStrategy loggingStrategy = new TimedLoggingStrategy(1f)
+	private final List<Long> sceneExecutionTimes = []
+	private final List<Long> postProcessingExecutionTimes = []
+	private final List<Long> uiExecutionTimes = []
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update', 1f, logger) { ->
-			graphicsNodes.clear()
-			scene.findAll(GraphicsNode, graphicsNodes)
-			imguiModules.clear()
-			scene.findAll(ImGuiModule, imguiModules)
+		graphicsNodes.clear()
+		scene.findAll(GraphicsNode, graphicsNodes)
+		imguiModules.clear()
+		scene.findAll(ImGuiModule, imguiModules)
 
-			// TODO: Create an allocation-free method of grouping objects
-			var groupedNodes = graphicsNodes.groupBy { it.shaderClass }
+		// TODO: Create an allocation-free method of grouping objects
+		var groupedNodes = graphicsNodes.groupBy { it.shaderClass }
 
-			window.useRenderPipeline()
-				.scene { ->
-					return average('Scene', 1f, logger) { ->
-						return framebuffer.useFramebuffer { ->
-							shaders.each { shader ->
-								shader.useShader { shaderContext ->
-									var camera = scene.find(Camera)
-									if (camera) {
-										camera.render(shaderContext)
-									}
-									groupedNodes[shader.class]?.each { graphics ->
-										if (graphics.enabled) {
-											graphics.render(shaderContext)
-										}
+		window.useRenderPipeline()
+			.scene { ->
+				return trackTime('GraphicsSystem::scene') { ->
+					return framebuffer.useFramebuffer { ->
+						shaders.each { shader ->
+							shader.useShader { shaderContext ->
+								var camera = scene.find(Camera)
+								if (camera) {
+									camera.render(shaderContext)
+								}
+								groupedNodes[shader.class]?.each { graphics ->
+									if (graphics.enabled) {
+										graphics.render(shaderContext)
 									}
 								}
 							}
 						}
 					}
 				}
-				.postProcessing { sceneBuffer ->
-					return average('Post-processing', 1f, logger) { ->
-						return postProcessingStage ? postProcessingStage(sceneBuffer) : null as Framebuffer
-					}
+			}
+			.postProcessing { sceneBuffer ->
+				return trackTime('GraphicsSystem::postProcessing') { ->
+					return postProcessingStage ? postProcessingStage(sceneBuffer) : null as Framebuffer
 				}
-				.ui(true) { context ->
-					average('UI', 1f, logger) { ->
-						imguiModules.each { component ->
-							if (component.enabled) {
-								component.render(context)
-							}
+			}
+			.ui(true) { context ->
+				trackTime('GraphicsSystem::ui') { ->
+					imguiModules.each { component ->
+						if (component.enabled) {
+							component.render(context)
 						}
 					}
 				}
-				.end()
+			}
+			.end()
+
+		if (loggingStrategy.shouldLog()) {
+			logger.debug(Profiler.marker, 'S: {}ms, PP: {}ms, UI: {}ms',
+				sprintf('%.2f', getTimes('GraphicsSystem::scene', sceneExecutionTimes).average()),
+				sprintf('%.2f', getTimes('GraphicsSystem::postProcessing', postProcessingExecutionTimes).average()),
+				sprintf('%.2f', getTimes('GraphicsSystem::ui', uiExecutionTimes).average()))
 		}
 	}
 

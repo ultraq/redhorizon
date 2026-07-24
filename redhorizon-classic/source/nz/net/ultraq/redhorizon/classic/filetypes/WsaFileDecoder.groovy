@@ -95,7 +95,7 @@ class WsaFileDecoder implements ImageDecoder, FileTypeTest {
 		// Decode frame by frame
 		try {
 			for (var frame = 0; frame < numFrames && !Thread.currentThread().interrupted; frame++) {
-				var colouredFrame = average('Decoding frame', 1f, logger) { ->
+				var colouredFrame = average('Frame decode avg {}ms', 1f, logger) { ->
 					var deltaFrame = lcw.decode(
 						ByteBuffer.wrapNative(input.readNBytes(frameOffsets[frame + 1] - frameOffsets[frame])),
 						ByteBuffer.allocateNative(delta)

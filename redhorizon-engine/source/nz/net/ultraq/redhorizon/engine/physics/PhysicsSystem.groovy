@@ -67,7 +67,7 @@ class PhysicsSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update', 1f, logger) { ->
+		average('Update: {}ms', 1f, logger) { ->
 			// Perform as many fixed-step updates within the accumulated frame time
 			// From: http://gafferongames.com/game-physics/fix-your-timestep/
 			if (updateStep) {

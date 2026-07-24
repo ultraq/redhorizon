@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.groovy.profilingextensions.Profiler
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.UnsynchronizedAppenderBase
@@ -47,8 +48,8 @@ class ImGuiLoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
 	protected void append(ILoggingEvent eventObject) {
 
 		var message = new String(encoder.encode(eventObject))
-		if (eventObject.message.contains('average time')) {
-			trigger(new ImGuiLogEvent(message, eventObject.loggerName + eventObject.argumentArray[0]))
+		if (eventObject.markerList.first() == Profiler.marker) {
+			trigger(new ImGuiLogEvent(message, eventObject.loggerName))
 		}
 		else {
 			trigger(new ImGuiLogEvent(message))

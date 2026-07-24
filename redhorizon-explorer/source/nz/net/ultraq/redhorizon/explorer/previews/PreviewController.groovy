@@ -128,7 +128,7 @@ class PreviewController extends Script implements AutoCloseable {
 			selectedFileInputStream = file.newInputStream()
 			var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
 			if (result) {
-				time("Reading file ${file.name} from filesystem", logger) { ->
+				time("Reading file ${file.name} from filesystem took {}ms", logger) { ->
 					var decoder = result.decoder().getConstructor().newInstance()
 					var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
 					previewObject(media, file.name)
@@ -155,7 +155,7 @@ class PreviewController extends Script implements AutoCloseable {
 			selectedFileInputStream = new BufferedInputStream(entry.mixFile().getEntryData(entry.mixEntry()))
 			var result = new FileTester().test(null, entry.size(), selectedFileInputStream)
 			if (result) {
-				time("Reading file ${entry.name()} from mix file", logger) { ->
+				time("Reading file ${entry.name()} from mix file took {}ms", logger) { ->
 					var decoder = result.decoder().getConstructor().newInstance()
 					var media = result.mediaClass().newInstance(entry.name(), decoder, selectedFileInputStream)
 					previewObject(media, entry.name())
