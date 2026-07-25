@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
+package nz.net.ultraq.redhorizon.audio
 
-import nz.net.ultraq.redhorizon.audio.Listener
-import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import static org.lwjgl.openal.AL10.*
 
 /**
- * A scene with the bare minimum objects for use with the runtime.
+ * A representation of the player's ears in the world, a listener node can be
+ * used to control the mix of the audio or to attach sounds relative to the
+ * player position.
  *
  * @author Emanuel Rabina
  */
-final class SimpleScene extends Scene {
+class Listener extends AudioNode<Listener> {
 
-	final Camera camera
-	final Listener listener
+	@Override
+	void render() {
 
-	/**
-	 * Constructor, create a scene with a camera in it.
-	 */
-	SimpleScene(int width, int height, Window window) {
-
-		camera = addAndReturnChild(new Camera(width, height, window::getViewport))
-		listener = camera.addAndReturnChild(new Listener()) // Listener is attached to camera
+		var position = globalPosition
+		alListener3f(AL_POSITION, position.x(), position.y(), position.z())
 	}
 }
