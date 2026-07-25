@@ -166,7 +166,7 @@ final class Runtime {
 							addDebugComponents(window, camera, inputEventHandler, gridLines.get())
 						}
 					)
-					var engine = new Engine()
+					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency)
@@ -178,6 +178,7 @@ final class Runtime {
 						.addSystem(new AudioSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
 						.withScene(scene)
+					)
 
 					// Application loop
 					window.show()

@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import groovy.transform.TupleConstructor
@@ -42,14 +43,22 @@ abstract class Application implements EventTarget<Application> {
 	final String version
 
 	/**
-	 * Configure the scene to use in the application.  Override to provide your
-	 * own scene.
+	 * Configure the engine to use in the application.
+	 *
+	 * @param engine
+	 *   The provided engine will already come with every system added.
+	 */
+	protected Engine configureEngine(Engine engine) {
+
+		return engine
+	}
+
+	/**
+	 * Configure the scene to use in the application.
 	 *
 	 * @param scene
-	 *   The scene to configure.  The provided scene will already come with a
-	 *   camera and a host of debugging elements that are initially disabled.
-	 * @return
-	 *   The configured scene.
+	 *   The provided scene will already come with a camera and a host of
+	 *   debugging elements that are initially disabled.
 	 */
 	protected Scene configureScene(Scene scene) {
 
