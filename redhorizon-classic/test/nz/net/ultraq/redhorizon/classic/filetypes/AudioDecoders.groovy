@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.AudioDevice
+import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
@@ -49,17 +50,21 @@ class AudioDecoders extends Specification {
 	}
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
-		when:
+		given:
 			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
 				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
 			}
-			sound.play()
-			while (!sound.stopped) {
+			var source = new AudioSource(sound)
+		when:
+			source.play()
+			while (!source.stopped) {
+				source.render()
 				Thread.sleep(500)
 			}
 		then:
 			notThrown(Exception)
 		cleanup:
+			source?.close()
 			sound?.close()
 	}
 
@@ -67,15 +72,15 @@ class AudioDecoders extends Specification {
 		when:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
 			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
+			var source = new AudioSource(music)
 //				.withLooping(true)
-			music.play()
+			source.play()
 			var start = System.currentTimeMillis()
-			while (!music.stopped) {
-				music.update()
-				music.render()
+			while (!source.stopped) {
+				source.render()
 				Thread.sleep(500)
 				if (System.currentTimeMillis() - start > 5000) {
-					music.stop()
+					source.stop()
 				}
 			}
 		then:

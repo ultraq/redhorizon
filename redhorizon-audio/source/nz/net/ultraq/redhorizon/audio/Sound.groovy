@@ -18,7 +18,6 @@ package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
-import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,18 +25,17 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 
 /**
- * A single buffer and source pair, used for simple cases where the sound data
- * is small and will fit in a single buffer.  Best suited for sound effects.
+ * A single pre-loaded buffer of sound data for use with 1 or more sources and
+ * repeat playbacks.  Best suited for sound effects.
  *
  * @author Emanuel Rabina
  */
-class Sound extends AudioNode<Sound> implements AutoCloseable {
+class Sound implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(Sound)
 
-	final Source source
 	private volatile List<ByteBuffer> buffers = []
-	private final Buffer buffer
+	final Buffer buffer
 
 	/**
 	 * Constructor, sets up a new sound using its name and a stream of data.
@@ -72,85 +70,11 @@ class Sound extends AudioNode<Sound> implements AutoCloseable {
 		}
 
 		buffer = new OpenALBuffer(result.bits(), result.channels(), result.frequency(), ByteBuffer.fromBuffers(*buffers))
-		source = new OpenALSource().attachBuffer(buffer)
 	}
 
 	@Override
 	void close() {
 
-		source.close()
 		buffer.close()
-	}
-
-	/**
-	 * Return whether the sound is currently paused.
-	 */
-	boolean isPaused() {
-
-		return source.isPaused()
-	}
-
-	/**
-	 * Return whether the sound is currently playing.
-	 */
-	boolean isPlaying() {
-
-		return source.isPlaying()
-	}
-
-	/**
-	 * Return whether the sound is currently stopped.
-	 */
-	boolean isStopped() {
-
-		return source.isStopped()
-	}
-
-	/**
-	 * Pause the sound.
-	 */
-	Sound pause() {
-
-		if (!paused) {
-			source.pause()
-		}
-		return this
-	}
-
-	@Override
-	void render() {
-
-		source.setPosition(globalPosition)
-	}
-
-	/**
-	 * Play the sound.
-	 */
-	Sound play() {
-
-		if (!playing) {
-			source.play()
-		}
-		return this
-	}
-
-	/**
-	 * Stop the sound.
-	 */
-	Sound stop() {
-
-		if (!stopped) {
-			source.stop()
-		}
-		return this
-	}
-
-	/**
-	 * Set the volume of the sound.
-	 */
-	Sound withVolume(float volume) {
-
-		source.withVolume(volume)
-		return this
 	}
 }

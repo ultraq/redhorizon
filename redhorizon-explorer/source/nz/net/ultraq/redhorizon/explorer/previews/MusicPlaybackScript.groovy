@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
@@ -27,7 +27,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
-class MusicPlaybackScript extends Script<Music> implements AutoCloseable {
+class MusicPlaybackScript extends Script<AudioSource> implements AutoCloseable {
 
 	private boolean playbackStarted = false
 
@@ -45,8 +45,6 @@ class MusicPlaybackScript extends Script<Music> implements AutoCloseable {
 
 	@Override
 	void update(float delta) {
-
-		node.update()
 
 		if (!playbackStarted) {
 			node.play()

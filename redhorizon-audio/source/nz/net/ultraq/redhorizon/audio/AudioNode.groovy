@@ -26,16 +26,8 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 abstract class AudioNode<T extends AudioNode> extends Node<T> {
 
 	/**
-	 * Return the source for this audio node.
-	 */
-	protected abstract Source getSource()
-
-	/**
 	 * Render this audio node, mostly by updating the state of the node with the
 	 * audio device.
 	 */
-	void render() {
-
-		source.setPosition(globalPosition)
-	}
+	abstract void render()
 }
