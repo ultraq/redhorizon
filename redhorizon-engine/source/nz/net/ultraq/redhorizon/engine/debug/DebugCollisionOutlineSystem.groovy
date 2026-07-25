@@ -60,7 +60,10 @@ class DebugCollisionOutlineSystem extends System {
 							default -> null
 						}
 						if (collisionShape) {
-							collisionOutline = collider.parent.addAndReturnChild(collisionShape.withName(COLLISION_OUTLINE_NAME))
+							var colliderPosition = collider.position
+							collisionOutline = collider.parent.addAndReturnChild(collisionShape
+								.translate(colliderPosition.x(), colliderPosition.y())
+								.withName(COLLISION_OUTLINE_NAME))
 						}
 					}
 					if (collider.enabled) {
