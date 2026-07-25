@@ -48,7 +48,7 @@ class ImGuiLoggingAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imp
 	protected void append(ILoggingEvent eventObject) {
 
 		var message = new String(encoder.encode(eventObject))
-		if (eventObject.markerList.first() == Profiler.marker) {
+		if (eventObject.markerList?.first() == Profiler.marker) {
 			trigger(new ImGuiLogEvent(message, eventObject.loggerName))
 		}
 		else {
