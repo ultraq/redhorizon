@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
+import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
+import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -37,34 +39,33 @@ class AudioCheck extends Specification {
 	}
 
 	Device device
+	Listener listener
 
 	def setup() {
 		device = new OpenALDevice()
+		listener = new OpenALListener()
+			.withGain(0.5f)
 	}
 
 	def cleanup() {
+		listener.close()
 		device.close()
 	}
 
 	def "Plays a sound - use Sound and AudioDecoder SPI"() {
 		given:
-			var listener = new ListenerNode()
-				.withGain(0.5f)
-			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck_Sound_bong_001.ogg').withBufferedStream { stream ->
-				return new Sound('AudioCheck_Sound_bong_001.ogg', stream)
+			var source = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck_Sound_bong_001.ogg').withBufferedStream { stream ->
+				var sound = new Sound('AudioCheck_Sound_bong_001.ogg', stream)
+				return new OpenALSource().attachBuffer(sound.buffer)
 			}
-			var source = new SourceNode(sound)
 		when:
 			source.play()
 			while (!source.stopped) {
-				listener.render()
-				source.render()
 				Thread.sleep(500)
 			}
 		then:
 			notThrown(Exception)
 		cleanup:
 			source?.close()
-			sound?.close()
 	}
 }
