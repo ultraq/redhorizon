@@ -101,9 +101,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	@Override
 	void render() {
 
-		if (music) {
-			music.update(source)
-		}
+		music?.update(source)
 		source.withPosition(globalPosition)
 	}
 
