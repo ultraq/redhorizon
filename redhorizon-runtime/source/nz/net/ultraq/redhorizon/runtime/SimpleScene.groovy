@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
-import nz.net.ultraq.redhorizon.audio.Listener
+import nz.net.ultraq.redhorizon.audio.ListenerNode
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -29,14 +29,14 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 final class SimpleScene extends Scene {
 
 	final Camera camera
-	final Listener listener
+	final ListenerNode listener
 
 	/**
 	 * Constructor, create a scene with a camera in it.
 	 */
-	SimpleScene(int width, int height, Window window) {
+	SimpleScene(int width, int height, Window window, float gain) {
 
 		camera = addAndReturnChild(new Camera(width, height, window::getViewport))
-		listener = camera.addAndReturnChild(new Listener()) // Listener is attached to camera
+		listener = camera.addAndReturnChild(new ListenerNode().withGain(gain)) // ListenerNode is attached to camera
 	}
 }

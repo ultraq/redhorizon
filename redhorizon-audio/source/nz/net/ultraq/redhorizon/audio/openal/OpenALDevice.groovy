@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.audio.AudioDevice
+import nz.net.ultraq.redhorizon.audio.Device
 
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC
@@ -34,9 +34,9 @@ import java.nio.IntBuffer
  *
  * @author Emanuel Rabina
  */
-class OpenALAudioDevice implements AudioDevice {
+class OpenALDevice implements Device {
 
-	private static final Logger logger = LoggerFactory.getLogger(OpenALAudioDevice)
+	private static final Logger logger = LoggerFactory.getLogger(OpenALDevice)
 
 	private final long device
 	private final long context
@@ -44,7 +44,7 @@ class OpenALAudioDevice implements AudioDevice {
 	/**
 	 * Create and configure a new sound device with OpenAL.
 	 */
-	OpenALAudioDevice() {
+	OpenALDevice() {
 
 		device = alcOpenDevice((ByteBuffer)null)
 		if (!device) {
@@ -75,12 +75,6 @@ class OpenALAudioDevice implements AudioDevice {
 	}
 
 	@Override
-	float getMasterVolume() {
-
-		return alGetListenerf(AL_GAIN)
-	}
-
-	@Override
 	void makeCurrent() {
 
 		alcMakeContextCurrent(context)
@@ -90,11 +84,5 @@ class OpenALAudioDevice implements AudioDevice {
 	void releaseCurrent() {
 
 		alcMakeContextCurrent(NULL)
-	}
-
-	@Override
-	void setMasterVolume(float volume) {
-
-		alListenerf(AL_GAIN, volume)
 	}
 }

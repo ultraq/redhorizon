@@ -16,21 +16,27 @@
 
 package nz.net.ultraq.redhorizon.audio
 
-import static org.lwjgl.openal.AL10.*
+import org.joml.Vector3fc
 
 /**
- * A representation of the player's ears in the world, a listener node can be
- * used to control the mix of the audio or to attach sounds relative to the
- * player position.
+ * The object through which sounds are heard.
  *
  * @author Emanuel Rabina
  */
-class Listener extends AudioNode<Listener> {
+interface Listener extends AudioResource {
 
-	@Override
-	void render() {
+	/**
+	 * Set the gain for sounds coming in to the listener.
+	 */
+	Listener withGain(float gain)
 
-		var position = globalPosition
-		alListener3f(AL_POSITION, position.x(), position.y(), position.z())
-	}
+	/**
+	 * Set the position of the listener.
+	 */
+	Listener withPosition(Vector3fc position)
+
+	/**
+	 * Set the velocity of the listener.
+	 */
+	Listener withVelocity(Vector3fc velocity)
 }

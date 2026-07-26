@@ -89,25 +89,12 @@ interface Source extends AudioResource {
 	 * @param buffers
 	 * @see Source#attachBuffer(Buffer)
 	 */
-	void queueBuffers(Buffer... buffers)
+	Source queueBuffers(Buffer... buffers)
 
 	/**
 	 * Rewind a source, resetting its state.
 	 */
 	Source rewind()
-
-	/**
-	 * Set the position of a source.
-	 */
-	void setPosition(float x, float y, float z)
-
-	/**
-	 * Set the position of a source.
-	 */
-	default void setPosition(Vector3fc position) {
-
-		setPosition(position.x(), position.y(), position.z())
-	}
 
 	/**
 	 * Stop playing the sound through this source.
@@ -117,15 +104,20 @@ interface Source extends AudioResource {
 	/**
 	 * Unqueue buffers from this source.
 	 */
-	void unqueueBuffers(Buffer... buffers)
+	Source unqueueBuffers(Buffer... buffers)
 
 	/**
-	 * Set whether this source loops.
+	 * Set whether this source should loop the attached sound data.
 	 */
 	Source withLooping(boolean looping)
 
 	/**
-	 * Set the volume of the source.
+	 * Set the position of a source.
+	 */
+	Source withPosition(Vector3fc position)
+
+	/**
+	 * Set the volume of a source.
 	 */
 	Source withVolume(float volume)
 }

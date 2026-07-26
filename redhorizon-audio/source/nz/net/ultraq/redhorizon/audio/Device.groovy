@@ -28,13 +28,7 @@ package nz.net.ultraq.redhorizon.audio
  *
  * @author Emanuel Rabina
  */
-interface AudioDevice extends AutoCloseable {
-
-	/**
-	 * Return a value between 0 and 1 that represents the volume of audio played
-	 * through this sound device.  The default master volume is 1.
-	 */
-	float getMasterVolume()
+interface Device extends AutoCloseable {
 
 	/**
 	 * Makes the context current on the executing thread.
@@ -45,13 +39,6 @@ interface AudioDevice extends AutoCloseable {
 	 * Releases the context that is current on the executing thread.
 	 */
 	void releaseCurrent()
-
-	/**
-	 * Set the volume of audio played through this sound device.
-	 *
-	 * @param volume A value between 0 and 1.  Defaults to 1.
-	 */
-	void setMasterVolume(float volume)
 
 	/**
 	 * Surround the given closure with calls to {@link #makeCurrent} and
@@ -67,15 +54,5 @@ interface AudioDevice extends AutoCloseable {
 		finally {
 			releaseCurrent()
 		}
-	}
-
-	/**
-	 * A fluent method for setting the master volume and returning the device so
-	 * that it can be chained.
-	 */
-	default AudioDevice withMasterVolume(float volume) {
-
-		setMasterVolume(volume)
-		return this
 	}
 }

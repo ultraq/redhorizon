@@ -16,8 +16,9 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.audio.AudioDevice
-import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
+import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.ListenerNode
+import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Video
@@ -44,14 +45,13 @@ class VideoDecoders extends Specification {
 		Configuration.STACK_SIZE.set(10240)
 	}
 
-	AudioDevice device
+	Device device
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
 
 	def setup() {
-		device = new OpenALAudioDevice()
-			.withMasterVolume(0.5f)
+		device = new OpenALDevice()
 		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
@@ -79,6 +79,7 @@ class VideoDecoders extends Specification {
 				.scale(1f, 1.2f)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window::getViewport)
+			var listener = new ListenerNode()
 		when:
 			window.show()
 			video.play()
@@ -88,6 +89,7 @@ class VideoDecoders extends Specification {
 				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
 				lastUpdateTimeMs = currentTimeMs
 
+				listener.render()
 				window.useRenderPipeline()
 					.scene { ->
 						framebuffer.useFramebuffer { ->

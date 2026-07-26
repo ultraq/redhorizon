@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.previews
+package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.audio.SourceNode
-import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.audio.Listener
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
+import org.joml.Vector3fc
+import static org.lwjgl.openal.AL10.*
 
 /**
- * Script for listening to a sound effect.
+ * OpenAL-specific listener implementation.
  *
  * @author Emanuel Rabina
  */
-class SoundPlaybackScript extends Script<SourceNode> implements AutoCloseable {
-
-	private boolean playbackStarted = false
+class OpenALListener implements Listener {
 
 	@Override
 	void close() {
 
-		node.stop()
+		// Nothing to close - listeners are implicit with each context
 	}
 
 	@Override
-	void init() {
+	Listener withGain(float gain) {
+
+		alListenerf(AL_GAIN, gain)
+		return this
 	}
 
 	@Override
-	void update(float delta) {
+	Listener withPosition(Vector3fc position) {
 
-		if (!playbackStarted) {
-			node.play()
-			playbackStarted = true
-		}
+		alListener3f(AL_POSITION, position.x(), position.y(), position.z())
+		return this
+	}
 
-		if (input.keyPressed(GLFW_KEY_SPACE, true)) {
-			if (node.stopped) {
-				node.play()
-			}
-		}
+	@Override
+	Listener withVelocity(Vector3fc velocity) {
+
+		alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z())
+		return this
 	}
 }

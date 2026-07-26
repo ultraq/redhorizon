@@ -16,11 +16,13 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.audio.AudioDevice
-import nz.net.ultraq.redhorizon.audio.AudioSource
+import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
+import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
+import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -38,14 +40,17 @@ class AudioDecoders extends Specification {
 		System.setProperty('org.lwjgl.system.stackSize', '10240')
 	}
 
-	AudioDevice device
+	Device device
+	Listener listener
 
 	def setup() {
-		device = new OpenALAudioDevice()
-			.withMasterVolume(0.5f)
+		device = new OpenALDevice()
+		listener = new OpenALListener()
+			.withGain(0.5f)
 	}
 
 	def cleanup() {
+		listener.close()
 		device.close()
 	}
 
@@ -54,7 +59,7 @@ class AudioDecoders extends Specification {
 			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
 				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
 			}
-			var source = new AudioSource(sound)
+			var source = new SourceNode(sound)
 		when:
 			source.play()
 			while (!source.stopped) {
@@ -72,7 +77,7 @@ class AudioDecoders extends Specification {
 		when:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
 			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
-			var source = new AudioSource(music)
+			var source = new SourceNode(music)
 //				.withLooping(true)
 			source.play()
 			var start = System.currentTimeMillis()

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
-import nz.net.ultraq.redhorizon.audio.AudioDevice
-import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
+import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
@@ -78,7 +78,7 @@ final class Runtime {
 	private Window window
 	private Framebuffer framebuffer
 	private List<Shader> shaders = []
-	private AudioDevice audioDevice
+	private Device audioDevice
 	private ResourceManager resourceManager
 	private Scene scene
 
@@ -137,8 +137,7 @@ final class Runtime {
 			Configuration.STACK_SIZE.set(lwjglStackSize)
 
 			// Init devices
-			audioDevice = new OpenALAudioDevice()
-				.withMasterVolume(audioMasterVolume)
+			audioDevice = new OpenALDevice()
 			window = new OpenGLWindow(windowWidth, windowHeight, "${application.name} ${application.version}")
 				.centerToScreen()
 				.scaleToFit()
@@ -162,7 +161,7 @@ final class Runtime {
 
 					// Init scene and systems
 					scene = application.configureScene(
-						new SimpleScene(windowWidth, windowHeight, window).tap {
+						new SimpleScene(windowWidth, windowHeight, window, audioMasterVolume).tap {
 							addDebugComponents(window, camera, inputEventHandler, gridLines.get())
 						}
 					)

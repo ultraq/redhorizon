@@ -19,8 +19,9 @@ package nz.net.ultraq.redhorizon.audio.openal
 import nz.net.ultraq.redhorizon.audio.Buffer
 import nz.net.ultraq.redhorizon.audio.Source
 
+import org.joml.Vector3fc
 import static org.lwjgl.openal.AL10.*
-import static org.lwjgl.openal.AL11.*
+import static org.lwjgl.openal.AL11.AL_UNDETERMINED
 
 /**
  * OpenAL-specific source implementation.
@@ -121,9 +122,10 @@ class OpenALSource implements Source {
 	}
 
 	@Override
-	void queueBuffers(Buffer... buffers) {
+	Source queueBuffers(Buffer... buffers) {
 
 		alSourceQueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
+		return this
 	}
 
 	@Override
@@ -134,9 +136,24 @@ class OpenALSource implements Source {
 	}
 
 	@Override
-	void setPosition(float x, float y, float z) {
+	Source withLooping(boolean looping) {
 
-		alSource3f(sourceId, AL_POSITION, x, y, z)
+		alSourcei(sourceId, AL_LOOPING, looping ? AL_TRUE : AL_FALSE)
+		return this
+	}
+
+	@Override
+	Source withPosition(Vector3fc position) {
+
+		alSource3f(sourceId, AL_POSITION, position.x(), position.y(), position.z())
+		return this
+	}
+
+	@Override
+	Source withVolume(float volume) {
+
+		alSourcef(sourceId, AL_GAIN, volume)
+		return this
 	}
 
 	@Override
@@ -149,22 +166,9 @@ class OpenALSource implements Source {
 	}
 
 	@Override
-	void unqueueBuffers(Buffer... buffers) {
+	Source unqueueBuffers(Buffer... buffers) {
 
 		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
-	}
-
-	@Override
-	Source withLooping(boolean looping) {
-
-		alSourcei(sourceId, AL_LOOPING, looping ? AL_TRUE : AL_FALSE)
-		return this
-	}
-
-	@Override
-	Source withVolume(float volume) {
-
-		alSourcef(sourceId, AL_GAIN, volume)
 		return this
 	}
 }

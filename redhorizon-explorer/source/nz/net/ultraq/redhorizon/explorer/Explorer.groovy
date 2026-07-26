@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
-import nz.net.ultraq.redhorizon.audio.AudioDevice
-import nz.net.ultraq.redhorizon.audio.openal.OpenALAudioDevice
+import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
@@ -120,7 +120,7 @@ class Explorer implements Runnable {
 	private Framebuffer sceneFramebuffer
 	private SharpUpscalingShader sharpUpscalingShader
 	private Framebuffer postProcessingFramebuffer
-	private AudioDevice device
+	private Device device
 	private ResourceManager resourceManager
 	private ExplorerScene scene
 
@@ -141,8 +141,7 @@ class Explorer implements Runnable {
 			sceneFramebuffer = new OpenGLFramebuffer(RENDER_WIDTH, RENDER_HEIGHT)
 			sharpUpscalingShader = new SharpUpscalingShader()
 			postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
-			device = new OpenALAudioDevice()
-				.withMasterVolume(0.5f)
+			device = new OpenALDevice()
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)

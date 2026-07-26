@@ -25,15 +25,15 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
  *
  * @author Emanuel Rabina
  */
-class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSource> {
+class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode> {
 
 	private final Source source
 	private final Music music
 
 	/**
-	 * Constructor, create an audio source attached to preloaded sound data.
+	 * Constructor, create an audio source attached to sound effect data.
 	 */
-	AudioSource(Sound sound) {
+	SourceNode(Sound sound) {
 
 		source = new OpenALSource().attachBuffer(sound.buffer)
 		music = null
@@ -42,7 +42,7 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	/**
 	 * Constructor, create an audio source attached to streaming sound data.
 	 */
-	AudioSource(Music music) {
+	SourceNode(Music music) {
 
 		source = new OpenALSource()
 		music.update(source)
@@ -83,7 +83,7 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	/**
 	 * Pause the sound.
 	 */
-	AudioSource pause() {
+	SourceNode pause() {
 
 		source.pause()
 		return this
@@ -92,7 +92,7 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	/**
 	 * Play the sound.
 	 */
-	AudioSource play() {
+	SourceNode play() {
 
 		source.play()
 		return this
@@ -104,13 +104,13 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 		if (music) {
 			music.update(source)
 		}
-		source.setPosition(globalPosition)
+		source.withPosition(globalPosition)
 	}
 
 	/**
 	 * Stop the sound.
 	 */
-	AudioSource stop() {
+	SourceNode stop() {
 
 		source.stop()
 		return this
@@ -119,7 +119,7 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	/**
 	 * Set the volume of the sound.
 	 */
-	AudioSource withVolume(float volume) {
+	SourceNode withVolume(float volume) {
 
 		source.withVolume(volume)
 		return this

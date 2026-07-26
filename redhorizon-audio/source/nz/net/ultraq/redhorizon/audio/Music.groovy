@@ -33,8 +33,8 @@ import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
- * A source backed by an unknown number of sound buffers, used for streaming
- * large amounts of sound data.  Best suited for music tracks.
+ * Multiple unknown sound buffers, used for streaming large amounts of sound
+ * data.  Best suited for music tracks.
  *
  * <p>Input streams will be decoded in a separate thread and loaded over time.
  * Whichever thread is used for updating audio will need to call {@link #update}
