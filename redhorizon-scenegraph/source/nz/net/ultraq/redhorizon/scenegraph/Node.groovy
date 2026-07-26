@@ -94,11 +94,7 @@ class Node<T extends Node> implements AutoCloseable {
 	@Override
 	void close() {
 
-		children.each { child ->
-			if (child instanceof AutoCloseable) {
-				child.close()
-			}
-		}
+		children*.close()
 	}
 
 	/**
