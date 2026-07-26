@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 
 import spock.lang.IgnoreIf

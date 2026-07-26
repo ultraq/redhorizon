@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.audio.Buffer
+import nz.net.ultraq.redhorizon.audio.api.Buffer
 
 import static org.lwjgl.openal.AL10.*
 import static org.lwjgl.system.MemoryStack.stackPush

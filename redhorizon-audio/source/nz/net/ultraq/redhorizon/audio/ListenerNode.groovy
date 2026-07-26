@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio
 
+import nz.net.ultraq.redhorizon.audio.api.Listener
 import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 
 import org.joml.Vector3f

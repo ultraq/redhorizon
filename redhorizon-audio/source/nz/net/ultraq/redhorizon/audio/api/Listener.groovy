@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.audio.api
 
 import org.joml.Vector3fc
 
@@ -23,7 +23,7 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-interface Listener extends AudioResource {
+interface Listener extends AutoCloseable {
 
 	/**
 	 * Set the gain for sounds coming in to the listener.

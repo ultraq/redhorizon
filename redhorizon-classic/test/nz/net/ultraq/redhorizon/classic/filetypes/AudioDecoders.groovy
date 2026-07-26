@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.audio.Device
-import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
 import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.api.Device
+import nz.net.ultraq.redhorizon.audio.api.Listener
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 

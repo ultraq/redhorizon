@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
+import nz.net.ultraq.redhorizon.audio.api.Buffer
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 
 import org.slf4j.Logger

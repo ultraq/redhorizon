@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.audio.Buffer
-import nz.net.ultraq.redhorizon.audio.Source
+import nz.net.ultraq.redhorizon.audio.api.Buffer
+import nz.net.ultraq.redhorizon.audio.api.Source
 
 import org.joml.Vector3fc
 import static org.lwjgl.openal.AL10.*

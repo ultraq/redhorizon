@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.audio.api.Source
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 /**

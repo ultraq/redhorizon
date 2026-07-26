@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.audio.api
 
 /**
  * The audio interface through which audio can be played.  One must first be

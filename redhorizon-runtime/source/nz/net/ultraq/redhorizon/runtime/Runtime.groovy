@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
-import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.ListenerNode
+import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem

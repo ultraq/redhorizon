@@ -20,6 +20,8 @@ import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
+import nz.net.ultraq.redhorizon.audio.api.Buffer
+import nz.net.ultraq.redhorizon.audio.api.Source
 import nz.net.ultraq.redhorizon.audio.openal.OpenALBuffer
 
 import org.slf4j.Logger

@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio.openal
 
-import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.api.Device
 
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC

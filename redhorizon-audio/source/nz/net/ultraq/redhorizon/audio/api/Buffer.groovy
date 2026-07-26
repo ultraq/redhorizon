@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.audio.api
 
 /**
  * An object that contains audio data.
  *
  * @author Emanuel Rabina
  */
-interface Buffer extends AudioResource {
+interface Buffer extends AutoCloseable {
 
 	/**
 	 * Get the number of bits per sample.

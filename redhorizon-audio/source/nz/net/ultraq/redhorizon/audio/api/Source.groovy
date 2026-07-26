@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.audio.api
 
 import org.joml.Vector3fc
 
@@ -23,7 +23,7 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-interface Source extends AudioResource {
+interface Source extends AutoCloseable {
 
 	/**
 	 * Attach a static buffer to this source for playback.
