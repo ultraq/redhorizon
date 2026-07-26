@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask

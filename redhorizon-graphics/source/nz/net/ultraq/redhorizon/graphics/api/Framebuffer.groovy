@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 /**
  * A section of memory that can be drawn to like a screen, and can then be used
@@ -22,7 +22,7 @@ package nz.net.ultraq.redhorizon.graphics
  *
  * @author Emanuel Rabina
  */
-interface Framebuffer extends GraphicsResource {
+interface Framebuffer extends AutoCloseable {
 
 	/**
 	 * Draw the contents of the framebuffer to the current render target.

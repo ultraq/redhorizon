@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.PostProcessingShaderContext
-import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.api.PostProcessingShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Texture
 
 /**
  * A shader that just renders a framebuffer to the screen.  Used as the last

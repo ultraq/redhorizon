@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader

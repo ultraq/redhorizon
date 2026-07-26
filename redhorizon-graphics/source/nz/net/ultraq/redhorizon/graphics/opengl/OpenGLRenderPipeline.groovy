@@ -16,10 +16,10 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.FramebufferSizeEvent
-import nz.net.ultraq.redhorizon.graphics.RenderPipeline
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.api.RenderPipeline
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiLayer
 
 import org.joml.primitives.Rectanglei
@@ -142,7 +142,7 @@ class OpenGLRenderPipeline implements RenderPipeline, AutoCloseable {
 
 	@Override
 	OpenGLRenderPipeline postProcessing(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure<Framebuffer> closure) {
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.api.Framebuffer') Closure<Framebuffer> closure) {
 
 		postProcessingResult = closure(sceneResult)
 		return this

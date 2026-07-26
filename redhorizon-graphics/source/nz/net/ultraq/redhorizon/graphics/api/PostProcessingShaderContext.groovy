@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 /**
- * Identifies a low-level graphics resource that can only be created/deleted via
- * the graphics system and its thread.
+ * A render context for post-processing stages, which are usually rendering from
+ * one framebuffer to another or the screen.
  *
  * @author Emanuel Rabina
  */
-interface GraphicsResource extends AutoCloseable {
+interface PostProcessingShaderContext extends ShaderContext {
+
+	/**
+	 * Set which framebuffer is being used to draw to the next render target.
+	 */
+	void setFramebufferTexture(Texture texture)
 }

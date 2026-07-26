@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics.imgui
 
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Window
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 
 import imgui.ImGui

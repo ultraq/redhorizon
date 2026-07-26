@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Window
 
 /**
  * Keys for objects being shared using Java's Scoped Values.  The values here

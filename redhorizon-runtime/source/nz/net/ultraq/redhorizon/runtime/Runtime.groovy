@@ -34,10 +34,10 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Window
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow

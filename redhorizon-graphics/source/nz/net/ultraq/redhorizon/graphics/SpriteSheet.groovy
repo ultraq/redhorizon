@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
+import nz.net.ultraq.redhorizon.graphics.api.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
 import org.joml.Vector2f

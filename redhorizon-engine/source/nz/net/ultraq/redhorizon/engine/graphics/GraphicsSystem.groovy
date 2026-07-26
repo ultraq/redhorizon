@@ -21,11 +21,11 @@ import nz.net.ultraq.groovy.profilingextensions.Profiler
 import nz.net.ultraq.groovy.profilingextensions.TimedLoggingStrategy
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.GraphicsNode
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -116,7 +116,7 @@ class GraphicsSystem extends System {
 	 * Configure the post-processing stage of the render pipeline.
 	 */
 	GraphicsSystem withPostProcessing(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure<Framebuffer> closure) {
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.api.Framebuffer') Closure<Framebuffer> closure) {
 
 		postProcessingStage = closure
 		return this

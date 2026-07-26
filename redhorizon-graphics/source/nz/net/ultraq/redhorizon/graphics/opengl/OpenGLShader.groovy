@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.LibRetroShaderReader
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.ShaderContext
-import nz.net.ultraq.redhorizon.graphics.Texture
-import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.ShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Texture
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc

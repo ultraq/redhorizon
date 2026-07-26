@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Texture
+import nz.net.ultraq.redhorizon.graphics.api.Texture
 
 import static org.lwjgl.opengl.GL11C.*
 import static org.lwjgl.opengl.GL13C.*

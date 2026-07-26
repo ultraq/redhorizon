@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Texture
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext

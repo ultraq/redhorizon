@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Matrix4f

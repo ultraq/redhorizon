@@ -14,14 +14,34 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
+
+import org.joml.Matrix4fc
 
 /**
- * A set of rendering commands that can be used by objects while this shader is
- * valid.  These are shortcuts to applying uniforms to a shader without required
- * knowledge of how the shader is constructed.
+ * A render context for drawing elements in a scene.
  *
  * @author Emanuel Rabina
  */
-interface ShaderContext {
+interface SceneShaderContext extends ShaderContext {
+
+	/**
+	 * Set a whole host of material attributes.
+	 */
+	void setMaterial(Material material)
+
+	/**
+	 * Set the model matrix uniform.
+	 */
+	void setModelMatrix(Matrix4fc model)
+
+	/**
+	 * Set the projection matrix uniform.
+	 */
+	void setProjectionMatrix(Matrix4fc projection)
+
+	/**
+	 * Set the view matrix uniform.
+	 */
+	void setViewMatrix(Matrix4fc view)
 }

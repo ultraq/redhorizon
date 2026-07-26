@@ -16,10 +16,12 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+
 import spock.lang.Specification
 
 /**
- * Tests for the {@link Colour} class.
+ * Tests for the {@link nz.net.ultraq.redhorizon.graphics.api.Colour} class.
  *
  * @author Emanuel Rabina
  */

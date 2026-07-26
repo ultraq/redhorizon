@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Material
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
 import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Material
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
 
 import org.joml.Matrix4fc
 

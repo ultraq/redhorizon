@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
-
-import org.joml.Vector2f
+package nz.net.ultraq.redhorizon.graphics.api
 
 /**
- * A material is a set of properties applied to the shape being rendered, often
- * being used to configure a shader.
- *
- * This particular base material only defines a texture, with subclasses being
- * used to add other properties.
+ * A set of rendering commands that can be used by objects while this shader is
+ * valid.  These are shortcuts to applying uniforms to a shader without required
+ * knowledge of how the shader is constructed.
  *
  * @author Emanuel Rabina
  */
-class Material {
-
-	Texture texture
-	Vector2f frameXY
+interface ShaderContext {
 }

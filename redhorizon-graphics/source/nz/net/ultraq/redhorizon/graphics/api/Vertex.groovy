@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import org.joml.Vector2f
 import org.joml.Vector3f

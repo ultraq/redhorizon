@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.debug
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Circle
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.physics.BoxCollider
 import nz.net.ultraq.redhorizon.physics.CircleCollider

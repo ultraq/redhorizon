@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
-import nz.net.ultraq.redhorizon.graphics.Material
-import nz.net.ultraq.redhorizon.graphics.Mesh
-import nz.net.ultraq.redhorizon.graphics.PostProcessingShaderContext
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.Texture
-import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.api.Material
+import nz.net.ultraq.redhorizon.graphics.api.Mesh
+import nz.net.ultraq.redhorizon.graphics.api.PostProcessingShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Texture
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc

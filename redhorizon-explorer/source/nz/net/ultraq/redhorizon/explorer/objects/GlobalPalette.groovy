@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.GraphicsNode
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
-import nz.net.ultraq.redhorizon.graphics.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Shader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
 

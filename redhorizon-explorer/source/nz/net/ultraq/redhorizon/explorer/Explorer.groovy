@@ -34,10 +34,10 @@ import nz.net.ultraq.redhorizon.explorer.previews.PreviewBeginEvent
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewEndEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.api.Window
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow

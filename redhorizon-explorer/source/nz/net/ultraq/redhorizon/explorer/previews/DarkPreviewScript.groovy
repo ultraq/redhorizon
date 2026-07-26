@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.ExplorerScene
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 
 /**
  * A script to make the background colour black and disable the grid lines.

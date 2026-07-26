@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger

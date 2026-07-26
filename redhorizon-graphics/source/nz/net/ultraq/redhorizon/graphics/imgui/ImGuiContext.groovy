@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Window
 
 import imgui.ImFont
 import org.joml.primitives.Rectanglei

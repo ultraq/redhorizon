@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
@@ -28,7 +28,7 @@ import groovy.transform.stc.FromString
  *
  * @author Emanuel Rabina
  */
-interface Shader<TShaderContext extends ShaderContext> extends GraphicsResource {
+interface Shader<TShaderContext extends ShaderContext> extends AutoCloseable {
 
 	/**
 	 * The name of this shader.

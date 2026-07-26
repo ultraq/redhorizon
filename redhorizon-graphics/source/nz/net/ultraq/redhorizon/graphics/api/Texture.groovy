@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import java.nio.ByteBuffer
 
@@ -23,7 +23,7 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-interface Texture extends GraphicsResource {
+interface Texture extends AutoCloseable {
 
 	/**
 	 * Enable the use of this texture for the next rendering commands at the

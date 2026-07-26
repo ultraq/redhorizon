@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2021, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
+
+import org.joml.Vector2f
 
 /**
- * A render context for post-processing stages, which are usually rendering from
- * one framebuffer to another or the screen.
+ * A material is a set of properties applied to the shape being rendered, often
+ * being used to configure a shader.
+ *
+ * This particular base material only defines a texture, with subclasses being
+ * used to add other properties.
  *
  * @author Emanuel Rabina
  */
-interface PostProcessingShaderContext extends ShaderContext {
+class Material {
 
-	/**
-	 * Set which framebuffer is being used to draw to the next render target.
-	 */
-	void setFramebufferTexture(Texture texture)
+	Texture texture
+	Vector2f frameXY
 }

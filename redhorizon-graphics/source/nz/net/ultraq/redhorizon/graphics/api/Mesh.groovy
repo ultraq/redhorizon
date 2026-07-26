@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import org.joml.Matrix4fc
 
@@ -24,7 +24,7 @@ import org.joml.Matrix4fc
  *
  * @author Emanuel Rabina
  */
-interface Mesh extends GraphicsResource {
+interface Mesh extends AutoCloseable {
 
 	/**
 	 * Whether or not this mesh is allowed to be updated with new vertex data.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.TupleConstructor

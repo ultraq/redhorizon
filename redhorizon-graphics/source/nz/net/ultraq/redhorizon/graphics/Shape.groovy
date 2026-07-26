@@ -16,7 +16,11 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.Mesh
+import nz.net.ultraq.redhorizon.graphics.api.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 

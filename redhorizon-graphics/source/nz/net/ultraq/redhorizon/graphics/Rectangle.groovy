@@ -16,7 +16,9 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 
 import org.joml.Vector3f
 

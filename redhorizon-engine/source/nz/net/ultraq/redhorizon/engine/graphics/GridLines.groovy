@@ -16,13 +16,13 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics
 
-import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsNode
-import nz.net.ultraq.redhorizon.graphics.Mesh
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Vertex
+import nz.net.ultraq.redhorizon.graphics.api.Mesh
+import nz.net.ultraq.redhorizon.graphics.api.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 

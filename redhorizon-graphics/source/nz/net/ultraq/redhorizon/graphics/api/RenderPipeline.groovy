@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics
+package nz.net.ultraq.redhorizon.graphics.api
 
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
@@ -40,7 +40,7 @@ interface RenderPipeline {
 	 * framebuffer will be used as input into the next stages.
 	 */
 	RenderPipeline postProcessing(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.Framebuffer') Closure<Framebuffer> closure)
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.graphics.api.Framebuffer') Closure<Framebuffer> closure)
 
 	/**
 	 * Perform rendering of the scene to a framebuffer of your choice, which

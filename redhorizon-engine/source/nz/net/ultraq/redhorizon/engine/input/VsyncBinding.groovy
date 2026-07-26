@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.input
 
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.api.Window
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V

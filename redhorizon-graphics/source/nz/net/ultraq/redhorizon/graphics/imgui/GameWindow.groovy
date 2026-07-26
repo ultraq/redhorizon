@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 
 import imgui.ImGui

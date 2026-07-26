@@ -21,7 +21,14 @@ import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.HeaderDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.ImageInfoEvent
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.Colour
+import nz.net.ultraq.redhorizon.graphics.api.Material
+import nz.net.ultraq.redhorizon.graphics.api.Mesh
+import nz.net.ultraq.redhorizon.graphics.api.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Shader
+import nz.net.ultraq.redhorizon.graphics.api.Texture
+import nz.net.ultraq.redhorizon.graphics.api.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture

@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.classic.graphics
 
-import nz.net.ultraq.redhorizon.graphics.Material
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
+import nz.net.ultraq.redhorizon.graphics.api.Material
+import nz.net.ultraq.redhorizon.graphics.api.SceneShaderContext
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 
 import org.joml.Matrix4fc
