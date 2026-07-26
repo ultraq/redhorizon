@@ -22,10 +22,6 @@ import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglei
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import java.util.function.Supplier
 
 /**
  * The player's view into the world.
@@ -34,9 +30,6 @@ import java.util.function.Supplier
  */
 class Camera extends Node<Camera> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Camera)
-
-	private final Supplier<Rectanglei> viewportSupplier
 	private final Matrix4fc projection
 	private final Matrix4fc view
 	private final Matrix4f viewProjection = new Matrix4f()
@@ -49,11 +42,9 @@ class Camera extends Node<Camera> {
 	 * @param width
 	 * @param height
 	 * @param depth
-	 * @param viewportSupplier Usually {@code Window::getViewport}
 	 */
-	Camera(float width, float height, float depth = 10f, Supplier<Rectanglei> viewportSupplier) {
+	Camera(float width, float height, float depth = 10f) {
 
-		this.viewportSupplier = viewportSupplier
 		projection = new Matrix4f().setOrthoSymmetric(width, height, 0, depth)
 		view = new Matrix4f().setLookAt(
 			0, 0, depth / 2 as float,
@@ -89,14 +80,14 @@ class Camera extends Node<Camera> {
 	/**
 	 * Convert a set of window coordinates to world coordinates.
 	 *
+	 * @param viewport
 	 * @param winX
 	 * @param winY
 	 * @param result A vector to store the result in.
 	 * @return The {@code result} vector.
 	 */
-	Vector3f unproject(float winX, float winY, Vector3f result) {
+	Vector3f unproject(Rectanglei viewport, float winX, float winY, Vector3f result) {
 
-		var viewport = viewportSupplier.get()
 		var viewportHeight = viewport.lengthY()
 		return getViewProjection()
 			.unproject(
