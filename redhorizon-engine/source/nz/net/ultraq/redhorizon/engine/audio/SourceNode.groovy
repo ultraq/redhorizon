@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.audio
+package nz.net.ultraq.redhorizon.engine.audio
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.audio.Source
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 /**

@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.audio
 
-import nz.net.ultraq.redhorizon.audio.AudioNode
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -39,9 +38,9 @@ class AudioSystem extends System {
 
 		average('Update: {}ms', 1f, logger) { ->
 			audioNodes.clear()
-			scene.findAll(AudioNode, audioNodes).each { audio ->
-				if (audio.enabled) {
-					audio.render()
+			scene.findAll(AudioNode, audioNodes).each { audioNode ->
+				if (audioNode.enabled) {
+					audioNode.render()
 				}
 			}
 		}
