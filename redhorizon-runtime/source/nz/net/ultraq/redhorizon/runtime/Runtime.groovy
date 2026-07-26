@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.ListenerNode
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
@@ -32,6 +33,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Shader
@@ -86,7 +88,7 @@ final class Runtime {
 	int lwjglStackSize = 10240
 
 	// Audio options
-	float audioMasterVolume = 1f
+	float audioListenerGain = 1f
 
 	// Graphics options
 	Colour windowBackgroundColour = Colour.BLACK
@@ -160,10 +162,14 @@ final class Runtime {
 				.run { ->
 
 					// Init scene and systems
+					var camera = new Camera(windowWidth, windowHeight)
+					var listener = new ListenerNode()
+						.withGain(audioListenerGain)
 					scene = application.configureScene(
-						new SimpleScene(windowWidth, windowHeight, window, audioMasterVolume).tap {
-							addDebugComponents(window, camera, inputEventHandler, gridLines.get())
-						}
+						new Scene()
+							.addChild(camera
+								.addChild(listener)) // Listener is attached to the camera
+							.addDebugComponents(window, camera, inputEventHandler, gridLines.get())
 					)
 					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
