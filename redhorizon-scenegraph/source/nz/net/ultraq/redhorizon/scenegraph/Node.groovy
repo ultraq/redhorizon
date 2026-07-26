@@ -412,6 +412,15 @@ class Node<T extends Node> implements AutoCloseable {
 	}
 
 	/**
+	 * Set the position of this object.
+	 */
+	T setPosition(Vector3fc position) {
+
+		transform.setTranslation(position)
+		return (T)this
+	}
+
+	/**
 	 * Set the rotation of this object.
 	 */
 	T setRotation(float x, float y, float z) {
