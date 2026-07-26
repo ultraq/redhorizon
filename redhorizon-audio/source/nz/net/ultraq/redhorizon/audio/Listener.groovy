@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.audio
 
-import nz.net.ultraq.redhorizon.audio.api.Listener
 import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 
 import org.joml.Vector3f
@@ -29,9 +28,9 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-class ListenerNode extends AudioNode<ListenerNode> {
+class Listener extends AudioNode<Listener> {
 
-	private final Listener listener = new OpenALListener()
+	private final nz.net.ultraq.redhorizon.audio.api.Listener listener = new OpenALListener()
 
 	// TODO: This should be derived from an attached movement component 🤔
 	private final Vector3f velocity = new Vector3f()
@@ -55,7 +54,7 @@ class ListenerNode extends AudioNode<ListenerNode> {
 	/**
 	 * Set the gain on sounds coming in to the listener.
 	 */
-	ListenerNode withGain(float gain) {
+	Listener withGain(float gain) {
 
 		listener.withGain(gain)
 		return this
@@ -64,7 +63,7 @@ class ListenerNode extends AudioNode<ListenerNode> {
 	/**
 	 * Set the listener's velocity.
 	 */
-	ListenerNode withVelocity(Vector3fc velocity) {
+	Listener withVelocity(Vector3fc velocity) {
 
 		this.velocity.set(velocity)
 		return this

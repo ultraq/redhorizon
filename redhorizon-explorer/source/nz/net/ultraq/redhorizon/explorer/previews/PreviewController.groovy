@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.Source
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
@@ -230,12 +230,12 @@ class PreviewController extends Script implements AutoCloseable {
 			}
 			case Sound ->
 				new Node()
-					.addChild(new SourceNode(file)
+					.addChild(new Source(file)
 						.addChild(new ScriptNode(SoundPlaybackScript)))
 					.withName("Sound - ${fileName}")
 			case Music ->
 				new Node()
-					.addChild(new SourceNode(file)
+					.addChild(new Source(file)
 						.addChild(new ScriptNode(MusicPlaybackScript))
 						.on(MusicStoppedEvent) { event ->
 							node.scene.queueUpdate { ->

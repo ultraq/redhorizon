@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
-import nz.net.ultraq.redhorizon.audio.ListenerNode
+import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.graphics.Camera
@@ -79,7 +79,7 @@ class VideoDecoders extends Specification {
 				.scale(1f, 1.2f)
 			var shader = new BasicShader()
 			var camera = new Camera(320, 200, window::getViewport)
-			var listener = new ListenerNode()
+			var listener = new Listener()
 		when:
 			window.show()
 			video.play()

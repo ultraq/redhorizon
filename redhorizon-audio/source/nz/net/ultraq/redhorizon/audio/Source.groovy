@@ -17,7 +17,6 @@
 package nz.net.ultraq.redhorizon.audio
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.audio.api.Source
 import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 
 /**
@@ -26,15 +25,15 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
  *
  * @author Emanuel Rabina
  */
-class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode> {
+class Source extends AudioNode<Source> implements EventTarget<Source> {
 
-	private final Source source
+	private final nz.net.ultraq.redhorizon.audio.api.Source source
 	private final Music music
 
 	/**
 	 * Constructor, create an audio source attached to sound effect data.
 	 */
-	SourceNode(Sound sound) {
+	Source(Sound sound) {
 
 		source = new OpenALSource().attachBuffer(sound.buffer)
 		music = null
@@ -43,7 +42,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Constructor, create an audio source attached to streaming sound data.
 	 */
-	SourceNode(Music music) {
+	Source(Music music) {
 
 		source = new OpenALSource()
 		music.update(source)
@@ -84,7 +83,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Pause the sound.
 	 */
-	SourceNode pause() {
+	Source pause() {
 
 		source.pause()
 		return this
@@ -93,7 +92,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Play the sound.
 	 */
-	SourceNode play() {
+	Source play() {
 
 		source.play()
 		return this
@@ -109,7 +108,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Stop the sound.
 	 */
-	SourceNode stop() {
+	Source stop() {
 
 		source.stop()
 		return this
@@ -118,7 +117,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Set the volume of the sound.
 	 */
-	SourceNode withVolume(float volume) {
+	Source withVolume(float volume) {
 
 		source.withVolume(volume)
 		return this

@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.Music
 import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.Source
 import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.api.Listener
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
@@ -59,7 +59,7 @@ class AudioDecoders extends Specification {
 			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
 				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
 			}
-			var source = new SourceNode(sound)
+			var source = new Source(sound)
 		when:
 			source.play()
 			while (!source.stopped) {
@@ -77,7 +77,7 @@ class AudioDecoders extends Specification {
 		when:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
 			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
-			var source = new SourceNode(music)
+			var source = new Source(music)
 //				.withLooping(true)
 			source.play()
 			var start = System.currentTimeMillis()

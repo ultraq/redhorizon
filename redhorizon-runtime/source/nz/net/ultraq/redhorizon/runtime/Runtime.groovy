@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
-import nz.net.ultraq.redhorizon.audio.ListenerNode
+import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.api.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
@@ -163,7 +163,7 @@ final class Runtime {
 
 					// Init scene and systems
 					var camera = new Camera(windowWidth, windowHeight)
-					var listener = new ListenerNode()
+					var listener = new Listener()
 						.withGain(audioListenerGain)
 					scene = application.configureScene(
 						new Scene()
