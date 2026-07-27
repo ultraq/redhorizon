@@ -129,6 +129,15 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	}
 
 	/**
+	 * Set the gain (ie: volume) of the sound.
+	 */
+	SourceNode withGain(float gain) {
+
+		source.withGain(gain)
+		return this
+	}
+
+	/**
 	 * Set the maximum distance at which there will no longer be any attenuation
 	 * of the sound.
 	 */
@@ -154,15 +163,6 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	SourceNode withRolloff(float rolloff) {
 
 		source.withRolloff(rolloff)
-		return this
-	}
-
-	/**
-	 * Set the volume of the sound.
-	 */
-	SourceNode withVolume(float volume) {
-
-		source.withVolume(volume)
 		return this
 	}
 

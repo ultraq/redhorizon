@@ -40,7 +40,7 @@ class MusicPlaybackScript extends Script<SourceNode> implements AutoCloseable {
 	@Override
 	void init() {
 
-		node.withVolume(0.5f)
+		node.withGain(0.5f)
 	}
 
 	@Override

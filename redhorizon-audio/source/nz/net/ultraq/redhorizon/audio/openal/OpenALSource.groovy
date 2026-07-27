@@ -136,6 +136,29 @@ class OpenALSource implements Source {
 	}
 
 	@Override
+	Source stop() {
+
+		if (!stopped) {
+			alSourceStop(sourceId)
+		}
+		return this
+	}
+
+	@Override
+	Source unqueueBuffers(Buffer... buffers) {
+
+		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
+		return this
+	}
+
+	@Override
+	Source withGain(float gain) {
+
+		alSourcef(sourceId, AL_GAIN, gain)
+		return this
+	}
+
+	@Override
 	Source withLooping(boolean looping) {
 
 		alSourcei(sourceId, AL_LOOPING, looping ? AL_TRUE : AL_FALSE)
@@ -167,29 +190,6 @@ class OpenALSource implements Source {
 	Source withRolloff(float rolloff) {
 
 		alSourcef(sourceId, AL_ROLLOFF_FACTOR, rolloff)
-		return this
-	}
-
-	@Override
-	Source withVolume(float volume) {
-
-		alSourcef(sourceId, AL_GAIN, volume)
-		return this
-	}
-
-	@Override
-	Source stop() {
-
-		if (!stopped) {
-			alSourceStop(sourceId)
-		}
-		return this
-	}
-
-	@Override
-	Source unqueueBuffers(Buffer... buffers) {
-
-		alSourceUnqueueBuffers(sourceId, *((OpenALBuffer[])buffers)*.bufferId)
 		return this
 	}
 }

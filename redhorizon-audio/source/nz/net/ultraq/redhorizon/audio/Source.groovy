@@ -107,6 +107,11 @@ interface Source extends AudioResource {
 	Source unqueueBuffers(Buffer... buffers)
 
 	/**
+	 * Set the gain (ie: volume) of a source.
+	 */
+	Source withGain(float gain)
+
+	/**
 	 * Set whether this source should loop the attached sound data.
 	 */
 	Source withLooping(boolean looping)
@@ -132,9 +137,4 @@ interface Source extends AudioResource {
 	 * Set the source rolloff factor.
 	 */
 	Source withRolloff(float rolloff)
-
-	/**
-	 * Set the volume of a source.
-	 */
-	Source withVolume(float volume)
 }
