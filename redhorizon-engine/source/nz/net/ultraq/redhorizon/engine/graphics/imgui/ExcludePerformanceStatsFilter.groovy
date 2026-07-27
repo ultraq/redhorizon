@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.groovy.profilingextensions.ProfilingExtensions
+import nz.net.ultraq.groovy.profilingextensions.Profiler
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.filter.Filter
@@ -32,7 +32,7 @@ class ExcludePerformanceStatsFilter extends Filter<ILoggingEvent> {
 	@Override
 	FilterReply decide(ILoggingEvent event) {
 
-		return event.markerList?.contains(ProfilingExtensions.profilingMarker) ?
+		return Profiler.PROFILER_MARKER in event.markerList ?
 			FilterReply.DENY :
 			FilterReply.NEUTRAL
 	}

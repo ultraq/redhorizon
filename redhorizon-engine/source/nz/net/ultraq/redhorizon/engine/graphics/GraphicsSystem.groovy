@@ -105,10 +105,14 @@ class GraphicsSystem extends System {
 			.end()
 
 		if (loggingStrategy.shouldLog()) {
-			logger.debug(Profiler.marker, 'S: {}ms, PP: {}ms, UI: {}ms',
-				sprintf('%.2f', getTimes('GraphicsSystem::scene', sceneExecutionTimes).average()),
-				sprintf('%.2f', getTimes('GraphicsSystem::postProcessing', postProcessingExecutionTimes).average()),
-				sprintf('%.2f', getTimes('GraphicsSystem::ui', uiExecutionTimes).average()))
+			logger.atDebug()
+				.addMarker(Profiler.PROFILER_MARKER)
+				.addMarker(Profiler.AVERAGE_MARKER)
+				.setMessage('S: {}ms, PP: {}ms, UI: {}ms')
+				.addArgument(() -> sprintf('%.2f', getTimes('GraphicsSystem::scene', sceneExecutionTimes).average()))
+				.addArgument(() -> sprintf('%.2f', getTimes('GraphicsSystem::postProcessing', postProcessingExecutionTimes).average()))
+				.addArgument(() -> sprintf('%.2f', getTimes('GraphicsSystem::ui', uiExecutionTimes).average()))
+				.log()
 		}
 	}
 
