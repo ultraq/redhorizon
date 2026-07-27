@@ -63,7 +63,7 @@ class ExplorerScene extends Scene {
 
 		this.window = window
 
-		camera = addAndReturnChild(new Camera(width, height, window::getViewport)
+		camera = addAndReturnChild(new Camera(width, height)
 			.addChild(new ListenerNode().withGain(0.5f)))
 
 		addChild(new Node()

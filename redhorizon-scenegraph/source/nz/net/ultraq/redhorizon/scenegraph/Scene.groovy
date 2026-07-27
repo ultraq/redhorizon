@@ -32,10 +32,7 @@ import java.util.concurrent.TimeUnit
  */
 class Scene implements EventTarget<Scene>, AutoCloseable {
 
-	@Delegate(
-		includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'],
-		interfaces = false
-	)
+	@Delegate(includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'])
 	final Node root = new RootNode()
 
 	private final Queue<Closure> updateQueue = new ArrayDeque<>()

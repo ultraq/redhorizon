@@ -74,7 +74,7 @@ class FileTester {
 
 		for (var decoderClass : decoderClasses) {
 			var decoder = decoderClass.getConstructor().newInstance()
-			if (!fileExtension || decoder.supportedFileExtensions.contains(fileExtension)) {
+			if (!fileExtension || fileExtension in decoder.supportedFileExtensions) {
 				var result = inputStream.markAndReset(512) { stream ->
 					try {
 						decoder.test(stream)
