@@ -129,6 +129,35 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	}
 
 	/**
+	 * Set the maximum distance at which there will no longer be any attenuation
+	 * of the sound.
+	 */
+	SourceNode withMaxDistance(float maxDistance) {
+
+		source.withMaxDistance(maxDistance)
+		return this
+	}
+
+	/**
+	 * Set the distance at which the volume of the source would be cut by half
+	 * (before being influenced by rolloff factor).
+	 */
+	SourceNode withReferenceDistance(float referenceDistance) {
+
+		source.withReferenceDistance(referenceDistance)
+		return this
+	}
+
+	/**
+	 * Set the rolloff factor for sounds from this source.
+	 */
+	SourceNode withRolloff(float rolloff) {
+
+		source.withRolloff(rolloff)
+		return this
+	}
+
+	/**
 	 * Set the volume of the sound.
 	 */
 	SourceNode withVolume(float volume) {

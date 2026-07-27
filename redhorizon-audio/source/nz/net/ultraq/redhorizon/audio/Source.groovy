@@ -112,9 +112,26 @@ interface Source extends AudioResource {
 	Source withLooping(boolean looping)
 
 	/**
+	 * Set the maximum distance at which there will no longer be any attenuation
+	 * of the sound.
+	 */
+	Source withMaxDistance(float maxDistance)
+
+	/**
 	 * Set the position of a source.
 	 */
 	Source withPosition(Vector3fc position)
+
+	/**
+	 * Set the distance at which the volume of the source would be cut by half
+	 * (before being influenced by rolloff factor).
+	 */
+	Source withReferenceDistance(float referenceDistance)
+
+	/**
+	 * Set the source rolloff factor.
+	 */
+	Source withRolloff(float rolloff)
 
 	/**
 	 * Set the volume of a source.

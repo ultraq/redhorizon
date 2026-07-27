@@ -143,9 +143,30 @@ class OpenALSource implements Source {
 	}
 
 	@Override
+	Source withMaxDistance(float maxDistance) {
+
+		alSourcef(sourceId, AL_MAX_DISTANCE, maxDistance)
+		return this
+	}
+
+	@Override
 	Source withPosition(Vector3fc position) {
 
 		alSource3f(sourceId, AL_POSITION, position.x(), position.y(), position.z())
+		return this
+	}
+
+	@Override
+	Source withReferenceDistance(float referenceDistance) {
+
+		alSourcef(sourceId, AL_REFERENCE_DISTANCE, referenceDistance)
+		return this
+	}
+
+	@Override
+	Source withRolloff(float rolloff) {
+
+		alSourcef(sourceId, AL_ROLLOFF_FACTOR, rolloff)
 		return this
 	}
 
