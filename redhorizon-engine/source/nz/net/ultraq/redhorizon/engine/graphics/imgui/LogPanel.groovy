@@ -65,7 +65,7 @@ class LogPanel extends ImGuiModule<LogPanel> {
 
 		if (logLines.size()) {
 			ImGui.separator()
-			ImGui.pushFont(context.monospaceFont)
+			ImGui.pushFont(context.monospaceFont, 0f)
 			logLines.each { line ->
 				ImGui.selectable(line)
 			}

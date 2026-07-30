@@ -130,7 +130,7 @@ class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList>
 
 				ImGui.tableSetColumnIndex(2)
 				if (!(entry instanceof FileEntry && entry.file().directory)) {
-					ImGui.pushFont(context.monospaceFont)
+					ImGui.pushFont(context.monospaceFont, 0f)
 					ImGui.text(sprintf('%,12d', entry.size()))
 					ImGui.popFont()
 				}
