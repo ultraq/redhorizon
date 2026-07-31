@@ -27,7 +27,6 @@ import nz.net.ultraq.eventhorizon.Event
  *   debug lines in the overlay.
  */
 record ImGuiLogEvent(String message, String persistentKey) implements Event {
-
 	ImGuiLogEvent(String message) {
 		this(message, null)
 	}

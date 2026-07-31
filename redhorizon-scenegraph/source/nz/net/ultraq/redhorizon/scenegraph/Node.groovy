@@ -46,7 +46,7 @@ class Node<T extends Node> implements AutoCloseable {
 	private final Vector3f globalScaleResult = new Vector3f()
 
 	private final Map<String, ? extends Node> nameMap = new HashMap<>()
-	private final Map<Class<? extends Node>, List<? extends Node>> typeMap = new HashMap<>()
+	private final Map<Class<?>, List<? extends Node>> typeMap = new HashMap<>()
 
 	/**
 	 * Add and return the child node to this node.

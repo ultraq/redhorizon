@@ -68,7 +68,7 @@ interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoClose
 	float getRenderScale()
 
 	/**
-	 * Get the factor by which UI content should be scale to account for the
+	 * Get the factor by which UI content should be scaled to account for the
 	 * user's display.
 	 */
 	float getUiScale()

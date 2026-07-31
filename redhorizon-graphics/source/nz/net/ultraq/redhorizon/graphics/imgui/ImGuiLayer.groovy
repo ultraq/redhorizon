@@ -61,19 +61,18 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 		var io = ImGui.getIO()
 		io.setConfigFlags(DockingEnable)
 
-		var fontConfig1 = new ImFontConfig()
+		var fontConfig = new ImFontConfig()
 		defaultFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * uiScale), fontConfig1)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale as float, fontConfig)
 		}
-		fontConfig1.destroy()
 		io.setFontDefault(defaultFont)
 
-		var fontConfig2 = new ImFontConfig()
 		monospaceFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, Math.round(16 * uiScale), fontConfig2)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale as float, fontConfig)
 		}
-		fontConfig2.destroy()
 
+		io.fonts.build()
+		fontConfig.destroy()
 		imGuiGlfw.init(windowHandle, true)
 		imGuiGl3.init('#version 410 core')
 
