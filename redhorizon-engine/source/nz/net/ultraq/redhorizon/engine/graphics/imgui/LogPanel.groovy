@@ -47,7 +47,7 @@ class LogPanel extends ImGuiModule<LogPanel> {
 	 */
 	LogPanel() {
 
-		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
+		ImGuiLoggingAppender.instance?.on(ImGuiLogEvent) { event ->
 			if (!event.persistentKey()) {
 				while (!logLines.offer(event.message())) {
 					logLines.poll()

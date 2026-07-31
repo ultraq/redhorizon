@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.physics.MovementNode
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.runtime.Runtime
+
+import org.joml.primitives.Rectanglef
+import spock.lang.IgnoreIf
+import spock.lang.Specification
 
 /**
- * Perform movement of all movable objects in a scene.
+ * Some performance tests are best done with the entire stack (instead of just
+ * sending snapshot releases to games in development), so build them from
+ * top-to-bottom here.
  *
  * @author Emanuel Rabina
  */
-class MovementSystem extends System {
+@IgnoreIf({ env.CI })
+class PerformanceTests extends Specification {
 
-	private final List<MovementNode> movementNodes = new ArrayList<>()
-
-	@Override
-	void update(Scene scene, float delta) {
-
-		movementNodes.clear()
-		scene.findAll(MovementNode, movementNodes).each { node ->
-			if (node.vector) {
-				node.parent.translate(node.vector.x() * node.speed * delta as float, node.vector.y() * node.speed * delta as float)
-			}
-		}
+	def 'Collision simulation'() {
+		given:
+			var simulation = new CollisionSimulation(new Rectanglef(-400f, -300f, 400f, 300f))
+		when:
+			new Runtime(simulation)
+				.execute()
+		then:
+			noExceptionThrown()
 	}
 }

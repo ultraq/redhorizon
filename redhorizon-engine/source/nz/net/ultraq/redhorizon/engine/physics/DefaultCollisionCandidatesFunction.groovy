@@ -37,7 +37,7 @@ class DefaultCollisionCandidatesFunction implements CollisionCandidatesFunction 
 	private int lastCollidersCount = 0
 
 	@Override
-	List<Tuple2<Collider, Collider>> calculate(Scene scene, List<Tuple2<Collider, Collider>> results) {
+	List<Collider> calculate(Scene scene, List<Collider> results) {
 
 		colliders.clear()
 		scene.findAll(Collider, colliders)
@@ -56,7 +56,8 @@ class DefaultCollisionCandidatesFunction implements CollisionCandidatesFunction 
 				if (!otherCollider.enabled || otherCollider == collider) {
 					return
 				}
-				results << new Tuple2<>(collider, otherCollider)
+				results << collider
+				results << otherCollider
 			}
 		}
 

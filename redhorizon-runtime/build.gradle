@@ -47,4 +47,8 @@ configure {
 				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
+		.configureVerification()
+			.withTestDependencies() {
+				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
+			}
 }

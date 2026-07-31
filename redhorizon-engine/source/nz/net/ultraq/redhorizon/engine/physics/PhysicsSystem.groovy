@@ -16,6 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
+import nz.net.ultraq.groovy.profilingextensions.LoggingStrategy
+import nz.net.ultraq.groovy.profilingextensions.Profiler
+import nz.net.ultraq.groovy.profilingextensions.TimedLoggingStrategy
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -32,55 +35,68 @@ class PhysicsSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(PhysicsSystem)
 
-	private final List<System> systems = []
+	private final MovementSystem movementSystem
+	private final CollisionSystem collisionSystem
 	private final float updateStep
 	private float accumulatedTime = 0f
+	private final LoggingStrategy loggingStrategy = new TimedLoggingStrategy(1f)
+	private final List<Long> movementExecutionTimes = []
+	private final List<Long> collisionExecutionTimes = []
 
 	/**
 	 * Constructor, configure the physics system.
 	 *
 	 * @param updateFrequency
-	 *   The rate at which physics updates should occur
+	 *   The rate at which physics updates should occur.  Use 0 to let the physics
+	 *   updates run at the same rate as the frame rate.
+	 * @param movementSystem
+	 * @param collisionSystem
 	 */
-	PhysicsSystem(int updateFrequency) {
+	PhysicsSystem(int updateFrequency, MovementSystem movementSystem, CollisionSystem collisionSystem) {
 
 		updateStep = updateFrequency ? 1 / updateFrequency : 0f
-	}
-
-	/**
-	 * Add a system to be managed by the physics system.
-	 */
-	PhysicsSystem addSystem(System system) {
-
-		systems << system
-		return this
-	}
-
-	/**
-	 * Shorthand for {@link #addSystem}.
-	 */
-	PhysicsSystem leftShift(System system) {
-
-		return addSystem(system)
+		this.movementSystem = movementSystem
+		this.collisionSystem = collisionSystem
 	}
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update: {}ms', 1f, logger) { ->
-			// Perform as many fixed-step updates within the accumulated frame time
-			// From: http://gafferongames.com/game-physics/fix-your-timestep/
-			if (updateStep) {
-				accumulatedTime += delta
-				while (accumulatedTime > updateStep) {
-					systems*.update(scene, updateStep)
-					accumulatedTime -= updateStep
-				}
+		// Perform as many fixed-step updates within the accumulated frame time
+		// From: http://gafferongames.com/game-physics/fix-your-timestep/
+		if (updateStep) {
+			accumulatedTime += delta
+			while (accumulatedTime > updateStep) {
+				updateSystems(scene, updateStep)
+				accumulatedTime -= updateStep
 			}
-			// Run updates at the speed of the framerate
-			else {
-				systems*.update(scene, delta)
-			}
+		}
+		// Run updates at the speed of the framerate
+		else {
+			updateSystems(scene, delta)
+		}
+
+		if (loggingStrategy.shouldLog()) {
+			logger.atDebug()
+				.addMarker(Profiler.PROFILER_MARKER)
+				.addMarker(Profiler.AVERAGE_MARKER)
+				.setMessage('M: {}ms, C: {}ms')
+				.addArgument(() -> sprintf('%.2f', getTimes('PhysicsSystem::movement', movementExecutionTimes).average()))
+				.addArgument(() -> sprintf('%.2f', getTimes('PhysicsSystem::collision', collisionExecutionTimes).average()))
+				.log()
+		}
+	}
+
+	/**
+	 * Run each of the physics subsystems.
+	 */
+	private void updateSystems(Scene scene, float delta) {
+
+		trackTime('PhysicsSystem::movement') { ->
+			movementSystem.update(scene, delta)
+		}
+		trackTime('PhysicsSystem::collision') { ->
+			collisionSystem.update(scene, delta)
 		}
 	}
 }

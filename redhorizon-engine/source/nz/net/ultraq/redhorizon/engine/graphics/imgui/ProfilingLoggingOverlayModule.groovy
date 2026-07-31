@@ -35,7 +35,7 @@ class ProfilingLoggingOverlayModule implements DebugOverlayModule {
 	 */
 	ProfilingLoggingOverlayModule() {
 
-		ImGuiLoggingAppender.instance.on(ImGuiLogEvent) { event ->
+		ImGuiLoggingAppender.instance?.on(ImGuiLogEvent) { event ->
 			if (event.persistentKey()) {
 				persistentLines[event.persistentKey()] = event.message()
 			}

@@ -178,9 +178,9 @@ final class Runtime {
 					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency)
-							.addSystem(new MovementSystem())
-							.addSystem(new CollisionSystem()
+						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency,
+							new MovementSystem(),
+							new CollisionSystem()
 								.withCollisionCandidatesFunction(collisionCandidatesFunction))
 						)
 						.addSystem(new SceneUpdateSystem())

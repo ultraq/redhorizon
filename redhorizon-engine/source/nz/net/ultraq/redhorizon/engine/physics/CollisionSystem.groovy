@@ -37,56 +37,55 @@ class CollisionSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
 	private CollisionCandidatesFunction collisionCandidatesFunction = new DefaultCollisionCandidatesFunction()
-	private final List<Tuple2<Collider, Collider>> collisionCandidates = new ArrayList<>()
+	private final List<Collider> collisionCandidates = new ArrayList<>()
 	private int lastCollisionCandidatesCount = 0
 	private final List<CompletableFuture<Void>> collisionEvents = new ArrayList<>()
-	private int lastCollisionEventsCount = 0
+//	private int lastCollisionEventsCount = 0
 	private final Map<Collider, Collider> collisions = new HashMap<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update: {}ms', 1f, logger) { ->
-			collisionEvents.clear()
-			collisionCandidates.clear()
+		collisionEvents.clear()
+		collisionCandidates.clear()
 
-			collisionCandidatesFunction.calculate(scene, collisionCandidates)
-			if (collisionCandidates.size() != lastCollisionCandidatesCount) {
-				logger.debug('Collision candidates: {}', collisionCandidates.size())
-				lastCollisionCandidatesCount = collisionCandidates.size()
-			}
+		collisionCandidatesFunction.calculate(scene, collisionCandidates)
+		if (collisionCandidates.size() != lastCollisionCandidatesCount) {
+			logger.debug('Collision candidates: {}', collisionCandidates.size())
+			lastCollisionCandidatesCount = collisionCandidates.size()
+		}
 
-			collisionCandidates.each { pair ->
-				var (collider, otherCollider) = pair
+		for (var i = 0; i < collisionCandidates.size(); i += 2) {
+			var collider = collisionCandidates[i]
+			var otherCollider = collisionCandidates[i + 1]
 
-				var existingCollision = collisions[collider] == otherCollider
-				if (collider.checkCollision(otherCollider)) {
-					if (existingCollision) {
-						// Do nothing - we don't have a 'collision continue' event
-					}
-					else {
-						collisions[collider] = otherCollider
-						collisions[otherCollider] = collider
-						collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
-						collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
-					}
+			var existingCollision = collisions[collider] == otherCollider
+			if (collider.checkCollision(otherCollider)) {
+				if (existingCollision) {
+					// Do nothing - we don't have a 'collision continue' event
 				}
-				else if (existingCollision) {
-					collisions.remove(collider)
-					collisions.remove(otherCollider)
-					collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
-					collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
+				else {
+					collisions[collider] = otherCollider
+					collisions[otherCollider] = collider
+					collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
+					collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
 				}
 			}
-			collisionEvents*.join()
-
-			if (collisionEvents.size() != lastCollisionEventsCount) {
-				if (collisionEvents) {
-					logger.debug('Collision events: {}', collisionEvents.size())
-				}
-				lastCollisionEventsCount = collisionEvents.size()
+			else if (existingCollision) {
+				collisions.remove(collider)
+				collisions.remove(otherCollider)
+				collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
+				collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
 			}
 		}
+		collisionEvents*.join()
+
+//		if (collisionEvents.size() != lastCollisionEventsCount) {
+//			if (collisionEvents) {
+//				logger.debug('Collision events: {}', collisionEvents.size())
+//			}
+//			lastCollisionEventsCount = collisionEvents.size()
+//		}
 	}
 
 	/**

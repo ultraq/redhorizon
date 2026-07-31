@@ -29,8 +29,9 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 interface CollisionCandidatesFunction {
 
 	/**
-	 * Given the scene, return a list of pairs of colliders for which collision
-	 * checks should be performed.
+	 * Given the scene, return a list of pairs of colliders (ie: add a collider to
+	 * position n, and the other one in n + 1) for which collision checks should
+	 * be performed.
 	 *
 	 * @param scene
 	 * @param results
@@ -38,5 +39,5 @@ interface CollisionCandidatesFunction {
 	 * @return
 	 *   The {@code results} list.
 	 */
-	List<Tuple2<Collider, Collider>> calculate(Scene scene, List<Tuple2<Collider, Collider>> results)
+	List<Collider> calculate(Scene scene, List<Collider> results)
 }
