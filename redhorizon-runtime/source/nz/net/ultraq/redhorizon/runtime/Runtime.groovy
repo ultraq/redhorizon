@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
+import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.physics.PhysicsSystem
@@ -102,6 +103,7 @@ final class Runtime {
 
 	// Physics options
 	int physicsFixedUpdateFrequency
+	CollisionCandidatesFunction collisionCandidatesFunction
 
 	// Resource manager options
 	String resourceManagerPathPrefix
@@ -178,7 +180,8 @@ final class Runtime {
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency)
 							.addSystem(new MovementSystem())
-							.addSystem(new CollisionSystem())
+							.addSystem(new CollisionSystem()
+								.withCollisionCandidatesFunction(collisionCandidatesFunction))
 						)
 						.addSystem(new SceneUpdateSystem())
 						.addSystem(new DebugCollisionOutlineSystem())

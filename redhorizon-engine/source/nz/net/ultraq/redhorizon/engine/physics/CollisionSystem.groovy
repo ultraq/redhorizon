@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.physics.Collider
 import nz.net.ultraq.redhorizon.physics.CollisionEndEvent
 import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
-import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
@@ -37,57 +36,46 @@ class CollisionSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(CollisionSystem)
 
-	private final List<Collider> colliders = new ArrayList<>()
-	private int lastCollidersCount = 0
+	private CollisionCandidatesFunction collisionCandidatesFunction = new DefaultCollisionCandidatesFunction()
+	private final List<Tuple2<Collider, Collider>> collisionCandidates = new ArrayList<>()
+	private int lastCollisionCandidatesCount = 0
 	private final List<CompletableFuture<Void>> collisionEvents = new ArrayList<>()
 	private int lastCollisionEventsCount = 0
 	private final Map<Collider, Collider> collisions = new HashMap<>()
-	private int lastCollisionChecksCount = 0
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update: {}ms', 1f, logger) { ->
-			colliders.clear()
 			collisionEvents.clear()
-			int collisionChecks = 0
+			collisionCandidates.clear()
 
-			scene.findAll(Collider, colliders)
-			if (colliders.size() != lastCollidersCount) {
-				logger.debug('Colliders: {}', colliders.size())
-				lastCollidersCount = colliders.size()
+			collisionCandidatesFunction.calculate(scene, collisionCandidates)
+			if (collisionCandidates.size() != lastCollisionCandidatesCount) {
+				logger.debug('Collision candidates: {}', collisionCandidates.size())
+				lastCollisionCandidatesCount = collisionCandidates.size()
 			}
 
-			colliders.each { collider ->
-				// Skip collision checks on disabled and stationary objects
-				if (!collider.enabled || !collider.parent.find(MovementNode)) {
-					return
-				}
-				colliders.each { otherCollider ->
-					// Skip collision checks on disabled objects and itself
-					if (!otherCollider.enabled || otherCollider == collider) {
-						return
-					}
-					collisionChecks++
+			collisionCandidates.each { pair ->
+				var (collider, otherCollider) = pair
 
-					var existingCollision = collisions[collider] == otherCollider
-					if (collider.checkCollision(otherCollider)) {
-						if (existingCollision) {
-							// Do nothing - we don't have a 'collision continue' event
-						}
-						else {
-							collisions[collider] = otherCollider
-							collisions[otherCollider] = collider
-							collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
-							collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
-						}
+				var existingCollision = collisions[collider] == otherCollider
+				if (collider.checkCollision(otherCollider)) {
+					if (existingCollision) {
+						// Do nothing - we don't have a 'collision continue' event
 					}
-					else if (existingCollision) {
-						collisions.remove(collider)
-						collisions.remove(otherCollider)
-						collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
-						collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
+					else {
+						collisions[collider] = otherCollider
+						collisions[otherCollider] = collider
+						collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
+						collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
 					}
+				}
+				else if (existingCollision) {
+					collisions.remove(collider)
+					collisions.remove(otherCollider)
+					collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
+					collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
 				}
 			}
 			collisionEvents*.join()
@@ -98,11 +86,17 @@ class CollisionSystem extends System {
 				}
 				lastCollisionEventsCount = collisionEvents.size()
 			}
-
-			if (collisionChecks != lastCollisionChecksCount) {
-				logger.debug('Collision checks: {}', collisionChecks)
-				lastCollisionChecksCount = collisionChecks
-			}
 		}
+	}
+
+	/**
+	 * Update the collision check function used by the collision system.
+	 */
+	CollisionSystem withCollisionCandidatesFunction(CollisionCandidatesFunction collisionCandidatesFunction) {
+
+		if (collisionCandidatesFunction) {
+			this.collisionCandidatesFunction = collisionCandidatesFunction
+		}
+		return this
 	}
 }
