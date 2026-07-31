@@ -44,7 +44,7 @@ class SceneTests extends Specification {
 		when:
 			var startTime = System.currentTimeMillis()
 			while (true) {
-				averageNanos('find', 1f, logger) { ->
+				averageNanos('find avg {}ns', 1f, logger) { ->
 					scene.find(MovementNode)
 				}
 				if (System.currentTimeMillis() - startTime > 5000) {

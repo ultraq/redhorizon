@@ -245,9 +245,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	Matrix4fc getGlobalTransform() {
 
-		return parent ?
-			parent.globalTransform.mul(transform, globalTransformResult) :
-			transform.get(globalTransformResult)
+		return globalTransformResult
 	}
 
 	/**
@@ -371,6 +369,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T resetTransform() {
 
 		transform.identity()
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -380,6 +379,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T rotate(float x, float y, float z) {
 
 		transform.rotateXYZ(x, y, z)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -389,6 +389,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T scale(float x, float y, float z = 1f) {
 
 		transform.scale(x, y, z)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -406,6 +407,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T setPosition(float x, float y, float z = 0f) {
 
 		transform.setTranslation(x, y, z)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -415,6 +417,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T setPosition(Vector3fc position) {
 
 		transform.setTranslation(position)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -424,6 +427,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T setRotation(float x, float y, float z) {
 
 		transform.setRotationXYZ(x, y, z)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -433,6 +437,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T setTransform(Matrix4fc fromTransform) {
 
 		transform.set(fromTransform)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -442,6 +447,7 @@ class Node<T extends Node> implements AutoCloseable {
 	T translate(float x, float y, float z = 0f) {
 
 		transform.translate(x, y, z)
+		updateGlobalTransform()
 		return (T)this
 	}
 
@@ -469,6 +475,23 @@ class Node<T extends Node> implements AutoCloseable {
 		else {
 			children*.traverse(type, visitor)
 		}
+	}
+
+	/**
+	 * Called after this node's transform has changed, notify each child node to
+	 * recalculate its global transform.
+	 */
+	@SuppressWarnings('GroovyInfiniteRecursion')
+	protected void updateGlobalTransform() {
+
+		if (parent) {
+			parent.globalTransform.mul(transform, globalTransformResult)
+		}
+		else {
+			transform.get(globalTransformResult)
+		}
+
+		children*.updateGlobalTransform()
 	}
 
 	/**
