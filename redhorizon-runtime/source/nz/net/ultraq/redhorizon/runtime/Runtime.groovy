@@ -94,6 +94,8 @@ final class Runtime {
 	Colour windowBackgroundColour = Colour.BLACK
 	int windowWidth = 800
 	int windowHeight = 600
+	int cameraWidth
+	int cameraHeight
 	int framebufferWidth
 	int framebufferHeight
 	Supplier<List<Shader>> additionalShaders
@@ -162,7 +164,7 @@ final class Runtime {
 				.run { ->
 
 					// Init scene and systems
-					var camera = new Camera(windowWidth, windowHeight)
+					var camera = new Camera(cameraWidth ?: windowWidth, cameraHeight ?: windowHeight)
 					var listener = new ListenerNode()
 						.withGain(audioListenerGain)
 					scene = application.configureScene(
