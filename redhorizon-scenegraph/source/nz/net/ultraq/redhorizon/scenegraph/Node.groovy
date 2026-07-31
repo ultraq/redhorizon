@@ -98,20 +98,22 @@ class Node<T extends Node> implements AutoCloseable {
 	}
 
 	/**
-	 * Disable this object.
+	 * Disable this and all child nodes.
 	 */
 	T disable() {
 
 		enabled = false
+		children*.disable()
 		return (T)this
 	}
 
 	/**
-	 * Enable this object.
+	 * Enable this and all child nodes.
 	 */
 	T enable() {
 
 		enabled = true
+		children*.enable()
 		return (T)this
 	}
 
@@ -324,7 +326,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	boolean isDisabled() {
 
-		return parent ? !enabled && parent.disabled : !enabled
+		return !enabled
 	}
 
 	/**
@@ -332,7 +334,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 */
 	boolean isEnabled() {
 
-		return parent ? enabled && parent.enabled : enabled
+		return enabled
 	}
 
 	/**

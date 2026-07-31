@@ -25,7 +25,34 @@ import spock.lang.Specification
  */
 class NodeTests extends Specification {
 
-	def 'find locates the matching descendant node'() {
+	def '#disable - disables this and all child nodes'() {
+		given:
+			var parent = new Node()
+				.withName('Parent')
+				.addChild(new Node().withName('Child 1'))
+				.addChild(new Node().withName('Child 2'))
+		when:
+			parent.disable()
+		then:
+			parent.disabled
+			parent.children.every { it.disabled }
+	}
+
+	def '#enable - enables this and all child nodes'() {
+		given:
+			var parent = new Node()
+				.withName('Parent')
+				.addChild(new Node().withName('Child 1'))
+				.addChild(new Node().withName('Child 2'))
+				.disable()
+		when:
+			parent.enable()
+		then:
+			parent.enabled
+			parent.children.every { it.enabled }
+	}
+
+	def '#find - locates the matching descendant node'() {
 		given:
 			var root = new Node()
 				.addChild(new Node().withName('Child')
