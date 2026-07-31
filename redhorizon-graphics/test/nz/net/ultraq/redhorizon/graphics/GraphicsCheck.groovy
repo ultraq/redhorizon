@@ -75,7 +75,7 @@ class GraphicsCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 	}
 
 	def "Opens a window with the debug overlay"() {
@@ -96,7 +96,7 @@ class GraphicsCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			emptyFramebuffer?.close()
 	}
@@ -123,7 +123,7 @@ class GraphicsCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			triangle?.close()
 			shader?.close()
@@ -149,7 +149,7 @@ class GraphicsCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			sprite?.close()
 			image?.close()

@@ -90,7 +90,7 @@ class PhysicsSystemTests extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			scene?.close()
 			shader?.close()

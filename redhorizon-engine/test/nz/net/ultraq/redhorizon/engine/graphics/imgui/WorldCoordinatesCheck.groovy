@@ -114,7 +114,7 @@ class WorldCoordinatesCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			gridLines?.close()
 	}

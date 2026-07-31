@@ -108,7 +108,7 @@ class ShadowShaderTests extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			shadowShader?.close()
 			sprite?.close()

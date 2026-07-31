@@ -106,6 +106,6 @@ class ImGuiElementsCheck extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 	}
 }

@@ -109,7 +109,7 @@ class VideoDecoders extends Specification {
 			}
 			video.stop()
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			shader?.close()
 			video?.close()

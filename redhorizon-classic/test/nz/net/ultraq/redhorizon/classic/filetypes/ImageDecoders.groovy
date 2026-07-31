@@ -102,7 +102,7 @@ class ImageDecoders extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			shader?.close()
 			sprite?.close()
@@ -136,7 +136,7 @@ class ImageDecoders extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			shader?.close()
 			sprite?.close()
@@ -201,7 +201,7 @@ class ImageDecoders extends Specification {
 				Thread.yield()
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			alphaMask?.close()
 			swapMap?.close()
@@ -245,7 +245,7 @@ class ImageDecoders extends Specification {
 			}
 			animation.stop()
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			shader?.close()
 			animation?.close()

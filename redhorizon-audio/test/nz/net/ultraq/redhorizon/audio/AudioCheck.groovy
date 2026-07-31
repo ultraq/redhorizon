@@ -62,7 +62,7 @@ class AudioCheck extends Specification {
 				Thread.sleep(500)
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			source?.close()
 			sound?.close()

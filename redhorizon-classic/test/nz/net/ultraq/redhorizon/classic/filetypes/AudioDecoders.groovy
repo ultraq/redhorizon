@@ -67,7 +67,7 @@ class AudioDecoders extends Specification {
 				Thread.sleep(500)
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			source?.close()
 			sound?.close()
@@ -89,7 +89,7 @@ class AudioDecoders extends Specification {
 				}
 			}
 		then:
-			notThrown(Exception)
+			noExceptionThrown()
 		cleanup:
 			music?.close()
 			inputStream?.close()
