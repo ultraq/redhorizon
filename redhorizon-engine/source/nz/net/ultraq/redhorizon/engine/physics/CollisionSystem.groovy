@@ -50,9 +50,10 @@ class CollisionSystem extends System {
 		collisionCandidates.clear()
 
 		collisionCandidatesFunction.calculate(scene, collisionCandidates)
-		if (collisionCandidates.size() != lastCollisionCandidatesCount) {
-			logger.debug('Collision candidates: {}', collisionCandidates.size())
-			lastCollisionCandidatesCount = collisionCandidates.size()
+		var collisionCandidatesCount = collisionCandidates.size() / 2 as int
+		if (collisionCandidatesCount != lastCollisionCandidatesCount) {
+			logger.debug('Collision candidates: {}', collisionCandidatesCount)
+			lastCollisionCandidatesCount = collisionCandidatesCount
 		}
 
 		for (var i = 0; i < collisionCandidates.size(); i += 2) {

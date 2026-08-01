@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon
 
+import nz.net.ultraq.redhorizon.CollisionSimulation.CollisionSimulationCandidateFunction
 import nz.net.ultraq.redhorizon.runtime.Runtime
 
 import org.joml.primitives.Rectanglef
@@ -37,6 +38,7 @@ class PerformanceTests extends Specification {
 			var simulation = new CollisionSimulation(new Rectanglef(-400f, -300f, 400f, 300f))
 		when:
 			new Runtime(simulation)
+				.withCollisionCandidatesFunction(new CollisionSimulationCandidateFunction())
 				.execute()
 		then:
 			noExceptionThrown()
