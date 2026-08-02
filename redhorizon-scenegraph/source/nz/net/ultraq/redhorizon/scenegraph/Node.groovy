@@ -67,6 +67,7 @@ class Node<T extends Node> implements AutoCloseable {
 		child.parent = this
 		scene?.trigger(new NodeAddedEvent(child))
 		addMappings(child)
+		child.updateGlobalTransform()
 		return (T)this
 	}
 
@@ -316,6 +317,7 @@ class Node<T extends Node> implements AutoCloseable {
 		child.parent = this
 		scene?.trigger(new NodeAddedEvent(child))
 		addMappings(child)
+		child.updateGlobalTransform()
 		return (T)this
 	}
 
