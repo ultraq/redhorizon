@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
@@ -123,6 +124,14 @@ class UiController extends Script implements EventTarget<UiController> {
 		entries.sort()
 	}
 
+	/**
+	 * Locate a script by its type.
+	 */
+	private <T extends Script> T findScript(Class<T> scriptClass) {
+
+		return (T)node.scene.findAll(ScriptNode).find { it.scriptClass == scriptClass }?.script
+	}
+
 	@Override
 	void init() {
 
@@ -133,7 +142,7 @@ class UiController extends Script implements EventTarget<UiController> {
 		entryList
 			.relay(EntrySelectedEvent, node.scene)
 			.on(EntrySelectedEvent) { event ->
-				new SelectEntryAction(this, node.scene.findScript(PreviewController), event.entry()).select()
+				new SelectEntryAction(this, findScript(PreviewController), event.entry()).select()
 			}
 			.on(ExtractMixEntryEvent) { event ->
 				new ExtractMixFileEntryAction(event.entry(), event.entry().name()).extract() // TODO: Save to specified location

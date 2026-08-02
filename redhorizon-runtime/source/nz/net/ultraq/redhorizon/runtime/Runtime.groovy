@@ -22,8 +22,12 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
+import nz.net.ultraq.redhorizon.engine.debug.DebugEverythingBinding
+import nz.net.ultraq.redhorizon.engine.debug.DebugStore
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
@@ -39,11 +43,13 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
@@ -110,7 +116,7 @@ final class Runtime {
 
 	// Debugging options
 	Supplier<GridLines> gridLines = { ->
-		return new GridLines(new Rectanglef(0f, 0f, framebufferWidth, framebufferHeight).center(), 50f,
+		return new GridLines(new Rectanglef(0f, 0f, framebuffer.width, framebuffer.height).center(), 50f,
 			new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY)
 	}
 
@@ -122,6 +128,42 @@ final class Runtime {
 		version = new VersionReader('runtime.properties').read()
 		logger.debug('Red Horizon runtime version {}, for application {} {}', version, application.name, application.version)
 		this.application = application
+	}
+
+	/**
+	 * Add all of the debug components in one go.
+	 */
+	private static Scene addDebugComponents(Scene scene, Window window, Camera camera, InputEventHandler inputEventHandler,
+		GridLines gridLines) {
+
+		scene.addChild(new DebugStore())
+		scene.addChild(
+			gridLines
+				.withName('Grid lines')
+				.disable()
+		)
+		var debugOverlay = new DebugOverlay()
+			.withCursorTracking(window, camera)
+			.withProfilingLogging()
+			.disable()
+		var nodeListComponent = new NodeList(scene)
+			.disable()
+		var logPanelComponent = new LogPanel()
+			.disable()
+		scene.addChild(
+			new Node()
+				.addChild(debugOverlay)
+				.addChild(nodeListComponent)
+				.addChild(logPanelComponent)
+				.withName('Debug UI')
+		)
+
+		var debugEverythingBinding = new DebugEverythingBinding(scene)
+		inputEventHandler
+			.addImGuiOverlayBinding([debugOverlay])
+			.addInputBinding(debugEverythingBinding)
+
+		return scene
 	}
 
 	/**
@@ -170,10 +212,11 @@ final class Runtime {
 					var listener = new ListenerNode()
 						.withGain(audioListenerGain)
 					scene = application.configureScene(
-						new Scene()
-							.addChild(camera
-								.addChild(listener)) // Listener is attached to the camera
-							.addDebugComponents(window, camera, inputEventHandler, gridLines.get())
+						addDebugComponents(
+							new Scene()
+								.addChild(camera
+									.addChild(listener)), // Listener is attached to the camera
+							window, camera, inputEventHandler, gridLines.get())
 					)
 					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
