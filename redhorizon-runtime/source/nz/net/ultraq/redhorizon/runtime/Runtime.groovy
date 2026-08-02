@@ -108,7 +108,7 @@ final class Runtime {
 	Supplier<List<Shader>> additionalShaders
 
 	// Simulation options
-	int simulationMinimumUpdateFrequency
+	int simulationMinimumUpdateFrequency = 60
 	CollisionCandidatesFunction collisionCandidatesFunction
 
 	// Resource manager options

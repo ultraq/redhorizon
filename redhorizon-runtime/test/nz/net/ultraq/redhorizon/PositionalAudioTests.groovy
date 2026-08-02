@@ -16,28 +16,21 @@
 
 package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.CollisionSimulation.CollisionSimulationCandidateFunction
 import nz.net.ultraq.redhorizon.runtime.Runtime
 
-import org.joml.primitives.Rectanglef
-import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
- * Some performance tests are best done with the entire stack (instead of just
- * sending snapshot releases to games in development), so build them from
- * top-to-bottom here.
+ * Move the cursor around and a sound queue should emit from that position.
  *
  * @author Emanuel Rabina
  */
-@IgnoreIf({ env.CI })
-class PerformanceTests extends Specification {
+class PositionalAudioTests extends Specification {
 
-	def 'Collision simulation'() {
+	def "Emit a sound from the cursor position"() {
 		when:
-			new Runtime(new CollisionSimulation(new Rectanglef(-400f, -300f, 400f, 300f)))
-				.withSimulationMinimumUpdateFrequency(60)
-				.withCollisionCandidatesFunction(new CollisionSimulationCandidateFunction())
+			new Runtime(new PositionalAudioScene())
+				.withAudioListenerGain(0.5f)
 				.execute()
 		then:
 			noExceptionThrown()
