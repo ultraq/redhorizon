@@ -208,7 +208,7 @@ final class Runtime {
 				.run { ->
 
 					// Init scene and systems
-					var camera = new Camera(cameraWidth ?: windowWidth, cameraHeight ?: windowHeight)
+					var camera = new Camera(cameraWidth ?: framebuffer.width, cameraHeight ?: framebuffer.height)
 					var listener = new ListenerNode()
 						.withGain(audioListenerGain)
 					scene = application.configureScene(
