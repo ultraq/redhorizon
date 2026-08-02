@@ -38,6 +38,7 @@ class PerformanceTests extends Specification {
 			var simulation = new CollisionSimulation(new Rectanglef(-400f, -300f, 400f, 300f))
 		when:
 			new Runtime(simulation)
+				.withSimulationMinimumUpdateFrequency(60)
 				.withCollisionCandidatesFunction(new CollisionSimulationCandidateFunction())
 				.execute()
 		then:

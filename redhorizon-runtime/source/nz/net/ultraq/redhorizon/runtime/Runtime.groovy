@@ -32,7 +32,7 @@ import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
-import nz.net.ultraq.redhorizon.engine.physics.PhysicsSystem
+import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
@@ -107,8 +107,8 @@ final class Runtime {
 	int framebufferHeight
 	Supplier<List<Shader>> additionalShaders
 
-	// Physics options
-	int physicsFixedUpdateFrequency
+	// Simulation options
+	int simulationMinimumUpdateFrequency
 	CollisionCandidatesFunction collisionCandidatesFunction
 
 	// Resource manager options
@@ -221,10 +221,13 @@ final class Runtime {
 					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler))
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-						.addSystem(new PhysicsSystem(physicsFixedUpdateFrequency,
-							new MovementSystem(),
-							new CollisionSystem()
-								.withCollisionCandidatesFunction(collisionCandidatesFunction))
+						.addSystem(
+							new SimulationSystem(
+								new MovementSystem(),
+								new CollisionSystem()
+									.withCollisionCandidatesFunction(collisionCandidatesFunction)
+							)
+								.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 						)
 						.addSystem(new SceneUpdateSystem())
 						.addSystem(new DebugCollisionOutlineSystem())
