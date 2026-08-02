@@ -53,8 +53,9 @@ class CollisionSimulation extends Application {
 	protected Scene configureScene(Scene scene) {
 
 		scene.addChild(new ScreenEdges(sceneSize))
+		var entities = scene.addAndReturnChild(new Node().withName('Entities'))
 		100.times { i ->
-			scene.addChild(new CollisionObject(sceneSize, i))
+			entities.addChild(new CollisionObject(sceneSize, i))
 		}
 		scene.find(DebugOverlay).enable()
 		return scene
