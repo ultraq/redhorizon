@@ -63,12 +63,12 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 
 		var fontConfig = new ImFontConfig()
 		defaultFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/Roboto-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale as float, fontConfig)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale * window.renderScale as float, fontConfig)
 		}
 		io.setFontDefault(defaultFont)
 
 		monospaceFont = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/imgui/RobotoMono-Medium.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale as float, fontConfig)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16f * uiScale * window.renderScale as float, fontConfig)
 		}
 
 		io.fonts.build()
@@ -76,6 +76,7 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 		imGuiGlfw.init(windowHandle, true)
 		imGuiGl3.init('#version 410 core')
 
+		ImGui.style.fontScaleMain = 1f / window.renderScale as float
 		ImGui.style.scaleAllSizes(uiScale)
 		gameWindow = new GameWindow()
 	}
