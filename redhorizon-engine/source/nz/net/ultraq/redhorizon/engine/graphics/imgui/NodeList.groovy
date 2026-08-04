@@ -40,6 +40,7 @@ class NodeList extends ImGuiModule<NodeList> {
 	final boolean debug = true
 	final Scene scene
 	private Node selectedNode
+	private int index
 
 	@Override
 	void render(ImGuiContext context) {
@@ -50,6 +51,7 @@ class NodeList extends ImGuiModule<NodeList> {
 		ImGui.popStyleVar()
 
 		// Node list
+		index = 0
 		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
 			scene.root.children.each { child ->
 				renderNode(child)
@@ -72,6 +74,7 @@ class NodeList extends ImGuiModule<NodeList> {
 		if (node == selectedNode) {
 			flags |= Selected
 		}
+		ImGui.pushID("${index++}${node.name}")
 		if (ImGui.treeNodeEx(node.name, flags)) {
 			if (ImGui.isItemClicked() && !ImGui.isItemToggledOpen()) {
 				selectedNode = node
@@ -81,5 +84,6 @@ class NodeList extends ImGuiModule<NodeList> {
 			}
 			ImGui.treePop()
 		}
+		ImGui.popID()
 	}
 }
