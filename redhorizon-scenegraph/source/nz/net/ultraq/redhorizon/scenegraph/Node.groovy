@@ -66,22 +66,9 @@ class Node<T extends Node> implements AutoCloseable {
 		children.add(child)
 		child.parent = this
 		scene?.trigger(new NodeAddedEvent(child))
-		addMappings(child)
+		updateMappings(child, null)
 		child.updateGlobalTransform()
 		return (T)this
-	}
-
-	/**
-	 * Fill out the mapping collections for the given node.
-	 */
-	private void addMappings(Node node) {
-
-		nameMap[node.name] = node
-		var nodeClass = node.class
-		while (nodeClass && nodeClass != Object) {
-			typeMap.getOrCreate(nodeClass) { [] } << node
-			nodeClass = nodeClass.superclass
-		}
 	}
 
 	/**
@@ -316,7 +303,7 @@ class Node<T extends Node> implements AutoCloseable {
 		children.add(Math.max(children.indexOf(before), 0), child)
 		child.parent = this
 		scene?.trigger(new NodeAddedEvent(child))
-		addMappings(child)
+		updateMappings(child, null)
 		child.updateGlobalTransform()
 		return (T)this
 	}
@@ -362,6 +349,7 @@ class Node<T extends Node> implements AutoCloseable {
 		children.remove(child)
 		child.parent = null
 		scene?.trigger(new NodeRemovedEvent(child))
+		updateMappings(null, child)
 		return (T)this
 	}
 
@@ -494,6 +482,29 @@ class Node<T extends Node> implements AutoCloseable {
 		}
 
 		children*.updateGlobalTransform()
+	}
+
+	/**
+	 * Fill out the mapping collections for the given node.
+	 */
+	private void updateMappings(Node addition, Node removal) {
+
+		if (addition) {
+			nameMap[addition.name] = addition
+			var nodeClass = addition.class
+			while (nodeClass && nodeClass != Object) {
+				typeMap.getOrCreate(nodeClass) { [] } << addition
+				nodeClass = nodeClass.superclass
+			}
+		}
+		if (removal) {
+			nameMap.remove(removal.name)
+			var nodeClass = removal.class
+			while (nodeClass && nodeClass != Object) {
+				typeMap[nodeClass]?.remove(removal)
+				nodeClass = nodeClass.superclass
+			}
+		}
 	}
 
 	/**

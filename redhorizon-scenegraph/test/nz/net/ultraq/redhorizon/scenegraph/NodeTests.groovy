@@ -62,4 +62,14 @@ class NodeTests extends Specification {
 		then:
 			result.name == 'Grandchild'
 	}
+
+	def 'Updates internal mappings after child removal'() {
+		given:
+			var root = new Node()
+				.addChild(new Node().withName('Child'))
+		when:
+			root.removeChild(root.find('Child'))
+		then:
+			root.find('Child') == null
+	}
 }
