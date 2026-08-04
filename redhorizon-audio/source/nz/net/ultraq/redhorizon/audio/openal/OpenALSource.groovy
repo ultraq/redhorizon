@@ -38,6 +38,9 @@ class OpenALSource implements Source {
 	OpenALSource() {
 
 		sourceId = alGenSources()
+		if (!sourceId) {
+			throw new IllegalStateException('Unable to create OpenAL source')
+		}
 	}
 
 	@Override
