@@ -17,8 +17,10 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.Device
+import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.ListenerNode
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
+import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Video
@@ -46,12 +48,15 @@ class VideoDecoders extends Specification {
 	}
 
 	Device device
+	Listener listener
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
 	DebugOverlay debugOverlay
 
 	def setup() {
 		device = new OpenALDevice()
+		listener = new OpenALListener()
+			.withGain(0.5f)
 		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
@@ -68,8 +73,9 @@ class VideoDecoders extends Specification {
 
 	def cleanup() {
 		framebuffer?.close()
-		device?.close()
 		window?.close()
+		listener?.close()
+		device?.close()
 	}
 
 	def 'Play a VQA file using the VideoDecoder SPI'() {
@@ -78,7 +84,7 @@ class VideoDecoders extends Specification {
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream)
 				.scale(1f, 1.2f)
 			var shader = new BasicShader()
-			var camera = new Camera(320, 200, window::getViewport)
+			var camera = new Camera(320, 200)
 			var listener = new ListenerNode()
 		when:
 			window.show()

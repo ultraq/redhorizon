@@ -72,7 +72,7 @@ class ImGuiElementsCheck extends Specification {
 				.addChild(new Node().withName('Child 1'))
 				.addChild(new Node().withName('Child 2'))
 
-			var camera = new Camera(800, 500, window::getViewport)
+			var camera = new Camera(800, 500)
 				.translate(450f, 200f)
 			var debugOverlay = new DebugOverlay()
 				.addModule(new CursorTrackingOverlayModule(window, camera))

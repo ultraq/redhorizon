@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.Music
+import nz.net.ultraq.redhorizon.audio.SourceNode
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
@@ -48,6 +49,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 	private final Animation animation
 	private final Music music
+	private final SourceNode musicSource
 	private final ExecutorService executor = Executors.newSingleThreadExecutor()
 	private Future<?> decodingTask
 	private volatile boolean animationReady
@@ -79,7 +81,8 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 			.on(Music.PlaybackReadyEvent) { event ->
 				musicReady = true
 			}
-		addChild(music)
+		musicSource = new SourceNode()
+		addChild(musicSource)
 
 		decodingTask = executor.submit { ->
 			Thread.currentThread().name = "Video ${fileName} :: Decoding"
@@ -99,7 +102,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 		}
 
 		// Let each of the animation and music streams fill up first
-		while (!(animationReady && musicReady)) {
+		while (!animationReady || !musicReady) {
 			Thread.onSpinWait()
 		}
 		update(0f)
@@ -110,7 +113,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 		stop()
 		executor.close()
-		music.close()
+		musicSource.close()
 		animation.close()
 	}
 
@@ -136,7 +139,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	Video play() {
 
 		animation.play()
-		music.play()
+		musicSource.play()
 		return this
 	}
 
@@ -153,7 +156,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	 */
 	void render() {
 
-		music.render()
+		musicSource.render()
 	}
 
 	/**
@@ -163,7 +166,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 		decodingTask.cancel(true)
 		animation.stop()
-		music.stop()
+		musicSource.stop()
 		return this
 	}
 
@@ -173,6 +176,6 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	void update(float delta) {
 
 		animation.update(delta)
-		music.update()
+		music.update(musicSource.source) // TODO: Needs better API 🤔
 	}
 }

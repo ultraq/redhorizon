@@ -28,9 +28,15 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
 class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode> {
 
 	private final Source source
-	private final Sound sound
-	private final Music music
 	private State state = State.STOPPED
+
+	/**
+	 * Constructor, create an audio source.
+	 */
+	SourceNode() {
+
+		source = new OpenALSource()
+	}
 
 	/**
 	 * Constructor, create an audio source attached to sound effect data.
@@ -38,19 +44,6 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	SourceNode(Sound sound) {
 
 		source = new OpenALSource().attachBuffer(sound.buffer)
-		this.sound = sound
-		music = null
-	}
-
-	/**
-	 * Constructor, create an audio source attached to streaming sound data.
-	 */
-	SourceNode(Music music) {
-
-		source = new OpenALSource()
-		music.update(source)
-		this.music = music
-		sound = null
 	}
 
 	@Override
@@ -115,7 +108,6 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 			state = currentState
 		}
 
-		music?.update(source)
 		source.withPosition(globalPosition)
 	}
 

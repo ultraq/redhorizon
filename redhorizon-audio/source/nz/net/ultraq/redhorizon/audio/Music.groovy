@@ -166,7 +166,7 @@ class Music implements AutoCloseable, EventTarget<Music> {
 				source.queueBuffers(buffer)
 				streamedBuffers << buffer
 			}
-			buffersQueued += buffersAhead
+			buffersQueued += eventDrain.size()
 		}
 
 		// Close any used buffers (n/a for looping tracks)
