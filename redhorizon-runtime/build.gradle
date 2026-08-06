@@ -37,6 +37,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
+				api project(':joml-extensions')
 				api project(':redhorizon-audio')
 				api project(':redhorizon-classic')
 				api project(':redhorizon-engine')
@@ -44,7 +45,6 @@ configure {
 				api project(':redhorizon-input')
 				api project(':redhorizon-physics')
 				api project(':redhorizon-scenegraph')
-				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 		.configureVerification()

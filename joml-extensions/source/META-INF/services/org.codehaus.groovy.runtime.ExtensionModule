@@ -14,20 +14,10 @@
 # limitations under the License.
 #
 
-group = nz.net.ultraq.redhorizon
-version = 0.43.2-SNAPSHOT
-
-eventHorizonVersion = 0.6.0
-groovyVersion = 5.0.7
-groovyExtensionsVersion = 4.0.1
-groovyProfilingExtensionsVersion = 0.12.0-SNAPSHOT
-imguiVersion = 1.92.7.1
-jomlPrimitivesVersion = 1.10.0
-jomlVersion = 1.10.9
-logbackVersion = 1.5.38
-lwjglVersion = 3.4.2
-picocliVersion = 4.7.7
-slf4jVersion = 2.0.18
-
-mockitoVersion = 5.23.0
-spockVersion = 2.4-groovy-5.0
+moduleName = joml-extensions
+moduleVersion = ${moduleVersion}
+extensionClasses = nz.net.ultraq.redhorizon.jomlextensions.CirclefExtensions,\
+                   nz.net.ultraq.redhorizon.jomlextensions.RectanglefExtensions,\
+                   nz.net.ultraq.redhorizon.jomlextensions.RectangleiExtensions,\
+                   nz.net.ultraq.redhorizon.jomlextensions.Vector2fExtensions
+staticExtensionClasses = nz.net.ultraq.redhorizon.jomlextensions.ConstantsExtensions

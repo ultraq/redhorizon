@@ -34,7 +34,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
+				implementation project(':joml-extensions')
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				api "org.joml:joml:${jomlVersion}"
 				api "org.joml:joml-primitives:${jomlPrimitivesVersion}"

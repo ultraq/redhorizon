@@ -40,6 +40,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
+				implementation project(':joml-extensions')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')
@@ -47,7 +48,6 @@ configure {
 				implementation project(':redhorizon-scenegraph')
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
-				implementation "nz.net.ultraq.groovy:joml-extensions:${jomlExtensionsVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
