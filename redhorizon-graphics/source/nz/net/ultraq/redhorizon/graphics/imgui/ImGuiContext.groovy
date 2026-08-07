@@ -51,6 +51,12 @@ interface ImGuiContext {
 	Rectanglei getUiArea()
 
 	/**
+	 * Get the factor between the requested framebuffer size, and the created one.
+	 * Useful for scaling items on some platforms so they match the intended size.
+	 */
+	float getRenderScale()
+
+	/**
 	 * Get the factor by which UI content should be scale to account for the
 	 * user's display.
 	 */

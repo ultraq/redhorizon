@@ -105,6 +105,12 @@ class ImGuiLayer implements ImGuiContext, GraphicsResource {
 	}
 
 	@Override
+	float getRenderScale() {
+
+		return window.renderScale
+	}
+
+	@Override
 	float getUiScale() {
 
 		return window.uiScale
