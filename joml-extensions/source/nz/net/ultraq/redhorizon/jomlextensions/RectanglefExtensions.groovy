@@ -54,7 +54,7 @@ class RectanglefExtensions {
 	 * includeBoudary} is set, then we also include whether the point lies on the
 	 * edge of the rectangle and count it as included if so.
 	 */
-	static boolean containsPoint(Rectanglef self, float x, float y, boolean includeBoundary = false) {
+	static boolean containsPoint(Rectanglef self, float x, float y, boolean includeBoundary) {
 
 		return includeBoundary ?
 			self.minX <= x && self.minY <= y && x <= self.maxX && y <= self.maxY :
