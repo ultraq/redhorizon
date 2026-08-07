@@ -28,7 +28,7 @@ configure {
 		}
 		.withJarOptions() {
 			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.joml-extensions'
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.jomlextensions'
 			}
 		}
 		.configureSource()

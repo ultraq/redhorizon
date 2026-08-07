@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph.partioning
+package nz.net.ultraq.redhorizon.engine.scene
 
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.FrustumIntersection
 import org.joml.Intersectionf
@@ -43,7 +43,6 @@ class QuadTree {
 	private final QuadTree parent
 	private final Rectanglef area
 	private final int capacity
-	// TODO: Make this quadtree accept any element that can return a Vector2f position
 	private List<Node> children = []
 	private List<QuadTree> quadrants // Going from NW, NE, SW, SE, to somewhat match the order of rendering objects
 
@@ -135,7 +134,8 @@ class QuadTree {
 
 		// For the literal edge case where the node lives right at the center of all
 		// of the quadrants, pick a random unfilled quadrant to place it into
-		if (position.x() == area.minX + area.lengthX() / 2 && position.y() == area.minY + area.lengthY() / 2) {
+		if (position.x() == area.minX + area.lengthX() / 2 as float &&
+			position.y() == area.minY + area.lengthY() / 2 as float) {
 			var randomQuadrantIndex = (int)Math.floor(Math.random() * 4)
 			var attempts = 0
 			while (true) {
@@ -162,7 +162,7 @@ class QuadTree {
 	 */
 	List<Node> query(FrustumIntersection frustumIntersection, List<Node> results = []) {
 
-		if (frustumIntersection.testPlaneXY(area)) {
+		if (frustumIntersection.testPlaneXY(area.minX, area.minY, area.maxX, area.maxY)) {
 			if (children) {
 				results.addAll(children)
 			}

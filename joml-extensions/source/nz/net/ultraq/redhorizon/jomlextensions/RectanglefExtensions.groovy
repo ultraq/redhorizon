@@ -50,6 +50,18 @@ class RectanglefExtensions {
 	}
 
 	/**
+	 * Check if this rectangle contains the given point {@code (x, y)}.  If {@code
+	 * includeBoudary} is set, then we also include whether the point lies on the
+	 * edge of the rectangle and count it as included if so.
+	 */
+	static boolean containsPoint(Rectanglef self, float x, float y, boolean includeBoundary = false) {
+
+		return includeBoundary ?
+			self.minX <= x && self.minY <= y && x <= self.maxX && y <= self.maxY :
+			self.containsPoint(x, y)
+	}
+
+	/**
 	 * Store and return the maxX/maxY components in the given vector.
 	 */
 	static Vector2f getMax(Rectanglef self, Vector2f result) {

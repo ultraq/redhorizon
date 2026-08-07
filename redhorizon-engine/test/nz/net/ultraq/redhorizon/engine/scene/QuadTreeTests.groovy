@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scenegraph.partitioning
+package nz.net.ultraq.redhorizon.engine.scene
 
-import nz.net.ultraq.redhorizon.engine.scenegraph.Node
-import nz.net.ultraq.redhorizon.engine.scenegraph.partioning.QuadTree
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.primitives.Rectanglef
 import spock.lang.Specification
