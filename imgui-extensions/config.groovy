@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-plugins {
-	id 'redhorizon-library'
-}
-
-description = 'Extensions for the ImGui library'
-
-configure {
-	asGroovyLibraryProject()
-		.withGroovyCompileOptions() {
-			groovyOptions.configurationScript = file('config.groovy')
-		}
-		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
-		}
-		.withJarOptions() {
-			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.imguiextensions'
-			}
-		}
-		.configureSource()
-			.withDependencies() {
-				api "io.github.spair:imgui-java-binding:${imguiVersion}"
-			}
+withConfig(configuration) {
+	ast(groovy.transform.CompileStatic)
 }
