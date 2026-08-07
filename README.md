@@ -88,14 +88,10 @@ way to learn about the systems and architectures used to make games interactive.
 This is where we are now, and the 0.40.0 and newer tags are a marker of this
 shift in focus where I've been using tutorials made for other game engines as a
 way to prove that what I'm doing can actually work.  The projects are simple,
-but built so far using Red Horizon as their basis are:
+but they've helped validate what I've been building so far.
 
-[redhorizon-libgdx-simplegame](https://github.com/ultraq/redhorizon-libgdx-simplegame)
 [![redhorizon-libgdx-simplegame](https://raw.githubusercontent.com/ultraq/redhorizon-libgdx-simplegame/refs/heads/main/screenshot.png)](https://github.com/ultraq/redhorizon-libgdx-simplegame)
 
-[redhorizon-unity-asteroids](https://github.com/ultraq/redhorizon-unity-asteroids)
 [![redhorizon-unity-asteroids](https://raw.githubusercontent.com/ultraq/redhorizon-unity-asteroids/refs/heads/main/screenshot-main.png)](https://github.com/ultraq/redhorizon-unity-asteroids)
 
-And there is also [redhorizon-shooter](https://github.com/ultraq/redhorizon-shooter)
-where I'm really just having a play with C&C's assets to do whatever thing I can
-think of in a twin-stick shooter environment.
+[![redhorizon-gdevelop-breakout](https://raw.githubusercontent.com/ultraq/redhorizon-gdevelop-breakout/refs/heads/main/screenshot.png)](https://github.com/ultraq/redhorizon-gdevelop-breakout)
