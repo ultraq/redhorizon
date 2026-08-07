@@ -40,6 +40,6 @@ class CirclefExtensions {
 	 */
 	static boolean intersects(Circlef self, Rectanglef other) {
 
-		return other.intersectsCircle(self)
+		return RectanglefExtensions.intersectsCircle(other, self)
 	}
 }

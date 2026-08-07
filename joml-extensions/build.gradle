@@ -22,6 +22,9 @@ description = 'Extensions to JOML objects to make some operations easier'
 
 configure {
 	asGroovyLibraryProject()
+		.withGroovyCompileOptions() {
+			groovyOptions.configurationScript = file('config.groovy')
+		}
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
 			link("https://javadoc.io/doc/org.joml/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
