@@ -52,99 +52,98 @@ class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList>
 
 		ImGui.setNextWindowSize(300, 500, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.begin('Current directory', new ImBoolean(true))
-		ImGui.popStyleVar()
+		ImGui.useWindow('Current directory', new ImBoolean(true)) { ->
 
-		focused = ImGui.isWindowFocused(ChildWindows)
-		hovered = ImGui.isWindowHovered()
+			focused = ImGui.isWindowFocused(ChildWindows)
+			hovered = ImGui.isWindowHovered()
 
-		// File list
-		if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
-			ImGui.tableSetupScrollFreeze(0, 1)
-			ImGui.tableSetupColumn('Name')
-			ImGui.tableSetupColumn('Type')
-			ImGui.tableSetupColumn('Size')
-			ImGui.tableSetupColumn('Description')
-			ImGui.tableHeadersRow()
+			// File list
+			if (ImGui.beginTable('FileTable', 4, BordersV | Resizable | RowBg | ScrollX | ScrollY | Sortable)) {
+				ImGui.tableSetupScrollFreeze(0, 1)
+				ImGui.tableSetupColumn('Name')
+				ImGui.tableSetupColumn('Type')
+				ImGui.tableSetupColumn('Size')
+				ImGui.tableSetupColumn('Description')
+				ImGui.tableHeadersRow()
 
-			var tableSortSpecs = ImGui.tableGetSortSpecs()
-			if (tableSortSpecs.specsDirty) {
+				var tableSortSpecs = ImGui.tableGetSortSpecs()
+				if (tableSortSpecs.specsDirty) {
 
-				// Take the special .. entry out to put back at the top after
-				var specialEntry = null
-				var specialEntryIndex = entries.findIndexOf { e -> e.name() == '/..' || e.name() == '..' }
-				if (specialEntryIndex != -1) {
-					specialEntry = entries.remove(specialEntryIndex)
-				}
-
-				var sortingColumnSpecs = tableSortSpecs.specs[0]
-				switch (sortingColumnSpecs.columnIndex) {
-					case 1 -> entries.sort { it.type() }
-					case 2 -> entries.sort { it.size() }
-					case 3 && entries[0] instanceof MixEntry -> entries.sort { ((MixEntry)it).description() }
-					default -> entries.sort { it.name() }
-				}
-				if (sortingColumnSpecs.sortDirection == ImGuiSortDirection.Descending) {
-					entries.reverse(true)
-				}
-
-				if (specialEntry) {
-					entries.add(0, specialEntry)
-				}
-
-				tableSortSpecs.specsDirty = false
-			}
-
-			entries.each { entry ->
-				ImGui.tableNextRow()
-
-				ImGui.tableSetColumnIndex(0)
-				// noinspection ChangeToOperator
-				var isSelected = selectedEntry.equals(entry)
-				if (ImGui.selectable(entry.name(), isSelected, SpanAllColumns)) {
-					updateSelection(entry)
-				}
-				if (isSelected) {
-					ImGui.setItemDefaultFocus()
-					if (!selectedEntryTriggered) {
-						trigger(new EntrySelectedEvent(entry))
-						selectedEntryTriggered = true
+					// Take the special .. entry out to put back at the top after
+					var specialEntry = null
+					var specialEntryIndex = entries.findIndexOf { e -> e.name() == '/..' || e.name() == '..' }
+					if (specialEntryIndex != -1) {
+						specialEntry = entries.remove(specialEntryIndex)
 					}
-					if (!ImGui.isItemVisible() && !entryVisibleOnce) {
-						ImGui.setScrollFromPosY(ImGui.getItemRectMinY())
-						entryVisibleOnce = true
+
+					var sortingColumnSpecs = tableSortSpecs.specs[0]
+					switch (sortingColumnSpecs.columnIndex) {
+						case 1 -> entries.sort { it.type() }
+						case 2 -> entries.sort { it.size() }
+						case 3 && entries[0] instanceof MixEntry -> entries.sort { ((MixEntry)it).description() }
+						default -> entries.sort { it.name() }
 					}
+					if (sortingColumnSpecs.sortDirection == ImGuiSortDirection.Descending) {
+						entries.reverse(true)
+					}
+
+					if (specialEntry) {
+						entries.add(0, specialEntry)
+					}
+
+					tableSortSpecs.specsDirty = false
 				}
-				if (entry instanceof MixEntry) {
-					if (ImGui.beginPopupContextItem()) {
-						if (ImGui.selectable('Extract')) {
-							trigger(new ExtractMixEntryEvent(entry))
-							ImGui.closeCurrentPopup()
+
+				entries.each { entry ->
+					ImGui.tableNextRow()
+
+					ImGui.tableSetColumnIndex(0)
+					// noinspection ChangeToOperator
+					var isSelected = selectedEntry.equals(entry)
+					if (ImGui.selectable(entry.name(), isSelected, SpanAllColumns)) {
+						updateSelection(entry)
+					}
+					if (isSelected) {
+						ImGui.setItemDefaultFocus()
+						if (!selectedEntryTriggered) {
+							trigger(new EntrySelectedEvent(entry))
+							selectedEntryTriggered = true
 						}
-						ImGui.endPopup()
+						if (!ImGui.isItemVisible() && !entryVisibleOnce) {
+							ImGui.setScrollFromPosY(ImGui.getItemRectMinY())
+							entryVisibleOnce = true
+						}
+					}
+					if (entry instanceof MixEntry) {
+						if (ImGui.beginPopupContextItem()) {
+							if (ImGui.selectable('Extract')) {
+								trigger(new ExtractMixEntryEvent(entry))
+								ImGui.closeCurrentPopup()
+							}
+							ImGui.endPopup()
+						}
+					}
+
+					ImGui.tableSetColumnIndex(1)
+					ImGui.text(entry.type() ?: '')
+
+					ImGui.tableSetColumnIndex(2)
+					if (!(entry instanceof FileEntry && entry.file().directory)) {
+						ImGui.useFont(context.monospaceFont, 0f) { ->
+							ImGui.text(sprintf('%,12d', entry.size()))
+						}
+					}
+
+					if (entry instanceof MixEntry && entry.description()) {
+						ImGui.tableSetColumnIndex(3)
+						ImGui.text(entry.description())
 					}
 				}
 
-				ImGui.tableSetColumnIndex(1)
-				ImGui.text(entry.type() ?: '')
-
-				ImGui.tableSetColumnIndex(2)
-				if (!(entry instanceof FileEntry && entry.file().directory)) {
-					ImGui.pushFont(context.monospaceFont, 0f)
-					ImGui.text(sprintf('%,12d', entry.size()))
-					ImGui.popFont()
-				}
-
-				if (entry instanceof MixEntry && entry.description()) {
-					ImGui.tableSetColumnIndex(3)
-					ImGui.text(entry.description())
-				}
+				ImGui.endTable()
 			}
-
-			ImGui.endTable()
 		}
-
-		ImGui.end()
+		ImGui.popStyleVar()
 	}
 
 	/**

@@ -61,24 +61,23 @@ class LogPanel extends ImGuiModule<LogPanel> {
 	void render(ImGuiContext context) {
 
 		ImGui.setNextWindowSize(800, 300, FirstUseEver)
-		ImGui.begin('Logs', new ImBoolean(true))
+		ImGui.useWindow('Logs', new ImBoolean(true)) { ->
 
-		if (logLines.size()) {
-			ImGui.separator()
-			ImGui.pushFont(context.monospaceFont, 0f)
-			logLines.eachWithIndex { line, i ->
-				ImGui.pushID("${i}${line}")
-				ImGui.selectable(line)
-				ImGui.popID()
-			}
-			ImGui.popFont()
+			if (logLines.size()) {
+				ImGui.separator()
+				ImGui.useFont(context.monospaceFont, 0f) { ->
+					logLines.eachWithIndex { line, i ->
+						ImGui.useId("${i}${line}") { ->
+							ImGui.selectable(line)
+						}
+					}
+				}
 
-			if (scrollToBottom) {
-				ImGui.setScrollHereY(1f)
-				scrollToBottom = false
+				if (scrollToBottom) {
+					ImGui.setScrollHereY(1f)
+					scrollToBottom = false
+				}
 			}
 		}
-
-		ImGui.end()
 	}
 }

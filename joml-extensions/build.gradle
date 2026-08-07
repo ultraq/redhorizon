@@ -33,7 +33,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				api "org.joml:joml:${jomlVersion}"
+				api "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }

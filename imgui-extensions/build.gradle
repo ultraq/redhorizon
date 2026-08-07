@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+plugins {
+	id 'redhorizon-library'
+}
 
-includeBuild 'redhorizon-build'
-include 'imgui-extensions'
-include 'joml-extensions'
-include 'redhorizon-audio'
-include 'redhorizon-classic'
-include 'redhorizon-engine'
-include 'redhorizon-explorer'
-include 'redhorizon-graphics'
-include 'redhorizon-input'
-include 'redhorizon-physics'
-include 'redhorizon-runtime'
-include 'redhorizon-scenegraph'
+description = 'Extensions for the ImGui library'
+
+configure {
+	asGroovyLibraryProject()
+		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
+		}
+		.withJarOptions() {
+			manifest {
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.imguiextensions'
+			}
+		}
+		.configureSource()
+			.withDependencies() {
+				api "io.github.spair:imgui-java-binding:${imguiVersion}"
+			}
+}

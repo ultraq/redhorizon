@@ -62,40 +62,44 @@ class GameWindow {
 		ImGui.pushStyleVar(WindowPadding, 0f, 0f)
 		ImGui.pushStyleVar(WindowRounding, 0f)
 		ImGui.pushStyleColor(WindowBg, backgroundColour.r, backgroundColour.g, backgroundColour.b, backgroundColour.a)
-		ImGui.begin('Game', imBooleanTrue, NoDecoration)
+		var cursorX = 0f
+		var cursorY = 0f
+		var imageSizeX = 0f
+		var imageSizeY = 0f
+		ImGui.useWindow('Game', imBooleanTrue, NoDecoration) { ->
 
-		ImGui.getWindowPos(windowPos)
-		var windowWidth = ImGui.getContentRegionAvailX()
-		var windowHeight = ImGui.getContentRegionAvailY()
-		var windowAspectRatio = windowWidth / windowHeight
-		var framebufferAspectRatio = framebuffer.width / framebuffer.height
-		var imageSizeX = windowWidth
-		var imageSizeY = windowHeight
-		var uvX = 0f
-		var uvY = 0f
-		var cursorX = 0
-		var cursorY = ImGui.cursorPosY
+			ImGui.getWindowPos(windowPos)
+			var windowWidth = ImGui.getContentRegionAvailX()
+			var windowHeight = ImGui.getContentRegionAvailY()
+			var windowAspectRatio = windowWidth / windowHeight
+			var framebufferAspectRatio = framebuffer.width / framebuffer.height
+			imageSizeX = windowWidth
+			imageSizeY = windowHeight
+			var uvX = 0f
+			var uvY = 0f
+			cursorX = 0
+			cursorY = ImGui.cursorPosY
 
-		// Window is wider
-		if (windowAspectRatio > framebufferAspectRatio) {
-			uvX = 1 / (framebuffer.width - (framebuffer.height - windowWidth)) as float
-			imageSizeX = windowHeight * framebufferAspectRatio as float
-			cursorX = (windowWidth - imageSizeX) * 0.5f as float
+			// Window is wider
+			if (windowAspectRatio > framebufferAspectRatio) {
+				uvX = 1 / (framebuffer.width - (framebuffer.height - windowWidth)) as float
+				imageSizeX = windowHeight * framebufferAspectRatio as float
+				cursorX = (windowWidth - imageSizeX) * 0.5f as float
+			}
+			// Window is taller
+			else if (windowAspectRatio < framebufferAspectRatio) {
+				uvY = 1 / (framebuffer.width - (framebuffer.height - windowHeight)) as float
+				imageSizeY = windowWidth / framebufferAspectRatio as float
+				cursorY = cursorY + (windowHeight - imageSizeY) * 0.5f as float
+			}
+
+			ImGui.setCursorPos(cursorX, cursorY)
+			ImGui.image(((OpenGLTexture)framebuffer.texture).textureId, imageSizeX, imageSizeY,
+				uvX, 1 - uvY as float, 1 - uvX as float, uvY)
+
+			ImGui.popStyleColor()
+			ImGui.popStyleVar(3)
 		}
-		// Window is taller
-		else if (windowAspectRatio < framebufferAspectRatio) {
-			uvY = 1 / (framebuffer.width - (framebuffer.height - windowHeight)) as float
-			imageSizeY = windowWidth / framebufferAspectRatio as float
-			cursorY = cursorY + (windowHeight - imageSizeY) * 0.5f as float
-		}
-
-		ImGui.setCursorPos(cursorX, cursorY)
-		ImGui.image(((OpenGLTexture)framebuffer.texture).textureId, imageSizeX, imageSizeY,
-			uvX, 1 - uvY as float, 1 - uvX as float, uvY)
-
-		ImGui.popStyleColor()
-		ImGui.popStyleVar(3)
-		ImGui.end()
 
 		lastImageX = cursorX + windowPos.x as float
 		lastImageY = cursorY + windowPos.y as float

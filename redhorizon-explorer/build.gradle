@@ -27,6 +27,7 @@ configure {
 	}
 		.configureSource()
 			.withDependencies() {
+				implementation project(':imgui-extensions')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-classic')
 				implementation project(':redhorizon-engine')

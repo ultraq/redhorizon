@@ -1,0 +1,30 @@
+
+ImGui extensions
+================
+
+[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/imgui-extensions)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/imgui-extensions)
+
+Extensions to the ImGui library.
+
+
+Installation
+------------
+
+Requires Java 25 on either macOS 12 Monterey and newer or Windows 10 64-bit and
+newer.
+
+Add a dependency to your project with the following co-ordinates:
+
+ - GroupId: `nz.net.ultraq.redhorizon`
+ - ArtifactId: `imgui-extensions`
+ - Version: `0.43.2`
+
+Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
+of available versions.
+
+
+API
+---
+
+Browse the online groovydocs for the full API:
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/imgui-extensions

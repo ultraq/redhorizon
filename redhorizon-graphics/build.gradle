@@ -38,6 +38,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
+				implementation project(':imgui-extensions')
 				implementation project(':joml-extensions')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-input')

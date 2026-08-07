@@ -47,19 +47,18 @@ class NodeList extends ImGuiModule<NodeList> {
 
 		ImGui.setNextWindowSize(250, 400, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
-		ImGui.begin('Scene', new ImBoolean(true))
-		ImGui.popStyleVar()
+		ImGui.useWindow('Scene', new ImBoolean(true)) { ->
 
-		// Node list
-		index = 0
-		if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
-			scene.root.children.each { child ->
-				renderNode(child)
+			// Node list
+			index = 0
+			if (ImGui.beginListBox('##NodeList', -Float.MIN_VALUE, -Float.MIN_VALUE)) {
+				scene.root.children.each { child ->
+					renderNode(child)
+				}
+				ImGui.endListBox()
 			}
-			ImGui.endListBox()
 		}
-
-		ImGui.end()
+		ImGui.popStyleVar()
 	}
 
 	/**
@@ -74,16 +73,16 @@ class NodeList extends ImGuiModule<NodeList> {
 		if (node == selectedNode) {
 			flags |= Selected
 		}
-		ImGui.pushID("${index++}${node.name}")
-		if (ImGui.treeNodeEx(node.name, flags)) {
-			if (ImGui.isItemClicked() && !ImGui.isItemToggledOpen()) {
-				selectedNode = node
+		ImGui.useId("${index++}${node.name}") { ->
+			if (ImGui.treeNodeEx(node.name, flags)) {
+				if (ImGui.isItemClicked() && !ImGui.isItemToggledOpen()) {
+					selectedNode = node
+				}
+				node.children.each { child ->
+					renderNode(child)
+				}
+				ImGui.treePop()
 			}
-			node.children.each { child ->
-				renderNode(child)
-			}
-			ImGui.treePop()
 		}
-		ImGui.popID()
 	}
 }

@@ -28,6 +28,7 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 		}
 		.withJarOptions() {
@@ -37,6 +38,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
+				api project(':imgui-extensions')
 				api project(':joml-extensions')
 				api project(':redhorizon-audio')
 				api project(':redhorizon-classic')
