@@ -72,30 +72,6 @@ class InputEventHandler {
 	}
 
 	/**
-	 * An overload of {@code <<} as an alias to {@link #addInputBinding(InputBinding)}.
-	 */
-	void leftShift(InputBinding binding) {
-
-		addInputBinding(binding)
-	}
-
-	/**
-	 * Run through all of the registered input bindings to check if any have been
-	 * triggered with the current rendering loop.
-	 */
-	void processInputs() {
-
-		bindings.each { binding ->
-			if (binding instanceof KeyBinding && keyPressed(binding.key, binding.once)) {
-				binding.action()
-			}
-			else if (binding instanceof MouseButtonBinding && mouseButtonPressed(binding.button)) {
-				binding.action()
-			}
-		}
-	}
-
-	/**
 	 * Return the current cursor position.
 	 */
 	Vector2fc cursorPosition() {
@@ -122,10 +98,34 @@ class InputEventHandler {
 	}
 
 	/**
+	 * An overload of {@code <<} as an alias to {@link #addInputBinding(InputBinding)}.
+	 */
+	void leftShift(InputBinding binding) {
+
+		addInputBinding(binding)
+	}
+
+	/**
 	 * Return whether the given mouse button is currently pressed.
 	 */
 	boolean mouseButtonPressed(int button) {
 
 		return mouseButtonPressedStates[button]
+	}
+
+	/**
+	 * Run through all of the registered input bindings to check if any have been
+	 * triggered with the current rendering loop.
+	 */
+	void processInputs() {
+
+		bindings.each { binding ->
+			if (binding instanceof KeyBinding && keyPressed(binding.key, binding.once)) {
+				binding.action()
+			}
+			else if (binding instanceof MouseButtonBinding && mouseButtonPressed(binding.button)) {
+				binding.action()
+			}
+		}
 	}
 }
