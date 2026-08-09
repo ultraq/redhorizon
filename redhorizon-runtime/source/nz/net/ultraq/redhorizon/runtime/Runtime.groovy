@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeProperties
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
@@ -146,15 +147,15 @@ final class Runtime {
 			.withCursorTracking(window, camera)
 			.withProfilingLogging()
 			.disable()
-		var nodeListComponent = new NodeList(scene)
-			.disable()
-		var logPanelComponent = new LogPanel()
-			.disable()
 		scene.addChild(
 			new Node()
 				.addChild(debugOverlay)
-				.addChild(nodeListComponent)
-				.addChild(logPanelComponent)
+				.addChild(new NodeList()
+					.disable())
+				.addChild(new NodeProperties()
+					.disable())
+				.addChild(new LogPanel()
+					.disable())
 				.withName('Debug UI')
 		)
 

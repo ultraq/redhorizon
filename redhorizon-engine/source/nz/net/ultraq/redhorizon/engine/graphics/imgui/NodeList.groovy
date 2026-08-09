@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.engine.graphics.imgui
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scenegraph.Node
-import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import imgui.ImGui
 import imgui.type.ImBoolean
@@ -27,20 +26,24 @@ import static imgui.flag.ImGuiCond.FirstUseEver
 import static imgui.flag.ImGuiStyleVar.WindowPadding
 import static imgui.flag.ImGuiTreeNodeFlags.*
 
-import groovy.transform.TupleConstructor
-
 /**
  * An ImGui panel showing how the scene is currently structured.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false, includes = ['scene'])
 class NodeList extends ImGuiModule<NodeList> {
 
 	final boolean debug = true
-	final Scene scene
 	private Node selectedNode
 	private int index
+
+	/**
+	 * Return the currently-selected node, if any.
+	 */
+	Node getSelectedNode() {
+
+		return selectedNode
+	}
 
 	@Override
 	void render(ImGuiContext context) {

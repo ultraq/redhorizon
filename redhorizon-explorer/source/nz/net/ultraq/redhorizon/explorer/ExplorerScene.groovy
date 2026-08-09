@@ -75,7 +75,7 @@ class ExplorerScene extends Scene {
 				.withName('Main menu'))
 			.addChild(new EntryList()
 				.withName('Entry list'))
-			.addChild(new NodeList(this)
+			.addChild(new NodeList()
 				.withName('Node list'))
 			.addChild(new LogPanel()
 				.withName('Log panel'))
