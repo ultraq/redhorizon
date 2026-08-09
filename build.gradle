@@ -16,7 +16,7 @@
 
 plugins {
 	id 'maven-publish'
-	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.9.4'
+	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.10.1'
 }
 
 description = 'Recreating the original 2D Command & Conquer games'
@@ -24,7 +24,7 @@ description = 'Recreating the original 2D Command & Conquer games'
 gradle.projectsEvaluated {
 	configure {
 		createMavenCentralPublisherBundle()
-			.forProjects(subprojects.findAll { it.plugins.hasPlugin('java-library') } as Project[])
+			.forProjects(subprojects.findAll { it.plugins.hasPlugin('java-library') })
 			.withCredentials(
 				findProperty('mavenCentral.publisher.username'),
 				findProperty('mavenCentral.publisher.password')
