@@ -105,7 +105,7 @@ class NodePropertiesTests extends Specification {
 
 		TestNode() {
 
-			square = new Rectangle(10f, 10f, Colour.RED, true)
+			square = new Rectangle(20f, 20f, Colour.RED, true)
 			addChild(square)
 		}
 

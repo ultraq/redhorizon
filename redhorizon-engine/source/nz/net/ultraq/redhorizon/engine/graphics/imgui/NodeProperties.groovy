@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import imgui.ImGui
 import imgui.type.ImBoolean
+import imgui.type.ImString
 import static imgui.flag.ImGuiCond.FirstUseEver
 
 import groovy.transform.TupleConstructor
@@ -84,15 +85,14 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 
 					// Float values
 					if (property.type == float || property.type == Float) {
-						var floats = new float[]{ property.getter() as float }
-						var name = property.name
-						if (!property.setter) {
-							name += ' (read-only)'
+						var floats = new float[]{ property.read() as float }
+						if (ImGui.dragFloat("${property.name}${property.readOnly ? ' (read-only)' : ''}", floats, 0.5f)) {
+							property.update(floats[0])
 						}
-						ImGui.dragFloat(name, floats, 0.5f)
-						if (property.setter && floats[0] != property.getter()) {
-							property.setter(floats[0])
-						}
+					}
+					// Draw unsupported types as read-only
+					else {
+						ImGui.inputText("${property.name} (unsupported)", new ImString(property.read() as String))
 					}
 				}
 			}
@@ -110,5 +110,30 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 		final Class<T> type
 		final Closure<T> getter
 		final Closure setter
+
+		/**
+		 * Return whether the property is read-only.
+		 */
+		boolean isReadOnly() {
+
+			return !setter
+		}
+
+		/**
+		 * Read the value of the property.
+		 */
+		T read() {
+
+			return getter()
+		}
+
+		/**
+		 * Update the value of the property.  Does nothing if the property is
+		 * read-only.
+		 */
+		void update(T value) {
+
+			setter?.call(value)
+		}
 	}
 }
