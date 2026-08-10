@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.joml.Vector2f
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -99,9 +100,14 @@ class NodePropertiesTests extends Specification {
 	 */
 	static class TestNode extends Node<TestNode> {
 
-		private final Rectangle square
 		public float x = 0f // Has public modifier, so should appear as a public field
 		float y = 0f // No modifier, so Groovy will generate get/set methods that we need to extract
+		final Vector2f vector = new Vector2f()
+
+		private final Rectangle square
+		private float lastX = 0f
+		private float lastY = 0f
+		private final Vector2f lastVector = new Vector2f()
 
 		TestNode() {
 
@@ -111,6 +117,16 @@ class NodePropertiesTests extends Specification {
 
 		void update() {
 
+			if (x != lastX || y != lastY) {
+				lastX = x
+				lastY = y
+				vector.set(x, y)
+			}
+			if (vector != lastVector) {
+				lastVector.set(vector)
+				x = vector.x()
+				y = vector.y()
+			}
 			setPosition(x, y)
 		}
 	}

@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import imgui.ImGui
 import imgui.type.ImBoolean
-import imgui.type.ImString
+import org.joml.Vector2f
 import static imgui.flag.ImGuiCond.FirstUseEver
 
 import groovy.transform.TupleConstructor
@@ -37,7 +37,8 @@ import java.lang.reflect.Modifier
  */
 class NodeProperties extends ImGuiModule<NodeProperties> {
 
-	private final HashMap<Node, List<Property<?>>> nodePublicPropertiesMap = new HashMap<>()
+	private static final Class<?>[] supportedTypes = [float, Float, Vector2f]
+	private final HashMap<Node, List<Property<?>>> nodePublicPropertiesMap = new LinkedHashMap<>()
 
 	final boolean debug = true
 
@@ -50,26 +51,34 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 			var publicProperties = new ArrayList<Property<?>>()
 
 			// Public fields
-			node.class.declaredFields.each { Field field ->
+			node.class.fields.each { Field field ->
 				if (field.modifiers & Modifier.PUBLIC && !field.name.startsWith('__')) {
-					publicProperties << new Property(field.name, field.type,
-						{ -> field.get(node) },
-						{ value -> field.set(node, value) })
+					var type = field.type
+					if (type in supportedTypes) {
+						publicProperties << new Property(field.name, type,
+							{ -> field.get(node) },
+							{ value -> field.set(node, value) })
+					}
 				}
 			}
 
 			// Public properties following the JavaBean spec using getters/setters
-			var declaredMethods = node.class.declaredMethods
-			declaredMethods.each { Method method ->
+			var methods = node.class.methods
+			methods.each { Method method ->
 				if (method.modifiers & Modifier.PUBLIC && method.name.startsWith('get')) {
-					var setter = declaredMethods.find { it.name == method.name.replaceFirst('get', 'set') } as Method
-					publicProperties << new Property(method.name.substring(3).uncapitalize(), method.returnType,
-						{ -> method.invoke(node) },
-						setter ? { value -> setter.invoke(node, value) } : null)
+					var type = method.returnType
+					if (type in supportedTypes) {
+						var setter = methods.find { it.name == method.name.replaceFirst('get', 'set') } as Method
+						publicProperties << new Property(method.name.substring(3).uncapitalize(), type,
+							{ -> method.invoke(node) },
+							setter ? { value -> setter.invoke(node, value) } :
+								type == Vector2f ? { float[] values -> ((Vector2f)method.invoke(node)).set(values) } :
+									null)
+					}
 				}
 			}
 
-			return publicProperties
+			return publicProperties.sort()
 		}
 	}
 
@@ -86,13 +95,17 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 					// Float values
 					if (property.type == float || property.type == Float) {
 						var floats = new float[]{ property.read() as float }
-						if (ImGui.dragFloat("${property.name}${property.readOnly ? ' (read-only)' : ''}", floats, 0.5f)) {
+						if (ImGui.dragFloat("${property.name}${property.readOnly ? ' (read-only)' : ''}", floats, 0.1f)) {
 							property.update(floats[0])
 						}
 					}
-					// Draw unsupported types as read-only
-					else {
-						ImGui.inputText("${property.name} (unsupported)", new ImString(property.read() as String))
+					// Vectors
+					else if (property.type == Vector2f) {
+						var vector = property.read() as Vector2f
+						var floats = vector.get(new float[2])
+						if (ImGui.dragFloat2(property.name, floats, 0.1f)) {
+							property.update(floats)
+						}
 					}
 				}
 			}
@@ -104,12 +117,18 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 	 * field name, type, value, and a setter function if it has one.
 	 */
 	@TupleConstructor(defaults = false)
-	private static class Property<T> {
+	private static class Property<T> implements Comparable<Property<T>> {
 
 		final String name
 		final Class<T> type
 		final Closure<T> getter
 		final Closure setter
+
+		@Override
+		int compareTo(Property<T> o) {
+
+			return name <=> o.name
+		}
 
 		/**
 		 * Return whether the property is read-only.
