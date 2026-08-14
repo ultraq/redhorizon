@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.engine.utilities
 
-import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.audio.AudioData
+import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
@@ -44,6 +44,19 @@ class ResourceManager implements AutoCloseable {
 	}
 
 	/**
+	 * Load short audio data from a file, best used for sound effects.
+	 */
+	@Memoized
+	AudioData loadAudioData(String path) {
+
+		var sound = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+			return new AudioData(path, stream)
+		}
+		resources << sound
+		return sound
+	}
+
+	/**
 	 * Load an image asset from an image file.
 	 */
 	@Memoized
@@ -54,46 +67,6 @@ class ResourceManager implements AutoCloseable {
 		}
 		resources << image
 		return image
-	}
-
-	/**
-	 * Load a music stream from an audio file.
-	 */
-	Music loadMusic(String path) {
-
-		var musicStream = new BufferedInputStream(getResourceAsStream(resolvePath(path)))
-		resources << musicStream
-
-		var music = new Music(path, musicStream)
-		resources << music
-
-		return music
-	}
-
-	/**
-	 * Load a sound effect from an audio file.
-	 */
-	@Memoized
-	Sound loadSound(String path) {
-
-		var sound = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
-			return new Sound(path, stream)
-		}
-		resources << sound
-		return sound
-	}
-
-	/**
-	 * Load a sprite sheet from an image file.
-	 */
-	@Memoized
-	SpriteSheet loadSpriteSheet(String path) {
-
-		var spriteSheet = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
-			return new SpriteSheet(path, stream)
-		}
-		resources << spriteSheet
-		return spriteSheet
 	}
 
 	/**
@@ -116,5 +89,32 @@ class ResourceManager implements AutoCloseable {
 	private String resolvePath(String path) {
 
 		return [pathPrefix, path].joinAndNormalize('/')
+	}
+
+	/**
+	 * Load a sprite sheet from an image file.
+	 */
+	@Memoized
+	SpriteSheet loadSpriteSheet(String path) {
+
+		var spriteSheet = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+			return new SpriteSheet(path, stream)
+		}
+		resources << spriteSheet
+		return spriteSheet
+	}
+
+	/**
+	 * Load long streaming audio data from a file, best used for music tracks.
+	 */
+	StreamingAudioData loadStreamingAudioData(String path) {
+
+		var musicStream = new BufferedInputStream(getResourceAsStream(resolvePath(path)))
+		resources << musicStream
+
+		var music = new StreamingAudioData(path, musicStream)
+		resources << music
+
+		return music
 	}
 }

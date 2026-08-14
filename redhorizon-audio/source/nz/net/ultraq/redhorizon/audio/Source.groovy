@@ -53,22 +53,16 @@ interface Source extends AudioResource {
 
 	/**
 	 * Rether whether this source is currently paused.
-	 *
-	 * @return
 	 */
 	boolean isPaused()
 
 	/**
 	 * Return whether this source is currently playing.
-	 *
-	 * @return
 	 */
 	boolean isPlaying()
 
 	/**
 	 * Return whether this source has stopped playing.
-	 *
-	 * @return
 	 */
 	boolean isStopped()
 

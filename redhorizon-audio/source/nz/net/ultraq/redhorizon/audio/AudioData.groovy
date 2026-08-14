@@ -25,35 +25,37 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 
 /**
- * A single pre-loaded buffer of sound data for use with 1 or more sources and
+ * A single pre-loaded buffer of audio data for use with 1 or more sources and
  * repeat playbacks.  Best suited for sound effects.
+ *
+ * <p>For a streaming variant, see {@link StreamingAudioData}.
  *
  * @author Emanuel Rabina
  */
-class Sound implements AutoCloseable {
+class AudioData implements AutoCloseable {
 
-	private static final Logger logger = LoggerFactory.getLogger(Sound)
+	private static final Logger logger = LoggerFactory.getLogger(AudioData)
 
 	private volatile List<ByteBuffer> buffers = []
 	final Buffer buffer
 
 	/**
-	 * Constructor, sets up a new sound using its name and a stream of data.
+	 * Constructor, sets up a new audio buffer using its name and a stream of data.
 	 *
 	 * <p>The file extension is the hint used to determine which available
 	 * {@link AudioDecoder} (registered using Java SPI) is capable of decoding the
 	 * stream.
 	 */
-	Sound(String fileName, InputStream inputStream) {
+	AudioData(String fileName, InputStream inputStream) {
 
 		this(fileName, AudioDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**
-	 * Constructor, sets up a new sound using its name, a selected decoder, and a
-	 * stream of data.
+	 * Constructor, sets up a new audio buffer using its name, a selected decoder,
+	 * and a stream of data.
 	 */
-	Sound(String fileName, AudioDecoder decoder, InputStream inputStream) {
+	AudioData(String fileName, AudioDecoder decoder, InputStream inputStream) {
 
 		var result = decoder
 			.on(SampleDecodedEvent) { event ->

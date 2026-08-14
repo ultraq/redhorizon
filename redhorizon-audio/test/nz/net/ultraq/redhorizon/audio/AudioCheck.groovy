@@ -48,12 +48,12 @@ class AudioCheck extends Specification {
 
 	def "Plays a sound - use Sound and AudioDecoder SPI"() {
 		given:
-			var listener = new ListenerNode()
+			var listener = new AudioListener()
 				.withGain(0.5f)
-			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck_Sound_bong_001.ogg').withBufferedStream { stream ->
-				return new Sound('AudioCheck_Sound_bong_001.ogg', stream)
+			var data = getResourceAsStream('nz/net/ultraq/redhorizon/audio/AudioCheck_Sound_bong_001.ogg').withBufferedStream { stream ->
+				return new AudioData('AudioCheck_Sound_bong_001.ogg', stream)
 			}
-			var source = new SourceNode(sound)
+			var source = new AudioSource(data)
 		when:
 			source.play()
 			while (!source.stopped) {
@@ -65,6 +65,6 @@ class AudioCheck extends Specification {
 			noExceptionThrown()
 		cleanup:
 			source?.close()
-			sound?.close()
+			data?.close()
 	}
 }

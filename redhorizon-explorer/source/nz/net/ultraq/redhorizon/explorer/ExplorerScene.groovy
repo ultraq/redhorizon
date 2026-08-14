@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer
 
-import nz.net.ultraq.redhorizon.audio.ListenerNode
+import nz.net.ultraq.redhorizon.audio.AudioListener
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
@@ -64,7 +64,7 @@ class ExplorerScene extends Scene {
 		this.window = window
 
 		camera = addAndReturnChild(new Camera(width, height)
-			.addChild(new ListenerNode().withGain(0.5f)))
+			.addChild(new AudioListener().withGain(0.5f)))
 
 		addChild(new Node()
 			.withName('UI')

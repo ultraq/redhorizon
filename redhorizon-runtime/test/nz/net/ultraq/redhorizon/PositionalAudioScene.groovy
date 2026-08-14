@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon
 
+import nz.net.ultraq.redhorizon.audio.AudioData
+import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
-import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.audio.SourceNode
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
@@ -55,13 +55,13 @@ class PositionalAudioScene extends Application {
 
 		private final Vector3f worldCoords = new Vector3f()
 		private float cooldown = 0f
-		private Sound sound
+		private AudioData sound
 
 		@Override
 		void init() {
 
 			var resourceManager = RESOURCE_MANAGER.get()
-			sound = resourceManager.loadSound('PositionalAudioScene_bong_001.ogg')
+			sound = resourceManager.loadAudioData('PositionalAudioScene_bong_001.ogg')
 		}
 
 		@Override
@@ -79,7 +79,7 @@ class PositionalAudioScene extends Application {
 				var scene = node.scene
 				scene.queueUpdate { ->
 					var impactSoundSource = scene.addAndReturnChild(
-						new SourceNode(sound)
+						new AudioSource(sound)
 							.setPosition(worldCoords.x(), worldCoords.y(), 0f)
 							.withRolloff(0f)
 							.withName('Cursor position sound')

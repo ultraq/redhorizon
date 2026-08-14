@@ -28,7 +28,7 @@ import org.joml.Vector3fc
  *
  * @author Emanuel Rabina
  */
-class ListenerNode extends AudioNode<ListenerNode> {
+class AudioListener extends AudioNode<AudioListener> {
 
 	private final Listener listener = new OpenALListener()
 
@@ -54,7 +54,7 @@ class ListenerNode extends AudioNode<ListenerNode> {
 	/**
 	 * Set the gain on sounds coming in to the listener.
 	 */
-	ListenerNode withGain(float gain) {
+	AudioListener withGain(float gain) {
 
 		listener.withGain(gain)
 		return this
@@ -63,7 +63,7 @@ class ListenerNode extends AudioNode<ListenerNode> {
 	/**
 	 * Set the listener's velocity.
 	 */
-	ListenerNode withVelocity(Vector3fc velocity) {
+	AudioListener withVelocity(Vector3fc velocity) {
 
 		this.velocity.set(velocity)
 		return this

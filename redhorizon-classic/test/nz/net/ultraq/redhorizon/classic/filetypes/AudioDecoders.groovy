@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.classic.filetypes
 
+import nz.net.ultraq.redhorizon.audio.AudioData
+import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.Listener
-import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.audio.Sound
-import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
 
@@ -56,10 +56,10 @@ class AudioDecoders extends Specification {
 
 	def "Play an AUD sound effect using the AudioDecoder SPI"() {
 		given:
-			var sound = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
-				return new Sound('AudioDecoders_Sound_affirm1.v00', stream)
+			var data = getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Sound_affirm1.v00').withBufferedStream { stream ->
+				return new AudioData('AudioDecoders_Sound_affirm1.v00', stream)
 			}
-			var source = new SourceNode(sound)
+			var source = new AudioSource(data)
 		when:
 			source.play()
 			while (!source.stopped) {
@@ -70,19 +70,19 @@ class AudioDecoders extends Specification {
 			noExceptionThrown()
 		cleanup:
 			source?.close()
-			sound?.close()
+			data?.close()
 	}
 
 	def "Play an AUD music track using the AudioDecoder SPI"() {
 		when:
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
-			var music = new Music('AudioDecoders_Music_fac1226m.aud', inputStream)
-			var source = new SourceNode()
-			music.update(source.source)
+			var data = new StreamingAudioData('AudioDecoders_Music_fac1226m.aud', inputStream)
+			var source = new AudioSource(data)
+			data.update()
 			source.play()
 			var start = System.currentTimeMillis()
 			while (!source.stopped) {
-				music.update(source.source)
+				data.update()
 				source.render()
 				Thread.sleep(500)
 				if (System.currentTimeMillis() - start > 5000) {
@@ -93,7 +93,7 @@ class AudioDecoders extends Specification {
 			noExceptionThrown()
 		cleanup:
 			source?.close()
-			music?.close()
+			data?.close()
 			inputStream?.close()
 	}
 }

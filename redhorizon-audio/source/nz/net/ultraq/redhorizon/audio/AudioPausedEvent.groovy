@@ -24,5 +24,5 @@ import groovy.transform.ImmutableOptions
  * @author Emanuel Rabina
  */
 @ImmutableOptions(knownImmutables = ['source'])
-record AudioPausedEvent(SourceNode source) implements AudioEvent {
+record AudioPausedEvent(AudioSource source) implements AudioEvent {
 }

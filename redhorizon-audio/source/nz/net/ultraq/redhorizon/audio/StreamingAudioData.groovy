@@ -36,15 +36,18 @@ import java.util.concurrent.LinkedBlockingQueue
  * Multiple unknown sound buffers, used for streaming large amounts of sound
  * data.  Best suited for music tracks.
  *
- * <p>Input streams will be decoded in a separate thread and loaded over time.
- * Whichever thread is used for updating audio will need to call {@link #update}
- * periodically to keep the music track fed.
+ * <p>For a single-buffer variant, see {@link AudioData}.
+ *
+ * <p>Input streams will be decoded in a separate thread and loaded over time,
+ * maintaining a buffer of up to 3 seconds (configurable in the constructor).
+ * The thread which controls this object will need to call {@link #update}
+ * periodically to keep converting streamed data into audio buffers.
  *
  * @author Emanuel Rabina
  */
-class Music implements AutoCloseable, EventTarget<Music> {
+class StreamingAudioData implements AutoCloseable, EventTarget<StreamingAudioData> {
 
-	private static final Logger logger = LoggerFactory.getLogger(Music)
+	private static final Logger logger = LoggerFactory.getLogger(StreamingAudioData)
 
 	private ExecutorService executor
 	private Future<?> decodingTask
@@ -54,26 +57,25 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	private int buffersQueued
 	private int buffersPlayed
 	private final BlockingQueue<Buffer> streamedBuffers = new LinkedBlockingQueue<>()
-	private final List<Buffer> bufferDrain = []
 	private boolean decodingError
 
 	/**
-	 * Constructor, set up streaming of the given music track.
+	 * Constructor, set up streaming of the given input data.
 	 *
 	 * <p>The file extension is the hint used to determine which available
 	 * {@link AudioDecoder} (registered using Java SPI) is capable of decoding the
 	 * stream.
 	 */
-	Music(String fileName, InputStream inputStream) {
+	StreamingAudioData(String fileName, InputStream inputStream) {
 
 		this(fileName, AudioDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1)), inputStream)
 	}
 
 	/**
-	 * Constructor, set up streaming of the given music track using its name, a
-	 * selected decoder, and a stream of data.
+	 * Constructor, set up streaming of the given input data using its name, and a
+	 * selected decoder.
 	 */
-	Music(String fileName, AudioDecoder decoder, InputStream inputStream) {
+	StreamingAudioData(String fileName, AudioDecoder decoder, InputStream inputStream) {
 
 		var fileSize = 0
 		var duration = 0
@@ -100,9 +102,9 @@ class Music implements AutoCloseable, EventTarget<Music> {
 			}
 		executor = Executors.newSingleThreadExecutor()
 		decodingTask = executor.submit { ->
-			Thread.currentThread().name = "Music track ${fileName} :: Decoding"
+			Thread.currentThread().name = "Streaming audio ${fileName} :: Decoding"
 			try {
-				logger.debug('Music decoding of {} started', fileName)
+				logger.debug('Decoding of {} started', fileName)
 				var result = decoder.decode(inputStream)
 				logger.debug('{} decoded after {} samples', fileName, result.buffers())
 				var fileInformation = result.fileInformation()
@@ -111,7 +113,7 @@ class Music implements AutoCloseable, EventTarget<Music> {
 				}
 			}
 			catch (Exception ex) {
-				logger.error('Failed to decode music track', ex)
+				logger.error('Failed to decode streaming audio', ex)
 				decodingError = true
 			}
 		}
@@ -125,7 +127,7 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	/**
 	 * Constructor, set up streaming from an audio event source.
 	 */
-	Music(EventTarget<? extends EventTarget> audioSource, int eventCapacity) {
+	StreamingAudioData(EventTarget<? extends EventTarget> audioSource, int eventCapacity) {
 
 		streamingEvents = new ArrayBlockingQueue<>(eventCapacity)
 		readAhead = eventCapacity
@@ -149,41 +151,43 @@ class Music implements AutoCloseable, EventTarget<Music> {
 	}
 
 	/**
-	 * Update the streaming data for the music track.
+	 * Load the next set of decoded sound data.  The returned buffers transfer
+	 * ownership of the data to the caller, and so the caller is responsible for
+	 * closing the buffers once used.
 	 */
-	void update(Source source) {
+	List<Buffer> read(List<Buffer> results, int processed) {
 
 		if (decodingError) {
 			throw new IllegalStateException('An error occurred decoding the music track')
 		}
 
-		// Buffer the music
-		var buffersAhead = !source.looping ? buffersPlayed - buffersQueued + readAhead : readAhead
-		if (buffersAhead > 0) {
-			eventDrain.clear()
-			streamingEvents.drain(eventDrain, buffersAhead).each { event ->
-				var buffer = new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
-				source.queueBuffers(buffer)
-				streamedBuffers << buffer
-			}
-			buffersQueued += eventDrain.size()
+		buffersPlayed += processed
+		return streamedBuffers.drain(results)
+	}
+
+	/**
+	 * Update the streaming data for the music track.
+	 */
+	void update() {
+
+		if (decodingError) {
+			throw new IllegalStateException('An error occurred decoding the music track')
 		}
 
-		// Close any used buffers (n/a for looping tracks)
-		var buffersProcessed = source.buffersProcessed()
-		if (buffersProcessed) {
-			buffersPlayed += buffersProcessed
-			bufferDrain.clear()
-			streamedBuffers.drain(bufferDrain, buffersProcessed).each { buffer ->
-				source.unqueueBuffers(buffer)
-				buffer.close()
-			}
+		// Convert decoded audio data to audio buffers
+		var buffersAhead = buffersPlayed - buffersQueued + readAhead
+		if (buffersAhead) {
+			eventDrain.clear()
+			streamedBuffers.addAll(streamingEvents.drain(eventDrain, buffersAhead).collect { event ->
+				return new OpenALBuffer(event.bits(), event.channels(), event.frequency(), event.buffer())
+			})
+			buffersQueued += eventDrain.size()
 		}
 	}
 
 	/**
-	 * For signalling that the animation is ready to play when driven from an
-	 * external source.
+	 * For signalling that the audio is ready to play when driven from an external
+	 * source.
 	 */
 	static record PlaybackReadyEvent() implements Event {}
 }

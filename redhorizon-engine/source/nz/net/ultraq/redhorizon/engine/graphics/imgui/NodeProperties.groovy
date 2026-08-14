@@ -26,7 +26,6 @@ import org.joml.Vector2f
 import static imgui.flag.ImGuiCond.FirstUseEver
 
 import groovy.transform.TupleConstructor
-import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
@@ -51,7 +50,7 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 			var publicProperties = new ArrayList<Property<?>>()
 
 			// Public fields
-			node.class.fields.each { Field field ->
+			node.class.fields.each { field ->
 				if (field.modifiers & Modifier.PUBLIC && !field.name.startsWith('__')) {
 					var type = field.type
 					if (type in supportedTypes) {
@@ -64,7 +63,7 @@ class NodeProperties extends ImGuiModule<NodeProperties> {
 
 			// Public properties following the JavaBean spec using getters/setters
 			var methods = node.class.methods
-			methods.each { Method method ->
+			methods.each { method ->
 				if (method.modifiers & Modifier.PUBLIC && method.name.startsWith('get')) {
 					var type = method.returnType
 					if (type in supportedTypes) {

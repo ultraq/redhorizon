@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
-import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
@@ -26,7 +26,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
  *
  * @author Emanuel Rabina
  */
-class SoundPlaybackScript extends Script<SourceNode> implements AutoCloseable {
+class SoundPlaybackScript extends Script<AudioSource> implements AutoCloseable {
 
 	private boolean playbackStarted = false
 

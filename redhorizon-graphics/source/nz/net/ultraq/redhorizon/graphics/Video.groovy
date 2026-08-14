@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.audio.SourceNode
+import nz.net.ultraq.redhorizon.audio.AudioSource
+import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
@@ -36,7 +36,7 @@ import java.util.concurrent.Future
  * Whichever thread is used for updating audio or video will need to call their
  * respective {@code update*} methods periodically to keep the video fed.
  *
- * <p>A video is composed of an {@link Animation} node and a {@link Music} node.
+ * <p>A video is composed of an {@link Animation} node and a {@link StreamingAudioData} node.
  * When participating in a scene with systems, those child nodes will be the
  * render targets, but for conveniencec their respective render methods are also
  * available on this class.
@@ -48,12 +48,12 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger(Video)
 
 	private final Animation animation
-	private final Music music
-	private final SourceNode musicSource
+	private final StreamingAudioData streamingAudioData
+	private final AudioSource audioSource
 	private final ExecutorService executor = Executors.newSingleThreadExecutor()
 	private Future<?> decodingTask
 	private volatile boolean animationReady
-	private volatile boolean musicReady
+	private volatile boolean audioReady
 	private boolean decodingError
 
 	/**
@@ -77,12 +77,11 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 			}
 		addChild(animation)
 
-		music = new Music(decoder, 32)
-			.on(Music.PlaybackReadyEvent) { event ->
-				musicReady = true
+		streamingAudioData = new StreamingAudioData(decoder, 32)
+			.on(StreamingAudioData.PlaybackReadyEvent) { event ->
+				audioReady = true
 			}
-		musicSource = new SourceNode()
-		addChild(musicSource)
+		audioSource = addAndReturnChild(new AudioSource(streamingAudioData))
 
 		decodingTask = executor.submit { ->
 			Thread.currentThread().name = "Video ${fileName} :: Decoding"
@@ -101,8 +100,8 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 			}
 		}
 
-		// Let each of the animation and music streams fill up first
-		while (!animationReady || !musicReady) {
+		// Let each of the animation and audio streams fill up first
+		while (!animationReady || !audioReady) {
 			Thread.onSpinWait()
 		}
 		update(0f)
@@ -113,7 +112,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 		stop()
 		executor.close()
-		musicSource.close()
+		audioSource.close()
 		animation.close()
 	}
 
@@ -122,7 +121,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	 */
 	boolean isPlaying() {
 
-		return animation.playing
+		return animation.playing && audioSource.playing
 	}
 
 	/**
@@ -130,7 +129,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	 */
 	boolean isStopped() {
 
-		return animation.stopped
+		return animation.stopped && audioSource.stopped
 	}
 
 	/**
@@ -139,7 +138,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	Video play() {
 
 		animation.play()
-		musicSource.play()
+		audioSource.play()
 		return this
 	}
 
@@ -156,7 +155,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	 */
 	void render() {
 
-		musicSource.render()
+		audioSource.render()
 	}
 
 	/**
@@ -166,7 +165,7 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 
 		decodingTask.cancel(true)
 		animation.stop()
-		musicSource.stop()
+		audioSource.stop()
 		return this
 	}
 
@@ -176,6 +175,6 @@ class Video extends Node<Video> implements EventTarget<Video>, AutoCloseable {
 	void update(float delta) {
 
 		animation.update(delta)
-		music.update(musicSource.source) // TODO: Needs better API 🤔
+		streamingAudioData.update()
 	}
 }

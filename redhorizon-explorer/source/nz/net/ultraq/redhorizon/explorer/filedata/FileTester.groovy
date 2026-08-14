@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.explorer.filedata
 
-import nz.net.ultraq.redhorizon.audio.Music
-import nz.net.ultraq.redhorizon.audio.Sound
+import nz.net.ultraq.redhorizon.audio.AudioData
+import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.classic.filetypes.AudFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.FileTypeTest
@@ -81,7 +81,7 @@ class FileTester {
 						logger.debug('Decoder check passed, using {}', decoderClass.simpleName)
 						return new FileTesterResult(decoderClass, decoderToType[decoderClass],
 							switch (decoderClass) {
-								case AudFileDecoder -> fileSize > (1024 * 1024) ? Music : Sound
+								case AudFileDecoder -> fileSize > (1024 * 1024) ? StreamingAudioData : AudioData
 								case CpsFileDecoder, PcxFileDecoder -> Image
 								case PalFileDecoder -> Palette
 								case ShpFileDecoder, TmpFileRADecoder, TmpFileTDDecoder -> SpriteSheet

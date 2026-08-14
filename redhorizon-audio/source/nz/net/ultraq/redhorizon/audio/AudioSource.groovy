@@ -25,62 +25,46 @@ import nz.net.ultraq.redhorizon.audio.openal.OpenALSource
  *
  * @author Emanuel Rabina
  */
-class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode> {
+class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSource> {
 
+	@Delegate(interfaces = false, includes = ['isLooping', 'isPaused', 'isPlaying', 'isStopped'])
 	private final Source source
+	private final StreamingAudioData streamingAudioData
+	private final List<Buffer> readBuffers = []
+	private final List<Buffer> streamedBuffers = []
+	private int buffersProcessed
 	private State state = State.STOPPED
 
 	/**
-	 * Constructor, create an audio source.
+	 * Constructor, create an audio source attached to streaming audio data.
 	 */
-	SourceNode() {
+	AudioSource(StreamingAudioData streamingAudioData) {
 
 		source = new OpenALSource()
+		this.streamingAudioData = streamingAudioData
 	}
 
 	/**
-	 * Constructor, create an audio source attached to sound effect data.
+	 * Constructor, create an audio source attached to preloaded audio data.
 	 */
-	SourceNode(Sound sound) {
+	AudioSource(AudioData audioData) {
 
-		source = new OpenALSource().attachBuffer(sound.buffer)
+		source = new OpenALSource().attachBuffer(audioData.buffer)
+		streamingAudioData = null
 	}
 
 	@Override
 	void close() {
 
 		source.close()
+		streamedBuffers*.close()
 		super.close()
-	}
-
-	/**
-	 * Return whether the sound is currently paused.
-	 */
-	boolean isPaused() {
-
-		return source.isPaused()
-	}
-
-	/**
-	 * Return whether the sound is currently playing.
-	 */
-	boolean isPlaying() {
-
-		return source.isPlaying()
-	}
-
-	/**
-	 * Return whether the sound is currently stopped.
-	 */
-	boolean isStopped() {
-
-		return source.isStopped()
 	}
 
 	/**
 	 * Pause the sound.
 	 */
-	SourceNode pause() {
+	AudioSource pause() {
 
 		source.pause()
 		return this
@@ -89,14 +73,33 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Play the sound.
 	 */
-	SourceNode play() {
+	AudioSource play() {
 
+		if (streamingAudioData) {
+			readBuffersFromStreamingSource()
+		}
 		source.play()
 		return this
 	}
 
+	/**
+	 * Load up the source queue with the next set of buffers from a streaming
+	 * source.
+	 */
+	private void readBuffersFromStreamingSource() {
+
+		readBuffers.clear()
+		streamingAudioData.read(readBuffers, buffersProcessed)
+		source.queueBuffers(*readBuffers)
+		streamedBuffers.addAll(readBuffers)
+	}
+
 	@Override
 	void render() {
+
+		if (streamingAudioData) {
+			readBuffersFromStreamingSource()
+		}
 
 		var currentState = source.paused ? State.PAUSED : source.playing ? State.PLAYING : State.STOPPED
 		if (currentState != state) {
@@ -109,12 +112,22 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 		}
 
 		source.withPosition(globalPosition)
+
+		// Close any used buffers (n/a for looping tracks)
+		if (streamingAudioData && !source.looping) {
+			buffersProcessed = source.buffersProcessed()
+			if (buffersProcessed) {
+				var exhaustedBuffers = streamedBuffers.take(buffersProcessed)
+				source.unqueueBuffers(*exhaustedBuffers)
+				exhaustedBuffers*.close()
+			}
+		}
 	}
 
 	/**
 	 * Stop the sound.
 	 */
-	SourceNode stop() {
+	AudioSource stop() {
 
 		source.stop()
 		return this
@@ -123,7 +136,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Set the gain (ie: volume) of the sound.
 	 */
-	SourceNode withGain(float gain) {
+	AudioSource withGain(float gain) {
 
 		source.withGain(gain)
 		return this
@@ -133,7 +146,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	 * Set the maximum distance at which there will no longer be any attenuation
 	 * of the sound.
 	 */
-	SourceNode withMaxDistance(float maxDistance) {
+	AudioSource withMaxDistance(float maxDistance) {
 
 		source.withMaxDistance(maxDistance)
 		return this
@@ -143,7 +156,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	 * Set the distance at which the volume of the source would be cut by half
 	 * (before being influenced by rolloff factor).
 	 */
-	SourceNode withReferenceDistance(float referenceDistance) {
+	AudioSource withReferenceDistance(float referenceDistance) {
 
 		source.withReferenceDistance(referenceDistance)
 		return this
@@ -152,7 +165,7 @@ class SourceNode extends AudioNode<SourceNode> implements EventTarget<SourceNode
 	/**
 	 * Set the rolloff factor for sounds from this source.
 	 */
-	SourceNode withRolloff(float rolloff) {
+	AudioSource withRolloff(float rolloff) {
 
 		source.withRolloff(rolloff)
 		return this
