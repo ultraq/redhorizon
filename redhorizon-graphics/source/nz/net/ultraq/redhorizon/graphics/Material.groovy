@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Vector2f
+import org.joml.Vector3f
+import org.joml.Vector4f
 
 /**
  * A material is a set of properties applied to the shape being rendered, often
@@ -31,4 +33,7 @@ class Material {
 
 	Texture texture
 	Vector2f frameXY
+	Vector4f ambientColour
+	Vector4f lightColour
+	Vector3f lightPosition
 }

@@ -40,7 +40,8 @@ class Vertex {
 	public static final Attribute[] LAYOUT = [
 		new Attribute('position', 0, Vector3f.FLOATS),
 		new Attribute('colour', 1, Colour.FLOATS),
-		new Attribute('textureUVs', 2, Vector2f.FLOATS)
+		new Attribute('textureUVs', 2, Vector2f.FLOATS),
+		new Attribute('normal', 3, Vector3f.FLOATS)
 	]
 
 	/**
@@ -56,16 +57,18 @@ class Vertex {
 	Vector3f position
 	Colour colour
 	Vector2f textureUVs
+	Vector3f normal
 
 	/**
 	 * Constructor, create a vertex with position, colour, and texture
 	 * coordinates.
 	 */
-	Vertex(Vector3f position, Colour colour, Vector2f textureUVs = new Vector2f(0, 0)) {
+	Vertex(Vector3f position, Colour colour, Vector2f textureUVs = new Vector2f(), Vector3f normal = new Vector3f()) {
 
 		this.position = position
 		this.colour = colour
 		this.textureUVs = textureUVs
+		this.normal = normal
 	}
 
 	/**
@@ -77,7 +80,8 @@ class Vertex {
 			case float[] -> new float[]{
 				position.x, position.y, position.z,
 				colour.r, colour.g, colour.b, colour.a,
-				textureUVs.x, textureUVs.y
+				textureUVs.x, textureUVs.y,
+				normal.x, normal.y, normal.z
 			}
 			default -> throw new IllegalArgumentException("Cannot convert Vertex to ${clazz}")
 		}
@@ -93,6 +97,7 @@ class Vertex {
 			colour = other.colour // Immutable object - should it be modifiable?
 		}
 		textureUVs.set(other.textureUVs)
+		normal.set(other.normal)
 	}
 
 	/**

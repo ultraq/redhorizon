@@ -20,24 +20,28 @@
 in vec4 position;
 in vec4 colour;
 in vec2 textureUVs;
-out vec4 v_vertexColour;
-out vec2 v_textureUVs;
+out VertexData {
+	vec4 colour;
+	vec2 textureUVs;
+} v;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
 void main() {
 	gl_Position = projection * view * model * position;
-	v_vertexColour = colour;
-	v_textureUVs = textureUVs;
+	v.colour = colour;
+	v.textureUVs = textureUVs;
 }
 
 #pragma stage fragment
-in vec4 v_vertexColour;
-in vec2 v_textureUVs;
+in VertexData {
+	vec4 colour;
+	vec2 textureUVs;
+} v;
 out vec4 fragmentColour;
 uniform sampler2D mainTexture;
 
 void main() {
-	fragmentColour = texture(mainTexture, v_textureUVs) * v_vertexColour;
+	fragmentColour = texture(mainTexture, v.textureUVs) * v.colour;
 }

@@ -19,18 +19,22 @@
 #pragma stage vertex
 in vec4 position;
 in vec2 textureUVs;
-out vec2 v_textureUVs;
+out VertexData {
+	vec2 textureUVs;
+} v;
 
 void main() {
 	gl_Position = position;
-	v_textureUVs = textureUVs;
+	v.textureUVs = textureUVs;
 }
 
 #pragma stage fragment
-in vec2 v_textureUVs;
+in VertexData {
+	vec2 textureUVs;
+} v;
 out vec4 fragmentColour;
 uniform sampler2D framebuffer;
 
 void main() {
-	fragmentColour = texture(framebuffer, v_textureUVs);
+	fragmentColour = texture(framebuffer, v.textureUVs);
 }

@@ -31,32 +31,36 @@
 in vec4 position;
 in vec4 colour;
 in vec2 textureUVs;
-out vec4 v_vertexColour;
-out vec2 v_texelPosition;
-out vec2 v_textureScale;
+out VertexData {
+	vec4 colour;
+	vec2 texelPosition;
+	vec2 textureScale;
+} v;
 uniform vec2 textureSourceSize;
 uniform vec2 textureTargetSize;
 
 void main() {
 
 	gl_Position = position;
-	v_vertexColour = colour;
-	v_texelPosition = textureUVs * textureSourceSize;
-	v_textureScale = max(floor(textureTargetSize / textureSourceSize), vec2(1.0, 1.0));
+	v.colour = colour;
+	v.texelPosition = textureUVs * textureSourceSize;
+	v.textureScale = max(floor(textureTargetSize / textureSourceSize), vec2(1.0, 1.0));
 }
 
 #pragma stage fragment
-in vec4 v_vertexColour;
-in vec2 v_texelPosition;
-in vec2 v_textureScale;
+in VertexData {
+	vec4 colour;
+	vec2 texelPosition;
+	vec2 textureScale;
+} v;
 out vec4 fragmentColour;
 uniform sampler2D framebuffer;
 uniform vec2 textureSourceSize;
 
 void main() {
 
-	vec2 texel = v_texelPosition;
-	vec2 scale = v_textureScale;
+	vec2 texel = v.texelPosition;
+	vec2 scale = v.textureScale;
 	vec2 texelFloor = floor(texel);
 	vec2 texelFract = fract(texel);
 	vec2 regionRange = 0.5 - 0.5 / scale;
@@ -65,5 +69,5 @@ void main() {
 	vec2 targetUVs = (texelFloor + texelOffset) / textureSourceSize;
 
 	fragmentColour = texture(framebuffer, targetUVs);
-	fragmentColour *= v_vertexColour;
+	fragmentColour *= v.colour;
 }

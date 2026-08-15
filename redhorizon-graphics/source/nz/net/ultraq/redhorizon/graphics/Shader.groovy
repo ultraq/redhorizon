@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
+import org.joml.Vector3fc
 import org.joml.Vector4fc
 
 import groovy.transform.stc.ClosureParams
@@ -64,6 +65,11 @@ interface Shader<TShaderContext extends ShaderContext> extends GraphicsResource 
 	 * Apply {@code Vector2fc} data to a uniform in this shader.
 	 */
 	void setUniform(String name, Vector2fc value)
+
+	/**
+	 * Apply {@code Vector3fc} data to a uniform in this shader.
+	 */
+	void setUniform(String name, Vector3fc value)
 
 	/**
 	 * Apply {@code Vector4fc[]} data to a uniform in this shader.

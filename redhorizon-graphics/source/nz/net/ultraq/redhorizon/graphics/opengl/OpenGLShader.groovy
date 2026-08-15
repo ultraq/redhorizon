@@ -26,6 +26,8 @@ import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector2fc
+import org.joml.Vector3f
+import org.joml.Vector3fc
 import org.joml.Vector4f
 import org.joml.Vector4fc
 import org.slf4j.Logger
@@ -192,6 +194,19 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 				.put(value.x(), value.y())
 				.flip()
 			glUniform2fv(uniformLocation, buffer)
+		}
+	}
+
+	@Override
+	void setUniform(String name, Vector3fc value) {
+
+		var uniformLocation = getUniformLocation(name)
+		stackPush().withCloseable { stack ->
+			var buffer = uniformBuffers
+				.getOrCreate(name) { -> stack.mallocFloat(Vector3f.FLOATS) }
+				.put(value.x(), value.y(), value.z())
+				.flip()
+			glUniform3fv(uniformLocation, buffer)
 		}
 	}
 

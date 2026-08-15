@@ -17,45 +17,40 @@
 #version 410 core
 
 #pragma stage vertex
-in vec4 position;
-in vec4 colour;
-in vec2 textureUVs;
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec4 colour;
+//layout(location = 2) in vec2 textureUVs;
+layout(location = 3) in vec3 normal;
 out VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec3 normal;
+	vec3 fragmentPosition;
 } v;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
-uniform vec2 frameXY;
 
 void main() {
 	gl_Position = projection * view * model * position;
 	v.colour = colour;
-	v.textureUVs = textureUVs + frameXY;
+	v.normal = (model * vec4(normal, 0.0)).xyz;
+	v.fragmentPosition = (model * position).xyz;
 }
 
 #pragma stage fragment
 in VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec3 normal;
+	vec3 fragmentPosition;
 } v;
 out vec4 fragmentColour;
-uniform sampler2D indexTexture;
-uniform sampler2D swapMap;
-uniform sampler2D palette;
-uniform sampler2D alphaMask;
+uniform vec4 ambientColour;
+uniform vec4 lightColour;
+uniform vec3 lightPosition;
 
 void main() {
-	// The final colour is obtained from:
-	//  - index value sampled from the texture
-	//  - run through an adjustment map (eg: for different faction colours)
-	//  - a colour is then pulled from the palette
-	//  - where an alpha mask is applied
-	//  - (and then the usual step of applying the vertex colouring)
-	vec2 index = vec2(texture(indexTexture, v.textureUVs).x, 1);
-	index = vec2(texture(swapMap, index).x, 1);
-	vec4 colour = vec4(texture(palette, index).rgb, 1);
-	colour *= texture(alphaMask, index);
-	fragmentColour = colour * v.colour;
+	vec3 norm = normalize(v.normal);
+	vec3 lightDir = normalize(lightPosition - v.fragmentPosition);
+	vec4 diffuse = max(dot(norm, lightDir), 0.0) * lightColour;
+	fragmentColour = v.colour * (ambientColour + diffuse);
 }
