@@ -37,6 +37,11 @@ interface Shader<TShaderContext extends ShaderContext> extends GraphicsResource 
 	String getName()
 
 	/**
+	 * Apply {@code boolean} data to a uniform in this shader.
+	 */
+	void setUniform(String name, boolean value)
+
+	/**
 	 * Apply {@code float} data to a uniform in this shader.
 	 */
 	void setUniform(String name, float value)

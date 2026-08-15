@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.graphics
 
 /**
- * Extract the vertex and fragment shader sources from the shader file that uses
- * the RetroArch/LibRetro format.  The format is
+ * Extract the vertex, geometry, and fragment shader sources from a combined
+ * shader file, in the RetroArch/LibRetro format.  The format is
  * <a href="https://github.com/libretro/slang-shaders/tree/master?tab=readme-ov-file#initial-preprocess-of-slang-files">outlined
  * here</a>, though currently the only thing supported is the {@code #pragma stage}
  * directive for specifying the shader type.
@@ -27,28 +27,43 @@ package nz.net.ultraq.redhorizon.graphics
  */
 class LibRetroShaderReader {
 
-	Tuple2<String, String> read(String shaderSourcePath) {
+	Tuple3<String, String, String> read(String shaderSourcePath) {
 
 		return getResourceAsStream(shaderSourcePath).withBufferedReader { reader ->
 			var vertexShaderSource = new StringBuilder()
+			var geometryShaderSource = new StringBuilder()
 			var fragmentShaderSource = new StringBuilder()
+			var geometryShaderEnabled = false
 			var stage = 'none'
+
 			reader.eachLine { line ->
 				if (line.startsWith('#pragma stage')) {
 					stage = line.substring('#pragma stage'.length()).trim()
+					if (stage == 'geometry') {
+						geometryShaderEnabled = true
+					}
 				}
 				else if (stage == 'vertex') {
 					vertexShaderSource << line << '\n'
+				}
+				else if (stage == 'geometry') {
+					geometryShaderSource << line << '\n'
 				}
 				else if (stage == 'fragment') {
 					fragmentShaderSource << line << '\n'
 				}
 				else {
 					vertexShaderSource << line << '\n'
+					geometryShaderSource << line << '\n'
 					fragmentShaderSource << line << '\n'
 				}
 			}
-			return new Tuple2<String, String>(vertexShaderSource.toString(), fragmentShaderSource.toString())
+
+			return new Tuple3<>(
+				vertexShaderSource.toString(),
+				geometryShaderEnabled ? geometryShaderSource.toString() : null,
+				fragmentShaderSource.toString()
+			)
 		}
 	}
 }

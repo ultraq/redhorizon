@@ -140,7 +140,7 @@ class Display3DModelTest extends Specification {
 	}
 
 	@TupleConstructor(defaults = false)
-	static class Object {
+	static class ObjFile {
 
 		final List<Vector3f> vertices
 		final List<Vector3f> normals
@@ -159,7 +159,7 @@ class Display3DModelTest extends Specification {
 	 */
 	static class ObjFileReader {
 
-		Object read(InputStream input) {
+		ObjFile read(InputStream input) {
 
 			var vertices = new ArrayList<Vector3f>()
 			var normals = new ArrayList<Vector3f>()
@@ -185,7 +185,7 @@ class Display3DModelTest extends Specification {
 				}
 			}
 
-			return new Object(vertices, normals, faces)
+			return new ObjFile(vertices, normals, faces)
 		}
 	}
 

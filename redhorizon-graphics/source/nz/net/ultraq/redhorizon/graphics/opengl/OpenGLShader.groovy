@@ -34,6 +34,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.opengl.GL11C.GL_TRUE
 import static org.lwjgl.opengl.GL20C.*
+import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER
 import static org.lwjgl.system.MemoryStack.stackPush
 
 import groovy.transform.Memoized
@@ -64,7 +65,7 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 
 		this.name = name
 
-		var (vertexShaderSource, fragmentShaderSource) = new LibRetroShaderReader().read(shaderSourcePath)
+		var (vertexShaderSource, geometryShaderSource, fragmentShaderSource) = new LibRetroShaderReader().read(shaderSourcePath)
 
 		/*
 		 * Create a shader of the specified name and type, running a compilation
@@ -88,9 +89,12 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 		/*
 		 * Link multiple shader parts together into a shader program.
 		 */
-		var linkShaderProgram = { int vertexShaderId, int fragmentShaderId ->
+		var linkShaderProgram = { int vertexShaderId, int geometryShaderId, int fragmentShaderId ->
 			var programId = glCreateProgram()
 			glAttachShader(programId, vertexShaderId)
+			if (geometryShaderId) {
+				glAttachShader(programId, geometryShaderId)
+			}
 			glAttachShader(programId, fragmentShaderId)
 
 			// Control binding points for attributes in our shaders
@@ -112,11 +116,15 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 		}
 
 		var vertexShaderId = compileShader(vertexShaderSource, GL_VERTEX_SHADER)
+		var geometryShaderId = geometryShaderSource ? compileShader(geometryShaderSource, GL_GEOMETRY_SHADER) : 0
 		var fragmentShaderId = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER)
 
-		programId = linkShaderProgram(vertexShaderId, fragmentShaderId)
+		programId = linkShaderProgram(vertexShaderId, geometryShaderId, fragmentShaderId)
 
 		glDeleteShader(vertexShaderId)
+		if (geometryShaderId) {
+			glDeleteShader(geometryShaderId)
+		}
 		glDeleteShader(fragmentShaderId)
 	}
 
@@ -138,6 +146,12 @@ abstract class OpenGLShader<TShaderContext extends ShaderContext> implements Sha
 	protected int getUniformLocation(String name) {
 
 		return glGetUniformLocation(programId, name)
+	}
+
+	@Override
+	void setUniform(String name, boolean value) {
+
+		glUniform1i(getUniformLocation(name), value ? 1 : 0)
 	}
 
 	@Override
