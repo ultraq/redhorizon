@@ -102,6 +102,7 @@ class Display3DModelTest extends Specification {
 			var transform = new Matrix4f()
 				.translate(0f, -1.5f, 0f)
 				.rotateX(Math.toRadians(15) as float)
+			var wireframeMode = true
 
 		when:
 			var lastTimeMillis = System.currentTimeMillis()
@@ -116,7 +117,7 @@ class Display3DModelTest extends Specification {
 				window.useRenderPipeline()
 					.scene { ->
 						framebuffer.useFramebuffer { ->
-							glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+							glPolygonMode(GL_FRONT_AND_BACK, wireframeMode ? GL_LINE : GL_FILL)
 							shader.useShader { shaderContext ->
 								camera.render(shaderContext)
 								teapot.render(shaderContext, material, transform)
@@ -130,6 +131,9 @@ class Display3DModelTest extends Specification {
 					.end()
 				if (input.keyPressed(GLFW_KEY_V, true)) {
 					window.toggleVSync()
+				}
+				else if (input.keyPressed(GLFW_KEY_W, true)) {
+					wireframeMode = !wireframeMode
 				}
 				Thread.yield()
 			}
