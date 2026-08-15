@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
-
 import org.joml.Matrix4fc
 
 /**

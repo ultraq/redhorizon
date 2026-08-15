@@ -57,6 +57,7 @@ interface Mesh extends GraphicsResource {
 	 */
 	static enum Type {
 
+		POINTS,
 		LINE_LOOP,
 		LINES,
 		TRIANGLES,

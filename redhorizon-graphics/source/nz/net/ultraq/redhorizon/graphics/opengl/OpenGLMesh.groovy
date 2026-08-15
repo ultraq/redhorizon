@@ -61,6 +61,7 @@ class OpenGLMesh implements Mesh {
 		this.dynamic = dynamic
 
 		mode = switch (type) {
+			case Type.POINTS -> GL_POINTS
 			case Type.LINES -> GL_LINES
 			case Type.LINE_LOOP -> GL_LINE_LOOP
 			case Type.TRIANGLES -> GL_TRIANGLES
