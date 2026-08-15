@@ -40,8 +40,7 @@ class CursorTrackingOverlayModule implements DebugOverlayModule {
 	CursorTrackingOverlayModule(Window window, Camera camera) {
 
 		window.on(CursorPositionEvent) { event ->
-			cursorPosition.set(event.xPos(), event.yPos())
-			camera.unproject(window.viewport, cursorPosition.x, cursorPosition.y, worldPosition)
+			camera.unproject(window.viewport, cursorPosition.set(event.xPos(), event.yPos()), worldPosition)
 		}
 	}
 

@@ -20,6 +20,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
+import org.joml.Vector2fc
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglei
 
@@ -96,5 +97,18 @@ class Camera extends Node<Camera> {
 				0,
 				new int[]{ viewport.minX, viewport.minY, viewport.lengthX(), viewportHeight },
 				result)
+	}
+
+	/**
+	 * Convert a set of window coordinates to world coordinates.
+	 *
+	 * @param viewport
+	 * @param windowPosition
+	 * @param result A vector to store the result in.
+	 * @return The {@code result} vector.
+	 */
+	Vector3f unproject(Rectanglei viewport, Vector2fc windowPosition, Vector3f result) {
+
+		return unproject(viewport, windowPosition.x(), windowPosition.y(), result)
 	}
 }

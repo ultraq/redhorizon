@@ -72,8 +72,7 @@ class PositionalAudioScene extends Application {
 				var window = WINDOW.get()
 
 				var camera = node.scene.find(Camera)
-				var cursorPosition = input.cursorPosition()
-				camera.unproject(window.viewport, cursorPosition.x(), cursorPosition.y(), worldCoords)
+				camera.unproject(window.viewport, input.cursorPosition(), worldCoords)
 
 				// TODO: Play sound once utility?
 				var scene = node.scene

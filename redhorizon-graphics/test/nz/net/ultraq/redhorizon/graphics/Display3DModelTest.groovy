@@ -112,6 +112,7 @@ class Display3DModelTest extends Specification {
 				var delta = (now - lastTimeMillis) / 1000 as float
 				lastTimeMillis = now
 				transform.rotateY(1f * delta as float)
+				camera.unproject(window.viewport, input.cursorPosition(), material.lightPosition)
 				window.useRenderPipeline()
 					.scene { ->
 						framebuffer.useFramebuffer { ->
