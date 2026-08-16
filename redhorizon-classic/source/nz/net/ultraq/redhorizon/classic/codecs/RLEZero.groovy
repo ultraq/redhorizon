@@ -20,12 +20,10 @@ import groovy.transform.CompileStatic
 import java.nio.ByteBuffer
 
 /**
- * Encoder/decoder utilizing Westwood's "RLE-Zero" compression scheme.
- * <p>
- * For details about RLE-Zero, see:
- * <a href="http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero" target="_top">http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero</a>
- * <p>
- * A RLE-Zero file can be decoded as follows:
+ * Decoder of Westwood's "RLE-Zero" compression scheme.  For details about
+ * RLE-Zero, see: <a href="http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero">http://www.shikadi.net/moddingwiki/Westwood_RLE-Zero</a>
+ *
+ * <p>A RLE-Zero file can be decoded as follows:
  * <ol>
  *   <li>0 c = Fill the next c bytes with 0</li>
  *   <li>v   = Write v</li>
@@ -34,10 +32,12 @@ import java.nio.ByteBuffer
  * @author Emanuel Rabina
  */
 @CompileStatic
-class RLEZero implements Encoder, Decoder {
+class RLEZero implements Decoder {
 
+	// @formatter:off
 	private static final byte CMD_FILL     = 0
 	private static final byte CMD_FILL_VAL = 0
+	// @formatter:on
 
 	@Override
 	ByteBuffer decode(ByteBuffer source, ByteBuffer dest) {
@@ -57,40 +57,6 @@ class RLEZero implements Encoder, Decoder {
 				dest.put(command)
 			}
 		}
-		return dest.flip()
-	}
-
-	@Override
-	ByteBuffer encode(ByteBuffer source, ByteBuffer dest) {
-
-		int count = 0
-		int limit = Math.min(source.limit(), 255)
-
-		outer: while (source.hasRemaining()) {
-			byte value = source.get()
-
-			// Count a series of 0s, describe the series
-			while (value == CMD_FILL_VAL) {
-				while (value == CMD_FILL_VAL && count < limit) {
-					count++
-					if (source.hasRemaining()) {
-						value = source.get()
-					}
-					else {
-						break
-					}
-				}
-				dest.put([ CMD_FILL, (byte)count ] as byte[])
-				count = 0
-				if (!source.hasRemaining()) {
-					break outer
-				}
-			}
-
-			// Write non-0 value
-			dest.put(value)
-		}
-		source.rewind()
 		return dest.flip()
 	}
 }

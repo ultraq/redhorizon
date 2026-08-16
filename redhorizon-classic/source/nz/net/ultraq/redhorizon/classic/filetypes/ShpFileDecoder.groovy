@@ -96,11 +96,11 @@ class ShpFileDecoder implements ImageDecoder, FileTypeTest {
 					lcw.decode(compressedImage, uncompressedImage)
 				case FORMAT_XOR_BASE ->
 					xorDelta
-						.deltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
+						.withDeltaSource(imagesData[imageOffsets.findIndexOf { it.offset == imageOffset.refOff }])
 						.decode(compressedImage, uncompressedImage)
 				case FORMAT_XOR_CHAIN ->
 					xorDelta
-//						.deltaSource(imagesData[i - 1])
+//						.withDeltaSource(imagesData[i - 1])
 						.decode(compressedImage, uncompressedImage)
 			}
 
