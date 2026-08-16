@@ -31,6 +31,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector4f
 import org.lwjgl.system.Configuration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import static org.lwjgl.glfw.GLFW.*
 import static org.lwjgl.opengl.GL11C.*
@@ -45,6 +46,7 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class Display3DModelTest extends Specification {
 
 	def setupSpec() {
