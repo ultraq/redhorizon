@@ -78,7 +78,7 @@ class DebugOverlay extends ImGuiModule<DebugOverlay> {
 		ImGui.setNextWindowPos((float)(viewport.workPosX + viewport.sizeX - width), viewport.workPosY)
 		ImGui.useFont(context.monospaceFont, 0f) { ->
 			ImGui.useWindow('Debug overlay', new ImBoolean(true),
-				NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize) { ->
+				NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | NoInputs | AlwaysAutoResize) { ->
 				width = (int)ImGui.getWindowSizeX()
 				ImGui.text("FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms")
 				if (modules) {
