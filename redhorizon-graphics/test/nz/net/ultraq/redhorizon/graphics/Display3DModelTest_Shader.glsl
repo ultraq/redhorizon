@@ -17,10 +17,9 @@
 #version 410 core
 
 #pragma stage vertex
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 colour;
-//layout(location = 2) in vec2 textureUVs;
-layout(location = 3) in vec3 normal;
+in vec4 position;
+in vec4 colour;
+in vec3 normal;
 out VertexData {
 	vec4 colour;
 	vec3 normal;

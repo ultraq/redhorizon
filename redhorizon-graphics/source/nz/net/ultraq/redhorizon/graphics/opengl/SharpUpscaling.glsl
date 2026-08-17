@@ -30,7 +30,7 @@
 #pragma stage vertex
 in vec4 position;
 in vec4 colour;
-in vec2 textureUVs;
+in vec2 textureCoord;
 out VertexData {
 	vec4 colour;
 	vec2 texelPosition;
@@ -43,7 +43,7 @@ void main() {
 
 	gl_Position = position;
 	v.colour = colour;
-	v.texelPosition = textureUVs * textureSourceSize;
+	v.texelPosition = textureCoord * textureSourceSize;
 	v.textureScale = max(floor(textureTargetSize / textureSourceSize), vec2(1.0, 1.0));
 }
 

@@ -19,10 +19,10 @@
 #pragma stage vertex
 in vec4 position;
 in vec4 colour;
-in vec2 textureUVs;
+in vec2 textureCoord;
 out VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec2 textureCoord;
 } v;
 uniform mat4 projection;
 uniform mat4 view;
@@ -32,13 +32,13 @@ uniform vec2 frameXY;
 void main() {
 	gl_Position = projection * view * model * position;
 	v.colour = colour;
-	v.textureUVs = textureUVs + frameXY;
+	v.textureCoord = textureCoord + frameXY;
 }
 
 #pragma stage fragment
 in VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec2 textureCoord;
 } v;
 out vec4 fragmentColour;
 uniform sampler2D indexTexture;
@@ -53,7 +53,7 @@ void main() {
 	//  - a colour is then pulled from the palette
 	//  - where an alpha mask is applied
 	//  - (and then the usual step of applying the vertex colouring)
-	vec2 index = vec2(texture(indexTexture, v.textureUVs).x, 1);
+	vec2 index = vec2(texture(indexTexture, v.textureCoord).x, 1);
 	index = vec2(texture(swapMap, index).x, 1);
 	vec4 colour = vec4(texture(palette, index).rgb, 1);
 	colour *= texture(alphaMask, index);

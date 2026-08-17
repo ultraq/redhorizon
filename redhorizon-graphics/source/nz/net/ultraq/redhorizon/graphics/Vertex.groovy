@@ -40,7 +40,7 @@ class Vertex {
 	public static final Attribute[] LAYOUT = [
 		new Attribute('position', 0, Vector3f.FLOATS),
 		new Attribute('colour', 1, Colour.FLOATS),
-		new Attribute('textureUVs', 2, Vector2f.FLOATS),
+		new Attribute('textureCoord', 2, Vector2f.FLOATS),
 		new Attribute('normal', 3, Vector3f.FLOATS)
 	]
 
@@ -56,18 +56,19 @@ class Vertex {
 
 	Vector3f position
 	Colour colour
-	Vector2f textureUVs
+	Vector2f textureCoord
 	Vector3f normal
 
 	/**
-	 * Constructor, create a vertex with position, colour, and texture
-	 * coordinates.
+	 * Constructor, create a vertex with the required position and colour, but
+	 * everything else optional.
 	 */
-	Vertex(Vector3f position, Colour colour, Vector2f textureUVs = new Vector2f(), Vector3f normal = new Vector3f()) {
+	Vertex(Vector3f position, Colour colour, Vector2f textureCoord = new Vector2f(),
+		Vector3f normal = new Vector3f(0f, 0f, 1f)) {
 
 		this.position = position
 		this.colour = colour
-		this.textureUVs = textureUVs
+		this.textureCoord = textureCoord
 		this.normal = normal
 	}
 
@@ -80,7 +81,7 @@ class Vertex {
 			case float[] -> new float[]{
 				position.x, position.y, position.z,
 				colour.r, colour.g, colour.b, colour.a,
-				textureUVs.x, textureUVs.y,
+				textureCoord.x, textureCoord.y,
 				normal.x, normal.y, normal.z
 			}
 			default -> throw new IllegalArgumentException("Cannot convert Vertex to ${clazz}")
@@ -96,7 +97,7 @@ class Vertex {
 		if (colour != other.colour) {
 			colour = other.colour // Immutable object - should it be modifiable?
 		}
-		textureUVs.set(other.textureUVs)
+		textureCoord.set(other.textureCoord)
 		normal.set(other.normal)
 	}
 

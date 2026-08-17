@@ -19,10 +19,10 @@
 #pragma stage vertex
 in vec4 position;
 in vec4 colour;
-in vec2 textureUVs;
+in vec2 textureCoord;
 out VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec2 textureCoord;
 } v;
 uniform mat4 projection;
 uniform mat4 view;
@@ -31,17 +31,17 @@ uniform mat4 model;
 void main() {
 	gl_Position = projection * view * model * position;
 	v.colour = colour;
-	v.textureUVs = textureUVs;
+	v.textureCoord = textureCoord;
 }
 
 #pragma stage fragment
 in VertexData {
 	vec4 colour;
-	vec2 textureUVs;
+	vec2 textureCoord;
 } v;
 out vec4 fragmentColour;
 uniform sampler2D mainTexture;
 
 void main() {
-	fragmentColour = texture(mainTexture, v.textureUVs) * v.colour;
+	fragmentColour = texture(mainTexture, v.textureCoord) * v.colour;
 }

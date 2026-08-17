@@ -153,7 +153,7 @@ class OpenGLMesh implements Mesh {
 	void updateVertexData(Vertex[] newVertices) {
 
 		if (!dynamic) {
-			throw new UnsupportedOperationException('Cannot update textureUVs on a mesh that was created without a dynamic buffer')
+			throw new UnsupportedOperationException('Cannot update vertex data on a mesh that was created without a dynamic buffer')
 		}
 
 		stackPush().withCloseable { stack ->
