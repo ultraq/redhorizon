@@ -17,6 +17,7 @@
 moduleName = joml-extensions
 moduleVersion = ${moduleVersion}
 extensionClasses = nz.net.ultraq.redhorizon.jomlextensions.CirclefExtensions,\
+                   nz.net.ultraq.redhorizon.jomlextensions.RayfExtensions,\
                    nz.net.ultraq.redhorizon.jomlextensions.RectanglefExtensions,\
                    nz.net.ultraq.redhorizon.jomlextensions.RectangleiExtensions,\
                    nz.net.ultraq.redhorizon.jomlextensions.Vector2fExtensions

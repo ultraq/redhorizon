@@ -220,7 +220,7 @@ final class Runtime {
 							window, camera, inputEventHandler, gridLines.get())
 					)
 					var engine = application.configureEngine(new Engine()
-						.addSystem(new InputSystem(inputEventHandler))
+						.addSystem(new InputSystem(inputEventHandler, window))
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 						.addSystem(
 							new SimulationSystem(

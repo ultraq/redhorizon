@@ -32,13 +32,13 @@ class Rectangle extends Shape {
 	/**
 	 * Constructor, produce a rectangle with the given dimensions.
 	 */
-	Rectangle(float width, float height, Colour colour, boolean filled = false) {
+	Rectangle(float width, float height, Colour colour, boolean filled = false, boolean dynamic = false) {
 
 		super(filled ? Type.TRIANGLES : Type.LINE_LOOP, new Vertex[]{
 			new Vertex(new Vector3f(-width / 2f as float, -height / 2f as float, 0), colour),
 			new Vertex(new Vector3f(width / 2f as float, -height / 2f as float, 0), colour),
 			new Vertex(new Vector3f(width / 2f as float, height / 2f as float, 0), colour),
 			new Vertex(new Vector3f(-width / 2f as float, height / 2f as float, 0), colour)
-		}, filled ? fillIndex : null)
+		}, filled ? fillIndex : null, dynamic)
 	}
 }

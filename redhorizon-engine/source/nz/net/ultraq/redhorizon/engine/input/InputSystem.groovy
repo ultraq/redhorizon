@@ -17,9 +17,13 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.graphics.Camera
+import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.joml.Vector3f
+import org.joml.primitives.Rayf
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -36,12 +40,43 @@ class InputSystem extends System {
 	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
 
 	final InputEventHandler input
+	final Window window
+	private final Vector3f worldPosition = new Vector3f()
+	private final List<Selectable> selectables = []
+	private Rayf cursorRay = new Rayf()
+	private Selectable selection
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		average('Update: {}ms', 1f, logger) { ->
+
+			// Process registered control bindings
 			input.processInputs()
+
+			// Find if any nodes are selected by the cursor
+			var cursor = input.cursorPosition()
+			scene.find(Camera).unproject(window.viewport, cursor, worldPosition)
+			cursorRay.set(worldPosition.x(), worldPosition.y(), 0f, 0f, 0f, -1f)
+			selectables.clear()
+			scene.findAll(Selectable, selectables).each { selectable ->
+				if (selectable.intersectsRay(cursorRay)) {
+					if (selectable == selection) {
+						// Do nothing, we don't have a 'cursor stay' event
+					}
+					else {
+						if (selection) {
+							selection.trigger(new CursorExitEvent())
+						}
+						selection = selectable
+						selectable.trigger(new CursorEnterEvent())
+					}
+				}
+				else if (selectable == selection) {
+					selection.trigger(new CursorExitEvent())
+					selection = null
+				}
+			}
 		}
 	}
 }

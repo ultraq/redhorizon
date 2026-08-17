@@ -33,9 +33,9 @@ class Shape extends GraphicsNode<Shape, SceneShaderContext> implements AutoClose
 	/**
 	 * Constructor, configure this shape.
 	 */
-	Shape(Type type, Vertex[] vertices, int[] index = null) {
+	Shape(Type type, Vertex[] vertices, int[] index = null, boolean dynamic = false) {
 
-		mesh = new OpenGLMesh(type, vertices, index)
+		mesh = new OpenGLMesh(type, vertices, index, dynamic)
 	}
 
 	@Override
