@@ -27,6 +27,11 @@ import org.joml.Matrix4fc
 interface Mesh extends GraphicsResource {
 
 	/**
+	 * Get the vertices that make up this mesh.
+	 */
+	Vertex[] getVertices()
+
+	/**
 	 * Whether or not this mesh is allowed to be updated with new vertex data.
 	 */
 	boolean isDynamic()

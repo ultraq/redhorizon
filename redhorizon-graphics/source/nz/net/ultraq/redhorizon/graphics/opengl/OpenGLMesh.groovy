@@ -41,7 +41,7 @@ class OpenGLMesh implements Mesh {
 	private static final Matrix4fc IDENTITY_MATRIX = new Matrix4f()
 
 	private final Type type
-	private final Vertex[] vertices
+	final Vertex[] vertices
 	final boolean dynamic
 	private final int[] index
 
@@ -158,14 +158,14 @@ class OpenGLMesh implements Mesh {
 
 		stackPush().withCloseable { stack ->
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId)
-
+			var newBuffer = stack.mallocFloat(Vertex.FLOATS * newVertices.length)
 			newVertices.eachWithIndex { newVertex, index ->
 				var vertex = vertices[index]
-				if (newVertex != vertex) {
-					glBufferSubData(GL_ARRAY_BUFFER, 0, stack.floats(newVertex as float[]))
-					vertex.update(newVertex)
-				}
+				newBuffer.put(newVertex as float[])
+				vertex.update(newVertex)
 			}
+			newBuffer.flip()
+			glBufferSubData(GL_ARRAY_BUFFER, 0, newBuffer)
 		}
 	}
 }
