@@ -143,7 +143,7 @@ final class Runtime {
 				.withName('Grid lines')
 				.disable()
 		)
-		var debugOverlay = new DebugOverlay()
+		var debugOverlay = new DebugOverlay(1f)
 			.withCursorTracking(window, camera)
 			.withProfilingLogging()
 			.disable()

@@ -20,6 +20,8 @@ import imgui.ImGui
 import imgui.type.ImBoolean
 import static imgui.flag.ImGuiWindowFlags.*
 
+import java.lang.management.ManagementFactory
+
 /**
  * A configurable debug overlay starting with just an FPS counter.
  *
@@ -32,6 +34,8 @@ class DebugOverlay extends ImGuiModule<DebugOverlay> {
 	private long lastUpdateTimeMs = System.currentTimeMillis()
 	private float updateTimer
 	private float framerate
+	private int gcCount
+	private int gcTime
 	private int width = 300
 	private final List<DebugOverlayModule> modules = []
 
@@ -69,6 +73,12 @@ class DebugOverlay extends ImGuiModule<DebugOverlay> {
 		updateTimer += delta
 		if (updateTimer > updateRateSeconds) {
 			framerate = ImGui.getIO().framerate
+			gcCount = 0
+			gcTime = 0
+			for (var gcBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+				gcCount += gcBean.collectionCount
+				gcTime += gcBean.collectionTime
+			}
 			updateTimer -= updateRateSeconds
 		}
 		lastUpdateTimeMs = currentTimeMs
@@ -80,7 +90,9 @@ class DebugOverlay extends ImGuiModule<DebugOverlay> {
 			ImGui.useWindow('Debug overlay', new ImBoolean(true),
 				NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | NoInputs | AlwaysAutoResize) { ->
 				width = (int)ImGui.getWindowSizeX()
-				ImGui.text("FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms")
+				ImGui.text(
+					"FPS: ${sprintf('%.1f', framerate)}, ${sprintf('%.1f', 1000 / framerate)}ms | " +
+						"GC: ${gcCount}, ${gcTime}ms")
 				if (modules) {
 					ImGui.separator()
 					modules*.render()
