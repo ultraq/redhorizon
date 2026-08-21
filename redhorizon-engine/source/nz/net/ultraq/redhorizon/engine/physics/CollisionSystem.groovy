@@ -60,7 +60,7 @@ class CollisionSystem extends System {
 			var collider = collisionCandidates[i]
 			var otherCollider = collisionCandidates[i + 1]
 
-			var existingCollision = collisions[collider] == otherCollider
+			var existingCollision = collisions[collider] == otherCollider || collisions[otherCollider] == collider
 			if (collider.checkCollision(otherCollider)) {
 				if (existingCollision) {
 					// Do nothing - we don't have a 'collision continue' event

@@ -31,7 +31,7 @@ import spock.lang.Specification
  * @author Emanuel Rabina
  */
 @IgnoreIf({ env.CI })
-class PerformanceTests extends Specification {
+class CollisionSimulationTests extends Specification {
 
 	def 'Collision simulation'() {
 		when:
