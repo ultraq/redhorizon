@@ -23,7 +23,9 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugEverythingBinding
+import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
+import nz.net.ultraq.redhorizon.engine.debug.DebugSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
@@ -231,7 +233,10 @@ final class Runtime {
 								.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 						)
 						.addSystem(new SceneUpdateSystem())
-						.addSystem(new DebugCollisionOutlineSystem())
+						.addSystem(new DebugSystem(
+							new DebugCollisionOutlineSystem(),
+							new DebugMovementArrowsSystem()
+						))
 						.addSystem(new AudioSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
 						.withScene(scene)

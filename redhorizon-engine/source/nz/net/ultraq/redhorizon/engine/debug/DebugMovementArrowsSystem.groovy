@@ -14,28 +14,49 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.engine.debug
 
 import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 /**
- * Perform movement of all movable objects in a scene.
+ * Manage the drawing of movement vectors for debugging.
  *
  * @author Emanuel Rabina
  */
-class MovementSystem extends System {
+class DebugMovementArrowsSystem extends System {
+
+	private static final String MOVEMENT_ARROW_NAME = 'Movement arrow'
 
 	private final List<MovementNode> movementNodes = new ArrayList<>()
 
 	@Override
 	void update(Scene scene, float delta) {
 
+		var debugStore = scene.find(DebugStore)
+		if (!debugStore) {
+			throw new IllegalStateException('Scene does not have a DebugStore')
+		}
+
 		movementNodes.clear()
 		scene.findAll(MovementNode, movementNodes).each { node ->
-			if (node.enabled && node.vector) {
-				node.parent.translate(node.vector.x * node.speed * delta as float, node.vector.y * node.speed * delta as float)
+			var movementArrow = node.find(MOVEMENT_ARROW_NAME)
+			if (debugStore.showMovementArrows) {
+				if (!movementArrow) {
+					movementArrow = node.addAndReturnChild(new MovementLine(node.vector, node.speed, Colour.YELLOW)
+						.withName(MOVEMENT_ARROW_NAME))
+				}
+				if (node.enabled) {
+					movementArrow.enable()
+				}
+				else {
+					movementArrow.disable()
+				}
+			}
+			else if (movementArrow) {
+				movementArrow.disable()
 			}
 		}
 	}

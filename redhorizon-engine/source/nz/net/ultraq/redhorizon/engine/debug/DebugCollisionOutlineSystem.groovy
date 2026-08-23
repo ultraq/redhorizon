@@ -25,9 +25,6 @@ import nz.net.ultraq.redhorizon.physics.CircleCollider
 import nz.net.ultraq.redhorizon.physics.Collider
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 /**
  * Manage the drawing of collision outlines for debugging.
  *
@@ -35,7 +32,6 @@ import org.slf4j.LoggerFactory
  */
 class DebugCollisionOutlineSystem extends System {
 
-	private static final Logger logger = LoggerFactory.getLogger(DebugCollisionOutlineSystem)
 	private static final String COLLISION_OUTLINE_NAME = 'Collision outline'
 
 	private final List<Collider> colliders = new ArrayList<>()
@@ -43,40 +39,37 @@ class DebugCollisionOutlineSystem extends System {
 	@Override
 	void update(Scene scene, float delta) {
 
-		average('Update: {}ms', 1f, logger) { ->
-			var debugStore = scene.find(DebugStore)
-			if (!debugStore) {
-				throw new IllegalStateException('Scene does not have a DebugStore')
-			}
+		var debugStore = scene.find(DebugStore)
+		if (!debugStore) {
+			throw new IllegalStateException('Scene does not have a DebugStore')
+		}
 
-			colliders.clear()
-			scene.findAll(Collider, colliders).each { collider ->
-				var collisionOutline = collider.parent.find(COLLISION_OUTLINE_NAME)
-				if (debugStore.showCollisionOutlines) {
-					if (!collisionOutline) {
-						var collisionShape = switch (collider) {
-							case BoxCollider -> new Rectangle(collider.width, collider.height, Colour.YELLOW)
-							case CircleCollider -> new Circle(collider.radius, Colour.YELLOW)
-							default -> null
-						}
-						if (collisionShape) {
-							var colliderPosition = collider.position
-							collisionOutline = collider.parent.addAndReturnChild(collisionShape
-								.translate(colliderPosition.x(), colliderPosition.y())
-								.withName(COLLISION_OUTLINE_NAME))
-						}
+		colliders.clear()
+		scene.findAll(Collider, colliders).each { collider ->
+			var collisionOutline = collider.parent.find(COLLISION_OUTLINE_NAME)
+			if (debugStore.showCollisionOutlines) {
+				if (!collisionOutline) {
+					var collisionShape = switch (collider) {
+						case BoxCollider -> new Rectangle(collider.width, collider.height, Colour.YELLOW)
+						case CircleCollider -> new Circle(collider.radius, Colour.YELLOW)
+						default -> null
 					}
-					if (collider.enabled) {
-						collisionOutline.enable()
-					}
-					else {
-						collisionOutline.disable()
+					if (collisionShape) {
+						var colliderPosition = collider.position
+						collisionOutline = collider.parent.addAndReturnChild(collisionShape
+							.translate(colliderPosition.x(), colliderPosition.y())
+							.withName(COLLISION_OUTLINE_NAME))
 					}
 				}
-				else if (collisionOutline) {
+				if (collider.enabled) {
+					collisionOutline.enable()
+				}
+				else {
 					collisionOutline.disable()
 				}
-				return true
+			}
+			else if (collisionOutline) {
+				collisionOutline.disable()
 			}
 		}
 	}

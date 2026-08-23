@@ -16,26 +16,22 @@
 
 package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.CollisionSimulation.CollisionSimulationCandidateFunction
 import nz.net.ultraq.redhorizon.runtime.Runtime
 
 import org.joml.primitives.Rectanglef
-import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
- * Performance tests for collision-related functions.
+ * Performance tests for movement-related functions.
  *
  * @author Emanuel Rabina
  */
-@IgnoreIf({ env.CI })
-class CollisionSimulationTests extends Specification {
+class MovementSimulationTests extends Specification {
 
-	def 'Collision simulation'() {
+	def 'Movement simulation'() {
 		when:
-			new Runtime(new CollisionSimulation(new Rectanglef(-400f, -300f, 400f, 300f)))
+			new Runtime(new MovementSimulation(new Rectanglef(-400f, -300f, 400f, 300f)))
 				.withSimulationMinimumUpdateFrequency(60)
-				.withCollisionCandidatesFunction(new CollisionSimulationCandidateFunction())
 				.execute()
 		then:
 			noExceptionThrown()

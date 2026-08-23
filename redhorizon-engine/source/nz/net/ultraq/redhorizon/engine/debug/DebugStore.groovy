@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Node
 class DebugStore extends Node<DebugStore> {
 
 	boolean showCollisionOutlines = false
+	boolean showMovementArrows = false
 	boolean showDebugOverlay = false
 	boolean showGridLines = false
 	boolean showLogPanel = false
@@ -39,6 +40,7 @@ class DebugStore extends Node<DebugStore> {
 	void disableAll() {
 
 		showCollisionOutlines = false
+		showMovementArrows = false
 		showDebugOverlay = false
 		showGridLines = false
 		showLogPanel = false
@@ -51,6 +53,7 @@ class DebugStore extends Node<DebugStore> {
 	void enableAll() {
 
 		showCollisionOutlines = true
+		showMovementArrows = true
 		showDebugOverlay = true
 		showGridLines = true
 		showLogPanel = true
