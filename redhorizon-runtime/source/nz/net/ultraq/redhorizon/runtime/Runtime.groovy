@@ -226,9 +226,9 @@ final class Runtime {
 						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 						.addSystem(
 							new SimulationSystem(
-								new MovementSystem(),
 								new CollisionSystem()
-									.withCollisionCandidatesFunction(collisionCandidatesFunction)
+									.withCollisionCandidatesFunction(collisionCandidatesFunction),
+								new MovementSystem()
 							)
 								.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 						)

@@ -23,6 +23,8 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.physics.BoxCollider
+import nz.net.ultraq.redhorizon.physics.Collider
+import nz.net.ultraq.redhorizon.physics.CollisionContinueEvent
 import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
 import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.runtime.Application
@@ -74,19 +76,26 @@ class MovementSimulation extends Application {
 
 			movementNode = node.find(MovementNode)
 
-			node.find(BoxCollider).on(CollisionStartEvent) { event ->
-				var otherCollider = event.otherCollider()
+			var stopMovement = { Collider otherCollider ->
 				if (otherCollider.parent instanceof ScreenEdges) {
-					if (otherCollider.name == ScreenEdges.TOP_COLLIDER_NAME ||
-						otherCollider.name == ScreenEdges.BOTTOM_COLLIDER_NAME) {
-						movementNode.vector.y = 0f
+					if (otherCollider.name == ScreenEdges.TOP_COLLIDER_NAME) {
+						movementNode.vector.y = Math.min(movementNode.vector.y, 0f)
 					}
-					else if (otherCollider.name == ScreenEdges.LEFT_COLLIDER_NAME ||
-						otherCollider.name == ScreenEdges.RIGHT_COLLIDER_NAME) {
-						movementNode.vector.x = 0f
+					else if (otherCollider.name == ScreenEdges.BOTTOM_COLLIDER_NAME) {
+						movementNode.vector.y = Math.max(movementNode.vector.y, 0f)
+					}
+					if (otherCollider.name == ScreenEdges.LEFT_COLLIDER_NAME) {
+						movementNode.vector.x = Math.max(movementNode.vector.x, 0f)
+					}
+					else if (otherCollider.name == ScreenEdges.RIGHT_COLLIDER_NAME) {
+						movementNode.vector.x = Math.min(movementNode.vector.x, 0f)
 					}
 				}
 			}
+
+			node.find(BoxCollider)
+				.on(CollisionStartEvent) { event -> stopMovement(event.otherCollider()) }
+				.on(CollisionContinueEvent) { event -> stopMovement(event.otherCollider()) }
 		}
 
 		@Override
@@ -95,7 +104,10 @@ class MovementSimulation extends Application {
 			movementNode.vector.set(
 				input.keyPressed(GLFW_KEY_A) ? -1f : input.keyPressed(GLFW_KEY_D) ? 1f : 0f,
 				input.keyPressed(GLFW_KEY_W) ? 1f : input.keyPressed(GLFW_KEY_S) ? -1f : 0f
-			).normalize()
+			)
+			if (movementNode.vector) {
+				movementNode.vector.normalize()
+			}
 		}
 	}
 }
