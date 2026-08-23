@@ -35,9 +35,9 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class PositionalAudioScene extends Application {
+class PositionalAudio extends Application {
 
-	PositionalAudioScene() {
+	PositionalAudio() {
 
 		super('Positional audio', 'test')
 	}
@@ -61,7 +61,7 @@ class PositionalAudioScene extends Application {
 		void init() {
 
 			var resourceManager = RESOURCE_MANAGER.get()
-			sound = resourceManager.loadAudioData('PositionalAudioScene_bong_001.ogg')
+			sound = resourceManager.loadAudioData('PositionalAudio_bong_001.ogg')
 		}
 
 		@Override

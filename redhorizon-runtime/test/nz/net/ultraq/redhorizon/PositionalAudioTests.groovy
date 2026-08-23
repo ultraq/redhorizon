@@ -29,7 +29,7 @@ class PositionalAudioTests extends Specification {
 
 	def "Emit a sound from the cursor position"() {
 		when:
-			new Runtime(new PositionalAudioScene())
+			new Runtime(new PositionalAudio())
 				.withAudioListenerGain(0.5f)
 				.execute()
 		then:
