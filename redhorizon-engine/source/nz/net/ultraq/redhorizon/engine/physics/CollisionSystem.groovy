@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.physics.Collider
+import nz.net.ultraq.redhorizon.physics.CollisionContinueEvent
 import nz.net.ultraq.redhorizon.physics.CollisionEndEvent
 import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -63,7 +64,8 @@ class CollisionSystem extends System {
 			var existingCollision = collisions[collider] == otherCollider || collisions[otherCollider] == collider
 			if (collider.checkCollision(otherCollider)) {
 				if (existingCollision) {
-					// Do nothing - we don't have a 'collision continue' event
+					collisionEvents << collider.trigger(new CollisionContinueEvent(otherCollider))
+					collisionEvents << otherCollider.trigger(new CollisionContinueEvent(collider))
 				}
 				else {
 					collisions[collider] = otherCollider

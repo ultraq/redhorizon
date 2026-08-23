@@ -46,8 +46,8 @@ class SimulationSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimulationSystem)
 
-	final MovementSystem movementSystem
 	final CollisionSystem collisionSystem
+	final MovementSystem movementSystem
 	private float updateStep = Float.MAX_VALUE
 	private float accumulatedTime = 0f
 	private final LoggingStrategy loggingStrategy = new TimedLoggingStrategy(1f)
@@ -63,11 +63,11 @@ class SimulationSystem extends System {
 		accumulatedTime += delta
 		var simulationDelta = Math.min(updateStep, delta)
 		while (accumulatedTime > simulationDelta) {
-			trackTime('SimulationSystem::movement') { ->
-				movementSystem.update(scene, simulationDelta)
-			}
 			trackTime('SimulationSystem::collision') { ->
 				collisionSystem.update(scene, simulationDelta)
+			}
+			trackTime('SimulationSystem::movement') { ->
+				movementSystem.update(scene, simulationDelta)
 			}
 			accumulatedTime -= simulationDelta
 		}
@@ -76,9 +76,9 @@ class SimulationSystem extends System {
 			logger.atDebug()
 				.addMarker(Profiler.PROFILER_MARKER)
 				.addMarker(Profiler.AVERAGE_MARKER)
-				.setMessage('M: {}ms, C: {}ms')
-				.addArgument(() -> sprintf('%.2f', getTimes('SimulationSystem::movement', movementExecutionTimes).average()))
+				.setMessage('C: {}ms, M: {}ms')
 				.addArgument(() -> sprintf('%.2f', getTimes('SimulationSystem::collision', collisionExecutionTimes).average()))
+				.addArgument(() -> sprintf('%.2f', getTimes('SimulationSystem::movement', movementExecutionTimes).average()))
 				.log()
 		}
 	}
