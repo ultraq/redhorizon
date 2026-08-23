@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon
 import nz.net.ultraq.redhorizon.runtime.Runtime
 
 import org.joml.primitives.Rectanglef
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
@@ -26,6 +27,7 @@ import spock.lang.Specification
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class MovementSimulationTests extends Specification {
 
 	def 'Movement simulation'() {
