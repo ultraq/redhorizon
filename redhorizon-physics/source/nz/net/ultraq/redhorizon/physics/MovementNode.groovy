@@ -44,7 +44,7 @@ class MovementNode extends Node<MovementNode> {
 	 * The rate at which it takes to reach {@code maxSpeed} from a standstill.  0
 	 * means that the node will reach full speed instantly.
 	 */
-//	float acceleration
+	float acceleration = 1f
 
 	/**
 	 * The intended direction and intensity of the movement, ranging from 0 to 1
@@ -55,7 +55,7 @@ class MovementNode extends Node<MovementNode> {
 	/**
 	 * The last vector value applied to the node before it was removed.
 	 */
-//	final Vector2f lastVector = new Vector2f()
+	final Vector2f lastVector = new Vector2f()
 
 	/**
 	 * The current speed and direction of the motion.

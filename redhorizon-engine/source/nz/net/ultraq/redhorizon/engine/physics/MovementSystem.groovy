@@ -39,14 +39,23 @@ class MovementSystem extends System {
 		scene.findAll(MovementNode, movementNodes).each { node ->
 			if (node.enabled) {
 				if (node.vector) {
-					node.speed = node.maxSpeed
-					target.set(node.vector).mul(node.speed * delta as float)
+					node.lastVector.lerp(node.vector, 1f * delta as float, target)
 					node.parent.translate(target.x, target.y)
-					node.velocity.set(node.vector).mul(node.speed)
+					node.lastVector.set(target)
+//					node.speed = Math.min(node.speed + (node.maxSpeed * node.acceleration * delta) as float, node.maxSpeed)
+//					target.set(node.vector).mul(node.speed * delta as float)
+//					node.parent.translate(target.x, target.y)
+//					node.velocity.set(node.vector).mul(node.speed)
+//					node.lastVector.set(node.vector)
 				}
-				else {
-					node.speed = 0f
-					node.velocity.set(0f, 0f)
+				else if (node.lastVector) {
+					node.lastVector.lerp(node.vector, 1f * delta as float, target)
+					node.parent.translate(target.x, target.y)
+					node.lastVector.set(target)
+//					node.speed = Math.max(node.speed - (node.maxSpeed * node.acceleration * delta) as float, 0f)
+//					target.set(node.lastVector).mul(node.speed * delta as float)
+//					node.parent.translate(target.x, target.y)
+//					node.velocity.set(node.lastVector).mul(node.speed)
 				}
 			}
 		}

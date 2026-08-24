@@ -55,7 +55,7 @@ class MovementSimulation extends Application {
 		scene.addChild(new ScreenEdges(sceneSize))
 		scene.addChild(
 			new Rectangle(10f, 10f, Colour.WHITE, true)
-				.addChild(new MovementNode(100f))
+				.addChild(new MovementNode(200f))
 				.addChild(new BoxCollider(10f, 10f))
 				.addChild(new ScriptNode(MovementObjectScript))
 		)
@@ -80,15 +80,19 @@ class MovementSimulation extends Application {
 				if (otherCollider.parent instanceof ScreenEdges) {
 					if (otherCollider.name == ScreenEdges.TOP_COLLIDER_NAME) {
 						movementNode.vector.y = Math.min(movementNode.vector.y, 0f)
+						movementNode.lastVector.y = Math.min(movementNode.lastVector.y, 0f)
 					}
 					else if (otherCollider.name == ScreenEdges.BOTTOM_COLLIDER_NAME) {
 						movementNode.vector.y = Math.max(movementNode.vector.y, 0f)
+						movementNode.lastVector.y = Math.max(movementNode.lastVector.y, 0f)
 					}
 					if (otherCollider.name == ScreenEdges.LEFT_COLLIDER_NAME) {
 						movementNode.vector.x = Math.max(movementNode.vector.x, 0f)
+						movementNode.lastVector.x = Math.max(movementNode.lastVector.x, 0f)
 					}
 					else if (otherCollider.name == ScreenEdges.RIGHT_COLLIDER_NAME) {
 						movementNode.vector.x = Math.min(movementNode.vector.x, 0f)
+						movementNode.lastVector.x = Math.min(movementNode.lastVector.x, 0f)
 					}
 				}
 			}

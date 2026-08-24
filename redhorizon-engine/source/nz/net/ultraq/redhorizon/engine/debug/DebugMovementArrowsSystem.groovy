@@ -47,9 +47,9 @@ class DebugMovementArrowsSystem extends System {
 			var vectorArrow = node.find(VECTOR_ARROW_NAME)
 			if (debugStore.showMovementArrows) {
 				if (!movementArrow && !vectorArrow) {
-					movementArrow = node.addAndReturnChild(new MovementLine(node.vector, node.maxSpeed, Colour.YELLOW)
+					movementArrow = node.addAndReturnChild(new MovementLine(node.vector, node.maxSpeed * 0.25f as float, Colour.YELLOW)
 						.withName(MOVEMENT_ARROW_NAME))
-					vectorArrow = node.addAndReturnChild(new MovementLine(node.velocity, 1f, Colour.GREEN)
+					vectorArrow = node.addAndReturnChild(new MovementLine(node.lastVector, node.maxSpeed * 0.25f as float, Colour.GREEN)
 						.withName(VECTOR_ARROW_NAME))
 				}
 				if (node.enabled) {
