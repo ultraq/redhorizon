@@ -94,7 +94,7 @@ class SimulationSystem extends System {
 	 */
 	SimulationSystem withMinimumUpdateFrequency(int minimumUpdateFrequency) {
 
-		updateStep = 1 / minimumUpdateFrequency
+		updateStep = minimumUpdateFrequency ? 1 / minimumUpdateFrequency : Float.MAX_VALUE
 		return this
 	}
 }

@@ -29,6 +29,7 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 class DebugMovementArrowsSystem extends System {
 
 	private static final String MOVEMENT_ARROW_NAME = 'Movement arrow'
+	private static final String VECTOR_ARROW_NAME = 'Vector arrow'
 
 	private final List<MovementNode> movementNodes = new ArrayList<>()
 
@@ -43,20 +44,26 @@ class DebugMovementArrowsSystem extends System {
 		movementNodes.clear()
 		scene.findAll(MovementNode, movementNodes).each { node ->
 			var movementArrow = node.find(MOVEMENT_ARROW_NAME)
+			var vectorArrow = node.find(VECTOR_ARROW_NAME)
 			if (debugStore.showMovementArrows) {
-				if (!movementArrow) {
-					movementArrow = node.addAndReturnChild(new MovementLine(node.vector, node.speed, Colour.YELLOW)
+				if (!movementArrow && !vectorArrow) {
+					movementArrow = node.addAndReturnChild(new MovementLine(node.vector, node.maxSpeed, Colour.YELLOW)
 						.withName(MOVEMENT_ARROW_NAME))
+					vectorArrow = node.addAndReturnChild(new MovementLine(node.velocity, 1f, Colour.GREEN)
+						.withName(VECTOR_ARROW_NAME))
 				}
 				if (node.enabled) {
 					movementArrow.enable()
+					vectorArrow.enable()
 				}
 				else {
 					movementArrow.disable()
+					vectorArrow.disable()
 				}
 			}
-			else if (movementArrow) {
+			else if (movementArrow && vectorArrow) {
 				movementArrow.disable()
+				vectorArrow.disable()
 			}
 		}
 	}

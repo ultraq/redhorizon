@@ -20,6 +20,8 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
+import org.joml.Vector2f
+
 /**
  * Perform movement of all movable objects in a scene.
  *
@@ -28,14 +30,24 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
 class MovementSystem extends System {
 
 	private final List<MovementNode> movementNodes = new ArrayList<>()
+	private final Vector2f target = new Vector2f()
 
 	@Override
 	void update(Scene scene, float delta) {
 
 		movementNodes.clear()
 		scene.findAll(MovementNode, movementNodes).each { node ->
-			if (node.enabled && node.vector) {
-				node.parent.translate(node.vector.x * node.speed * delta as float, node.vector.y * node.speed * delta as float)
+			if (node.enabled) {
+				if (node.vector) {
+					node.speed = node.maxSpeed
+					target.set(node.vector).mul(node.speed * delta as float)
+					node.parent.translate(target.x, target.y)
+					node.velocity.set(node.vector).mul(node.speed)
+				}
+				else {
+					node.speed = 0f
+					node.velocity.set(0f, 0f)
+				}
 			}
 		}
 	}

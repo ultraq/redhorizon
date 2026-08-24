@@ -27,9 +27,38 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
+@TupleConstructor(includes = ['maxSpeed', 'vector'])
 class MovementNode extends Node<MovementNode> {
 
+	/**
+	 * The current speed of the node.
+	 */
 	float speed
+
+	/**
+	 * The maximum speed at which the node can move.
+	 */
+	float maxSpeed
+
+	/**
+	 * The rate at which it takes to reach {@code maxSpeed} from a standstill.  0
+	 * means that the node will reach full speed instantly.
+	 */
+//	float acceleration
+
+	/**
+	 * The intended direction and intensity of the movement, ranging from 0 to 1
+	 * or -1 on each axis.
+	 */
 	final Vector2f vector = new Vector2f()
+
+	/**
+	 * The last vector value applied to the node before it was removed.
+	 */
+//	final Vector2f lastVector = new Vector2f()
+
+	/**
+	 * The current speed and direction of the motion.
+	 */
+	final Vector2f velocity = new Vector2f()
 }

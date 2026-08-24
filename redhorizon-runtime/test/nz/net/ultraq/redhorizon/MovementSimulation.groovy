@@ -102,8 +102,12 @@ class MovementSimulation extends Application {
 		void update(float delta) {
 
 			movementNode.vector.set(
-				input.keyPressed(GLFW_KEY_A) ? -1f : input.keyPressed(GLFW_KEY_D) ? 1f : 0f,
-				input.keyPressed(GLFW_KEY_W) ? 1f : input.keyPressed(GLFW_KEY_S) ? -1f : 0f
+				input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT) ? -1f :
+					input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT) ? 1f :
+						0f,
+				input.keyPressed(GLFW_KEY_W) || input.keyPressed(GLFW_KEY_UP) ? 1f :
+					input.keyPressed(GLFW_KEY_S) || input.keyPressed(GLFW_KEY_DOWN) ? -1f :
+						0f
 			)
 			if (movementNode.vector) {
 				movementNode.vector.normalize()
