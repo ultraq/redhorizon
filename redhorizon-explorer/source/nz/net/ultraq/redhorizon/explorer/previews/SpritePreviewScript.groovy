@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Sprite
 
 import static org.lwjgl.glfw.GLFW.*
@@ -38,7 +38,7 @@ class SpritePreviewScript extends Script {
 	@Override
 	void init() {
 
-		(node.scene as ExplorerScene).camera.scale(2f)
+		node.scene.find(Camera).scale(2f)
 		sprite = node.find(Sprite)
 	}
 

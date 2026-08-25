@@ -17,35 +17,39 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
-import nz.net.ultraq.redhorizon.audio.Device
-import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
-import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
-import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.engine.graphics.GridLines
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.explorer.controllers.CyclePaletteController
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
+import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewBeginEvent
+import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.explorer.previews.PreviewEndEvent
+import nz.net.ultraq.redhorizon.explorer.ui.EntryList
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
+import nz.net.ultraq.redhorizon.explorer.ui.MainMenuBar
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
+import nz.net.ultraq.redhorizon.explorer.ui.UiController
+import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
-import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
-import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.runtime.Application
+import nz.net.ultraq.redhorizon.runtime.Runtime
+import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
+import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scenegraph.Scene
+import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW
 
-import org.lwjgl.system.Configuration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import picocli.CommandLine
@@ -55,6 +59,8 @@ import picocli.CommandLine.Model.ArgSpec
 import picocli.CommandLine.Model.OptionSpec
 import picocli.CommandLine.Option
 
+import java.util.concurrent.Callable
+
 /**
  * A Command & Conquer asset explorer, allows peeking into and previewing the
  * classic C&C files using a file explorer-like interface.
@@ -62,7 +68,7 @@ import picocli.CommandLine.Option
  * @author Emanuel Rabina
  */
 @Command(name = 'explorer', defaultValueProvider = DefaultOptionsProvider)
-class Explorer implements Runnable {
+class Explorer extends Application implements Callable<Integer> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Explorer)
 	private static final Preferences userPreferences = new Preferences()
@@ -70,10 +76,6 @@ class Explorer implements Runnable {
 	private static final int RENDER_HEIGHT = 480
 	private static final int OUTPUT_WIDTH = RENDER_WIDTH * 2
 	private static final int OUTPUT_HEIGHT = RENDER_HEIGHT * 2
-
-	static {
-		Configuration.STACK_SIZE.set(10240)
-	}
 
 	/**
 	 * Entry point to the Explorer application.
@@ -116,95 +118,36 @@ class Explorer implements Runnable {
 	@Option(names = '--starting-directory', description = 'View this directory on launch.  Remembers your last usage.')
 	File startingDirectory
 
-	private Window window
-	private Framebuffer sceneFramebuffer
 	private SharpUpscalingShader sharpUpscalingShader
 	private Framebuffer postProcessingFramebuffer
-	private Device device
-	private ResourceManager resourceManager
-	private ExplorerScene scene
+	private GraphicsSystem graphicsSystem
+
+	/**
+	 * Constructor, set the program name and version.
+	 */
+	Explorer() {
+
+		super('Red Horizon Explorer', new VersionReader('explorer.properties').read())
+	}
 
 	@Override
-	void run() {
+	Integer call() {
 
-		try {
-			// Setup
-			window = new OpenGLWindow(OUTPUT_WIDTH, OUTPUT_HEIGHT, 'Explorer')
-				.centerToScreen()
-				.scaleToFit()
-				.withBackgroundColour(Colour.GREY)
-				.withMaximized(maximized)
-				.withVSync(true)
-				.on(WindowMaximizedEvent) { event ->
-					maximized = event.maximized()
-				}
-			sceneFramebuffer = new OpenGLFramebuffer(RENDER_WIDTH, RENDER_HEIGHT)
-			sharpUpscalingShader = new SharpUpscalingShader()
-			postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
-			device = new OpenALDevice()
-			var input = new InputEventHandler()
-				.addInputSource(window)
-				.addEscapeToCloseBinding(window)
-				.addVSyncBinding(window)
-			resourceManager = new ResourceManager('.')
-
-			// Init scene and engine
-			scene = new ExplorerScene(window, input, RENDER_WIDTH, RENDER_HEIGHT, touchpadInput, startingDirectory,
-				new MixDatabase())
-			scene
-				.on(TouchpadInputEvent) { event ->
-					touchpadInput = event.touchpadInput()
-				}
-				.on(EntrySelectedEvent) { event ->
-					var entry = event.entry()
-					if (entry instanceof FileEntry && entry.file().directory) {
-						startingDirectory = entry.file()
-					}
-				}
-			var graphicsSystem = new GraphicsSystem(window, sceneFramebuffer, new BasicShader(), new PalettedSpriteShader())
-			scene
-				.on(PreviewBeginEvent) { event ->
-					// Use sharp upscaling shader when adjusting for low-res files with an old aspect ratio
-					if (event.fileName().endsWith('.wsa')) {
-						logger.debug('WSA file detected, using sharp upscaling shader to fix aspect ratio issues')
-						graphicsSystem.withPostProcessing { sceneBuffer ->
-							postProcessingFramebuffer.useFramebuffer { ->
-								sharpUpscalingShader.useShader { shaderContext ->
-									shaderContext.setTextureSourceSize(320, 200)
-									shaderContext.setTextureTargetSize(OUTPUT_WIDTH, OUTPUT_HEIGHT)
-									sceneBuffer.draw(shaderContext)
-								}
-							}
-						}
-					}
-				}
-				.on(PreviewEndEvent) { event ->
-					graphicsSystem.withPostProcessing(null)
-				}
-			var engine = new Engine()
-				.addSystem(new InputSystem(input))
-				.addSystem(new ScriptSystem(new ScriptEngine('.'), input))
-				.addSystem(new AudioSystem())
-				.addSystem(graphicsSystem)
-				.addSystem(new SceneUpdateSystem())
-				.withScene(scene)
-
-			// Game loop
-			window.show()
-			var deltaTimer = new DeltaTimer()
-			while (!window.shouldClose()) {
-				engine.update(deltaTimer.deltaTime())
-				Thread.yield()
+		var exitCode = new Runtime(this)
+			.withDebugComponents(false)
+			.withAudioListenerGain(0.5f)
+			.withWindowWidth(OUTPUT_WIDTH)
+			.withWindowHeight(OUTPUT_HEIGHT)
+			.withWindowMaximized(maximized)
+			.withFramebufferWidth(RENDER_WIDTH)
+			.withFramebufferHeight(RENDER_HEIGHT)
+			.withAdditionalShaders { ->
+				// Init shader when graphics context is available
+				// TODO: Need some better way to initiate post-processing shaders
+				sharpUpscalingShader = new SharpUpscalingShader()
+				return []
 			}
-		}
-		finally {
-			// Shutdown
-			resourceManager?.close()
-			device?.close()
-			postProcessingFramebuffer?.close()
-			sharpUpscalingShader?.close()
-			window?.close()
-		}
+			.execute()
 
 		// Save preferences for next time
 		userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
@@ -212,5 +155,90 @@ class Explorer implements Runnable {
 		if (startingDirectory) {
 			userPreferences.set(ExplorerPreferences.STARTING_DIRECTORY, startingDirectory.toString())
 		}
+
+		return exitCode
+	}
+
+	@Override
+	protected Scene configureScene(Scene scene) {
+
+		var window = WINDOW.get()
+		window.on(WindowMaximizedEvent) { event ->
+			maximized = event.maximized()
+		}
+
+		// TODO: Need some way to initiate these graphics components, maybe in the
+		//       same place for the sharp-upscaling shader above
+		postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
+
+		scene
+			.addChild(new Node()
+				.withName('Debug UI')
+				.addChild(new DebugOverlay()
+					.withCursorTracking(window, scene.find(Camera))
+					.withProfilingLogging()))
+			.addChild(new Node()
+				.withName('UI')
+				.addChild(new MainMenuBar(window, touchpadInput)
+					.withName('Main menu'))
+				.addChild(new EntryList()
+					.withName('Entry list'))
+				.addChild(new NodeList()
+					.withName('Node list'))
+				.addChild(new LogPanel()
+					.withName('Log panel'))
+				.addChild(new UiSettingsComponent(startingDirectory, new MixDatabase(), touchpadInput)
+					.withName('UI settings'))
+				.addChild(new ScriptNode(UiController))
+			)
+			.addChild(new Node()
+				.withName('Preview controller')
+				.addChild(new ScriptNode(PreviewController))
+			)
+			.addChild(new GridLines(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24,
+				new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f), new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f))
+				.withName('Grid lines'))
+			.addChild(new GlobalPalette()
+				.withName('Global palette & alpha mask'))
+			.addChild(new ScriptNode(CyclePaletteController))
+
+		scene
+			.on(TouchpadInputEvent) { event ->
+				touchpadInput = event.touchpadInput()
+			}
+			.on(EntrySelectedEvent) { event ->
+				var entry = event.entry()
+				if (entry instanceof FileEntry && entry.file().directory) {
+					startingDirectory = entry.file()
+				}
+			}
+			.on(PreviewBeginEvent) { event ->
+				// Use sharp upscaling shader when adjusting for low-res files with an old aspect ratio
+				if (event.fileName().endsWith('.wsa')) {
+					logger.debug('WSA file detected, using sharp upscaling shader to fix aspect ratio issues')
+					graphicsSystem.withPostProcessing { sceneBuffer ->
+						postProcessingFramebuffer.useFramebuffer { ->
+							sharpUpscalingShader.useShader { shaderContext ->
+								shaderContext.setTextureSourceSize(320, 200)
+								shaderContext.setTextureTargetSize(OUTPUT_WIDTH, OUTPUT_HEIGHT)
+								sceneBuffer.draw(shaderContext)
+							}
+						}
+					}
+				}
+			}
+			.on(PreviewEndEvent) { event ->
+				graphicsSystem.withPostProcessing(null)
+			}
+
+		return scene
+	}
+
+	@Override
+	protected Engine configureEngine(Engine engine) {
+
+		engine
+		graphicsSystem = engine.findSystem(GraphicsSystem)
+		return engine
 	}
 }

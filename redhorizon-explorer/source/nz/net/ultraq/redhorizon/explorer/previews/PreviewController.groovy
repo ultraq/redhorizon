@@ -18,20 +18,20 @@ package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.AudioSource
+import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
 import nz.net.ultraq.redhorizon.explorer.previews.AnimationPlaybackScript.AnimationStoppedEvent
-import nz.net.ultraq.redhorizon.explorer.previews.MusicPlaybackScript.MusicStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.previews.VideoPlaybackScript.VideoStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
 import nz.net.ultraq.redhorizon.graphics.Animation
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
@@ -41,6 +41,7 @@ import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -59,25 +60,29 @@ class PreviewController extends Script implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PreviewController)
 
-	private ExplorerScene scene
 	private InputStream selectedFileInputStream
+	private Object previewedMedia
 	private Node previewedEntity
 
 	@Override
 	void close() {
 
-		clearPreview()
+		clearPreview(node.scene)
 	}
 
 	/**
 	 * Clear the current entry in preview and reset the preview scene.
 	 */
-	private void clearPreview() {
+	private void clearPreview(Scene scene) {
 
 		if (previewedEntity) {
-			node.scene.removeChild(previewedEntity)
 			previewedEntity.close()
+			scene.removeChild(previewedEntity)
 			previewedEntity = null
+		}
+		if (previewedMedia && previewedMedia instanceof AutoCloseable) {
+			previewedMedia.close()
+			previewedMedia = null
 		}
 		if (selectedFileInputStream) {
 			selectedFileInputStream.close()
@@ -105,14 +110,8 @@ class PreviewController extends Script implements AutoCloseable {
 //				scene.trigger(new PreviewEndEvent())
 //			}
 
-		scene.camera.resetTransform()
+		scene.find(Camera).resetTransform()
 		scene.trigger(new PreviewEndEvent())
-	}
-
-	@Override
-	void init() {
-
-		scene = node.scene as ExplorerScene
 	}
 
 	/**
@@ -120,8 +119,10 @@ class PreviewController extends Script implements AutoCloseable {
 	 */
 	void preview(FileEntry entry) {
 
+		var scene = node.scene
+
 		scene.queueUpdate { ->
-			clearPreview()
+			clearPreview(scene)
 
 			var file = entry.file()
 			logger.info('Loading {}...', file.name)
@@ -132,7 +133,7 @@ class PreviewController extends Script implements AutoCloseable {
 				time("Reading file ${file.name} from filesystem took {}ms", logger) { ->
 					var decoder = result.decoder().getConstructor().newInstance()
 					var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
-					previewObject(media, file.name)
+					previewObject(scene, media, file.name)
 				}
 			}
 			else {
@@ -148,8 +149,10 @@ class PreviewController extends Script implements AutoCloseable {
 	 */
 	void preview(MixEntry entry) {
 
+		var scene = node.scene
+
 		scene.queueUpdate { ->
-			clearPreview()
+			clearPreview(scene)
 
 			logger.info('Loading {} from mix file', entry.name())
 
@@ -159,7 +162,7 @@ class PreviewController extends Script implements AutoCloseable {
 				time("Reading file ${entry.name()} from mix file took {}ms", logger) { ->
 					var decoder = result.decoder().getConstructor().newInstance()
 					var media = result.mediaClass().newInstance(entry.name(), decoder, selectedFileInputStream)
-					previewObject(media, entry.name())
+					previewObject(scene, media, entry.name())
 				}
 			}
 			else {
@@ -173,7 +176,7 @@ class PreviewController extends Script implements AutoCloseable {
 	/**
 	 * Update the preview area for the given file data and type.
 	 */
-	private void previewObject(Object file, String fileName) {
+	private void previewObject(Scene scene, Object file, String fileName) {
 
 		var entity = switch (file) {
 
@@ -204,8 +207,8 @@ class PreviewController extends Script implements AutoCloseable {
 					.addChild(file
 						.addChild(new ScriptNode(AnimationPlaybackScript))
 						.on(AnimationStoppedEvent) { event ->
-							node.scene.queueUpdate { ->
-								clearPreview()
+							scene.queueUpdate { ->
+								clearPreview(scene)
 							}
 						}
 					)
@@ -220,8 +223,8 @@ class PreviewController extends Script implements AutoCloseable {
 					.addChild(file
 						.addChild(new ScriptNode(VideoPlaybackScript))
 						.on(VideoStoppedEvent) { event ->
-							node.scene.queueUpdate { ->
-								clearPreview()
+							scene.queueUpdate { ->
+								clearPreview(scene)
 							}
 						}
 					)
@@ -237,9 +240,9 @@ class PreviewController extends Script implements AutoCloseable {
 				new Node()
 					.addChild(new AudioSource(file)
 						.addChild(new ScriptNode(MusicPlaybackScript))
-						.on(MusicStoppedEvent) { event ->
-							node.scene.queueUpdate { ->
-								clearPreview()
+						.on(AudioStoppedEvent) { event ->
+							scene.queueUpdate { ->
+								clearPreview(scene)
 							}
 						}
 					)
@@ -258,6 +261,7 @@ class PreviewController extends Script implements AutoCloseable {
 			previewedEntity = entity
 			node.scene.trigger(new PreviewBeginEvent(fileName))
 		}
+		previewedMedia = file
 	}
 
 	/**

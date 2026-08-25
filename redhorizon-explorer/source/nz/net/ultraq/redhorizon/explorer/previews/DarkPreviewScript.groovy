@@ -16,9 +16,10 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
+import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
 import nz.net.ultraq.redhorizon.graphics.Colour
+import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW
 
 /**
  * A script to make the background colour black and disable the grid lines.
@@ -27,20 +28,19 @@ import nz.net.ultraq.redhorizon.graphics.Colour
  */
 class DarkPreviewScript extends Script implements AutoCloseable {
 
-	private ExplorerScene scene
-
 	@Override
 	void close() {
 
-		scene.window.withBackgroundColour(Colour.GREY)
-		scene.gridLines.enable()
+		var window = WINDOW.get()
+		window.withBackgroundColour(Colour.GREY)
+		node.scene.find(GridLines).enable()
 	}
 
 	@Override
 	void init() {
 
-		scene = node.scene as ExplorerScene
-		scene.window.withBackgroundColour(Colour.BLACK)
-		scene.gridLines.disable()
+		var window = WINDOW.get()
+		window.withBackgroundColour(Colour.BLACK)
+		node.scene.find(GridLines).disable()
 	}
 }

@@ -94,6 +94,9 @@ final class Runtime {
 	private ResourceManager resourceManager
 	private Scene scene
 
+	// Debug options
+	boolean debugComponents = true
+
 	// LWJGL options
 	int lwjglStackSize = 10240
 
@@ -104,6 +107,7 @@ final class Runtime {
 	Colour windowBackgroundColour = Colour.BLACK
 	int windowWidth = 800
 	int windowHeight = 600
+	boolean windowMaximized = false
 	int cameraWidth
 	int cameraHeight
 	int framebufferWidth
@@ -134,37 +138,40 @@ final class Runtime {
 	}
 
 	/**
-	 * Add all of the debug components in one go.
+	 * Add all of the debug components in one go, provided {@code condition} is
+	 * {@code true}.
 	 */
-	private static Scene addDebugComponents(Scene scene, Window window, Camera camera, InputEventHandler inputEventHandler,
-		GridLines gridLines) {
+	private static Scene addDebugComponentsIf(Scene scene, Window window, Camera camera,
+		InputEventHandler inputEventHandler, GridLines gridLines, boolean condition) {
 
-		scene.addChild(new DebugStore())
-		scene.addChild(
-			gridLines
-				.withName('Grid lines')
+		if (condition) {
+			scene.addChild(new DebugStore())
+			scene.addChild(
+				gridLines
+					.withName('Grid lines')
+					.disable()
+			)
+			var debugOverlay = new DebugOverlay()
+				.withCursorTracking(window, camera)
+				.withProfilingLogging()
 				.disable()
-		)
-		var debugOverlay = new DebugOverlay(1f)
-			.withCursorTracking(window, camera)
-			.withProfilingLogging()
-			.disable()
-		scene.addChild(
-			new Node()
-				.addChild(debugOverlay)
-				.addChild(new NodeList()
-					.disable())
-				.addChild(new NodeProperties()
-					.disable())
-				.addChild(new LogPanel()
-					.disable())
-				.withName('Debug UI')
-		)
+			scene.addChild(
+				new Node()
+					.addChild(debugOverlay)
+					.addChild(new NodeList()
+						.disable())
+					.addChild(new NodeProperties()
+						.disable())
+					.addChild(new LogPanel()
+						.disable())
+					.withName('Debug UI')
+			)
 
-		var debugEverythingBinding = new DebugEverythingBinding(scene)
-		inputEventHandler
-			.addImGuiOverlayBinding([debugOverlay])
-			.addInputBinding(debugEverythingBinding)
+			var debugEverythingBinding = new DebugEverythingBinding(scene)
+			inputEventHandler
+				.addImGuiOverlayBinding([debugOverlay])
+				.addInputBinding(debugEverythingBinding)
+		}
 
 		return scene
 	}
@@ -193,6 +200,7 @@ final class Runtime {
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(windowBackgroundColour)
+				.withMaximized(windowMaximized)
 				.withVSync(true)
 			framebuffer = new OpenGLFramebuffer(framebufferWidth ?: windowWidth, framebufferHeight ?: windowHeight)
 			shaders << new BasicShader()
@@ -215,11 +223,12 @@ final class Runtime {
 					var listener = new AudioListener()
 						.withGain(audioListenerGain)
 					scene = application.configureScene(
-						addDebugComponents(
+						addDebugComponentsIf(
 							new Scene()
 								.addChild(camera
 									.addChild(listener)), // Listener is attached to the camera
-							window, camera, inputEventHandler, gridLines.get())
+							window, camera, inputEventHandler, gridLines.get(),
+							debugComponents)
 					)
 					var engine = application.configureEngine(new Engine()
 						.addSystem(new InputSystem(inputEventHandler, window))
@@ -233,10 +242,10 @@ final class Runtime {
 								.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 						)
 						.addSystem(new SceneUpdateSystem())
-						.addSystem(new DebugSystem(
+						.addSystemIf(new DebugSystem(
 							new DebugCollisionOutlineSystem(),
 							new DebugMovementArrowsSystem()
-						))
+						), debugComponents)
 						.addSystem(new AudioSystem())
 						.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
 						.withScene(scene)

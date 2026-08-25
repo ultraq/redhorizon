@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.explorer.actions
+package nz.net.ultraq.redhorizon.explorer.controllers
 
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
 /**
- * Command object for cycling the global palette.
+ * Controller for cycling the global palette on press of the P key.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class CyclePaletteAction {
+class CyclePaletteController extends Script {
 
-	final ExplorerScene scene
+	@Override
+	void init() {
 
-	/**
-	 * Cycle the global palette.
-	 */
-	void cyclePalette() {
-
-		scene.queueUpdate { ->
-			scene.find(GlobalPalette).cyclePalette()
-		}
+		input.addInputBinding(new KeyBinding(GLFW_KEY_P, true, { ->
+			node.scene.find(GlobalPalette).cyclePalette()
+		}))
 	}
 }

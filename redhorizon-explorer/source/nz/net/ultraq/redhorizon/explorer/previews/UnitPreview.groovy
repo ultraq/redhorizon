@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
@@ -129,7 +129,7 @@ class UnitPreview extends Node<UnitPreview> {
 //					.scale(1f + value as float))
 //			})
 //				.start()
-			(node.scene as ExplorerScene).camera.scale(2f)
+			node.scene.find(Camera).scale(2f)
 			sprite = node.find(Sprite)
 		}
 

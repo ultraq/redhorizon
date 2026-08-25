@@ -46,6 +46,26 @@ class Engine {
 	}
 
 	/**
+	 * Convenience method to add a system to the engine if some condition is
+	 * {@code true}.
+	 */
+	Engine addSystemIf(System system, boolean condition) {
+
+		if (condition) {
+			systems.add(system)
+		}
+		return this
+	}
+
+	/**
+	 * Return the matching system instance.
+	 */
+	<T extends System> T findSystem(Class<T> systemClass) {
+
+		return (T)systems.find { it.class == systemClass }
+	}
+
+	/**
 	 * An overload of the {@code <<} operator as an alias to {@link #addSystem(System)}.
 	 */
 	Engine leftShift(System system) {

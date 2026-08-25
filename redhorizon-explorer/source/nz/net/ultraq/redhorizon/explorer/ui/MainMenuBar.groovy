@@ -18,8 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.graphics.actions.CloseWindowAction
-import nz.net.ultraq.redhorizon.explorer.ExplorerScene
-import nz.net.ultraq.redhorizon.explorer.actions.CyclePaletteAction
+import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
@@ -37,7 +36,6 @@ import groovy.transform.TupleConstructor
 class MainMenuBar extends ImGuiModule<MainMenuBar> implements EventTarget<MainMenuBar> {
 
 	final Window window
-	final ExplorerScene scene
 	boolean touchpadInput
 
 	@Override
@@ -58,7 +56,7 @@ class MainMenuBar extends ImGuiModule<MainMenuBar> implements EventTarget<MainMe
 					trigger(new TouchpadInputEvent(!touchpadInput))
 				}
 				if (ImGui.menuItem('Cycle palette', 'P')) {
-					new CyclePaletteAction(scene).cyclePalette()
+					scene.find(GlobalPalette).cyclePalette()
 				}
 				ImGui.endMenu()
 			}

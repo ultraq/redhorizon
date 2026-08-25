@@ -59,14 +59,5 @@ class MusicPlaybackScript extends Script<AudioSource> implements AutoCloseable {
 				node.pause()
 			}
 		}
-
-		if (playbackStarted && node.stopped) {
-			node.trigger(new MusicStoppedEvent())
-		}
 	}
-
-	/**
-	 * Triggered when the music has finished playing by itself.
-	 */
-	static record MusicStoppedEvent() implements Event {}
 }

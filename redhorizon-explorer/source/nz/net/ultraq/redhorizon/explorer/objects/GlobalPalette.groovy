@@ -54,9 +54,10 @@ class GlobalPalette extends GraphicsNode<GlobalPalette, PalettedSpriteShaderCont
 	 */
 	void cyclePalette() {
 
-		removeChild(palette)
-		palette.close()
-		palette = addAndReturnChild(loadPalette(paletteType.next()))
+		scene.queueUpdate { ->
+			palette.remove().close()
+			palette = addAndReturnChild(loadPalette(paletteType.next()))
+		}
 	}
 
 	/**
