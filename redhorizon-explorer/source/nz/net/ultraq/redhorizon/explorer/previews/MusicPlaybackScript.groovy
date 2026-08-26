@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
-import nz.net.ultraq.eventhorizon.Event
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 
@@ -45,6 +44,8 @@ class MusicPlaybackScript extends Script<AudioSource> implements AutoCloseable {
 
 	@Override
 	void update(float delta) {
+
+		node.update()
 
 		if (!playbackStarted) {
 			node.play()

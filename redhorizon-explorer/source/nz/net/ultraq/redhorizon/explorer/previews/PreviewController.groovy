@@ -236,7 +236,7 @@ class PreviewController extends Script implements AutoCloseable {
 					.addChild(new AudioSource(file)
 						.addChild(new ScriptNode(SoundPlaybackScript)))
 					.withName("Sound - ${fileName}")
-			case StreamingAudioData ->
+			case StreamingAudioData -> {
 				yield new Node()
 					.addChild(new AudioSource(file)
 						.addChild(new ScriptNode(MusicPlaybackScript))
@@ -247,6 +247,7 @@ class PreviewController extends Script implements AutoCloseable {
 						}
 					)
 					.withName("Music - ${fileName}")
+			}
 
 				// 🤷
 			case Palette ->

@@ -134,6 +134,15 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	}
 
 	/**
+	 * If this source is attached to streaming audio data, update that stream so
+	 * that there are buffers to read at next render.
+	 */
+	void update() {
+
+		streamingAudioData?.update()
+	}
+
+	/**
 	 * Set the gain (ie: volume) of the sound.
 	 */
 	AudioSource withGain(float gain) {

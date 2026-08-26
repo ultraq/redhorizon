@@ -78,11 +78,11 @@ class AudioDecoders extends Specification {
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/AudioDecoders_Music_fac1226m.aud'))
 			var data = new StreamingAudioData('AudioDecoders_Music_fac1226m.aud', inputStream)
 			var source = new AudioSource(data)
-			data.update()
+			source.update()
 			source.play()
 			var start = System.currentTimeMillis()
 			while (!source.stopped) {
-				data.update()
+				source.update()
 				source.render()
 				Thread.sleep(500)
 				if (System.currentTimeMillis() - start > 5000) {
