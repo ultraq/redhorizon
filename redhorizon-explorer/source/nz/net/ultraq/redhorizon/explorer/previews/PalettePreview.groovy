@@ -62,7 +62,7 @@ class PalettePreview extends Node<PalettePreview> {
 		@Override
 		void close() {
 
-			node.scene.find(GridLines).enable()
+			node.scene.find(GridLines)?.enable()
 		}
 
 		@Override

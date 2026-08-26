@@ -42,6 +42,7 @@ import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.WindowMaximizedEvent
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
+import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
@@ -133,30 +134,29 @@ class Explorer extends Application implements Callable<Integer> {
 	@Override
 	Integer call() {
 
-		var exitCode = new Runtime(this)
-			.withDebugComponents(false)
-			.withAudioListenerGain(0.5f)
-			.withWindowWidth(OUTPUT_WIDTH)
-			.withWindowHeight(OUTPUT_HEIGHT)
-			.withWindowMaximized(maximized)
-			.withFramebufferWidth(RENDER_WIDTH)
-			.withFramebufferHeight(RENDER_HEIGHT)
-			.withAdditionalShaders { ->
-				// Init shader when graphics context is available
-				// TODO: Need some better way to initiate post-processing shaders
-				sharpUpscalingShader = new SharpUpscalingShader()
-				return []
-			}
-			.execute()
-
-		// Save preferences for next time
-		userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
-		userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
-		if (startingDirectory) {
-			userPreferences.set(ExplorerPreferences.STARTING_DIRECTORY, startingDirectory.toString())
+		try {
+			return new Runtime(this)
+				.withDebugComponents(false)
+				.withAudioListenerGain(0.5f)
+				.withWindowWidth(OUTPUT_WIDTH)
+				.withWindowHeight(OUTPUT_HEIGHT)
+				.withWindowMaximized(maximized)
+				.withFramebufferWidth(RENDER_WIDTH)
+				.withFramebufferHeight(RENDER_HEIGHT)
+				.withWindowBackgroundColour(Colour.GREY)
+				.withAdditionalShaders { ->
+					return [new PalettedSpriteShader()]
+				}
+				.execute()
 		}
-
-		return exitCode
+		finally {
+			// Save preferences for next time
+			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
+			userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
+			if (startingDirectory) {
+				userPreferences.set(ExplorerPreferences.STARTING_DIRECTORY, startingDirectory.toString())
+			}
+		}
 	}
 
 	@Override
@@ -166,10 +166,6 @@ class Explorer extends Application implements Callable<Integer> {
 		window.on(WindowMaximizedEvent) { event ->
 			maximized = event.maximized()
 		}
-
-		// TODO: Need some way to initiate these graphics components, maybe in the
-		//       same place for the sharp-upscaling shader above
-		postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
 
 		scene
 			.addChild(new Node()
@@ -237,8 +233,9 @@ class Explorer extends Application implements Callable<Integer> {
 	@Override
 	protected Engine configureEngine(Engine engine) {
 
-		engine
 		graphicsSystem = engine.findSystem(GraphicsSystem)
+		sharpUpscalingShader = new SharpUpscalingShader()
+		postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
 		return engine
 	}
 }

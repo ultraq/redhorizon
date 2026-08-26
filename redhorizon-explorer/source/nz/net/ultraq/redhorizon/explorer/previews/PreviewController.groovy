@@ -182,7 +182,7 @@ class PreviewController extends Script implements AutoCloseable {
 
 		// Dynamic objects
 			case SpriteSheet ->
-				previewSprite(file, fileName)
+				yield previewSprite(file, fileName)
 //		case IniFile ->
 //			preview(file as MapFile, objectId)
 //
@@ -232,12 +232,12 @@ class PreviewController extends Script implements AutoCloseable {
 					.withName("Video - ${fileName}")
 			}
 			case AudioData ->
-				new Node()
+				yield new Node()
 					.addChild(new AudioSource(file)
 						.addChild(new ScriptNode(SoundPlaybackScript)))
 					.withName("Sound - ${fileName}")
 			case StreamingAudioData ->
-				new Node()
+				yield new Node()
 					.addChild(new AudioSource(file)
 						.addChild(new ScriptNode(MusicPlaybackScript))
 						.on(AudioStoppedEvent) { event ->
@@ -250,7 +250,7 @@ class PreviewController extends Script implements AutoCloseable {
 
 				// 🤷
 			case Palette ->
-				new PalettePreview(file)
+				yield new PalettePreview(file)
 					.withName("Palette - ${fileName}")
 			default ->
 				logger.info('Filetype of {} not yet configured', file.class.simpleName)

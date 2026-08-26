@@ -32,8 +32,9 @@ class SpritePreviewScript extends Script {
 
 	private Sprite sprite
 	private int frame = 0
-	private float repeatTimer
-	private float repeatInterval = 0.1f
+	private float timer
+	private float frameInterval = 0.1f
+	private boolean autoplay = true
 
 	@Override
 	void init() {
@@ -45,14 +46,21 @@ class SpritePreviewScript extends Script {
 	@Override
 	void update(float delta) {
 
-		repeatTimer += delta
-		if ((input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT)) && repeatTimer >= repeatInterval) {
+		timer += delta
+
+		if ((input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT)) && timer >= frameInterval) {
 			frame = Math.max(frame - 1, 0)
-			repeatTimer = 0f
+			timer = 0f
+			autoplay = false
 		}
-		else if ((input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT)) && repeatTimer >= repeatInterval) {
+		else if ((input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT)) && timer >= frameInterval) {
 			frame = Math.min(frame + 1, sprite.spriteSheet.numFrames - 1)
-			repeatTimer = 0f
+			timer = 0f
+			autoplay = false
+		}
+		else if (autoplay && timer >= frameInterval) {
+			frame = (frame + 1) % sprite.spriteSheet.numFrames
+			timer = 0f
 		}
 
 		sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))

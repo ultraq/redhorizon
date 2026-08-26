@@ -46,6 +46,11 @@ class PalFileDecoder implements PaletteDecoder, FileTypeTest {
 	@Override
 	void test(InputStream inputStream) {
 
-		// Pal files don't have marker information on them, so they just pass
+		// Pal files are always 768 bytes (256 colours * 3 bytes per colour), so
+		// attempt to read the size of the stream.
+		inputStream.markAndReset(769) { stream ->
+			var bytes = stream.readNBytes(769)
+			assert bytes.length == 768
+		}
 	}
 }
