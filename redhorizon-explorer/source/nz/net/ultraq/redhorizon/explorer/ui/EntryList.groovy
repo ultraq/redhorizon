@@ -53,6 +53,7 @@ class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList>
 		ImGui.setNextWindowSize(300, 500, FirstUseEver)
 		ImGui.pushStyleVar(WindowPadding, 0, 0)
 		ImGui.useWindow('Current directory', new ImBoolean(true)) { ->
+			ImGui.popStyleVar()
 
 			focused = ImGui.isWindowFocused(ChildWindows)
 			hovered = ImGui.isWindowHovered()
@@ -143,7 +144,6 @@ class EntryList extends ImGuiModule<EntryList> implements EventTarget<EntryList>
 				ImGui.endTable()
 			}
 		}
-		ImGui.popStyleVar()
 	}
 
 	/**
