@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.jomlextensions
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector2f
+import org.joml.Vector2fc
 import org.joml.Vector3f
 import org.joml.Vector4f
 
@@ -30,6 +31,7 @@ import org.joml.Vector4f
 class ConstantsExtensions {
 
 	private static final Matrix4fc IDENTITY = new Matrix4f()
+	private static final Vector2fc UP = new Vector2f(0f, 1f)
 
 	/**
 	 * The number of floats used to represent a {@code Matrix4f}.
@@ -69,5 +71,13 @@ class ConstantsExtensions {
 	static Matrix4fc getIDENTITY(Matrix4f self) {
 
 		return IDENTITY
+	}
+
+	/**
+	 * Return a reusable vector for the 'up' direction in this game.
+	 */
+	static Vector2fc getUP(Vector2f self) {
+
+		return UP
 	}
 }
