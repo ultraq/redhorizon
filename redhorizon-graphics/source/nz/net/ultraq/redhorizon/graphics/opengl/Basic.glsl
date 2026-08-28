@@ -27,11 +27,12 @@ out VertexData {
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
+uniform vec2 frameXY;
 
 void main() {
 	gl_Position = projection * view * model * position;
 	v.colour = colour;
-	v.textureCoord = textureCoord;
+	v.textureCoord = textureCoord + frameXY;
 }
 
 #pragma stage fragment

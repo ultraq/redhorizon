@@ -47,7 +47,6 @@ class SpriteSheet implements AutoCloseable {
 	private final float frameWidth
 	private final float frameHeight
 	final Texture texture
-	private final Vector2f framePosition = new Vector2f()
 
 	/**
 	 * Constructor, create a new sprite sheet using its name and a stream of data.
@@ -92,6 +91,39 @@ class SpriteSheet implements AutoCloseable {
 		frameHeight = height / textureHeight
 	}
 
+	/**
+	 * Constructor, create a new sprite sheet from a single image, divided into
+	 * the specified frame sizes.
+	 */
+	SpriteSheet(String fileName, int width, int height, InputStream inputStream) {
+
+		var decoder = ImageDecoder.forFileExtension(fileName.substring(fileName.lastIndexOf('.') + 1))
+		var result = decoder
+			.on(FrameDecodedEvent) { event ->
+				imageData << event.data().flipVertical(event.width(), event.height(), event.format())
+			}
+			.decode(inputStream)
+		while (imageData.size() != result.frames()) {
+			Thread.onSpinWait()
+		}
+
+		var fileInformation = result.fileInformation()
+		if (fileInformation) {
+			logger.info('{}: {}', fileName, fileInformation)
+		}
+
+		this.width = width
+		this.height = height
+		format = result.format()
+		framesX = (result.width() / width) as int
+		var framesY = (result.height() / height) as int
+		numFrames = framesX * framesY
+
+		texture = new OpenGLTexture(result.width(), result.height(), format, imageData.first())
+		frameWidth = width / texture.width
+		frameHeight = height / texture.height
+	}
+
 	@Override
 	void close() {
 
@@ -102,10 +134,10 @@ class SpriteSheet implements AutoCloseable {
 	 * Get the position in texture coordinates of the given frame in the sprite
 	 * sheet.
 	 */
-	Vector2f getFramePosition(int index) {
+	Vector2f getFramePosition(int index, Vector2f result) {
 
 		var x = (index % framesX) * frameWidth
 		var y = ((index / framesX) as int) * frameHeight
-		return framePosition.set(x, y)
+		return result.set(x, y)
 	}
 }

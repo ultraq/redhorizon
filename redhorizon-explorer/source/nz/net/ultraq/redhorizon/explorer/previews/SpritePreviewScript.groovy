@@ -63,6 +63,6 @@ class SpritePreviewScript extends Script {
 			timer = 0f
 		}
 
-		sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))
+		sprite.withFramePosition(frame)
 	}
 }

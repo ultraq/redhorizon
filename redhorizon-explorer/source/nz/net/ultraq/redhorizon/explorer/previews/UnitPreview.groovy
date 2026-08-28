@@ -171,12 +171,12 @@ class UnitPreview extends Node<UnitPreview> {
 			var rotationFrame = closestHeading ? (currentState.headings - closestHeading) * frames as int : 0
 			var animationFrame = frames > 1 ? Math.floor((float)(animationTimer * FRAMERATE)) % frames as int : 0
 			var frame = node.unitData.shpFile.getStateFramesOffset(currentState) + rotationFrame + animationFrame
-			sprite.withFramePosition(sprite.spriteSheet.getFramePosition(frame))
+			sprite.withFramePosition(frame)
 
 			var turret = node.find('Turret') as Sprite
 			if (turret) {
 				var turretData = node.unitData.shpFile.parts.turret
-				turret.withFramePosition(turret.spriteSheet.getFramePosition(frame + turretData.headings))
+				turret.withFramePosition(frame + turretData.headings)
 			}
 		}
 	}

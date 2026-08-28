@@ -40,16 +40,19 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	final SpriteSheet spriteSheet
 	private final Mesh mesh
 	private final Material material
+	@Lazy
+	private Vector2f framePositionResult
 
 	/**
 	 * Constructor, create a new sprite.
 	 */
-	private Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture,
-		Class<? extends Shader> shaderClass) {
+	Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture,
+		Class<? extends Shader> shaderClass, SpriteSheet spriteSheet) {
 
 		this.width = width
 		this.height = height
 		this.shaderClass = shaderClass
+		this.spriteSheet = spriteSheet
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(0, 0)),
 			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
@@ -64,8 +67,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	 */
 	Sprite(Image image, Class<? extends Shader> shaderClass = BasicShader) {
 
-		this(image.width, image.height, 1f, 1f, image.texture, shaderClass)
-		spriteSheet = null
+		this(image.width, image.height, 1f, 1f, image.texture, shaderClass, null)
 	}
 
 	/**
@@ -75,8 +77,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 
 		this(spriteSheet.width, spriteSheet.height,
 			spriteSheet.width / spriteSheet.texture.width, spriteSheet.height / spriteSheet.texture.height,
-			spriteSheet.texture, shaderClass)
-		this.spriteSheet = spriteSheet
+			spriteSheet.texture, shaderClass, spriteSheet)
 	}
 
 	@Override
@@ -97,9 +98,9 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	/**
 	 * Adjust which frame of the sprite sheet is displayed.
 	 */
-	Sprite withFramePosition(Vector2f framePosition) {
+	Sprite withFramePosition(int framePosition) {
 
-		material.frameXY = framePosition
+		material.frameXY.set(spriteSheet.getFramePosition(framePosition, framePositionResult))
 		return this
 	}
 }

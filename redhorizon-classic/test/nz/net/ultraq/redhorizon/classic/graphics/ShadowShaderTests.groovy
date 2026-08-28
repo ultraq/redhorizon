@@ -96,7 +96,7 @@ class ShadowShaderTests extends Specification {
 							shadowShader.useShader { shaderContext ->
 								camera.render(shaderContext)
 								sprite
-									.withFramePosition(spriteSheet.getFramePosition(frame))
+									.withFramePosition(frame)
 									.render(shaderContext)
 							}
 						}

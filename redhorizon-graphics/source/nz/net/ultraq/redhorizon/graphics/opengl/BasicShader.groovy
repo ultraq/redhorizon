@@ -58,6 +58,7 @@ class BasicShader extends OpenGLShader<SceneShaderContext> {
 			@Override
 			void setMaterial(Material material) {
 				setUniform('mainTexture', 0, material?.texture ?: whiteTexture)
+				setUniform('frameXY', material.frameXY)
 			}
 
 			@Override

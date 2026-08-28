@@ -189,7 +189,7 @@ class ImageDecoders extends Specification {
 								shaderContext.setPalette(palette)
 								shaderContext.setAlphaMask(alphaMask)
 								sprite
-									.withFramePosition(spriteSheet.getFramePosition(frame))
+									.withFramePosition(frame)
 									.render(shaderContext)
 							}
 						}
