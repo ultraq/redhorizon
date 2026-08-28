@@ -32,7 +32,6 @@ import org.joml.Vector3f
 class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoCloseable {
 
 	private static final int[] index = new int[]{ 0, 1, 2, 2, 3, 0 }
-	private static final Vector2f defaultFramePosition = new Vector2f(0, 0)
 
 	final int width
 	final int height
@@ -59,7 +58,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
 			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.WHITE, new Vector2f(0, frameHeight))
 		}, index)
-		material = new Material(texture: texture, frameXY: defaultFramePosition)
+		material = new Material(texture: texture, frameXY: new Vector2f())
 	}
 
 	/**
