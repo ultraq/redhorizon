@@ -152,6 +152,15 @@ class AudioSource extends AudioNode<AudioSource> implements EventTarget<AudioSou
 	}
 
 	/**
+	 * Configure whether the source will loop.
+	 */
+	AudioSource withLooping(boolean looping) {
+
+		source.withLooping(looping)
+		return this
+	}
+
+	/**
 	 * Set the maximum distance at which there will no longer be any attenuation
 	 * of the sound.
 	 */

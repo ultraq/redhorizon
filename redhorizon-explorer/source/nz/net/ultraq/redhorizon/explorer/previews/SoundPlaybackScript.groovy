@@ -38,6 +38,8 @@ class SoundPlaybackScript extends Script<AudioSource> implements AutoCloseable {
 
 	@Override
 	void init() {
+
+		node.withGain(0.5f)
 	}
 
 	@Override
