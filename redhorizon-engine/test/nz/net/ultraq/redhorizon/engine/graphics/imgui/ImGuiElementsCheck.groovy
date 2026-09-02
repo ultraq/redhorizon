@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
+import nz.net.ultraq.redhorizon.engine.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule

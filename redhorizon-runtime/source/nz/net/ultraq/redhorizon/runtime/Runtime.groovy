@@ -19,6 +19,7 @@ package nz.net.ultraq.redhorizon.runtime
 import nz.net.ultraq.redhorizon.audio.AudioListener
 import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
+import nz.net.ultraq.redhorizon.engine.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
@@ -39,7 +40,6 @@ import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
-import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
