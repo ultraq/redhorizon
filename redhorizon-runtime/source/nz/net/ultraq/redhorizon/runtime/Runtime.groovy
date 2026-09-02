@@ -37,10 +37,10 @@ import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
+import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
-import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
@@ -211,7 +211,10 @@ final class Runtime {
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
 				.addVSyncBinding(window)
-			resourceManager = new ResourceManager(resourceManagerPathPrefix ?: application.class.packageName.replaceAll('\\.', '/'))
+			resourceManager = application.configureResourceManager(
+				new ResourceManager()
+					.addClasspath(resourceManagerPathPrefix ?: application.class.packageName.replaceAll('\\.', '/'))
+			)
 
 			ScopedValue
 				.where(WINDOW, window)
@@ -230,25 +233,26 @@ final class Runtime {
 							window, camera, inputEventHandler, gridLines.get(),
 							debugComponents)
 					)
-					var engine = application.configureEngine(new Engine()
-						.addSystem(new InputSystem(inputEventHandler, window))
-						.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-						.addSystem(
-							new SimulationSystem(
-								new CollisionSystem()
-									.withCollisionCandidatesFunction(collisionCandidatesFunction),
-								new MovementSystem()
+					var engine = application.configureEngine(
+						new Engine()
+							.addSystem(new InputSystem(inputEventHandler, window))
+							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+							.addSystem(
+								new SimulationSystem(
+									new CollisionSystem()
+										.withCollisionCandidatesFunction(collisionCandidatesFunction),
+									new MovementSystem()
+								)
+									.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 							)
-								.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
-						)
-						.addSystem(new SceneUpdateSystem())
-						.addSystemIf(new DebugSystem(
-							new DebugCollisionOutlineSystem(),
-							new DebugMovementArrowsSystem()
-						), debugComponents)
-						.addSystem(new AudioSystem())
-						.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
-						.withScene(scene)
+							.addSystem(new SceneUpdateSystem())
+							.addSystemIf(new DebugSystem(
+								new DebugCollisionOutlineSystem(),
+								new DebugMovementArrowsSystem()
+							), debugComponents)
+							.addSystem(new AudioSystem())
+							.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
+							.withScene(scene)
 					)
 
 					// Application loop

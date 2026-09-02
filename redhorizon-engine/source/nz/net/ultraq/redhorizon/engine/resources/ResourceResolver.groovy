@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
-
-import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Window
+package nz.net.ultraq.redhorizon.engine.resources
 
 /**
- * Keys for objects being shared using Java's Scoped Values.  The values here
- * are available for the lifecycle of the application.
+ * An interface for taking a name or path of a resource and returning a stream
+ * of its contents, if the resource exists.
  *
  * @author Emanuel Rabina
  */
-class ScopedValues {
+interface ResourceResolver {
 
-	public static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
-	public static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
+	/**
+	 * Given a path to a resource, return an input stream for reading its
+	 * contents, or {@code null} if the resource doesn't exist.
+	 */
+	InputStream resolve(String path)
 }

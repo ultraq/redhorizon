@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.utilities
+package nz.net.ultraq.redhorizon.engine.resources
 
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 
 import groovy.transform.Memoized
-import groovy.transform.TupleConstructor
 
 /**
  * Class for holding closeable resources so they can be closed in one go (if
@@ -31,11 +30,37 @@ import groovy.transform.TupleConstructor
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
 class ResourceManager implements AutoCloseable {
 
-	final String pathPrefix
+	private final List<ResourceResolver> resourceResolvers = []
 	private final List<AutoCloseable> resources = []
+
+	/**
+	 * Add a location to search for resources.  Any supported archive files in the
+	 * path are also loaded as a resource location.
+	 */
+	ResourceManager addDirectory(String path) {
+
+		return addResourceResolver(new FileSystemResourceResolver(path))
+	}
+
+	/**
+	 * Shorthand for adding a classpath resource resolver.
+	 */
+	ResourceManager addClasspath(String pathPrefix) {
+
+		return addResourceResolver(new ClasspathResourceResolver(pathPrefix))
+	}
+
+	/**
+	 * Add a resource resolver which can be used for locating resources using this
+	 * manager.
+	 */
+	ResourceManager addResourceResolver(ResourceResolver resourceResolver) {
+
+		resourceResolvers << resourceResolver
+		return this
+	}
 
 	@Override
 	void close() {
@@ -49,7 +74,7 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	AudioData loadAudioData(String path) {
 
-		var sound = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+		var sound = resolveStream(path).withBufferedStream { stream ->
 			return new AudioData(path, stream)
 		}
 		resources << sound
@@ -62,7 +87,7 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	Image loadImage(String path) {
 
-		var image = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+		var image = resolveStream(path).withBufferedStream { stream ->
 			return new Image(path, stream)
 		}
 		resources << image
@@ -75,20 +100,11 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	Palette loadPalette(String path) {
 
-		var palette = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+		var palette = resolveStream(path).withBufferedStream { stream ->
 			return new Palette(path, stream)
 		}
 		resources << palette
 		return palette
-	}
-
-	/**
-	 * Combine the configured path prefix with the requested path to obtain the
-	 * full path.
-	 */
-	private String resolvePath(String path) {
-
-		return [pathPrefix, path].joinAndNormalize('/')
 	}
 
 	/**
@@ -97,7 +113,7 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	SpriteSheet loadSpriteSheet(String path) {
 
-		var spriteSheet = getResourceAsStream(resolvePath(path)).withBufferedStream { stream ->
+		var spriteSheet = resolveStream(path).withBufferedStream { stream ->
 			return new SpriteSheet(path, stream)
 		}
 		resources << spriteSheet
@@ -105,16 +121,38 @@ class ResourceManager implements AutoCloseable {
 	}
 
 	/**
+	 * Load a raw input stream for the given file.
+	 */
+	@Memoized
+	BufferedInputStream loadFile(String path) {
+
+		var inputStream = new BufferedInputStream(resolveStream(path))
+		resources << inputStream
+		return inputStream
+	}
+
+	/**
 	 * Load long streaming audio data from a file, best used for music tracks.
 	 */
 	StreamingAudioData loadStreamingAudioData(String path) {
 
-		var musicStream = new BufferedInputStream(getResourceAsStream(resolvePath(path)))
+		var musicStream = new BufferedInputStream(resolveStream(path))
 		resources << musicStream
 
 		var music = new StreamingAudioData(path, musicStream)
 		resources << music
 
 		return music
+	}
+
+	/**
+	 * Search through all registered resource resolvers for a file with the given
+	 * name.
+	 */
+	private InputStream resolveStream(String path) {
+
+		return resourceResolvers.findResult { resourceResolver ->
+			return resourceResolver.resolve(path)
+		}
 	}
 }

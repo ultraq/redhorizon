@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
+package nz.net.ultraq.redhorizon.engine.resources
 
-import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Window
+import groovy.transform.TupleConstructor
 
 /**
- * Keys for objects being shared using Java's Scoped Values.  The values here
- * are available for the lifecycle of the application.
+ * A resource resolver for resources on the file system.
  *
  * @author Emanuel Rabina
  */
-class ScopedValues {
+@TupleConstructor(defaults = false)
+class FileSystemResourceResolver implements ResourceResolver {
 
-	public static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
-	public static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
+	final String pathPrefix
+
+	@Override
+	InputStream resolve(String path) {
+
+		try {
+			return new FileInputStream(new File(pathPrefix, path))
+		}
+		catch (FileNotFoundException ignored) {
+			return null
+		}
+	}
 }
