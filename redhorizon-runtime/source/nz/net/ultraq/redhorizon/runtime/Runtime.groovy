@@ -37,7 +37,6 @@ import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
-import nz.net.ultraq.redhorizon.engine.resources.ResourceManager
 import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
@@ -51,6 +50,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene

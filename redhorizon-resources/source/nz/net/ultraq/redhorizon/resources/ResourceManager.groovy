@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.resources
+package nz.net.ultraq.redhorizon.resources
 
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData

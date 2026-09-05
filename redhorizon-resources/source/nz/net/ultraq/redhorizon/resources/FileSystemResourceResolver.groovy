@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+package nz.net.ultraq.redhorizon.resources
 
-includeBuild 'redhorizon-build'
-include 'imgui-extensions'
-include 'joml-extensions'
-include 'redhorizon-audio'
-include 'redhorizon-classic'
-include 'redhorizon-engine'
-include 'redhorizon-explorer'
-include 'redhorizon-graphics'
-include 'redhorizon-input'
-include 'redhorizon-physics'
-include 'redhorizon-resources'
-include 'redhorizon-runtime'
-include 'redhorizon-scenegraph'
+import groovy.transform.TupleConstructor
+
+/**
+ * A resource resolver for resources on the file system.
+ *
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class FileSystemResourceResolver implements ResourceResolver {
+
+	final String pathPrefix
+
+	@Override
+	InputStream resolve(String path) {
+
+		try {
+			return new FileInputStream(new File(pathPrefix, path))
+		}
+		catch (FileNotFoundException ignored) {
+			return null
+		}
+	}
+}

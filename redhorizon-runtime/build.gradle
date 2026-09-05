@@ -29,6 +29,7 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
 		}
 		.withJarOptions() {
@@ -46,6 +47,7 @@ configure {
 				api project(':redhorizon-graphics')
 				api project(':redhorizon-input')
 				api project(':redhorizon-physics')
+				api project(':redhorizon-resources')
 				api project(':redhorizon-scenegraph')
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}

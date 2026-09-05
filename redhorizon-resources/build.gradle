@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.resources
+plugins {
+	id 'redhorizon-library'
+}
 
-import groovy.transform.TupleConstructor
+description = 'Resource management module for the Red Horizon project'
 
-/**
- * A resource resolver for resources on the file system.
- *
- * @author Emanuel Rabina
- */
-@TupleConstructor(defaults = false)
-class FileSystemResourceResolver implements ResourceResolver {
-
-	final String pathPrefix
-
-	@Override
-	InputStream resolve(String path) {
-
-		try {
-			return new FileInputStream(new File(pathPrefix, path))
+configure {
+	asGroovyLibraryProject()
+		.withJarOptions() {
+			manifest {
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.resources'
+			}
 		}
-		catch (FileNotFoundException ignored) {
-			return null
-		}
-	}
+		.configureSource()
+			.withDependencies() {
+				api project(':redhorizon-audio')
+				api project(':redhorizon-graphics')
+			}
 }

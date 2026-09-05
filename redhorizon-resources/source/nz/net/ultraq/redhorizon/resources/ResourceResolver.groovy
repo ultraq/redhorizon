@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.resources
+package nz.net.ultraq.redhorizon.resources
 
 /**
  * An interface for taking a name or path of a resource and returning a stream
