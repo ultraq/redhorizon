@@ -112,4 +112,21 @@ class InputEventHandlerTests extends Specification {
 				assert cursorPosition.x() == 100 && cursorPosition.y() == 50
 			}
 	}
+
+	def "Inputs are relayed through the event handler"() {
+		given:
+			var inputSource = new TestInputSource()
+			var scrollEventReceived = false
+			new InputEventHandler()
+				.addInputSource(inputSource)
+				.on(ScrollEvent) { event ->
+					scrollEventReceived = true
+				}
+		when:
+			inputSource.trigger(new ScrollEvent(0, 10))
+		then:
+			new PollingConditions().eventually { ->
+				assert scrollEventReceived
+			}
+	}
 }

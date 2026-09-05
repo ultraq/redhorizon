@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.input
 
+import nz.net.ultraq.eventhorizon.EventTarget
+
 import org.joml.Vector2f
 import org.joml.Vector2fc
 
@@ -30,9 +32,15 @@ import java.util.concurrent.ConcurrentHashMap
  * which will require the {@link InputEventHandler#processInputs()} method to be
  * called during the render loop to run through them.
  *
+ * <p>Alternatively, every input event is relayed through this object, so code
+ * can act on raw input events if desired.  For some inputs, like scrolling
+ * (which does not have a 'scroll stop/zero' state and so there is way to
+ * reliably know if scrolling has stopped), this is the only way to react to
+ * this input.
+ *
  * @author Emanuel Rabina
  */
-class InputEventHandler {
+class InputEventHandler implements EventTarget<InputEventHandler> {
 
 	private final Map<Integer, Boolean> keyPressedStates = new ConcurrentHashMap<>()
 	private final Map<Integer, Boolean> mouseButtonPressedStates = new ConcurrentHashMap<>()
@@ -68,6 +76,7 @@ class InputEventHandler {
 				gamepadButtonPressedStates[event.button()] = event.pressed()
 			}
 		}
+		inputSource.relay(InputEvent, this)
 		return this
 	}
 

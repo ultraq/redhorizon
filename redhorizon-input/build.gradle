@@ -20,7 +20,6 @@ plugins {
 
 description = 'Input module for the Red Horizon project'
 
-// @formatter:off
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
@@ -42,4 +41,3 @@ configure {
 				testImplementation "org.slf4j:slf4j-simple:${slf4jVersion}"
 			}
 }
-// @formatter:on

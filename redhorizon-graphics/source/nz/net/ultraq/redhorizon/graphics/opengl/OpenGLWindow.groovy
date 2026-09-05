@@ -24,6 +24,7 @@ import nz.net.ultraq.redhorizon.graphics.input.GamepadStateProcessor
 import nz.net.ultraq.redhorizon.input.CursorPositionEvent
 import nz.net.ultraq.redhorizon.input.KeyEvent
 import nz.net.ultraq.redhorizon.input.MouseButtonEvent
+import nz.net.ultraq.redhorizon.input.ScrollEvent
 
 import org.joml.primitives.Rectanglei
 import org.lwjgl.system.Configuration
@@ -137,6 +138,9 @@ class OpenGLWindow implements Window<OpenGLWindow> {
 		}
 		glfwSetCursorPosCallback(window) { long window, double xpos, double ypos ->
 			trigger(new CursorPositionEvent(xpos * renderScale, ypos * renderScale))
+		}
+		glfwSetScrollCallback(window) { long window, double xOffset, double yOffset ->
+			trigger(new ScrollEvent(xOffset, yOffset))
 		}
 		gamepadStateProcessor = new GamepadStateProcessor(this)
 
