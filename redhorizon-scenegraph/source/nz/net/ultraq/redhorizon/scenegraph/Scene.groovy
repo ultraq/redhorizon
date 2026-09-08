@@ -35,6 +35,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	@Delegate(includes = ['clear', 'insertBefore', 'leftShift', 'removeChild', 'rotate', 'scale', 'translate', 'traverse'])
 	final Node root = new RootNode()
 
+	private final Map<String, Object> contextObjects = new HashMap<>()
 	private final Queue<Closure> updateQueue = new ArrayDeque<>()
 	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()
 
@@ -53,6 +54,18 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	<T extends Node> T addAndReturnChild(T node) {
 
 		return root.addAndReturnChild(node)
+	}
+
+	/**
+	 * Add anything to the scene that nodes could be interested in using, whose
+	 * lifetime is often tied to that of the scene.  These 'context objects' can
+	 * be retrieved using {@link #getContextObject(String)} or the subscript
+	 * operator ({@code []} brackets).
+	 */
+	Scene addContextObject(String key, Object object) {
+
+		contextObjects[key] = object
+		return this
 	}
 
 	@Override
@@ -148,6 +161,22 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	<T extends Node> List<T> findAll(Class<T> type, List<T> results = []) {
 
 		return root.findAll(type, results)
+	}
+
+	/**
+	 * Retrieve a context object from the scene.
+	 */
+	<T> T getContextObject(String key) {
+
+		return (T)contextObjects[key]
+	}
+
+	/**
+	 * Shorthand for {@link #getContextObject(String)}.
+	 */
+	<T> T getAt(String key) {
+
+		return getContextObject(key)
 	}
 
 	/**

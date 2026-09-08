@@ -14,19 +14,35 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.runtime
+package nz.net.ultraq.redhorizon.runtime.extensions
 
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 /**
- * Keys for objects being shared using Java's Scoped Values.  The values here
- * are available for the lifecycle of the application.
+ * Extensions to the {@link Scene} class.
  *
  * @author Emanuel Rabina
  */
-class ScopedValues {
+class SceneExtensions {
 
-	public static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
-	public static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
+	public static final String RESOURCE_MANAGER_KEY = 'resourceManager'
+	public static final String WINDOW_KEY = 'window'
+
+	/**
+	 * Retrieve the resource manager saved on the scene as a context object.
+	 */
+	static ResourceManager getResourceManager(Scene self) {
+
+		return self[RESOURCE_MANAGER_KEY]
+	}
+
+	/**
+	 * Retrieve the window saved on the scene as a context object.
+	 */
+	static Window getWindow(Scene self) {
+
+		return self[WINDOW_KEY]
+	}
 }

@@ -54,7 +54,7 @@ import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
+import static nz.net.ultraq.redhorizon.runtime.extensions.SceneExtensions.*
 
 import org.joml.primitives.Rectanglef
 import org.lwjgl.system.Configuration
@@ -104,7 +104,7 @@ final class Runtime {
 	float audioListenerGain = 1f
 
 	// Graphics options
-	Colour windowBackgroundColour = Colour.BLACK
+	Colour windowBackgroundColour = Colour.GREY
 	int windowWidth = 800
 	int windowHeight = 600
 	boolean windowMaximized = false
@@ -118,13 +118,10 @@ final class Runtime {
 	int simulationMinimumUpdateFrequency = 60
 	CollisionCandidatesFunction collisionCandidatesFunction
 
-	// Resource manager options
-	String resourceManagerPathPrefix
-
 	// Debugging options
 	Supplier<GridLines> gridLines = { ->
 		return new GridLines(new Rectanglef(0f, 0f, framebuffer.width, framebuffer.height).center(), 50f,
-			new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f), Colour.GREY)
+			new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f), new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f))
 	}
 
 	/**
@@ -213,56 +210,52 @@ final class Runtime {
 				.addVSyncBinding(window)
 			resourceManager = application.configureResourceManager(
 				new ResourceManager()
-					.addClasspath(resourceManagerPathPrefix ?: application.class.packageName.replaceAll('\\.', '/'))
+					.addClasspath(application.class.packageName.replaceAll('\\.', '/'))
 			)
 
-			ScopedValue
-				.where(WINDOW, window)
-				.where(RESOURCE_MANAGER, resourceManager)
-				.run { ->
-
-					// Init scene and systems
-					var camera = new Camera(cameraWidth ?: framebuffer.width, cameraHeight ?: framebuffer.height)
-					var listener = new AudioListener()
-						.withGain(audioListenerGain)
-					scene = application.configureScene(
-						addDebugComponentsIf(
-							new Scene()
-								.addChild(camera
-									.addChild(listener)), // Listener is attached to the camera
-							window, camera, inputEventHandler, gridLines.get(),
-							debugComponents)
+			// Init scene and systems
+			var camera = new Camera(cameraWidth ?: framebuffer.width, cameraHeight ?: framebuffer.height)
+			var listener = new AudioListener()
+				.withGain(audioListenerGain)
+			scene = application.configureScene(
+				addDebugComponentsIf(
+					new Scene()
+						.addChild(camera
+							.addChild(listener)) // Listener is attached to the camera
+						.addContextObject(WINDOW_KEY, window)
+						.addContextObject(RESOURCE_MANAGER_KEY, resourceManager),
+					window, camera, inputEventHandler, gridLines.get(),
+					debugComponents)
+			)
+			var engine = application.configureEngine(
+				new Engine()
+					.addSystem(new InputSystem(inputEventHandler, window))
+					.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
+					.addSystem(
+						new SimulationSystem(
+							new CollisionSystem()
+								.withCollisionCandidatesFunction(collisionCandidatesFunction),
+							new MovementSystem()
+						)
+							.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
 					)
-					var engine = application.configureEngine(
-						new Engine()
-							.addSystem(new InputSystem(inputEventHandler, window))
-							.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
-							.addSystem(
-								new SimulationSystem(
-									new CollisionSystem()
-										.withCollisionCandidatesFunction(collisionCandidatesFunction),
-									new MovementSystem()
-								)
-									.withMinimumUpdateFrequency(simulationMinimumUpdateFrequency)
-							)
-							.addSystem(new SceneUpdateSystem())
-							.addSystemIf(new DebugSystem(
-								new DebugCollisionOutlineSystem(),
-								new DebugMovementArrowsSystem()
-							), debugComponents)
-							.addSystem(new AudioSystem())
-							.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
-							.withScene(scene)
-					)
+					.addSystem(new SceneUpdateSystem())
+					.addSystemIf(new DebugSystem(
+						new DebugCollisionOutlineSystem(),
+						new DebugMovementArrowsSystem()
+					), debugComponents)
+					.addSystem(new AudioSystem())
+					.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
+					.withScene(scene)
+			)
 
-					// Application loop
-					window.show()
-					var deltaTimer = new DeltaTimer()
-					while (!window.shouldClose()) {
-						engine.update(deltaTimer.deltaTime())
-						Thread.yield()
-					}
-				}
+			// Application loop
+			window.show()
+			var deltaTimer = new DeltaTimer()
+			while (!window.shouldClose()) {
+				engine.update(deltaTimer.deltaTime())
+				Thread.yield()
+			}
 		}
 		catch (Throwable throwable) {
 			logger.error('An error occurred', throwable)

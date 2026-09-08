@@ -49,7 +49,6 @@ import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -162,7 +161,7 @@ class Explorer extends Application implements Callable<Integer> {
 	@Override
 	protected Scene configureScene(Scene scene) {
 
-		var window = WINDOW.get()
+		var window = scene.window
 		window.on(WindowMaximizedEvent) { event ->
 			maximized = event.maximized()
 		}

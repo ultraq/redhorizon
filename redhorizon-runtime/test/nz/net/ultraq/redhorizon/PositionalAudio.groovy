@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
 import org.joml.Vector3f
 
@@ -60,7 +59,7 @@ class PositionalAudio extends Application {
 		@Override
 		void init() {
 
-			var resourceManager = RESOURCE_MANAGER.get()
+			var resourceManager = node.scene.resourceManager
 			sound = resourceManager.loadAudioData('PositionalAudio_bong_001.ogg')
 		}
 
@@ -69,7 +68,7 @@ class PositionalAudio extends Application {
 
 			cooldown += delta
 			if (cooldown > 1f) {
-				var window = WINDOW.get()
+				var window = node.scene.window
 
 				var camera = node.scene.find(Camera)
 				camera.unproject(window.viewport, input.cursorPosition(), worldCoords)
