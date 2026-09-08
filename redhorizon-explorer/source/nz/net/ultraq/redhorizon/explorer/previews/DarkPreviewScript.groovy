@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
-import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW
 
 /**

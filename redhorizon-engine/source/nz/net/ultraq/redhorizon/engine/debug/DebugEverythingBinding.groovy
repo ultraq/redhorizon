@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.debug
 
-import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.KeyBinding
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -50,14 +49,6 @@ class DebugEverythingBinding extends KeyBinding {
 			else {
 				debugStore.disableAll()
 				debugModules*.disable()
-			}
-
-			var gridLines = scene.find(GridLines)
-			if (debugStore.showGridLines) {
-				gridLines.enable()
-			}
-			else {
-				gridLines.disable()
 			}
 		})
 	}
