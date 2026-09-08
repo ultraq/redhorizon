@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.runtime.objects
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.GraphicsNode
@@ -36,6 +36,9 @@ import org.joml.primitives.Rectanglef
  */
 class GridLines extends GraphicsNode<GridLines, SceneShaderContext> implements AutoCloseable {
 
+	public static final Colour DEFAULT_ORIGIN_COLOUR = new Colour('GridLines-DefaultOriginColour', 0.2f, 0.2f, 0.2f)
+	public static final Colour DEFAULT_DIVIDERS_COLOUR = new Colour('GridLines-DefaultDividersColour', 0.6f, 0.6f, 0.6f)
+
 	final Class<? extends Shader> shaderClass = BasicShader
 	private final Mesh dividerLines
 	private final Mesh originLines
@@ -44,7 +47,8 @@ class GridLines extends GraphicsNode<GridLines, SceneShaderContext> implements A
 	 * Constructor, build a set of grid lines for the X and Y axes within the
 	 * bounds specified by {@code range}, for every {@code step} rendered pixels.
 	 */
-	GridLines(Rectanglef range, float step, Colour originColour, Colour dividersColour) {
+	GridLines(Rectanglef range, float step, Colour originColour = DEFAULT_ORIGIN_COLOUR,
+		Colour dividersColour = DEFAULT_DIVIDERS_COLOUR) {
 
 		// Alter values so that they line up with the origin
 		var minX = Math.floor(range.minX / step) * step as int
@@ -68,8 +72,8 @@ class GridLines extends GraphicsNode<GridLines, SceneShaderContext> implements A
 		originLines = new OpenGLMesh(Type.LINES, new Vertex[]{
 			new Vertex(new Vector3f(range.minX, 0, 0), originColour),
 			new Vertex(new Vector3f(range.maxX, 0, 0), originColour),
-			new Vertex(new Vector3f(0, range.minX, 0), originColour),
-			new Vertex(new Vector3f(0, range.maxX, 0), originColour)
+			new Vertex(new Vector3f(0, range.minY, 0), originColour),
+			new Vertex(new Vector3f(0, range.maxY, 0), originColour)
 		})
 	}
 

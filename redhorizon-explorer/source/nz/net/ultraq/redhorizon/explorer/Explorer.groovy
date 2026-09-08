@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.explorer
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
@@ -46,6 +45,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
+import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -190,8 +190,7 @@ class Explorer extends Application implements Callable<Integer> {
 				.withName('Preview controller')
 				.addChild(new ScriptNode(PreviewController))
 			)
-			.addChild(new GridLines(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24,
-				new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f), new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f))
+			.addChild(new GridLines(nz.net.ultraq.redhorizon.classic.maps.Map.MAX_BOUNDS, 24)
 				.withName('Grid lines'))
 			.addChild(new GlobalPalette()
 				.withName('Global palette & alpha mask'))

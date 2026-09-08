@@ -17,17 +17,19 @@
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
 import nz.net.ultraq.redhorizon.engine.DeltaTimer
-import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
-import org.joml.primitives.Rectanglef
+import org.joml.Vector3f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -68,7 +70,12 @@ class WorldCoordinatesCheck extends Specification {
 	def 'Convert window coordinates to world coordinates'() {
 		given:
 			var camera = new Camera(800, 600)
-			var gridLines = new GridLines(new Rectanglef(0f, 0f, 800f, 600f).center(), 50, Colour.RED, Colour.YELLOW)
+			var originLines = new OpenGLMesh(Type.LINES, new Vertex[]{
+				new Vertex(new Vector3f(-300, 0, 0), Colour.RED),
+				new Vertex(new Vector3f(300, 0, 0), Colour.RED),
+				new Vertex(new Vector3f(0, -300, 0), Colour.RED),
+				new Vertex(new Vector3f(0, 300, 0), Colour.RED)
+			})
 			var debugOverlay = new DebugOverlay()
 				.addModule(new CursorTrackingOverlayModule(window, camera))
 			var input = new InputEventHandler()
@@ -102,7 +109,7 @@ class WorldCoordinatesCheck extends Specification {
 						framebuffer.useFramebuffer { ->
 							shader.useShader { shaderContext ->
 								camera.render(shaderContext)
-								gridLines.render(shaderContext)
+								originLines.render(shaderContext)
 							}
 						}
 					}
@@ -116,6 +123,6 @@ class WorldCoordinatesCheck extends Specification {
 		then:
 			noExceptionThrown()
 		cleanup:
-			gridLines?.close()
+			originLines?.close()
 	}
 }

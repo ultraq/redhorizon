@@ -28,7 +28,6 @@ import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
 import nz.net.ultraq.redhorizon.engine.debug.DebugSystem
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeProperties
@@ -51,6 +50,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.resources.ResourceManager
+import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
@@ -120,8 +120,7 @@ final class Runtime {
 
 	// Debugging options
 	Supplier<GridLines> gridLines = { ->
-		return new GridLines(new Rectanglef(0f, 0f, framebuffer.width, framebuffer.height).center(), 50f,
-			new Colour('GridLines-DarkGrey', 0.2f, 0.2f, 0.2f), new Colour('GridLines-Grey', 0.6f, 0.6f, 0.6f))
+		return new GridLines(new Rectanglef(0f, 0f, framebuffer.width, framebuffer.height).center(), 50f)
 	}
 
 	/**
