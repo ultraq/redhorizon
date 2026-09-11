@@ -59,8 +59,7 @@ abstract class Application implements EventTarget<Application> {
 	 *
 	 * @param resourceManager
 	 *   The provided resource manager will already have a classpath resource
-	 *   resolver with a default prefix of the application's package, or the value
-	 *   set in the runtime's {@code resourceManagerPathPrefix} property.
+	 *   resolver with a default prefix of the application's package.
 	 */
 	protected ResourceManager configureResourceManager(ResourceManager resourceManager) {
 
