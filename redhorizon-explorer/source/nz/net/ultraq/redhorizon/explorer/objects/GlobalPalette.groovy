@@ -17,12 +17,9 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.explorer.PaletteType
-import nz.net.ultraq.redhorizon.graphics.GraphicsNode
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
-import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader.PalettedSpriteShaderContext
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,11 +29,10 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class GlobalPalette extends GraphicsNode<GlobalPalette, PalettedSpriteShaderContext> {
+class GlobalPalette extends Node<GlobalPalette> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalPalette)
 
-	final Class<? extends Shader> shaderClass = PalettedSpriteShader
 	private PaletteType paletteType
 	private Palette palette
 
@@ -70,11 +66,5 @@ class GlobalPalette extends GraphicsNode<GlobalPalette, PalettedSpriteShaderCont
 		return getResourceAsStream(paletteType.file).withBufferedStream { stream ->
 			return new Palette(paletteType.file, stream)
 		}
-	}
-
-	@Override
-	void render(PalettedSpriteShaderContext shaderContext) {
-
-		shaderContext.setPalette(palette)
 	}
 }

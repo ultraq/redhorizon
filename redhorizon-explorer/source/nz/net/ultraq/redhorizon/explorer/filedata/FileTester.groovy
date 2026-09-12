@@ -70,7 +70,7 @@ class FileTester {
 	 */
 	FileTesterResult test(String fileName, long fileSize, InputStream inputStream) {
 
-		var fileExtension = fileName ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase() : null
+		var fileExtension = fileName?.contains('.') ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase() : null
 
 		for (var decoderClass : decoderClasses) {
 			var decoder = decoderClass.getConstructor().newInstance()

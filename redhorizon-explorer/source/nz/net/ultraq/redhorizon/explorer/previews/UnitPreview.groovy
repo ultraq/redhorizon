@@ -116,7 +116,7 @@ class UnitPreview extends Node<UnitPreview> {
 		private Sprite sprite
 		private float repeatTimer
 		private float animationTimer
-		private Faction faction
+		private Faction faction = Faction.GOLD
 
 		@Override
 		void init() {
