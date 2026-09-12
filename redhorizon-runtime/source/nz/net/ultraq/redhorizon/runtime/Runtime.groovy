@@ -145,7 +145,7 @@ final class Runtime {
 				.addChild(new DebugStore())
 				.addChild(gridLines
 					.withName('Grid lines'))
-			var debugOverlay = new DebugOverlay()
+			var debugOverlay = new DebugOverlay(1f)
 				.withCursorTracking(window, camera)
 				.withProfilingLogging()
 				.disable()

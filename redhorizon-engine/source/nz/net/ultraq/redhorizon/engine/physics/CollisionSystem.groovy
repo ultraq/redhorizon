@@ -64,21 +64,21 @@ class CollisionSystem extends System {
 			var existingCollision = collisions[collider] == otherCollider || collisions[otherCollider] == collider
 			if (collider.checkCollision(otherCollider)) {
 				if (existingCollision) {
-					collisionEvents << collider.trigger(new CollisionContinueEvent(otherCollider))
-					collisionEvents << otherCollider.trigger(new CollisionContinueEvent(collider))
+					collisionEvents << collider.triggerAsync(new CollisionContinueEvent(otherCollider))
+					collisionEvents << otherCollider.triggerAsync(new CollisionContinueEvent(collider))
 				}
 				else {
 					collisions[collider] = otherCollider
 					collisions[otherCollider] = collider
-					collisionEvents << collider.trigger(new CollisionStartEvent(otherCollider))
-					collisionEvents << otherCollider.trigger(new CollisionStartEvent(collider))
+					collisionEvents << collider.triggerAsync(new CollisionStartEvent(otherCollider))
+					collisionEvents << otherCollider.triggerAsync(new CollisionStartEvent(collider))
 				}
 			}
 			else if (existingCollision) {
 				collisions.remove(collider)
 				collisions.remove(otherCollider)
-				collisionEvents << collider.trigger(new CollisionEndEvent(otherCollider))
-				collisionEvents << otherCollider.trigger(new CollisionEndEvent(collider))
+				collisionEvents << collider.triggerAsync(new CollisionEndEvent(otherCollider))
+				collisionEvents << otherCollider.triggerAsync(new CollisionEndEvent(collider))
 			}
 		}
 		collisionEvents*.join()
