@@ -15,15 +15,11 @@
  */
 
 package nz.net.ultraq.redhorizon.classic
-
-import groovy.transform.TupleConstructor
-
 /**
  * Available factions in classic C&C.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
 enum Faction {
 
 	// @formatter:off
@@ -37,5 +33,15 @@ enum Faction {
 	MAROON (200, 200, 201, 202, 203, 203, 204, 205, 206, 206, 207, 221, 222, 222, 223, 223)
 	// @formatter:on
 
-	final int[] colours
+	final Map<Integer, Integer> colourIndexes = new HashMap<>()
+
+	/**
+	 * Constructor, create the associated palette swap map.
+	 */
+	private Faction(int[] colours) {
+
+		colours.eachWithIndex { colour, index ->
+			colourIndexes.put(80 + index, colour)
+		}
+	}
 }

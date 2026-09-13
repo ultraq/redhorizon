@@ -29,11 +29,10 @@ import java.nio.ByteBuffer
  *
  * @author Emanuel Rabina
  */
-class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderContext>
-	implements AutoCloseable {
+class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderContext> implements AutoCloseable {
 
 	final Class<? extends Shader> shaderClass = PalettedSpriteShader
-	int[] colours
+	private Map<Integer, Integer> colourIndexes
 	private boolean coloursChanged
 	private final ByteBuffer buffer
 	final Texture texture
@@ -41,17 +40,17 @@ class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderCo
 	/**
 	 * Constructor, builds an adjustment map for the given colours.
 	 *
-	 * TODO: Don't tie this to C&C and instead have the classic package provide an
-	 *       implementation.  Also need a data structure that represents these
-	 *       swaps a lot better.
+	 * @param colourIndexes
+	 *   A mapping of the palette index value to the new palette index value to
+	 *   use instead.
 	 */
-	PaletteSwapMap(int[] colours) {
+	PaletteSwapMap(Map<Integer, Integer> colourIndexes) {
 
-		this.colours = colours
+		this.colourIndexes = colourIndexes
 		buffer = ByteBuffer.allocateNative(256)
 		256.times { i ->
-			if (i in 80..95) {
-				buffer.put(colours[i - 80] as byte)
+			if (i in colourIndexes) {
+				buffer.put(colourIndexes[i] as byte)
 			}
 			else {
 				buffer.put(i as byte)
@@ -78,9 +77,9 @@ class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderCo
 	 * Set the faction to use.  This will cause the adjustment map to be updated
 	 * with the next call to {@link #update()}.
 	 */
-	void setColours(int[] colours) {
+	void setColourIndexes(Map<Integer, Integer> colourIndexes) {
 
-		this.colours = colours
+		this.colourIndexes = colourIndexes
 		coloursChanged = true
 	}
 
@@ -90,8 +89,13 @@ class PaletteSwapMap extends GraphicsNode<PaletteSwapMap, PalettedSpriteShaderCo
 	void update() {
 
 		if (coloursChanged) {
-			(80..95).each { i ->
-				buffer.put(i, colours[i - 80] as byte)
+			256.times { i ->
+				if (i in colourIndexes) {
+					buffer.put(i, colourIndexes[i] as byte)
+				}
+				else {
+					buffer.put(i, i as byte)
+				}
 			}
 			texture.update(buffer)
 			coloursChanged = false

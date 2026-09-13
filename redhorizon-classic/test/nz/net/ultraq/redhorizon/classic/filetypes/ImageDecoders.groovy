@@ -151,7 +151,7 @@ class ImageDecoders extends Specification {
 			}
 			var sprite = new Sprite(spriteSheet, PalettedSpriteShader)
 			var faction = Faction.RED
-			var swapMap = new PaletteSwapMap(faction.colours)
+			var swapMap = new PaletteSwapMap(faction.colourIndexes)
 			var palette = getResourceAsStream('nz/net/ultraq/redhorizon/classic/Palette_temperat.pal').withBufferedStream { stream ->
 				return new Palette('Palette_temperat.pal', stream)
 			}
@@ -160,9 +160,9 @@ class ImageDecoders extends Specification {
 			var timer = 0
 			var frame = 0
 			window.on(KeyEvent) { event ->
-				if (event.keyPressed(GLFW_KEY_P)) {
-					swapMap.setColours(faction.colours)
+				if (event.keyPressed(GLFW_KEY_F)) {
 					faction++
+					swapMap.setColourIndexes(faction.colourIndexes)
 				}
 			}
 		when:

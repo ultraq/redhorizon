@@ -16,13 +16,18 @@
 
 package nz.net.ultraq.redhorizon.explorer.objects
 
+import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
+import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * The palette used for any paletted graphics in the scene.
@@ -33,8 +38,10 @@ class GlobalPalette extends Node<GlobalPalette> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GlobalPalette)
 
-	private PaletteType paletteType
 	private Palette palette
+	private PaletteType paletteType
+	private PaletteSwapMap paletteSwapMap
+	private Faction faction = Faction.GOLD
 
 	/**
 	 * Constructor, create the global palette and load an initial palette.
@@ -43,6 +50,18 @@ class GlobalPalette extends Node<GlobalPalette> {
 
 		palette = addAndReturnChild(loadPalette())
 		addChild(new PaletteAlphaMask())
+		paletteSwapMap = addAndReturnChild(new PaletteSwapMap(faction.colourIndexes))
+		addChild(new ScriptNode(GlobalPaletteScript))
+	}
+
+	/**
+	 * Cycle through available faction colours, replacing the current global one.
+	 */
+	void cycleFaction() {
+
+		faction++
+		paletteSwapMap.setColourIndexes(faction.colourIndexes)
+		logger.info('Viewing with {} faction colours', faction.name())
 	}
 
 	/**
@@ -53,6 +72,7 @@ class GlobalPalette extends Node<GlobalPalette> {
 		scene.queueUpdate { ->
 			palette.remove().close()
 			palette = addAndReturnChild(loadPalette(paletteType.next()))
+			logger.info('Using {} palette', paletteType.name())
 		}
 	}
 
@@ -65,6 +85,32 @@ class GlobalPalette extends Node<GlobalPalette> {
 		this.paletteType = paletteType
 		return getResourceAsStream(paletteType.file).withBufferedStream { stream ->
 			return new Palette(paletteType.file, stream)
+		}
+	}
+
+	/**
+	 * Reset the faction colours to the default.
+	 */
+	void resetFaction() {
+
+		faction = Faction.GOLD
+		paletteSwapMap.setColourIndexes(faction.colourIndexes)
+	}
+
+	/**
+	 * Script for adjusting the global palette.
+	 */
+	static class GlobalPaletteScript extends Script<GlobalPalette> {
+
+		@Override
+		void update(float delta) {
+
+			if (input.keyPressed(GLFW_KEY_F, true)) {
+				node.cycleFaction()
+			}
+			else if (input.keyPressed(GLFW_KEY_P, true)) {
+				node.cyclePalette()
+			}
 		}
 	}
 }

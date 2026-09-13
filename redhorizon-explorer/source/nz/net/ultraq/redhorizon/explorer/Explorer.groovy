@@ -24,7 +24,6 @@ import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
-import nz.net.ultraq.redhorizon.explorer.controllers.CyclePaletteController
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
@@ -213,7 +212,6 @@ class Explorer extends Application implements Callable<Integer> {
 				.withName('Grid lines'))
 			.addChild(new GlobalPalette()
 				.withName('Global palette & alpha mask'))
-			.addChild(new ScriptNode(CyclePaletteController))
 
 		scene
 			.on(TouchpadInputEvent) { event ->

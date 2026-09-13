@@ -20,7 +20,6 @@ import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
-import nz.net.ultraq.redhorizon.classic.Faction
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.maps.RedAlertMapLoader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -29,6 +28,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
+import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
 import nz.net.ultraq.redhorizon.explorer.previews.AnimationPlaybackScript.AnimationStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.previews.VideoPlaybackScript.VideoStoppedEvent
 import nz.net.ultraq.redhorizon.explorer.ui.EntrySelectedEvent
@@ -36,7 +36,6 @@ import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
-import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
@@ -115,6 +114,7 @@ class PreviewController extends Script implements AutoCloseable {
 //			}
 
 		scene.find(Camera).resetTransform()
+		scene.find(GlobalPalette).resetFaction()
 		scene.trigger(new PreviewEndEvent())
 	}
 
@@ -197,8 +197,6 @@ class PreviewController extends Script implements AutoCloseable {
 		var mapNode = time("Loading map ${fileName} took {}ms", logger) { ->
 			return new RedAlertMapLoader(resourceManager).load(iniFile)
 		}
-		mapNode
-			.addChild(new PaletteSwapMap(Faction.GOLD.colours))
 		scene << mapNode
 		previewedEntity = mapNode
 		scene.trigger(new PreviewBeginEvent(fileName))
@@ -321,7 +319,6 @@ class PreviewController extends Script implements AutoCloseable {
 
 		// No config found, fall back to viewing a SHP file as frame-by-frame media
 		return new Node()
-			.addChild(new PaletteSwapMap(Faction.GOLD.colours))
 			.addChild(new Sprite(spriteSheet, PalettedSpriteShader))
 			.addChild(new ScriptNode(SpritePreviewScript))
 			.withName("Sprite - ${fileName}")
