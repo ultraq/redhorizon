@@ -60,7 +60,7 @@ class SpriteSheet implements AutoCloseable {
 	 * Constructor, create a new sprite sheet using its name, the selected decoder,
 	 * and a stream of data.
 	 */
-	SpriteSheet(String fileName, ImageDecoder decoder, InputStream inputStream) {
+	SpriteSheet(String fileName, ImageDecoder decoder, InputStream inputStream, int framesAcross = 0) {
 
 		var result = decoder
 			.on(FrameDecodedEvent) { event ->
@@ -80,7 +80,7 @@ class SpriteSheet implements AutoCloseable {
 		height = result.height()
 		format = result.format()
 		numFrames = result.frames()
-		framesX = MAX_TEXTURE_WIDTH / width as int
+		framesX = framesAcross ?: MAX_TEXTURE_WIDTH / width as int
 
 		var textureData = (imageData as ByteBuffer[]).combine(width, height, format, framesX)
 		var textureWidth = width * framesX

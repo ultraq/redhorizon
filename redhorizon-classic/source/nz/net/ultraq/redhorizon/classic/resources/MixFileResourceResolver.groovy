@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.maps
+package nz.net.ultraq.redhorizon.classic.resources
+
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.resources.ResourceResolver
 
 import groovy.transform.TupleConstructor
 
 /**
- * Contains a list of the available theaters used in Red Horizon.
+ * Resolve resources found in {@code mix} files.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum Theater {
+@TupleConstructor(defaults = false)
+class MixFileResourceResolver implements ResourceResolver {
 
-	// @formatter:off
-	// Available theater types
-	DESERT    ('Desert',    'des'),
-	INTERIOR  ('Interior',  'int', 4, 4),
-	SNOW      ('Snow',      'sno', 5, 4),
-	TEMPERATE ('Temperate', 'tem', 4, 4),
-	WINTER    ('Winter',    'win')
-	// @formatter:on
+	final MixFile mixFile
 
-	final String label
-	final String ext
-	final int clearX
-	final int clearY
+	@Override
+	InputStream resolve(String path) {
+
+		var mixEntry = mixFile.getEntry(path)
+		return mixEntry ? mixFile.getEntryData(mixEntry) : null
+	}
 }

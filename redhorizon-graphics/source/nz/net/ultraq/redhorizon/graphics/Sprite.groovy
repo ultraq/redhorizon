@@ -45,7 +45,7 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 	/**
 	 * Constructor, create a new sprite.
 	 */
-	Sprite(int width, int height, float frameWidth, float frameHeight, Texture texture,
+	Sprite(int width, int height, float repeatX, float repeatY, Texture texture,
 		Class<? extends Shader> shaderClass, SpriteSheet spriteSheet) {
 
 		this.width = width
@@ -54,9 +54,9 @@ class Sprite extends GraphicsNode<Sprite, SceneShaderContext> implements AutoClo
 		this.spriteSheet = spriteSheet
 		mesh = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
 			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(0, 0)),
-			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, 0)),
-			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.WHITE, new Vector2f(frameWidth, frameHeight)),
-			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.WHITE, new Vector2f(0, frameHeight))
+			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.WHITE, new Vector2f(repeatX, 0)),
+			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.WHITE, new Vector2f(repeatX, repeatY)),
+			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.WHITE, new Vector2f(0, repeatY))
 		}, index)
 		material = new Material(texture: texture, frameXY: new Vector2f())
 	}

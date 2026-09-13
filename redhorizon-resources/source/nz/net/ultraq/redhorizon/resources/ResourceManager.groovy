@@ -74,11 +74,11 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	AudioData loadAudioData(String path) {
 
-		var sound = resolveStream(path).withBufferedStream { stream ->
-			return new AudioData(path, stream)
+		return loadFile(path).withCloseable { inputStream ->
+			var sound = new AudioData(path, inputStream)
+			resources << sound
+			return sound
 		}
-		resources << sound
-		return sound
 	}
 
 	/**
@@ -87,11 +87,11 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	Image loadImage(String path) {
 
-		var image = resolveStream(path).withBufferedStream { stream ->
-			return new Image(path, stream)
+		return loadFile(path).withCloseable { inputStream ->
+			var image = new Image(path, inputStream)
+			resources << image
+			return image
 		}
-		resources << image
-		return image
 	}
 
 	/**
@@ -100,11 +100,11 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	Palette loadPalette(String path) {
 
-		var palette = resolveStream(path).withBufferedStream { stream ->
-			return new Palette(path, stream)
+		return loadFile(path).withCloseable { inputStream ->
+			var palette = new Palette(path, inputStream)
+			resources << palette
+			return palette
 		}
-		resources << palette
-		return palette
 	}
 
 	/**
@@ -113,22 +113,21 @@ class ResourceManager implements AutoCloseable {
 	@Memoized
 	SpriteSheet loadSpriteSheet(String path) {
 
-		var spriteSheet = resolveStream(path).withBufferedStream { stream ->
-			return new SpriteSheet(path, stream)
+		return loadFile(path).withCloseable { inputStream ->
+			var spriteSheet = new SpriteSheet(path, inputStream)
+			resources << spriteSheet
+			return spriteSheet
 		}
-		resources << spriteSheet
-		return spriteSheet
 	}
 
 	/**
-	 * Load a raw input stream for the given file.
+	 * Load a raw input stream for the given file.  Unlike the other load methods
+	 * in this class, the returned stream is the responsibility of the caller, and
+	 * should be closed once used.
 	 */
-	@Memoized
 	BufferedInputStream loadFile(String path) {
 
-		var inputStream = new BufferedInputStream(resolveStream(path))
-		resources << inputStream
-		return inputStream
+		return new BufferedInputStream(resolveStream(path))
 	}
 
 	/**
@@ -136,7 +135,7 @@ class ResourceManager implements AutoCloseable {
 	 */
 	StreamingAudioData loadStreamingAudioData(String path) {
 
-		var musicStream = new BufferedInputStream(resolveStream(path))
+		var musicStream = loadFile(path)
 		resources << musicStream
 
 		var music = new StreamingAudioData(path, musicStream)
@@ -146,13 +145,28 @@ class ResourceManager implements AutoCloseable {
 	}
 
 	/**
+	 * Add a resource that was loaded outside of this resource manager, so that it
+	 * can be closed when this resource manager is closed.
+	 */
+	<T extends AutoCloseable> T manageResource(T resource) {
+
+		resources << resource
+		return resource
+	}
+
+	/**
 	 * Search through all registered resource resolvers for a file with the given
 	 * name.
 	 */
 	private InputStream resolveStream(String path) {
 
-		return resourceResolvers.findResult { resourceResolver ->
+		var stream = resourceResolvers.findResult { resourceResolver ->
 			return resourceResolver.resolve(path)
 		}
+		if (stream) {
+			return stream
+		}
+
+		throw new FileNotFoundException("Resource not found: $path")
 	}
 }

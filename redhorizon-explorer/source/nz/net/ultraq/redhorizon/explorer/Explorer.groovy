@@ -17,6 +17,8 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
+import nz.net.ultraq.redhorizon.classic.resources.MixFileResourceResolver
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
@@ -43,6 +45,7 @@ import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
@@ -122,6 +125,7 @@ class Explorer extends Application implements Callable<Integer> {
 	private SharpUpscalingShader sharpUpscalingShader
 	private Framebuffer postProcessingFramebuffer
 	private GraphicsSystem graphicsSystem
+	private List<MixFile> mixFiles = []
 
 	/**
 	 * Constructor, set the program name and version.
@@ -150,6 +154,8 @@ class Explorer extends Application implements Callable<Integer> {
 				.execute()
 		}
 		finally {
+			mixFiles*.close()
+
 			// Save preferences for next time
 			userPreferences.set(ExplorerPreferences.WINDOW_MAXIMIZED, maximized)
 			userPreferences.set(ExplorerPreferences.TOUCHPAD_INPUT, touchpadInput)
@@ -157,6 +163,18 @@ class Explorer extends Application implements Callable<Integer> {
 				userPreferences.set(ExplorerPreferences.STARTING_DIRECTORY, startingDirectory.toString())
 			}
 		}
+	}
+
+	@Override
+	protected ResourceManager configureResourceManager(ResourceManager resourceManager) {
+
+		new File('./mix/red-alert').listFiles({ dir, name -> name.endsWith('.mix') } as FilenameFilter).sort().each { file ->
+			logger.debug('Loading MIX file: {}', file)
+			var mixFile = new MixFile(file)
+			resourceManager.addResourceResolver(new MixFileResourceResolver(mixFile))
+			mixFiles << mixFile
+		}
+		return resourceManager
 	}
 
 	@Override

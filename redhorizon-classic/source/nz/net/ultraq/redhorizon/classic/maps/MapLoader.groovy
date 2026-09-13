@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,18 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import groovy.transform.TupleConstructor
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 /**
- * Contains a list of the available theaters used in Red Horizon.
+ * Any class that can take a map file and return a scene structure for it.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor
-enum Theater {
+interface MapLoader<TMapFile> {
 
-	// @formatter:off
-	// Available theater types
-	DESERT    ('Desert',    'des'),
-	INTERIOR  ('Interior',  'int', 4, 4),
-	SNOW      ('Snow',      'sno', 5, 4),
-	TEMPERATE ('Temperate', 'tem', 4, 4),
-	WINTER    ('Winter',    'win')
-	// @formatter:on
-
-	final String label
-	final String ext
-	final int clearX
-	final int clearY
+	/**
+	 * Read a map file, converting its elements to a scene represented by the
+	 * returned root node.
+	 */
+	Node load(TMapFile mapFile)
 }

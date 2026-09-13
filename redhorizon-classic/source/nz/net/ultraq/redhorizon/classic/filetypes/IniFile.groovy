@@ -34,7 +34,7 @@ import java.util.regex.Pattern
 class IniFile {
 
 	private static final Pattern COMMENT_PATTERN = ~/^\s*;.*/
-	private static final Pattern SECTION_PATTERN = ~/\[(.+)\](\s*;.*)?/
+	private static final Pattern SECTION_PATTERN = ~/\[(.+)](\s*;.*)?/
 	private static final Pattern LINE_PATTERN = ~/([^=]+)=([^;]+)(;.*)?/
 
 	private final Map<String, Map<String, String>> sections = [:]

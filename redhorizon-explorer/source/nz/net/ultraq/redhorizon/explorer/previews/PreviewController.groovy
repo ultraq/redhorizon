@@ -21,6 +21,8 @@ import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.classic.Faction
+import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
+import nz.net.ultraq.redhorizon.classic.maps.RedAlertMapLoader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
 import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
@@ -40,8 +42,10 @@ import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
+import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+import static nz.net.ultraq.redhorizon.runtime.ScopedValues.RESOURCE_MANAGER
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -128,16 +132,28 @@ class PreviewController extends Script implements AutoCloseable {
 			logger.info('Loading {}...', file.name)
 
 			selectedFileInputStream = file.newInputStream()
-			var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
-			if (result) {
-				time("Reading file ${file.name} from filesystem took {}ms", logger) { ->
-					var decoder = result.decoder().getConstructor().newInstance()
-					var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
-					previewObject(scene, media, file.name)
+
+			// Special case for map files for now (only way to know it's a map file is
+			// to read the whole thing!)
+			if (file.name.endsWith('.ini')) {
+				var iniFile = new IniFile(selectedFileInputStream)
+				if (iniFile['Basic']) {
+					var resourceManager = RESOURCE_MANAGER.get()
+					previewMap(scene, iniFile, file.name, resourceManager)
 				}
 			}
 			else {
-				logger.info('No filetype implementation for {}', file.name)
+				var result = new FileTester().test(file.name, file.size(), selectedFileInputStream)
+				if (result) {
+					time("Reading file ${file.name} from filesystem took {}ms", logger) { ->
+						var decoder = result.decoder().getConstructor().newInstance()
+						var media = result.mediaClass().newInstance(file.name, decoder, selectedFileInputStream)
+						previewObject(scene, media, file.name)
+					}
+				}
+				else {
+					logger.info('No filetype implementation for {}', file.name)
+				}
 			}
 
 			scene.trigger(new EntrySelectedEvent(entry))
@@ -157,7 +173,7 @@ class PreviewController extends Script implements AutoCloseable {
 			logger.info('Loading {} from mix file', entry.name())
 
 			selectedFileInputStream = new BufferedInputStream(entry.mixFile().getEntryData(entry.mixEntry()))
-			var result = new FileTester().test(null, entry.size(), selectedFileInputStream)
+			var result = new FileTester().test(entry.name(), entry.size(), selectedFileInputStream)
 			if (result) {
 				time("Reading file ${entry.name()} from mix file took {}ms", logger) { ->
 					var decoder = result.decoder().getConstructor().newInstance()
@@ -174,6 +190,21 @@ class PreviewController extends Script implements AutoCloseable {
 	}
 
 	/**
+	 * Attempt to load a map from it's .ini file.
+	 */
+	private void previewMap(Scene scene, IniFile iniFile, String fileName, ResourceManager resourceManager) {
+
+		var mapNode = time("Loading map ${fileName} took {}ms", logger) { ->
+			return new RedAlertMapLoader(resourceManager).load(iniFile)
+		}
+		mapNode
+			.addChild(new PaletteSwapMap(Faction.GOLD.colours))
+		scene << mapNode
+		previewedEntity = mapNode
+		scene.trigger(new PreviewBeginEvent(fileName))
+	}
+
+	/**
 	 * Update the preview area for the given file data and type.
 	 */
 	private void previewObject(Scene scene, Object file, String fileName) {
@@ -183,16 +214,9 @@ class PreviewController extends Script implements AutoCloseable {
 		// Dynamic objects
 			case SpriteSheet ->
 				yield previewSprite(file, fileName)
-//		case IniFile ->
-//			preview(file as MapFile, objectId)
-//
+
 				// Static media
 			case Image -> {
-//				if (fileClass == TmpFileRADecoder) {
-//					yield new Entity()
-//						.addComponent(new SpriteComponent(file, PalettedSpriteShader))
-//						.withName("Tilemap - ${fileName}")
-//				}
 				yield new Node()
 					.addChild(new Sprite(file, BasicShader))
 					.addChild(new ScriptNode(DarkPreviewScript))
@@ -258,9 +282,9 @@ class PreviewController extends Script implements AutoCloseable {
 		}
 
 		if (entity) {
-			node.scene.addChild(entity)
+			scene.addChild(entity)
 			previewedEntity = entity
-			node.scene.trigger(new PreviewBeginEvent(fileName))
+			scene.trigger(new PreviewBeginEvent(fileName))
 		}
 		previewedMedia = file
 	}
@@ -302,20 +326,4 @@ class PreviewController extends Script implements AutoCloseable {
 			.addChild(new ScriptNode(SpritePreviewScript))
 			.withName("Sprite - ${fileName}")
 	}
-
-	/**
-	 * Attempt to load up a map from its map file.
-	 */
-//	private void previewMap(MapFile mapFile, String objectId) {
-//
-//		var mapViewerScript = new MapViewerScript(camera, nodeList, options.touchpadInput)
-//		time("Loading map ${objectId}", logger) { ->
-//			resourceManager.withDirectory(currentDirectory) { ->
-//				var map = new Map(mapFile, resourceManager).attachScript(mapViewerScript)
-//				scene << map
-//				preview = map
-//			}
-//		}
-//		mapViewerScript.viewInitialPosition()
-//	}
 }

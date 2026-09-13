@@ -78,7 +78,7 @@ class FileTester {
 				var result = inputStream.markAndReset(512) { stream ->
 					try {
 						decoder.test(stream)
-						logger.debug('Decoder check passed, using {}', decoderClass.simpleName)
+						logger.debug('Decoder check passed for {}, using {}', fileName, decoderClass.simpleName)
 						return new FileTesterResult(decoderClass, decoderToType[decoderClass],
 							switch (decoderClass) {
 								case AudFileDecoder -> fileSize > (1024 * 1024) ? StreamingAudioData : AudioData
