@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * A custom class for any script used during the game update phase.

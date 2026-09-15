@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * For viewing a palette file.

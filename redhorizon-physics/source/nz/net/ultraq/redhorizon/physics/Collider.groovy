@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.physics
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * Base class for all collision nodes.

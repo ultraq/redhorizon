@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine
 
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * Any object that can be added to the {@link Engine} to perform some operation

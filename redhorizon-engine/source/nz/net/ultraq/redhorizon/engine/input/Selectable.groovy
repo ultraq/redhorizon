@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.input
 
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.joml.primitives.Rayf
 import org.joml.primitives.Rectanglef

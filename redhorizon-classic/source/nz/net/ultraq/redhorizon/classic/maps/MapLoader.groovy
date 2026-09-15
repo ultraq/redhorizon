@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * Any class that can take a map file and return a scene structure for it.

@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.maps
 
 import nz.net.ultraq.redhorizon.classic.filetypes.MapFile
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.joml.Vector2f
 import org.joml.primitives.Rectanglef

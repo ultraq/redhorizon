@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.redhorizon.physics.Collider
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * A function that calculates between which collider pairs a collision check

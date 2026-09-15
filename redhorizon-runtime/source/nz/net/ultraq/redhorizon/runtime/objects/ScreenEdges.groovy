@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.runtime.objects
 
 import nz.net.ultraq.redhorizon.physics.BoxCollider
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.joml.primitives.Rectanglef
 

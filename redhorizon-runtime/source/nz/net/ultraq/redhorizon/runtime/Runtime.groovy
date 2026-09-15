@@ -52,8 +52,8 @@ import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
-import nz.net.ultraq.redhorizon.scenegraph.Node
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.scene.Scene
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
 import org.joml.primitives.Rectanglef

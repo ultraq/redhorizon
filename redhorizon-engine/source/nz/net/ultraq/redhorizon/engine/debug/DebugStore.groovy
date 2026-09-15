@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.debug
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * A node for storing debug information.  Holds some basic state that is

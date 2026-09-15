@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph
+package nz.net.ultraq.redhorizon.scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

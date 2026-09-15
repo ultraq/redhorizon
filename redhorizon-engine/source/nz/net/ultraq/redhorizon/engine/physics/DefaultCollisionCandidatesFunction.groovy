@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.redhorizon.physics.Collider
 import nz.net.ultraq.redhorizon.physics.MovementNode
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

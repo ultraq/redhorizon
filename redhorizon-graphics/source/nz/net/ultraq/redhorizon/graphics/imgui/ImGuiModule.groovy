@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics.imgui
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * Any ImGui object to render during the ImGui phase.

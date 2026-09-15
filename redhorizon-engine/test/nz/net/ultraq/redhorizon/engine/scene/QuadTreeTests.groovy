@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.engine.scene
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.joml.primitives.Rectanglef
 import spock.lang.Specification

@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.physics.BoxCollider
 import nz.net.ultraq.redhorizon.physics.CircleCollider
 import nz.net.ultraq.redhorizon.physics.Collider
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * Manage the drawing of collision outlines for debugging.

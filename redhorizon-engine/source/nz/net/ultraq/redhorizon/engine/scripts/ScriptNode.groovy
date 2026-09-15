@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.scripts
 
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * A wrapper for scripts that allows them to be a part of the scene and operate

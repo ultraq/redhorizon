@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.physics.MovementNode
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * Perform movement of all movable objects in a scene.

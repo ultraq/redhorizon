@@ -20,7 +20,7 @@ import nz.net.ultraq.groovy.profilingextensions.LoggingStrategy
 import nz.net.ultraq.groovy.profilingextensions.Profiler
 import nz.net.ultraq.groovy.profilingextensions.TimedLoggingStrategy
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

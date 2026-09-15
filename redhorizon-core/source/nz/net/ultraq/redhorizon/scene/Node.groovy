@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph
+package nz.net.ultraq.redhorizon.scene
 
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -112,7 +112,8 @@ class Node<T extends Node> implements AutoCloseable {
 	 * @return
 	 *   The matching node, or {@code null} if no match is found.
 	 */
-	Node findAncestor(@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node') Closure<Boolean> predicate) {
+	Node findAncestor(
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scene.Node') Closure<Boolean> predicate) {
 
 		if (parent) {
 			return predicate(parent) ? parent : parent.findAncestor(predicate)
@@ -128,8 +129,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
 	<T extends Node> T find(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
-			Closure<Boolean> predicate) {
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scene.Node') Closure<Boolean> predicate) {
 
 		return (T)children.inject(null) { result, node ->
 			return result ?: predicate(node) ? node : node.find(predicate)
@@ -170,8 +170,7 @@ class Node<T extends Node> implements AutoCloseable {
 	 * @return The matching nodes, or an empty list if no matches are found.
 	 */
 	<T extends Node> List<T> findAll(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
-			Closure<Boolean> predicate,
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scene.Node') Closure<Boolean> predicate,
 		List<T> results = []) {
 
 		children.findAll { child ->

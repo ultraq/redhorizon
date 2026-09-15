@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import groovy.transform.TupleConstructor
 

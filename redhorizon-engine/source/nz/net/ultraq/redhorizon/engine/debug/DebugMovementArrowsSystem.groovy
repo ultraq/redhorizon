@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.engine.debug
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.physics.MovementNode
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * Manage the drawing of movement vectors for debugging.

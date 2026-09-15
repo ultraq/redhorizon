@@ -26,6 +26,7 @@ configure {
 	}
 		.configureSource()
 			.withDependencies() {
+				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-runtime')
 				implementation "info.picocli:picocli:${picocliVersion}"
 				implementation 'nz.net.ultraq.preferences:preferences:3.1.0'

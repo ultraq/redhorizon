@@ -21,7 +21,7 @@ import nz.net.ultraq.redhorizon.physics.Collider
 import nz.net.ultraq.redhorizon.physics.CollisionContinueEvent
 import nz.net.ultraq.redhorizon.physics.CollisionEndEvent
 import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

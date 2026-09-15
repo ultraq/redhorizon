@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
 import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

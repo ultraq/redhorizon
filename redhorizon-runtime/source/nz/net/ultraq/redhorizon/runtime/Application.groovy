@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.runtime
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.resources.ResourceManager
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import groovy.transform.TupleConstructor
 

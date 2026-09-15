@@ -32,8 +32,8 @@ import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
 import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.objects.ScreenEdges
-import nz.net.ultraq.redhorizon.scenegraph.Node
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.joml.Vector2f
 import org.joml.Vector3f

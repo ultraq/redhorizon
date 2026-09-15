@@ -19,7 +19,7 @@ package nz.net.ultraq.redhorizon.graphics
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

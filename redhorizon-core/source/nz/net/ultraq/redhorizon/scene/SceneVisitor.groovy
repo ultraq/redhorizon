@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph
-
-import nz.net.ultraq.eventhorizon.Event
-
-import groovy.transform.ImmutableOptions
+package nz.net.ultraq.redhorizon.scene
 
 /**
- * Event for when a node has been added to the scene.
+ * Interface for anything that wants to be able to traverse the scene graph.
  *
  * @author Emanuel Rabina
  */
-@ImmutableOptions(knownImmutables = ['node'])
-record NodeAddedEvent(Node node) implements Event {
+@FunctionalInterface
+interface SceneVisitor {
+
+	/**
+	 * Visit any node.
+	 *
+	 * @return
+	 *   {@code true} if traversal should continue, {@code false} if it should
+	 *   stop.
+	 */
+	boolean visit(Node node)
 }

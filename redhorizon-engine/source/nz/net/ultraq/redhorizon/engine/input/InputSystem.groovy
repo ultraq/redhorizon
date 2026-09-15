@@ -20,7 +20,7 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.joml.Vector3f
 import org.joml.primitives.Rayf

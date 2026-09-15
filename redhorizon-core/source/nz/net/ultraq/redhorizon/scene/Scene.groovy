@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.scenegraph
+package nz.net.ultraq.redhorizon.scene
 
 import nz.net.ultraq.eventhorizon.EventTarget
 
@@ -95,7 +95,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 * @return The matching node, or {@code null} if no match is found.
 	 */
 	<T extends Node> T find(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scene.Node')
 			Closure<Boolean> predicate) {
 
 		return root.find(predicate)
@@ -131,7 +131,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	 * @return The matching nodes, or an empty list if no matches are found.
 	 */
 	<T extends Node> List<T> findAll(
-		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scenegraph.Node')
+		@ClosureParams(value = SimpleType, options = 'nz.net.ultraq.redhorizon.scene.Node')
 			Closure<Boolean> predicate,
 		List<T> results = []) {
 

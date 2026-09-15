@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.audio
 
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * Parent class for all audio nodes.

@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.ui.actions
 
 import nz.net.ultraq.redhorizon.explorer.ui.TouchpadInputEvent
 import nz.net.ultraq.redhorizon.explorer.ui.UiSettingsComponent
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import groovy.transform.TupleConstructor
 

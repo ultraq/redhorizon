@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.extensions
 
 import nz.net.ultraq.redhorizon.classic.nodes.Layer
-import nz.net.ultraq.redhorizon.scenegraph.Node
+import nz.net.ultraq.redhorizon.scene.Node
 
 /**
  * Extensions to the {@link Node} class to work with the 2D nature of the

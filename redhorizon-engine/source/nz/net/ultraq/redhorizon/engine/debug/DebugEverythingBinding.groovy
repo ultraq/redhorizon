@@ -18,7 +18,7 @@ package nz.net.ultraq.redhorizon.engine.debug
 
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.KeyBinding
-import nz.net.ultraq.redhorizon.scenegraph.Scene
+import nz.net.ultraq.redhorizon.scene.Scene
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
