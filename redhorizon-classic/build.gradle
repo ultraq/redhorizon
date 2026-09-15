@@ -29,18 +29,19 @@ configure {
 				engine.  All of the reverse engineering of the old codecs and files takes place
 				here, and serve as working examples for other programmers.
 			''')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
-			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation project(':joml-extensions')
+				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-engine')
 				implementation project(':redhorizon-graphics')

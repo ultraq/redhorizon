@@ -24,8 +24,9 @@ description = 'Physics module for the Red Horizon project'
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
@@ -35,7 +36,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation project(':joml-extensions')
+				implementation project(':redhorizon-core')
 				api project(':redhorizon-scenegraph')
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"

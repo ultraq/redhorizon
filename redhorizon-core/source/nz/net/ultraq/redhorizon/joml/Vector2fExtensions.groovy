@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-rootProject.name = 'redhorizon'
+package nz.net.ultraq.redhorizon.joml
 
-includeBuild 'redhorizon-build'
-include 'redhorizon-core'
-include 'redhorizon-audio'
-include 'redhorizon-classic'
-include 'redhorizon-engine'
-include 'redhorizon-explorer'
-include 'redhorizon-graphics'
-include 'redhorizon-input'
-include 'redhorizon-physics'
-include 'redhorizon-resources'
-include 'redhorizon-runtime'
-include 'redhorizon-scenegraph'
+import org.joml.Vector2f
+
+import groovy.transform.CompileStatic
+
+/**
+ * Extensions to the {@link org.joml.Vector2f} class.
+ *
+ * @author Emanuel Rabina
+ */
+@CompileStatic
+class Vector2fExtensions {
+
+	/**
+	 * Consider a {@code Vector2f} truthy if it is non-null and has non-zero
+	 * values.
+	 */
+	static boolean asBoolean(Vector2f self) {
+
+		return self?.length()
+	}
+}

@@ -29,6 +29,7 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
@@ -40,8 +41,7 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation project(':imgui-extensions')
-				implementation project(':joml-extensions')
+				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
 				implementation project(':redhorizon-input')

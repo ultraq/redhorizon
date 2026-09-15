@@ -31,6 +31,8 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-scenegraph/${version}/", 'nz.net.ultraq.redhorizon.scenegraph.')
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
+			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
 			manifest {
@@ -39,8 +41,8 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				api project(':imgui-extensions')
-				api project(':joml-extensions')
+				implementation project(':redhorizon-core')
+				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 				api project(':redhorizon-audio')
 				api project(':redhorizon-classic')
 				api project(':redhorizon-engine')
@@ -49,7 +51,6 @@ configure {
 				api project(':redhorizon-physics')
 				api project(':redhorizon-resources')
 				api project(':redhorizon-scenegraph')
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 		.configureVerification()
 			.withTestDependencies() {
