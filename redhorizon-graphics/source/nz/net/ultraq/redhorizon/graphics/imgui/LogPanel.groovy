@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
-
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 import imgui.ImGui
 import imgui.type.ImBoolean

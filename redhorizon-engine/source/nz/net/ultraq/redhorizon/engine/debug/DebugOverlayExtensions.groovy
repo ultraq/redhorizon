@@ -16,11 +16,11 @@
 
 package nz.net.ultraq.redhorizon.engine.debug
 
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ProfilingLoggingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.imgui.ProfilingLoggingOverlayModule
 
 /**
  * Extensions for common use of the {@link DebugOverlay}.

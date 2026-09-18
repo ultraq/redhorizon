@@ -39,6 +39,7 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-audio')
+				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-lwjgl3:${imguiVersion}"
 				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"

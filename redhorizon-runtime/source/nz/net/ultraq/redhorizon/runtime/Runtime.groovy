@@ -26,9 +26,6 @@ import nz.net.ultraq.redhorizon.engine.debug.DebugEverythingBinding
 import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
 import nz.net.ultraq.redhorizon.engine.debug.DebugSystem
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeProperties
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
 import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
@@ -41,6 +38,9 @@ import nz.net.ultraq.redhorizon.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.graphics.imgui.NodeProperties
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.groovy.profilingextensions.Profiler

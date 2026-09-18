@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.imgui
-
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlayModule
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 import imgui.ImGui
 
