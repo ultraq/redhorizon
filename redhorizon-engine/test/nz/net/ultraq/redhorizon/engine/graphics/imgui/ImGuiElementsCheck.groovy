@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.imgui.CursorTrackingOverlayModule
@@ -27,6 +26,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
 import org.slf4j.LoggerFactory
 import spock.lang.IgnoreIf

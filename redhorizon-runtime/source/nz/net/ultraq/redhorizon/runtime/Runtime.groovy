@@ -19,7 +19,6 @@ package nz.net.ultraq.redhorizon.runtime
 import nz.net.ultraq.redhorizon.audio.AudioListener
 import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
-import nz.net.ultraq.redhorizon.engine.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
@@ -54,6 +53,7 @@ import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
 import org.joml.primitives.Rectanglef

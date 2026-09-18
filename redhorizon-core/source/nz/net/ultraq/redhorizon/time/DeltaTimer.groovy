@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine
+package nz.net.ultraq.redhorizon.time
 
 import groovy.transform.CompileStatic
 
@@ -26,7 +26,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class DeltaTimer {
 
-	private long lastUpdateTimeNanos = java.lang.System.nanoTime()
+	private long lastUpdateTimeNanos = System.nanoTime()
 
 	/**
 	 * The amount of time, in seconds, that has elapsed since the last call to
@@ -34,7 +34,7 @@ class DeltaTimer {
 	 */
 	float deltaTime() {
 
-		var currentTimeNanos = java.lang.System.nanoTime()
+		var currentTimeNanos = System.nanoTime()
 		var delta = (currentTimeNanos - lastUpdateTimeNanos) / 1_000_000_000L
 		lastUpdateTimeNanos = currentTimeNanos
 		return delta as float

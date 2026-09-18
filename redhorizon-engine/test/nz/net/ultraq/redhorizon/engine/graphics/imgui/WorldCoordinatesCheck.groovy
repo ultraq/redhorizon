@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.redhorizon.engine.graphics.imgui
 
-import nz.net.ultraq.redhorizon.engine.DeltaTimer
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
@@ -28,6 +27,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
 import org.joml.Vector3f
 import org.lwjgl.system.Configuration
