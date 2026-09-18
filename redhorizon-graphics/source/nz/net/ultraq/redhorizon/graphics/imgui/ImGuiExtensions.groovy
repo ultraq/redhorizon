@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.imgui
+package nz.net.ultraq.redhorizon.graphics.imgui
 
 import imgui.ImFont
 import imgui.ImGui

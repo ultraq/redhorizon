@@ -21,4 +21,3 @@ extensionClasses = nz.net.ultraq.redhorizon.joml.CirclefExtensions,\
                    nz.net.ultraq.redhorizon.joml.RectanglefExtensions,\
                    nz.net.ultraq.redhorizon.joml.RectangleiExtensions,\
                    nz.net.ultraq.redhorizon.joml.Vector2fExtensions
-staticExtensionClasses = nz.net.ultraq.redhorizon.imgui.ImGuiExtensions
