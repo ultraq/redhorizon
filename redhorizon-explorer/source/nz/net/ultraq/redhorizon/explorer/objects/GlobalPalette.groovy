@@ -17,13 +17,13 @@
 package nz.net.ultraq.redhorizon.explorer.objects
 
 import nz.net.ultraq.redhorizon.classic.Faction
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.PaletteType
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.PaletteAlphaMask
 import nz.net.ultraq.redhorizon.graphics.PaletteSwapMap
 import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

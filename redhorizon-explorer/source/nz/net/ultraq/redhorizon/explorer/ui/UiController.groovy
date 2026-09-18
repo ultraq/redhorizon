@@ -18,8 +18,6 @@ package nz.net.ultraq.redhorizon.explorer.ui
 
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
@@ -29,6 +27,8 @@ import nz.net.ultraq.redhorizon.explorer.previews.PreviewController
 import nz.net.ultraq.redhorizon.explorer.ui.actions.ExtractMixFileEntryAction
 import nz.net.ultraq.redhorizon.explorer.ui.actions.SelectEntryAction
 import nz.net.ultraq.redhorizon.explorer.ui.actions.ToggleTouchpadInputAction
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 
 import static org.lwjgl.glfw.GLFW.*
 

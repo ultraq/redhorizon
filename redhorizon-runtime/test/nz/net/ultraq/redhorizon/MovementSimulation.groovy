@@ -17,8 +17,6 @@
 package nz.net.ultraq.redhorizon
 
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
@@ -30,6 +28,8 @@ import nz.net.ultraq.redhorizon.physics.MovementNode
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.objects.ScreenEdges
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 
 import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.*

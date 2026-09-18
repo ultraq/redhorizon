@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scripts
+package nz.net.ultraq.redhorizon.script
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.input.InputEventHandler

@@ -23,7 +23,6 @@ import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
 import nz.net.ultraq.redhorizon.explorer.objects.GlobalPalette
@@ -50,6 +49,7 @@ import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.script.ScriptNode
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW
 
 import org.slf4j.Logger

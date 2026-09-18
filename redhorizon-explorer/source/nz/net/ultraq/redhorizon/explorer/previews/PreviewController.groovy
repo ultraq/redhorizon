@@ -23,8 +23,6 @@ import nz.net.ultraq.redhorizon.audio.StreamingAudioData
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.maps.RedAlertMapLoader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.filedata.FileTester
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixEntry
@@ -43,6 +41,8 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.RESOURCE_MANAGER
 
 import org.slf4j.Logger

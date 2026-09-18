@@ -17,13 +17,13 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.classic.units.UnitData
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

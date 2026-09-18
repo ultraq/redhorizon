@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scripts
+package nz.net.ultraq.redhorizon.script
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

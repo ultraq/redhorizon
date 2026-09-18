@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.redhorizon.audio.AudioSource
-import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.script.Script
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE
 

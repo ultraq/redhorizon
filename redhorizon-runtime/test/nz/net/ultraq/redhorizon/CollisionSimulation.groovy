@@ -20,8 +20,6 @@ import nz.net.ultraq.redhorizon.engine.input.CursorEnterEvent
 import nz.net.ultraq.redhorizon.engine.input.CursorExitEvent
 import nz.net.ultraq.redhorizon.engine.input.Selectable
 import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.graphics.Vertex
@@ -34,6 +32,8 @@ import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.objects.ScreenEdges
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 
 import org.joml.Vector2f
 import org.joml.Vector3f

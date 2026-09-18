@@ -19,13 +19,13 @@ package nz.net.ultraq.redhorizon
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
-import nz.net.ultraq.redhorizon.engine.scripts.Script
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.script.Script
+import nz.net.ultraq.redhorizon.script.ScriptNode
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 
 import org.joml.Vector3f

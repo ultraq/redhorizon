@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.engine.scripts.Script
 import nz.net.ultraq.redhorizon.graphics.Animation
+import nz.net.ultraq.redhorizon.script.Script
 
 /**
  * Control the behaviour of an animation in preview.
