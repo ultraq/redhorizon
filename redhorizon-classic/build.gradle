@@ -31,7 +31,6 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
@@ -43,7 +42,6 @@ configure {
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-engine')
 				implementation project(':redhorizon-graphics')
-				implementation project(':redhorizon-input')
 				implementation project(':redhorizon-resources')
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
 				implementation "org.apache.groovy:groovy-json:${groovyVersion}"

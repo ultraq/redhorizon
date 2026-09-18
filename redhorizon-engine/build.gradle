@@ -25,7 +25,6 @@ configure {
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
@@ -42,7 +41,6 @@ configure {
 				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
-				implementation project(':redhorizon-input')
 				implementation project(':redhorizon-physics')
 				implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"

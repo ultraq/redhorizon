@@ -27,7 +27,6 @@ configure {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-classic/${version}/", 'nz.net.ultraq.redhorizon.classic.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-input/${version}/", 'nz.net.ultraq.redhorizon.input.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-physics/${version}/", 'nz.net.ultraq.redhorizon.physics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
@@ -46,7 +45,6 @@ configure {
 				api project(':redhorizon-classic')
 				api project(':redhorizon-engine')
 				api project(':redhorizon-graphics')
-				api project(':redhorizon-input')
 				api project(':redhorizon-physics')
 				api project(':redhorizon-resources')
 			}
