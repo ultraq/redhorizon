@@ -17,10 +17,10 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.redhorizon.audio.AudioListener
+import nz.net.ultraq.redhorizon.audio.AudioSystem
 import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.audio.AudioSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugEverythingBinding
 import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem

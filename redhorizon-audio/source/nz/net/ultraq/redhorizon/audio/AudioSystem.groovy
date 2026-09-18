@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.audio
+package nz.net.ultraq.redhorizon.audio
 
-import nz.net.ultraq.redhorizon.audio.AudioNode
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.scene.Scene
 
