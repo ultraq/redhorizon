@@ -1,5 +1,5 @@
 /*
- * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics.actions
+package nz.net.ultraq.redhorizon.graphics.actions
 
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import groovy.transform.TupleConstructor
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_V
 
 /**
- * Command object for closing the window.
+ * Input binding for toggling/cyling vsync options.
  *
  * @author Emanuel Rabina
  */
-@TupleConstructor(defaults = false)
-class CloseWindowAction {
+class VsyncBinding extends KeyBinding {
 
-	final Window window
-
-	/**
-	 * Close the window.
-	 */
-	void close() {
-
-		window.shouldClose(true)
+	VsyncBinding(Window window) {
+		super(GLFW_KEY_V, true, { ->
+			window.toggleVSync()
+		})
 	}
 }

@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.graphics
+package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.groovy.profilingextensions.LoggingStrategy
 import nz.net.ultraq.groovy.profilingextensions.Profiler
 import nz.net.ultraq.groovy.profilingextensions.TimedLoggingStrategy
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.graphics.Camera
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.GraphicsNode
-import nz.net.ultraq.redhorizon.graphics.SceneShaderContext
-import nz.net.ultraq.redhorizon.graphics.Shader
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scene.Scene
 

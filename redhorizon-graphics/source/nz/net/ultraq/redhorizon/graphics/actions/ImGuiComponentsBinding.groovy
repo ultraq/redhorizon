@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.graphics.actions
 
-import nz.net.ultraq.redhorizon.engine.graphics.actions.CloseWindowAction
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-
 /**
- * Bind the {@code ESC} key to closing the window.
+ * Configure a key to toggle the enabled/disabled state of any
+ * {@link ImGuiModule}s.
  *
  * @author Emanuel Rabina
  */
-class EscapeToCloseBinding extends KeyBinding {
+class ImGuiComponentsBinding extends KeyBinding {
 
-	EscapeToCloseBinding(Window window) {
-		super(GLFW_KEY_ESCAPE, true, { ->
-			new CloseWindowAction(window).close()
+	ImGuiComponentsBinding(int key, List<ImGuiModule> components) {
+		super(key, true, { ->
+			components.each { component ->
+				if (component.enabled) {
+					component.disable()
+				}
+				else {
+					component.enable()
+				}
+			}
 		})
 	}
 }

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.graphics.extensions
 
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.actions.EscapeToCloseBinding
+import nz.net.ultraq.redhorizon.graphics.actions.ImGuiComponentsBinding
+import nz.net.ultraq.redhorizon.graphics.actions.VsyncBinding
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 

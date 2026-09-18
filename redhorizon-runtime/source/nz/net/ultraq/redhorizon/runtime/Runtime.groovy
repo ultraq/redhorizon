@@ -26,7 +26,6 @@ import nz.net.ultraq.redhorizon.engine.debug.DebugEverythingBinding
 import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
 import nz.net.ultraq.redhorizon.engine.debug.DebugSystem
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeProperties
@@ -38,6 +37,7 @@ import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
+import nz.net.ultraq.redhorizon.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.graphics.Shader
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay

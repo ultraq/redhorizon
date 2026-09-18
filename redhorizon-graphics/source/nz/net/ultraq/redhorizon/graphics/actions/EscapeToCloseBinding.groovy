@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.graphics.actions
 
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_V
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
 
 /**
- * Input binding for toggling/cyling vsync options.
+ * Bind the {@code ESC} key to closing the window.
  *
  * @author Emanuel Rabina
  */
-class VsyncBinding extends KeyBinding {
+class EscapeToCloseBinding extends KeyBinding {
 
-	VsyncBinding(Window window) {
-		super(GLFW_KEY_V, true, { ->
-			window.toggleVSync()
+	EscapeToCloseBinding(Window window) {
+		super(GLFW_KEY_ESCAPE, true, { ->
+			new CloseWindowAction(window).close()
 		})
 	}
 }

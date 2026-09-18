@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.graphics.actions
 
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
-import nz.net.ultraq.redhorizon.input.KeyBinding
+import nz.net.ultraq.redhorizon.graphics.Window
+
+import groovy.transform.TupleConstructor
 
 /**
- * Configure a key to toggle the enabled/disabled state of any
- * {@link ImGuiModule}s.
+ * Command object for closing the window.
  *
  * @author Emanuel Rabina
  */
-class ImGuiComponentsBinding extends KeyBinding {
+@TupleConstructor(defaults = false)
+class CloseWindowAction {
 
-	ImGuiComponentsBinding(int key, List<ImGuiModule> components) {
-		super(key, true, { ->
-			components.each { component ->
-				if (component.enabled) {
-					component.disable()
-				}
-				else {
-					component.enable()
-				}
-			}
-		})
+	final Window window
+
+	/**
+	 * Close the window.
+	 */
+	void close() {
+
+		window.shouldClose(true)
 	}
 }
