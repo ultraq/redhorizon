@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scene
+package nz.net.ultraq.redhorizon.scene
 
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

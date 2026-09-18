@@ -35,7 +35,6 @@ import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
 import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
 import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
 import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
-import nz.net.ultraq.redhorizon.engine.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptSystem
 import nz.net.ultraq.redhorizon.graphics.Camera
@@ -53,6 +52,7 @@ import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.time.DeltaTimer
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 

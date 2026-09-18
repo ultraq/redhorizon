@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.scene
-
-import nz.net.ultraq.redhorizon.scene.Node
+package nz.net.ultraq.redhorizon.scene
 
 import org.joml.primitives.Rectanglef
 import spock.lang.Specification
