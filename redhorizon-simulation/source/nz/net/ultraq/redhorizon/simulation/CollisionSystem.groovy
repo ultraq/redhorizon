@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.simulation
 
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.simulation.Collider
-import nz.net.ultraq.redhorizon.simulation.CollisionContinueEvent
-import nz.net.ultraq.redhorizon.simulation.CollisionEndEvent
-import nz.net.ultraq.redhorizon.simulation.CollisionStartEvent
 import nz.net.ultraq.redhorizon.scene.Scene
 
 import org.slf4j.Logger

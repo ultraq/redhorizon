@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.simulation
 
 import nz.net.ultraq.redhorizon.scene.Scene
-import nz.net.ultraq.redhorizon.simulation.Collider
-import nz.net.ultraq.redhorizon.simulation.MovementNode
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

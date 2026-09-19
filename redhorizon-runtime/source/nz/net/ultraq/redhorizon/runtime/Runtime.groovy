@@ -27,10 +27,6 @@ import nz.net.ultraq.redhorizon.engine.debug.DebugMovementArrowsSystem
 import nz.net.ultraq.redhorizon.engine.debug.DebugStore
 import nz.net.ultraq.redhorizon.engine.debug.DebugSystem
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
-import nz.net.ultraq.redhorizon.engine.physics.CollisionCandidatesFunction
-import nz.net.ultraq.redhorizon.engine.physics.CollisionSystem
-import nz.net.ultraq.redhorizon.engine.physics.MovementSystem
-import nz.net.ultraq.redhorizon.engine.physics.SimulationSystem
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Framebuffer
@@ -53,6 +49,10 @@ import nz.net.ultraq.redhorizon.scene.Scene
 import nz.net.ultraq.redhorizon.scene.SceneUpdateSystem
 import nz.net.ultraq.redhorizon.script.ScriptEngine
 import nz.net.ultraq.redhorizon.script.ScriptSystem
+import nz.net.ultraq.redhorizon.simulation.CollisionCandidatesFunction
+import nz.net.ultraq.redhorizon.simulation.CollisionSystem
+import nz.net.ultraq.redhorizon.simulation.MovementSystem
+import nz.net.ultraq.redhorizon.simulation.SimulationSystem
 import nz.net.ultraq.redhorizon.time.DeltaTimer
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.*
 

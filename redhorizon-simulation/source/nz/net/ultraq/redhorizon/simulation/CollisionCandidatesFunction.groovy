@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.simulation
 
-import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.simulation.MovementNode
 import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
- * Perform movement of all movable objects in a scene.
+ * A function that calculates between which collider pairs a collision check
+ * should be performed.
  *
  * @author Emanuel Rabina
  */
-class MovementSystem extends System {
+@FunctionalInterface
+interface CollisionCandidatesFunction {
 
-	private final List<MovementNode> movementNodes = new ArrayList<>()
-
-	@Override
-	void update(Scene scene, float delta) {
-
-		movementNodes.clear()
-		scene.findAll(MovementNode, movementNodes).each { node ->
-			if (node.enabled && node.vector) {
-				node.parent.translate(node.vector.x * node.speed * delta as float, node.vector.y * node.speed * delta as float)
-			}
-		}
-	}
+	/**
+	 * Given the scene, return a list of pairs of colliders (ie: add a collider to
+	 * position n, and the other one in n + 1) for which collision checks should
+	 * be performed.
+	 *
+	 * @param scene
+	 * @param results
+	 *   The list into which the collision pairs should be added.
+	 * @return
+	 *   The {@code results} list.
+	 */
+	List<Collider> calculate(Scene scene, List<Collider> results)
 }

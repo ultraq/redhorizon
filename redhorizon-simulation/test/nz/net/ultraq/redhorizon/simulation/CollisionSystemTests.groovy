@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.simulation
 
-import nz.net.ultraq.redhorizon.simulation.BoxCollider
-import nz.net.ultraq.redhorizon.simulation.CollisionStartEvent
-import nz.net.ultraq.redhorizon.simulation.MovementNode
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
 
@@ -26,7 +23,7 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 /**
- * Tests for the {@link CollisionSystem}.
+ * Tests for the {@link nz.net.ultraq.redhorizon.simulation.CollisionSystem}.
  *
  * @author Emanuel Rabina
  */

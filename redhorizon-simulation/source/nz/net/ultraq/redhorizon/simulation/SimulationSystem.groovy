@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.physics
+package nz.net.ultraq.redhorizon.simulation
 
 import nz.net.ultraq.groovy.profilingextensions.LoggingStrategy
 import nz.net.ultraq.groovy.profilingextensions.Profiler
