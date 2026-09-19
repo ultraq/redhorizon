@@ -30,7 +30,7 @@ configure {
 		}
 		.withJarOptions() {
 			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.physics'
+				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.simulation'
 			}
 		}
 		.configureSource()

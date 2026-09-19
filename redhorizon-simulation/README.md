@@ -2,7 +2,7 @@
 Red Horizon - Physics module
 ============================
 
-[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-physics)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-physics)
+[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-simulation)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-simulation)
 
 Physics module for the Red Horizon project.
 
@@ -16,7 +16,7 @@ newer.
 Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
- - ArtifactId: `redhorizon-physics`
+ - ArtifactId: `redhorizon-simulation`
  - Version: `0.43.3`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
@@ -27,4 +27,4 @@ API
 ---
 
 Browse the online groovydocs for the full API:
-https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-physics
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-simulation

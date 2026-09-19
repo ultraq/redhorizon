@@ -20,9 +20,9 @@ import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Circle
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
-import nz.net.ultraq.redhorizon.physics.BoxCollider
-import nz.net.ultraq.redhorizon.physics.CircleCollider
-import nz.net.ultraq.redhorizon.physics.Collider
+import nz.net.ultraq.redhorizon.simulation.BoxCollider
+import nz.net.ultraq.redhorizon.simulation.CircleCollider
+import nz.net.ultraq.redhorizon.simulation.Collider
 import nz.net.ultraq.redhorizon.scene.Scene
 
 /**

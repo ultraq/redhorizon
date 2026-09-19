@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.physics
+package nz.net.ultraq.redhorizon.simulation
 
 import nz.net.ultraq.redhorizon.scene.Node
 

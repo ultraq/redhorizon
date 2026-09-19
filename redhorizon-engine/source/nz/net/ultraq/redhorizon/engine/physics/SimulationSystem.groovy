@@ -87,7 +87,7 @@ class SimulationSystem extends System {
 	 * Configure the simulation to run at a minimum rate.
 	 *
 	 * @param minimumUpdateFrequency
-	 *   The minimum rate at which physics updates should occur.  If the framerate
+	 *   The minimum rate at which simulation updates should occur.  If the framerate
 	 *   is below this value then simulation updates will still run at this rate.
 	 *   If the framerate goes above then the simulation will match the framerate.
 	 *   Use 0 to always let the simulation match the framerate.

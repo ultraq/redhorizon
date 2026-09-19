@@ -28,9 +28,9 @@ parts of the overall engine.  These standalone modules are:
  - [`redhorizon-engine`](redhorizon-engine) - make everything here interactive
  - [`redhorizon-graphics`](redhorizon-graphics) - draw meshes and sprites
  - [`redhorizon-input`](redhorizon-input) - read and respond to player input
- - [`redhorizon-physics`](redhorizon-physics) - simulating movement and collision
  - [`redhorizon-runtime`](redhorizon-runtime) - bootstrap package for building games
  - [`redhorizon-scenegraph`](redhorizon-scenegraph) - organize objects in a game world
+ - [`redhorizon-simulation`](redhorizon-simulation) - simulating movement and collision
 
 Instructions for use in projects can be found in each of those subproject
 READMEs.

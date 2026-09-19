@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.engine.physics
 
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.physics.MovementNode
+import nz.net.ultraq.redhorizon.simulation.MovementNode
 import nz.net.ultraq.redhorizon.scene.Scene
 
 /**

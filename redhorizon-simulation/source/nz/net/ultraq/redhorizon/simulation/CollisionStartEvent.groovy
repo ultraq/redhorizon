@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.physics
+package nz.net.ultraq.redhorizon.simulation
 
 import groovy.transform.ImmutableOptions
 
 /**
- * Triggered when two collider objects continue to intersect/collide.
+ * Triggered when two collider objects intersect/collide.
  *
  * @author Emanuel Rabina
  */
 @ImmutableOptions(knownImmutables = ['otherCollider'])
-record CollisionContinueEvent(Collider otherCollider) implements CollisionEvent {
+record CollisionStartEvent(Collider otherCollider) implements CollisionEvent {
 }

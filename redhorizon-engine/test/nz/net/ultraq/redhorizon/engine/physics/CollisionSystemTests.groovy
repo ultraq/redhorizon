@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon.engine.physics
 
-import nz.net.ultraq.redhorizon.physics.BoxCollider
-import nz.net.ultraq.redhorizon.physics.CollisionStartEvent
-import nz.net.ultraq.redhorizon.physics.MovementNode
+import nz.net.ultraq.redhorizon.simulation.BoxCollider
+import nz.net.ultraq.redhorizon.simulation.CollisionStartEvent
+import nz.net.ultraq.redhorizon.simulation.MovementNode
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
 
