@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.resources
+package nz.net.ultraq.redhorizon.assets
 
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
@@ -25,38 +25,38 @@ import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import groovy.transform.Memoized
 
 /**
- * Class for holding closeable resources so they can be closed in one go (if
+ * Class for holding closeable assets so they can be closed in one go (if
  * they aren't closed prior).
  *
  * @author Emanuel Rabina
  */
-class ResourceManager implements AutoCloseable {
+class AssetManager implements AutoCloseable {
 
-	private final List<ResourceResolver> resourceResolvers = []
+	private final List<AssetResolver> resourceResolvers = []
 	private final List<AutoCloseable> resources = []
 
 	/**
-	 * Add a location to search for resources.  Any supported archive files in the
+	 * Add a location to search for assets.  Any supported archive files in the
 	 * path are also loaded as a resource location.
 	 */
-	ResourceManager addDirectory(String path) {
+	AssetManager addDirectory(String path) {
 
-		return addResourceResolver(new FileSystemResourceResolver(path))
+		return addResourceResolver(new FileSystemAssetResolver(path))
 	}
 
 	/**
 	 * Shorthand for adding a classpath resource resolver.
 	 */
-	ResourceManager addClasspath(String pathPrefix) {
+	AssetManager addClasspath(String pathPrefix) {
 
-		return addResourceResolver(new ClasspathResourceResolver(pathPrefix))
+		return addResourceResolver(new ClasspathAssetResolver(pathPrefix))
 	}
 
 	/**
-	 * Add a resource resolver which can be used for locating resources using this
+	 * Add a resource resolver which can be used for locating assets using this
 	 * manager.
 	 */
-	ResourceManager addResourceResolver(ResourceResolver resourceResolver) {
+	AssetManager addResourceResolver(AssetResolver resourceResolver) {
 
 		resourceResolvers << resourceResolver
 		return this

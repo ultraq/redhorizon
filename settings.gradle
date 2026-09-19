@@ -17,12 +17,12 @@
 rootProject.name = 'redhorizon'
 
 includeBuild 'redhorizon-build'
+include 'redhorizon-assets'
 include 'redhorizon-core'
 include 'redhorizon-audio'
 include 'redhorizon-classic'
 include 'redhorizon-engine'
 include 'redhorizon-explorer'
 include 'redhorizon-graphics'
-include 'redhorizon-resources'
 include 'redhorizon-runtime'
 include 'redhorizon-simulation'

@@ -23,12 +23,12 @@ description = 'Runtime package for building applications with the Red Horizon en
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
+			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-assets/${version}/", 'nz.net.ultraq.redhorizon.assets.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-classic/${version}/", 'nz.net.ultraq.redhorizon.classic.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-engine/${version}/", 'nz.net.ultraq.redhorizon.engine.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-resources/${version}/", 'nz.net.ultraq.redhorizon.resources.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-simulation/${version}/", 'nz.net.ultraq.redhorizon.simulation.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
@@ -41,11 +41,11 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-core')
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				api project(':redhorizon-assets')
 				api project(':redhorizon-audio')
 				api project(':redhorizon-classic')
 				api project(':redhorizon-engine')
 				api project(':redhorizon-graphics')
-				api project(':redhorizon-resources')
 				api project(':redhorizon-simulation')
 			}
 		.configureVerification()

@@ -2,9 +2,9 @@
 Red Horizon - Resource management module
 ========================================
 
-[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-resources)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-resources)
+[![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-assets)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-assets)
 
-Resource management module for the Red Horizon project.
+Asset management module for the Red Horizon project.
 
 
 Installation
@@ -16,7 +16,7 @@ newer.
 Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
- - ArtifactId: `redhorizon-resources`
+ - ArtifactId: `redhorizon-assets`
  - Version: `0.43.3`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
@@ -27,4 +27,4 @@ API
 ---
 
 Browse the online groovydocs for the full API:
-https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-resources
+https://javadoc.io/doc/nz.net.ultraq.redhorizon/redhorizon-assets

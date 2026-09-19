@@ -16,8 +16,8 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 
 /**
  * Keys for objects being shared using Java's Scoped Values.  The values here
@@ -27,6 +27,6 @@ import nz.net.ultraq.redhorizon.resources.ResourceManager
  */
 class ScopedValues {
 
+	public static final ScopedValue<AssetManager> ASSET_MANAGER = ScopedValue.newInstance()
 	public static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
-	public static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
 }

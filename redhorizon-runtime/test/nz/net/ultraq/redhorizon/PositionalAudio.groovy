@@ -60,8 +60,8 @@ class PositionalAudio extends Application {
 		@Override
 		void init() {
 
-			var resourceManager = RESOURCE_MANAGER.get()
-			sound = resourceManager.loadAudioData('PositionalAudio_bong_001.ogg')
+			var assetManager = ASSET_MANAGER.get()
+			sound = assetManager.loadAudioData('PositionalAudio_bong_001.ogg')
 		}
 
 		@Override

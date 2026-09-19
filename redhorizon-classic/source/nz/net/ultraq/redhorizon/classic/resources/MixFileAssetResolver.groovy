@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-plugins {
-	id 'redhorizon-library'
-}
+package nz.net.ultraq.redhorizon.classic.resources
 
-description = 'Resource management module for the Red Horizon project'
+import nz.net.ultraq.redhorizon.assets.AssetResolver
+import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
 
-configure {
-	asGroovyLibraryProject()
-		.withJarOptions() {
-			manifest {
-				attributes 'Automatic-Module-Name': 'nz.net.ultraq.redhorizon.resources'
-			}
-		}
-		.configureSource()
-			.withDependencies() {
-				api project(':redhorizon-audio')
-				api project(':redhorizon-graphics')
-			}
+import groovy.transform.TupleConstructor
+
+/**
+ * Resolve assets found in {@code MIX} files.
+ *
+ * @author Emanuel Rabina
+ */
+@TupleConstructor(defaults = false)
+class MixFileAssetResolver implements AssetResolver {
+
+	final MixFile mixFile
+
+	@Override
+	InputStream resolve(String path) {
+
+		var mixEntry = mixFile.getEntry(path)
+		return mixEntry ? mixFile.getEntryData(mixEntry) : null
+	}
 }

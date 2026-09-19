@@ -47,13 +47,13 @@ class Map extends Node<Map> {
 	final Rectanglef boundary
 	final Vector2f initialPosition
 
-//	private final ResourceManager resourceManager
+//	private final AssetManager resourceManager
 //	private final RulesFile rules
 
 	/**
 	 * Constructor, create a new map from a map file.
 	 */
-//	Map(MapFile mapFile, ResourceManager resourceManager) {
+//	Map(MapFile mapFile, AssetManager resourceManager) {
 //
 //		this.mapFile = mapFile
 //		this.resourceManager = resourceManager
@@ -416,7 +416,7 @@ class Map extends Node<Map> {
 //						imageVariant |= 0x08
 //					}
 //				}
-//				// Select the proper density for resources
+//				// Select the proper density for assets
 //				else if (tile.isResource) {
 //					var adjacent = (-1..1).inject(0) { accY, y ->
 //						return accY + (-1..1).inject(0) { accX, x ->

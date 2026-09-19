@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.previews
 
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
@@ -39,11 +40,10 @@ import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.script.Script
 import nz.net.ultraq.redhorizon.script.ScriptNode
-import static nz.net.ultraq.redhorizon.runtime.ScopedValues.RESOURCE_MANAGER
+import static nz.net.ultraq.redhorizon.runtime.ScopedValues.ASSET_MANAGER
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -137,8 +137,8 @@ class PreviewController extends Script implements AutoCloseable {
 			if (file.name.endsWith('.ini')) {
 				var iniFile = new IniFile(selectedFileInputStream)
 				if (iniFile['Basic']) {
-					var resourceManager = RESOURCE_MANAGER.get()
-					previewMap(scene, iniFile, file.name, resourceManager)
+					var assetManager = ASSET_MANAGER.get()
+					previewMap(scene, iniFile, file.name, assetManager)
 				}
 			}
 			else {
@@ -191,10 +191,10 @@ class PreviewController extends Script implements AutoCloseable {
 	/**
 	 * Attempt to load a map from it's .ini file.
 	 */
-	private void previewMap(Scene scene, IniFile iniFile, String fileName, ResourceManager resourceManager) {
+	private void previewMap(Scene scene, IniFile iniFile, String fileName, AssetManager assetManager) {
 
 		var mapNode = time("Loading map ${fileName} took {}ms", logger) { ->
-			return new RedAlertMapLoader(resourceManager).load(iniFile)
+			return new RedAlertMapLoader(assetManager).load(iniFile)
 		}
 		scene << mapNode
 		previewedEntity = mapNode

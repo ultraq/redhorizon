@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.resources
+package nz.net.ultraq.redhorizon.assets
 
 import groovy.transform.TupleConstructor
 
 /**
- * A resource resolver for resources on the file system.
+ * An asset resolver for assets on the file system.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class FileSystemResourceResolver implements ResourceResolver {
+class FileSystemAssetResolver implements AssetResolver {
 
 	final String pathPrefix
 

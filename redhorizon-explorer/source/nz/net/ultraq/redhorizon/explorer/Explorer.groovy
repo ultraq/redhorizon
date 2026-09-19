@@ -17,8 +17,9 @@
 package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.resources.MixFileResourceResolver
+import nz.net.ultraq.redhorizon.classic.resources.MixFileAssetResolver
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase
@@ -43,7 +44,6 @@ import nz.net.ultraq.redhorizon.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.graphics.opengl.SharpUpscalingShader
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
@@ -164,15 +164,24 @@ class Explorer extends Application implements Callable<Integer> {
 	}
 
 	@Override
-	protected ResourceManager configureResourceManager(ResourceManager resourceManager) {
+	protected AssetManager configureAssetManager(AssetManager assetManager) {
 
 		new File('./mix/red-alert').listFiles({ dir, name -> name.endsWith('.mix') } as FilenameFilter).sort().each { file ->
 			logger.debug('Loading MIX file: {}', file)
 			var mixFile = new MixFile(file)
-			resourceManager.addResourceResolver(new MixFileResourceResolver(mixFile))
+			assetManager.addResourceResolver(new MixFileAssetResolver(mixFile))
 			mixFiles << mixFile
 		}
-		return resourceManager
+		return assetManager
+	}
+
+	@Override
+	protected Engine configureEngine(Engine engine) {
+
+		graphicsSystem = engine.findSystem(GraphicsSystem)
+		sharpUpscalingShader = new SharpUpscalingShader()
+		postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
+		return engine
 	}
 
 	@Override
@@ -242,14 +251,5 @@ class Explorer extends Application implements Callable<Integer> {
 			}
 
 		return scene
-	}
-
-	@Override
-	protected Engine configureEngine(Engine engine) {
-
-		graphicsSystem = engine.findSystem(GraphicsSystem)
-		sharpUpscalingShader = new SharpUpscalingShader()
-		postProcessingFramebuffer = new OpenGLFramebuffer(OUTPUT_WIDTH, OUTPUT_HEIGHT, true)
-		return engine
 	}
 }

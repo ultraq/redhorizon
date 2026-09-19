@@ -17,8 +17,8 @@
 package nz.net.ultraq.redhorizon.runtime
 
 import nz.net.ultraq.eventhorizon.EventTarget
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scene.Scene
 
 import groovy.transform.TupleConstructor
@@ -44,6 +44,18 @@ abstract class Application implements EventTarget<Application> {
 	final String version
 
 	/**
+	 * Configure the asset manager to use in the application.
+	 *
+	 * @param assetManager
+	 *   The provided asset manager will already have a classpath asset resolver
+	 *   with a default prefix of the application's package.
+	 */
+	protected AssetManager configureAssetManager(AssetManager assetManager) {
+
+		return assetManager
+	}
+
+	/**
 	 * Configure the engine to use in the application.
 	 *
 	 * @param engine
@@ -52,18 +64,6 @@ abstract class Application implements EventTarget<Application> {
 	protected Engine configureEngine(Engine engine) {
 
 		return engine
-	}
-
-	/**
-	 * Configure the resource manager to use in the application.
-	 *
-	 * @param resourceManager
-	 *   The provided resource manager will already have a classpath resource
-	 *   resolver with a default prefix of the application's package.
-	 */
-	protected ResourceManager configureResourceManager(ResourceManager resourceManager) {
-
-		return resourceManager
 	}
 
 	/**

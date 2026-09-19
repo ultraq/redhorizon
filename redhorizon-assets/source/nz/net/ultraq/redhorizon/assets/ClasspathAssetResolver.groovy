@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.resources
+package nz.net.ultraq.redhorizon.assets
+
+import groovy.transform.TupleConstructor
 
 /**
- * An interface for taking a name or path of a resource and returning a stream
- * of its contents, if the resource exists.
+ * An asset resolver for assets on the classpath.
  *
  * @author Emanuel Rabina
  */
-interface ResourceResolver {
+@TupleConstructor(defaults = false)
+class ClasspathAssetResolver implements AssetResolver {
 
-	/**
-	 * Given a path to a resource, return an input stream for reading its
-	 * contents, or {@code null} if the resource doesn't exist.
-	 */
-	InputStream resolve(String path)
+	final String pathPrefix
+
+	@Override
+	InputStream resolve(String path) {
+
+		try {
+			return getResourceAsStream([pathPrefix, path].joinAndNormalize('/'))
+		}
+		catch (IllegalArgumentException ignored) {
+			return null
+		}
+	}
 }

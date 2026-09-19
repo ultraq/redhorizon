@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.redhorizon.classic.maps
 
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.filetypes.TmpFileRADecoder
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.scene.Node
 
 import org.joml.primitives.Rectanglef
@@ -36,7 +36,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class RedAlertMapLoader implements MapLoader<IniFile> {
 
-	final ResourceManager resourceManager
+	final AssetManager assetManager
 
 	@Override
 	Node load(IniFile iniFile) {
@@ -61,10 +61,10 @@ class RedAlertMapLoader implements MapLoader<IniFile> {
 		MapBackground(Theater theater, Rectanglef boundary) {
 
 			var clearTileName = "${MapRAMapPackTile.DEFAULT.name}.${theater.ext}"
-			var clearSpriteSheet = resourceManager.loadFile(clearTileName).withCloseable { inputStream ->
+			var clearSpriteSheet = assetManager.loadFile(clearTileName).withCloseable { inputStream ->
 				return new SpriteSheet(clearTileName, new TmpFileRADecoder(), inputStream, theater.clearX)
 			}
-			var clearSprite = resourceManager.manageResource(
+			var clearSprite = assetManager.manageResource(
 				new Sprite(128 * 24, 128 * 24, 128 / theater.clearX as float, 128 / theater.clearY as float,
 					clearSpriteSheet.texture, PalettedSpriteShader, clearSpriteSheet))
 			addChild(clearSprite.translate(boundary.minX, boundary.minY))

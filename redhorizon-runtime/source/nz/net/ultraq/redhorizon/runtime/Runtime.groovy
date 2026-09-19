@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.runtime
 
+import nz.net.ultraq.redhorizon.assets.AssetManager
 import nz.net.ultraq.redhorizon.audio.AudioListener
 import nz.net.ultraq.redhorizon.audio.AudioSystem
 import nz.net.ultraq.redhorizon.audio.Device
@@ -41,7 +42,6 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.resources.ResourceManager
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
 import nz.net.ultraq.redhorizon.scene.Node
@@ -91,7 +91,7 @@ final class Runtime {
 	private Framebuffer framebuffer
 	private List<Shader> shaders = []
 	private Device audioDevice
-	private ResourceManager resourceManager
+	private AssetManager assetManager
 	private Scene scene
 
 	// Debug options
@@ -205,14 +205,14 @@ final class Runtime {
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
 				.addVSyncBinding(window)
-			resourceManager = application.configureResourceManager(
-				new ResourceManager()
+			assetManager = application.configureAssetManager(
+				new AssetManager()
 					.addClasspath(application.class.packageName.replaceAll('\\.', '/'))
 			)
 
 			ScopedValue
 				.where(WINDOW, window)
-				.where(RESOURCE_MANAGER, resourceManager)
+				.where(ASSET_MANAGER, assetManager)
 				.run { ->
 					try {
 
@@ -268,7 +268,7 @@ final class Runtime {
 			return 1
 		}
 		finally {
-			resourceManager?.close()
+			assetManager?.close()
 			shaders*.close()
 			framebuffer?.close()
 			window?.close()
