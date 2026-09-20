@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.graphics.actions
-
-import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.input.KeyBinding
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+package nz.net.ultraq.redhorizon.actions
 
 /**
- * Bind the {@code ESC} key to closing the window.
+ * Any discrete action that can be performed.
  *
  * @author Emanuel Rabina
  */
-class EscapeToCloseBinding extends KeyBinding {
+interface Action {
 
-	EscapeToCloseBinding(Window window) {
-		super(GLFW_KEY_ESCAPE, true, { ->
-			new CloseWindowAction(window).execute()
-		})
-	}
+	/**
+	 * Perform the action.
+	 */
+	void execute()
 }

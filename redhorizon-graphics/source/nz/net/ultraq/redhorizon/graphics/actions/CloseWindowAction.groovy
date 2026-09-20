@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.redhorizon.graphics.actions
 
+import nz.net.ultraq.redhorizon.actions.Action
 import nz.net.ultraq.redhorizon.graphics.Window
 
 import groovy.transform.TupleConstructor
@@ -26,14 +27,14 @@ import groovy.transform.TupleConstructor
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class CloseWindowAction {
+class CloseWindowAction implements Action {
 
 	final Window window
 
 	/**
 	 * Close the window.
 	 */
-	void close() {
+	void execute() {
 
 		window.shouldClose(true)
 	}
