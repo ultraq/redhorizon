@@ -23,8 +23,8 @@ description = 'Audio module for the Red Horizon project'
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
+			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 		}
 		.withJarOptions() {
 			manifest {

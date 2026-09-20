@@ -26,6 +26,7 @@ configure {
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
+			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
 			link("https://javadoc.io/doc/org.joml.primitives/joml-primitives/${jomlPrimitivesVersion}", 'org.joml.primitives.')
 		}
 		.withJarOptions() {
@@ -37,6 +38,7 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-core')
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
+				implementation "org.joml:joml:${jomlVersion}"
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }

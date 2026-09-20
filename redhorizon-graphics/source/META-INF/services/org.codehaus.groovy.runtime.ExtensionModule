@@ -16,6 +16,7 @@
 
 moduleName = redhorizon-graphics
 moduleVersion = ${moduleVersion}
-extensionClasses = nz.net.ultraq.redhorizon.graphics.extensions.ByteBufferImageExtensions,\
-                   nz.net.ultraq.redhorizon.engine.input.InputEventHandlerExtensions
+extensionClasses = nz.net.ultraq.redhorizon.graphics.extensions.AssetManagerExtensions,\
+                   nz.net.ultraq.redhorizon.graphics.extensions.ByteBufferImageExtensions,\
+                   nz.net.ultraq.redhorizon.graphics.extensions.InputEventHandlerExtensions
 staticExtensionClasses = nz.net.ultraq.redhorizon.graphics.imgui.ImGuiExtensions

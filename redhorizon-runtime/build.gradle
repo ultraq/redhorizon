@@ -23,7 +23,6 @@ description = 'Runtime package for building applications with the Red Horizon en
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-assets/${version}/", 'nz.net.ultraq.redhorizon.assets.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-classic/${version}/", 'nz.net.ultraq.redhorizon.classic.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
@@ -40,7 +39,6 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-core')
 				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
-				api project(':redhorizon-assets')
 				api project(':redhorizon-audio')
 				api project(':redhorizon-classic')
 				api project(':redhorizon-graphics')

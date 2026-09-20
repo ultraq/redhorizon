@@ -23,7 +23,7 @@ import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 
 /**
- * Tests for the {@link nz.net.ultraq.redhorizon.simulation.CollisionSystem}.
+ * Tests for the {@link CollisionSystem}.
  *
  * @author Emanuel Rabina
  */

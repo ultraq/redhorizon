@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+ * Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,6 @@
  */
 
 package nz.net.ultraq.redhorizon.assets
-
-import nz.net.ultraq.redhorizon.audio.AudioData
-import nz.net.ultraq.redhorizon.audio.StreamingAudioData
-import nz.net.ultraq.redhorizon.graphics.Image
-import nz.net.ultraq.redhorizon.graphics.Palette
-import nz.net.ultraq.redhorizon.graphics.SpriteSheet
-
-import groovy.transform.Memoized
 
 /**
  * Class for holding closeable assets so they can be closed in one go (if
@@ -69,58 +61,6 @@ class AssetManager implements AutoCloseable {
 	}
 
 	/**
-	 * Load short audio data from a file, best used for sound effects.
-	 */
-	@Memoized
-	AudioData loadAudioData(String path) {
-
-		return loadFile(path).withCloseable { inputStream ->
-			var sound = new AudioData(path, inputStream)
-			resources << sound
-			return sound
-		}
-	}
-
-	/**
-	 * Load an image asset from an image file.
-	 */
-	@Memoized
-	Image loadImage(String path) {
-
-		return loadFile(path).withCloseable { inputStream ->
-			var image = new Image(path, inputStream)
-			resources << image
-			return image
-		}
-	}
-
-	/**
-	 * Load a palette from a palette file.
-	 */
-	@Memoized
-	Palette loadPalette(String path) {
-
-		return loadFile(path).withCloseable { inputStream ->
-			var palette = new Palette(path, inputStream)
-			resources << palette
-			return palette
-		}
-	}
-
-	/**
-	 * Load a sprite sheet from an image file.
-	 */
-	@Memoized
-	SpriteSheet loadSpriteSheet(String path) {
-
-		return loadFile(path).withCloseable { inputStream ->
-			var spriteSheet = new SpriteSheet(path, inputStream)
-			resources << spriteSheet
-			return spriteSheet
-		}
-	}
-
-	/**
 	 * Load a raw input stream for the given file.  Unlike the other load methods
 	 * in this class, the returned stream is the responsibility of the caller, and
 	 * should be closed once used.
@@ -128,20 +68,6 @@ class AssetManager implements AutoCloseable {
 	BufferedInputStream loadFile(String path) {
 
 		return new BufferedInputStream(resolveStream(path))
-	}
-
-	/**
-	 * Load long streaming audio data from a file, best used for music tracks.
-	 */
-	StreamingAudioData loadStreamingAudioData(String path) {
-
-		var musicStream = loadFile(path)
-		resources << musicStream
-
-		var music = new StreamingAudioData(path, musicStream)
-		resources << music
-
-		return music
 	}
 
 	/**

@@ -1,5 +1,5 @@
 #
-# Copyright 2025, Emanuel Rabina (http://www.ultraq.net.nz/)
+# Copyright 2026, Emanuel Rabina (http://www.ultraq.net.nz/)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,20 +14,6 @@
 # limitations under the License.
 #
 
-group = nz.net.ultraq.redhorizon
-version = 0.44.0-SNAPSHOT
-
-eventHorizonVersion = 0.7.0
-groovyVersion = 5.1.2
-groovyExtensionsVersion = 4.1.0
-groovyProfilingExtensionsVersion = 0.12.0
-imguiVersion = 1.92.7.1
-jomlPrimitivesVersion = 1.10.0
-jomlVersion = 1.10.9
-logbackVersion = 1.6.3
-lwjglVersion = 3.4.3
-picocliVersion = 4.7.7
-slf4jVersion = 2.0.19
-
-mockitoVersion = 5.23.0
-spockVersion = 2.4-groovy-5.0
+moduleName = redhorizon-audio
+moduleVersion = ${moduleVersion}
+extensionClasses = nz.net.ultraq.redhorizon.audio.extensions.AssetManagerExtensions

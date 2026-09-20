@@ -28,7 +28,6 @@ configure {
 				engine.  All of the reverse engineering of the old codecs and files takes place
 				here, and serve as working examples for other programmers.
 			''')
-			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-assets/${version}/", 'nz.net.ultraq.redhorizon.assets.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-audio/${version}/", 'nz.net.ultraq.redhorizon.audio.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-graphics/${version}/", 'nz.net.ultraq.redhorizon.graphics.')
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
@@ -37,7 +36,6 @@ configure {
 		}
 		.configureSource()
 			.withDependencies() {
-				implementation project(':redhorizon-assets')
 				implementation project(':redhorizon-core')
 				implementation project(':redhorizon-audio')
 				implementation project(':redhorizon-graphics')
