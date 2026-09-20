@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.classic.input
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Camera
@@ -30,14 +30,14 @@ import org.slf4j.LoggerFactory
 import groovy.transform.TupleConstructor
 
 /**
- * A system for processing user input.
+ * A system for selecting nodes in a scene.
  *
  * @author Emanuel Rabina
  */
 @TupleConstructor(defaults = false)
-class InputSystem extends System {
+class SelectionSystem extends System {
 
-	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
+	private static final Logger logger = LoggerFactory.getLogger(SelectionSystem)
 
 	final InputEventHandler input
 	final Window window
@@ -50,9 +50,6 @@ class InputSystem extends System {
 	void update(Scene scene, float delta) {
 
 		average('Update: {}ms', 1f, logger) { ->
-
-			// Process registered control bindings
-			input.processInputs()
 
 			// Find if any nodes are selected by the cursor
 			var cursor = input.cursorPosition()

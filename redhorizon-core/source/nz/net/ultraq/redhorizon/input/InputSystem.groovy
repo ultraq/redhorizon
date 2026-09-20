@@ -14,14 +14,35 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.input
 
-import nz.net.ultraq.eventhorizon.Event
+import nz.net.ultraq.redhorizon.engine.System
+import nz.net.ultraq.redhorizon.scene.Scene
+
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import groovy.transform.TupleConstructor
 
 /**
- * Event fired when the cursor exits the bounds of a selectable node.
+ * A system for processing user input.
  *
  * @author Emanuel Rabina
  */
-record CursorExitEvent() implements Event {
+@TupleConstructor(defaults = false)
+class InputSystem extends System {
+
+	private static final Logger logger = LoggerFactory.getLogger(InputSystem)
+
+	final InputEventHandler input
+
+	@Override
+	void update(Scene scene, float delta) {
+
+		average('Update: {}ms', 1f, logger) { ->
+			input.processInputs()
+
+			// TODO: Can we move the gamepad handling here too?
+		}
+	}
 }

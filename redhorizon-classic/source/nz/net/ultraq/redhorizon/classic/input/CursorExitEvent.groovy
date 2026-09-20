@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.input
+package nz.net.ultraq.redhorizon.classic.input
 
 import nz.net.ultraq.eventhorizon.Event
 
 /**
- * Event fired when the cursor enters the bounds of a selectable node.
+ * Event fired when the cursor exits the bounds of a selectable node.
  *
  * @author Emanuel Rabina
  */
-record CursorEnterEvent() implements Event {
+record CursorExitEvent() implements Event {
 }

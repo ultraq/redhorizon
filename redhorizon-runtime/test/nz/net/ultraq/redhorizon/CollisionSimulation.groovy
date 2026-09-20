@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.engine.input.CursorEnterEvent
-import nz.net.ultraq.redhorizon.engine.input.CursorExitEvent
-import nz.net.ultraq.redhorizon.engine.input.Selectable
+import nz.net.ultraq.redhorizon.classic.input.CursorEnterEvent
+import nz.net.ultraq.redhorizon.classic.input.CursorExitEvent
+import nz.net.ultraq.redhorizon.classic.input.Selectable
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
 import nz.net.ultraq.redhorizon.graphics.Vertex
