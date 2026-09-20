@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.debug
+package nz.net.ultraq.redhorizon.runtime.debug
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Circle
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
+import nz.net.ultraq.redhorizon.scene.Scene
 import nz.net.ultraq.redhorizon.simulation.BoxCollider
 import nz.net.ultraq.redhorizon.simulation.CircleCollider
 import nz.net.ultraq.redhorizon.simulation.Collider
-import nz.net.ultraq.redhorizon.scene.Scene
 
 /**
  * Manage the drawing of collision outlines for debugging.

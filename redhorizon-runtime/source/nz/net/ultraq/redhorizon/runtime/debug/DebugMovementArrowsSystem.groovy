@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.engine.debug
+package nz.net.ultraq.redhorizon.runtime.debug
 
 import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.simulation.MovementNode
 import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.simulation.MovementNode
 
 /**
  * Manage the drawing of movement vectors for debugging.
