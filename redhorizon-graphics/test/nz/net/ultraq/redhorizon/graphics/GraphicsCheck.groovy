@@ -17,14 +17,15 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.actions.CloseWindowAction
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
-import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
@@ -47,7 +48,12 @@ class GraphicsCheck extends Specification {
 		Configuration.STACK_SIZE.set(10240)
 	}
 
-	OpenGLWindow window
+	Window window
+	Framebuffer framebuffer
+	BasicShader shader
+	GraphicsSystem graphicsSystem
+	Scene scene
+	DeltaTimer timer = new DeltaTimer()
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
@@ -56,103 +62,50 @@ class GraphicsCheck extends Specification {
 			.withVSync(true)
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
-					window.shouldClose(true)
+					new CloseWindowAction(window).execute()
 				}
 			}
+		framebuffer = new OpenGLFramebuffer(1600, 1200)
+		shader = new BasicShader()
+		graphicsSystem = new GraphicsSystem(window, framebuffer, shader)
+		scene = new Scene()
+			.addChild(new Camera(800, 600))
 	}
 
 	def cleanup() {
+		scene?.close()
+		shader?.close()
+		framebuffer?.close()
 		window?.close()
-	}
-
-	def "Opens a window"() {
-		when:
-			window.show()
-			while (!window.shouldClose()) {
-				window.useWindow { ->
-					// Do something!
-				}
-				Thread.yield()
-			}
-		then:
-			noExceptionThrown()
 	}
 
 	def "Opens a window with the debug overlay"() {
 		given:
-			var emptyFramebuffer = new OpenGLFramebuffer(800, 600)
-			var debugOverlay = new DebugOverlay()
+			scene.addChild(new DebugOverlay())
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useRenderPipeline()
-					.scene { ->
-						return emptyFramebuffer
-					}
-					.ui(false) { imGuiContext ->
-						debugOverlay.render(imGuiContext)
-					}
-					.end()
+				graphicsSystem.update(scene, timer.deltaTime())
 				Thread.yield()
 			}
 		then:
 			noExceptionThrown()
-		cleanup:
-			emptyFramebuffer?.close()
 	}
 
 	def "Draws a triangle"() {
 		given:
-			var shader = new BasicShader()
-			var triangle = new OpenGLMesh(Type.TRIANGLES, new Vertex[]{
-				new Vertex(new Vector3f(0, 3, 0), Colour.RED),
-				new Vertex(new Vector3f(-3, -3, 0), Colour.GREEN),
-				new Vertex(new Vector3f(3, -3, 0), Colour.BLUE)
-			})
-			var triangleTransform = new Matrix4f()
-			var camera = new Camera(10, 10)
+			scene.addChild(new Shape(Type.TRIANGLES, new Vertex[]{
+				new Vertex(new Vector3f(0, 150, 0), Colour.RED),
+				new Vertex(new Vector3f(-200, -150, 0), Colour.GREEN),
+				new Vertex(new Vector3f(200, -150, 0), Colour.BLUE)
+			}))
 		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						triangle.render(shaderContext, null, triangleTransform)
-					}
-				}
+				graphicsSystem.update(scene, timer.deltaTime())
 				Thread.yield()
 			}
 		then:
 			noExceptionThrown()
-		cleanup:
-			triangle?.close()
-			shader?.close()
-	}
-
-	def "Draws a sprite - using Image and ImageDecoder SPI"() {
-		given:
-			var shader = new BasicShader()
-			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/GraphicsCheck_Texture_ship0000.png').withBufferedStream { stream ->
-				return new Image('GraphicsCheck_Texture_ship0000.png', stream)
-			}
-			var sprite = new Sprite(image, BasicShader)
-			var camera = new Camera(80, 60)
-		when:
-			window.show()
-			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						sprite.render(shaderContext)
-					}
-				}
-				Thread.yield()
-			}
-		then:
-			noExceptionThrown()
-		cleanup:
-			sprite?.close()
-			image?.close()
-			shader?.close()
 	}
 }

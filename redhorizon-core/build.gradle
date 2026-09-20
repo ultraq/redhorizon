@@ -37,7 +37,7 @@ configure {
 			.withDependencies() {
 				implementation "io.github.spair:imgui-java-binding:${imguiVersion}"
 				implementation "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
+				api "org.joml:joml:${jomlVersion}"
+				api "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }

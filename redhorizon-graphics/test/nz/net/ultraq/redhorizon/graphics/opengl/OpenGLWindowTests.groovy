@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.redhorizon.graphics.opengl
 
+import nz.net.ultraq.redhorizon.graphics.Colour
+
 import spock.lang.Specification
 
 /**
@@ -24,6 +26,26 @@ import spock.lang.Specification
  * @author Emanuel Rabina
  */
 class OpenGLWindowTests extends Specification {
+
+	def "Opens a window"() {
+		given:
+			var window = new OpenGLWindow(800, 600, "Testing")
+				.centerToScreen()
+				.withBackgroundColour(Colour.GREY)
+				.withVSync(true)
+		when:
+			window.show()
+			while (!window.shouldClose()) {
+				window.useWindow { ->
+					// Do something!
+				}
+				Thread.yield()
+			}
+		then:
+			noExceptionThrown()
+		cleanup:
+			window?.close()
+	}
 
 	def 'Cannot create a window larger than the monitor size'() {
 		when:

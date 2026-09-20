@@ -38,8 +38,6 @@ configure {
 			.withDependencies() {
 				implementation project(':redhorizon-core')
 				api "nz.net.ultraq:event-horizon:${eventHorizonVersion}"
-				implementation "org.joml:joml:${jomlVersion}"
-				implementation "org.joml:joml-primitives:${jomlPrimitivesVersion}"
 			}
 }
 // @formatter:on

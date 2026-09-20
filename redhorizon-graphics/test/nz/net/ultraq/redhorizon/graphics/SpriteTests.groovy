@@ -16,9 +16,13 @@
 
 package nz.net.ultraq.redhorizon.graphics
 
+import nz.net.ultraq.redhorizon.graphics.actions.CloseWindowAction
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
@@ -37,7 +41,12 @@ class SpriteTests extends Specification {
 		Configuration.STACK_SIZE.set(10240)
 	}
 
-	OpenGLWindow window
+	Window window
+	Framebuffer framebuffer
+	BasicShader shader
+	GraphicsSystem graphicsSystem
+	Scene scene
+	DeltaTimer timer = new DeltaTimer()
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "Testing")
@@ -46,45 +55,61 @@ class SpriteTests extends Specification {
 			.withVSync(true)
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
-					window.shouldClose(true)
+					new CloseWindowAction(window).execute()
 				}
 			}
+		framebuffer = new OpenGLFramebuffer(1600, 1200)
+		shader = new BasicShader()
+		graphicsSystem = new GraphicsSystem(window, framebuffer, shader)
+		scene = new Scene()
+			.addChild(new Camera(80, 60))
 	}
 
 	def cleanup() {
+		scene?.close()
+		shader?.close()
+		framebuffer?.close()
 		window?.close()
 	}
 
-	def "Ensure sprites don't share the same frame when rendered together"() {
-		when:
-			var shader = new BasicShader()
-			var image = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/SpriteTests_SpriteSheet.png').withBufferedStream { stream ->
-				return new SpriteSheet('SpriteTests_SpriteSheet.png', 32, 32, stream)
+	def "Draws a sprite - using Image and ImageDecoder SPI"() {
+		given:
+			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/SpriteTests_Image.png').withBufferedStream { stream ->
+				return new Image('SpriteTests_Image.png', stream)
 			}
-			var sprite1 = new Sprite(image, BasicShader)
-				.translate(-16f, 0f)
-			var sprite2 = new Sprite(image, BasicShader)
-				.translate(16f, 0f)
-			var camera = new Camera(80, 60)
+			scene.addChild(new Sprite(spriteSheet, BasicShader))
+		when:
 			window.show()
 			while (!window.shouldClose()) {
-				window.useWindow { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						sprite1.withFramePosition(16)
-						sprite2.withFramePosition(18)
-						sprite1.render(shaderContext)
-						sprite2.render(shaderContext)
-					}
-				}
+				graphicsSystem.update(scene, timer.deltaTime())
 				Thread.yield()
 			}
 		then:
 			noExceptionThrown()
 		cleanup:
-			sprite1?.close()
-			sprite2?.close()
-			image?.close()
-			shader?.close()
+			spriteSheet?.close()
+	}
+
+	def "Ensure sprites don't share the same frame when rendered together"() {
+		when:
+			var spriteSheet = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/SpriteTests_SpriteSheet.png').withBufferedStream { stream ->
+				return new SpriteSheet('SpriteTests_SpriteSheet.png', 32, 32, stream)
+			}
+			scene
+				.addChild(new Sprite(spriteSheet, BasicShader)
+					.withFramePosition(16)
+					.translate(-16f, 0f))
+				.addChild(new Sprite(spriteSheet, BasicShader)
+					.withFramePosition(18)
+					.translate(16f, 0f))
+			window.show()
+			while (!window.shouldClose()) {
+				graphicsSystem.update(scene, timer.deltaTime())
+				Thread.yield()
+			}
+		then:
+			noExceptionThrown()
+		cleanup:
+			spriteSheet?.close()
 	}
 }

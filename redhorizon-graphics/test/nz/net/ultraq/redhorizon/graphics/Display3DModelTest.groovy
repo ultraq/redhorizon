@@ -23,9 +23,9 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLMesh
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
-import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -33,7 +33,7 @@ import org.joml.Vector4f
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W
 import static org.lwjgl.opengl.GL11C.*
 
 import groovy.transform.TupleConstructor
@@ -54,8 +54,12 @@ class Display3DModelTest extends Specification {
 	}
 
 	OpenGLWindow window
-	Basic3DShader shader
 	Framebuffer framebuffer
+	Basic3DShader shader
+	GraphicsSystem graphicsSystem
+	Scene scene
+	DeltaTimer timer = new DeltaTimer()
+	InputEventHandler input
 
 	def setup() {
 		window = new OpenGLWindow(800, 600, "3D model test")
@@ -63,16 +67,20 @@ class Display3DModelTest extends Specification {
 			.scaleToFit()
 			.withBackgroundColour(Colour.GREY)
 			.withVSync(true)
-			.on(KeyEvent) { event ->
-				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
-					window.shouldClose(true)
-				}
-			}
-		shader = new Basic3DShader()
 		framebuffer = new OpenGLFramebuffer(1600, 1200)
+		shader = new Basic3DShader()
+		graphicsSystem = new GraphicsSystem(window, framebuffer, shader)
+		scene = new Scene()
+			.addChild(new DebugOverlay())
+			.addChild(new Camera(8, 6))
+		input = new InputEventHandler()
+			.addInputSource(window)
+			.addEscapeToCloseBinding(window)
+			.addVSyncBinding(window)
 	}
 
 	def cleanup() {
+		scene?.close()
 		shader?.close()
 		framebuffer?.close()
 		window?.close()
@@ -80,10 +88,6 @@ class Display3DModelTest extends Specification {
 
 	def "Displays a 3D model"() {
 		given:
-			var camera = new Camera(8, 6)
-			var debugOverlay = new DebugOverlay()
-			var input = new InputEventHandler()
-				.addInputSource(window)
 			var object = getResourceAsStream('nz/net/ultraq/redhorizon/graphics/Display3DModelTest_UtahTeapot.obj').withBufferedStream { stream ->
 				return new ObjFileReader().read(stream)
 			}
@@ -95,46 +99,28 @@ class Display3DModelTest extends Specification {
 			object.faces.each { face ->
 				index.addAll(face.vertexIndex)
 			}
-			var teapot = new OpenGLMesh(Type.TRIANGLES, vertices as Vertex[], index as int[])
 			var material = new Material(
 				ambientColour: new Vector4f(0.25f, 0.25f, 0.25f, 1f),
 				lightColour: new Vector4f(0.8f, 0.8f, 1f, 1f),
 				lightPosition: new Vector3f(5f, 5f, 5f)
 			)
-			var transform = new Matrix4f()
+			var teapot = new Model(Type.TRIANGLES, vertices as Vertex[], index as int[], material)
+			scene.addChild(teapot
 				.translate(0f, -1.5f, 0f)
-				.rotateX(Math.toRadians(15) as float)
+				.rotate(Math.toRadians(15) as float, 0f, 0f))
 			var wireframeMode = true
 
 		when:
-			var lastTimeMillis = System.currentTimeMillis()
 			window.show()
 			glEnable(GL_LINE_SMOOTH)
 			while (!window.shouldClose()) {
-				var now = System.currentTimeMillis()
-				var delta = (now - lastTimeMillis) / 1000 as float
-				lastTimeMillis = now
-				transform.rotateY(1f * delta as float)
-				camera.unproject(window.viewport, input.cursorPosition(), material.lightPosition)
-				window.useRenderPipeline()
-					.scene { ->
-						framebuffer.useFramebuffer { ->
-							glPolygonMode(GL_FRONT_AND_BACK, wireframeMode ? GL_LINE : GL_FILL)
-							shader.useShader { shaderContext ->
-								camera.render(shaderContext)
-								teapot.render(shaderContext, material, transform)
-							}
-							glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-						}
-					}
-					.ui(false) { imGuiContext ->
-						debugOverlay.render(imGuiContext)
-					}
-					.end()
-				if (input.keyPressed(GLFW_KEY_V, true)) {
-					window.toggleVSync()
-				}
-				else if (input.keyPressed(GLFW_KEY_W, true)) {
+				var delta = timer.deltaTime()
+				input.processInputs()
+				teapot.rotate(0f, 1f * delta as float, 0f)
+				scene.find(Camera).unproject(window.viewport, input.cursorPosition(), material.lightPosition)
+				glPolygonMode(GL_FRONT_AND_BACK, wireframeMode ? GL_LINE : GL_FILL)
+				graphicsSystem.update(scene, delta)
+				if (input.keyPressed(GLFW_KEY_W, true)) {
 					wireframeMode = !wireframeMode
 				}
 				Thread.yield()
@@ -232,6 +218,34 @@ class Display3DModelTest extends Specification {
 					setUniform('view', view)
 				}
 			}
+		}
+	}
+
+	/**
+	 * A 3D model node.
+	 */
+	static class Model extends GraphicsNode<Model, SceneShaderContext> {
+
+		final Class<? extends Shader> shaderClass = Basic3DShader
+		final Mesh mesh
+		final Material material
+
+		Model(Type type, Vertex[] vertices, int[] index, Material material) {
+
+			mesh = new OpenGLMesh(type, vertices, index)
+			this.material = material
+		}
+
+		@Override
+		void close() {
+
+			mesh.close()
+		}
+
+		@Override
+		void render(SceneShaderContext shaderContext) {
+
+			mesh.render(shaderContext, material, transform)
 		}
 	}
 }
