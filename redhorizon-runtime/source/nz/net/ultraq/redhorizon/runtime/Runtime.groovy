@@ -230,7 +230,7 @@ final class Runtime {
 						)
 						var engine = application.configureEngine(
 							new Engine()
-								.addSystem(new InputSystem(inputEventHandler, window))
+								.addSystem(new InputSystem(inputEventHandler))
 								.addSystem(new ScriptSystem(new ScriptEngine('.'), inputEventHandler))
 								.addSystem(
 									new SimulationSystem(
