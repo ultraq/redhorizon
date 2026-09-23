@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.graphics
 
 import nz.net.ultraq.redhorizon.input.InputSource
+import nz.net.ultraq.redhorizon.scene.Resource
 
 import org.joml.primitives.Rectanglei
 
@@ -37,7 +38,7 @@ import org.joml.primitives.Rectanglei
  *
  * @author Emanuel Rabina
  */
-interface Window<TWindow extends Window> extends InputSource<TWindow>, AutoCloseable {
+interface Window<TWindow extends Window> extends InputSource<TWindow>, Resource, AutoCloseable {
 
 	/**
 	 * Center the window to the screen.

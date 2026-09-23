@@ -37,6 +37,7 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 
 	private final Queue<Closure> updateQueue = new ArrayDeque<>()
 	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor()
+	private final Map<String, ? extends Resource> resources = new HashMap<>()
 
 	/**
 	 * Add a node as a child of the root of the scene.
@@ -53,6 +54,15 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	<T extends Node> T addAndReturnChild(T node) {
 
 		return root.addAndReturnChild(node)
+	}
+
+	/**
+	 * Adds a resource to the scene.
+	 */
+	<T extends Resource> Scene addResource(String name, T resource) {
+
+		resources.put(name, resource)
+		return this
 	}
 
 	@Override
@@ -148,6 +158,30 @@ class Scene implements EventTarget<Scene>, AutoCloseable {
 	<T extends Node> List<T> findAll(Class<T> type, List<T> results = []) {
 
 		return root.findAll(type, results)
+	}
+
+	/**
+	 * Enables the subscript operator as an alias for {@link #getResource}.
+	 */
+	<T extends Resource> T getAt(String name) {
+
+		return getResource(name)
+	}
+
+	/**
+	 * Retrieve a resource from the scene.
+	 */
+	<T extends Resource> T getResource(String name) {
+
+		return (T)resources.get(name)
+	}
+
+	/**
+	 * Enables the subscript operator as an alias for {@link #addResource}.
+	 */
+	<T extends Resource> Scene putAt(String name, T resource) {
+
+		return addResource(name, resource)
 	}
 
 	/**

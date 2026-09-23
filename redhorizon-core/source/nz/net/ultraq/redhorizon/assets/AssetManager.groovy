@@ -16,13 +16,15 @@
 
 package nz.net.ultraq.redhorizon.assets
 
+import nz.net.ultraq.redhorizon.scene.Resource
+
 /**
  * Class for holding closeable assets so they can be closed in one go (if
  * they aren't closed prior).
  *
  * @author Emanuel Rabina
  */
-class AssetManager implements AutoCloseable {
+class AssetManager implements Resource, AutoCloseable {
 
 	private final List<AssetResolver> resourceResolvers = []
 	private final List<AutoCloseable> resources = []
