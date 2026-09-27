@@ -4,7 +4,8 @@ Red Horizon - Graphics module
 
 [![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-graphics)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-graphics)
 
-Graphics module for the Red Horizon project.
+Graphics module for the Red Horizon project, adds graphics rendering to the core
+engine.
 
 
 Installation
@@ -17,7 +18,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-graphics`
- - Version: `0.43.3`
+ - Version: `0.44.0`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
 of available versions.

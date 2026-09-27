@@ -4,7 +4,7 @@ Red Horizon Runtime
 
 [![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-runtime)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-runtime)
 
-Runtime package for building games with the Red Horizon engine.
+Runtime package for scaffolding games with the Red Horizon engine.
 
 
 Installation
@@ -17,7 +17,7 @@ Add a dependency to your project with the following co-ordinates:
 
 - GroupId: `nz.net.ultraq.redhorizon`
 - ArtifactId: `redhorizon-runtime`
-- Version: `0.43.3`
+- Version: `0.44.0`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
 of available versions.

@@ -6,7 +6,7 @@ Red Horizon - Classic
 
 A module that bridges the classic C&C file formats for use with the Red Horizon
 engine.  All of the reverse engineering of the old codecs and files takes place
-here, and serve as working examples for other programmers.
+here, and serves as working examples for other programmers.
 
 
 Installation
@@ -21,7 +21,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-classic`
- - Version: `0.43.3`
+ - Version: `0.44.0`
 
 
 Codecs

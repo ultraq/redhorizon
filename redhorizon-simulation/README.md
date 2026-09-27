@@ -4,7 +4,8 @@ Red Horizon - Physics module
 
 [![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-simulation)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-simulation)
 
-Physics module for the Red Horizon project.
+Physics module for the Red Horizon project, adds movement and a collision system
+to the core engine.
 
 
 Installation
@@ -17,7 +18,7 @@ Add a dependency to your project with the following co-ordinates:
 
  - GroupId: `nz.net.ultraq.redhorizon`
  - ArtifactId: `redhorizon-simulation`
- - Version: `0.43.3`
+ - Version: `0.44.0`
 
 Check the [project tags](https://github.com/ultraq/redhorizon/tags) for a list
 of available versions.

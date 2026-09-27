@@ -16,12 +16,8 @@
 
 package nz.net.ultraq.redhorizon
 
-import nz.net.ultraq.redhorizon.classic.input.CursorEnterEvent
-import nz.net.ultraq.redhorizon.classic.input.CursorExitEvent
-import nz.net.ultraq.redhorizon.classic.input.Selectable
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Rectangle
-import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.objects.ScreenEdges
@@ -36,7 +32,6 @@ import nz.net.ultraq.redhorizon.simulation.CollisionStartEvent
 import nz.net.ultraq.redhorizon.simulation.MovementNode
 
 import org.joml.Vector2f
-import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 
 /**
@@ -78,7 +73,6 @@ class CollisionSimulation extends Application {
 			addChild(new BoxCollider(10f, 10f))
 			addChild(new MovementNode(Math.random() * 200f as float,
 				new Vector2f(-1f + (Math.random() * 2f) as float, -1f + (Math.random() * 2) as float)))
-			addChild(new Selectable(10f, 10f))
 			addChild(new ScriptNode(CollisionObjectScript))
 				.translate(
 					sceneSize.minX + 10f + (Math.random() * (sceneSize.lengthX() - 20f)) as float,
@@ -112,23 +106,6 @@ class CollisionSimulation extends Application {
 			}
 			var rectangle = node.find(Rectangle)
 			var originalColour = rectangle.mesh.vertices.first().colour
-			node.find(Selectable)
-				.on(CursorEnterEvent) { event ->
-					var whiteVertices = rectangle.mesh.vertices.collect { v ->
-						return new Vertex(new Vector3f(v.position), Colour.WHITE, new Vector2f(v.textureCoord), new Vector3f(v.normal))
-					} as Vertex[]
-					scene.queueUpdate { ->
-						rectangle.mesh.updateVertexData(whiteVertices)
-					}
-				}
-				.on(CursorExitEvent) { event ->
-					var originalVertices = rectangle.mesh.vertices.collect { v ->
-						return new Vertex(new Vector3f(v.position), originalColour, new Vector2f(v.textureCoord), new Vector3f(v.normal))
-					} as Vertex[]
-					scene.queueUpdate { ->
-						rectangle.mesh.updateVertexData(originalVertices)
-					}
-				}
 		}
 	}
 

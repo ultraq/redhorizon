@@ -20,11 +20,12 @@ plugins {
 
 description = 'Graphics module for the Red Horizon project'
 
-// @formatter:off
 configure {
 	asGroovyLibraryProject()
 		.withGroovydocOptions() {
 			link("https://javadoc.io/doc/nz.net.ultraq/redhorizon-core/${version}/", 'nz.net.ultraq.redhorizon.')
+			link("https://javadoc.io/doc/ch.qos.logback/logback-classic/${logbackVersion}", 'ch.qos.logback.classic.')
+			link("https://javadoc.io/doc/ch.qos.logback/logback-core/${logbackVersion}", 'ch.qos.logback.core.')
 			link("https://javadoc.io/doc/io.github.spair/imgui-java-binding/${imguiVersion}", 'imgui.')
 			link("https://javadoc.io/doc/nz.net.ultraq/event-horizon/${eventHorizonVersion}/", 'nz.net.ultraq.eventhorizon.')
 			link("https://javadoc.io/doc/org.joml/joml/${jomlVersion}", 'org.joml.')
@@ -56,9 +57,4 @@ configure {
 				}
 			}
 			.expandExtensionModuleVersion()
-		.configureVerification()
-			.withTestDependencies() {
-				testImplementation "ch.qos.logback:logback-classic:${logbackVersion}"
-			}
 }
-// @formatter:on

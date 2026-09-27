@@ -5,9 +5,8 @@ Red Horizon - Core module
 [![Maven Central](https://img.shields.io/maven-central/v/nz.net.ultraq.redhorizon/redhorizon-core)](https://central.sonatype.com/artifact/nz.net.ultraq.redhorizon/redhorizon-core)
 
 Core module for the Red Horizon project.  This module contains the base concepts
-and components for putting together a game engine, but it's pretty barebones
-without the other modules that are built from this to add outputs and real
-interactivity.
+and components for putting together a game, but it's pretty barebones without
+the other modules that are built from this to add rendering and interactivity.
 
 
 Installation
