@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.redhorizon.explorer.scripts
 
-import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.script.Script
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

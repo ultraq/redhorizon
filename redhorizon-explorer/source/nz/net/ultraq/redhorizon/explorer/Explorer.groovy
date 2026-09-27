@@ -48,6 +48,7 @@ import nz.net.ultraq.redhorizon.runtime.Application
 import nz.net.ultraq.redhorizon.runtime.Runtime
 import nz.net.ultraq.redhorizon.runtime.objects.GridLines
 import nz.net.ultraq.redhorizon.runtime.utilities.VersionReader
+import nz.net.ultraq.redhorizon.scene.Node
 import nz.net.ultraq.redhorizon.scene.Scene
 import nz.net.ultraq.redhorizon.script.ScriptNode
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.WINDOW

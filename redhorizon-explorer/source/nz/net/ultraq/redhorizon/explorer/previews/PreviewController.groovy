@@ -41,6 +41,7 @@ import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scene.Node
+import nz.net.ultraq.redhorizon.scene.Scene
 import nz.net.ultraq.redhorizon.script.Script
 import nz.net.ultraq.redhorizon.script.ScriptNode
 import static nz.net.ultraq.redhorizon.runtime.ScopedValues.ASSET_MANAGER
