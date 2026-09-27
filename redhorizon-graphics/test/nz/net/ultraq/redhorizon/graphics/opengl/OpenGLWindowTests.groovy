@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.graphics.opengl
 
 import nz.net.ultraq.redhorizon.graphics.Colour
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 /**
@@ -25,6 +26,7 @@ import spock.lang.Specification
  *
  * @author Emanuel Rabina
  */
+@IgnoreIf({ env.CI })
 class OpenGLWindowTests extends Specification {
 
 	def "Opens a window"() {
