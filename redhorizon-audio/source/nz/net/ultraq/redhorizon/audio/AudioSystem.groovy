@@ -22,15 +22,19 @@ import nz.net.ultraq.redhorizon.scene.Scene
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import groovy.transform.TupleConstructor
+
 /**
  * Render audio nodes.
  *
  * @author Emanuel Rabina
  */
+@TupleConstructor(defaults = false)
 class AudioSystem extends System {
 
 	private static final Logger logger = LoggerFactory.getLogger(AudioSystem)
 
+	final Device device
 	private final List<AudioNode> audioNodes = new ArrayList<>()
 
 	@Override

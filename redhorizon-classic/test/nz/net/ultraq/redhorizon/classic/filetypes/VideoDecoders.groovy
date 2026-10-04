@@ -64,7 +64,7 @@ class VideoDecoders extends Specification {
 		device = new OpenALDevice()
 		listener = new OpenALListener()
 			.withGain(0.5f)
-		audioSystem = new AudioSystem()
+		audioSystem = new AudioSystem(device)
 
 		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()

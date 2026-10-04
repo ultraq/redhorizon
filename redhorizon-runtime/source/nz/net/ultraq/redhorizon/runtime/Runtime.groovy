@@ -245,7 +245,7 @@ final class Runtime {
 									new DebugCollisionOutlineSystem(),
 									new DebugMovementArrowsSystem()
 								), debugComponents)
-								.addSystem(new AudioSystem())
+								.addSystem(new AudioSystem(audioDevice))
 								.addSystem(new GraphicsSystem(window, framebuffer, shaders as Shader[]))
 								.withScene(scene)
 						)
