@@ -17,6 +17,7 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.AudioDecoder.SampleDecodedEvent
+import nz.net.ultraq.redhorizon.classic.assets.VideoDecoder
 import nz.net.ultraq.redhorizon.classic.codecs.Decoder
 import nz.net.ultraq.redhorizon.classic.codecs.IMAADPCM16bit
 import nz.net.ultraq.redhorizon.classic.codecs.LCW
@@ -24,7 +25,6 @@ import nz.net.ultraq.redhorizon.classic.codecs.WSADPCM8bit
 import nz.net.ultraq.redhorizon.classic.io.NativeDataInputStream
 import nz.net.ultraq.redhorizon.graphics.ImageDecoder.FrameDecodedEvent
 import nz.net.ultraq.redhorizon.graphics.Palette
-import nz.net.ultraq.redhorizon.graphics.VideoDecoder
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

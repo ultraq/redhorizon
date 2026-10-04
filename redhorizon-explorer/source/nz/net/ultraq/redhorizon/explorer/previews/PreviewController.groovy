@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.AudioSource
 import nz.net.ultraq.redhorizon.audio.AudioStoppedEvent
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
+import nz.net.ultraq.redhorizon.classic.assets.Video
 import nz.net.ultraq.redhorizon.classic.filetypes.IniFile
 import nz.net.ultraq.redhorizon.classic.maps.RedAlertMapLoader
 import nz.net.ultraq.redhorizon.classic.units.UnitData
@@ -37,7 +38,6 @@ import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.Sprite
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.graphics.Video
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.PalettedSpriteShader
 import nz.net.ultraq.redhorizon.scene.Node

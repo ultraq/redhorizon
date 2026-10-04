@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.redhorizon.classic.resources
+package nz.net.ultraq.redhorizon.classic.assets
 
 import nz.net.ultraq.redhorizon.assets.AssetResolver
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile

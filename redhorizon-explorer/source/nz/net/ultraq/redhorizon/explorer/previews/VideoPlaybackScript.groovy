@@ -17,7 +17,7 @@
 package nz.net.ultraq.redhorizon.explorer.previews
 
 import nz.net.ultraq.eventhorizon.Event
-import nz.net.ultraq.redhorizon.graphics.Video
+import nz.net.ultraq.redhorizon.classic.assets.Video
 import nz.net.ultraq.redhorizon.script.Script
 
 /**

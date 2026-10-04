@@ -18,6 +18,7 @@ package nz.net.ultraq.redhorizon.explorer.filedata
 
 import nz.net.ultraq.redhorizon.audio.AudioData
 import nz.net.ultraq.redhorizon.audio.StreamingAudioData
+import nz.net.ultraq.redhorizon.classic.assets.Video
 import nz.net.ultraq.redhorizon.classic.filetypes.AudFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.CpsFileDecoder
 import nz.net.ultraq.redhorizon.classic.filetypes.FileTypeTest
@@ -32,7 +33,6 @@ import nz.net.ultraq.redhorizon.graphics.Animation
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.Palette
 import nz.net.ultraq.redhorizon.graphics.SpriteSheet
-import nz.net.ultraq.redhorizon.graphics.Video
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

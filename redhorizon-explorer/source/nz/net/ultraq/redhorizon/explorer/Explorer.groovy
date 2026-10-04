@@ -18,8 +18,8 @@ package nz.net.ultraq.redhorizon.explorer
 
 import nz.net.ultraq.preferences.Preferences
 import nz.net.ultraq.redhorizon.assets.AssetManager
+import nz.net.ultraq.redhorizon.classic.assets.MixFileAssetResolver
 import nz.net.ultraq.redhorizon.classic.filetypes.MixFile
-import nz.net.ultraq.redhorizon.classic.resources.MixFileAssetResolver
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.explorer.filedata.FileEntry
 import nz.net.ultraq.redhorizon.explorer.mixdata.MixDatabase

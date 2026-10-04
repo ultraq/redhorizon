@@ -17,18 +17,22 @@
 package nz.net.ultraq.redhorizon.classic.filetypes
 
 import nz.net.ultraq.redhorizon.audio.AudioListener
+import nz.net.ultraq.redhorizon.audio.AudioSystem
 import nz.net.ultraq.redhorizon.audio.Device
 import nz.net.ultraq.redhorizon.audio.Listener
 import nz.net.ultraq.redhorizon.audio.openal.OpenALDevice
 import nz.net.ultraq.redhorizon.audio.openal.OpenALListener
+import nz.net.ultraq.redhorizon.classic.assets.Video
 import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Video
+import nz.net.ultraq.redhorizon.graphics.GraphicsSystem
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.KeyEvent
+import nz.net.ultraq.redhorizon.scene.Scene
+import nz.net.ultraq.redhorizon.time.DeltaTimer
 
 import org.lwjgl.system.Configuration
 import spock.lang.IgnoreIf
@@ -49,18 +53,23 @@ class VideoDecoders extends Specification {
 
 	Device device
 	Listener listener
+	AudioSystem audioSystem
 	OpenGLWindow window
 	OpenGLFramebuffer framebuffer
-	DebugOverlay debugOverlay
+	BasicShader shader
+	GraphicsSystem graphicsSystem
+	Scene scene
 
 	def setup() {
 		device = new OpenALDevice()
 		listener = new OpenALListener()
 			.withGain(0.5f)
+		audioSystem = new AudioSystem()
+
 		window = new OpenGLWindow(640, 400, "Testing")
 			.centerToScreen()
 			.scaleToFit()
-			.withBackgroundColour(Colour.GREY)
+			.withBackgroundColour(Colour.BLACK)
 			.withVSync(true)
 			.on(KeyEvent) { event ->
 				if (event.keyPressed(GLFW_KEY_ESCAPE)) {
@@ -68,11 +77,18 @@ class VideoDecoders extends Specification {
 				}
 			}
 		framebuffer = new OpenGLFramebuffer(640, 400)
-		debugOverlay = new DebugOverlay()
+		shader = new BasicShader()
+		graphicsSystem = new GraphicsSystem(window, framebuffer, shader)
+		scene = new Scene()
+			.addChild(new Camera(320, 200))
+			.addChild(new AudioListener())
+			.addChild(new DebugOverlay())
 	}
 
 	def cleanup() {
+		scene?.close()
 		framebuffer?.close()
+		shader?.close()
 		window?.close()
 		listener?.close()
 		device?.close()
@@ -83,42 +99,22 @@ class VideoDecoders extends Specification {
 			var inputStream = new BufferedInputStream(getResourceAsStream('nz/net/ultraq/redhorizon/classic/filetypes/VideoDecoders_Video_gdi1.vqa'))
 			var video = new Video('VideoDecoders_Video_gdi1.vqa', inputStream)
 				.scale(1f, 1.2f)
-			var shader = new BasicShader()
-			var camera = new Camera(320, 200)
-			var listener = new AudioListener()
+			scene.addChild(video)
 		when:
 			window.show()
+			var deltaTimer = new DeltaTimer()
 			video.play()
-			var lastUpdateTimeMs = System.currentTimeMillis()
 			while (!window.shouldClose() && video.playing) {
-				var currentTimeMs = System.currentTimeMillis()
-				var delta = (currentTimeMs - lastUpdateTimeMs) / 1000 as float
-				lastUpdateTimeMs = currentTimeMs
-
-				listener.render()
-				window.useRenderPipeline()
-					.scene { ->
-						framebuffer.useFramebuffer { ->
-							shader.useShader { shaderContext ->
-								camera.render(shaderContext)
-								video.update(delta)
-								video.render(shaderContext)
-								video.render()
-							}
-						}
-					}
-					.ui(false) { imGuiContext ->
-						debugOverlay.render(imGuiContext)
-					}
-					.end()
+				var delta = deltaTimer.deltaTime()
+				video.update(delta)
+				audioSystem.update(scene, delta)
+				graphicsSystem.update(scene, delta)
 				Thread.yield()
 			}
 			video.stop()
 		then:
 			noExceptionThrown()
 		cleanup:
-			shader?.close()
-			video?.close()
 			inputStream?.close()
 	}
 }
